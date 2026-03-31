@@ -220,6 +220,39 @@ npm run test:e2e:ui      # Tests E2E con interfaz
 
 ## 📝 Historial de Cambios
 
+### 2024-XX-XX: Fase 3 - Catálogo de Productos (TDD)
+
+**Tests escritos e implementación:**
+
+**API Endpoints:**
+- ✅ `GET /api/productos` - Listado con filtros, ordenamiento y paginación
+- ✅ `GET /api/productos/[slug]` - Detalle de producto con productos relacionados
+
+**Tests de Integración:**
+- ✅ `tests/integration/api/productos.test.ts` - 23 tests (listado con filtros)
+- ✅ `tests/integration/api/producto-detalle.test.ts` - 10 tests (detalle de producto)
+
+**Páginas Implementadas:**
+- ✅ `/productos` - Catálogo con filtros laterales, paginación, ordenamiento y búsqueda
+- ✅ `/productos/[slug]` - Página de detalle con:
+  - Galería de imágenes
+  - Información completa del producto
+  - Selector de stock
+  - Productos relacionados
+  - Botón de añadir al carrito
+
+**Funcionalidades del Catálogo:**
+- Filtrado por categoría (DECORACION, ACCESORIOS, FUNCIONAL, ARTICULADOS, JUGUETES)
+- Filtrado por material (PLA, PETG)
+- Filtrado por rango de precio
+- Filtrado por disponibilidad (en stock)
+- Búsqueda por nombre y descripción
+- Ordenamiento por nombre, precio o stock
+- Paginación configurable
+- Diseño responsive
+
+**Total tests Fase 3: 33 nuevos tests**
+
 ### 2024-XX-XX: Tests Fase 2 (TDD)
 
 **Tests escritos siguiendo TDD correctamente:**
