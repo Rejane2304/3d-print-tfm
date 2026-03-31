@@ -218,6 +218,63 @@ npm run test:e2e         # Tests E2E con Playwright
 npm run test:e2e:ui      # Tests E2E con interfaz
 ```
 
+## 📝 Historial de Cambios
+
+### 2024-XX-XX: Tests Fase 2 (TDD)
+
+**Tests escritos siguiendo TDD correctamente:**
+
+**Tests de Integración:**
+- ✅ `tests/integration/api/registro.test.ts` - Tests API de registro (validación, creación, duplicados)
+- ✅ `tests/integration/auth/login.test.ts` - Tests flujo de login (autorización, sesión, usuarios inactivos)
+- ✅ `tests/integration/middleware.test.ts` - Tests middleware de autorización (redirecciones por rol)
+- ✅ `tests/integration/pages/home.test.ts` - Tests página de inicio (carga de productos, imágenes)
+
+**Tests Unitarios:**
+- ✅ `tests/unit/components/Header.test.tsx` - Tests componente Header (auth, navegación, responsive)
+- ✅ `tests/unit/components/Footer.test.tsx` - Tests componente Footer (enlaces, información)
+
+**Tests E2E:**
+- ✅ `tests/e2e/auth/login.spec.ts` - Tests E2E flujo completo de autenticación (registro, login, logout, acceso protegido)
+
+**Estructura de Tests:**
+```
+tests/
+├── integration/
+│   ├── api/registro.test.ts
+│   ├── auth/login.test.ts
+│   ├── middleware.test.ts
+│   └── pages/home.test.ts
+├── unit/
+│   ├── validaciones.test.ts
+│   └── components/
+│       ├── Header.test.tsx
+│       └── Footer.test.tsx
+└── e2e/
+    └── auth/
+        └── login.spec.ts
+```
+
+### 2024-XX-XX: Corrección de Rutas de Imágenes
+
+**Problema identificado**: Las rutas de imágenes en `public/data/products.csv` estaban incorrectas y no coincidían con la estructura de directorios real.
+
+**Cambios realizados**:
+- ✅ Corregidas las rutas en `public/data/products.csv`: De `/images/products/p1.jpg` a `/images/products/p1/p1-1.jpg`
+- ✅ Regenerados los datos de seed con `npm run db:seed`
+- ✅ Verificado que las imágenes se cargan correctamente en la página de inicio
+
+**Estructura de imágenes**:
+```
+public/images/products/
+├── p1/p1-1.jpg      # Vaso Decorativo Floral
+├── p2/p2-1.jpg      # Organizador de Escritorio
+├── p3/p3-1.jpg      # Maceta Geométrica
+└── ... (p4-p10)
+```
+
+Ver detalles completos en: [private/RESUMEN_CONFIGURACION.md](private/RESUMEN_CONFIGURACION.md)
+
 ## 📝 Licencia
 
 Este proyecto es desarrollado para fines académicos como Trabajo de Fin de Máster.

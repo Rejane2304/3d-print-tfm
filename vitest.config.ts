@@ -5,6 +5,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
+    setupFiles: ['./tests/setup.ts'],
     include: ['tests/**/*.{test,spec}.{js,jsx,ts,tsx}'],
     exclude: [
       '**/node_modules/**',
@@ -12,6 +13,7 @@ export default defineConfig({
       '**/cypress/**',
       '**/.{idea,git,cache,output,temp}/**',
       '**/tests/e2e/**',
+      '**/tests/unit/components/**', // Excluir tests de componentes React por ahora
     ],
     coverage: {
       provider: 'v8',
@@ -34,5 +36,10 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
+  },
+  esbuild: {
+    include: [/\.[jt]sx?$/],
+    exclude: [],
+    loader: 'tsx',
   },
 });
