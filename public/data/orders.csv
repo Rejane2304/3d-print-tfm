@@ -1,0 +1,11 @@
+id,userId,total,status,paymentMethod,shippingAddress,notes
+ORD-0001,USER-0002,65.98,COMPLETED,card,Calle Mayor 15 - 28001 Madrid,Entregar por la mañana
+ORD-0002,USER-0003,45.50,PENDING,card,Avda Cataluña 42 - 08001 Barcelona,
+ORD-0003,USER-0004,128.00,CONFIRMED,card,Plaza España 8 - 41001 Sevilla,
+ORD-0004,USER-0005,32.99,COMPLETED,card,Carrer Valencia 23 - 46001 Valencia,Envolver para regalo
+ORD-0005,USER-0006,89.50,PENDING,card,Paseo Gran Vía 11 - 28013 Madrid,
+ORD-0006,USER-0007,156.00,CONFIRMED,card,Calle Sevilla 5 - 41002 Sevilla,
+ORD-0007,USER-0008,24.99,PENDING,card,Avda Europa 19 - 28020 Madrid,
+ORD-0008,USER-0009,78.50,COMPLETED,card,Calle Luna 7 - 28001 Madrid,
+ORD-0009,USER-0002,199.00,CONFIRMED,card,Calle Mayor 15 - 28001 Madrid,Envío prioritario
+ORD-0010,USER-0003,45.99,PENDING,card,Avda Cataluña 42 - 08001 Barcelona,

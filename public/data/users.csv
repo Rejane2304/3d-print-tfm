@@ -1,0 +1,11 @@
+id,email,password,name,phone,address,role
+USER-0001,admin@3dprint.com,admin123,Admin,+34 600 000 001,Calle Admin 1,admin
+USER-0002,juan@example.com,pass123,Juan Pérez,+34 600 000 002,Calle Mayor 15,user
+USER-0003,maria@example.com,pass123,María García,+34 600 000 003,Avda Cataluña 42,user
+USER-0004,pedro@example.com,pass123,Pedro López,+34 600 000 004,Plaza España 8,user
+USER-0005,ana@example.com,pass123,Ana Martínez,+34 600 000 005,Carrer Valencia 23,user
+USER-0006,carlos@example.com,pass123,Carlos Rodríguez,+34 600 000 006,Paseo Gran Vía 11,user
+USER-0007,laura@example.com,pass123,Laura Sánchez,+34 600 000 007,Calle Sevilla 5,user
+USER-0008,miguel@example.com,pass123,Miguel Torres,+34 600 000 008,Avda Europa 19,user
+USER-0009,sofia@example.com,pass123,Sofia Fernández,+34 600 000 009,Calle Luna 7,user
+USER-0010,test@example.com,test123,Usuario Test,+34 600 000 010,Calle Test 10,user

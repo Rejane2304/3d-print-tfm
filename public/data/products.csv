@@ -1,0 +1,11 @@
+id,name,price,stock,category,material,description,image
+PROD-0001,Vaso Decorativo Floral,12.99,23,DECOR,PLA,Vaso con diseño floral para decoración del hogar,/images/products/p1.jpg
+PROD-0002,Organizador de Escritorio Hexagonal,18.50,27,ACCESSORY,PLA,Organizador modular hexagonal para materiales de oficina,/images/products/p2.jpg
+PROD-0003,Maceta Geométrica Minimalista,15.00,36,FUNCTIONAL,PLA,Maceta con diseño geométrico para plantas pequeñas,/images/products/p3.jpg
+PROD-0004,Soporte para Teléfono Ajustable,9.99,54,ACCESSORY,PLA,Soporte para smartphone con ángulo ajustable,/images/products/p4.jpg
+PROD-0005,Figura Articulada Dinosaurio Rex,22.00,14,PIECE,PLA,Figura articulada tipo dinosaurio para colección,/images/products/p5.jpg
+PROD-0006,Miniatura de Casa,35.00,13,DECOR,PETG,Miniatura de casa detallada para decoración,/images/products/p6.jpg
+PROD-0007,Porta Lápices/Pinceles Dragón,14.50,31,ACCESSORY,PLA,Porta lápices/Pinceles con forma de dragón estilizado,/images/products/p7.jpg
+PROD-0008,Coche Clásico Articulado,28.00,15,TOY,PLA,Coche clásico articulado con ruedas móviles,/images/products/p8.jpg
+PROD-0009,Lámpara Luna 3D,45.00,4,DECOR,PETG,Lámpara LED nocturna con forma de luna realista,/images/products/p9.jpg
+PROD-0010,Caja Secretera Medieval,38.00,13,FUNCTIONAL,PETG,Caja secretpera con diseño de castillo medieval,/images/products/p10.jpg
