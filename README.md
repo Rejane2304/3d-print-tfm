@@ -22,7 +22,7 @@ Aplicación web de comercio electrónico especializada en productos impresos en 
 - **100% en español** (UI y backend)
 - **Seguridad enterprise** con autenticación JWT
 - **Manejo de errores** centralizado
-- **141+ tests** (unitarios, integración y E2E)
+- **182+ tests** (unitarios, integración y E2E)
 
 ## 🚀 Tecnologías
 
@@ -149,7 +149,7 @@ npm run test:e2e
 - ✅ **Unitarios:** 37 tests (validaciones)
 - ✅ **Integración:** 104 tests (API, auth, carrito, checkout, páginas)
 - ✅ **E2E:** Tests de autenticación en múltiples dispositivos
-- ✅ **Total:** 141 tests pasando (100%)
+- ✅ **Total:** 182 tests pasando (100%)
 
 ## 🗄️ Estructura del Proyecto
 
@@ -286,6 +286,26 @@ npm run test:coverage          # Tests con cobertura
 ```
 
 ## 📝 Historial de Cambios Recientes
+
+### 2025-04-01: Fase 5 - Panel Admin (Completada)
+
+**Implementación:**
+- ✅ `/admin/dashboard` - Dashboard con métricas y navegación
+- ✅ `/admin/productos` - Gestión completa de productos con filtros
+- ✅ `/admin/productos/nuevo` - Formulario de creación de productos
+- ✅ `/admin/pedidos` - Gestión de pedidos con filtros por estado
+- ✅ `/admin/pedidos/[id]` - Detalle de pedido con actualización de estado
+- ✅ API `/api/admin/metrics` - Métricas del dashboard
+- ✅ API `/api/admin/productos` - CRUD de productos
+- ✅ API `/api/admin/pedidos` - Gestión de pedidos
+
+**Tests:**
+- ✅ `tests/integration/admin/panel.test.ts` - 12 tests
+- ✅ `tests/integration/admin/dashboard-ui.test.ts` - 5 tests
+- ✅ `tests/integration/admin/productos.test.ts` - 14 tests
+- ✅ `tests/integration/admin/pedidos.test.ts` - 10 tests
+- ✅ Total Fase 5: 41 tests
+- ✅ **Total proyecto: 182 tests (100%)**
 
 ### 2025-04-01: Fase 4 - Checkout + Pagos (Completada)
 

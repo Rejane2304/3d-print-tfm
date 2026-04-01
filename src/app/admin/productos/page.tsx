@@ -239,7 +239,7 @@ export default function AdminProductosPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {producto.precio.toFixed(2)} €
+                      {Number(producto.precio).toFixed(2)} €
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`text-sm ${producto.stock < 10 ? 'text-red-600 font-medium' : 'text-gray-900'}`}>
