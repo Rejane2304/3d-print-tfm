@@ -22,7 +22,7 @@ Aplicación web de comercio electrónico especializada en productos impresos en 
 - **100% en español** (UI y backend)
 - **Seguridad enterprise** con autenticación JWT
 - **Manejo de errores** centralizado
-- **182+ tests** (unitarios, integración y E2E)
+- **212+ tests** (unitarios, integración y E2E)
 
 ## 🚀 Tecnologías
 
@@ -149,7 +149,7 @@ npm run test:e2e
 - ✅ **Unitarios:** 37 tests (validaciones)
 - ✅ **Integración:** 104 tests (API, auth, carrito, checkout, páginas)
 - ✅ **E2E:** Tests de autenticación en múltiples dispositivos
-- ✅ **Total:** 182 tests pasando (100%)
+- ✅ **Total:** 212 tests pasando (100%)
 
 ## 🗄️ Estructura del Proyecto
 
@@ -287,6 +287,24 @@ npm run test:coverage          # Tests con cobertura
 
 ## 📝 Historial de Cambios Recientes
 
+### 2025-04-01: Fase 6 - Sistema de Facturación (Completada)
+
+**Implementación:**
+- ✅ `/admin/facturas` - Gestión completa de facturas
+- ✅ `/admin/facturas/[id]` - Detalle de factura con PDF
+- ✅ API `/api/admin/facturas` - CRUD de facturas
+- ✅ API `/api/admin/facturas/[id]/pdf` - Generación de PDF
+- ✅ Generación automática de números de factura (F-AAAA-NNNNNN)
+- ✅ Anulación de facturas (soft delete)
+- ✅ Cálculo automático de IVA 21%
+
+**Tests:**
+- ✅ `tests/integration/admin/facturas.test.ts` - 30 tests
+- ✅ Tests de validación de NIF
+- ✅ Tests de formato de factura española
+- ✅ Total Fase 6: 30 tests
+- ✅ **Total proyecto: 212 tests (100%)**
+
 ### 2025-04-01: Fase 5 - Panel Admin (Completada)
 
 **Implementación:**
@@ -305,7 +323,6 @@ npm run test:coverage          # Tests con cobertura
 - ✅ `tests/integration/admin/productos.test.ts` - 14 tests
 - ✅ `tests/integration/admin/pedidos.test.ts` - 10 tests
 - ✅ Total Fase 5: 41 tests
-- ✅ **Total proyecto: 182 tests (100%)**
 
 ### 2025-04-01: Fase 4 - Checkout + Pagos (Completada)
 
