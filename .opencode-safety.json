@@ -1,0 +1,68 @@
+{
+  "version": "1.0",
+  "rules": [
+    {
+      "action": "delete",
+      "target": "file",
+      "protected_patterns": [
+        "prisma/schema.prisma",
+        "prisma/seed.ts",
+        "prisma/migrations/**",
+        "private/data/**",
+        "doc/**",
+        "tests/**",
+        ".env*",
+        "package.json",
+        "tsconfig.json",
+        "next.config.*",
+        "DELETION_RULES.md"
+      ],
+      "require_confirmation": true,
+      "backup_before_delete": true,
+      "confirm_message": "⚠️ ESTÁS A PUNTO DE ELIMINAR UN ARCHIVO PROTEGIDO.\n\nArchivo: {path}\n\nEsta acción:\n- Creará respaldo automático\n- Requiere confirmación explícita\n\nEscribe 'SÍ ELIMINAR {path}' para confirmar:"
+    },
+    {
+      "action": "delete",
+      "target": "directory",
+      "protected_patterns": [
+        "src/app/**",
+        "src/components/**",
+        "src/lib/**",
+        "src/types/**",
+        "src/hooks/**",
+        "src/services/**",
+        "src/validators/**"
+      ],
+      "require_confirmation": true,
+      "backup_before_delete": true,
+      "confirm_message": "⚠️ ESTÁS A PUNTO DE ELIMINAR UNA CARPETA PROTEGIDA.\n\nCarpeta: {path}\n\nContenido:\n{contents}\n\nEsta acción:\n- Creará respaldo completo\n- Requiere confirmación explícita\n\nEscribe 'SÍ ELIMINAR CARPETA {path}' para confirmar:"
+    },
+    {
+      "action": "delete",
+      "target": "any",
+      "safe_patterns": [
+        "node_modules/**",
+        ".next/**",
+        "dist/**",
+        "build/**",
+        "test-results/**",
+        "coverage/**",
+        "playwright-report/**",
+        "*.tmp",
+        "*.log"
+      ],
+      "require_confirmation": false,
+      "backup_before_delete": false
+    }
+  ],
+  "backup": {
+    "enabled": true,
+    "location": "./.backups",
+    "retention_days": 30,
+    "compress": true
+  },
+  "logging": {
+    "enabled": true,
+    "log_file": "./.backups/deletion-log.json"
+  }
+}
