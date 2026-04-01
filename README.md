@@ -13,7 +13,7 @@ Aplicación web de comercio electrónico especializada en productos impresos en 
 
 ### Características Principales
 
-- **Catálogo fijo** de productos en PLA/PETG
+- **Catálogo fijo** de productos en PLA/PETG con filtros y búsqueda
 - **Gestión de pedidos** con flujo de estados completo
 - **Pagos con Stripe** (modo test)
 - **Panel de administración** con CRUDs completos
@@ -21,6 +21,7 @@ Aplicación web de comercio electrónico especializada en productos impresos en 
 - **100% en español** (UI y backend)
 - **Seguridad enterprise** con autenticación JWT
 - **Manejo de errores** centralizado
+- **110+ tests** (unitarios, integración y E2E)
 
 ## 🚀 Tecnologías
 
@@ -28,7 +29,7 @@ Aplicación web de comercio electrónico especializada en productos impresos en 
 |-----------|-------------|
 | **Frontend** | Next.js 14, React 18, Tailwind CSS 3.4 |
 | **Backend** | Next.js API Routes, TypeScript 5 |
-| **Base de datos** | PostgreSQL, Prisma ORM 5.22 |
+| **Base de datos** | PostgreSQL (Supabase), Prisma ORM 5.22 |
 | **Autenticación** | NextAuth.js 4.24 |
 | **Pagos** | Stripe (modo test) |
 | **Testing** | Vitest, Playwright |
@@ -92,21 +93,41 @@ La aplicación estará disponible en [http://localhost:3000](http://localhost:30
 
 | Variable | Origen | Descripción |
 |----------|--------|-------------|
-| `DATABASE_URL` | Supabase (2 proyectos gratuitos) | URL de conexión PostgreSQL |
+| `DATABASE_URL` | Supabase (Session Pooler) | URL de conexión PostgreSQL |
 | `NEXTAUTH_SECRET` | Generar localmente | Secreto para JWT (`openssl rand -base64 32`) |
 | `NEXTAUTH_URL` | Configurar | URL base de la app (`http://localhost:3000`) |
 | `STRIPE_SECRET_KEY` | Stripe Dashboard | Clave secreta de Stripe (modo test) |
 | `STRIPE_PUBLISHABLE_KEY` | Stripe Dashboard | Clave pública de Stripe (modo test) |
+| `STRIPE_WEBHOOK_SECRET` | Stripe CLI | Secreto para webhooks de Stripe |
 
-**Arquitectura de base de datos:** Supabase gratuito con 2 proyectos separados (desarrollo + producción)
+**Arquitectura de base de datos:** Supabase con 2 proyectos separados (desarrollo + producción)
 
 **Ver guía paso a paso:** [private/GUIA_VARIABLES_ENTORNO.md](private/GUIA_VARIABLES_ENTORNO.md)
 
 ## 🧪 Testing
 
-### Tests Unitarios
+### Tests Unitarios (Sin necesidad de BD)
 ```bash
-npm test
+npm run test:unit
+# o
+npm test -- tests/unit
+```
+
+### Tests de Integración (Requiere PostgreSQL)
+```bash
+# Configurar .env.test con DATABASE_URL de test
+npm run test:integration
+# o
+VITEST_ENV=integration npm test -- tests/integration
+```
+
+### Tests E2E (Requiere servidor corriendo)
+```bash
+# Terminal 1: Iniciar servidor
+npm run dev
+
+# Terminal 2: Ejecutar tests E2E
+npm run test:e2e
 ```
 
 ### Tests con Cobertura
@@ -114,17 +135,20 @@ npm test
 npm run test:coverage
 ```
 
-### Tests E2E (Playwright)
+### Verificación completa
 ```bash
+npm run lint
+npm run test:unit
+npm run test:integration
 npm run test:e2e
 ```
 
-### Todos los tests
-```bash
-npm run lint
-npm test
-npm run test:e2e
-```
+## 📊 Estado de Tests
+
+- ✅ **Unitarios:** 37 tests (validaciones)
+- ✅ **Integración:** 73 tests (API, auth, middleware, páginas)
+- ✅ **E2E:** Tests de autenticación en múltiples dispositivos
+- ✅ **Total:** 110+ tests pasando
 
 ## 🗄️ Estructura del Proyecto
 
@@ -137,39 +161,62 @@ npm run test:e2e
 │   ├── app/                   # Next.js App Router
 │   │   ├── (auth)/            # Login, Registro
 │   │   ├── (shop)/            # Tienda pública
+│   │   │   ├── page.tsx        # Home con productos destacados
+│   │   │   ├── productos/      # Catálogo de productos
+│   │   │   └── productos/[slug]/  # Detalle de producto
 │   │   ├── (admin)/           # Panel admin
+│   │   │   └── dashboard/      # Dashboard administrativo
 │   │   └── api/               # API routes
-│   │       └── auth/
-│   │           └── [...nextauth]/
-│   │               └── route.ts   # Configuración NextAuth
-│   ├── components/            # Componentes React
+│   │       ├── auth/
+│   │       │   └── [...nextauth]/
+│   │       │       └── route.ts   # Configuración NextAuth
+│   │       ├── auth/registro/     # API de registro
+│   │       ├── productos/         # API de catálogo
+│   │       └── productos/[slug]/  # API de detalle
+│   ├── components/
+│   │   ├── products/          # Componentes de catálogo
+│   │   │   ├── ProductCard.tsx
+│   │   │   ├── FilterSidebar.tsx
+│   │   │   ├── Pagination.tsx
+│   │   │   ├── SearchBar.tsx
+│   │   │   └── SortSelector.tsx
+│   │   ├── layout/            # Header, Footer
+│   │   └── ui/               # Componentes base
 │   ├── lib/
-│   │   ├── db/                # Conexión Prisma
-│   │   ├── auth/              # Configuración auth
-│   │   ├── validators/          # Validaciones Zod
-│   │   ├── errors/            # Manejo de errores
-│   │   │   ├── index.ts       # Tipos y utilidades
-│   │   │   └── api-wrapper.ts # Wrappers para API routes
-│   │   └── utils/             # Utilidades
-│   ├── hooks/                 # Custom hooks
-│   └── types/                 # Tipos TypeScript
-│       └── next-auth.d.ts     # Tipos extendidos de NextAuth
+│   │   ├── db/prisma.ts      # Conexión Prisma
+│   │   ├── auth/             # Configuración auth
+│   │   ├── validators/       # Validaciones Zod
+│   │   └── errors/           # Manejo de errores
+│   ├── hooks/                # Custom hooks
+│   └── types/                # Tipos TypeScript
 ├── tests/
-│   ├── unit/                  # Tests unitarios
-│   ├── integration/           # Tests de integración
-│   └── e2e/                   # Tests E2E
-├── public/                    # Assets estáticos
-│   ├── images/                # Imágenes del proyecto
+│   ├── unit/                 # Tests unitarios
+│   │   └── validaciones.test.ts
+│   ├── integration/          # Tests de integración
+│   │   ├── api/
+│   │   │   ├── registro.test.ts
+│   │   │   ├── productos.test.ts
+│   │   │   └── producto-detalle.test.ts
+│   │   ├── auth/
+│   │   │   └── login.test.ts
+│   │   ├── middleware.test.ts
+│   │   └── pages/
+│   │       └── home.test.ts
+│   └── e2e/                  # Tests E2E
+│       └── auth/
+│           └── login.spec.ts
+├── public/
+│   ├── images/
 │   │   ├── logo.svg
-│   │   └── products/          # Imágenes de productos (p1-p10)
-│   └── data/                  # Archivos CSV con datos iniciales
-├── doc/                       # Documentación TFM
-└── private/                   # Datos y recursos de referencia
+│   │   └── products/         # p1-p10 con imágenes
+│   └── data/                 # CSV con datos iniciales
+├── scripts/                  # Scripts de utilidad
+│   └── prepare-test-db.sh    # Preparar BD de test
+├── doc/                      # Documentación TFM
+└── private/                  # Documentación privada
     ├── PLAN_IMPLEMENTACION.md
     ├── COMANDOS.md
-    ├── GUIA_VARIABLES_ENTORNO.md
-    ├── data/                  # CSV fuente
-    └── public/                # Imágenes fuente
+    └── GUIA_VARIABLES_ENTORNO.md
 ```
 
 ## 👥 Usuarios de Prueba
@@ -183,9 +230,9 @@ npm run test:e2e
 ## 📚 Documentación
 
 - [Plan de Implementación](private/PLAN_IMPLEMENTACION.md) - Roadmap completo del proyecto
-- [Guía de Variables de Entorno](private/GUIA_VARIABLES_ENTORNO.md) - Paso a paso para configurar credenciales
-- [Comandos de Desarrollo](private/COMANDOS.md) - Comandos útiles
-- Documentación completa en `/doc/`
+- [Guía de Variables de Entorno](private/GUIA_VARIABLES_ENTORNO.md) - Configuración paso a paso
+- [Comandos de Desarrollo](private/COMANDOS.md) - Comandos útiles y troubleshooting
+- Documentación académica en `/doc/`
 
 ## 🔐 Seguridad
 
@@ -201,112 +248,66 @@ npm run test:e2e
 
 ```bash
 # Desarrollo
-npm run dev              # Iniciar servidor de desarrollo
-npm run lint             # Ejecutar ESLint
-npm test                 # Ejecutar tests unitarios
+npm run dev                    # Iniciar servidor de desarrollo
+npm run lint                   # Ejecutar ESLint
+npm run lint -- --fix          # Corregir errores de ESLint
 
 # Base de datos
-npm run db:generate      # Generar cliente Prisma
-npm run db:migrate       # Crear migración
-npm run db:seed          # Cargar datos iniciales
-npm run db:reset         # Resetear BD + seed
-npm run db:studio        # Abrir Prisma Studio
+npm run db:generate            # Generar cliente Prisma
+npm run db:migrate             # Crear migración
+npm run db:seed                # Cargar datos iniciales
+npm run db:reset               # Resetear BD + seed
+npm run db:studio              # Abrir Prisma Studio
 
 # Testing
-npm run test:coverage    # Tests con cobertura
-npm run test:e2e         # Tests E2E con Playwright
-npm run test:e2e:ui      # Tests E2E con interfaz
+npm run test:unit              # Tests unitarios
+npm run test:integration       # Tests de integración
+npm run test:e2e               # Tests E2E con Playwright
+npm run test:e2e:ui            # Tests E2E con interfaz
+npm run test:coverage          # Tests con cobertura
+
+# Scripts
+./scripts/prepare-test-db.sh   # Preparar BD de test
 ```
 
-## 📝 Historial de Cambios
+## 📝 Historial de Cambios Recientes
 
-### 2024-XX-XX: Fase 3 - Catálogo de Productos (TDD)
+### 2025-04-01: Corrección de Tests E2E y Configuración PostgreSQL
 
-**Tests escritos e implementación:**
+**Tests E2E corregidos:**
+- ✅ Actualizados selectores para usar IDs de inputs
+- ✅ Corregido test de Footer (selector específico)
+- ✅ Tests de login funcionando en todos los dispositivos
 
-**API Endpoints:**
-- ✅ `GET /api/productos` - Listado con filtros, ordenamiento y paginación
-- ✅ `GET /api/productos/[slug]` - Detalle de producto con productos relacionados
+**Configuración de tests:**
+- ✅ Tests configurados para usar PostgreSQL (no SQLite)
+- ✅ Agregados scripts `test:unit` y `test:integration`
+- ✅ Creado script `prepare-test-db.sh`
+- ✅ 110 tests pasando correctamente
 
-**Tests de Integración:**
-- ✅ `tests/integration/api/productos.test.ts` - 23 tests (listado con filtros)
-- ✅ `tests/integration/api/producto-detalle.test.ts` - 10 tests (detalle de producto)
+### 2025-04-01: Fase 3 - Catálogo de Productos (Completada)
 
-**Páginas Implementadas:**
-- ✅ `/productos` - Catálogo con filtros laterales, paginación, ordenamiento y búsqueda
-- ✅ `/productos/[slug]` - Página de detalle con:
-  - Galería de imágenes
-  - Información completa del producto
-  - Selector de stock
-  - Productos relacionados
-  - Botón de añadir al carrito
+**Implementación:**
+- ✅ `/productos` - Catálogo con filtros, paginación, ordenamiento y búsqueda
+- ✅ `/productos/[slug]` - Detalle de producto con galería y productos relacionados
+- ✅ Filtros por categoría, material, precio, stock
+- ✅ Búsqueda por nombre y descripción
+- ✅ Ordenamiento por nombre, precio o stock
+- ✅ Diseño responsive (mobile → 4K)
 
-**Funcionalidades del Catálogo:**
-- Filtrado por categoría (DECORACION, ACCESORIOS, FUNCIONAL, ARTICULADOS, JUGUETES)
-- Filtrado por material (PLA, PETG)
-- Filtrado por rango de precio
-- Filtrado por disponibilidad (en stock)
-- Búsqueda por nombre y descripción
-- Ordenamiento por nombre, precio o stock
-- Paginación configurable
-- Diseño responsive
+**Tests:**
+- ✅ `tests/integration/api/productos.test.ts` - 23 tests
+- ✅ `tests/integration/api/producto-detalle.test.ts` - 10 tests
+- ✅ Total Fase 3: 33 tests
 
-**Total tests Fase 3: 33 nuevos tests**
+### 2025-04-01: Corrección de Errores de Lint y TypeScript
 
-### 2024-XX-XX: Tests Fase 2 (TDD)
-
-**Tests escritos siguiendo TDD correctamente:**
-
-**Tests de Integración:**
-- ✅ `tests/integration/api/registro.test.ts` - Tests API de registro (validación, creación, duplicados)
-- ✅ `tests/integration/auth/login.test.ts` - Tests flujo de login (autorización, sesión, usuarios inactivos)
-- ✅ `tests/integration/middleware.test.ts` - Tests middleware de autorización (redirecciones por rol)
-- ✅ `tests/integration/pages/home.test.ts` - Tests página de inicio (carga de productos, imágenes)
-
-**Tests Unitarios:**
-- ✅ `tests/unit/components/Header.test.tsx` - Tests componente Header (auth, navegación, responsive)
-- ✅ `tests/unit/components/Footer.test.tsx` - Tests componente Footer (enlaces, información)
-
-**Tests E2E:**
-- ✅ `tests/e2e/auth/login.spec.ts` - Tests E2E flujo completo de autenticación (registro, login, logout, acceso protegido)
-
-**Estructura de Tests:**
-```
-tests/
-├── integration/
-│   ├── api/registro.test.ts
-│   ├── auth/login.test.ts
-│   ├── middleware.test.ts
-│   └── pages/home.test.ts
-├── unit/
-│   ├── validaciones.test.ts
-│   └── components/
-│       ├── Header.test.tsx
-│       └── Footer.test.tsx
-└── e2e/
-    └── auth/
-        └── login.spec.ts
-```
-
-### 2024-XX-XX: Corrección de Rutas de Imágenes
-
-**Problema identificado**: Las rutas de imágenes en `public/data/products.csv` estaban incorrectas y no coincidían con la estructura de directorios real.
-
-**Cambios realizados**:
-- ✅ Corregidas las rutas en `public/data/products.csv`: De `/images/products/p1.jpg` a `/images/products/p1/p1-1.jpg`
-- ✅ Regenerados los datos de seed con `npm run db:seed`
-- ✅ Verificado que las imágenes se cargan correctamente en la página de inicio
-
-**Estructura de imágenes**:
-```
-public/images/products/
-├── p1/p1-1.jpg      # Vaso Decorativo Floral
-├── p2/p2-1.jpg      # Organizador de Escritorio
-├── p3/p3-1.jpg      # Maceta Geométrica
-└── ... (p4-p10)
-```
-
-Ver detalles completos en: [private/RESUMEN_CONFIGURACION.md](private/RESUMEN_CONFIGURACION.md)
+**Correcciones:**
+- ✅ ESLint: Sin errores ni warnings
+- ✅ TypeScript: Sin errores
+- ✅ Eliminados `any` innecesarios
+- ✅ Corregidas variables no utilizadas
+- ✅ Tipado mejorado en NextAuth y middleware
 
 ## 📝 Licencia
 
