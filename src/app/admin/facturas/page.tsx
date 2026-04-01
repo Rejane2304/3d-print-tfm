@@ -21,6 +21,7 @@ import {
   CheckCircle2,
   AlertTriangle
 } from 'lucide-react';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 
 interface Factura {
   id: string;
@@ -48,6 +49,8 @@ export default function AdminFacturasPage() {
   const [filtroEstado, setFiltroEstado] = useState('');
   const [mostrarGenerarModal, setMostrarGenerarModal] = useState(false);
   const [pedidoIdInput, setPedidoIdInput] = useState('');
+  const [modalAnularOpen, setModalAnularOpen] = useState(false);
+  const [facturaAAnular, setFacturaAAnular] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -121,16 +124,21 @@ export default function AdminFacturasPage() {
   };
 
   const anularFactura = async (id: string) => {
-    if (!confirm('¿Estás seguro de que deseas anular esta factura? Esta acción no se puede deshacer.')) {
-      return;
-    }
+    setFacturaAAnular(id);
+    setModalAnularOpen(true);
+  };
+
+  const confirmarAnulacion = async () => {
+    if (!facturaAAnular) return;
 
     try {
-      const response = await fetch(`/api/admin/facturas/${id}`, {
+      const response = await fetch(`/api/admin/facturas/${facturaAAnular}`, {
         method: 'DELETE',
       });
 
       if (response.ok) {
+        setModalAnularOpen(false);
+        setFacturaAAnular(null);
         await cargarFacturas();
       }
     } catch (err) {
@@ -381,6 +389,20 @@ export default function AdminFacturasPage() {
           </div>
         </div>
       )}
+
+      {/* Modal Confirmación Anular */}
+      <ConfirmModal
+        isOpen={modalAnularOpen}
+        onClose={() => {
+          setModalAnularOpen(false);
+          setFacturaAAnular(null);
+        }}
+        onConfirm={confirmarAnulacion}
+        title="¿Anular factura?"
+        description="Esta acción no se puede deshacer. La factura se marcará como anulada pero permanecerá en el sistema para fines contables."
+        confirmText="Anular"
+        type="warning"
+      />
     </div>
   );
 }

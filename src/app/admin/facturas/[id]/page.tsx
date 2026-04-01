@@ -23,6 +23,7 @@ import {
   Calendar,
   Euro
 } from 'lucide-react';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 
 interface FacturaDetalle {
   id: string;
@@ -71,6 +72,7 @@ export default function AdminFacturaDetallePage() {
   const [factura, setFactura] = useState<FacturaDetalle | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [modalAnularOpen, setModalAnularOpen] = useState(false);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -109,16 +111,17 @@ export default function AdminFacturaDetallePage() {
   };
 
   const anularFactura = async () => {
-    if (!confirm('¿Estás seguro de que deseas anular esta factura? Esta acción no se puede deshacer.')) {
-      return;
-    }
+    setModalAnularOpen(true);
+  };
 
+  const confirmarAnulacion = async () => {
     try {
       const response = await fetch(`/api/admin/facturas/${params.id}`, {
         method: 'DELETE',
       });
 
       if (response.ok) {
+        setModalAnularOpen(false);
         await cargarFactura();
       } else {
         const data = await response.json();
@@ -352,6 +355,17 @@ export default function AdminFacturaDetallePage() {
           </div>
         </div>
       </div>
+
+      {/* Modal Confirmación Anular */}
+      <ConfirmModal
+        isOpen={modalAnularOpen}
+        onClose={() => setModalAnularOpen(false)}
+        onConfirm={confirmarAnulacion}
+        title="¿Anular factura?"
+        description="Esta acción no se puede deshacer. La factura se marcará como anulada pero permanecerá en el sistema para fines contables."
+        confirmText="Anular"
+        type="warning"
+      />
     </div>
   );
 }
