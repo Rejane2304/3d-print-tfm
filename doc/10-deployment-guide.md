@@ -317,4 +317,4 @@ Antes del lanzamiento:
 - Tests de carga
 - Disaster recovery plan
 
-**Última actualización**: 2025-04-01
+**Última actualización**: 2026-04-01
