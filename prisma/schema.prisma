@@ -132,6 +132,7 @@ model Usuario {
   movimientosInventario MovimientoInventario[]
   alertasResueltas Alerta[] @relation("AlertasResueltas")
   sesiones      Session[]
+  carrito       Carrito?
 
   @@index([email])
   @@index([rol])
@@ -169,6 +170,7 @@ model Direccion {
   // Relaciones
   usuario       Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
   pedidosEnvio  Pedido[]  @relation("DireccionEnvio")
+  carritos     Carrito[]
   
   @@index([usuarioId])
   @@index([esPrincipal])
@@ -222,6 +224,7 @@ model Producto {
   itemsPedido   ItemPedido[]
   movimientos   MovimientoInventario[]
   alertas       Alerta[]
+  itemsCarrito  ItemCarrito[]
   
   @@index([categoria])
   @@index([activo])
@@ -266,6 +269,51 @@ model ImagenProducto {
   @@index([productoId])
   @@index([esPrincipal])
   @@map("imagenes_producto")
+}
+
+// ============================================
+// MODELO 4.5: CARRITO
+// Carrito temporal de compras del usuario
+// ============================================
+
+model Carrito {
+  id         String   @id @default(uuid())
+  usuarioId  String   @unique
+  usuario    Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  // Items en el carrito
+  items      ItemCarrito[]
+
+  // Dirección de envío seleccionada (opcional)
+  direccionEnvioId String?
+  direccionEnvio   Direccion? @relation(fields: [direccionEnvioId], references: [id])
+
+  // Cálculos
+  subtotal   Decimal  @db.Decimal(10, 2) @default(0)
+
+  // Timestamps
+  creadoEn   DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  @@map("carritos")
+}
+
+model ItemCarrito {
+  id         String   @id @default(uuid())
+  carritoId  String
+  carrito    Carrito  @relation(fields: [carritoId], references: [id], onDelete: Cascade)
+
+  productoId String
+  producto   Producto @relation(fields: [productoId], references: [id])
+
+  cantidad   Int      @default(1)
+  precioUnitario Decimal @db.Decimal(10, 2) // Precio al momento de añadir
+
+  creadoEn   DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  @@unique([carritoId, productoId]) // Un solo item por producto
+  @@map("items_carrito")
 }
 
 // ============================================
