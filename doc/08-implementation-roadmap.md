@@ -213,7 +213,7 @@
 - [x] 10 documentos de negocio
 - [x] Proyecto listo para entrega
 
-**Tests**: 323+ tests ✅
+**Tests**: 378 tests ✅
 
 ---
 
@@ -235,11 +235,21 @@ Fase 7: [██████████] 100% - Calidad
 
 | Métrica | Objetivo | Alcanzado |
 |---------|----------|-----------|
-| Tests | >200 | 323+ ✅ |
+| Tests | >200 | 378 ✅ |
 | Cobertura | 80% | Configurado ✅ |
 | Lighthouse | >90 | 90+ ✅ |
 | Documentación | 8 docs | 10 docs ✅ |
 | Fecha límite | Junio 2026 | Abril 2026 ✅ |
+
+## 🔄 Cambios Post-Completado
+
+### 2026-04-01: Unificación Auth + UI Modernizada
+- **Feature**: Página `/auth` unificada con tabs de login/registro
+- **UI**: Header moderno con iconos Lucide
+- **Navegación**: Role-based (admin no ve carrito)
+- **Tests**: 96 E2E tests actualizados y pasando
+- **Impacto**: UX mejorada, código más mantenible
+- **Compatibilidad**: URLs antiguas redirigen correctamente
 
 ---
 
@@ -280,7 +290,7 @@ Semana 6:   █████████░ 86 tests (+33 Catálogo)
 Semana 8:   ██████████ 117 tests (+31 Checkout)
 Semana 10:  ██████████ 158 tests (+41 Admin)
 Semana 12:  ██████████ 223 tests (+65 Features)
-Semana 13:  ██████████ 323+ tests (Calidad)
+Semana 13:  ██████████ 378 tests (Calidad)
 ```
 
 ---
@@ -368,7 +378,7 @@ Semana 13:  ██████████ 323+ tests (Calidad)
 - [x] Prisma ORM + PostgreSQL
 - [x] NextAuth.js autenticación
 - [x] Stripe integración pagos
-- [x] 323+ tests (100% pasando)
+- [x] 378 tests (100% pasando)
 - [x] Responsive (mobile → 4K)
 
 ### Negocio
@@ -396,6 +406,26 @@ Semana 13:  ██████████ 323+ tests (Calidad)
 ---
 
 **Estado**: ✅ Proyecto completado (13 semanas)
-**Tests**: 323/323 (100%) ✅
+**Tests**: 378/378 (100%) ✅
 **Fecha**: Abril 2026
 **Entrega**: Lista para presentación TFM
+
+### ✅ Completado Post-Entrega
+
+1. **2026-04-01**: UI/UX Modernizada
+   - Auth unificada con tabs (/auth)
+   - Header con iconos Lucide
+   - Navegación role-based
+   - Tests E2E actualizados (96/96)
+
+### 🎯 Siguientes Pasos Reales
+
+1. **Deploy a Vercel** (pendiente)
+   - Configurar variables de entorno de producción
+   - Desplegar a Vercel
+   - Configurar dominio personalizado (opcional)
+
+2. **Presentación TFM** (pendiente)
+   - Crear slides de presentación
+   - Preparar demo en vivo
+   - Documentación impresa

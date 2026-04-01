@@ -32,6 +32,20 @@ STRIPE_WEBHOOK_SECRET="whsec_..."
 NODE_ENV="production"
 ```
 
+### 4. Notas sobre Auth Unificada
+
+**Cambio reciente (2026-04-01)**: El sistema ahora usa una página `/auth` unificada con tabs para login y registro.
+
+- **URLs nuevas**:
+  - `/auth` - Página unificada (tab login por defecto)
+  - `/auth?tab=register` - Tab de registro
+
+- **URLs antiguas** (redirigen automáticamente):
+  - `/login` → `/auth`
+  - `/registro` → `/auth?tab=register`
+
+- **No requiere cambios en despliegue**: Las redirecciones son automáticas en la aplicación.
+
 ### 2. Base de Datos
 
 ```bash
@@ -299,7 +313,7 @@ npm run build && npm start
 
 Antes del lanzamiento:
 
-- [ ] Tests pasando (323+)
+- [ ] Tests pasando (378)
 - [ ] Lighthouse score > 90
 - [ ] SSL funcionando
 - [ ] Webhook Stripe configurado

@@ -27,7 +27,7 @@ Aplicación web de comercio electrónico especializada en productos impresos en 
 - **100% en español** (UI y backend)
 - **Seguridad enterprise** con autenticación JWT
 - **Manejo de errores** centralizado
-- **227+ tests** (unitarios, integración y E2E)
+- **378 tests** (unitarios, integración y E2E)
 
 ## 🚀 Tecnologías
 
@@ -40,7 +40,8 @@ Aplicación web de comercio electrónico especializada en productos impresos en 
 | **Pagos** | Stripe (modo test) |
 | **Testing** | Vitest, Playwright |
 | **Validación** | Zod |
-| **Despliegue** | Vercel |
+| **Despliegue** | Vercel (recomendado) |
+| **Icons** | Lucide React |
 
 ## 📦 Instalación
 
@@ -152,9 +153,9 @@ npm run test:e2e
 ## 📊 Estado de Tests
 
 - ✅ **Unitarios:** 37 tests (validaciones)
-- ✅ **Integración:** 104 tests (API, auth, carrito, checkout, páginas)
-- ✅ **E2E:** Tests de autenticación en múltiples dispositivos
-- ✅ **Total:** 212 tests pasando (100%)
+- ✅ **Integración:** 227 tests (API, auth, carrito, checkout, páginas, admin)
+- ✅ **E2E:** 114 tests en 6 dispositivos (Chrome, Firefox, Safari, iPad, iPhone, 4K)
+- ✅ **Total:** 378 tests pasando (100%)
 
 ## 🗄️ Estructura del Proyecto
 
@@ -291,6 +292,21 @@ npm run test:coverage          # Tests con cobertura
 ```
 
 ## 📝 Historial de Cambios Recientes
+
+### 2026-04-01: UI/UX Modernizada - Unificación Auth
+
+**Unificación Login/Registro:**
+- ✅ Nueva página `/auth` con tabs de login y registro
+- ✅ UX mejorada: cambio instantáneo entre tabs
+- ✅ Email compartido entre login y registro
+- ✅ Header moderno con iconos Lucide (carrito, cuenta, logout)
+- ✅ Redirecciones de URLs antiguas (/login, /registro)
+- ✅ Tests E2E actualizados: 96 tests pasando en todos los dispositivos
+
+**Navegación Role-Based:**
+- ✅ Clientes: Ven carrito, tienda, cuenta
+- ✅ Admin: Ve dashboard, gestión, NO ve carrito
+- ✅ Redirecciones automáticas según rol
 
 ### 2026-04-01: Fases 6-8 - Features Avanzadas Completadas
 

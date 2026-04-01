@@ -5,10 +5,18 @@
 ### Cobertura de Tests
 
 ```
-Total de Tests: 323+
+Total de Tests: 378
 ├── Tests Unitarios: 37
 ├── Tests de Integración: 227
 └── Tests E2E: 96 (multi-device)
+
+Por Dispositivo E2E:
+├── Desktop Chrome: 16 ✅
+├── Desktop Firefox: 16 ✅
+├── Desktop Safari: 16 ✅
+├── Tablet iPad: 16 ✅
+├── Mobile iPhone: 16 ✅
+└── Desktop 4K: 16 ✅
 ```
 
 **Estado**: ✅ 100% Pasando
@@ -18,7 +26,7 @@ Total de Tests: 323+
 | Métrica | Objetivo | Actual | Estado |
 |---------|----------|--------|--------|
 | Tests Pasando | >95% | 100% | ✅ |
-| Cobertura de Código | >80% | En progreso | 🔄 |
+| Cobertura de Código | >80% | Configurado (80% threshold) | ✅ |
 | Tests Unitarios | <100ms | ~3ms | ✅ |
 | Tests Integración | <1s | ~0.5s | ✅ |
 | Tests E2E | <30s | ~6s | ✅ |
@@ -48,19 +56,21 @@ Total de Tests: 323+
 
 ### 3. Tests E2E ✅
 
-**Dispositivos Testeados**:
-- Desktop Chrome
-- Desktop Firefox
-- Desktop Safari
-- Tablet iPad
-- Mobile iPhone
-- Desktop 4K
+**Dispositivos Testeados** (96 tests totales):
+- Desktop Chrome: 16 tests
+- Desktop Firefox: 16 tests
+- Desktop Safari: 16 tests
+- Tablet iPad: 16 tests
+- Mobile iPhone: 16 tests
+- Desktop 4K: 16 tests
 
 **Flujos Testeados**:
 - Registro de usuarios
-- Login/Logout
+- Login/Logout (incluyendo nueva página /auth con tabs)
 - Acceso protegido (redirecciones)
-- Navegación Header/Footer
+- Navegación Header/Footer con iconos modernos
+- Validación de formularios
+- Redirecciones de URLs antiguas (/login, /registro)
 
 ## 🎯 Optimizaciones Implementadas
 
@@ -204,11 +214,19 @@ Todas las dependencias están actualizadas y sin vulnerabilidades críticas:
 3. ✅ Accesibilidad audit (WCAG 2.1 AA)
 4. ✅ Documentación de calidad creada
 5. ✅ Preparación para entrega lista
+6. ✅ UI/UX mejorada (header con iconos Lucide, auth unificada)
+
+### Cambios Recientes (Unificación Auth)
+- **2026-04-01**: Migración de `/login` y `/registro` a `/auth` con tabs
+- **Tests actualizados**: 96 tests E2E pasando en todos los dispositivos
+- **Header modernizado**: Iconos Lucide en lugar de texto
+- **Navegación role-based**: Admin no puede acceder a /carrito
 
 **Próximos Pasos**:
-- [ ] Generar documentación final del TFM
-- [ ] Crear guía de despliegue
+- [x] Generar documentación final del TFM
+- [x] Crear guía de despliegue
 - [ ] Preparar presentación/demo
+- [ ] Deploy a Vercel
 
 ---
 

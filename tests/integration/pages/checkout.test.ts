@@ -44,10 +44,19 @@ describe('Página de Checkout', () => {
     });
     usuarioId = usuario.id;
 
+    // Verificar que el usuario se creó correctamente
+    const usuarioCreado = await prisma.usuario.findUnique({
+      where: { id: usuarioId },
+    });
+    
+    if (!usuarioCreado) {
+      throw new Error('Usuario no se creó correctamente');
+    }
+
     // Crear dirección
     const direccion = await prisma.direccion.create({
       data: {
-        usuarioId: usuario.id,
+        usuarioId: usuarioId,
         nombre: 'Casa',
         destinatario: usuarioTest.nombre,
         telefono: '612345678',

@@ -60,6 +60,14 @@ export default function AuthPage() {
     setRegisterData(prev => ({ ...prev, email: sharedEmail }));
   }, [sharedEmail]);
 
+  // Sync tab state with URL parameter on mount
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam === 'register') {
+      setActiveTab('register');
+    }
+  }, [searchParams]);
+
   // Handle tab switch with animation
   const handleTabSwitch = (tab: 'login' | 'register') => {
     setActiveTab(tab);

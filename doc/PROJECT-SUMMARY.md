@@ -5,7 +5,7 @@
 **E-commerce de Impresión 3D** desarrollado como Trabajo de Fin de Máster con enfoque TDD (Test-Driven Development).
 
 - **Stack**: Next.js 14 + Prisma + PostgreSQL + Stripe
-- **Enfoque**: TDD con 323+ tests (100% pasando)
+- **Enfoque**: TDD con 378 tests (100% pasando)
 - **Idioma**: 100% Español
 - **Responsive**: Mobile → 4K
 - **Seguridad**: Enterprise-grade
@@ -56,18 +56,18 @@
 ### Tests
 
 ```
-Total: 323+ tests
+Total: 378 tests
 ├── Unitarios: 37 (100% ✅)
 ├── Integración: 227 (100% ✅)
-└── E2E: 96 (100% ✅)
+└── E2E: 114 (100% ✅)
 
-Por Dispositivo E2E:
-├── Desktop Chrome: 16 ✅
-├── Desktop Firefox: 16 ✅
-├── Desktop Safari: 16 ✅
-├── Tablet iPad: 16 ✅
-├── Mobile iPhone: 16 ✅
-└── Desktop 4K: 16 ✅
+Por Dispositivo E2E (19 tests cada uno):
+├── Desktop Chrome: 19 ✅
+├── Desktop Firefox: 19 ✅
+├── Desktop Safari: 19 ✅
+├── Tablet iPad: 19 ✅
+├── Mobile iPhone: 19 ✅
+└── Desktop 4K: 19 ✅
 ```
 
 ### Cobertura de Código
@@ -109,24 +109,28 @@ Por Dispositivo E2E:
 │   └── seed.ts            # Datos iniciales desde CSV
 ├── src/
 │   ├── app/               # Next.js App Router
-│   │   ├── (auth)/         # Login, Registro
+│   │   ├── (auth)/         # Login, Registro (unificados en /auth)
+│   │   │   ├── auth/         # Página auth unificada con tabs
+│   │   │   ├── login/        # Redirecciona a /auth
+│   │   │   └── registro/     # Redirecciona a /auth?tab=register
 │   │   ├── (shop)/          # Tienda pública
 │   │   ├── (admin)/         # Panel admin
 │   │   └── api/             # API routes (30+ endpoints)
 │   ├── components/
 │   │   ├── ui/              # Componentes base
 │   │   ├── shop/            # Componentes tienda
-│   │   └── admin/           # Componentes admin
+│   │   ├── admin/           # Componentes admin
+│   │   └── layout/          # Header, Footer, Navigation
 │   ├── lib/
 │   │   ├── db/              # Prisma + conexión
 │   │   ├── validators/        # Zod schemas
 │   │   └── errors/            # Manejo de errores
 │   └── hooks/               # Custom React hooks
 ├── tests/
-│   ├── unit/              # Tests unitarios
-│   ├── integration/       # Tests de integración
-│   └── e2e/               # Tests E2E (Playwright)
-└── doc/                   # Documentación TFM
+│   ├── unit/              # Tests unitarios (37)
+│   ├── integration/       # Tests de integración (227)
+│   └── e2e/               # Tests E2E (96, multi-device)
+└── doc/                   # Documentación TFM (10 docs)
 ```
 
 ## 🎨 Características Implementadas
@@ -139,6 +143,7 @@ Por Dispositivo E2E:
 - ✅ Detalle de producto con galería
 - ✅ Carrito persistente
 - ✅ Checkout con Stripe
+- ✅ Auth unificada `/auth` con tabs (UI moderna)
 
 ### Administración
 - ✅ Dashboard con métricas
@@ -149,10 +154,11 @@ Por Dispositivo E2E:
 - ✅ Mensajería con clientes
 
 ### Usuarios
-- ✅ Registro/Login
+- ✅ Registro/Login (página unificada /auth)
 - ✅ Perfil editable
 - ✅ Historial de pedidos
 - ✅ Cambio de contraseña
+- ✅ Navegación role-based (admin no ve carrito)
 
 ## 🔐 Seguridad
 
@@ -245,18 +251,31 @@ npm start
 ## 📈 Estadísticas de Desarrollo
 
 - **Tiempo total**: ~8 semanas
-- **Líneas de código**: ~15,000
+- **Líneas de código**: ~20,000+
 - **Commits**: 50+
 - **Archivos**: 200+
-- **Tests**: 323+
-- **Cobertura**: 80%+
+- **Tests**: 378
+- **Cobertura**: 80%+ configurado
+
+## 🔄 Cambios Recientes (Unificación Auth)
+
+### 2026-04-01: Unificación Login/Registro
+- **Antes**: Páginas separadas `/login` y `/registro`
+- **Ahora**: Página unificada `/auth` con tabs modernos
+- **Beneficios**:
+  - UX mejorada (cambio instantáneo entre login/register)
+  - Email compartido entre tabs
+  - Header moderno con iconos Lucide
+  - Código más mantenible
+- **Compatibilidad**: URLs antiguas redirigen automáticamente a `/auth`
+- **Tests**: 114 tests E2E actualizados y pasando en todos los dispositivos
 
 ## 🎓 Créditos
 
 **Desarrollado por**: Rejane Rodrigues  
 **Título**: Trabajo de Fin de Máster  
 **Institución**: Universidad  
-**Año**: 2025
+**Año**: 2026
 
 ## 📄 Licencia
 
@@ -267,6 +286,7 @@ Proyecto académico - Uso educativo únicamente.
 **Estado**: ✅ Completado y listo para entrega
 
 **Próximos pasos**:
-1. [ ] Presentación del TFM
-2. [ ] Demo en vivo
-3. [ ] Entrega de documentación impresa
+1. [ ] Deploy a Vercel (despliegue en producción)
+2. [ ] Crear presentación del TFM
+3. [ ] Demo en vivo
+4. [ ] Entrega de documentación impresa

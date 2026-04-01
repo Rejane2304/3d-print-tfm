@@ -13,9 +13,9 @@ test.describe('Flujo de Autenticación', () => {
     test('debe mostrar tabs de login y registro', async ({ page }) => {
       await page.goto(`${BASE_URL}/auth`);
       
-      // Verificar que existen ambos tabs
-      await expect(page.getByRole('button', { name: /iniciar sesión/i })).toBeVisible();
-      await expect(page.getByRole('button', { name: /crear cuenta/i })).toBeVisible();
+      // Verificar que existen ambos tabs (usando .first() para evitar strict mode violation)
+      await expect(page.getByRole('button', { name: /iniciar sesión/i }).first()).toBeVisible();
+      await expect(page.getByRole('button', { name: /crear cuenta/i }).first()).toBeVisible();
       
       // El tab de login debe estar activo por defecto
       await expect(page.locator('input#login-email')).toBeVisible();
@@ -26,7 +26,7 @@ test.describe('Flujo de Autenticación', () => {
       
       // Debe redirigir a /auth
       await expect(page).toHaveURL(/auth/);
-      await expect(page.getByRole('button', { name: /iniciar sesión/i })).toBeVisible();
+      await expect(page.getByRole('button', { name: /iniciar sesión/i }).first()).toBeVisible();
     });
 
     test('debe redirigir /registro a /auth con tab register', async ({ page }) => {
@@ -55,7 +55,7 @@ test.describe('Flujo de Autenticación', () => {
       await page.goto(`${BASE_URL}/auth?tab=register`);
       
       // Intentar enviar formulario vacío
-      await page.getByRole('button', { name: /crear cuenta$/i }).click();
+      await page.locator('button[type="submit"]').filter({ hasText: /crear cuenta/i }).click();
       
       // Debe seguir en la misma página (validación HTML5)
       await expect(page).toHaveURL(/auth/);
@@ -74,7 +74,7 @@ test.describe('Flujo de Autenticación', () => {
       await page.locator('input#register-confirm').fill('TestPassword123!');
       
       // Enviar formulario
-      await page.getByRole('button', { name: /crear cuenta$/i }).click();
+      await page.locator('button[type="submit"]').filter({ hasText: /crear cuenta/i }).click();
       
       // Esperar procesamiento
       await page.waitForTimeout(3000);
@@ -95,7 +95,7 @@ test.describe('Flujo de Autenticación', () => {
       await page.locator('input#register-password').fill('TestPassword123!');
       await page.locator('input#register-confirm').fill('TestPassword123!');
       
-      await page.getByRole('button', { name: /crear cuenta$/i }).click();
+      await page.locator('button[type="submit"]').filter({ hasText: /crear cuenta/i }).click();
       
       await page.waitForTimeout(2000);
       
@@ -121,7 +121,7 @@ test.describe('Flujo de Autenticación', () => {
       await page.locator('input#login-email').fill('juan@example.com');
       await page.locator('input#login-password').fill('pass123');
       
-      await page.getByRole('button', { name: /iniciar sesión$/i }).click();
+      await page.locator('button[type="submit"]').filter({ hasText: /iniciar sesión/i }).click();
       
       // Esperar redirección
       await page.waitForTimeout(3000);
@@ -137,13 +137,13 @@ test.describe('Flujo de Autenticación', () => {
       await page.locator('input#login-email').fill('juan@example.com');
       await page.locator('input#login-password').fill('contraseña-incorrecta');
       
-      await page.getByRole('button', { name: /iniciar sesión$/i }).click();
+      await page.locator('button[type="submit"]').filter({ hasText: /iniciar sesión/i }).click();
       
-      // Esperar mensaje de error
-      await page.waitForTimeout(2000);
+      // Esperar a que aparezca el mensaje de error (máx 5 segundos)
+      await page.waitForSelector('text=Email o contraseña incorrectos', { timeout: 5000 });
       
-      // Debe mostrar error de credenciales
-      const errorVisible = await page.getByText(/incorrectos|error/i).isVisible().catch(() => false);
+      // Verificar que el error es visible
+      const errorVisible = await page.locator('text=Email o contraseña incorrectos').isVisible();
       expect(errorVisible).toBe(true);
     });
 
@@ -152,13 +152,16 @@ test.describe('Flujo de Autenticación', () => {
       await page.goto(`${BASE_URL}/auth`);
       await page.locator('input#login-email').fill('juan@example.com');
       await page.locator('input#login-password').fill('pass123');
-      await page.getByRole('button', { name: /iniciar sesión$/i }).click();
+      await page.locator('button[type="submit"]').filter({ hasText: /iniciar sesión/i }).click();
       
-      await page.waitForTimeout(3000);
+      // Esperar a que redirija fuera de /auth (login exitoso)
+      await page.waitForURL((url) => !url.pathname.includes('/auth'), { timeout: 10000 });
       
-      // Intentar volver a auth
+      // Intentar volver a auth - debe redirigir automáticamente
       await page.goto(`${BASE_URL}/auth`);
-      await page.waitForTimeout(2000);
+      
+      // Esperar un momento para que ocurra la redirección automática
+      await page.waitForTimeout(3000);
       
       // Debe redirigir automáticamente
       const currentUrl = page.url();
@@ -167,31 +170,61 @@ test.describe('Flujo de Autenticación', () => {
   });
 
   test.describe('Logout', () => {
-    test('debe cerrar sesión correctamente', async ({ page }) => {
+    test('debe cerrar sesión correctamente', async ({ page, isMobile }) => {
       // Iniciar sesión primero
       await page.goto(`${BASE_URL}/auth`);
       await page.locator('input#login-email').fill('juan@example.com');
       await page.locator('input#login-password').fill('pass123');
-      await page.getByRole('button', { name: /iniciar sesión$/i }).click();
+      await page.locator('button[type="submit"]').filter({ hasText: /iniciar sesión/i }).click();
       
+      // Esperar redirección y que la sesión se establezca
       await page.waitForTimeout(3000);
       
-      // Buscar y hacer clic en cerrar sesión (icono en Header)
-      const logoutButton = page.getByRole('button', { name: /salir/i });
+      if (isMobile) {
+        // En mobile, abrir menú hamburguesa primero
+        const menuButton = page.locator('header button').filter({ has: page.locator('svg') }).first();
+        if (await menuButton.isVisible().catch(() => false)) {
+          await menuButton.click();
+          await page.waitForTimeout(500);
+        }
+      }
+      
+      // Buscar y hacer clic en cerrar sesión por el icono (más confiable)
+      const logoutButton = page.locator('button svg.lucide-log-out').locator('..');
       
       if (await logoutButton.isVisible().catch(() => false)) {
         await logoutButton.click();
       }
       
+      // Esperar a que se complete el logout
       await page.waitForTimeout(2000);
       
       // Refrescar página para verificar que se cerró sesión
-      await page.goto(`${BASE_URL}/`);
-      await page.waitForTimeout(2000);
+      await page.reload();
+      await page.waitForTimeout(1500);
       
-      // Debe mostrar botón de entrar
-      const loginVisible = await page.getByRole('link', { name: /entrar/i }).isVisible().catch(() => false);
-      expect(loginVisible).toBe(true);
+      if (isMobile) {
+        // En mobile, abrir menú hamburguesa para ver el botón de login
+        const menuButton = page.locator('header button').filter({ has: page.locator('svg') }).first();
+        if (await menuButton.isVisible().catch(() => false)) {
+          await menuButton.click();
+          await page.waitForTimeout(500);
+        }
+      }
+      
+      // Verificar que se muestra el botón de iniciar sesión
+      // Buscar por el href o el icono de login (más confiable que el texto)
+      const loginLink = page.locator('a[href="/auth"], a[href="/login"]').first();
+      const loginVisible = await loginLink.isVisible().catch(() => false);
+      
+      // Alternativa: buscar el icono de login
+      if (!loginVisible) {
+        const loginIcon = page.locator('a svg.lucide-log-in').locator('..');
+        const loginIconVisible = await loginIcon.isVisible().catch(() => false);
+        expect(loginIconVisible).toBe(true);
+      } else {
+        expect(loginVisible).toBe(true);
+      }
     });
   });
 
@@ -217,7 +250,7 @@ test.describe('Flujo de Autenticación', () => {
       await page.goto(`${BASE_URL}/auth`);
       await page.locator('input#login-email').fill('juan@example.com');
       await page.locator('input#login-password').fill('pass123');
-      await page.getByRole('button', { name: /iniciar sesión$/i }).click();
+      await page.locator('button[type="submit"]').filter({ hasText: /iniciar sesión/i }).click();
       
       await page.waitForTimeout(3000);
       
@@ -235,7 +268,7 @@ test.describe('Flujo de Autenticación', () => {
       await page.goto(`${BASE_URL}/auth`);
       await page.locator('input#login-email').fill('admin@3dprint.com');
       await page.locator('input#login-password').fill('admin123');
-      await page.getByRole('button', { name: /iniciar sesión$/i }).click();
+      await page.locator('button[type="submit"]').filter({ hasText: /iniciar sesión/i }).click();
       
       await page.waitForTimeout(3000);
       
@@ -252,7 +285,7 @@ test.describe('Flujo de Autenticación', () => {
       await page.goto(`${BASE_URL}/auth`);
       await page.locator('input#login-email').fill('admin@3dprint.com');
       await page.locator('input#login-password').fill('admin123');
-      await page.getByRole('button', { name: /iniciar sesión$/i }).click();
+      await page.locator('button[type="submit"]').filter({ hasText: /iniciar sesión/i }).click();
       
       await page.waitForTimeout(3000);
       

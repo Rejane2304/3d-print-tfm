@@ -97,7 +97,7 @@
 ✅ **Personalización**: Capacidad única
 ✅ **Precio Competitivo**: Sin intermediarios
 ✅ **100% Español**: Mercado local
-✅ **Testing Completo**: 323+ tests
+✅ **Testing Completo**: 378 tests
 
 ### Debilidades
 
@@ -205,7 +205,7 @@ Precio
 2. **Inversión Inicial**: Equipamiento (impresoras)
 3. **Calidad**: Configuraciones optimizadas
 4. **Diseños**: Catálogo propio
-5. **Testing**: 323+ tests funcionando
+5. **Testing**: 378 tests funcionando
 
 ### Para Nosotros
 

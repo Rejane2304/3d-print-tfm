@@ -7,17 +7,18 @@
 **Descripción**: Crear una cuenta nueva
 **Precondiciones**: No estar logueado
 **Flujo Principal**:
-1. Usuario accede a /registro
+1. Usuario accede a /auth (tab de registro)
 2. Completa: nombre, email, password, confirmarPassword
 3. Sistema valida datos (Zod)
 4. Sistema verifica email único
 5. Sistema crea usuario (bcrypt hash)
-6. Sistema redirige a login con mensaje éxito
+6. Sistema muestra mensaje de éxito y cambia a tab de login
 
 **Flujos Alternativos**:
 - Email duplicado: Mostrar error
 - Password débil: Mostrar requisitos
 - Campos vacíos: Validación HTML5
+- URLs antiguas (/registro): Redirigen a /auth?tab=register
 
 **Postcondiciones**: Usuario creado en BD
 
@@ -28,7 +29,7 @@
 **Descripción**: Autenticarse en el sistema
 **Precondiciones**: Tener cuenta
 **Flujo Principal**:
-1. Usuario accede a /login
+1. Usuario accede a /auth (tab de login)
 2. Introduce email y password
 3. Sistema verifica credenciales
 4. Sistema crea sesión (JWT)
@@ -38,6 +39,7 @@
 - Credenciales inválidas: Mostrar error
 - Cuenta no verificada: Mensaje apropiado
 - Usuario ADMIN: Redirección a /admin/dashboard
+- URLs antiguas (/login): Redirigen a /auth
 
 **Postcondiciones**: Sesión activa
 
@@ -266,7 +268,7 @@
 **Flujo**:
 1. Usuario solicita ruta protegida
 2. Middleware verifica sesión
-3. Si no autenticado → /login
+3. Si no autenticado → /auth
 4. Si autenticado, verifica rol:
    - Ruta /admin → Solo ADMIN
    - Ruta /carrito → No ADMIN (redirigir)
@@ -296,6 +298,19 @@
 | UC-203 Auth | ❌ | ❌ | ✅ |
 
 **Total**: 16 casos de uso principales
+
+## 🔄 Cambios Recientes (Unificación Auth)
+
+### 2026-04-01: Unificación Login/Registro
+- **Antes**: Páginas separadas `/login` y `/registro`
+- **Ahora**: Página unificada `/auth` con tabs
+- **Beneficios**:
+  - UX mejorada (cambio instantáneo entre login/register)
+  - Email compartido entre tabs
+  - Código más mantenible
+  - Header moderno con iconos
+- **Compatibilidad**: URLs antiguas redirigen a `/auth`
+- **Tests**: 96 tests E2E actualizados y pasando
 
 ---
 
