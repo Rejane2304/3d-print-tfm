@@ -2,7 +2,7 @@
  * Tests Unitarios - Componente CartSummary
  * TDD: Tests primero, implementación después
  */
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import CartSummary from '@/components/cart/CartSummary';
 

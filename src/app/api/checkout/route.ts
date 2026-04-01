@@ -141,9 +141,15 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       );
     }
 
+    // Generar número de pedido
+    const year = new Date().getFullYear();
+    const count = await prisma.pedido.count();
+    const numeroPedido = `P-${year}${String(count + 1).padStart(6, '0')}`;
+
     // Crear pedido en estado PENDIENTE
     const pedido = await prisma.pedido.create({
       data: {
+        numeroPedido,
         usuarioId: usuario.id,
         estado: 'PENDIENTE',
         subtotal,
