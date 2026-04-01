@@ -64,7 +64,7 @@ const authOptions: AuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user }: { token: any; user: any }) {
       if (user) {
         token.id = user.id;
         // Obtener el rol desde la base de datos
@@ -78,7 +78,7 @@ const authOptions: AuthOptions = {
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: any; token: any }) {
       if (token && session.user) {
         session.user.id = token.id as string;
         if (token.rol) {
