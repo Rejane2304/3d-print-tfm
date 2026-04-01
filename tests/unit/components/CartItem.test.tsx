@@ -2,10 +2,10 @@
  * Tests Unitarios - Componente CartItem
  * TDD: Tests primero, implementación después
  * 
- * NOTA: El componente usa propiedades en inglés:
- * - quantity (cantidad)
- * - unitPrice (precio unitario)
- * - price (precio)
+ * NOTA: El componente usa propiedades en español para coincidir con la base de datos:
+ * - cantidad
+ * - precioUnitario
+ * - precio
  * 
  * Los tests usan los nombres correctos de las props del componente.
  */
@@ -17,13 +17,13 @@ describe('CartItem', () => {
   const mockItem = {
     id: 'item-1',
     productoId: 'prod-1',
-    quantity: 2,
-    unitPrice: 29.99,
+    cantidad: 2,
+    precioUnitario: 29.99,
     producto: {
       id: 'prod-1',
       nombre: 'Producto Test',
       slug: 'producto-test',
-      price: 29.99,
+      precio: 29.99,
       stock: 10,
       imagen: '/images/test.jpg',
     },
@@ -49,8 +49,8 @@ describe('CartItem', () => {
   it('debe mostrar cantidad actual', () => {
     render(<CartItem item={mockItem} {...mockHandlers} />);
 
-    const quantityInput = screen.getByDisplayValue('2');
-    expect(quantityInput).toBeInTheDocument();
+    const cantidadInput = screen.getByDisplayValue('2');
+    expect(cantidadInput).toBeInTheDocument();
   });
 
   it('debe calcular y mostrar subtotal correctamente', () => {
@@ -79,15 +79,15 @@ describe('CartItem', () => {
   });
 
   it('debe deshabilitar decrementar cuando cantidad es 1', () => {
-    const itemWithQuantity1 = { ...mockItem, quantity: 1 };
-    render(<CartItem item={itemWithQuantity1} {...mockHandlers} />);
+    const itemWithCantidad1 = { ...mockItem, cantidad: 1 };
+    render(<CartItem item={itemWithCantidad1} {...mockHandlers} />);
 
     const decrementButton = screen.getByLabelText(/decrementar/i);
     expect(decrementButton).toBeDisabled();
   });
 
   it('debe deshabilitar incrementar cuando alcanza stock máximo', () => {
-    const itemAtMaxStock = { ...mockItem, quantity: 10 };
+    const itemAtMaxStock = { ...mockItem, cantidad: 10 };
     render(<CartItem item={itemAtMaxStock} {...mockHandlers} />);
 
     const incrementButton = screen.getByLabelText(/incrementar/i);
@@ -120,9 +120,9 @@ describe('CartItem', () => {
   it('debe actualizar cantidad al escribir en input', () => {
     render(<CartItem item={mockItem} {...mockHandlers} />);
 
-    const quantityInput = screen.getByDisplayValue('2');
-    fireEvent.change(quantityInput, { target: { value: '5' } });
-    fireEvent.blur(quantityInput);
+    const cantidadInput = screen.getByDisplayValue('2');
+    fireEvent.change(cantidadInput, { target: { value: '5' } });
+    fireEvent.blur(cantidadInput);
 
     expect(mockHandlers.onUpdateQuantity).toHaveBeenCalledWith('item-1', 5);
   });
@@ -130,9 +130,9 @@ describe('CartItem', () => {
   it('debe validar cantidad máxima al escribir', () => {
     render(<CartItem item={mockItem} {...mockHandlers} />);
 
-    const quantityInput = screen.getByDisplayValue('2');
-    fireEvent.change(quantityInput, { target: { value: '15' } });
-    fireEvent.blur(quantityInput);
+    const cantidadInput = screen.getByDisplayValue('2');
+    fireEvent.change(cantidadInput, { target: { value: '15' } });
+    fireEvent.blur(cantidadInput);
 
     // No debería permitir más que el stock
     expect(mockHandlers.onUpdateQuantity).toHaveBeenCalledWith('item-1', 10);

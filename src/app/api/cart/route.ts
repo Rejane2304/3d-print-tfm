@@ -10,7 +10,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { withErrorHandler } from '@/lib/errors/api-wrapper';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth/auth-options';
 
 // GET /api/cart - Ver carrito del usuario
 export const GET = withErrorHandler(async (req: NextRequest) => {
@@ -82,13 +82,13 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       items: carrito.items.map((item) => ({
         id: item.id,
         productoId: item.productoId,
-        quantity: item.cantidad,
-        unitPrice: Number(item.precioUnitario),
+        cantidad: item.cantidad,
+        precioUnitario: Number(item.precioUnitario),
         producto: {
           id: item.producto.id,
           nombre: item.producto.nombre,
           slug: item.producto.slug,
-          price: Number(item.producto.precio),
+          precio: Number(item.producto.precio),
           stock: item.producto.stock,
           imagen: item.producto.imagenes[0]?.url || null,
         },
@@ -113,7 +113,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   // Obtener datos del body
   const body = await req.json();
-  const { productoId, quantity = 1 } = body;
+  const { productoId, cantidad = 1 } = body;
 
   // Validaciones
   if (!productoId) {
@@ -123,7 +123,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     );
   }
 
-  if (quantity <= 0) {
+  if (cantidad <= 0) {
     return NextResponse.json(
       { success: false, error: 'Cantidad debe ser mayor a 0' },
       { status: 400 }
@@ -162,7 +162,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     );
   }
 
-  if (producto.stock < quantity) {
+  if (producto.stock < cantidad) {
     return NextResponse.json(
       { success: false, error: 'Stock insuficiente' },
       { status: 400 }
@@ -190,7 +190,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   if (itemExistente) {
     // Actualizar cantidad
-    const nuevaCantidad = itemExistente.cantidad + quantity;
+    const nuevaCantidad = itemExistente.cantidad + cantidad;
     
     if (producto.stock < nuevaCantidad) {
       return NextResponse.json(
@@ -209,7 +209,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       data: {
         carritoId: carrito.id,
         productoId: producto.id,
-        cantidad: quantity,
+        cantidad: cantidad,
         precioUnitario: producto.precio,
       },
     });

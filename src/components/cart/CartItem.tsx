@@ -15,18 +15,18 @@ interface CartItemProps {
   item: {
     id: string;
     productoId: string;
-    quantity: number;
-    unitPrice: number;
+    cantidad: number;
+    precioUnitario: number;
     producto: {
       id: string;
       nombre: string;
       slug: string;
-      price: number;
+      precio: number;
       stock: number;
       imagen: string | null;
     };
   };
-  onUpdateQuantity: (itemId: string, quantity: number) => void;
+  onUpdateQuantity: (itemId: string, cantidad: number) => void;
   onRemove: (itemId: string) => void;
   isUpdating?: boolean;
 }
@@ -37,9 +37,9 @@ export default function CartItem({
   onRemove,
   isUpdating = false,
 }: CartItemProps) {
-  const [quantity, setQuantity] = useState(item.quantity);
+  const [cantidad, setCantidad] = useState(item.cantidad);
   const [modalOpen, setModalOpen] = useState(false);
-  const subtotal = item.unitPrice * item.quantity;
+  const subtotal = item.precioUnitario * item.cantidad;
 
   const handleRemoveClick = () => {
     setModalOpen(true);
@@ -50,10 +50,10 @@ export default function CartItem({
     onRemove(item.id);
   };
 
-  const handleQuantityChange = (newQuantity: number) => {
-    if (newQuantity < 1 || newQuantity > item.producto.stock) return;
-    setQuantity(newQuantity);
-    onUpdateQuantity(item.id, newQuantity);
+  const handleQuantityChange = (nuevaCantidad: number) => {
+    if (nuevaCantidad < 1 || nuevaCantidad > item.producto.stock) return;
+    setCantidad(nuevaCantidad);
+    onUpdateQuantity(item.id, nuevaCantidad);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,11 +62,11 @@ export default function CartItem({
     
     // Limitar entre 1 y stock disponible
     const clampedValue = Math.max(1, Math.min(value, item.producto.stock));
-    setQuantity(clampedValue);
+    setCantidad(clampedValue);
   };
 
   const handleInputBlur = () => {
-    onUpdateQuantity(item.id, quantity);
+    onUpdateQuantity(item.id, cantidad);
   };
 
   return (
@@ -95,28 +95,28 @@ export default function CartItem({
             {item.producto.nombre}
           </Link>
           <p className="text-sm text-gray-500 mt-1">
-            {item.unitPrice.toFixed(2)} € / unidad
+            {item.precioUnitario.toFixed(2)} € / unidad
           </p>
         </div>
 
-        {/* Controles de quantity */}
+        {/* Controles de cantidad */}
         <div className="flex items-center justify-between mt-4 sm:mt-0">
           <div className="flex items-center gap-2">
             {/* Botón decrementar */}
             <button
               type="button"
-              onClick={() => handleQuantityChange(quantity - 1)}
-              disabled={quantity <= 1 || isUpdating}
-              aria-label="Decrementar quantity"
+              onClick={() => handleQuantityChange(cantidad - 1)}
+              disabled={cantidad <= 1 || isUpdating}
+              aria-label="Decrementar cantidad"
               className="p-2 rounded-md border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <Minus className="h-4 w-4" />
             </button>
 
-            {/* Input de quantity */}
+            {/* Input de cantidad */}
             <input
               type="number"
-              value={quantity}
+              value={cantidad}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
               min={1}
@@ -128,16 +128,16 @@ export default function CartItem({
             {/* Botón incrementar */}
             <button
               type="button"
-              onClick={() => handleQuantityChange(quantity + 1)}
-              disabled={quantity >= item.producto.stock || isUpdating}
-              aria-label="Incrementar quantity"
+              onClick={() => handleQuantityChange(cantidad + 1)}
+              disabled={cantidad >= item.producto.stock || isUpdating}
+              aria-label="Incrementar cantidad"
               className="p-2 rounded-md border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <Plus className="h-4 w-4" />
             </button>
 
             {/* Indicador de stock */}
-            {quantity >= item.producto.stock && (
+            {cantidad >= item.producto.stock && (
               <span className="text-xs text-orange-600 ml-2">
                 Stock máximo
               </span>
@@ -151,7 +151,7 @@ export default function CartItem({
                 {subtotal.toFixed(2)} €
               </p>
               <p className="text-sm text-gray-500">
-                {item.quantity} x {item.unitPrice.toFixed(2)} €
+                {item.cantidad} x {item.precioUnitario.toFixed(2)} €
               </p>
               {isUpdating && (
                 <p className="text-xs text-gray-400 mt-1">Actualizando...</p>

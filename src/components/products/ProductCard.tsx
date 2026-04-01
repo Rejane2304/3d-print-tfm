@@ -9,13 +9,13 @@ interface Producto {
   id: string;
   slug: string;
   nombre: string;
-  description?: string | null;
-  descriptionCorta?: string | null;
-  price: number | Decimal;
+  descripcion?: string | null;
+  descripcionCorta?: string | null;
+  precio: number | Decimal;
   stock: number;
-  images: Array<{
+  imagenes: Array<{
     url: string;
-    isPrimary: boolean;
+    esPrincipal: boolean;
   }>;
 }
 
@@ -24,8 +24,8 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ producto }: ProductCardProps) {
-  const imagenPrincipal = producto.images[0];
-  const price = Number(producto.price);
+  const imagenPrincipal = producto.imagenes?.find(img => img.esPrincipal) || producto.imagenes?.[0];
+  const precio = Number(producto.precio);
   
   return (
     <Link
@@ -67,15 +67,15 @@ export default function ProductCard({ producto }: ProductCardProps) {
           {producto.nombre}
         </h3>
         
-        {producto.descriptionCorta && (
+        {producto.descripcionCorta && (
           <p className="text-sm text-gray-500 mb-2 line-clamp-2">
-            {producto.descriptionCorta}
+            {producto.descripcionCorta}
           </p>
         )}
         
         <div className="flex items-center justify-between">
           <span className="text-xl font-bold text-indigo-600">
-            {price.toFixed(2)} €
+            {precio.toFixed(2)} €
           </span>
           
           <span className={`text-sm ${

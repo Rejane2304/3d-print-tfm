@@ -2,10 +2,10 @@
  * Tests Unitarios - Componente CartSummary
  * TDD: Tests primero, implementación después
  * 
- * NOTA: El componente usa propiedades en inglés:
- * - quantity (cantidad)
- * - unitPrice (precio unitario)
- * - price (precio)
+ * NOTA: El componente usa propiedades en español para coincidir con la base de datos:
+ * - cantidad
+ * - precioUnitario
+ * - precio
  * 
  * Los tests usan los nombres correctos de las props del componente.
  */
@@ -18,24 +18,24 @@ describe('CartSummary', () => {
     {
       id: 'item-1',
       productoId: 'prod-1',
-      quantity: 2,
-      unitPrice: 29.99,
+      cantidad: 2,
+      precioUnitario: 29.99,
       producto: {
         id: 'prod-1',
         nombre: 'Producto A',
-        price: 29.99,
+        precio: 29.99,
         stock: 10,
       },
     },
     {
       id: 'item-2',
       productoId: 'prod-2',
-      quantity: 1,
-      unitPrice: 49.99,
+      cantidad: 1,
+      precioUnitario: 49.99,
       producto: {
         id: 'prod-2',
         nombre: 'Producto B',
-        price: 49.99,
+        precio: 49.99,
         stock: 5,
       },
     },

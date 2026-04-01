@@ -9,7 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { withErrorHandler } from '@/lib/errors/api-wrapper';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth/auth-options';
 import Stripe from 'stripe';
 
 // Inicializar Stripe (modo test)
@@ -73,7 +73,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   // Verificar stock disponible
   for (const item of usuario.carrito.items) {
-    if (item.producto.stock < item.quantity) {
+    if (item.producto.stock < item.cantidad) {
       return NextResponse.json(
         { success: false, error: `Stock insuficiente para ${item.producto.nombre}` },
         { status: 400 }
@@ -95,9 +95,9 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
           name: item.producto.nombre,
           description: `Producto ID: ${item.producto.id}`,
         },
-        unit_amount: Math.round(Number(item.unitPrice) * 100), // Stripe usa céntimos
+        unit_amount: Math.round(Number(item.precioUnitario) * 100), // Stripe usa céntimos
       },
-      quantity: item.quantity,
+      quantity: item.cantidad,
     }));
 
     // Añadir envío si aplica
@@ -168,12 +168,12 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         items: {
           create: usuario.carrito.items.map((item) => ({
             productoId: item.productoId,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
-            subtotal: Number(item.unitPrice) * item.quantity,
+            cantidad: item.cantidad,
+            precio: item.precioUnitario,
+            subtotal: Number(item.precioUnitario) * item.cantidad,
             nombre: item.producto.nombre,
-            price: item.producto.price,
-            category: item.producto.category,
+            precioProducto: item.producto.precio,
+            categoria: item.producto.categoria,
             material: item.producto.material,
           })),
         },

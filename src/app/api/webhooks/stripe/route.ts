@@ -122,7 +122,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         where: { id: item.productoId },
         data: {
           stock: {
-            decrement: item.quantity,
+            decrement: item.cantidad,
           },
         },
       });

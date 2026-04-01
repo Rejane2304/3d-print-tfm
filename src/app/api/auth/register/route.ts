@@ -20,10 +20,24 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     direccion: datosDireccion 
   } = body;
   
-  // Validaciones básicas
-  if (!nombre || !email || !password) {
+  // Validaciones específicas por campo
+  if (!nombre || nombre.trim() === '') {
     return NextResponse.json(
-      { success: false, error: 'Nombre, email y contraseña son obligatorios' },
+      { success: false, error: 'El campo nombre es obligatorio' },
+      { status: 400 }
+    );
+  }
+  
+  if (!email || email.trim() === '') {
+    return NextResponse.json(
+      { success: false, error: 'El campo email es obligatorio' },
+      { status: 400 }
+    );
+  }
+  
+  if (!password) {
+    return NextResponse.json(
+      { success: false, error: 'El campo password es obligatorio' },
       { status: 400 }
     );
   }
@@ -35,8 +49,17 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     );
   }
   
+  // Validar formato de email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return NextResponse.json(
+      { success: false, error: 'El formato del email no es válido' },
+      { status: 400 }
+    );
+  }
+  
   // Validar teléfono si se proporciona
-  if (telefono) {
+  if (telefono && telefono.trim() !== '') {
     const phoneDigits = telefono.replace(/\D/g, '');
     if (phoneDigits.length < 9) {
       return NextResponse.json(
@@ -67,7 +90,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       email: email.toLowerCase(),
       password: hashedPassword,
       nombre,
-      telefono,
+      telefono: telefono || null,
       rol: 'CLIENTE',
       activo: true,
       // Crear dirección si se proporcionan los datos

@@ -1,7 +1,7 @@
 /**
  * API Route para items individuales del carrito
  * 
- * PATCH /api/cart/[itemId] - Actualizar quantity
+ * PATCH /api/cart/[itemId] - Actualizar cantidad
  * DELETE /api/cart/[itemId] - Eliminar item
  * 
  * Requiere autenticación
@@ -10,9 +10,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { withErrorHandler } from '@/lib/errors/api-wrapper';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../../auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth/auth-options';
 
-// PATCH /api/cart/[itemId] - Actualizar quantity
+// PATCH /api/cart/[itemId] - Actualizar cantidad
 export const PATCH = withErrorHandler(async (
   req: NextRequest,
   { params }: { params: { itemId: string } }
@@ -29,11 +29,11 @@ export const PATCH = withErrorHandler(async (
     );
   }
 
-  // Obtener nueva quantity
+  // Obtener nueva cantidad
   const body = await req.json();
-  const { quantity } = body;
+  const { cantidad } = body;
 
-  if (quantity === undefined || quantity < 0) {
+  if (cantidad === undefined || cantidad < 0) {
     return NextResponse.json(
       { success: false, error: 'Cantidad inválida' },
       { status: 400 }
@@ -63,8 +63,8 @@ export const PATCH = withErrorHandler(async (
     );
   }
 
-  // Si quantity es 0, eliminar el item
-  if (quantity === 0) {
+  // Si cantidad es 0, eliminar el item
+  if (cantidad === 0) {
     await prisma.itemCarrito.delete({
       where: { id: itemId },
     });
@@ -75,8 +75,8 @@ export const PATCH = withErrorHandler(async (
     });
 
     const nuevoSubtotal = itemsRestantes.reduce(
-      (sum: number, i: { unitPrice: { toString: () => string }; quantity: number }) =>
-        sum + Number(i.unitPrice) * i.quantity,
+      (sum: number, i: { precioUnitario: { toString: () => string }; cantidad: number }) =>
+        sum + Number(i.precioUnitario) * i.cantidad,
       0
     );
 
@@ -92,17 +92,17 @@ export const PATCH = withErrorHandler(async (
   }
 
   // Verificar stock
-  if (item.producto.stock < quantity) {
+  if (item.producto.stock < cantidad) {
     return NextResponse.json(
       { success: false, error: 'Stock insuficiente' },
       { status: 400 }
     );
   }
 
-  // Actualizar quantity
+  // Actualizar cantidad
   await prisma.itemCarrito.update({
     where: { id: itemId },
-    data: { quantity },
+    data: { cantidad },
   });
 
   // Recalcular subtotal
@@ -111,8 +111,8 @@ export const PATCH = withErrorHandler(async (
   });
 
   const nuevoSubtotal = items.reduce(
-    (sum: number, i: { unitPrice: { toString: () => string }; quantity: number }) =>
-      sum + Number(i.unitPrice) * i.quantity,
+    (sum: number, i: { precioUnitario: { toString: () => string }; cantidad: number }) =>
+      sum + Number(i.precioUnitario) * i.cantidad,
     0
   );
 
@@ -177,8 +177,8 @@ export const DELETE = withErrorHandler(async (
   });
 
   const nuevoSubtotal = itemsRestantes.reduce(
-    (sum: number, i: { unitPrice: { toString: () => string }; quantity: number }) =>
-      sum + Number(i.unitPrice) * i.quantity,
+    (sum: number, i: { precioUnitario: { toString: () => string }; cantidad: number }) =>
+      sum + Number(i.precioUnitario) * i.cantidad,
     0
   );
 

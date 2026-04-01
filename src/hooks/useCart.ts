@@ -10,13 +10,13 @@ import { useSession } from 'next-auth/react';
 export interface CartItem {
   id: string;
   productoId: string;
-  quantity: number;
-  unitPrice: number;
+  cantidad: number;
+  precioUnitario: number;
   producto: {
     id: string;
     nombre: string;
     slug: string;
-    price: number;
+    precio: number;
     stock: number;
     imagen: string | null;
   };
@@ -64,9 +64,9 @@ export function useCart() {
         const cartData = localStorage.getItem(CART_STORAGE_KEY);
         if (cartData) {
           const items: CartItem[] = JSON.parse(cartData);
-          const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+          const totalItems = items.reduce((sum, item) => sum + item.cantidad, 0);
           const subtotal = items.reduce(
-            (sum, item) => sum + item.unitPrice * item.quantity,
+            (sum, item) => sum + item.precioUnitario * item.cantidad,
             0
           );
           setCart({
@@ -92,14 +92,14 @@ export function useCart() {
   }, [isAuthenticated, isLoadingSession]);
 
   // Añadir item al carrito
-  const addItem = useCallback(async (productoId: string, quantity: number, productoInfo: any) => {
+  const addItem = useCallback(async (productoId: string, cantidad: number, productoInfo: any) => {
     try {
       if (isAuthenticated) {
         // Usar API
         const response = await fetch('/api/cart', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ productoId, quantity }),
+          body: JSON.stringify({ productoId, cantidad }),
         });
         
         if (!response.ok) {
@@ -119,19 +119,19 @@ export function useCart() {
         
         if (existingItem) {
           // Actualizar cantidad
-          existingItem.quantity += quantity;
+          existingItem.cantidad += cantidad;
         } else {
           // Añadir nuevo item
           items.push({
             id: `local-${Date.now()}`,
             productoId,
-            quantity,
-            unitPrice: productoInfo.price,
+            cantidad,
+            precioUnitario: productoInfo.precio,
             producto: {
               id: productoId,
               nombre: productoInfo.nombre,
               slug: productoInfo.slug,
-              price: productoInfo.price,
+              precio: productoInfo.precio,
               stock: productoInfo.stock,
               imagen: productoInfo.imagen || null,
             },
@@ -154,14 +154,14 @@ export function useCart() {
   }, [isAuthenticated, loadCart]);
 
   // Actualizar cantidad de un item
-  const updateQuantity = useCallback(async (itemId: string, quantity: number) => {
+  const updateQuantity = useCallback(async (itemId: string, cantidad: number) => {
     try {
       if (isAuthenticated) {
         // Usar API
         const response = await fetch(`/api/cart/${itemId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ quantity }),
+          body: JSON.stringify({ cantidad }),
         });
         
         if (!response.ok) {
@@ -176,12 +176,12 @@ export function useCart() {
         if (cartData) {
           let items: CartItem[] = JSON.parse(cartData);
           
-          if (quantity <= 0) {
+          if (cantidad <= 0) {
             items = items.filter(item => item.id !== itemId);
           } else {
             const item = items.find(i => i.id === itemId);
             if (item) {
-              item.quantity = quantity;
+              item.cantidad = cantidad;
             }
           }
           
@@ -266,7 +266,7 @@ export function useCart() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
               productoId: item.productoId, 
-              quantity: item.quantity 
+              cantidad: item.cantidad 
             }),
           });
         } catch (err) {
