@@ -19,7 +19,7 @@ export default function Pagination({ currentPage, totalPages }: PaginationProps)
   const buildPageUrl = (page: number) => {
     const params = new URLSearchParams(currentSearchParams.toString());
     params.set('page', page.toString());
-    return `/productos?${params.toString()}`;
+    return `/products?${params.toString()}`;
   };
   
   // Generar array de páginas a mostrar

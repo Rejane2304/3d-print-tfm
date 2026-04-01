@@ -22,7 +22,7 @@ describe('Middleware de Autorización', () => {
   });
 
   describe('Rutas de Admin (/admin/*)', () => {
-    it('debe redirigir a /login usuarios no autenticados', async () => {
+    it('debe redirigir a /auth usuarios no autenticados', async () => {
       mockGetToken.mockResolvedValue(null);
 
       const req = createRequest('/admin/dashboard');
@@ -62,44 +62,70 @@ describe('Middleware de Autorización', () => {
     });
   });
 
-  describe('Rutas de Cliente (/carrito, /checkout, /cuenta)', () => {
-    it('debe redirigir a /login con callback URL usuarios no autenticados', async () => {
+  describe('Rutas de Cliente (/checkout, /account) - /cart ya NO requiere auth', () => {
+    it('debe PERMITIR acceso a /cart para usuarios no autenticados (usar localStorage)', async () => {
+      // CAMBIO: /cart ahora es accesible para invitados
       mockGetToken.mockResolvedValue(null);
 
-      const req = createRequest('/carrito');
+      const req = createRequest('/cart');
       const middleware = await import('@/middleware');
       const res = await middleware.middleware(req);
 
-      const location = res.headers.get('location');
-      expect(location).toContain('/login');
-      expect(location).toContain('callbackUrl');
-      expect(location).toContain(encodeURIComponent('/carrito'));
+      // No debe redirigir, el carrito es accesible para todos
+      expect(res.headers.get('location')).toBeNull();
     });
 
-    it('debe permitir acceso a CLIENTE autenticados', async () => {
+    it('debe PERMITIR acceso a /cart para CLIENTE autenticados', async () => {
       mockGetToken.mockResolvedValue({
         email: 'cliente@example.com',
         rol: 'CLIENTE',
       });
 
-      const req = createRequest('/carrito');
+      const req = createRequest('/cart');
       const middleware = await import('@/middleware');
       const res = await middleware.middleware(req);
 
       expect(res.headers.get('location')).toBeNull();
     });
 
-    it('debe redirigir ADMIN a /admin/dashboard', async () => {
+    it('debe redirigir ADMIN que intenta acceder a /cart a /admin/dashboard', async () => {
       mockGetToken.mockResolvedValue({
         email: 'admin@3dprint.com',
         rol: 'ADMIN',
       });
 
-      const req = createRequest('/carrito');
+      const req = createRequest('/cart');
       const middleware = await import('@/middleware');
       const res = await middleware.middleware(req);
 
       expect(res.headers.get('location')).toBe('http://localhost:3000/admin/dashboard');
+    });
+
+    it('debe redirigir a /login con callback URL usuarios no autenticados en /checkout', async () => {
+      // /checkout SÍ requiere autenticación
+      mockGetToken.mockResolvedValue(null);
+
+      const req = createRequest('/checkout');
+      const middleware = await import('@/middleware');
+      const res = await middleware.middleware(req);
+
+      const location = res.headers.get('location');
+      expect(location).toContain('/login');
+      expect(location).toContain('callbackUrl');
+      expect(location).toContain(encodeURIComponent('/checkout'));
+    });
+
+    it('debe redirigir a /login con callback URL usuarios no autenticados en /account', async () => {
+      mockGetToken.mockResolvedValue(null);
+
+      const req = createRequest('/account');
+      const middleware = await import('@/middleware');
+      const res = await middleware.middleware(req);
+
+      const location = res.headers.get('location');
+      expect(location).toContain('/login');
+      expect(location).toContain('callbackUrl');
+      expect(location).toContain(encodeURIComponent('/account'));
     });
 
     it('debe redirigir ADMIN intentando checkout', async () => {
@@ -121,7 +147,7 @@ describe('Middleware de Autorización', () => {
         rol: 'ADMIN',
       });
 
-      const req = createRequest('/cuenta/pedidos');
+      const req = createRequest('/account/orders');
       const middleware = await import('@/middleware');
       const res = await middleware.middleware(req);
 
@@ -129,14 +155,14 @@ describe('Middleware de Autorización', () => {
     });
   });
 
-  describe('Rutas de Autenticación (/login, /registro)', () => {
+  describe('Rutas de Autenticación (/auth)', () => {
     it('debe redirigir CLIENTE autenticados a /', async () => {
       mockGetToken.mockResolvedValue({
         email: 'cliente@example.com',
         rol: 'CLIENTE',
       });
 
-      const req = createRequest('/login');
+      const req = createRequest('/auth');
       const middleware = await import('@/middleware');
       const res = await middleware.middleware(req);
 
@@ -149,7 +175,7 @@ describe('Middleware de Autorización', () => {
         rol: 'ADMIN',
       });
 
-      const req = createRequest('/login');
+      const req = createRequest('/auth');
       const middleware = await import('@/middleware');
       const res = await middleware.middleware(req);
 
@@ -159,20 +185,20 @@ describe('Middleware de Autorización', () => {
     it('debe permitir acceso a usuarios no autenticados', async () => {
       mockGetToken.mockResolvedValue(null);
 
-      const req = createRequest('/login');
+      const req = createRequest('/auth');
       const middleware = await import('@/middleware');
       const res = await middleware.middleware(req);
 
       expect(res.headers.get('location')).toBeNull();
     });
 
-    it('debe aplicar a /registro también', async () => {
+    it('debe aplicar a /auth con tab=register también', async () => {
       mockGetToken.mockResolvedValue({
         email: 'cliente@example.com',
         rol: 'CLIENTE',
       });
 
-      const req = createRequest('/registro');
+      const req = createRequest('/auth?tab=register');
       const middleware = await import('@/middleware');
       const res = await middleware.middleware(req);
 
@@ -191,10 +217,10 @@ describe('Middleware de Autorización', () => {
       expect(res.headers.get('location')).toBeNull();
     });
 
-    it('debe permitir acceso a /productos sin autenticación', async () => {
+    it('debe permitir acceso a /products sin autenticación', async () => {
       mockGetToken.mockResolvedValue(null);
 
-      const req = createRequest('/productos');
+      const req = createRequest('/products');
       const middleware = await import('@/middleware');
       const res = await middleware.middleware(req);
 
@@ -207,7 +233,7 @@ describe('Middleware de Autorización', () => {
         rol: 'ADMIN',
       });
 
-      const req = createRequest('/productos');
+      const req = createRequest('/products');
       const middleware = await import('@/middleware');
       const res = await middleware.middleware(req);
 

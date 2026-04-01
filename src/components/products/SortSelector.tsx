@@ -19,14 +19,14 @@ export default function SortSelector({ initialOrdenar = 'nombre', initialOrden =
     const params = new URLSearchParams(searchParams.toString());
     params.set('ordenar', e.target.value);
     params.delete('page');
-    router.push(`/productos?${params.toString()}`);
+    router.push(`/products?${params.toString()}`);
   };
 
   const handleOrdenChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('orden', e.target.value);
     params.delete('page');
-    router.push(`/productos?${params.toString()}`);
+    router.push(`/products?${params.toString()}`);
   };
 
   return (
@@ -38,7 +38,7 @@ export default function SortSelector({ initialOrdenar = 'nombre', initialOrden =
         className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-indigo-500"
       >
         <option value="nombre">Nombre</option>
-        <option value="precio">Precio</option>
+        <option value="price">Precio</option>
         <option value="stock">Stock</option>
       </select>
       

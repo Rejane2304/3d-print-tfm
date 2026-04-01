@@ -44,7 +44,7 @@ describe('Footer Component', () => {
   it('debe tener enlace correcto a productos', () => {
     render(<Footer />);
     const productosLink = screen.getByText('Productos').closest('a');
-    expect(productosLink).toHaveAttribute('href', '/productos');
+    expect(productosLink).toHaveAttribute('href', '/products');
   });
 
   it('debe mostrar sección de información legal', () => {

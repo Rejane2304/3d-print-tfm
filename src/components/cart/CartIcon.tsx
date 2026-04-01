@@ -1,45 +1,27 @@
 /**
  * CartIcon Component
  * Ícono del carrito con contador de items
+ * Funciona para usuarios autenticados (API) y no autenticados (localStorage)
  * Se muestra en el Header
  */
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ShoppingCart } from 'lucide-react';
+import { useCart } from '@/hooks/useCart';
 
 export default function CartIcon() {
-  const [itemCount, setItemCount] = useState(0);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchCartCount();
-  }, []);
-
-  const fetchCartCount = async () => {
-    try {
-      const response = await fetch('/api/carrito');
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success && data.carrito) {
-          setItemCount(data.carrito.totalItems || 0);
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching cart count:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { cart, loading } = useCart();
+  const itemCount = cart?.totalItems || 0;
 
   return (
     <Link 
-      href="/carrito" 
-      className="relative p-2 text-gray-700 hover:text-indigo-600 transition-colors"
+      href="/cart" 
+      className="relative p-2 text-gray-600 hover:text-indigo-600 transition-colors flex items-center gap-2"
       aria-label="Ver carrito"
     >
-      <ShoppingCart className="h-6 w-6" />
+      <ShoppingCart className="h-5 w-5" />
+      <span className="text-sm font-medium hidden lg:inline">Carrito</span>
       
       {!loading && itemCount > 0 && (
         <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">

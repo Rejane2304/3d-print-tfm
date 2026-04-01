@@ -1,5 +1,5 @@
 /**
- * Middleware para redirigir /login y /registro a /auth
+ * Middleware para redirigir /login y /register a /auth
  * Mantiene compatibilidad con URLs antiguas
  */
 import { NextResponse } from 'next/server';
@@ -13,8 +13,8 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(`/auth${search}`, request.url));
   }
   
-  // Redirigir /registro a /auth con tab=register
-  if (pathname === '/registro') {
+  // Redirigir /register a /auth con tab=register
+  if (pathname === '/register') {
     const url = new URL('/auth', request.url);
     // Preservar query params existentes
     if (search) {
@@ -29,5 +29,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/login', '/registro'],
+  matcher: ['/login', '/register'],
 };

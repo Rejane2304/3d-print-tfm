@@ -25,9 +25,9 @@ export const metadata: Metadata = {
   title: "3D Print TFM - Impresión 3D",
   description: "E-commerce de productos impresos en 3D. Proyecto de fin de máster.",
   icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
-    apple: "/favicon.ico",
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
   },
 };
 

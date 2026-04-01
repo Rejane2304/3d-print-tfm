@@ -8,8 +8,9 @@ import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
 // Rutas protegidas por rol
-const CLIENT_ROUTES = ['/carrito', '/checkout', '/cuenta'];
-const AUTH_ROUTES = ['/login', '/registro', '/auth'];
+// NOTA: /cart ya NO está protegido, funciona con localStorage para invitados
+const PROTECTED_CLIENT_ROUTES = ['/checkout', '/account'];
+const AUTH_ROUTES = ['/login', '/register', '/auth'];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -29,16 +30,15 @@ export async function middleware(request: NextRequest) {
   // ============================================
   if (userRole === 'ADMIN') {
     // Verificar si intenta acceder a rutas de cliente
-    const isClientRoute = CLIENT_ROUTES.some(route => 
+    const isProtectedRoute = PROTECTED_CLIENT_ROUTES.some(route => 
       pathname.startsWith(route)
     );
     
-    // También verificar /productos (catálogo público está permitido)
-    const isShopRoute = pathname === '/carrito' || 
-                       pathname.startsWith('/checkout') ||
-                       pathname.startsWith('/cuenta');
+    // También verificar /products (catálogo público está permitido)
+    const isShopRoute = pathname.startsWith('/checkout') ||
+                       pathname.startsWith('/account');
     
-    if (isClientRoute || isShopRoute) {
+    if (isProtectedRoute || isShopRoute) {
       console.log(`🚫 ADMIN intentó acceder a ${pathname} - Redirigiendo a /admin/dashboard`);
       return NextResponse.redirect(new URL('/admin/dashboard', request.url));
     }
@@ -66,8 +66,10 @@ export async function middleware(request: NextRequest) {
   
   // ============================================
   // REGLA 3: Rutas de Cliente (protegidas)
+  // NOTA: /cart NO está protegido, funciona con localStorage para invitados
+  // Solo /checkout y /account requieren autenticación
   // ============================================
-  const isProtectedClientRoute = CLIENT_ROUTES.some(route => 
+  const isProtectedClientRoute = PROTECTED_CLIENT_ROUTES.some((route: string) => 
     pathname.startsWith(route)
   );
   
@@ -129,11 +131,11 @@ export const config = {
     
     // Rutas específicas que necesitan protección
     '/admin/:path*',
-    '/carrito',
+    // '/cart' ya no está protegido - funciona con localStorage
     '/checkout/:path*',
-    '/cuenta/:path*',
+    '/account/:path*',
     '/login',
-    '/registro',
+    '/register',
     '/auth',
   ],
 };

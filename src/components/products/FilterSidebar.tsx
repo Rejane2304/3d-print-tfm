@@ -23,7 +23,7 @@ const MATERIALES = [
 
 interface FilterSidebarProps {
   searchParams: {
-    categoria?: string;
+    category?: string;
     material?: string;
     minPrecio?: string;
     maxPrecio?: string;
@@ -47,15 +47,15 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
     // Resetear página al cambiar filtros
     params.delete('page');
     
-    router.push(`/productos?${params.toString()}`);
+    router.push(`/products?${params.toString()}`);
   };
   
   const limpiarFiltros = () => {
-    router.push('/productos');
+    router.push('/products');
   };
   
   const hayFiltrosActivos = 
-    searchParams.categoria || 
+    searchParams.category || 
     searchParams.material || 
     searchParams.minPrecio || 
     searchParams.maxPrecio || 
@@ -81,8 +81,8 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
           Categoría
         </label>
         <select
-          value={searchParams.categoria || ''}
-          onChange={(e) => updateFilter('categoria', e.target.value)}
+          value={searchParams.category || ''}
+          onChange={(e) => updateFilter('category', e.target.value)}
           className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
         >
           {CATEGORIAS.map((cat) => (
@@ -111,7 +111,7 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
         </select>
       </div>
       
-      {/* Rango de precio */}
+      {/* Rango de price */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Precio

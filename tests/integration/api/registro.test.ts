@@ -1,15 +1,15 @@
 /**
- * Tests de Integración - API de Registro
- * POST /api/auth/registro
+ * Tests de Integración - API de Register
+ * POST /api/auth/register
  * TDD: Tests primero, implementación después
  */
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
-import { POST } from '@/app/api/auth/registro/route';
+import { POST } from '@/app/api/auth/register/route';
 import { prisma } from '@/lib/db/prisma';
 import { cleanupTestUsers } from '../../helpers/db-cleanup';
 
-describe('POST /api/auth/registro', () => {
+describe('POST /api/auth/register', () => {
   const datosValidos = {
     nombre: 'Juan Pérez',
     email: 'test-nuevo@example.com',
@@ -173,7 +173,7 @@ describe('POST /api/auth/registro', () => {
 
 // Helper para crear requests
 function createRequest(body: object): NextRequest {
-  return new NextRequest('http://localhost:3000/api/auth/registro', {
+  return new NextRequest('http://localhost:3000/api/auth/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),

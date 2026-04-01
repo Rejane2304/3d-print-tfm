@@ -137,8 +137,8 @@ test.describe('Flujo de Autenticación', () => {
         !currentUrl.includes('/auth'),
         currentUrl === `${BASE_URL}/`,
         currentUrl === BASE_URL,
-        currentUrl.includes('/productos'),
-        currentUrl.includes('/cuenta')
+        currentUrl.includes('/products'),
+        currentUrl.includes('/account')
       ];
       
       expect(successIndicators.some(Boolean)).toBe(true);
@@ -252,16 +252,19 @@ test.describe('Flujo de Autenticación', () => {
   });
 
   test.describe('Acceso protegido', () => {
-    test('debe redirigir usuarios no autenticados de /carrito a /auth', async ({ page }) => {
-      await page.goto(`${BASE_URL}/carrito`);
+    test('debe PERMITIR acceso a /cart para usuarios no autenticados (invitados)', async ({ page }) => {
+      // CAMBIO: El carrito ahora es accesible para invitados (usa localStorage)
+      await page.goto(`${BASE_URL}/cart`);
       await page.waitForTimeout(2000);
       
       const currentUrl = page.url();
-      expect(currentUrl).toContain('auth');
+      // Ya no redirige, permite ver el carrito vacío
+      expect(currentUrl).toContain('/cart');
+      expect(await page.getByText('Tu Carrito').isVisible()).toBe(true);
     });
 
-    test('debe redirigir usuarios no autenticados de /cuenta a /auth', async ({ page }) => {
-      await page.goto(`${BASE_URL}/cuenta/pedidos`);
+    test('debe redirigir usuarios no autenticados de /account a /auth', async ({ page }) => {
+      await page.goto(`${BASE_URL}/account/orders`);
       await page.waitForTimeout(2000);
       
       const currentUrl = page.url();
@@ -303,7 +306,7 @@ test.describe('Flujo de Autenticación', () => {
       expect(is404).toBe(false);
     });
 
-    test('debe redirigir admin de /carrito a área admin', async ({ page }) => {
+    test('debe redirigir admin de /cart a área admin', async ({ page }) => {
       // Iniciar sesión como admin
       await page.goto(`${BASE_URL}/auth`);
       await page.locator('input#login-email').fill('admin@3dprint.com');
@@ -312,13 +315,13 @@ test.describe('Flujo de Autenticación', () => {
       
       await page.waitForTimeout(3000);
       
-      // Intentar acceder a carrito
-      await page.goto(`${BASE_URL}/carrito`);
+      // Intentar acceder a cart
+      await page.goto(`${BASE_URL}/cart`);
       await page.waitForTimeout(2000);
       
-      // Debe redirigir fuera del carrito
+      // Debe redirigir fuera del cart
       const currentUrl = page.url();
-      expect(currentUrl).not.toContain('/carrito');
+      expect(currentUrl).not.toContain('/cart');
     });
   });
 
@@ -327,7 +330,7 @@ test.describe('Flujo de Autenticación', () => {
       await page.goto(`${BASE_URL}/`);
       await expect(page.locator('header')).toBeVisible();
       
-      await page.goto(`${BASE_URL}/productos`);
+      await page.goto(`${BASE_URL}/products`);
       await expect(page.locator('header')).toBeVisible();
       
       await page.goto(`${BASE_URL}/auth`);

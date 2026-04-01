@@ -1,6 +1,13 @@
 /**
  * Tests Unitarios - Componente CartItem
  * TDD: Tests primero, implementación después
+ * 
+ * NOTA: El componente usa propiedades en inglés:
+ * - quantity (cantidad)
+ * - unitPrice (precio unitario)
+ * - price (precio)
+ * 
+ * Los tests usan los nombres correctos de las props del componente.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
@@ -10,13 +17,13 @@ describe('CartItem', () => {
   const mockItem = {
     id: 'item-1',
     productoId: 'prod-1',
-    cantidad: 2,
-    precioUnitario: 29.99,
+    quantity: 2,
+    unitPrice: 29.99,
     producto: {
       id: 'prod-1',
       nombre: 'Producto Test',
       slug: 'producto-test',
-      precio: 29.99,
+      price: 29.99,
       stock: 10,
       imagen: '/images/test.jpg',
     },
@@ -56,7 +63,7 @@ describe('CartItem', () => {
   it('debe permitir incrementar cantidad', () => {
     render(<CartItem item={mockItem} {...mockHandlers} />);
 
-    const incrementButton = screen.getByLabelText('Incrementar cantidad');
+    const incrementButton = screen.getByLabelText(/incrementar/i);
     fireEvent.click(incrementButton);
 
     expect(mockHandlers.onUpdateQuantity).toHaveBeenCalledWith('item-1', 3);
@@ -65,32 +72,32 @@ describe('CartItem', () => {
   it('debe permitir decrementar cantidad', () => {
     render(<CartItem item={mockItem} {...mockHandlers} />);
 
-    const decrementButton = screen.getByLabelText('Decrementar cantidad');
+    const decrementButton = screen.getByLabelText(/decrementar/i);
     fireEvent.click(decrementButton);
 
     expect(mockHandlers.onUpdateQuantity).toHaveBeenCalledWith('item-1', 1);
   });
 
   it('debe deshabilitar decrementar cuando cantidad es 1', () => {
-    const itemWithQuantity1 = { ...mockItem, cantidad: 1 };
+    const itemWithQuantity1 = { ...mockItem, quantity: 1 };
     render(<CartItem item={itemWithQuantity1} {...mockHandlers} />);
 
-    const decrementButton = screen.getByLabelText('Decrementar cantidad');
+    const decrementButton = screen.getByLabelText(/decrementar/i);
     expect(decrementButton).toBeDisabled();
   });
 
   it('debe deshabilitar incrementar cuando alcanza stock máximo', () => {
-    const itemAtMaxStock = { ...mockItem, cantidad: 10 };
+    const itemAtMaxStock = { ...mockItem, quantity: 10 };
     render(<CartItem item={itemAtMaxStock} {...mockHandlers} />);
 
-    const incrementButton = screen.getByLabelText('Incrementar cantidad');
+    const incrementButton = screen.getByLabelText(/incrementar/i);
     expect(incrementButton).toBeDisabled();
   });
 
   it('debe permitir eliminar item del carrito', () => {
     render(<CartItem item={mockItem} {...mockHandlers} />);
 
-    const removeButton = screen.getByLabelText('Eliminar del carrito');
+    const removeButton = screen.getByLabelText(/eliminar/i);
     fireEvent.click(removeButton);
 
     expect(mockHandlers.onRemove).toHaveBeenCalledWith('item-1');
@@ -107,7 +114,7 @@ describe('CartItem', () => {
     render(<CartItem item={mockItem} {...mockHandlers} />);
 
     const productLink = screen.getByRole('link', { name: 'Producto Test' });
-    expect(productLink).toHaveAttribute('href', '/productos/producto-test');
+    expect(productLink).toHaveAttribute('href', '/products/producto-test');
   });
 
   it('debe actualizar cantidad al escribir en input', () => {
@@ -134,8 +141,8 @@ describe('CartItem', () => {
   it('debe mostrar estado de carga durante actualización', () => {
     render(<CartItem item={mockItem} {...mockHandlers} isUpdating />);
 
-    expect(screen.getByText('Actualizando...')).toBeInTheDocument();
-    expect(screen.getByLabelText('Incrementar cantidad')).toBeDisabled();
-    expect(screen.getByLabelText('Decrementar cantidad')).toBeDisabled();
+    expect(screen.getByText(/actualizando/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/incrementar/i)).toBeDisabled();
+    expect(screen.getByLabelText(/decrementar/i)).toBeDisabled();
   });
 });

@@ -15,18 +15,18 @@ interface CartItemProps {
   item: {
     id: string;
     productoId: string;
-    cantidad: number;
-    precioUnitario: number;
+    quantity: number;
+    unitPrice: number;
     producto: {
       id: string;
       nombre: string;
       slug: string;
-      precio: number;
+      price: number;
       stock: number;
       imagen: string | null;
     };
   };
-  onUpdateQuantity: (itemId: string, cantidad: number) => void;
+  onUpdateQuantity: (itemId: string, quantity: number) => void;
   onRemove: (itemId: string) => void;
   isUpdating?: boolean;
 }
@@ -37,9 +37,9 @@ export default function CartItem({
   onRemove,
   isUpdating = false,
 }: CartItemProps) {
-  const [quantity, setQuantity] = useState(item.cantidad);
+  const [quantity, setQuantity] = useState(item.quantity);
   const [modalOpen, setModalOpen] = useState(false);
-  const subtotal = item.precioUnitario * item.cantidad;
+  const subtotal = item.unitPrice * item.quantity;
 
   const handleRemoveClick = () => {
     setModalOpen(true);
@@ -73,7 +73,7 @@ export default function CartItem({
     <div className="flex flex-col sm:flex-row gap-4 p-4 bg-white rounded-lg shadow-sm border border-gray-200">
       {/* Imagen del producto */}
       <Link
-        href={`/productos/${item.producto.slug}`}
+        href={`/products/${item.producto.slug}`}
         className="relative w-full sm:w-32 h-32 flex-shrink-0"
       >
         <Image
@@ -89,17 +89,17 @@ export default function CartItem({
       <div className="flex-1 flex flex-col justify-between">
         <div>
           <Link
-            href={`/productos/${item.producto.slug}`}
+            href={`/products/${item.producto.slug}`}
             className="text-lg font-semibold text-gray-900 hover:text-indigo-600 transition-colors line-clamp-2"
           >
             {item.producto.nombre}
           </Link>
           <p className="text-sm text-gray-500 mt-1">
-            {item.precioUnitario.toFixed(2)} € / unidad
+            {item.unitPrice.toFixed(2)} € / unidad
           </p>
         </div>
 
-        {/* Controles de cantidad */}
+        {/* Controles de quantity */}
         <div className="flex items-center justify-between mt-4 sm:mt-0">
           <div className="flex items-center gap-2">
             {/* Botón decrementar */}
@@ -107,13 +107,13 @@ export default function CartItem({
               type="button"
               onClick={() => handleQuantityChange(quantity - 1)}
               disabled={quantity <= 1 || isUpdating}
-              aria-label="Decrementar cantidad"
+              aria-label="Decrementar quantity"
               className="p-2 rounded-md border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <Minus className="h-4 w-4" />
             </button>
 
-            {/* Input de cantidad */}
+            {/* Input de quantity */}
             <input
               type="number"
               value={quantity}
@@ -130,7 +130,7 @@ export default function CartItem({
               type="button"
               onClick={() => handleQuantityChange(quantity + 1)}
               disabled={quantity >= item.producto.stock || isUpdating}
-              aria-label="Incrementar cantidad"
+              aria-label="Incrementar quantity"
               className="p-2 rounded-md border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <Plus className="h-4 w-4" />
@@ -151,7 +151,7 @@ export default function CartItem({
                 {subtotal.toFixed(2)} €
               </p>
               <p className="text-sm text-gray-500">
-                {item.cantidad} x {item.precioUnitario.toFixed(2)} €
+                {item.quantity} x {item.unitPrice.toFixed(2)} €
               </p>
               {isUpdating && (
                 <p className="text-xs text-gray-400 mt-1">Actualizando...</p>

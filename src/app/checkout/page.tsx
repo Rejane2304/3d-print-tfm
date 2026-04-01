@@ -17,16 +17,16 @@ interface Direccion {
   telefono: string;
   direccion: string;
   complemento?: string;
-  codigoPostal: string;
+  postalCode: string;
   ciudad: string;
   provincia: string;
-  esPrincipal: boolean;
+  isPrimary: boolean;
 }
 
 interface CarritoItem {
   id: string;
-  cantidad: number;
-  precioUnitario: number;
+  quantity: number;
+  unitPrice: number;
   producto: {
     id: string;
     nombre: string;
@@ -66,21 +66,21 @@ export default function CheckoutPage() {
         const data = await resDirecciones.json();
         setDirecciones(data.direcciones || []);
         // Seleccionar dirección principal por defecto
-        const principal = data.direcciones?.find((d: Direccion) => d.esPrincipal);
+        const principal = data.direcciones?.find((d: Direccion) => d.isPrimary);
         if (principal) {
           setDireccionSeleccionada(principal.id);
         }
       }
 
       // Cargar carrito
-      const resCarrito = await fetch('/api/carrito');
+      const resCarrito = await fetch('/api/cart');
       if (resCarrito.ok) {
         const data = await resCarrito.json();
         setCarrito(data.carrito);
 
         // Si el carrito está vacío, redirigir
         if (!data.carrito?.items?.length) {
-          router.push('/carrito');
+          router.push('/cart');
         }
       }
     } catch (err) {
@@ -106,7 +106,7 @@ export default function CheckoutPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          direccionEnvioId: direccionSeleccionada,
+          shippingAddressId: direccionSeleccionada,
         }),
       });
 
@@ -175,7 +175,7 @@ export default function CheckoutPage() {
                     No tienes direcciones guardadas
                   </p>
                   <a
-                    href="/cuenta/direcciones"
+                    href="/account/direcciones"
                     className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-800"
                   >
                     Agregar dirección <ChevronRight className="h-4 w-4" />
@@ -203,7 +203,7 @@ export default function CheckoutPage() {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="font-medium">{direccion.nombre}</span>
-                          {direccion.esPrincipal && (
+                          {direccion.isPrimary && (
                             <span className="text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded">
                               Principal
                             </span>
@@ -217,7 +217,7 @@ export default function CheckoutPage() {
                           {direccion.complemento && `, ${direccion.complemento}`}
                         </p>
                         <p className="text-sm text-gray-600">
-                          {direccion.codigoPostal} {direccion.ciudad},{' '}
+                          {direccion.postalCode} {direccion.ciudad},{' '}
                           {direccion.provincia}
                         </p>
                         <p className="text-sm text-gray-600">
@@ -241,11 +241,11 @@ export default function CheckoutPage() {
                   <div className="flex-1">
                     <p className="font-medium">{item.producto.nombre}</p>
                     <p className="text-sm text-gray-600">
-                      {item.cantidad} x {item.precioUnitario.toFixed(2)} €
+                      {item.quantity} x {item.unitPrice.toFixed(2)} €
                     </p>
                   </div>
                   <p className="font-semibold">
-                    {(item.cantidad * item.precioUnitario).toFixed(2)} €
+                    {(item.quantity * item.unitPrice).toFixed(2)} €
                   </p>
                 </div>
               ))}

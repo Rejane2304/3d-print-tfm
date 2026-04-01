@@ -69,7 +69,7 @@ export default function AdminDashboardPage() {
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Tarjetas de resumen */}
-          <Link href="/admin/productos"
+          <Link href="/admin/products"
             className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow"
           >
             <div className="flex items-center">
@@ -85,7 +85,7 @@ export default function AdminDashboardPage() {
             </div>
           </Link>
 
-          <Link href="/admin/pedidos"
+          <Link href="/admin/orders"
             className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow"
           >
             <div className="flex items-center">

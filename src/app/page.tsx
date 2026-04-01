@@ -45,14 +45,14 @@ export default async function HomePage() {
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/productos"
+                href="/products"
                 className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-lg font-medium rounded-md text-indigo-600 bg-white hover:bg-gray-100 transition-colors"
               >
                 Ver productos
               </Link>
               
               <Link
-                href="/registro"
+                href="/register"
                 className="inline-flex items-center justify-center px-8 py-4 border-2 border-white text-lg font-medium rounded-md text-white hover:bg-white hover:text-indigo-600 transition-colors"
               >
                 Crear cuenta
@@ -76,14 +76,14 @@ export default async function HomePage() {
               { name: 'Funcional', color: 'bg-green-100', icon: '⚙️' },
               { name: 'Articulados', color: 'bg-orange-100', icon: '🦖' },
               { name: 'Juguetes', color: 'bg-purple-100', icon: '🎮' },
-            ].map((categoria) => (
+            ].map((category) => (
               <Link
-                key={categoria.name}
-                href={`/productos?categoria=${categoria.name.toUpperCase()}`}
-                className={`${categoria.color} p-6 lg:p-8 rounded-xl text-center hover:shadow-lg transition-shadow group`}
+                key={category.name}
+                href={`/products?category=${category.name.toUpperCase()}`}
+                className={`${category.color} p-6 lg:p-8 rounded-xl text-center hover:shadow-lg transition-shadow group`}
               >
-                <span className="text-3xl lg:text-4xl mb-3 block group-hover:scale-110 transition-transform">{categoria.icon}</span>
-                <span className="text-gray-800 font-semibold text-lg">{categoria.name}</span>
+                <span className="text-3xl lg:text-4xl mb-3 block group-hover:scale-110 transition-transform">{category.icon}</span>
+                <span className="text-gray-800 font-semibold text-lg">{category.name}</span>
               </Link>
             ))}
           </div>
@@ -96,7 +96,7 @@ export default async function HomePage() {
           <div className="flex justify-between items-center mb-12">
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">Productos destacados</h2>
             <Link
-              href="/productos"
+              href="/products"
               className="text-indigo-600 hover:text-indigo-800 font-medium flex items-center"
             >
               Ver todos
@@ -111,7 +111,7 @@ export default async function HomePage() {
               {productosDestacados.map((producto) => (
                 <Link
                   key={producto.id}
-                  href={`/productos/${producto.slug}`}
+                  href={`/products/${producto.slug}`}
                   className="group"
                 >
                   <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
@@ -133,13 +133,13 @@ export default async function HomePage() {
                         {producto.nombre}
                       </h3>
                       
-                      <p className="text-sm text-gray-500 mb-3 line-clamp-2">
-                        {producto.descripcionCorta || producto.descripcion}
-                      </p>
-                      
-                      <div className="flex justify-between items-center">
-                        <span className="text-xl font-bold text-indigo-600">
-                          {Number(producto.precio).toFixed(2)} €
+                       <p className="text-sm text-gray-500 mb-3 line-clamp-2">
+                         {producto.descripcionCorta || producto.descripcion}
+                       </p>
+
+                       <div className="flex justify-between items-center">
+                         <span className="text-xl font-bold text-indigo-600">
+                           {Number(producto.precio).toFixed(2)} €
                         </span>
                         
                         <span className="text-sm text-gray-500">
@@ -202,7 +202,7 @@ export default async function HomePage() {
           </p>
           
           <Link
-            href="/registro"
+            href="/register"
             className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-lg font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
           >
             Crear cuenta gratuita

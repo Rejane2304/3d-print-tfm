@@ -9,13 +9,13 @@ interface Producto {
   id: string;
   slug: string;
   nombre: string;
-  descripcion?: string | null;
-  descripcionCorta?: string | null;
-  precio: number | Decimal;
+  description?: string | null;
+  descriptionCorta?: string | null;
+  price: number | Decimal;
   stock: number;
-  imagenes: Array<{
+  images: Array<{
     url: string;
-    esPrincipal: boolean;
+    isPrimary: boolean;
   }>;
 }
 
@@ -24,12 +24,12 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ producto }: ProductCardProps) {
-  const imagenPrincipal = producto.imagenes[0];
-  const precio = Number(producto.precio);
+  const imagenPrincipal = producto.images[0];
+  const price = Number(producto.price);
   
   return (
     <Link
-      href={`/productos/${producto.slug}`}
+      href={`/products/${producto.slug}`}
       className="group bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300"
     >
       <div className="relative aspect-square bg-gray-200">
@@ -67,15 +67,15 @@ export default function ProductCard({ producto }: ProductCardProps) {
           {producto.nombre}
         </h3>
         
-        {producto.descripcionCorta && (
+        {producto.descriptionCorta && (
           <p className="text-sm text-gray-500 mb-2 line-clamp-2">
-            {producto.descripcionCorta}
+            {producto.descriptionCorta}
           </p>
         )}
         
         <div className="flex items-center justify-between">
           <span className="text-xl font-bold text-indigo-600">
-            {precio.toFixed(2)} €
+            {price.toFixed(2)} €
           </span>
           
           <span className={`text-sm ${

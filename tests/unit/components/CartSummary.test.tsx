@@ -1,6 +1,13 @@
 /**
  * Tests Unitarios - Componente CartSummary
  * TDD: Tests primero, implementación después
+ * 
+ * NOTA: El componente usa propiedades en inglés:
+ * - quantity (cantidad)
+ * - unitPrice (precio unitario)
+ * - price (precio)
+ * 
+ * Los tests usan los nombres correctos de las props del componente.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
@@ -11,24 +18,24 @@ describe('CartSummary', () => {
     {
       id: 'item-1',
       productoId: 'prod-1',
-      cantidad: 2,
-      precioUnitario: 29.99,
+      quantity: 2,
+      unitPrice: 29.99,
       producto: {
         id: 'prod-1',
         nombre: 'Producto A',
-        precio: 29.99,
+        price: 29.99,
         stock: 10,
       },
     },
     {
       id: 'item-2',
       productoId: 'prod-2',
-      cantidad: 1,
-      precioUnitario: 49.99,
+      quantity: 1,
+      unitPrice: 49.99,
       producto: {
         id: 'prod-2',
         nombre: 'Producto B',
-        precio: 49.99,
+        price: 49.99,
         stock: 5,
       },
     },

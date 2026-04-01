@@ -10,11 +10,11 @@ import { ShoppingCart, ArrowRight, Loader2 } from 'lucide-react';
 interface CartSummaryProps {
   items: Array<{
     id: string;
-    cantidad: number;
-    precioUnitario: number;
+    quantity: number;
+    unitPrice: number;
     producto: {
       nombre: string;
-      precio: number;
+      price: number;
     };
   }>;
   subtotal: number;
@@ -36,7 +36,7 @@ export default function CartSummary({
   onCheckout,
   onContinueShopping,
 }: CartSummaryProps) {
-  const totalItems = items.reduce((sum, item) => sum + item.cantidad, 0);
+  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const envioGratis = subtotal >= envioGratisDesde;
   const envio = envioGratis ? 0 : gastosEnvio;
   const total = subtotal + envio;

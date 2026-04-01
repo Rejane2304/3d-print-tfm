@@ -28,17 +28,17 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/productos" className="text-gray-400 hover:text-white text-sm lg:text-base transition-colors">
+                <Link href="/products" className="text-gray-400 hover:text-white text-sm lg:text-base transition-colors">
                   Productos
                 </Link>
               </li>
               <li>
-                <Link href="/login" className="text-gray-400 hover:text-white text-sm lg:text-base transition-colors">
+                <Link href="/auth" className="text-gray-400 hover:text-white text-sm lg:text-base transition-colors">
                   Iniciar sesión
                 </Link>
               </li>
               <li>
-                <Link href="/registro" className="text-gray-400 hover:text-white text-sm lg:text-base transition-colors">
+                <Link href="/register" className="text-gray-400 hover:text-white text-sm lg:text-base transition-colors">
                   Registrarse
                 </Link>
               </li>

@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
       prisma.usuario.count({ where: { rol: 'CLIENTE' } }),
       prisma.pedido.count({
         where: {
-          creadoEn: {
+          createdAt: {
             gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
           },
         },
@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
       prisma.pedido.aggregate({
         where: {
           estado: { in: ['CONFIRMADO', 'PREPARANDO', 'ENVIADO', 'ENTREGADO'] },
-          creadoEn: {
+          createdAt: {
             gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
           },
         },

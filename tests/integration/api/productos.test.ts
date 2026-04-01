@@ -1,6 +1,6 @@
 /**
  * Tests de Integración - API de Productos
- * GET /api/productos - Listado con filtros
+ * GET /api/products - Listado con filtros
  * TDD: Tests primero, implementación después
  */
 import { describe, it, expect, beforeEach } from 'vitest';
@@ -8,9 +8,9 @@ import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 
 // Import será agregado cuando implementemos el endpoint
-// import { GET } from '@/app/api/productos/route';
+// import { GET } from '@/app/api/products/route';
 
-describe('GET /api/productos', () => {
+describe('GET /api/products', () => {
   beforeEach(async () => {
     // No necesitamos limpiar ya que usamos datos del seed
   });

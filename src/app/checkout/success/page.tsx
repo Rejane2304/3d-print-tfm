@@ -65,7 +65,7 @@ export default function CheckoutSuccessPage() {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Número de pedido:</span>
-                  <span className="font-medium">{pedido.numeroPedido}</span>
+                  <span className="font-medium">{pedido.orderNumber}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Total:</span>
@@ -81,7 +81,7 @@ export default function CheckoutSuccessPage() {
 
           <div className="space-y-3">
             <Link
-              href="/cuenta/pedidos"
+              href="/account/orders"
               className="inline-flex items-center justify-center gap-2 w-full bg-indigo-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
             >
               Ver mis pedidos
@@ -89,7 +89,7 @@ export default function CheckoutSuccessPage() {
             </Link>
 
             <Link
-              href="/productos"
+              href="/products"
               className="inline-flex items-center justify-center w-full border border-gray-300 text-gray-700 py-3 px-6 rounded-lg font-medium hover:bg-gray-50 transition-colors"
             >
               Seguir comprando

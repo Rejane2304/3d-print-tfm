@@ -1,12 +1,12 @@
 /**
  * Tests de Integración - API de Producto Individual
- * GET /api/productos/[slug] - Detalle de producto
+ * GET /api/products/[slug] - Detalle de producto
  * TDD: Tests primero, implementación después
  */
 import { describe, it, expect } from 'vitest';
 import { prisma } from '@/lib/db/prisma';
 
-describe('GET /api/productos/[slug]', () => {
+describe('GET /api/products/[slug]', () => {
   describe('Obtener producto por slug', () => {
     it('debe retornar producto existente', async () => {
       const producto = await prisma.producto.findFirst({

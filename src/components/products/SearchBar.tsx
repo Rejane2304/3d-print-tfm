@@ -30,7 +30,7 @@ export default function SearchBar({ initialValue = '' }: SearchBarProps) {
     // Resetear página al buscar
     params.delete('page');
     
-    router.push(`/productos?${params.toString()}`);
+    router.push(`/products?${params.toString()}`);
   };
 
   return (

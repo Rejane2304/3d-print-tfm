@@ -31,9 +31,9 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   // Obtener datos del body
   const body = await req.json();
-  const { direccionEnvioId } = body;
+  const { shippingAddressId } = body;
 
-  if (!direccionEnvioId) {
+  if (!shippingAddressId) {
     return NextResponse.json(
       { success: false, error: 'Dirección de envío requerida' },
       { status: 400 }
@@ -73,7 +73,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   // Verificar stock disponible
   for (const item of usuario.carrito.items) {
-    if (item.producto.stock < item.cantidad) {
+    if (item.producto.stock < item.quantity) {
       return NextResponse.json(
         { success: false, error: `Stock insuficiente para ${item.producto.nombre}` },
         { status: 400 }
@@ -95,9 +95,9 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
           name: item.producto.nombre,
           description: `Producto ID: ${item.producto.id}`,
         },
-        unit_amount: Math.round(Number(item.precioUnitario) * 100), // Stripe usa céntimos
+        unit_amount: Math.round(Number(item.unitPrice) * 100), // Stripe usa céntimos
       },
-      quantity: item.cantidad,
+      quantity: item.quantity,
     }));
 
     // Añadir envío si aplica
@@ -121,17 +121,17 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       line_items: lineItems,
       mode: 'payment',
       success_url: `${process.env.NEXTAUTH_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXTAUTH_URL}/carrito`,
+      cancel_url: `${process.env.NEXTAUTH_URL}/cart`,
       metadata: {
         userId: usuario.id,
         carritoId: usuario.carrito.id,
-        direccionEnvioId,
+        shippingAddressId,
       },
     });
 
     // Obtener dirección de envío
     const direccion = await prisma.direccion.findUnique({
-      where: { id: direccionEnvioId },
+      where: { id: shippingAddressId },
     });
 
     if (!direccion) {
@@ -144,23 +144,23 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     // Generar número de pedido
     const year = new Date().getFullYear();
     const count = await prisma.pedido.count();
-    const numeroPedido = `P-${year}${String(count + 1).padStart(6, '0')}`;
+    const orderNumber = `P-${year}${String(count + 1).padStart(6, '0')}`;
 
     // Crear pedido en estado PENDIENTE
     const pedido = await prisma.pedido.create({
       data: {
-        numeroPedido,
+        orderNumber,
         usuarioId: usuario.id,
         estado: 'PENDIENTE',
         subtotal,
         envio: gastosEnvio,
         total,
-        direccionEnvioId,
+        shippingAddressId,
         nombreEnvio: direccion.nombre,
         telefonoEnvio: direccion.telefono,
-        direccionEnvio: direccion.direccion,
+        shippingAddress: direccion.direccion,
         complementoEnvio: direccion.complemento,
-        codigoPostalEnvio: direccion.codigoPostal,
+        postalCodeEnvio: direccion.postalCode,
         ciudadEnvio: direccion.ciudad,
         provinciaEnvio: direccion.provincia,
         paisEnvio: direccion.pais,
@@ -168,12 +168,12 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         items: {
           create: usuario.carrito.items.map((item) => ({
             productoId: item.productoId,
-            cantidad: item.cantidad,
-            precioUnitario: item.precioUnitario,
-            subtotal: Number(item.precioUnitario) * item.cantidad,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            subtotal: Number(item.unitPrice) * item.quantity,
             nombre: item.producto.nombre,
-            precio: item.producto.precio,
-            categoria: item.producto.categoria,
+            price: item.producto.price,
+            category: item.producto.category,
             material: item.producto.material,
           })),
         },

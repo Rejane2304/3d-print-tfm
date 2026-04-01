@@ -3,10 +3,10 @@
  * TDD: Tests primero, implementación después
  * 
  * Endpoints:
- * - GET /api/carrito - Ver carrito del usuario autenticado
- * - POST /api/carrito - Añadir producto al carrito
- * - PATCH /api/carrito/[itemId] - Actualizar cantidad
- * - DELETE /api/carrito/[itemId] - Eliminar item del carrito
+ * - GET /api/cart - Ver carrito del usuario autenticado
+ * - POST /api/cart - Añadir producto al carrito
+ * - PATCH /api/cart/[itemId] - Actualizar cantidad
+ * - DELETE /api/cart/[itemId] - Eliminar item del carrito
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { prisma } from '@/lib/db/prisma';
@@ -79,26 +79,26 @@ describe('API del Carrito', () => {
     });
   });
 
-  describe('GET /api/carrito', () => {
+  describe('GET /api/cart', () => {
     it('debe retornar error sin autenticación', async () => {
-      const response = await fetch('http://localhost:3000/api/carrito');
+      const response = await fetch('http://localhost:3000/api/cart');
       // Puede devolver 401, 404 o 500 dependiendo del error
       expect([401, 404, 500]).toContain(response.status);
     });
 
     it('debe retornar estructura vacía para usuario autenticado sin carrito', async () => {
-      const response = await fetch('http://localhost:3000/api/carrito', {
+      const response = await fetch('http://localhost:3000/api/cart', {
         headers: { 'Cookie': 'next-auth.session-token=test-token' }
       });
       expect([200, 401]).toContain(response.status);
     });
   });
 
-  describe('POST /api/carrito', () => {
+  describe('POST /api/cart', () => {
     it('debe añadir producto al carrito', async () => {
       if (!productoTest) return;
 
-      const response = await fetch('http://localhost:3000/api/carrito', {
+      const response = await fetch('http://localhost:3000/api/cart', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -114,7 +114,7 @@ describe('API del Carrito', () => {
     });
 
     it('debe rechazar cantidad negativa o cero', async () => {
-      const response = await fetch('http://localhost:3000/api/carrito', {
+      const response = await fetch('http://localhost:3000/api/cart', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -130,7 +130,7 @@ describe('API del Carrito', () => {
     });
 
     it('debe rechazar producto inexistente', async () => {
-      const response = await fetch('http://localhost:3000/api/carrito', {
+      const response = await fetch('http://localhost:3000/api/cart', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -146,9 +146,9 @@ describe('API del Carrito', () => {
     });
   });
 
-  describe('PATCH /api/carrito/[itemId]', () => {
+  describe('PATCH /api/cart/[itemId]', () => {
     it('debe requerir autenticación', async () => {
-      const response = await fetch('http://localhost:3000/api/carrito/item-123', {
+      const response = await fetch('http://localhost:3000/api/cart/item-123', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cantidad: 2 })
@@ -158,9 +158,9 @@ describe('API del Carrito', () => {
     });
   });
 
-  describe('DELETE /api/carrito/[itemId]', () => {
+  describe('DELETE /api/cart/[itemId]', () => {
     it('debe requerir autenticación', async () => {
-      const response = await fetch('http://localhost:3000/api/carrito/item-123', {
+      const response = await fetch('http://localhost:3000/api/cart/item-123', {
         method: 'DELETE'
       });
 

@@ -4,8 +4,8 @@
  * 
  * Páginas:
  * - /admin/dashboard - Dashboard con métricas
- * - /admin/productos - Gestión de productos
- * - /admin/pedidos - Gestión de pedidos
+ * - /admin/products - Gestión de productos
+ * - /admin/orders - Gestión de pedidos
  * - /admin/inventario - Control de inventario
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
@@ -93,9 +93,9 @@ describe('Panel de Administración', () => {
     });
   });
 
-  describe('GET /admin/productos', () => {
+  describe('GET /admin/products', () => {
     it('debe mostrar lista de productos para admin', async () => {
-      const response = await fetch('http://localhost:3000/admin/productos', {
+      const response = await fetch('http://localhost:3000/admin/products', {
         headers: {
           'Cookie': 'next-auth.session-token=admin-token'
         }
@@ -105,9 +105,9 @@ describe('Panel de Administración', () => {
     });
   });
 
-  describe('GET /admin/pedidos', () => {
+  describe('GET /admin/orders', () => {
     it('debe mostrar lista de pedidos para admin', async () => {
-      const response = await fetch('http://localhost:3000/admin/pedidos', {
+      const response = await fetch('http://localhost:3000/admin/orders', {
         headers: {
           'Cookie': 'next-auth.session-token=admin-token'
         }
@@ -145,9 +145,9 @@ describe('Panel de Administración', () => {
     });
   });
 
-  describe('API /api/admin/productos', () => {
+  describe('API /api/admin/products', () => {
     it('debe crear producto (POST)', async () => {
-      const response = await fetch('http://localhost:3000/api/admin/productos', {
+      const response = await fetch('http://localhost:3000/api/admin/products', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -167,7 +167,7 @@ describe('Panel de Administración', () => {
     });
 
     it('debe actualizar producto (PATCH)', async () => {
-      const response = await fetch('http://localhost:3000/api/admin/productos/test-id', {
+      const response = await fetch('http://localhost:3000/api/admin/products/test-id', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -183,7 +183,7 @@ describe('Panel de Administración', () => {
     });
 
     it('debe eliminar producto (DELETE)', async () => {
-      const response = await fetch('http://localhost:3000/api/admin/productos/test-id', {
+      const response = await fetch('http://localhost:3000/api/admin/products/test-id', {
         method: 'DELETE',
         headers: {
           'Cookie': 'next-auth.session-token=admin-token'
@@ -206,7 +206,7 @@ describe('Panel de Administración', () => {
     });
 
     it('debe rechazar creación de producto por cliente', async () => {
-      const response = await fetch('http://localhost:3000/api/admin/productos', {
+      const response = await fetch('http://localhost:3000/api/admin/products', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

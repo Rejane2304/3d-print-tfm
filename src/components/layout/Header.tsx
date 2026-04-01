@@ -13,7 +13,6 @@ import Image from 'next/image';
 import { 
   Home, 
   ShoppingBag, 
-  ShoppingCart, 
   User, 
   LogOut, 
   LogIn, 
@@ -24,6 +23,7 @@ import {
   Package,
   Bell
 } from 'lucide-react';
+import CartIcon from '@/components/cart/CartIcon';
 
 export default function Header() {
   const { data: session, status } = useSession();
@@ -67,7 +67,7 @@ export default function Header() {
 
             {/* Products - visible for everyone */}
             <Link
-              href="/productos"
+              href="/products"
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
               title="Productos"
             >
@@ -75,27 +75,23 @@ export default function Header() {
               <span className="text-sm font-medium hidden lg:inline">Productos</span>
             </Link>
 
-            {/* Cart and Account - ONLY for CLIENTE, NOT for ADMIN */}
-            {!isLoading && isAuthenticated && isCliente && (
-              <>
-                <Link
-                  href="/carrito"
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200 relative"
-                  title="Carrito"
-                >
-                  <ShoppingCart className="h-5 w-5" />
-                  <span className="text-sm font-medium hidden lg:inline">Carrito</span>
-                </Link>
+            {/* Cart - visible for everyone (guests and CLIENTE) */}
+            {(!isLoading && (!isAuthenticated || isCliente)) && (
+              <div className="flex items-center">
+                <CartIcon />
+              </div>
+            )}
 
-                <Link
-                  href="/cuenta"
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
-                  title="Mi Cuenta"
-                >
-                  <User className="h-5 w-5" />
-                  <span className="text-sm font-medium hidden lg:inline">Cuenta</span>
-                </Link>
-              </>
+            {/* Account - ONLY for CLIENTE */}
+            {!isLoading && isAuthenticated && isCliente && (
+              <Link
+                href="/account"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
+                title="Mi Cuenta"
+              >
+                <User className="h-5 w-5" />
+                <span className="text-sm font-medium hidden lg:inline">Cuenta</span>
+              </Link>
             )}
 
             {/* Admin Dashboard - ONLY for ADMIN */}
@@ -188,7 +184,7 @@ export default function Header() {
 
             {/* Products */}
             <Link
-              href="/productos"
+              href="/products"
               className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
@@ -196,27 +192,23 @@ export default function Header() {
               <span className="font-medium">Productos</span>
             </Link>
 
-            {/* Cart and Account - ONLY for CLIENTE */}
-            {!isLoading && isAuthenticated && isCliente && (
-              <>
-                <Link
-                  href="/carrito"
-                  className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <ShoppingCart className="h-5 w-5" />
-                  <span className="font-medium">Carrito</span>
-                </Link>
+            {/* Cart - visible for everyone (guests and CLIENTE) */}
+            {(!isLoading && (!isAuthenticated || isCliente)) && (
+              <div className="px-3 py-2">
+                <CartIcon />
+              </div>
+            )}
 
-                <Link
-                  href="/cuenta"
-                  className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <User className="h-5 w-5" />
-                  <span className="font-medium">Mi Cuenta</span>
-                </Link>
-              </>
+            {/* Account - ONLY for CLIENTE */}
+            {!isLoading && isAuthenticated && isCliente && (
+              <Link
+                href="/account"
+                className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <User className="h-5 w-5" />
+                <span className="font-medium">Mi Cuenta</span>
+              </Link>
             )}
 
             {/* Admin - ONLY for ADMIN */}
