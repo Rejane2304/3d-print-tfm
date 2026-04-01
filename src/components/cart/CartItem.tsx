@@ -9,6 +9,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Trash2, Minus, Plus, Loader2 } from 'lucide-react';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
 interface CartItemProps {
   item: {
@@ -37,7 +38,17 @@ export default function CartItem({
   isUpdating = false,
 }: CartItemProps) {
   const [quantity, setQuantity] = useState(item.cantidad);
+  const [modalOpen, setModalOpen] = useState(false);
   const subtotal = item.precioUnitario * item.cantidad;
+
+  const handleRemoveClick = () => {
+    setModalOpen(true);
+  };
+
+  const handleConfirmRemove = () => {
+    setModalOpen(false);
+    onRemove(item.id);
+  };
 
   const handleQuantityChange = (newQuantity: number) => {
     if (newQuantity < 1 || newQuantity > item.producto.stock) return;
@@ -149,7 +160,7 @@ export default function CartItem({
 
             <button
               type="button"
-              onClick={() => onRemove(item.id)}
+              onClick={handleRemoveClick}
               disabled={isUpdating}
               aria-label="Eliminar del carrito"
               className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors disabled:opacity-50"
@@ -163,6 +174,19 @@ export default function CartItem({
           </div>
         </div>
       </div>
+
+      {/* Modal de confirmación para eliminar */}
+      <ConfirmModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onConfirm={handleConfirmRemove}
+        title="¿Eliminar del carrito?"
+        description={`¿Estás seguro de que deseas eliminar "${item.producto.nombre}" del carrito?`}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        type="danger"
+        isLoading={isUpdating}
+      />
     </div>
   );
 }
