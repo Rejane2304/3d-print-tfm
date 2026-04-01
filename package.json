@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest",
+    "test:unit": "vitest --run tests/unit",
+    "test:integration": "VITEST_ENV=integration vitest --run tests/integration",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
     "test:e2e": "playwright test",

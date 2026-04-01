@@ -1,14 +1,10 @@
 /**
  * Setup para tests de Vitest
- * Configuración del entorno de pruebas con SQLite en memoria
+ * Configuración del entorno de pruebas con PostgreSQL
  */
 import { vi, afterAll, beforeAll } from 'vitest';
 import '@testing-library/jest-dom';
-import { execSync } from 'child_process';
 import { prisma } from '@/lib/db/prisma';
-
-// Configurar variables de entorno para tests
-process.env.DATABASE_URL = 'file:./test.db';
 
 // Mock global de next/navigation
 vi.mock('next/navigation', () => ({
@@ -44,17 +40,64 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
+/**
+ * Limpia la base de datos de test
+ * Orden específico para respetar foreign keys
+ */
+async function limpiarBaseDeDatos() {
+  const tablas = [
+    'LogAuditoria',
+    'VerificationToken',
+    'Session',
+    'MensajePedido',
+    'Alerta',
+    'MovimientoInventario',
+    'Pago',
+    'ItemPedido',
+    'Pedido',
+    'Factura',
+    'ImagenProducto',
+    'Producto',
+    'Direccion',
+    'Usuario',
+    'ConfiguracionEnvio',
+    'Configuracion',
+  ];
+
+  for (const tabla of tablas) {
+    try {
+      await prisma.$executeRawUnsafe(`TRUNCATE TABLE "${tabla}" CASCADE`);
+    } catch (error) {
+      // Ignorar errores si la tabla no existe o está vacía
+      console.log(`⚠️  Tabla ${tabla}: ${error instanceof Error ? error.message : 'error desconocido'}`);
+    }
+  }
+}
+
+/**
+ * Inserta datos iniciales necesarios para tests
+ * Nota: Cada test debe crear sus propios datos
+ */
+async function seedDatosIniciales() {
+  // Los tests deben ser independientes y crear sus propios datos
+  // No insertamos datos aquí para evitar dependencias
+}
+
 // Setup para tests de integración
 beforeAll(async () => {
-  // Inicializar BD de test si es necesario
   if (process.env.VITEST_ENV === 'integration') {
-    console.log('🧪 Configurando base de datos de test...');
+    console.log('🧪 Configurando base de datos de test (PostgreSQL)...');
     try {
-      // Limpiar datos existentes
-      await prisma.$executeRaw`DELETE FROM usuarios WHERE email LIKE 'test-%'`;
+      // Limpiar base de datos
+      await limpiarBaseDeDatos();
+      
+      // Insertar datos iniciales
+      await seedDatosIniciales();
+      
       console.log('✅ BD de test lista');
     } catch (error) {
       console.error('❌ Error configurando BD:', error);
+      throw error;
     }
   }
 });
@@ -64,7 +107,7 @@ afterAll(async () => {
   if (process.env.VITEST_ENV === 'integration') {
     console.log('🧹 Limpiando base de datos de test...');
     try {
-      await prisma.$executeRaw`DELETE FROM usuarios WHERE email LIKE 'test-%'`;
+      await limpiarBaseDeDatos();
       console.log('✅ Limpieza completada');
     } catch (error) {
       console.error('❌ Error en limpieza:', error);
