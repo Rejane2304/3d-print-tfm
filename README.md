@@ -7,6 +7,11 @@ E-commerce de Impresión 3D - Proyecto de Fin de Máster
 [![Prisma](https://img.shields.io/badge/Prisma-5.22.0-2D3748)](https://www.prisma.io/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
 
+## 🌐 Enlaces del Proyecto
+
+- **📊 Presentación TFM**: [Ver slides](https://docs.google.com/presentation/d/PLACEHOLDER) *(Próximamente)*
+- **🚀 Demo en vivo**: [Ver despliegue](https://PLACEHOLDER.vercel.app) *(Próximamente)*
+
 ## 📋 Descripción
 
 Aplicación web de comercio electrónico especializada en productos impresos en 3D. Desarrollada como Trabajo de Fin de Máster con enfoque TDD (Test-Driven Development).

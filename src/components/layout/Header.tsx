@@ -1,7 +1,8 @@
 /**
- * Header Component
+ * Header Component - Modern Professional Design
  * Responsive: mobile → 4K
- * Navegación principal con autenticación
+ * Icons instead of text for better UX
+ * Role-based navigation (Admin cannot buy)
  */
 'use client';
 
@@ -9,6 +10,20 @@ import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { useState } from 'react';
 import Image from 'next/image';
+import { 
+  Home, 
+  ShoppingBag, 
+  ShoppingCart, 
+  User, 
+  LogOut, 
+  LogIn, 
+  UserPlus,
+  LayoutDashboard,
+  Menu,
+  X,
+  Package,
+  Bell
+} from 'lucide-react';
 
 export default function Header() {
   const { data: session, status } = useSession();
@@ -16,6 +31,8 @@ export default function Header() {
 
   const isLoading = status === 'loading';
   const isAuthenticated = status === 'authenticated';
+  const isAdmin = session?.user?.rol === 'ADMIN';
+  const isCliente = session?.user?.rol === 'CLIENTE';
 
   const handleLogout = async () => {
     await signOut({ callbackUrl: '/' });
@@ -23,7 +40,7 @@ export default function Header() {
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
-      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 3xl:px-20">
+      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
         <div className="flex justify-between items-center h-16 lg:h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
@@ -37,67 +54,104 @@ export default function Header() {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-1 lg:space-x-4">
+          <nav className="hidden md:flex items-center space-x-1">
+            {/* Home - visible for everyone */}
             <Link
               href="/"
-              className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm lg:text-base font-medium transition-colors"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
+              title="Inicio"
             >
-              Inicio
+              <Home className="h-5 w-5" />
+              <span className="text-sm font-medium hidden lg:inline">Inicio</span>
             </Link>
+
+            {/* Products - visible for everyone */}
             <Link
               href="/productos"
-              className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm lg:text-base font-medium transition-colors"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
+              title="Productos"
             >
-              Productos
+              <Package className="h-5 w-5" />
+              <span className="text-sm font-medium hidden lg:inline">Productos</span>
             </Link>
-            
-            {!isLoading && isAuthenticated && (
+
+            {/* Cart and Account - ONLY for CLIENTE, NOT for ADMIN */}
+            {!isLoading && isAuthenticated && isCliente && (
               <>
                 <Link
                   href="/carrito"
-                  className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm lg:text-base font-medium transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200 relative"
+                  title="Carrito"
                 >
-                  Carrito
+                  <ShoppingCart className="h-5 w-5" />
+                  <span className="text-sm font-medium hidden lg:inline">Carrito</span>
                 </Link>
+
                 <Link
                   href="/cuenta"
-                  className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm lg:text-base font-medium transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
+                  title="Mi Cuenta"
                 >
-                  Mi Cuenta
+                  <User className="h-5 w-5" />
+                  <span className="text-sm font-medium hidden lg:inline">Cuenta</span>
                 </Link>
               </>
+            )}
+
+            {/* Admin Dashboard - ONLY for ADMIN */}
+            {!isLoading && isAuthenticated && isAdmin && (
+              <Link
+                href="/admin/dashboard"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
+                title="Panel Admin"
+              >
+                <LayoutDashboard className="h-5 w-5" />
+                <span className="text-sm font-medium hidden lg:inline">Admin</span>
+              </Link>
             )}
           </nav>
 
           {/* Auth Buttons */}
-          <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
+          <div className="hidden md:flex items-center space-x-2">
             {isLoading ? (
-              <div className="h-8 w-20 bg-gray-200 animate-pulse rounded"></div>
+              <div className="h-8 w-8 bg-gray-200 animate-pulse rounded-full"></div>
             ) : isAuthenticated ? (
-              <div className="flex items-center space-x-2 lg:space-x-4">
-                <span className="text-sm text-gray-600 hidden lg:inline">
-                  Hola, {session?.user?.name}
+              <div className="flex items-center space-x-3">
+                {/* User greeting - hidden on small screens */}
+                <span className="text-sm text-gray-600 hidden xl:block max-w-[150px] truncate">
+                  {session?.user?.name}
                 </span>
+                
+                {/* Logout button with icon */}
                 <button
                   onClick={handleLogout}
-                  className="bg-red-600 text-white hover:bg-red-700 px-3 py-2 lg:px-4 lg:py-2 rounded-md text-sm lg:text-base font-medium transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-red-600 hover:bg-red-50 transition-all duration-200"
+                  title="Cerrar sesión"
                 >
-                  Cerrar sesión
+                  <LogOut className="h-5 w-5" />
+                  <span className="text-sm font-medium hidden lg:inline">Salir</span>
                 </button>
               </div>
             ) : (
               <>
+                {/* Login button with icon */}
                 <Link
                   href="/login"
-                  className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm lg:text-base font-medium transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
+                  title="Iniciar sesión"
                 >
-                  Iniciar sesión
+                  <LogIn className="h-5 w-5" />
+                  <span className="text-sm font-medium hidden lg:inline">Entrar</span>
                 </Link>
+
+                {/* Register button */}
                 <Link
                   href="/registro"
-                  className="bg-indigo-600 text-white hover:bg-indigo-700 px-3 py-2 lg:px-4 lg:py-2 rounded-md text-sm lg:text-base font-medium transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-all duration-200 shadow-sm hover:shadow-md"
+                  title="Registrarse"
                 >
-                  Registrarse
+                  <UserPlus className="h-5 w-5" />
+                  <span className="text-sm font-medium hidden lg:inline">Registro</span>
                 </Link>
               </>
             )}
@@ -106,17 +160,13 @@ export default function Header() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-md text-gray-700 hover:text-indigo-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            aria-label="Toggle menu"
+            className="md:hidden p-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
+            aria-label={mobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
           >
             {mobileMenuOpen ? (
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <X className="h-6 w-6" />
             ) : (
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+              <Menu className="h-6 w-6" />
             )}
           </button>
         </div>
@@ -124,67 +174,95 @@ export default function Header() {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-200">
-          <div className="px-2 pt-2 pb-3 space-y-1">
+        <div className="md:hidden bg-white border-t border-gray-200 shadow-lg">
+          <div className="px-4 py-3 space-y-1">
+            {/* Home */}
             <Link
               href="/"
-              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50"
+              className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Inicio
+              <Home className="h-5 w-5" />
+              <span className="font-medium">Inicio</span>
             </Link>
+
+            {/* Products */}
             <Link
               href="/productos"
-              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50"
+              className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Productos
+              <Package className="h-5 w-5" />
+              <span className="font-medium">Productos</span>
             </Link>
-            
-            {!isLoading && isAuthenticated && (
+
+            {/* Cart and Account - ONLY for CLIENTE */}
+            {!isLoading && isAuthenticated && isCliente && (
               <>
                 <Link
                   href="/carrito"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50"
+                  className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Carrito
+                  <ShoppingCart className="h-5 w-5" />
+                  <span className="font-medium">Carrito</span>
                 </Link>
+
                 <Link
                   href="/cuenta"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50"
+                  className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Mi Cuenta
+                  <User className="h-5 w-5" />
+                  <span className="font-medium">Mi Cuenta</span>
                 </Link>
               </>
             )}
 
+            {/* Admin - ONLY for ADMIN */}
+            {!isLoading && isAuthenticated && isAdmin && (
+              <Link
+                href="/admin/dashboard"
+                className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <LayoutDashboard className="h-5 w-5" />
+                <span className="font-medium">Panel Admin</span>
+              </Link>
+            )}
+
+            <hr className="my-2 border-gray-200" />
+
+            {/* Auth buttons for mobile */}
             {!isLoading && isAuthenticated ? (
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
                   handleLogout();
                 }}
-                className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-red-50"
+                className="flex w-full items-center gap-3 px-3 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
               >
-                Cerrar sesión
+                <LogOut className="h-5 w-5" />
+                <span className="font-medium">Cerrar sesión</span>
               </button>
             ) : (
               <>
                 <Link
                   href="/login"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50"
+                  className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Iniciar sesión
+                  <LogIn className="h-5 w-5" />
+                  <span className="font-medium">Iniciar sesión</span>
                 </Link>
+
                 <Link
                   href="/registro"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-indigo-600 hover:bg-indigo-50"
+                  className="flex items-center gap-3 px-3 py-3 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Registrarse
+                  <UserPlus className="h-5 w-5" />
+                  <span className="font-medium">Registrarse</span>
                 </Link>
               </>
             )}
