@@ -136,7 +136,7 @@ export default function Header() {
               <>
                 {/* Login button with icon */}
                 <Link
-                  href="/login"
+                  href="/auth"
                   className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
                   title="Iniciar sesión"
                 >
@@ -146,7 +146,7 @@ export default function Header() {
 
                 {/* Register button */}
                 <Link
-                  href="/registro"
+                  href="/auth?tab=register"
                   className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-all duration-200 shadow-sm hover:shadow-md"
                   title="Registrarse"
                 >
@@ -248,7 +248,7 @@ export default function Header() {
             ) : (
               <>
                 <Link
-                  href="/login"
+                  href="/auth"
                   className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
@@ -257,7 +257,7 @@ export default function Header() {
                 </Link>
 
                 <Link
-                  href="/registro"
+                  href="/auth?tab=register"
                   className="flex items-center gap-3 px-3 py-3 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >

@@ -9,7 +9,7 @@ import { getToken } from 'next-auth/jwt';
 
 // Rutas protegidas por rol
 const CLIENT_ROUTES = ['/carrito', '/checkout', '/cuenta'];
-const AUTH_ROUTES = ['/login', '/registro'];
+const AUTH_ROUTES = ['/login', '/registro', '/auth'];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -134,5 +134,6 @@ export const config = {
     '/cuenta/:path*',
     '/login',
     '/registro',
+    '/auth',
   ],
 };
