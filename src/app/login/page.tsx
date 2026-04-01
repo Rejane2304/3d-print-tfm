@@ -38,7 +38,7 @@ export default function LoginPage() {
         router.push(callbackUrl);
         router.refresh();
       }
-    } catch (error) {
+    } catch {
       setError('Error al iniciar sesión. Inténtalo de nuevo.');
     } finally {
       setLoading(false);

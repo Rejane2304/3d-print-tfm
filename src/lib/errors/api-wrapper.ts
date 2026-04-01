@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ApiError, ErrorCode, handleError } from '../errors';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type RouteHandler = (req: NextRequest, ...args: any[]) => Promise<NextResponse>;
 
 /**
@@ -12,6 +13,7 @@ type RouteHandler = (req: NextRequest, ...args: any[]) => Promise<NextResponse>;
  * Uso: export const GET = withErrorHandler(async (req) => { ... })
  */
 export function withErrorHandler(handler: RouteHandler): RouteHandler {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return async (req: NextRequest, ...args: any[]) => {
     try {
       return await handler(req, ...args);
@@ -46,9 +48,10 @@ export function validateInput<T>(
 ): T {
   try {
     return schema.parse(data);
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Extraer mensaje de error de Zod
-    const message = error.errors?.[0]?.message || `Error de validación en ${context}`;
+    const zodError = error as { errors?: [{ message?: string }] };
+    const message = zodError.errors?.[0]?.message || `Error de validación en ${context}`;
     throw new ApiError(ErrorCode.VALIDATION_INVALID_INPUT, message, 400);
   }
 }
@@ -63,11 +66,12 @@ export async function withDbOperation<T>(
 ): Promise<T> {
   try {
     return await operation();
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const prismaError = error as { code?: string; meta?: { target?: string[] } };
     // Manejar errores específicos de Prisma
-    if (error.code === 'P2002') {
+    if (prismaError.code === 'P2002') {
       // Unique constraint violation
-      const field = error.meta?.target?.[0] || 'campo';
+      const field = prismaError.meta?.target?.[0] || 'campo';
       throw new ApiError(
         ErrorCode.DB_DUPLICATE_ENTRY,
         `Ya existe un registro con ese ${field}`,
@@ -76,7 +80,7 @@ export async function withDbOperation<T>(
       );
     }
     
-    if (error.code === 'P2025') {
+    if (prismaError.code === 'P2025') {
       // Record not found
       throw new ApiError(
         ErrorCode.DB_NOT_FOUND,
@@ -85,7 +89,7 @@ export async function withDbOperation<T>(
       );
     }
     
-    if (error.code === 'P2003') {
+    if (prismaError.code === 'P2003') {
       // Foreign key constraint
       throw new ApiError(
         ErrorCode.VALIDATION_INVALID_INPUT,

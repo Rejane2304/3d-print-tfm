@@ -172,7 +172,7 @@ export default async function ProductoDetallePage({ params }: ProductoDetallePag
                   {producto.peso && (
                     <>
                       <dt className="text-gray-600">Peso:</dt>
-                      <dd className="font-medium">{producto.peso} g</dd>
+                      <dd className="font-medium">{Number(producto.peso)} g</dd>
                     </>
                   )}
                   {producto.tiempoImpresion && (

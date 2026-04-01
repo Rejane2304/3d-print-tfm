@@ -5,7 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { withErrorHandler } from '@/lib/errors/api-wrapper';
-import { Categoria, Material } from '@prisma/client';
+import { Categoria, Material, Prisma } from '@prisma/client';
 
 export const GET = withErrorHandler(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
@@ -26,7 +26,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   const busqueda = searchParams.get('busqueda');
   
   // Construir where clause
-  const where: any = {
+  const where: Prisma.ProductoWhereInput = {
     activo: true,
   };
   
@@ -54,19 +54,19 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   
   if (busqueda) {
     where.OR = [
-      { nombre: { contains: busqueda, mode: 'insensitive' } },
-      { descripcion: { contains: busqueda, mode: 'insensitive' } },
+      { nombre: { contains: busqueda, mode: 'insensitive' as Prisma.QueryMode } },
+      { descripcion: { contains: busqueda, mode: 'insensitive' as Prisma.QueryMode } },
     ];
   }
   
   // Construir orderBy
-  const orderBy: any = {};
+  const orderBy: Prisma.ProductoOrderByWithRelationInput = {};
   if (ordenar === 'precio') {
-    orderBy.precio = orden;
+    orderBy.precio = orden as Prisma.SortOrder;
   } else if (ordenar === 'nombre') {
-    orderBy.nombre = orden;
+    orderBy.nombre = orden as Prisma.SortOrder;
   } else if (ordenar === 'stock') {
-    orderBy.stock = orden;
+    orderBy.stock = orden as Prisma.SortOrder;
   }
   
   // Ejecutar queries en paralelo

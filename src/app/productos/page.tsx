@@ -8,6 +8,7 @@ import ProductCard from '@/components/products/ProductCard';
 import FilterSidebar from '@/components/products/FilterSidebar';
 import Pagination from '@/components/products/Pagination';
 import SearchBar from '@/components/products/SearchBar';
+import SortSelector from '@/components/products/SortSelector';
 
 interface ProductosPageProps {
   searchParams: {
@@ -23,12 +24,13 @@ interface ProductosPageProps {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function getProductos(searchParams: ProductosPageProps['searchParams']) {
   const page = parseInt(searchParams.page || '1', 10);
   const pageSize = 12;
   const skip = (page - 1) * pageSize;
   
-  // Construir where clause
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const where: any = { activo: true };
   
   if (searchParams.categoria) {
@@ -60,7 +62,7 @@ async function getProductos(searchParams: ProductosPageProps['searchParams']) {
     ];
   }
   
-  // Construir orderBy
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const orderBy: any = {};
   if (searchParams.ordenar === 'precio') {
     orderBy.precio = searchParams.orden || 'asc';
@@ -129,36 +131,11 @@ export default async function ProductosPage({ searchParams }: ProductosPageProps
                 Mostrando {productos.length} de {total} productos
               </p>
               
-              {/* Ordenamiento */}
-              <form className="flex items-center gap-2">
-                <label className="text-sm text-gray-600">Ordenar por:</label>
-                <select
-                  name="ordenar"
-                  defaultValue={searchParams.ordenar || 'nombre'}
-                  className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-indigo-500"
-                  onChange={(e) => {
-                    const form = e.target.form;
-                    if (form) form.submit();
-                  }}
-                >
-                  <option value="nombre">Nombre</option>
-                  <option value="precio">Precio</option>
-                  <option value="stock">Stock</option>
-                </select>
-                
-                <select
-                  name="orden"
-                  defaultValue={searchParams.orden || 'asc'}
-                  className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-indigo-500"
-                  onChange={(e) => {
-                    const form = e.target.form;
-                    if (form) form.submit();
-                  }}
-                >
-                  <option value="asc">Ascendente</option>
-                  <option value="desc">Descendente</option>
-                </select>
-              </form>
+              {/* Ordenamiento - Client Component */}
+              <SortSelector 
+                initialOrdenar={searchParams.ordenar} 
+                initialOrden={searchParams.orden} 
+              />
             </div>
             
             {/* Grid */}

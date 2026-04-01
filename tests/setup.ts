@@ -1,9 +1,14 @@
 /**
  * Setup para tests de Vitest
- * Configuración del entorno de pruebas
+ * Configuración del entorno de pruebas con SQLite en memoria
  */
-import { vi } from 'vitest';
+import { vi, afterAll, beforeAll } from 'vitest';
 import '@testing-library/jest-dom';
+import { execSync } from 'child_process';
+import { prisma } from '@/lib/db/prisma';
+
+// Configurar variables de entorno para tests
+process.env.DATABASE_URL = 'file:./test.db';
 
 // Mock global de next/navigation
 vi.mock('next/navigation', () => ({
@@ -37,4 +42,33 @@ Object.defineProperty(window, 'matchMedia', {
     removeEventListener: vi.fn(),
     dispatchEvent: vi.fn(),
   })),
+});
+
+// Setup para tests de integración
+beforeAll(async () => {
+  // Inicializar BD de test si es necesario
+  if (process.env.VITEST_ENV === 'integration') {
+    console.log('🧪 Configurando base de datos de test...');
+    try {
+      // Limpiar datos existentes
+      await prisma.$executeRaw`DELETE FROM usuarios WHERE email LIKE 'test-%'`;
+      console.log('✅ BD de test lista');
+    } catch (error) {
+      console.error('❌ Error configurando BD:', error);
+    }
+  }
+});
+
+// Limpieza después de todos los tests
+afterAll(async () => {
+  if (process.env.VITEST_ENV === 'integration') {
+    console.log('🧹 Limpiando base de datos de test...');
+    try {
+      await prisma.$executeRaw`DELETE FROM usuarios WHERE email LIKE 'test-%'`;
+      console.log('✅ Limpieza completada');
+    } catch (error) {
+      console.error('❌ Error en limpieza:', error);
+    }
+  }
+  await prisma.$disconnect();
 });

@@ -62,7 +62,7 @@ export default function RegistroPage() {
         // Registro exitoso, redirigir al login
         router.push('/login?registro=exitoso');
       }
-    } catch (error) {
+    } catch {
       setError('Error al registrar. Inténtalo de nuevo.');
     } finally {
       setLoading(false);

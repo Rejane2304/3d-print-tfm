@@ -2,9 +2,10 @@
  * Tests de Integración - NextAuth Login
  * Tests para el flujo de autenticación con credenciales
  */
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterAll } from 'vitest';
 import { prisma } from '@/lib/db/prisma';
 import bcrypt from 'bcrypt';
+import { cleanupTestUsers } from '../../helpers/db-cleanup';
 
 describe('NextAuth - Flujo de Login', () => {
   const usuarioTest = {
@@ -14,10 +15,8 @@ describe('NextAuth - Flujo de Login', () => {
   };
 
   beforeEach(async () => {
-    // Limpiar y crear usuario de prueba
-    await prisma.usuario.deleteMany({
-      where: { email: usuarioTest.email },
-    });
+    // Limpiar TODOS los usuarios de test
+    await cleanupTestUsers();
 
     const hashedPassword = await bcrypt.hash(usuarioTest.password, 12);
     await prisma.usuario.create({
@@ -29,6 +28,11 @@ describe('NextAuth - Flujo de Login', () => {
         activo: true,
       },
     });
+  });
+
+  afterAll(async () => {
+    // Limpieza final
+    await cleanupTestUsers();
   });
 
   describe('Autorización de credenciales', () => {
@@ -106,17 +110,35 @@ describe('NextAuth - Flujo de Login', () => {
 
   describe('Usuarios inactivos', () => {
     it('debe rechazar login de usuario inactivo', async () => {
-      await prisma.usuario.update({
-        where: { email: usuarioTest.email },
-        data: { activo: false },
+      // Crear usuario inactivo específico para este test
+      const usuarioInactivo = {
+        email: 'test-inactivo@example.com',
+        password: 'TestPassword123!',
+        nombre: 'Usuario Inactivo',
+      };
+
+      const hashedPassword = await bcrypt.hash(usuarioInactivo.password, 12);
+      await prisma.usuario.create({
+        data: {
+          email: usuarioInactivo.email,
+          password: hashedPassword,
+          nombre: usuarioInactivo.nombre,
+          rol: 'CLIENTE',
+          activo: false,
+        },
       });
 
       const usuario = await prisma.usuario.findUnique({
-        where: { email: usuarioTest.email },
+        where: { email: usuarioInactivo.email },
       });
 
+      expect(usuario).toBeDefined();
       expect(usuario!.activo).toBe(false);
-      // En implementación real, el authorize callback rechazaría esto
+
+      // Limpiar usuario de test creado
+      await prisma.usuario.delete({
+        where: { email: usuarioInactivo.email },
+      });
     });
   });
 });

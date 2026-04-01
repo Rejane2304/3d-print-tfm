@@ -19,8 +19,7 @@ export async function requireAdmin() {
     redirect('/login');
   }
   
-  // @ts-ignore
-  if (session.user?.rol !== Rol.ADMIN) {
+  if ((session.user as { rol?: string }).rol !== Rol.ADMIN) {
     redirect('/');
   }
   
@@ -34,8 +33,7 @@ export async function requireClient() {
     redirect('/login');
   }
   
-  // @ts-ignore
-  if (session.user?.rol === Rol.ADMIN) {
+  if ((session.user as { rol?: string }).rol === Rol.ADMIN) {
     redirect('/admin/dashboard');
   }
   

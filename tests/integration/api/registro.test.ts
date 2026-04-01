@@ -7,6 +7,7 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { POST } from '@/app/api/auth/registro/route';
 import { prisma } from '@/lib/db/prisma';
+import { cleanupTestUsers } from '../../helpers/db-cleanup';
 
 describe('POST /api/auth/registro', () => {
   const datosValidos = {
@@ -18,10 +19,19 @@ describe('POST /api/auth/registro', () => {
   };
 
   beforeEach(async () => {
-    // Limpiar usuario de prueba si existe
+    // Limpiar TODOS los usuarios de test creados por estos tests
     await prisma.usuario.deleteMany({
-      where: { email: datosValidos.email },
+      where: {
+        email: {
+          contains: 'test-',
+        },
+      },
     });
+  });
+
+  afterAll(async () => {
+    // Limpieza final: eliminar SOLO usuarios de test (con prefijo test-)
+    await cleanupTestUsers();
   });
 
   describe('Validación de datos', () => {

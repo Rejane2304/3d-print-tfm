@@ -13,12 +13,13 @@ export interface CustomSession {
 }
 
 // Helper para obtener el usuario de la sesión
-export function getUserFromSession(session: any): CustomUser | null {
-  if (!session?.user) return null;
+export function getUserFromSession(session: unknown): CustomUser | null {
+  const s = session as { user?: CustomUser } | null;
+  if (!s?.user) return null;
   return {
-    id: session.user.id,
-    email: session.user.email,
-    name: session.user.name,
-    rol: session.user.rol,
+    id: s.user.id,
+    email: s.user.email,
+    name: s.user.name,
+    rol: s.user.rol,
   };
 }

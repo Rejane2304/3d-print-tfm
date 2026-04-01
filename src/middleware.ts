@@ -8,7 +8,6 @@ import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
 // Rutas protegidas por rol
-const ADMIN_ROUTES = ['/admin'];
 const CLIENT_ROUTES = ['/carrito', '/checkout', '/cuenta'];
 const AUTH_ROUTES = ['/login', '/registro'];
 
