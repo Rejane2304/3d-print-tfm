@@ -94,11 +94,11 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       return;
     }
 
-    // Actualizar pedido a PAGADO
+    // Actualizar pedido a CONFIRMADO (estado inicial después del pago)
     await prisma.pedido.update({
       where: { id: pedido.id },
       data: {
-        estado: 'PAGADO',
+        estado: 'CONFIRMADO',
         confirmadoEn: new Date(),
       },
     });
@@ -112,7 +112,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         metodo: 'TARJETA',
         estado: 'COMPLETADO',
         stripeSessionId: session.id,
-        stripePaymentIntentId: session.payment_intent as string,
+        stripePaymentIntentId: (session.payment_intent as string) || undefined,
       },
     });
 

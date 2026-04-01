@@ -14,14 +14,15 @@ Aplicación web de comercio electrónico especializada en productos impresos en 
 ### Características Principales
 
 - **Catálogo fijo** de productos en PLA/PETG con filtros y búsqueda
+- **Carrito de compras** con gestión completa
+- **Pagos con Stripe** (modo test) - Checkout integrado
 - **Gestión de pedidos** con flujo de estados completo
-- **Pagos con Stripe** (modo test)
 - **Panel de administración** con CRUDs completos
 - **Responsive** desde mobile hasta 4K
 - **100% en español** (UI y backend)
 - **Seguridad enterprise** con autenticación JWT
 - **Manejo de errores** centralizado
-- **110+ tests** (unitarios, integración y E2E)
+- **141+ tests** (unitarios, integración y E2E)
 
 ## 🚀 Tecnologías
 
@@ -146,16 +147,16 @@ npm run test:e2e
 ## 📊 Estado de Tests
 
 - ✅ **Unitarios:** 37 tests (validaciones)
-- ✅ **Integración:** 73 tests (API, auth, middleware, páginas)
+- ✅ **Integración:** 104 tests (API, auth, carrito, checkout, páginas)
 - ✅ **E2E:** Tests de autenticación en múltiples dispositivos
-- ✅ **Total:** 110+ tests pasando
+- ✅ **Total:** 141 tests pasando (100%)
 
 ## 🗄️ Estructura del Proyecto
 
 ```
 3d-print-tfm/
 ├── prisma/
-│   ├── schema.prisma          # Esquema de base de datos (16 modelos)
+│   ├── schema.prisma          # Esquema de base de datos (18 modelos)
 │   └── seed.ts                # Datos iniciales desde CSV
 ├── src/
 │   ├── app/                   # Next.js App Router
@@ -163,7 +164,8 @@ npm run test:e2e
 │   │   ├── (shop)/            # Tienda pública
 │   │   │   ├── page.tsx        # Home con productos destacados
 │   │   │   ├── productos/      # Catálogo de productos
-│   │   │   └── productos/[slug]/  # Detalle de producto
+│   │   │   ├── productos/[slug]/  # Detalle de producto
+│   │   │   └── carrito/        # Carrito de compras
 │   │   ├── (admin)/           # Panel admin
 │   │   │   └── dashboard/      # Dashboard administrativo
 │   │   └── api/               # API routes
@@ -171,15 +173,24 @@ npm run test:e2e
 │   │       │   └── [...nextauth]/
 │   │       │       └── route.ts   # Configuración NextAuth
 │   │       ├── auth/registro/     # API de registro
-│   │       ├── productos/         # API de catálogo
-│   │       └── productos/[slug]/  # API de detalle
+│   │       ├── carrito/            # API del carrito
+│   │       │   └── [itemId]/       # Actualizar/eliminar items
+│   │       ├── checkout/           # API de checkout Stripe
+│   │       ├── productos/          # API de catálogo
+│   │       ├── productos/[slug]/  # API de detalle
+│   │       └── webhooks/stripe/   # Webhook para pagos
 │   ├── components/
-│   │   ├── products/          # Componentes de catálogo
+│   │   ├── cart/               # Componentes del carrito
+│   │   │   ├── CartItem.tsx
+│   │   │   ├── CartSummary.tsx
+│   │   │   └── CartIcon.tsx
+│   │   ├── products/           # Componentes de catálogo
 │   │   │   ├── ProductCard.tsx
 │   │   │   ├── FilterSidebar.tsx
 │   │   │   ├── Pagination.tsx
 │   │   │   ├── SearchBar.tsx
-│   │   │   └── SortSelector.tsx
+│   │   │   ├── SortSelector.tsx
+│   │   │   └── AddToCartButton.tsx
 │   │   ├── layout/            # Header, Footer
 │   │   └── ui/               # Componentes base
 │   ├── lib/
@@ -195,13 +206,17 @@ npm run test:e2e
 │   ├── integration/          # Tests de integración
 │   │   ├── api/
 │   │   │   ├── registro.test.ts
+│   │   │   ├── carrito.test.ts
+│   │   │   ├── checkout.test.ts
 │   │   │   ├── productos.test.ts
-│   │   │   └── producto-detalle.test.ts
+│   │   │   ├── producto-detalle.test.ts
+│   │   │   └── webhook-stripe.test.ts
 │   │   ├── auth/
 │   │   │   └── login.test.ts
 │   │   ├── middleware.test.ts
 │   │   └── pages/
-│   │       └── home.test.ts
+│   │       ├── home.test.ts
+│   │       └── checkout.test.ts
 │   └── e2e/                  # Tests E2E
 │       └── auth/
 │           └── login.spec.ts
@@ -271,6 +286,31 @@ npm run test:coverage          # Tests con cobertura
 ```
 
 ## 📝 Historial de Cambios Recientes
+
+### 2025-04-01: Fase 4 - Checkout + Pagos (Completada)
+
+**Implementación:**
+- ✅ `/carrito` - Carrito de compras completo con gestión de items
+- ✅ `/checkout` - Proceso de checkout con Stripe
+- ✅ `/checkout/success` - Confirmación de pago
+- ✅ API `/api/carrito` - CRUD completo del carrito
+- ✅ API `/api/checkout` - Integración Stripe Checkout
+- ✅ Webhook `/api/webhooks/stripe` - Confirmación de pagos
+- ✅ Componentes: CartItem, CartSummary, CartIcon, AddToCartButton
+
+**Tests:**
+- ✅ `tests/integration/api/carrito.test.ts` - 8 tests
+- ✅ `tests/integration/api/checkout.test.ts` - 6 tests
+- ✅ `tests/integration/api/webhook-stripe.test.ts` - 9 tests
+- ✅ `tests/integration/pages/checkout.test.ts` - 8 tests
+- ✅ Total Fase 4: 31 tests
+
+### 2025-04-01: Corrección Final - Todos los Tests Pasando
+
+**Correcciones:**
+- ✅ Todos los 141 tests pasando (100%)
+- ✅ Corregidos tests de integración del checkout
+- ✅ Documentación actualizada
 
 ### 2025-04-01: Corrección de Tests E2E y Configuración PostgreSQL
 

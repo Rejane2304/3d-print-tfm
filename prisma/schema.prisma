@@ -440,6 +440,7 @@ model Pago {
   estado                EstadoPago  @default(PENDIENTE)
   
   // Stripe
+  stripeSessionId       String?     @unique @db.VarChar(255)
   stripePaymentIntentId String?     @unique @db.VarChar(255)
   stripeClientSecret    String?     @db.VarChar(255)
   stripeChargeId        String?     @db.VarChar(255)
