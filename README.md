@@ -22,7 +22,7 @@ Aplicación web de comercio electrónico especializada en productos impresos en 
 - **100% en español** (UI y backend)
 - **Seguridad enterprise** con autenticación JWT
 - **Manejo de errores** centralizado
-- **212+ tests** (unitarios, integración y E2E)
+- **227+ tests** (unitarios, integración y E2E)
 
 ## 🚀 Tecnologías
 
@@ -286,6 +286,35 @@ npm run test:coverage          # Tests con cobertura
 ```
 
 ## 📝 Historial de Cambios Recientes
+
+### 2025-04-01: Fases 6-8 - Features Avanzadas Completadas
+
+**Fase 6 - Alertas Automáticas:**
+- ✅ `/admin/alertas` - Sistema de gestión de alertas
+- ✅ API `/api/admin/alertas` - CRUD completo de alertas
+- ✅ Tipos: STOCK_BAJO, STOCK_AGOTADO, PEDIDO_SIN_PAGAR, PEDIDO_ATRASADO, ERROR_SISTEMA
+- ✅ Niveles de severidad: BAJA, MEDIA, ALTA, CRITICA
+- ✅ Estados: PENDIENTE, EN_PROCESO, RESUELTA, IGNORADA
+- ✅ Filtros por tipo, severidad y estado
+
+**Fase 6 - Mensajería:**
+- ✅ API `/api/admin/mensajes` - Sistema de chat en pedidos
+- ✅ Mensajes entre admin y clientes
+- ✅ Marcado de mensajes leídos
+- ✅ Soporte para archivos adjuntos
+
+**Fase 6 - Perfiles Editables:**
+- ✅ `/cuenta/perfil` - Página de edición de perfil
+- ✅ API `/api/cuenta/perfil` - Actualización de datos personales
+- ✅ Cambio de contraseña con validación
+- ✅ Validación de NIF, teléfono y email
+
+**Tests:**
+- ✅ `tests/integration/admin/alertas.test.ts` - 20 tests
+- ✅ `tests/integration/admin/mensajes.test.ts` - 15 tests  
+- ✅ `tests/integration/cuenta/perfil.test.ts` - 17 tests
+- ✅ Total Fases 6-8: 52 tests
+- ✅ **Total proyecto: 227 tests (100%)**
 
 ### 2025-04-01: Fase 6 - Sistema de Facturación (Completada)
 
