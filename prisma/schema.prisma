@@ -348,6 +348,10 @@ model Pedido {
   // Método de pago
   metodoPago    MetodoPago    @default(TARJETA)
   
+  // Stripe
+  stripeSessionId String?   @unique @db.VarChar(255)
+  stripePaymentIntentId String? @db.VarChar(255)
+  
   // Notas
   notasCliente  String?       @db.Text
   notasInternas String?       @db.Text // Solo para admins
