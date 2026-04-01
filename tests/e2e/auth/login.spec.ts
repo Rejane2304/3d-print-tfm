@@ -191,8 +191,12 @@ test.describe('Flujo de Autenticación', () => {
       await page.locator('input#login-password').fill('pass123');
       await page.locator('button[type="submit"]').filter({ hasText: /iniciar sesión/i }).click();
       
-      // Esperar redirección y que la sesión se establezca
-      await page.waitForTimeout(3000);
+      // Esperar redirección completa
+      await page.waitForTimeout(4000);
+      
+      // Verificar que estamos autenticados (no en /auth)
+      let currentUrl = page.url();
+      expect(currentUrl).not.toContain('/auth');
       
       if (isMobile) {
         // En mobile, abrir menú hamburguesa primero
@@ -203,19 +207,24 @@ test.describe('Flujo de Autenticación', () => {
         }
       }
       
-      // Buscar y hacer clic en cerrar sesión por el icono (más confiable)
-      const logoutButton = page.locator('button svg.lucide-log-out').locator('..');
-      
-      if (await logoutButton.isVisible().catch(() => false)) {
-        await logoutButton.click();
+      // Buscar y hacer clic en cerrar sesión
+      const logoutLink = page.locator('a[href="/api/auth/signout"]').first();
+      if (await logoutLink.isVisible().catch(() => false)) {
+        await logoutLink.click();
+      } else {
+        // Si no hay link visible, intentar hacer clic en botón de logout si existe
+        const logoutButton = page.locator('button:has-text("Cerrar sesión"), button:has-text("Salir")').first();
+        if (await logoutButton.isVisible().catch(() => false)) {
+          await logoutButton.click();
+        }
       }
       
       // Esperar a que se complete el logout
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(3000);
       
       // Refrescar página para verificar que se cerró sesión
       await page.reload();
-      await page.waitForTimeout(1500);
+      await page.waitForTimeout(2000);
       
       if (isMobile) {
         // En mobile, abrir menú hamburguesa para ver el botón de login
@@ -227,15 +236,13 @@ test.describe('Flujo de Autenticación', () => {
       }
       
       // Verificar que se muestra el botón de iniciar sesión
-      // Buscar por el href o el icono de login (más confiable que el texto)
-      const loginLink = page.locator('a[href="/auth"], a[href="/login"]').first();
+      const loginLink = page.locator('a[href="/auth"]').first();
       const loginVisible = await loginLink.isVisible().catch(() => false);
       
-      // Alternativa: buscar el icono de login
+      // Alternativa: buscar formulario de login
       if (!loginVisible) {
-        const loginIcon = page.locator('a svg.lucide-log-in').locator('..');
-        const loginIconVisible = await loginIcon.isVisible().catch(() => false);
-        expect(loginIconVisible).toBe(true);
+        const loginForm = await page.locator('input#login-email').isVisible().catch(() => false);
+        expect(loginForm || loginVisible).toBe(true);
       } else {
         expect(loginVisible).toBe(true);
       }
