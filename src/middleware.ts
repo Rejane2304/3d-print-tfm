@@ -7,10 +7,10 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
-// Rutas protegidas por rol
+  // Rutas protegidas por rol
 // NOTA: /cart ya NO está protegido, funciona con localStorage para invitados
 const PROTECTED_CLIENT_ROUTES = ['/checkout', '/account'];
-const AUTH_ROUTES = ['/login', '/register', '/auth'];
+const AUTH_ROUTES = ['/login', '/auth'];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -29,13 +29,14 @@ export async function middleware(request: NextRequest) {
   // Si es ADMIN e intenta acceder a rutas de tienda
   // ============================================
   if (userRole === 'ADMIN') {
-    // Verificar si intenta acceder a rutas de cliente
-    const isProtectedRoute = PROTECTED_CLIENT_ROUTES.some(route => 
+    // Verificar si intenta acceder a rutas de cliente protegidas
+    const isProtectedRoute = PROTECTED_CLIENT_ROUTES.some((route: string) => 
       pathname.startsWith(route)
     );
     
-    // También verificar /products (catálogo público está permitido)
-    const isShopRoute = pathname.startsWith('/checkout') ||
+    // Verificar /cart, /checkout, /account
+    const isShopRoute = pathname === '/cart' ||
+                       pathname.startsWith('/checkout') ||
                        pathname.startsWith('/account');
     
     if (isProtectedRoute || isShopRoute) {
@@ -49,9 +50,9 @@ export async function middleware(request: NextRequest) {
   // ============================================
   if (pathname.startsWith('/admin')) {
     if (!isAuthenticated) {
-      // No autenticado, redirigir a login
+      // No autenticado, redirigir a auth
       console.log(`🔒 Usuario no autenticado intentó acceder a ${pathname}`);
-      return NextResponse.redirect(new URL('/login', request.url));
+      return NextResponse.redirect(new URL('/auth', request.url));
     }
     
     if (userRole !== 'ADMIN') {
@@ -75,11 +76,11 @@ export async function middleware(request: NextRequest) {
   
   if (isProtectedClientRoute) {
     if (!isAuthenticated) {
-      // No autenticado, redirigir a login con callback
+      // No autenticado, redirigir a auth con callback
       console.log(`🔒 Usuario no autenticado intentó acceder a ${pathname}`);
       const callbackUrl = encodeURIComponent(pathname);
       return NextResponse.redirect(
-        new URL(`/login?callbackUrl=${callbackUrl}`, request.url)
+        new URL(`/auth?callbackUrl=${callbackUrl}`, request.url)
       );
     }
     

@@ -1,6 +1,7 @@
 /**
  * Página de Autenticación Unificada
  * Login y Registro en la misma página con tabs
+ * Incluye campos de dirección en el registro
  * Estado compartido del email entre formularios
  * Diseño moderno con animaciones suaves
  */
@@ -17,11 +18,16 @@ import {
   Eye, 
   EyeOff, 
   ArrowRight,
-  Phone,
   CheckCircle2,
   LogIn,
-  UserPlus
+  UserPlus,
+  MapPin,
+  Home,
+  Building,
+  Map,
+  Phone
 } from 'lucide-react';
+// PhoneInput component removed as it's not used
 
 export default function AuthPage() {
   const router = useRouter();
@@ -43,11 +49,18 @@ export default function AuthPage() {
   
   // Register form state
   const [registerData, setRegisterData] = useState({
+    // Datos personales
     nombre: '',
     email: '',
     password: '',
     confirmarPassword: '',
     telefono: '',
+    // Datos de dirección
+    direccion: '',
+    complemento: '',
+    codigoPostal: '',
+    ciudad: '',
+    provincia: '',
   });
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -121,6 +134,21 @@ export default function AuthPage() {
       return;
     }
 
+    // Validar campos de dirección
+    if (!registerData.direccion || !registerData.codigoPostal || !registerData.ciudad || !registerData.provincia) {
+      setRegisterError('Por favor, completa todos los campos de dirección obligatorios');
+      setRegisterLoading(false);
+      return;
+    }
+
+    // Validar código postal (5 dígitos para España)
+    const cpRegex = /^\d{5}$/;
+    if (!cpRegex.test(registerData.codigoPostal)) {
+      setRegisterError('El código postal debe tener 5 dígitos');
+      setRegisterLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
@@ -130,6 +158,18 @@ export default function AuthPage() {
           email: registerData.email,
           password: registerData.password,
           telefono: registerData.telefono || undefined,
+          // Datos de dirección
+          direccion: {
+            nombre: 'Principal',
+            destinatario: registerData.nombre,
+            telefono: registerData.telefono || '',
+            direccion: registerData.direccion,
+            complemento: registerData.complemento || undefined,
+            codigoPostal: registerData.codigoPostal,
+            ciudad: registerData.ciudad,
+            provincia: registerData.provincia,
+            esPrincipal: true,
+          }
         }),
       });
 
@@ -154,8 +194,8 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-indigo-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-indigo-50 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-lg w-full">
         {/* Header with Logo */}
         <div className="text-center mb-8">
           <div className="mx-auto h-16 w-16 bg-indigo-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-indigo-200">
@@ -330,129 +370,249 @@ export default function AuthPage() {
                     </div>
                   )}
 
-                  {/* Nombre */}
-                  <div>
-                    <label htmlFor="register-nombre" className="block text-sm font-medium text-gray-700 mb-2">
-                      Nombre completo
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <User className="h-5 w-5 text-gray-400" />
+                  {/* Sección: Datos Personales */}
+                  <div className="border-b border-gray-200 pb-4 mb-4">
+                    <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3 flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      Datos Personales
+                    </h3>
+                    
+                    {/* Nombre */}
+                    <div className="mb-4">
+                      <label htmlFor="register-nombre" className="block text-sm font-medium text-gray-700 mb-2">
+                        Nombre completo *
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <User className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          id="register-nombre"
+                          name="nombre"
+                          type="text"
+                          required
+                          className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                          placeholder="Tu nombre completo"
+                          value={registerData.nombre}
+                          onChange={(e) => setRegisterData({ ...registerData, nombre: e.target.value })}
+                        />
                       </div>
-                      <input
-                        id="register-nombre"
-                        name="nombre"
-                        type="text"
-                        required
-                        className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
-                        placeholder="Tu nombre"
-                        value={registerData.nombre}
-                        onChange={(e) => setRegisterData({ ...registerData, nombre: e.target.value })}
-                      />
+                    </div>
+
+                    {/* Email */}
+                    <div className="mb-4">
+                      <label htmlFor="register-email" className="block text-sm font-medium text-gray-700 mb-2">
+                        Correo electrónico *
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <Mail className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          id="register-email"
+                          name="email"
+                          type="email"
+                          required
+                          className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                          placeholder="tu@email.com"
+                          value={registerData.email}
+                          onChange={(e) => {
+                            setRegisterData({ ...registerData, email: e.target.value });
+                            setSharedEmail(e.target.value);
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Teléfono */}
+                    <div className="mb-4">
+                      <label htmlFor="register-telefono" className="block text-sm font-medium text-gray-700 mb-2">
+                        Teléfono <span className="text-gray-400 font-normal">(opcional)</span>
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <Phone className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          id="register-telefono"
+                          name="telefono"
+                          type="tel"
+                          className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                          placeholder="+34 600 123 456"
+                          value={registerData.telefono}
+                          onChange={(e) => setRegisterData({ ...registerData, telefono: e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Password */}
+                    <div className="mb-4">
+                      <label htmlFor="register-password" className="block text-sm font-medium text-gray-700 mb-2">
+                        Contraseña *
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <Lock className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          id="register-password"
+                          name="password"
+                          type={showRegisterPassword ? 'text' : 'password'}
+                          required
+                          className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                          placeholder="Mínimo 8 caracteres"
+                          value={registerData.password}
+                          onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                        >
+                          {showRegisterPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Confirm Password */}
+                    <div>
+                      <label htmlFor="register-confirm" className="block text-sm font-medium text-gray-700 mb-2">
+                        Confirmar contraseña *
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <Lock className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          id="register-confirm"
+                          name="confirmarPassword"
+                          type={showConfirmPassword ? 'text' : 'password'}
+                          required
+                          className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                          placeholder="Repite tu contraseña"
+                          value={registerData.confirmarPassword}
+                          onChange={(e) => setRegisterData({ ...registerData, confirmarPassword: e.target.value })}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                        >
+                          {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        </button>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Email */}
-                  <div>
-                    <label htmlFor="register-email" className="block text-sm font-medium text-gray-700 mb-2">
-                      Correo electrónico
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Mail className="h-5 w-5 text-gray-400" />
+                  {/* Sección: Dirección de Envío */}
+                  <div className="border-b border-gray-200 pb-4 mb-4">
+                    <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3 flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
+                      Dirección de Envío
+                    </h3>
+                    
+                    {/* Dirección */}
+                    <div className="mb-4">
+                      <label htmlFor="register-direccion" className="block text-sm font-medium text-gray-700 mb-2">
+                        Calle y número *
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <Home className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          id="register-direccion"
+                          name="direccion"
+                          type="text"
+                          required
+                          className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                          placeholder="Calle Mayor 123"
+                          value={registerData.direccion}
+                          onChange={(e) => setRegisterData({ ...registerData, direccion: e.target.value })}
+                        />
                       </div>
-                      <input
-                        id="register-email"
-                        name="email"
-                        type="email"
-                        required
-                        className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
-                        placeholder="tu@email.com"
-                        value={registerData.email}
-                        onChange={(e) => {
-                          setRegisterData({ ...registerData, email: e.target.value });
-                          setSharedEmail(e.target.value);
-                        }}
-                      />
                     </div>
-                  </div>
 
-                  {/* Teléfono (Optional) */}
-                  <div>
-                    <label htmlFor="register-telefono" className="block text-sm font-medium text-gray-700 mb-2">
-                      Teléfono <span className="text-gray-400 font-normal">(opcional)</span>
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Phone className="h-5 w-5 text-gray-400" />
+                    {/* Complemento */}
+                    <div className="mb-4">
+                      <label htmlFor="register-complemento" className="block text-sm font-medium text-gray-700 mb-2">
+                        Piso, puerta, escalera <span className="text-gray-400 font-normal">(opcional)</span>
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <Building className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          id="register-complemento"
+                          name="complemento"
+                          type="text"
+                          className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                          placeholder="2º A"
+                          value={registerData.complemento}
+                          onChange={(e) => setRegisterData({ ...registerData, complemento: e.target.value })}
+                        />
                       </div>
-                      <input
-                        id="register-telefono"
-                        name="telefono"
-                        type="tel"
-                        className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
-                        placeholder="+34 600 123 456"
-                        value={registerData.telefono}
-                        onChange={(e) => setRegisterData({ ...registerData, telefono: e.target.value })}
-                      />
                     </div>
-                  </div>
 
-                  {/* Password */}
-                  <div>
-                    <label htmlFor="register-password" className="block text-sm font-medium text-gray-700 mb-2">
-                      Contraseña
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Lock className="h-5 w-5 text-gray-400" />
+                    {/* Código Postal */}
+                    <div className="mb-4">
+                      <label htmlFor="register-cp" className="block text-sm font-medium text-gray-700 mb-2">
+                        Código Postal *
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <Map className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          id="register-cp"
+                          name="codigoPostal"
+                          type="text"
+                          required
+                          maxLength={5}
+                          pattern="\d{5}"
+                          className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                          placeholder="28001"
+                          value={registerData.codigoPostal}
+                          onChange={(e) => setRegisterData({ ...registerData, codigoPostal: e.target.value })}
+                        />
                       </div>
-                      <input
-                        id="register-password"
-                        name="password"
-                        type={showRegisterPassword ? 'text' : 'password'}
-                        required
-                        className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
-                        placeholder="Mínimo 8 caracteres"
-                        value={registerData.password}
-                        onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowRegisterPassword(!showRegisterPassword)}
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
-                      >
-                        {showRegisterPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                      </button>
                     </div>
-                  </div>
 
-                  {/* Confirm Password */}
-                  <div>
-                    <label htmlFor="register-confirm" className="block text-sm font-medium text-gray-700 mb-2">
-                      Confirmar contraseña
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Lock className="h-5 w-5 text-gray-400" />
+                    {/* Ciudad y Provincia - Grid */}
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* Ciudad */}
+                      <div>
+                        <label htmlFor="register-ciudad" className="block text-sm font-medium text-gray-700 mb-2">
+                          Ciudad *
+                        </label>
+                        <input
+                          id="register-ciudad"
+                          name="ciudad"
+                          type="text"
+                          required
+                          className="block w-full px-3 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                          placeholder="Madrid"
+                          value={registerData.ciudad}
+                          onChange={(e) => setRegisterData({ ...registerData, ciudad: e.target.value })}
+                        />
                       </div>
-                      <input
-                        id="register-confirm"
-                        name="confirmarPassword"
-                        type={showConfirmPassword ? 'text' : 'password'}
-                        required
-                        className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
-                        placeholder="Repite tu contraseña"
-                        value={registerData.confirmarPassword}
-                        onChange={(e) => setRegisterData({ ...registerData, confirmarPassword: e.target.value })}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
-                      >
-                        {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                      </button>
+
+                      {/* Provincia */}
+                      <div>
+                        <label htmlFor="register-provincia" className="block text-sm font-medium text-gray-700 mb-2">
+                          Provincia *
+                        </label>
+                        <input
+                          id="register-provincia"
+                          name="provincia"
+                          type="text"
+                          required
+                          className="block w-full px-3 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                          placeholder="Madrid"
+                          value={registerData.provincia}
+                          onChange={(e) => setRegisterData({ ...registerData, provincia: e.target.value })}
+                        />
+                      </div>
                     </div>
                   </div>
 

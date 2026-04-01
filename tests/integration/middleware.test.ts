@@ -31,7 +31,7 @@ describe('Middleware de Autorización', () => {
 
       expect(res).toBeInstanceOf(NextResponse);
       const location = res.headers.get('location');
-      expect(location).toContain('/login');
+      expect(location).toContain('/auth');
     });
 
     it('debe redirigir a / clientes que intentan acceder', async () => {
@@ -110,7 +110,7 @@ describe('Middleware de Autorización', () => {
       const res = await middleware.middleware(req);
 
       const location = res.headers.get('location');
-      expect(location).toContain('/login');
+      expect(location).toContain('/auth');
       expect(location).toContain('callbackUrl');
       expect(location).toContain(encodeURIComponent('/checkout'));
     });
@@ -123,7 +123,7 @@ describe('Middleware de Autorización', () => {
       const res = await middleware.middleware(req);
 
       const location = res.headers.get('location');
-      expect(location).toContain('/login');
+      expect(location).toContain('/auth');
       expect(location).toContain('callbackUrl');
       expect(location).toContain(encodeURIComponent('/account'));
     });

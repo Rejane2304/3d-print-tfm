@@ -13,7 +13,7 @@ export default defineConfig({
       '**/cypress/**',
       '**/.{idea,git,cache,output,temp}/**',
       '**/tests/e2e/**',
-      '**/tests/unit/components/**', // Excluir tests de componentes React por ahora
+      '**/tests/unit/components/**', // Excluir tests de componentes React - requieren configuración especial
     ],
     coverage: {
       provider: 'v8',

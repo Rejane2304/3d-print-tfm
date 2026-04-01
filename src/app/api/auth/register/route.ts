@@ -1,28 +1,50 @@
 /**
- * API Route para registro de usuarios
+ * API Route para registro de usuarios con dirección
  * POST /api/auth/register
+ * 
+ * Recibe datos del usuario y opcionalmente una dirección inicial
  */
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
 import { prisma } from '@/lib/db/prisma';
-import { registroSchema } from '@/lib/validators';
 import { withErrorHandler } from '@/lib/errors/api-wrapper';
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
   const body = await req.json();
   
-  // Validar datos de entrada
-  const result = registroSchema.safeParse(body);
+  const { 
+    nombre, 
+    email, 
+    password, 
+    telefono, 
+    direccion: datosDireccion 
+  } = body;
   
-  if (!result.success) {
-    const errores = result.error.errors.map(err => err.message).join(', ');
+  // Validaciones básicas
+  if (!nombre || !email || !password) {
     return NextResponse.json(
-      { success: false, error: errores },
+      { success: false, error: 'Nombre, email y contraseña son obligatorios' },
       { status: 400 }
     );
   }
   
-  const { nombre, email, password, telefono } = result.data;
+  if (password.length < 8) {
+    return NextResponse.json(
+      { success: false, error: 'La contraseña debe tener al menos 8 caracteres' },
+      { status: 400 }
+    );
+  }
+  
+  // Validar teléfono si se proporciona
+  if (telefono) {
+    const phoneDigits = telefono.replace(/\D/g, '');
+    if (phoneDigits.length < 9) {
+      return NextResponse.json(
+        { success: false, error: 'El teléfono debe tener al menos 9 dígitos' },
+        { status: 400 }
+      );
+    }
+  }
   
   // Verificar si el email ya existe
   const usuarioExistente = await prisma.usuario.findUnique({
@@ -39,7 +61,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   // Hash de la contraseña
   const hashedPassword = await bcrypt.hash(password, 12);
   
-  // Crear usuario
+  // Crear usuario con dirección (si se proporciona)
   const usuario = await prisma.usuario.create({
     data: {
       email: email.toLowerCase(),
@@ -48,11 +70,26 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       telefono,
       rol: 'CLIENTE',
       activo: true,
+      // Crear dirección si se proporcionan los datos
+      direcciones: datosDireccion ? {
+        create: {
+          nombre: datosDireccion.nombre || 'Principal',
+          destinatario: datosDireccion.destinatario || nombre,
+          telefono: datosDireccion.telefono || telefono || '',
+          direccion: datosDireccion.direccion,
+          complemento: datosDireccion.complemento,
+          codigoPostal: datosDireccion.codigoPostal,
+          ciudad: datosDireccion.ciudad,
+          provincia: datosDireccion.provincia,
+          pais: datosDireccion.pais || 'España',
+          esPrincipal: datosDireccion.esPrincipal ?? true,
+        }
+      } : undefined
     },
+    include: {
+      direcciones: true
+    }
   });
-  
-  // Crear dirección vacía para el usuario (opcional)
-  // El usuario la completará en su perfil
   
   return NextResponse.json(
     { 
@@ -62,6 +99,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         id: usuario.id,
         email: usuario.email,
         nombre: usuario.nombre,
+        direccion: usuario.direcciones?.[0] || null
       }
     },
     { status: 201 }
