@@ -22,6 +22,7 @@ import {
   Eye,
   MessageSquare
 } from 'lucide-react';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
 interface Alerta {
   id: string;
@@ -79,6 +80,8 @@ export default function AdminAlertasPage() {
   const [alertaSeleccionada, setAlertaSeleccionada] = useState<Alerta | null>(null);
   const [notasResolucion, setNotasResolucion] = useState('');
   const [mostrarModal, setMostrarModal] = useState(false);
+  const [modalEliminarOpen, setModalEliminarOpen] = useState(false);
+  const [alertaAEliminar, setAlertaAEliminar] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -148,13 +151,16 @@ export default function AdminAlertasPage() {
     }
   };
 
-  const eliminarAlerta = async (id: string) => {
-    if (!confirm('¿Estás seguro de que deseas eliminar esta alerta?')) {
-      return;
-    }
+  const eliminarAlerta = (id: string) => {
+    setAlertaAEliminar(id);
+    setModalEliminarOpen(true);
+  };
+
+  const confirmarEliminarAlerta = async () => {
+    if (!alertaAEliminar) return;
 
     try {
-      const response = await fetch(`/api/admin/alertas/${id}`, {
+      const response = await fetch(`/api/admin/alertas/${alertaAEliminar}`, {
         method: 'DELETE',
       });
 
@@ -166,6 +172,9 @@ export default function AdminAlertasPage() {
       }
     } catch (err) {
       setError('Error al eliminar alerta');
+    } finally {
+      setModalEliminarOpen(false);
+      setAlertaAEliminar(null);
     }
   };
 
@@ -434,6 +443,19 @@ export default function AdminAlertasPage() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={modalEliminarOpen}
+        onClose={() => {
+          setModalEliminarOpen(false);
+          setAlertaAEliminar(null);
+        }}
+        onConfirm={confirmarEliminarAlerta}
+        title="¿Eliminar alerta?"
+        description="Esta acción no se puede deshacer. La alerta se eliminará permanentemente."
+        confirmText="Eliminar"
+        type="danger"
+      />
     </div>
   );
 }

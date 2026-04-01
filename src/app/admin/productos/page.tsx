@@ -19,6 +19,7 @@ import {
   Loader2,
   AlertCircle
 } from 'lucide-react';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
 interface Producto {
   id: string;
@@ -40,6 +41,8 @@ export default function AdminProductosPage() {
   const [error, setError] = useState<string | null>(null);
   const [busqueda, setBusqueda] = useState('');
   const [filtroCategoria, setFiltroCategoria] = useState('');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [productoAEliminar, setProductoAEliminar] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -77,21 +80,27 @@ export default function AdminProductosPage() {
     }
   };
 
-  const handleEliminar = async (id: string) => {
-    if (!confirm('¿Estás seguro de que deseas eliminar este producto?')) {
-      return;
-    }
+  const handleEliminar = (id: string) => {
+    setProductoAEliminar(id);
+    setModalOpen(true);
+  };
+
+  const confirmarEliminar = async () => {
+    if (!productoAEliminar) return;
 
     try {
-      const response = await fetch(`/api/admin/productos/${id}`, {
+      const response = await fetch(`/api/admin/productos/${productoAEliminar}`, {
         method: 'DELETE',
       });
 
       if (response.ok) {
-        setProductos(productos.filter(p => p.id !== id));
+        setProductos(productos.filter(p => p.id !== productoAEliminar));
       }
     } catch (err) {
       setError('Error al eliminar producto');
+    } finally {
+      setModalOpen(false);
+      setProductoAEliminar(null);
     }
   };
 
@@ -285,6 +294,19 @@ export default function AdminProductosPage() {
           Mostrando {productosFiltrados.length} de {productos.length} productos
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          setProductoAEliminar(null);
+        }}
+        onConfirm={confirmarEliminar}
+        title="¿Eliminar producto?"
+        description="Esta acción no se puede deshacer. El producto se eliminará permanentemente del catálogo."
+        confirmText="Eliminar"
+        type="danger"
+      />
     </div>
   );
 }
