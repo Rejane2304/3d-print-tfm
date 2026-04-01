@@ -8,15 +8,18 @@ import bcrypt from 'bcrypt';
 import { cleanupTestUsers } from '../../helpers/db-cleanup';
 
 describe('NextAuth - Flujo de Login', () => {
+  // Usar email único que no empiece con 'test-' para evitar que cleanupTestUsers lo borre
   const usuarioTest = {
-    email: 'test-login@example.com',
+    email: 'auth-integration@example.com',
     password: 'TestPassword123!',
     nombre: 'Usuario Test',
   };
 
   beforeEach(async () => {
-    // Limpiar TODOS los usuarios de test
-    await cleanupTestUsers();
+    // Limpiar usuarios de test anteriores con este email específico
+    await prisma.usuario.deleteMany({
+      where: { email: usuarioTest.email }
+    });
 
     const hashedPassword = await bcrypt.hash(usuarioTest.password, 12);
     await prisma.usuario.create({
