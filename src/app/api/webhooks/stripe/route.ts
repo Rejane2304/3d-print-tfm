@@ -112,7 +112,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         metodo: 'TARJETA',
         estado: 'COMPLETADO',
         stripeSessionId: session.id,
-        stripePaymentIntentId: (session.payment_intent as string) || undefined,
+        stripePaymentIntentId: session.payment_intent ? String(session.payment_intent) : undefined,
       },
     });
 

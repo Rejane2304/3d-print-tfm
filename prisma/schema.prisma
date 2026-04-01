@@ -451,8 +451,9 @@ model Pago {
   fechaReembolso        DateTime?
   
   // Auditoría
-  creadoEn              DateTime    @default(now())
-  actualizadoEn         DateTime    @updatedAt
+  creadoPor     String?   // ID del admin que creó el producto
+  creadoEn      DateTime  @default(now())
+  actualizadoEn DateTime  @updatedAt
   
   // Relaciones
   pedido                Pedido      @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
