@@ -123,25 +123,12 @@ test.describe('Flujo de Autenticación', () => {
       
       await page.locator('button[type="submit"]').filter({ hasText: /iniciar sesión/i }).click();
       
-      // Esperar redirección - puede ir a home o callbackUrl
-      try {
-        await page.waitForURL((url) => !url.pathname.includes('/auth'), { timeout: 5000 });
-      } catch {
-        // Si no redirige, verificar que no estamos en /auth (puede estar en proceso)
-        await page.waitForTimeout(2000);
-      }
+      // Esperar más tiempo para la redirección completa
+      await page.waitForTimeout(3000);
       
-      // Verificar que ya no estamos en auth
+      // Verificar que ya no estamos en auth (puede estar en home, products o cualquier otra página)
       const currentUrl = page.url();
-      const successIndicators = [
-        !currentUrl.includes('/auth'),
-        currentUrl === `${BASE_URL}/`,
-        currentUrl === BASE_URL,
-        currentUrl.includes('/products'),
-        currentUrl.includes('/account')
-      ];
-      
-      expect(successIndicators.some(Boolean)).toBe(true);
+      expect(currentUrl).not.toContain('/auth');
     });
 
     test('debe rechazar credenciales inválidas', async ({ page }) => {
@@ -180,13 +167,19 @@ test.describe('Flujo de Autenticación', () => {
       // Esperar a que redirija fuera de /auth (login exitoso)
       await page.waitForURL((url) => !url.pathname.includes('/auth'), { timeout: 10000 });
       
-      // Intentar volver a auth - verificar que la página carga (no es necesario que redirija)
+      // Intentar volver a auth - ahora debería redirigir automáticamente
       await page.goto(`${BASE_URL}/auth`);
-      await page.waitForTimeout(2000);
       
-      // La página debe cargar correctamente - puede redirigir o mostrar auth
-      // Verificar que el header está presente (indica que la página cargó correctamente)
-      await expect(page.locator('header')).toBeVisible({ timeout: 10000 });
+      // Esperar redirección automática (usuarios autenticados no pueden ver /auth)
+      try {
+        await page.waitForURL((url) => !url.pathname.includes('/auth'), { timeout: 5000 });
+      } catch {
+        // Si no redirige automáticamente, verificar que al menos no estamos en auth
+        await page.waitForTimeout(2000);
+      }
+      
+      const currentUrl = page.url();
+      expect(currentUrl).not.toContain('/auth');
     });
   });
 
@@ -313,13 +306,19 @@ test.describe('Flujo de Autenticación', () => {
       
       await page.waitForTimeout(3000);
       
-      // Intentar acceder a cart
+      // Intentar acceder a cart - debe redirigir a admin
       await page.goto(`${BASE_URL}/cart`);
-      await page.waitForTimeout(2000);
       
-      // Debe redirigir fuera del cart
+      // Esperar redirección al área de admin
+      try {
+        await page.waitForURL((url) => url.pathname.includes('/admin') || !url.pathname.includes('/cart'), { timeout: 5000 });
+      } catch {
+        await page.waitForTimeout(2000);
+      }
+      
       const currentUrl = page.url();
-      expect(currentUrl).not.toContain('/cart');
+      // Debe estar en /admin/dashboard o cualquier página que no sea /cart
+      expect(currentUrl === `${BASE_URL}/` || currentUrl.includes('/admin') || !currentUrl.includes('/cart')).toBe(true);
     });
   });
 

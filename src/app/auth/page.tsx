@@ -8,7 +8,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { signIn } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { 
@@ -32,8 +32,21 @@ import {
 export default function AuthPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { data: session, status } = useSession();
   const callbackUrl = searchParams.get('callbackUrl') || '/';
   const registroExitoso = searchParams.get('registro') === 'exitoso';
+  
+  // Redirect authenticated users away from auth page
+  useEffect(() => {
+    if (status === 'authenticated' && session) {
+      const userRole = (session.user as { rol?: string })?.rol;
+      if (userRole === 'ADMIN') {
+        router.push('/admin/dashboard');
+      } else {
+        router.push(callbackUrl);
+      }
+    }
+  }, [status, session, router, callbackUrl]);
   
   // Tab state: 'login' | 'register'
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
