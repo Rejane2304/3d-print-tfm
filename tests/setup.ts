@@ -52,6 +52,8 @@ if (typeof window !== 'undefined') {
  * Orden específica para respetar foreign keys
  * Implementa reintentos para manejar deadlocks
  * 
+ * NOTA: El caller debe manejar el advisory lock si es necesario para serialización
+ * 
  * ⚠️  CRÍTICO: Esta función ejecuta TRUNCATE que borra TODOS los datos.
  *     SOLO debe ejecutarse en una BD aislada de tests.
  *     Está protegida por validateTestDatabaseIsolation()
@@ -92,7 +94,6 @@ async function limpiarBaseDeDatos() {
           await prisma.$executeRawUnsafe(`TRUNCATE TABLE "${tabla}" CASCADE`);
         } catch (error) {
           // Ignorar errores si la tabla no existe o está vacía
-          // console.log(`⚠️  Tabla ${tabla}: ${error instanceof Error ? error.message : 'error desconocido'}`);
         }
       }
       // Si llegamos aquí, la limpieza fue exitosa
@@ -125,83 +126,118 @@ async function seedDatosIniciales() {
   const bcrypt = await import('bcrypt');
   const passwordHash = await bcrypt.hash('test123', 10);
 
-  await prisma.usuario.createMany({
-    data: [
-      {
-        id: 'test-admin-id',
-        email: 'admin@test.com',
-        nombre: 'Admin Test',
-        password: passwordHash,
-        rol: 'ADMIN',
-        activo: true,
-      },
-      {
-        id: 'test-client-id',
-        email: 'cliente@test.com',
-        nombre: 'Cliente Test',
-        password: passwordHash,
-        rol: 'CLIENTE',
-        activo: true,
-      },
-    ],
-    skipDuplicates: true,
-  });
+  // Eliminar datos anteriores primero (por si acaso quedaron de una ejecución anterior)
+  try {
+    await prisma.imagenProducto.deleteMany({});
+    await prisma.producto.deleteMany({});
+    await prisma.usuario.deleteMany({});
+  } catch (error) {
+    // Ignore errors if tables don't exist
+  }
 
-  await prisma.producto.createMany({
-    data: [
-      {
-        id: 'test-product-1',
-        slug: 'test-product-1',
-        nombre: 'Producto Test 1',
-        descripcion: 'Descripción del producto de test',
-        precio: 19.99,
-        stock: 10,
-        categoria: 'DECORACION',
-        material: 'PLA',
-        activo: true,
-      },
-      {
-        id: 'test-product-2',
-        slug: 'test-product-2',
-        nombre: 'Producto Test 2',
-        descripcion: 'Otro producto de test',
-        precio: 29.99,
-        stock: 5,
-        categoria: 'ACCESORIOS',
-        material: 'PETG',
-        activo: true,
-      },
-    ],
-    skipDuplicates: true,
-  });
+  // Pequeño delay 
+  await new Promise(resolve => setTimeout(resolve, 100));
 
-  await prisma.imagenProducto.createMany({
-    data: [
-      {
-        id: 'test-img-1',
-        productoId: 'test-product-1',
-        url: 'https://example.com/img1.jpg',
-        nombreArchivo: 'img1.jpg',
-        textoAlt: 'Producto 1',
-        esPrincipal: true,
-        orden: 0,
-      },
-      {
-        id: 'test-img-2',
-        productoId: 'test-product-2',
-        url: 'https://example.com/img2.jpg',
-        nombreArchivo: 'img2.jpg',
-        textoAlt: 'Producto 2',
-        esPrincipal: true,
-        orden: 0,
-      },
-    ],
-    skipDuplicates: true,
-  });
+  try {
+    // Crear usuarios
+    await prisma.usuario.createMany({
+      data: [
+        {
+          id: 'test-admin-id',
+          email: 'admin@test.com',
+          nombre: 'Admin Test',
+          password: passwordHash,
+          rol: 'ADMIN',
+          activo: true,
+        },
+        {
+          id: 'test-client-id',
+          email: 'cliente@test.com',
+          nombre: 'Cliente Test',
+          password: passwordHash,
+          rol: 'CLIENTE',
+          activo: true,
+        },
+      ],
+    });
+  } catch (error) {
+    console.error('❌ Error creando usuarios:', error instanceof Error ? error.message : error);
+  }
+
+  // Pequeño delay para asegurar persistencia
+  await new Promise(resolve => setTimeout(resolve, 100));
+
+  try {
+    // Crear productos
+    await prisma.producto.createMany({
+      data: [
+        {
+          id: 'test-product-1',
+          slug: 'test-product-1',
+          nombre: 'Producto Test 1',
+          descripcion: 'Descripción del producto de test',
+          precio: 19.99,
+          stock: 10,
+          categoria: 'DECORACION',
+          material: 'PLA',
+          activo: true,
+        },
+        {
+          id: 'test-product-2',
+          slug: 'test-product-2',
+          nombre: 'Producto Test 2',
+          descripcion: 'Otro producto de test',
+          precio: 29.99,
+          stock: 5,
+          categoria: 'ACCESORIOS',
+          material: 'PETG',
+          activo: true,
+        },
+      ],
+    });
+  } catch (error) {
+    console.error('❌ Error creando productos:', error instanceof Error ? error.message : error);
+  }
+
+  // Pequeño delay para asegurar persistencia
+  await new Promise(resolve => setTimeout(resolve, 100));
+
+  try {
+    // Crear imágenes
+    await prisma.imagenProducto.createMany({
+      data: [
+        {
+          id: 'test-img-1',
+          productoId: 'test-product-1',
+          url: 'https://example.com/img1.jpg',
+          nombreArchivo: 'img1.jpg',
+          textoAlt: 'Producto 1',
+          esPrincipal: true,
+          orden: 0,
+        },
+        {
+          id: 'test-img-2',
+          productoId: 'test-product-2',
+          url: 'https://example.com/img2.jpg',
+          nombreArchivo: 'img2.jpg',
+          textoAlt: 'Producto 2',
+          esPrincipal: true,
+          orden: 0,
+        },
+      ],
+    });
+  } catch (error) {
+    console.error('❌ Error creando imágenes:', error instanceof Error ? error.message : error);
+  }
+
+  // Final pequeño delay para asegurar que TODO está persistido
+  await new Promise(resolve => setTimeout(resolve, 100));
 }
 
 // Flag para asegurar que solo se ejecuta una vez
 let dbSetupDone = false;
+let setupPromise: Promise<void> | null = null;
+let setupLockAcquired = false;
 
 // Setup para tests de integración
 beforeAll(async () => {
@@ -212,54 +248,76 @@ beforeAll(async () => {
       return;
     }
     
-    // Solo ejecutar una vez
-    if (dbSetupDone) {
+    // Si ya está en proceso o completado, esperar
+    if (setupPromise) {
+      await setupPromise;
       return;
     }
-    dbSetupDone = true;
     
-    console.log('🧪 Configurando base de datos de test (PostgreSQL)...');
-    try {
-      // Limpiar base de datos
-      await limpiarBaseDeDatos();
-      
-      // Insertar datos iniciales
-      await seedDatosIniciales();
-      
-      // Esperar a que los datos persistan en la BD
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Verificar que hay datos
-      const usuariosCount = await prisma.usuario.count();
-      const productosCount = await prisma.producto.count();
-      
-      if (usuariosCount === 0 || productosCount === 0) {
-        console.log(`⚠️  Datos insuficientes: ${usuariosCount} usuarios, ${productosCount} productos`);
+    // Crear una promesa compartida para toda la inicialización
+    setupPromise = (async () => {
+      console.log('🧪 Configurando base de datos de test (PostgreSQL)...');
+      try {
+        // Usar advisory lock para TODA la fase de setup (TRUNCATE + SEED)
+        // Esto previene que otros tests limpien mientras estamos inicializando
+        await prisma.$executeRawUnsafe(`SELECT pg_advisory_lock(1)`);
+        setupLockAcquired = true;
+        
+        try {
+          // Limpiar base de datos 
+          await limpiarBaseDeDatos();
+          
+          // Insertar datos iniciales (dentro del lock para evitar race conditions)
+          await seedDatosIniciales();
+        } finally {
+          // Liberar el lock
+          if (setupLockAcquired) {
+            try {
+              await prisma.$executeRawUnsafe(`SELECT pg_advisory_unlock(1)`);
+            } catch {
+              // Ignorar error si el lock no existe
+            }
+            setupLockAcquired = false;
+          }
+        }
+        
+        // Esperar a que los datos persistan en la BD (FUERA del lock)
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Verificar que hay datos
+        const usuariosCount = await prisma.usuario.count();
+        const productosCount = await prisma.producto.count();
+        
+        if (usuariosCount === 0 || productosCount === 0) {
+          console.log(`⚠️  Datos insuficientes: ${usuariosCount} usuarios, ${productosCount} productos`);
+        }
+        
+        console.log('✅ BD de test lista');
+        dbSetupDone = true;
+      } catch (error) {
+        console.error('❌ Error configurando BD:', error);
+        console.log('⚠️  Continuando sin base de datos...');
+        // Don't throw - let tests continue
       }
-      
-      console.log('✅ BD de test lista');
-    } catch (error) {
-      console.error('❌ Error configurando BD:', error);
-      console.log('⚠️  Continuando sin base de datos...');
-      // Don't throw - let tests continue
-    }
+    })();
+    
+    // Esperar a que se complete
+    await setupPromise;
   }
 });
 
 // Limpieza después de todos los tests
+// NOTA: No limpiamos aquí para evitar race conditions entre test files en paralelo
+// El siguiente test run iniciará con TRUNCATE fresco en beforeAll
 afterAll(async () => {
   if (process.env.VITEST_ENV === 'integration') {
     if (process.env.SKIP_DB_TESTS === 'true') {
       return;
     }
     
-    console.log('🧹 Limpiando base de datos de test...');
-    try {
-      await limpiarBaseDeDatos();
-      console.log('✅ Limpieza completada');
-    } catch (error) {
-      console.error('❌ Error en limpieza:', error);
-    }
+    console.log('🧹 Tests completados, desconectando BD...');
+    // Nota: NO hacemos TRUNCATE aquí porque causaría race conditions
+    // cuando el siguiente test file intenta leer datos mientras limpiamos
   }
   try {
     await prisma.$disconnect();

@@ -23,6 +23,31 @@ services:
       POSTGRES_DB: 3dprint_tfm_test
       # Configuración de inicialización
       POSTGRES_INITDB_ARGS: "-c password_encryption=scram-sha-256"
+      # Optimizaciones para tests (reducir deadlocks)
+      POSTGRES_HOST_AUTH_METHOD: "md5"
+    
+    command:
+      - "postgres"
+      - "-c"
+      - "max_connections=200"
+      - "-c"
+      - "shared_buffers=256MB"
+      - "-c"
+      - "effective_cache_size=1GB"
+      - "-c"
+      - "work_mem=10MB"
+      - "-c"
+      - "maintenance_work_mem=64MB"
+      - "-c"
+      - "default_transaction_isolation=read_committed"
+      - "-c"
+      - "max_locks_per_transaction=256"
+      - "-c"
+      - "deadlock_timeout=10s"
+      - "-c"
+      - "statement_timeout=60000"
+      - "-c"
+      - "log_lock_waits=on"
     
     ports:
       # Mapear puerto 5433 localmente para evitar conflictos
