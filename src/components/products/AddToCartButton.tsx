@@ -28,6 +28,7 @@ interface AddToCartButtonProps {
 }
 
 export default function AddToCartButton({ productoId, stock, producto }: AddToCartButtonProps) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { status } = useSession();
   const router = useRouter();
   const { addItem } = useCart();
