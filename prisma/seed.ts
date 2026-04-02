@@ -4,18 +4,58 @@
  * 
  * Usage: npx prisma db seed
  */
-import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcrypt';
+import { PrismaClient, Role, Category, Material, OrderStatus } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 import { readFileSync } from 'fs';
-import { parse } from 'csv-parse/sync';
-import path from 'path';
+import * as csvParse from 'csv-parse/sync';
+import * as path from 'path';
 
 const prisma = new PrismaClient();
+
+interface UserCSV {
+  id: string;
+  email: string;
+  password: string;
+  name: string;
+  phone: string;
+  address: string;
+  role: string;
+}
+
+interface ProductCSV {
+  id: string;
+  name: string;
+  price: string;
+  stock: string;
+  category: string;
+  material: string;
+  description: string;
+  image: string;
+}
+
+interface OrderCSV {
+  id: string;
+  userId: string;
+  total: string;
+  status: string;
+  paymentMethod: string;
+  shippingAddress: string;
+  notes: string;
+}
+
+interface AlertCSV {
+  id: string;
+  type: string;
+  title: string;
+  message: string;
+  status: string;
+  metadata: string;
+}
 
 function parseCSV<T>(fileName: string): T[] {
   const filePath = path.join(process.cwd(), 'public/data', fileName);
   const content = readFileSync(filePath, 'utf-8');
-  return parse(content, {
+  return csvParse.parse(content, {
     columns: true,
     skip_empty_lines: true,
     trim: true,
@@ -25,7 +65,7 @@ function parseCSV<T>(fileName: string): T[] {
   }) as T[];
 }
 
-async function main() {
+async function main(): Promise<void> {
   console.log('🌱 Starting database seed...\n');
 
   try {
@@ -36,19 +76,21 @@ async function main() {
 
     // Create users from CSV
     console.log('👤 Creating users from CSV...');
-    const usersCSV = parseCSV<{ id: string; email: string; password: string; name: string; phone: string; address: string; role: string }>('users.csv');
+    const usersCSV = parseCSV<UserCSV>('users.csv');
     
     for (const user of usersCSV) {
       const hashedPassword = user.role === 'admin' 
         ? await bcrypt.hash('admin123', 12)
         : await bcrypt.hash('pass123', 12);
       
+      const role: Role = user.role === 'admin' ? 'ADMIN' : 'CUSTOMER';
+      
       await prisma.user.create({
         data: {
           email: user.email,
           name: user.name,
           password: hashedPassword,
-          role: user.role === 'admin' ? 'ADMIN' : 'CUSTOMER',
+          role: role,
           isActive: true,
           phone: user.phone,
         },
@@ -58,18 +100,9 @@ async function main() {
 
     // Create products from CSV
     console.log('📦 Creating products from CSV...');
-    const productsCSV = parseCSV<{ 
-      id: string; 
-      name: string; 
-      price: string; 
-      stock: string; 
-      category: string; 
-      material: string; 
-      description: string; 
-      image: string 
-    }>('products.csv');
+    const productsCSV = parseCSV<ProductCSV>('products.csv');
 
-    const categoryMap: Record<string, string> = {
+    const categoryMap: Record<string, Category> = {
       'DECOR': 'DECORATION',
       'ACCESSORY': 'ACCESSORIES',
       'FUNCTIONAL': 'FUNCTIONAL',
@@ -84,6 +117,9 @@ async function main() {
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-|-$/g, '');
 
+      const category: Category = categoryMap[product.category] || 'ACCESSORIES';
+      const material = product.material as Material;
+
       await prisma.product.create({
         data: {
           name: product.name,
@@ -92,8 +128,8 @@ async function main() {
           shortDescription: product.description.split(',')[0],
           price: parseFloat(product.price),
           stock: parseInt(product.stock),
-          category: (categoryMap[product.category] || 'ACCESSORIES') as 'DECORATION' | 'ACCESSORIES' | 'FUNCTIONAL' | 'ARTICULATED' | 'TOYS',
-          material: product.material as 'PLA' | 'PETG',
+          category: category,
+          material: material,
           isActive: true,
           isFeatured: i < 3,
           images: {
@@ -112,20 +148,12 @@ async function main() {
 
     // Create orders from CSV
     console.log('📋 Creating orders from CSV...');
-    const ordersCSV = parseCSV<{ 
-      id: string; 
-      userId: string; 
-      total: string; 
-      status: string;
-      paymentMethod: string;
-      shippingAddress: string;
-      notes: string;
-    }>('orders.csv');
+    const ordersCSV = parseCSV<OrderCSV>('orders.csv');
 
     const users = await prisma.user.findMany();
     const products = await prisma.product.findMany();
 
-    const statusMap: Record<string, 'PENDING' | 'CONFIRMED' | 'PREPARING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED'> = {
+    const statusMap: Record<string, OrderStatus> = {
       'PENDING': 'PENDING',
       'CONFIRMED': 'CONFIRMED',
       'SHIPPED': 'SHIPPED',
@@ -135,13 +163,13 @@ async function main() {
 
     for (let i = 0; i < ordersCSV.length; i++) {
       const order = ordersCSV[i];
-      const user = users.find(u => u.id.includes(order.userId.replace('USER-', ''))) || users[0];
+      const user = users.find((u: { id: string }) => u.id.includes(order.userId.replace('USER-', ''))) || users[0];
       const addressParts = order.shippingAddress.split(' - ');
       const fullAddress = addressParts[0] || order.shippingAddress;
       const postalCode = addressParts[1]?.split(' ')[0] || '28001';
       const city = addressParts[1]?.split(' ')[1] || 'Madrid';
       
-      const status = statusMap[order.status] || 'PENDING';
+      const status: OrderStatus = statusMap[order.status] || 'PENDING';
       
       const productIndex = i % products.length;
       const product = products[productIndex];
@@ -183,14 +211,7 @@ async function main() {
 
     // Create alerts from CSV
     console.log('⚠️ Creating alerts from CSV...');
-    const alertsCSV = parseCSV<{ 
-      id: string; 
-      type: string; 
-      title: string; 
-      message: string; 
-      status: string;
-      metadata: string;
-    }>('alerts.csv');
+    const alertsCSV = parseCSV<AlertCSV>('alerts.csv');
 
     const typeMap: Record<string, 'LOW_STOCK' | 'OUT_OF_STOCK' | 'ORDER_DELAYED' | 'PAYMENT_FAILED' | 'SYSTEM_ERROR'> = {
       'LOW_STOCK': 'LOW_STOCK',
@@ -200,14 +221,28 @@ async function main() {
       'SYSTEM_ERROR': 'SYSTEM_ERROR',
     };
 
+    const severityMap: Record<string, 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'> = {
+      'READ': 'LOW',
+      'UNREAD': 'MEDIUM',
+    };
+
+    const alertStatusMap: Record<string, 'PENDING' | 'IN_PROGRESS' | 'RESOLVED' | 'IGNORED'> = {
+      'READ': 'RESOLVED',
+      'UNREAD': 'PENDING',
+    };
+
     for (const alert of alertsCSV) {
+      const alertType = typeMap[alert.type] || 'LOW_STOCK';
+      const severity = severityMap[alert.status] || 'MEDIUM';
+      const alertStatus = alertStatusMap[alert.status] || 'PENDING';
+      
       await prisma.alert.create({
         data: {
-          type: typeMap[alert.type] || 'LOW_STOCK',
+          type: alertType,
           title: alert.title || alert.message?.substring(0, 50) || 'Alert',
           message: alert.message || '',
-          severity: alert.status === 'READ' ? 'LOW' : 'MEDIUM',
-          status: alert.status === 'READ' ? 'RESOLVED' : 'PENDING',
+          severity: severity,
+          status: alertStatus,
         },
       });
     }
@@ -228,7 +263,7 @@ async function main() {
 }
 
 main()
-  .catch((e) => {
+  .catch((e: Error) => {
     console.error(e);
     throw e;
   });
