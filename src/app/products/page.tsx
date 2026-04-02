@@ -15,12 +15,12 @@ interface ProductosPageProps {
     page?: string;
     category?: string;
     material?: string;
-    minPrecio?: string;
-    maxPrecio?: string;
-    enStock?: string;
-    ordenar?: string;
-    orden?: string;
-    busqueda?: string;
+    minPrice?: string;
+    maxPrice?: string;
+    inStock?: string;
+    sortBy?: string;
+    sortOrder?: string;
+    search?: string;
   };
 }
 
@@ -41,35 +41,35 @@ async function getProductos(searchParams: ProductosPageProps['searchParams']) {
     where.material = searchParams.material;
   }
 
-  if (searchParams.minPrecio || searchParams.maxPrecio) {
+  if (searchParams.minPrice || searchParams.maxPrice) {
     where.precio = {};
-    if (searchParams.minPrecio) {
-      where.precio.gte = parseFloat(searchParams.minPrecio);
+    if (searchParams.minPrice) {
+      where.precio.gte = parseFloat(searchParams.minPrice);
     }
-    if (searchParams.maxPrecio) {
-      where.precio.lte = parseFloat(searchParams.maxPrecio);
+    if (searchParams.maxPrice) {
+      where.precio.lte = parseFloat(searchParams.maxPrice);
     }
   }
 
-  if (searchParams.enStock === 'true') {
+  if (searchParams.inStock === 'true') {
     where.stock = { gt: 0 };
   }
 
-  if (searchParams.busqueda) {
+  if (searchParams.search) {
     where.OR = [
-      { nombre: { contains: searchParams.busqueda, mode: 'insensitive' } },
-      { descripcion: { contains: searchParams.busqueda, mode: 'insensitive' } },
+      { nombre: { contains: searchParams.search, mode: 'insensitive' } },
+      { descripcion: { contains: searchParams.search, mode: 'insensitive' } },
     ];
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const orderBy: any = {};
-  if (searchParams.ordenar === 'price') {
-    orderBy.precio = searchParams.orden || 'asc';
-  } else if (searchParams.ordenar === 'stock') {
-    orderBy.stock = searchParams.orden || 'desc';
+  if (searchParams.sortBy === 'price') {
+    orderBy.precio = searchParams.sortOrder || 'asc';
+  } else if (searchParams.sortBy === 'stock') {
+    orderBy.stock = searchParams.sortOrder || 'desc';
   } else {
-    orderBy.nombre = searchParams.orden || 'asc';
+    orderBy.nombre = searchParams.sortOrder || 'asc';
   }
 
   const [productos, total] = await Promise.all([
@@ -114,7 +114,7 @@ export default async function ProductosPage({ searchParams }: ProductosPageProps
         
         {/* Search Bar */}
         <div className="mb-6">
-          <SearchBar initialValue={searchParams.busqueda} />
+          <SearchBar initialValue={searchParams.search} />
         </div>
         
         <div className="flex flex-col lg:flex-row gap-8">
@@ -133,8 +133,8 @@ export default async function ProductosPage({ searchParams }: ProductosPageProps
               
               {/* Ordenamiento - Client Component */}
               <SortSelector 
-                initialOrdenar={searchParams.ordenar} 
-                initialOrden={searchParams.orden} 
+                initialSortBy={searchParams.sortBy} 
+                initialSortOrder={searchParams.sortOrder} 
               />
             </div>
             

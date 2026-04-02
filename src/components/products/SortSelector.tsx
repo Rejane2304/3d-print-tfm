@@ -7,24 +7,24 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 
 interface SortSelectorProps {
-  initialOrdenar?: string;
-  initialOrden?: string;
+  initialSortBy?: string;
+  initialSortOrder?: string;
 }
 
-export default function SortSelector({ initialOrdenar = 'nombre', initialOrden = 'asc' }: SortSelectorProps) {
+export default function SortSelector({ initialSortBy = 'nombre', initialSortOrder = 'asc' }: SortSelectorProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const handleOrdenarChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleSortByChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const params = new URLSearchParams(searchParams.toString());
-    params.set('ordenar', e.target.value);
+    params.set('sortBy', e.target.value);
     params.delete('page');
     router.push(`/products?${params.toString()}`);
   };
 
-  const handleOrdenChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleSortOrderChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const params = new URLSearchParams(searchParams.toString());
-    params.set('orden', e.target.value);
+    params.set('sortOrder', e.target.value);
     params.delete('page');
     router.push(`/products?${params.toString()}`);
   };
@@ -33,8 +33,8 @@ export default function SortSelector({ initialOrdenar = 'nombre', initialOrden =
     <div className="flex items-center gap-2">
       <label className="text-sm text-gray-600">Ordenar por:</label>
       <select
-        defaultValue={initialOrdenar}
-        onChange={handleOrdenarChange}
+        defaultValue={initialSortBy}
+        onChange={handleSortByChange}
         className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-indigo-500"
       >
         <option value="nombre">Nombre</option>
@@ -43,8 +43,8 @@ export default function SortSelector({ initialOrdenar = 'nombre', initialOrden =
       </select>
       
       <select
-        defaultValue={initialOrden}
-        onChange={handleOrdenChange}
+        defaultValue={initialSortOrder}
+        onChange={handleSortOrderChange}
         className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-indigo-500"
       >
         <option value="asc">Ascendente</option>
