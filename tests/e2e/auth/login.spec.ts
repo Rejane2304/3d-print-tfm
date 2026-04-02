@@ -15,7 +15,7 @@ test.describe('Flujo de Autenticación', () => {
       
       // Verificar que existen ambos tabs (usando .first() para evitar strict mode violation)
       await expect(page.getByRole('button', { name: /iniciar sesión/i }).first()).toBeVisible();
-      await expect(page.getByRole('button', { name: /crear cuenta/i }).first()).toBeVisible();
+      await expect(page.getByRole('button', { name: /registrarse/i }).first()).toBeVisible();
       
       // El tab de login debe estar activo por defecto
       await expect(page.locator('input#login-email')).toBeVisible();
@@ -55,7 +55,7 @@ test.describe('Flujo de Autenticación', () => {
       await page.goto(`${BASE_URL}/auth?tab=register`);
       
       // Intentar enviar formulario vacío
-      await page.locator('button[type="submit"]').filter({ hasText: /crear cuenta/i }).click();
+      await page.locator('button[type="submit"]').filter({ hasText: /registrarse/i }).click();
       
       // Debe seguir en la misma página (validación HTML5)
       await expect(page).toHaveURL(/auth/);
@@ -74,7 +74,7 @@ test.describe('Flujo de Autenticación', () => {
       await page.locator('input#register-confirm').fill('TestPassword123!');
       
       // Enviar formulario
-      await page.locator('button[type="submit"]').filter({ hasText: /crear cuenta/i }).click();
+      await page.locator('button[type="submit"]').filter({ hasText: /registrarse/i }).click();
       
       // Esperar procesamiento
       await page.waitForTimeout(4000);
@@ -95,7 +95,7 @@ test.describe('Flujo de Autenticación', () => {
       await page.locator('input#register-password').fill('TestPassword123!');
       await page.locator('input#register-confirm').fill('TestPassword123!');
       
-      await page.locator('button[type="submit"]').filter({ hasText: /crear cuenta/i }).click();
+      await page.locator('button[type="submit"]').filter({ hasText: /registrarse/i }).click();
       
       await page.waitForTimeout(2000);
       

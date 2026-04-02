@@ -46,22 +46,24 @@ Object.defineProperty(window, 'matchMedia', {
  */
 async function limpiarBaseDeDatos() {
   const tablas = [
-    'LogAuditoria',
-    'VerificationToken',
-    'Session',
-    'MensajePedido',
-    'Alerta',
-    'MovimientoInventario',
-    'Pago',
-    'ItemPedido',
-    'Pedido',
-    'Factura',
-    'ImagenProducto',
-    'Producto',
-    'Direccion',
-    'Usuario',
-    'ConfiguracionEnvio',
-    'Configuracion',
+    'logs_auditoria',
+    'tokens_verificacion',
+    'sesiones',
+    'mensajes_pedido',
+    'alertas',
+    'movimientos_inventario',
+    'pagos',
+    'items_pedido',
+    'pedidos',
+    'facturas',
+    'imagenes_producto',
+    'productos',
+    'direcciones',
+    'usuarios',
+    'configuracion_envios',
+    'configuracion',
+    'carritos',
+    'items_carrito',
   ];
 
   for (const tabla of tablas) {
@@ -76,11 +78,84 @@ async function limpiarBaseDeDatos() {
 
 /**
  * Inserta datos iniciales necesarios para tests
- * Nota: Cada test debe crear sus propios datos
  */
 async function seedDatosIniciales() {
-  // Los tests deben ser independientes y crear sus propios datos
-  // No insertamos datos aquí para evitar dependencias
+  const bcrypt = await import('bcrypt');
+  const passwordHash = await bcrypt.hash('test123', 10);
+
+  await prisma.usuario.createMany({
+    data: [
+      {
+        id: 'test-admin-id',
+        email: 'admin@test.com',
+        nombre: 'Admin Test',
+        password: passwordHash,
+        rol: 'ADMIN',
+        activo: true,
+      },
+      {
+        id: 'test-client-id',
+        email: 'cliente@test.com',
+        nombre: 'Cliente Test',
+        password: passwordHash,
+        rol: 'CLIENTE',
+        activo: true,
+      },
+    ],
+    skipDuplicates: true,
+  });
+
+  await prisma.producto.createMany({
+    data: [
+      {
+        id: 'test-product-1',
+        slug: 'test-product-1',
+        nombre: 'Producto Test 1',
+        descripcion: 'Descripción del producto de test',
+        precio: 19.99,
+        stock: 10,
+        categoria: 'DECORACION',
+        material: 'PLA',
+        activo: true,
+      },
+      {
+        id: 'test-product-2',
+        slug: 'test-product-2',
+        nombre: 'Producto Test 2',
+        descripcion: 'Otro producto de test',
+        precio: 29.99,
+        stock: 5,
+        categoria: 'ACCESORIOS',
+        material: 'PETG',
+        activo: true,
+      },
+    ],
+    skipDuplicates: true,
+  });
+
+  await prisma.imagenProducto.createMany({
+    data: [
+      {
+        id: 'test-img-1',
+        productoId: 'test-product-1',
+        url: 'https://example.com/img1.jpg',
+        nombreArchivo: 'img1.jpg',
+        textoAlt: 'Producto 1',
+        esPrincipal: true,
+        orden: 0,
+      },
+      {
+        id: 'test-img-2',
+        productoId: 'test-product-2',
+        url: 'https://example.com/img2.jpg',
+        nombreArchivo: 'img2.jpg',
+        textoAlt: 'Producto 2',
+        esPrincipal: true,
+        orden: 0,
+      },
+    ],
+    skipDuplicates: true,
+  });
 }
 
 // Setup para tests de integración

@@ -11,7 +11,6 @@ async function getProductosDestacados() {
   const productos = await prisma.producto.findMany({
     where: {
       activo: true,
-      destacado: true,
     },
     include: {
       imagenes: {
@@ -19,9 +18,35 @@ async function getProductosDestacados() {
         take: 1,
       },
     },
-    take: 4,
   });
-  return productos;
+
+  const pedidosEntregados = await prisma.pedido.findMany({
+    where: {
+      estado: 'ENTREGADO',
+    },
+    include: {
+      items: true,
+    },
+  });
+
+  const ventasPorProducto: Record<string, number> = {};
+  for (const pedido of pedidosEntregados) {
+    for (const item of pedido.items) {
+      if (item.productoId) {
+        ventasPorProducto[item.productoId] = (ventasPorProducto[item.productoId] || 0) + item.cantidad;
+      }
+    }
+  }
+
+  const productosConVentas = productos
+    .map((producto) => ({
+      ...producto,
+      ventas: ventasPorProducto[producto.id] || 0,
+    }))
+    .sort((a, b) => b.ventas - a.ventas)
+    .slice(0, 3);
+
+  return productosConVentas;
 }
 
 export default async function HomePage() {
@@ -49,13 +74,6 @@ export default async function HomePage() {
                 className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-lg font-medium rounded-md text-indigo-600 bg-white hover:bg-gray-100 transition-colors"
               >
                 Ver productos
-              </Link>
-              
-              <Link
-                href="/register"
-                className="inline-flex items-center justify-center px-8 py-4 border-2 border-white text-lg font-medium rounded-md text-white hover:bg-white hover:text-indigo-600 transition-colors"
-              >
-                Crear cuenta
               </Link>
             </div>
           </div>
@@ -107,7 +125,7 @@ export default async function HomePage() {
           </div>
           
           {productosDestacados.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
               {productosDestacados.map((producto) => (
                 <Link
                   key={producto.id}
@@ -198,14 +216,14 @@ export default async function HomePage() {
           </h2>
           
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Regístrate ahora y descubre nuestra colección única de productos impresos en 3D.
+            Descubre nuestra colección única de productos impresos en 3D.
           </p>
           
           <Link
-            href="/register"
+            href="/products"
             className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-lg font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
           >
-            Crear cuenta gratuita
+            Ver productos
           </Link>
         </div>
       </section>

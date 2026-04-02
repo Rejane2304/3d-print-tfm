@@ -38,7 +38,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/register" className="text-gray-400 hover:text-white text-sm lg:text-base transition-colors">
+                <Link href="/auth" className="text-gray-400 hover:text-white text-sm lg:text-base transition-colors">
                   Registrarse
                 </Link>
               </li>
