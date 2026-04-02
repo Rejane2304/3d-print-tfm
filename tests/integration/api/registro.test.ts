@@ -160,13 +160,20 @@ describe('POST /api/auth/register', () => {
 
   describe('Manejo de duplicados', () => {
     it('debe rechazar email duplicado', async () => {
+      const emailDuplicado = `test-dup-${Date.now()}@example.com`;
+      
       // Crear usuario primero
-      const req1 = createRequest(datosValidos);
-      await POST(req1);
+      const req1 = createRequest({
+        ...datosValidos,
+        email: emailDuplicado,
+      });
+      const res1 = await POST(req1);
+      expect(res1.status).toBe(201);
 
       // Intentar crear duplicado
       const req2 = createRequest({
         ...datosValidos,
+        email: emailDuplicado,
         nombre: 'Otro Nombre',
       });
       const res = await POST(req2);
