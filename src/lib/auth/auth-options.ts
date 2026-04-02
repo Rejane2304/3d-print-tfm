@@ -14,8 +14,8 @@ export const authOptions: AuthOptions = {
     maxAge: 30 * 24 * 60 * 60,
   },
   pages: {
-    signIn: '/login',
-    error: '/login',
+    signIn: '/auth',
+    error: '/auth',
   },
   providers: [
     CredentialsProvider({

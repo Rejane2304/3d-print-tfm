@@ -148,11 +148,11 @@ test.describe('Flujo de Autenticación', () => {
       // Esperar a que se procese el login (dar tiempo al error)
       await page.waitForTimeout(3000);
       
-      // Verificar que NO redirige (es decir, sigue en /auth o página de error)
+      // Verificar que NO redirige fuera de /auth
+      // NextAuth redirige a /auth con parámetro error si las credenciales son inválidas
       const currentUrl = page.url();
       
-      // NextAuth típicamente permanece en /auth si hay error
-      // O redirige a /auth con algún parámetro de error
+      // Debe estar en /auth (con o sin parámetros de error)
       const stillOnAuth = currentUrl.includes('/auth');
       
       // Alternativamente, puede haber un mensaje de error visible
@@ -161,7 +161,7 @@ test.describe('Flujo de Autenticación', () => {
         .isVisible()
         .catch(() => false);
       
-      // Debe cumplir al menos una condición
+      // Debe cumplir al menos una condición: estar en /auth O mostrar error
       expect(stillOnAuth || hasErrorMessage).toBe(true);
     });
 
