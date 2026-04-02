@@ -15,7 +15,7 @@ if (fs.existsSync(envFile)) {
 
 export default defineConfig({
   test: {
-    environment: 'jsdom',
+    environment: process.env.VITEST_ENV === 'integration' ? 'node' : 'jsdom',
     globals: true,
     setupFiles: ['./tests/setup.ts'],
     include: ['tests/**/*.{test,spec}.{js,jsx,ts,tsx}'],
