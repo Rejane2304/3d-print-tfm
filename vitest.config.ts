@@ -25,7 +25,7 @@ export default defineConfig({
       '**/cypress/**',
       '**/.{idea,git,cache,output,temp}/**',
       '**/tests/e2e/**',
-      '**/tests/unit/components/**', // Excluir tests de componentes React - requieren configuración especial
+      '**/tests/unit/components/**', // Requiere configuración adicional - ver ROADMAP
     ],
     testTimeout: process.env.VITEST_ENV === 'integration' ? 20000 : 10000,
     coverage: {
@@ -54,5 +54,9 @@ export default defineConfig({
     include: [/\.[jt]sx?$/],
     exclude: [],
     loader: 'tsx',
+  },
+  // Configuración para React Testing Library y componentes
+  define: {
+    'process.env': {},
   },
 });
