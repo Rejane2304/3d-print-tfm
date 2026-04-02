@@ -63,24 +63,24 @@ export default function ProductCard({ producto }: ProductCardProps) {
       </div>
       
       <div className="p-4">
-        <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-indigo-600 transition-colors line-clamp-2">
+        <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-indigo-600 transition-colors line-clamp-2" data-testid="product-name">
           {producto.nombre}
         </h3>
         
         {producto.descripcionCorta && (
-          <p className="text-sm text-gray-500 mb-2 line-clamp-2">
+          <p className="text-sm text-gray-500 mb-2 line-clamp-2" data-testid="product-description">
             {producto.descripcionCorta}
           </p>
         )}
         
         <div className="flex items-center justify-between">
-          <span className="text-xl font-bold text-indigo-600">
+          <span className="text-xl font-bold text-indigo-600" data-testid="product-price">
             {precio.toFixed(2)} €
           </span>
           
           <span className={`text-sm ${
             producto.stock > 0 ? 'text-green-600' : 'text-red-600'
-          }`}>
+          }`} data-testid="product-stock">
             {producto.stock > 0 ? 'En stock' : 'Agotado'}
           </span>
         </div>

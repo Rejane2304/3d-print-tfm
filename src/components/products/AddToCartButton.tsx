@@ -66,7 +66,7 @@ export default function AddToCartButton({ productoId, stock, producto }: AddToCa
   const isOutOfStock = stock <= 0;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-testid="add-to-cart-container">
       {/* Selector de quantity */}
       <div className="flex items-center gap-4">
         <label htmlFor="quantity" className="text-sm font-medium text-gray-700">
@@ -79,6 +79,7 @@ export default function AddToCartButton({ productoId, stock, producto }: AddToCa
             disabled={quantity <= 1 || loading || isOutOfStock}
             className="p-2 rounded-md border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             aria-label="Decrementar quantity"
+            data-testid="decrease-quantity"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
@@ -88,6 +89,7 @@ export default function AddToCartButton({ productoId, stock, producto }: AddToCa
           <input
             type="number"
             id="quantity"
+            data-testid="quantity-input"
             value={quantity}
             onChange={(e) => {
               const value = parseInt(e.target.value, 10);
@@ -107,6 +109,7 @@ export default function AddToCartButton({ productoId, stock, producto }: AddToCa
             disabled={quantity >= stock || loading || isOutOfStock}
             className="p-2 rounded-md border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             aria-label="Incrementar quantity"
+            data-testid="increase-quantity"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -120,6 +123,7 @@ export default function AddToCartButton({ productoId, stock, producto }: AddToCa
         type="button"
         onClick={handleAddToCart}
         disabled={loading || isOutOfStock}
+        data-testid="add-to-cart-button"
         className={`w-full py-3 px-6 rounded-md font-medium text-white transition-all duration-200 flex items-center justify-center gap-2 ${
           success
             ? 'bg-green-600 hover:bg-green-700'
