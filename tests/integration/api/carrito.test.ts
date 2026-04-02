@@ -14,7 +14,7 @@ import bcrypt from 'bcrypt';
 
 describe('API del Carrito', () => {
   const usuarioTest = {
-    email: 'test-carrito@example.com',
+    email: `test-carrito-${Date.now()}-${Math.random()}@example.com`,
     password: 'TestPassword123!',
     nombre: 'Usuario Carrito Test',
   };
@@ -23,20 +23,26 @@ describe('API del Carrito', () => {
   let productoTest: { id: string; slug: string; nombre: string; precio: number; stock: number };
 
   beforeAll(async () => {
-    // Limpiar datos previos
-    await prisma.itemCarrito.deleteMany({
-      where: {
-        carrito: {
-          usuario: { email: usuarioTest.email }
-        }
-      }
-    });
-    await prisma.carrito.deleteMany({
-      where: { usuario: { email: usuarioTest.email } }
-    });
-    await prisma.usuario.deleteMany({
-      where: { email: usuarioTest.email }
-    });
+    // Limpiar datos previos usando transacción para evitar deadlocks
+    try {
+      await prisma.$transaction(async (tx) => {
+        await tx.itemCarrito.deleteMany({
+          where: {
+            carrito: {
+              usuario: { email: usuarioTest.email }
+            }
+          }
+        });
+        await tx.carrito.deleteMany({
+          where: { usuario: { email: usuarioTest.email } }
+        });
+        await tx.usuario.deleteMany({
+          where: { email: usuarioTest.email }
+        });
+      });
+    } catch (error) {
+      // Ignorar errores si no hay datos que limpiar
+    }
 
     const hashedPassword = await bcrypt.hash(usuarioTest.password, 12);
     const usuario = await prisma.usuario.create({
@@ -66,17 +72,23 @@ describe('API del Carrito', () => {
   });
 
   afterAll(async () => {
-    await prisma.itemCarrito.deleteMany({
-      where: {
-        carrito: { usuario: { email: usuarioTest.email } }
-      }
-    });
-    await prisma.carrito.deleteMany({
-      where: { usuario: { email: usuarioTest.email } }
-    });
-    await prisma.usuario.deleteMany({
-      where: { email: usuarioTest.email }
-    });
+    try {
+      await prisma.$transaction(async (tx) => {
+        await tx.itemCarrito.deleteMany({
+          where: {
+            carrito: { usuario: { email: usuarioTest.email } }
+          }
+        });
+        await tx.carrito.deleteMany({
+          where: { usuario: { email: usuarioTest.email } }
+        });
+        await tx.usuario.deleteMany({
+          where: { email: usuarioTest.email }
+        });
+      });
+    } catch (error) {
+      // Ignorar errores en limpieza
+    }
   });
 
   describe('GET /api/cart', () => {

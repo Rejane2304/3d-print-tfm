@@ -1,5 +1,17 @@
 import { defineConfig } from 'vitest/config';
 import path from 'path';
+import dotenv from 'dotenv';
+import fs from 'fs';
+
+// Cargar .env.test si está usando ambiente de tests
+const envFile = process.env.NODE_ENV === 'test' || process.env.VITEST_ENV === 'integration' 
+  ? '.env.test' 
+  : '.env';
+
+if (fs.existsSync(envFile)) {
+  const envContent = dotenv.parse(fs.readFileSync(envFile));
+  Object.assign(process.env, envContent);
+}
 
 export default defineConfig({
   test: {

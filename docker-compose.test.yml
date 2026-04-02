@@ -1,0 +1,63 @@
+version: '3'
+
+# ============================================
+# DOCKER COMPOSE PARA TESTS
+# ============================================
+# Proporciona una base de datos PostgreSQL
+# completamente aislada para tests
+#
+# Uso:
+#   npm run test:docker:up
+#   npm run test:integration
+#   npm run test:docker:down
+
+services:
+  postgres-test:
+    image: postgres:16-alpine
+    container_name: 3dprint-test-db
+    
+    environment:
+      # Usuario y contraseña para PostgreSQL
+      POSTGRES_USER: testuser
+      POSTGRES_PASSWORD: testpassword123
+      POSTGRES_DB: 3dprint_tfm_test
+      # Configuración de inicialización
+      POSTGRES_INITDB_ARGS: "-c password_encryption=scram-sha-256"
+    
+    ports:
+      # Mapear puerto 5433 localmente para evitar conflictos
+      # Puerto interno 5432 -> Puerto externo 5433
+      - "5433:5432"
+    
+    volumes:
+      # Volumen anónimo para datos (se limpia al eliminar container)
+      - postgres_test_data:/var/lib/postgresql/data
+    
+    healthcheck:
+      # Verificar que PostgreSQL está listo
+      test: ["CMD-SHELL", "pg_isready -U testuser"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    
+    # No reiniciar automáticamente
+    restart: unless-stopped
+    
+    # Logs
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    networks:
+      - test-network
+
+networks:
+  test-network:
+    driver: bridge
+
+volumes:
+  postgres_test_data:
+    driver: local

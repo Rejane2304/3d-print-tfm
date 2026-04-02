@@ -8,7 +8,7 @@ import bcrypt from 'bcrypt';
 
 describe('Página de Checkout', () => {
   const usuarioTest = {
-    email: 'test-checkout-page@example.com',
+    email: `test-checkout-page-${Date.now()}-${Math.random()}@example.com`,
     password: 'TestPassword123!',
     nombre: 'Usuario Checkout',
   };
@@ -17,19 +17,25 @@ describe('Página de Checkout', () => {
   let direccionId: string;
 
   beforeAll(async () => {
-    // Limpiar datos previos
-    await prisma.itemCarrito.deleteMany({
-      where: { carrito: { usuario: { email: usuarioTest.email } } }
-    });
-    await prisma.carrito.deleteMany({
-      where: { usuario: { email: usuarioTest.email } }
-    });
-    await prisma.direccion.deleteMany({
-      where: { usuario: { email: usuarioTest.email } }
-    });
-    await prisma.usuario.deleteMany({
-      where: { email: usuarioTest.email }
-    });
+    // Limpiar datos previos usando transacción para evitar deadlocks
+    try {
+      await prisma.$transaction(async (tx) => {
+        await tx.itemCarrito.deleteMany({
+          where: { carrito: { usuario: { email: usuarioTest.email } } }
+        });
+        await tx.carrito.deleteMany({
+          where: { usuario: { email: usuarioTest.email } }
+        });
+        await tx.direccion.deleteMany({
+          where: { usuario: { email: usuarioTest.email } }
+        });
+        await tx.usuario.deleteMany({
+          where: { email: usuarioTest.email }
+        });
+      });
+    } catch (error) {
+      // Ignorar errores si no hay datos que limpiar
+    }
 
     // Crear usuario
     const hashedPassword = await bcrypt.hash(usuarioTest.password, 12);
@@ -71,18 +77,24 @@ describe('Página de Checkout', () => {
   });
 
   afterAll(async () => {
-    await prisma.itemCarrito.deleteMany({
-      where: { carrito: { usuario: { email: usuarioTest.email } } }
-    });
-    await prisma.carrito.deleteMany({
-      where: { usuario: { email: usuarioTest.email } }
-    });
-    await prisma.direccion.deleteMany({
-      where: { usuario: { email: usuarioTest.email } }
-    });
-    await prisma.usuario.deleteMany({
-      where: { email: usuarioTest.email }
-    });
+    try {
+      await prisma.$transaction(async (tx) => {
+        await tx.itemCarrito.deleteMany({
+          where: { carrito: { usuario: { email: usuarioTest.email } } }
+        });
+        await tx.carrito.deleteMany({
+          where: { usuario: { email: usuarioTest.email } }
+        });
+        await tx.direccion.deleteMany({
+          where: { usuario: { email: usuarioTest.email } }
+        });
+        await tx.usuario.deleteMany({
+          where: { email: usuarioTest.email }
+        });
+      });
+    } catch (error) {
+      // Ignorar errores en limpieza
+    }
   });
 
   describe('GET /checkout', () => {

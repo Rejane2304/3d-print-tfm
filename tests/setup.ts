@@ -1,10 +1,15 @@
 /**
  * Setup para tests de Vitest
  * Configuración del entorno de pruebas con PostgreSQL
+ * 
+ * ⚠️  IMPORTANTE: Este archivo ejecuta operaciones destructivas (TRUNCATE)
+ *     sobre la base de datos. Está configurado para ejecutarse SOLO contra
+ *     una BD aislada de tests, NUNCA contra la BD de desarrollo/producción.
  */
 import { vi, afterAll, beforeAll } from 'vitest';
 import '@testing-library/jest-dom';
 import { prisma } from '@/lib/db/prisma';
+import { validateTestDatabaseIsolation } from './helpers/db-validation';
 
 // Mock global de next/navigation
 vi.mock('next/navigation', () => ({
@@ -43,6 +48,10 @@ Object.defineProperty(window, 'matchMedia', {
 /**
  * Limpia la base de datos de test
  * Orden específico para respetar foreign keys
+ * 
+ * ⚠️  CRÍTICO: Esta función ejecuta TRUNCATE que borra TODOS los datos.
+ *     SOLO debe ejecutarse en una BD aislada de tests.
+ *     Está protegida por validateTestDatabaseIsolation()
  */
 async function limpiarBaseDeDatos() {
   const tablas = [
@@ -65,6 +74,9 @@ async function limpiarBaseDeDatos() {
     'configuracion_envios',
     'configuracion',
   ];
+
+  // Validación de seguridad extra: nunca truncar sin validación
+  await validateTestDatabaseIsolation();
 
   for (const tabla of tablas) {
     try {
@@ -158,6 +170,9 @@ async function seedDatosIniciales() {
   });
 }
 
+// Flag para asegurar que solo se ejecuta una vez
+let dbSetupDone = false;
+
 // Setup para tests de integración
 beforeAll(async () => {
   if (process.env.VITEST_ENV === 'integration') {
@@ -166,6 +181,12 @@ beforeAll(async () => {
       console.log('⏭️  Saltando configuración de base de datos (SKIP_DB_TESTS=true)');
       return;
     }
+    
+    // Solo ejecutar una vez
+    if (dbSetupDone) {
+      return;
+    }
+    dbSetupDone = true;
     
     console.log('🧪 Configurando base de datos de test (PostgreSQL)...');
     try {

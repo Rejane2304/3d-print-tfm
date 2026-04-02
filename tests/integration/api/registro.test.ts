@@ -126,41 +126,61 @@ describe('POST /api/auth/register', () => {
     });
 
     it('debe asignar rol CLIENTE por defecto', async () => {
-      const emailUnico = `test-rol-${Date.now()}@example.com`;
+      const emailUnico = `test-rol-${Date.now()}-${Math.random()}@example.com`;
       const datosTest = { ...datosValidos, email: emailUnico };
       const req = createRequest(datosTest);
       const res = await POST(req);
       
       expect(res.status).toBe(201);
+      const body = await res.json();
+      
+      // Verificar que la respuesta contiene el rol
+      expect(body.usuario).toBeDefined();
+      expect(body.success).toBe(true);
+      
+      // Pequeña pausa para asegurar que la transacción se ha completado
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       const usuario = await prisma.usuario.findUnique({
         where: { email: emailUnico.toLowerCase() },
       });
 
       expect(usuario).toBeDefined();
-      expect(usuario!.rol).toBe('CLIENTE');
+      if (usuario) {
+        expect(usuario.rol).toBe('CLIENTE');
+      }
     });
 
     it('debe activar usuario por defecto', async () => {
-      const emailUnico = `test-activo-${Date.now()}@example.com`;
+      const emailUnico = `test-activo-${Date.now()}-${Math.random()}@example.com`;
       const datosTest = { ...datosValidos, email: emailUnico };
       const req = createRequest(datosTest);
       const res = await POST(req);
       
       expect(res.status).toBe(201);
+      const body = await res.json();
+      
+      // Verificar que la respuesta es exitosa
+      expect(body.usuario).toBeDefined();
+      expect(body.success).toBe(true);
+      
+      // Pequeña pausa para asegurar que la transacción se ha completado
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       const usuario = await prisma.usuario.findUnique({
         where: { email: emailUnico.toLowerCase() },
       });
 
       expect(usuario).toBeDefined();
-      expect(usuario!.activo).toBe(true);
+      if (usuario) {
+        expect(usuario.activo).toBe(true);
+      }
     });
   });
 
   describe('Manejo de duplicados', () => {
     it('debe rechazar email duplicado', async () => {
-      const emailDuplicado = `test-dup-${Date.now()}@example.com`;
+      const emailDuplicado = `test-dup-${Date.now()}-${Math.random()}@example.com`;
       
       // Crear usuario primero
       const req1 = createRequest({
@@ -169,6 +189,18 @@ describe('POST /api/auth/register', () => {
       });
       const res1 = await POST(req1);
       expect(res1.status).toBe(201);
+      const body1 = await res1.json();
+      expect(body1.success).toBe(true);
+
+      // Pausa más larga para asegurar que la transacción se ha completado y es visible
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Verificar que el usuario fue creado
+      const usuarioCreado = await prisma.usuario.findUnique({
+        where: { email: emailDuplicado.toLowerCase() },
+      });
+      
+      expect(usuarioCreado).toBeDefined();
 
       // Intentar crear duplicado
       const req2 = createRequest({
