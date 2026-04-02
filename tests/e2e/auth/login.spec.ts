@@ -123,10 +123,16 @@ test.describe('Flujo de Autenticación', () => {
       
       await page.locator('button[type="submit"]').filter({ hasText: /iniciar sesión/i }).click();
       
-      // Esperar más tiempo para la redirección completa
-      await page.waitForTimeout(4000);
+      // Esperar a que la URL cambie (salga de /auth)
+      // Usar timeout más largo para evitar flakiness en mobile
+      try {
+        await page.waitForURL((url) => !url.pathname.includes('/auth'), { timeout: 10000 });
+      } catch {
+        // Si el waitForURL falla, validar manualmente
+        await page.waitForTimeout(2000);
+      }
       
-      // Verificar que ya no estamos en auth (puede estar en home, products o cualquier otra página)
+      // Verificar que ya no estamos en auth
       const currentUrl = page.url();
       expect(currentUrl).not.toContain('/auth');
     });
