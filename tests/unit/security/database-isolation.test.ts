@@ -10,7 +10,7 @@
  * para testing (SKIP_DB_VALIDATION=true)
  */
 import { describe, it, expect } from 'vitest';
-import { getDatabaseInfo } from '../../helpers/db-validation';
+import { getDBInfo } from '../../helpers';
 
 // Skip these tests if using production database for testing
 const skipTests = process.env.SKIP_DB_VALIDATION === 'true';
@@ -18,8 +18,8 @@ const describeFunc = skipTests ? describe.skip : describe;
 
 describeFunc('🔒 Seguridad - Aislamiento de Base de Datos', () => {
   it('debe estar ejecutando contra BD de test', () => {
-    const dbInfo = getDatabaseInfo();
-    
+    const dbInfo = getDBInfo();
+
     // Verificar que es una BD de test (o permitir producción si SKIP_DB_VALIDATION está habilitado)
     if (process.env.SKIP_DB_VALIDATION !== 'true') {
       expect(dbInfo.isTest).toBe(true);
@@ -59,13 +59,13 @@ describeFunc('🔒 Seguridad - Aislamiento de Base de Datos', () => {
   });
 
   it('debe mostrar información de BD correcta', () => {
-    const dbInfo = getDatabaseInfo();
-    
+    const dbInfo = getDBInfo();
+
     console.log('📊 Database Info:');
     console.log(`   Database: ${dbInfo.database}`);
     console.log(`   Is Test: ${dbInfo.isTest}`);
     console.log(`   Is Production: ${dbInfo.isProduction}`);
-    
+
     expect(dbInfo).toBeDefined();
     expect(dbInfo.database).toBeDefined();
   });
