@@ -9,7 +9,7 @@
     "lint": "next lint",
     "test": "vitest",
     "test:unit": "vitest --run tests/unit",
-    "test:integration": "VITEST_ENV=integration vitest --run tests/integration",
+    "test:integration": "VITEST_ENV=integration vitest --run --reporter=verbose tests/integration",
     "test:integration:watch": "VITEST_ENV=integration vitest tests/integration",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",

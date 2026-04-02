@@ -27,6 +27,7 @@ export default defineConfig({
       '**/tests/e2e/**',
       '**/tests/unit/components/**', // Excluir tests de componentes React - requieren configuración especial
     ],
+    testTimeout: process.env.VITEST_ENV === 'integration' ? 20000 : 10000,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],

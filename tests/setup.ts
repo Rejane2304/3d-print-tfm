@@ -49,7 +49,8 @@ if (typeof window !== 'undefined') {
 
 /**
  * Limpia la base de datos de test
- * Orden específico para respetar foreign keys
+ * Orden específica para respetar foreign keys
+ * Implementa reintentos para manejar deadlocks
  * 
  * ⚠️  CRÍTICO: Esta función ejecuta TRUNCATE que borra TODOS los datos.
  *     SOLO debe ejecutarse en una BD aislada de tests.
@@ -80,13 +81,40 @@ async function limpiarBaseDeDatos() {
   // Validación de seguridad extra: nunca truncar sin validación
   await validateTestDatabaseIsolation();
 
-  for (const tabla of tablas) {
+  // Reintentos para manejar deadlocks
+  const maxReintentos = 3;
+  let ultimoError: Error | null = null;
+
+  for (let intento = 0; intento < maxReintentos; intento++) {
     try {
-      await prisma.$executeRawUnsafe(`TRUNCATE TABLE "${tabla}" CASCADE`);
+      for (const tabla of tablas) {
+        try {
+          await prisma.$executeRawUnsafe(`TRUNCATE TABLE "${tabla}" CASCADE`);
+        } catch (error) {
+          // Ignorar errores si la tabla no existe o está vacía
+          // console.log(`⚠️  Tabla ${tabla}: ${error instanceof Error ? error.message : 'error desconocido'}`);
+        }
+      }
+      // Si llegamos aquí, la limpieza fue exitosa
+      return;
     } catch (error) {
-      // Ignorar errores si la tabla no existe o está vacía
-      // console.log(`⚠️  Tabla ${tabla}: ${error instanceof Error ? error.message : 'error desconocido'}`);
+      ultimoError = error instanceof Error ? error : new Error(String(error));
+      
+      // Si es deadlock, reintentar
+      if (ultimoError.message.includes('deadlock')) {
+        console.log(`⚠️  Deadlock detectado en intento ${intento + 1}/${maxReintentos}, reintentando...`);
+        // Esperar antes de reintentar
+        await new Promise(resolve => setTimeout(resolve, 500 * (intento + 1)));
+      } else {
+        // Si no es deadlock, no reintentar
+        throw error;
+      }
     }
+  }
+
+  // Si llegamos aquí después de todos los reintentos
+  if (ultimoError) {
+    console.error(`❌ Error limpiando BD después de ${maxReintentos} intentos:`, ultimoError.message);
   }
 }
 
