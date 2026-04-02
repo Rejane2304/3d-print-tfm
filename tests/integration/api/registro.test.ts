@@ -3,7 +3,7 @@
  * POST /api/auth/register
  * TDD: Tests primero, implementación después
  */
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { POST } from '@/app/api/auth/register/route';
 import { prisma } from '@/lib/db/prisma';
@@ -16,15 +16,15 @@ describe('POST /api/auth/register', () => {
     // Generar email único con timestamp para evitar conflictos
     datosValidos = {
       nombre: 'Juan Pérez',
-      email: `test-${Date.now()}@example.com`,
+      email: `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}@example.com`,
       password: 'Password123!',
       confirmarPassword: 'Password123!',
       telefono: '+34 600 123 456',
     };
   });
 
-  afterAll(async () => {
-    // Limpieza final: eliminar SOLO usuarios de test (con prefijo test-)
+  afterEach(async () => {
+    // Limpieza después de cada test para evitar datos residuales
     await cleanupTestUsers();
   });
 
@@ -93,8 +93,8 @@ describe('POST /api/auth/register', () => {
     });
 
     it('debe guardar email en minúsculas', async () => {
-      // Generar email único con timestamp para evitar conflictos
-      const uniqueEmail = `TEST-${Date.now()}@EXAMPLE.COM`;
+      // Generar email único con timestamp y random
+      const uniqueEmail = `TEST-${Date.now()}-${Math.random().toString(36).substr(2, 9)}@EXAMPLE.COM`;
       const expectedEmail = uniqueEmail.toLowerCase();
       
       const req = createRequest({
@@ -109,7 +109,7 @@ describe('POST /api/auth/register', () => {
     });
 
     it('debe hashear la contraseña', async () => {
-      const emailUnico = `test-hash-${Date.now()}@example.com`;
+      const emailUnico = `test-hash-${Date.now()}-${Math.random().toString(36).substr(2, 9)}@example.com`;
       const datosTest = { ...datosValidos, email: emailUnico };
       const req = createRequest(datosTest);
       const res = await POST(req);
@@ -126,7 +126,7 @@ describe('POST /api/auth/register', () => {
     });
 
     it('debe asignar rol CLIENTE por defecto', async () => {
-      const emailUnico = `test-rol-${Date.now()}-${Math.random()}@example.com`;
+      const emailUnico = `test-rol-${Date.now()}-${Math.random().toString(36).substr(2, 9)}@example.com`;
       const datosTest = { ...datosValidos, email: emailUnico };
       const req = createRequest(datosTest);
       const res = await POST(req);
@@ -152,7 +152,7 @@ describe('POST /api/auth/register', () => {
     });
 
     it('debe activar usuario por defecto', async () => {
-      const emailUnico = `test-activo-${Date.now()}-${Math.random()}@example.com`;
+      const emailUnico = `test-activo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}@example.com`;
       const datosTest = { ...datosValidos, email: emailUnico };
       const req = createRequest(datosTest);
       const res = await POST(req);
@@ -180,7 +180,7 @@ describe('POST /api/auth/register', () => {
 
   describe('Manejo de duplicados', () => {
     it('debe rechazar email duplicado', async () => {
-      const emailDuplicado = `test-dup-${Date.now()}-${Math.random()}@example.com`;
+      const emailDuplicado = `test-dup-${Date.now()}-${Math.random().toString(36).substr(2, 9)}@example.com`;
       
       // Crear usuario primero
       const req1 = createRequest({
@@ -192,8 +192,8 @@ describe('POST /api/auth/register', () => {
       const body1 = await res1.json();
       expect(body1.success).toBe(true);
 
-      // Pausa más larga para asegurar que la transacción se ha completado y es visible
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Pausa para asegurar que la transacción se ha completado
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       // Verificar que el usuario fue creado
       const usuarioCreado = await prisma.usuario.findUnique({
