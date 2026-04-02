@@ -1,8 +1,8 @@
 /**
- * Script de Seed para 3D Print TFM
- * Población inicial de la base de datos con datos de los archivos CSV
+ * Seed Script for 3D Print TFM
+ * Initial database population with CSV data
  * 
- * Uso: npx prisma db seed
+ * Usage: npx prisma db seed
  */
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
@@ -26,16 +26,16 @@ function parseCSV<T>(fileName: string): T[] {
 }
 
 async function main() {
-  console.log('🌱 Iniciando seed de la base de datos...\n');
+  console.log('🌱 Starting database seed...\n');
 
   try {
-    // Limpiar tablas en orden (respetando foreign keys)
-    console.log('🧹 Limpiando datos existentes...');
+    // Clean tables in order (respecting foreign keys)
+    console.log('🧹 Cleaning existing data...');
     await prisma.$executeRaw`TRUNCATE TABLE "mensajes_pedido", "movimientos_inventario", "pagos", "items_pedido", "pedidos", "facturas", "imagenes_producto", "productos", "direcciones", "usuarios", "alertas", "configuracion_envios", "configuracion", "sesiones", "tokens_verificacion", "logs_auditoria", "carritos", "items_carrito" CASCADE`;
-    console.log('✅ Datos limpiados\n');
+    console.log('✅ Data cleaned\n');
 
-    // Crear usuarios desde CSV
-    console.log('👤 Creando usuarios desde CSV...');
+    // Create users from CSV
+    console.log('👤 Creating users from CSV...');
     const usersCSV = parseCSV<{ id: string; email: string; password: string; name: string; phone: string; address: string; role: string }>('users.csv');
     
     for (const user of usersCSV) {
@@ -43,21 +43,21 @@ async function main() {
         ? await bcrypt.hash('admin123', 12)
         : await bcrypt.hash('pass123', 12);
       
-      await prisma.usuario.create({
+      await prisma.user.create({
         data: {
           email: user.email,
-          nombre: user.name,
+          name: user.name,
           password: hashedPassword,
-          rol: user.role === 'admin' ? 'ADMIN' : 'CLIENTE',
-          activo: true,
-          telefono: user.phone,
+          role: user.role === 'admin' ? 'ADMIN' : 'CLIENTE',
+          isActive: true,
+          phone: user.phone,
         },
       });
     }
-    console.log(`✅ ${usersCSV.length} usuarios creados\n`);
+    console.log(`✅ ${usersCSV.length} users created\n`);
 
-    // Crear productos desde CSV
-    console.log('📦 Creando productos desde CSV...');
+    // Create products from CSV
+    console.log('📦 Creating products from CSV...');
     const productsCSV = parseCSV<{ 
       id: string; 
       name: string; 
@@ -84,34 +84,34 @@ async function main() {
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-|-$/g, '');
 
-      await prisma.producto.create({
+      await prisma.product.create({
         data: {
-          nombre: product.name,
+          name: product.name,
           slug: slug,
-          descripcion: product.description,
-          descripcionCorta: product.description.split(',')[0],
-          precio: parseFloat(product.price),
+          description: product.description,
+          shortDescription: product.description.split(',')[0],
+          price: parseFloat(product.price),
           stock: parseInt(product.stock),
-          categoria: (categoryMap[product.category] || 'ACCESORIOS') as 'DECORACION' | 'ACCESORIOS' | 'FUNCIONAL' | 'ARTICULADOS' | 'JUGUETES',
+          category: (categoryMap[product.category] || 'ACCESORIOS') as 'DECORACION' | 'ACCESORIOS' | 'FUNCIONAL' | 'ARTICULADOS' | 'JUGUETES',
           material: product.material as 'PLA' | 'PETG',
-          activo: true,
-          destacado: i < 3,
-          imagenes: {
+          isActive: true,
+          isFeatured: i < 3,
+          images: {
             create: {
               url: product.image,
-              nombreArchivo: product.image.split('/').pop() || 'imagen.jpg',
-              textoAlt: product.name,
-              esPrincipal: true,
-              orden: 0,
+              filename: product.image.split('/').pop() || 'imagen.jpg',
+              altText: product.name,
+              isMain: true,
+              displayOrder: 0,
             },
           },
         },
       });
     }
-    console.log(`✅ ${productsCSV.length} productos creados\n`);
+    console.log(`✅ ${productsCSV.length} products created\n`);
 
-    // Crear pedidos desde CSV
-    console.log('📋 Creando pedidos desde CSV...');
+    // Create orders from CSV
+    console.log('📋 Creating orders from CSV...');
     const ordersCSV = parseCSV<{ 
       id: string; 
       userId: string; 
@@ -122,10 +122,10 @@ async function main() {
       notes: string;
     }>('orders.csv');
 
-    const usuarios = await prisma.usuario.findMany();
-    const productos = await prisma.producto.findMany();
+    const users = await prisma.user.findMany();
+    const products = await prisma.product.findMany();
 
-    const estadoMap: Record<string, 'PENDIENTE' | 'CONFIRMADO' | 'PREPARANDO' | 'ENVIADO' | 'ENTREGADO' | 'CANCELADO'> = {
+    const statusMap: Record<string, 'PENDIENTE' | 'CONFIRMADO' | 'PREPARANDO' | 'ENVIADO' | 'ENTREGADO' | 'CANCELADO'> = {
       'PENDING': 'PENDIENTE',
       'CONFIRMED': 'CONFIRMADO',
       'SHIPPED': 'ENVIADO',
@@ -135,54 +135,54 @@ async function main() {
 
     for (let i = 0; i < ordersCSV.length; i++) {
       const order = ordersCSV[i];
-      const usuario = usuarios.find(u => u.id.includes(order.userId.replace('USER-', ''))) || usuarios[0];
+      const user = users.find(u => u.id.includes(order.userId.replace('USER-', ''))) || users[0];
       const addressParts = order.shippingAddress.split(' - ');
       const fullAddress = addressParts[0] || order.shippingAddress;
       const postalCode = addressParts[1]?.split(' ')[0] || '28001';
       const city = addressParts[1]?.split(' ')[1] || 'Madrid';
       
-      const estado = estadoMap[order.status] || 'PENDIENTE';
+      const status = statusMap[order.status] || 'PENDIENTE';
       
-      const productoIndex = i % productos.length;
-      const producto = productos[productoIndex];
-      const cantidad = Math.floor(Math.random() * 2) + 1;
-      const subtotal = producto.precio.toNumber() * cantidad;
+      const productIndex = i % products.length;
+      const product = products[productIndex];
+      const quantity = Math.floor(Math.random() * 2) + 1;
+      const subtotal = product.price.toNumber() * quantity;
       
-      await prisma.pedido.create({
+      await prisma.order.create({
         data: {
-          numeroPedido: `P-${order.id.replace('ORD-', '')}`,
-          usuarioId: usuario.id,
+          orderNumber: `P-${order.id.replace('ORD-', '')}`,
+          userId: user.id,
           subtotal: subtotal,
-          envio: 3.99,
+          shipping: 3.99,
           total: subtotal + 3.99,
-          estado: estado,
-          direccionEnvio: fullAddress,
-          nombreEnvio: usuario.nombre,
-          telefonoEnvio: usuario.telefono || '600000000',
-          codigoPostalEnvio: postalCode,
-          ciudadEnvio: city,
-          provinciaEnvio: 'Madrid',
-          paisEnvio: 'España',
-          notasCliente: order.notes || null,
+          status: status,
+          shippingAddress: fullAddress,
+          shippingName: user.name,
+          shippingPhone: user.phone || '600000000',
+          shippingPostalCode: postalCode,
+          shippingCity: city,
+          shippingProvince: 'Madrid',
+          shippingCountry: 'España',
+          customerNotes: order.notes || null,
           items: {
             create: {
-              productoId: producto.id,
-              nombre: producto.nombre,
-              descripcion: producto.descripcion,
-              precio: producto.precio,
-              cantidad: cantidad,
-              categoria: producto.categoria,
-              material: producto.material,
+              productId: product.id,
+              name: product.name,
+              description: product.description,
+              price: product.price,
+              quantity: quantity,
+              category: product.category,
+              material: product.material,
               subtotal: subtotal,
             },
           },
         },
       });
     }
-    console.log(`✅ ${ordersCSV.length} pedidos creados\n`);
+    console.log(`✅ ${ordersCSV.length} orders created\n`);
 
-    // Crear alertas desde CSV
-    console.log('⚠️ Creando alertas desde CSV...');
+    // Create alerts from CSV
+    console.log('⚠️ Creating alerts from CSV...');
     const alertsCSV = parseCSV<{ 
       id: string; 
       type: string; 
@@ -192,7 +192,7 @@ async function main() {
       metadata: string;
     }>('alerts.csv');
 
-    const tipoMap: Record<string, 'STOCK_BAJO' | 'SIN_STOCK' | 'PEDIDO_RETRASADO' | 'PAGO_FALLIDO' | 'ERROR_SISTEMA'> = {
+    const typeMap: Record<string, 'STOCK_BAJO' | 'SIN_STOCK' | 'PEDIDO_RETRASADO' | 'PAGO_FALLIDO' | 'ERROR_SISTEMA'> = {
       'LOW_STOCK': 'STOCK_BAJO',
       'OUT_OF_STOCK': 'SIN_STOCK',
       'ORDER_DELAYED': 'PEDIDO_RETRASADO',
@@ -201,26 +201,26 @@ async function main() {
     };
 
     for (const alert of alertsCSV) {
-      await prisma.alerta.create({
+      await prisma.alert.create({
         data: {
-          tipo: tipoMap[alert.type] || 'STOCK_BAJO',
-          titulo: alert.title || alert.message?.substring(0, 50) || 'Alerta',
-          mensaje: alert.message || '',
-          severidad: alert.status === 'READ' ? 'BAJA' : 'MEDIA',
-          estado: alert.status === 'READ' ? 'RESUELTA' : 'PENDIENTE',
+          type: typeMap[alert.type] || 'STOCK_BAJO',
+          title: alert.title || alert.message?.substring(0, 50) || 'Alerta',
+          message: alert.message || '',
+          severity: alert.status === 'READ' ? 'BAJA' : 'MEDIA',
+          status: alert.status === 'READ' ? 'RESUELTA' : 'PENDIENTE',
         },
       });
     }
-    console.log(`✅ ${alertsCSV.length} alertas creadas\n`);
+    console.log(`✅ ${alertsCSV.length} alerts created\n`);
 
-    console.log('✅ Seed completado exitosamente!');
-    console.log('\n📊 Resumen:');
-    console.log(`   - Usuarios: ${usersCSV.length}`);
-    console.log(`   - Productos: ${productsCSV.length}`);
-    console.log(`   - Pedidos: ${ordersCSV.length}`);
-    console.log(`   - Alertas: ${alertsCSV.length}`);
+    console.log('✅ Seed completed successfully!');
+    console.log('\n📊 Summary:');
+    console.log(`   - Users: ${usersCSV.length}`);
+    console.log(`   - Products: ${productsCSV.length}`);
+    console.log(`   - Orders: ${ordersCSV.length}`);
+    console.log(`   - Alerts: ${alertsCSV.length}`);
   } catch (error) {
-    console.error('❌ Error durante el seed:', error);
+    console.error('❌ Error during seed:', error);
     throw error;
   } finally {
     await prisma.$disconnect();

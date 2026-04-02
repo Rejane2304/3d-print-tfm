@@ -2,11 +2,10 @@
 // PRISMA SCHEMA - E-COMMERCE 3D PRINT TFM
 // ============================================
 // Stack: Next.js + PostgreSQL + Prisma
-// Testing: TDD - Tests primero, código después
-// Locale: 100% Español
+// Locale: Code in English, UI in Spanish
 
 // ============================================
-// GENERADOR Y DATASOURCE
+// GENERATOR & DATASOURCE
 // ============================================
 
 generator client {
@@ -19,15 +18,15 @@ datasource db {
 }
 
 // ============================================
-// ENUMS - Todos en español
+// ENUMS
 // ============================================
 
-enum Rol {
+enum Role {
   CLIENTE
   ADMIN
 }
 
-enum Categoria {
+enum Category {
   DECORACION
   ACCESORIOS
   FUNCIONAL
@@ -42,7 +41,7 @@ enum Material {
   TPU
 }
 
-enum EstadoPedido {
+enum OrderStatus {
   PENDIENTE
   CONFIRMADO
   PREPARANDO
@@ -51,13 +50,13 @@ enum EstadoPedido {
   CANCELADO
 }
 
-enum MetodoPago {
+enum PaymentMethod {
   TARJETA
   BIZUM
   TRANSFERENCIA
 }
 
-enum EstadoPago {
+enum PaymentStatus {
   PENDIENTE
   PROCESANDO
   COMPLETADO
@@ -66,7 +65,7 @@ enum EstadoPago {
   PARCIAL
 }
 
-enum TipoMovimiento {
+enum MovementType {
   ENTRADA
   SALIDA
   AJUSTE
@@ -74,7 +73,7 @@ enum TipoMovimiento {
   DEVOLUCION
 }
 
-enum TipoAlerta {
+enum AlertType {
   STOCK_BAJO
   SIN_STOCK
   PEDIDO_RETRASADO
@@ -82,14 +81,14 @@ enum TipoAlerta {
   ERROR_SISTEMA
 }
 
-enum SeveridadAlerta {
+enum AlertSeverity {
   BAJA
   MEDIA
   ALTA
   CRITICA
 }
 
-enum EstadoAlerta {
+enum AlertStatus {
   PENDIENTE
   EN_PROGRESO
   RESUELTA
@@ -97,658 +96,576 @@ enum EstadoAlerta {
 }
 
 // ============================================
-// MODELO 1: USUARIOS
+// MODEL 1: USERS
 // ============================================
 
-model Usuario {
+model User {
   id            String    @id @default(uuid())
   email         String    @unique @db.VarChar(255)
-  password      String    @db.VarChar(255) // bcrypt hash
-  nombre        String    @db.VarChar(100)
-  telefono      String?   @db.VarChar(20)
-  rol           Rol       @default(CLIENTE)
+  password      String    @db.VarChar(255)
+  name          String    @db.VarChar(100) @map("nombre")
+  phone         String?   @db.VarChar(20) @map("telefono")
+  role          Role      @default(CLIENTE) @map("rol")
   
-  // Datos fiscales para facturación
-  nif           String?   @db.VarChar(20) // NIF/CIF español
-  nombreFiscal  String?   @db.VarChar(200)
+  taxId         String?   @db.VarChar(20) @map("nif")
+  fiscalName    String?   @db.VarChar(200) @map("nombreFiscal")
   
-  // Estado de la cuenta
-  activo        Boolean   @default(true)
-  emailVerificado DateTime?
-  ultimoAcceso  DateTime?
-  intentosFallidos Int    @default(0)
-  bloqueadoHasta DateTime?
+  isActive      Boolean   @default(true) @map("activo")
+  emailVerified DateTime? @map("emailVerificado")
+  lastAccess    DateTime? @map("ultimoAcceso")
+  failedAttempts Int      @default(0) @map("intentosFallidos")
+  lockedUntil   DateTime? @map("bloqueadoHasta")
   
-  // Auditoría
-  creadoEn      DateTime  @default(now())
-  actualizadoEn DateTime  @updatedAt
-  creadoPor     String?   // ID del admin que creó el usuario
+  createdAt     DateTime  @default(now()) @map("creadoEn")
+  updatedAt     DateTime  @updatedAt @map("actualizadoEn")
+  createdBy     String?   @map("creadoPor")
   
-  // Relaciones
-  direcciones   Direccion[]
-  pedidos       Pedido[]
-  pagos         Pago[]
-  mensajes      MensajePedido[]
-  movimientosInventario MovimientoInventario[]
-  alertasResueltas Alerta[] @relation("AlertasResueltas")
-  sesiones      Session[]
-  carrito       Carrito?
+  addresses     Address[]
+  orders        Order[]
+  payments      Payment[]
+  messages      OrderMessage[]
+  inventoryMovements InventoryMovement[]
+  resolvedAlerts Alert[] @relation("ResolvedAlerts")
+  sessions      Session[]
+  cart          Cart?
 
   @@index([email])
-  @@index([rol])
-  @@index([activo])
-  @@index([creadoEn])
+  @@index([role])
+  @@index([isActive])
+  @@index([createdAt])
   @@map("usuarios")
 }
 
 // ============================================
-// MODELO 2: DIRECCIONES (Múltiples por usuario)
+// MODEL 2: ADDRESSES
 // ============================================
 
-model Direccion {
+model Address {
   id            String    @id @default(uuid())
-  usuarioId     String
+  userId        String    @map("usuarioId")
   
-  // Campos de dirección española
-  nombre        String    @db.VarChar(100) // "Casa", "Trabajo", etc.
-  destinatario  String    @db.VarChar(100)
-  telefono      String    @db.VarChar(20)
-  direccion     String    @db.VarChar(255) // Calle y número
-  complemento   String?   @db.VarChar(100) // Piso, puerta, etc.
-  codigoPostal  String    @db.VarChar(10)
-  ciudad        String    @db.VarChar(100)
-  provincia     String    @db.VarChar(100)
-  pais          String    @default("España") @db.VarChar(50)
+  name          String    @db.VarChar(100) @map("nombre")
+  recipient     String    @db.VarChar(100) @map("destinatario")
+  phone         String    @db.VarChar(20) @map("telefono")
+  address       String    @db.VarChar(255) @map("direccion")
+  complement    String?   @db.VarChar(100) @map("complemento")
+  postalCode    String    @db.VarChar(10) @map("codigoPostal")
+  city          String    @db.VarChar(100) @map("ciudad")
+  province      String    @db.VarChar(100) @map("provincia")
+  country       String    @default("España") @db.VarChar(50) @map("pais")
   
-  // Predeterminada
-  esPrincipal   Boolean   @default(false)
+  isDefault     Boolean   @default(false) @map("esPrincipal")
   
-  // Auditoría
-  creadoEn      DateTime  @default(now())
-  actualizadoEn DateTime  @updatedAt
+  createdAt     DateTime  @default(now()) @map("creadoEn")
+  updatedAt     DateTime  @updatedAt @map("actualizadoEn")
   
-  // Relaciones
-  usuario       Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
-  pedidosEnvio  Pedido[]  @relation("DireccionEnvio")
-  carritos     Carrito[]
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orderShipments Order[]  @relation("ShippingAddress")
+  carts         Cart[]
   
-  @@index([usuarioId])
-  @@index([esPrincipal])
+  @@index([userId])
+  @@index([isDefault])
   @@map("direcciones")
 }
 
 // ============================================
-// MODELO 3: PRODUCTOS
+// MODEL 3: PRODUCTS
 // ============================================
 
-model Producto {
+model Product {
   id            String    @id @default(uuid())
-  slug          String    @unique @db.VarChar(100) // URL amigable
+  slug          String    @unique @db.VarChar(100)
   
-  // Datos básicos
-  nombre        String    @db.VarChar(200)
-  descripcion   String    @db.Text
-  descripcionCorta String? @db.VarChar(255)
+  name          String    @db.VarChar(200) @map("nombre")
+  description   String    @db.Text @map("descripcion")
+  shortDescription String? @db.VarChar(255) @map("descripcionCorta")
   
-  // Precios en céntimos (Decimal para precisión)
-  precio        Decimal   @db.Decimal(10, 2)
-  precioAnterior Decimal? @db.Decimal(10, 2) // Para ofertas
+  price         Decimal   @db.Decimal(10, 2) @map("precio")
+  previousPrice Decimal?  @db.Decimal(10, 2) @map("precioAnterior")
   
-  // Stock
-  stock         Int       @default(0)
-  stockMinimo   Int       @default(5) // Umbral para alertas
+  stock         Int       @default(0) @map("stock")
+  minStock      Int       @default(5) @map("stockMinimo")
   
-  // Características
-  categoria     Categoria
-  material      Material
-  dimensiones   String?   @db.VarChar(50) // Ej: "20x15x10 cm"
-  peso          Decimal?  @db.Decimal(8, 2) // En gramos
-  tiempoImpresion Int?    // En minutos
+  category      Category  @map("categoria")
+  material      Material  @map("material")
+  dimensions    String?   @db.VarChar(50) @map("dimensiones")
+  weight        Decimal?  @db.Decimal(8, 2) @map("peso")
+  printTime     Int?      @map("tiempoImpresion")
   
-  // SEO
-  metaTitulo    String?   @db.VarChar(200)
-  metaDescripcion String? @db.VarChar(300)
+  metaTitle     String?   @db.VarChar(200) @map("metaTitulo")
+  metaDescription String? @db.VarChar(300) @map("metaDescripcion")
   
-  // Estado
-  activo        Boolean   @default(true)
-  destacado     Boolean   @default(false)
+  isActive      Boolean   @default(true) @map("activo")
+  isFeatured    Boolean   @default(false) @map("destacado")
   
-  // Imágenes (máximo 5)
-  imagenes      ImagenProducto[]
+  images        ProductImage[] @relation("ProductImages")
   
-  // Auditoría
-  creadoEn      DateTime  @default(now())
-  actualizadoEn DateTime  @updatedAt
+  createdAt     DateTime  @default(now()) @map("creadoEn")
+  updatedAt     DateTime  @updatedAt @map("actualizadoEn")
   
-  // Relaciones
-  itemsPedido   ItemPedido[]
-  movimientos   MovimientoInventario[]
-  alertas       Alerta[]
-  itemsCarrito  ItemCarrito[]
+  orderItems    OrderItem[]
+  movements     InventoryMovement[]
+  alerts        Alert[]
+  cartItems     CartItem[]
   
-  @@index([categoria])
-  @@index([activo])
-  @@index([destacado])
+  @@index([category])
+  @@index([isActive])
+  @@index([isFeatured])
   @@index([stock])
-  @@index([precio])
-  @@index([creadoEn])
+  @@index([price])
+  @@index([createdAt])
   @@map("productos")
 }
 
 // ============================================
-// MODELO 4: IMÁGENES DE PRODUCTOS (Máximo 5)
+// MODEL 4: PRODUCT IMAGES
 // ============================================
 
-model ImagenProducto {
+model ProductImage {
   id            String    @id @default(uuid())
-  productoId    String
+  productId     String    @map("productoId")
   
-  // Archivo
-  url           String    @db.VarChar(500) // URL de Vercel Blob
-  nombreArchivo String    @db.VarChar(255)
-  tamano        Int?      // En bytes
-  mimeType      String?   @db.VarChar(50)
+  url           String    @db.VarChar(500) @map("url")
+  filename      String    @db.VarChar(255) @map("nombreArchivo")
+  size          Int?      @map("tamano")
+  mimeType      String?   @db.VarChar(50) @map("mimeType")
   
-  // Metadata
-  textoAlt      String    @db.VarChar(255) // Texto alternativo SEO
-  esPrincipal   Boolean   @default(false)
-  orden         Int       @default(0) // Orden de visualización
+  altText       String    @db.VarChar(255) @map("textoAlt")
+  isMain        Boolean   @default(false) @map("esPrincipal")
+  displayOrder  Int       @default(0) @map("orden")
   
-  // Thumbnails generados
-  urlSmall      String?   @db.VarChar(500)
-  urlMedium     String?   @db.VarChar(500)
-  urlLarge      String?   @db.VarChar(500)
+  urlSmall      String?   @db.VarChar(500) @map("urlSmall")
+  urlMedium     String?   @db.VarChar(500) @map("urlMedium")
+  urlLarge      String?   @db.VarChar(500) @map("urlLarge")
   
-  // Auditoría
-  subidoEn      DateTime  @default(now())
+  uploadedAt    DateTime  @default(now()) @map("subidoEn")
   
-  // Relaciones
-  producto      Producto  @relation(fields: [productoId], references: [id], onDelete: Cascade)
+  product       Product   @relation("ProductImages", fields: [productId], references: [id], onDelete: Cascade)
   
-  @@unique([productoId, orden])
-  @@index([productoId])
-  @@index([esPrincipal])
+  @@unique([productId, displayOrder])
+  @@index([productId])
+  @@index([isMain])
   @@map("imagenes_producto")
 }
 
 // ============================================
-// MODELO 4.5: CARRITO
-// Carrito temporal de compras del usuario
+// MODEL 5: CART
 // ============================================
 
-model Carrito {
+model Cart {
   id         String   @id @default(uuid())
-  usuarioId  String   @unique
-  usuario    Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  userId     String   @unique @map("usuarioId")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // Items en el carrito
-  items      ItemCarrito[]
+  items      CartItem[]
 
-  // Dirección de envío seleccionada (opcional)
-  direccionEnvioId String?
-  direccionEnvio   Direccion? @relation(fields: [direccionEnvioId], references: [id])
+  shippingAddressId String? @map("direccionEnvioId")
+  shippingAddress   Address? @relation(fields: [shippingAddressId], references: [id])
 
-  // Cálculos
-  subtotal   Decimal  @db.Decimal(10, 2) @default(0)
+  subtotal   Decimal  @db.Decimal(10, 2) @default(0) @map("subtotal")
 
-  // Timestamps
-  creadoEn   DateTime @default(now())
-  actualizadoEn DateTime @updatedAt
+  createdAt   DateTime @default(now()) @map("creadoEn")
+  updatedAt DateTime @updatedAt @map("actualizadoEn")
 
   @@map("carritos")
 }
 
-model ItemCarrito {
+model CartItem {
   id         String   @id @default(uuid())
-  carritoId  String
-  carrito    Carrito  @relation(fields: [carritoId], references: [id], onDelete: Cascade)
+  cartId     String   @map("carritoId")
+  cart       Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
 
-  productoId String
-  producto   Producto @relation(fields: [productoId], references: [id])
+  productId String    @map("productoId")
+  product   Product   @relation(fields: [productId], references: [id])
 
-  cantidad   Int      @default(1)
-  precioUnitario Decimal @db.Decimal(10, 2) // Precio al momento de añadir
+  quantity   Int      @default(1) @map("cantidad")
+  unitPrice Decimal   @db.Decimal(10, 2) @map("precioUnitario")
 
-  creadoEn   DateTime @default(now())
-  actualizadoEn DateTime @updatedAt
+  createdAt   DateTime @default(now()) @map("creadoEn")
+  updatedAt DateTime @updatedAt @map("actualizadoEn")
 
-  @@unique([carritoId, productoId]) // Un solo item por producto
+  @@unique([cartId, productId])
   @@map("items_carrito")
 }
 
 // ============================================
-// MODELO 5: PEDIDOS
+// MODEL 6: ORDERS
 // ============================================
 
-model Pedido {
+model Order {
   id            String        @id @default(uuid())
-  numeroPedido  String        @unique @db.VarChar(20) // P-20240001
-  usuarioId     String
+  orderNumber   String        @unique @db.VarChar(20) @map("numeroPedido")
+  userId        String        @map("usuarioId")
   
-  // Estado del pedido
-  estado        EstadoPedido  @default(PENDIENTE)
+  status        OrderStatus   @default(PENDIENTE) @map("estado")
   
-  // Totales (Decimal para precisión)
-  subtotal      Decimal       @db.Decimal(10, 2)
-  envio         Decimal       @db.Decimal(10, 2)
-  descuento     Decimal?      @db.Decimal(10, 2)
-  total         Decimal       @db.Decimal(10, 2)
+  subtotal      Decimal       @db.Decimal(10, 2) @map("subtotal")
+  shipping      Decimal       @db.Decimal(10, 2) @map("envio")
+  discount      Decimal?      @db.Decimal(10, 2) @map("descuento")
+  total         Decimal       @db.Decimal(10, 2) @map("total")
   
-  // Dirección de envío (snapshot)
-  direccionEnvioId String?
-  nombreEnvio   String        @db.VarChar(100)
-  telefonoEnvio String        @db.VarChar(20)
-  direccionEnvio String       @db.VarChar(255)
-  complementoEnvio String?    @db.VarChar(100)
-  codigoPostalEnvio String    @db.VarChar(10)
-  ciudadEnvio   String        @db.VarChar(100)
-  provinciaEnvio String       @db.VarChar(100)
-  paisEnvio     String        @db.VarChar(50)
+  shippingAddressId String?     @map("direccionEnvioId")
+  shippingName      String        @db.VarChar(100) @map("nombreEnvio")
+  shippingPhone     String        @db.VarChar(20) @map("telefonoEnvio")
+  shippingAddress   String        @db.VarChar(255) @map("direccionEnvio")
+  shippingComplement String?     @db.VarChar(100) @map("complementoEnvio")
+  shippingPostalCode String      @db.VarChar(10) @map("codigoPostalEnvio")
+  shippingCity      String        @db.VarChar(100) @map("ciudadEnvio")
+  shippingProvince  String        @db.VarChar(100) @map("provinciaEnvio")
+  shippingCountry   String        @db.VarChar(50) @map("paisEnvio")
   
-  // Método de pago
-  metodoPago    MetodoPago    @default(TARJETA)
+  paymentMethod    PaymentMethod @default(TARJETA) @map("metodoPago")
   
-  // Stripe
-  stripeSessionId String?   @unique @db.VarChar(255)
-  stripePaymentIntentId String? @db.VarChar(255)
+  stripeSessionId String?   @unique @db.VarChar(255) @map("stripeSessionId")
+  stripePaymentIntentId String? @db.VarChar(255) @map("stripePaymentIntentId")
   
-  // Notas
-  notasCliente  String?       @db.Text
-  notasInternas String?       @db.Text // Solo para admins
+  customerNotes  String?       @db.Text @map("notasCliente")
+  internalNotes  String?       @db.Text @map("notasInternas")
   
-  // Envío
-  fechaEnvio    DateTime?
-  numeroSeguimiento String?   @db.VarChar(100)
-  transportista String?       @db.VarChar(100)
-  fechaEntrega  DateTime?
+  shippedAt     DateTime?     @map("fechaEnvio")
+  trackingNumber String?   @db.VarChar(100) @map("numeroSeguimiento")
+  carrier       String?       @db.VarChar(100) @map("transportista")
+  deliveredAt   DateTime?     @map("fechaEntrega")
   
-  // Auditoría de estados
-  creadoEn      DateTime      @default(now())
-  actualizadoEn DateTime      @updatedAt
-  confirmadoEn  DateTime?
-  preparandoEn  DateTime?
-  enviadoEn     DateTime?
-  entregadoEn   DateTime?
-  canceladoEn   DateTime?
-  canceladoPor  String?       // ID del usuario que canceló
-  motivoCancelacion String?   @db.Text
+  createdAt       DateTime      @default(now()) @map("creadoEn")
+  updatedAt DateTime      @updatedAt @map("actualizadoEn")
+  confirmedAt  DateTime?      @map("confirmadoEn")
+  preparingAt  DateTime?      @map("preparandoEn")
+  sentAt     DateTime?         @map("enviadoEn")
+  deliveredAt2   DateTime?    @map("entregadoEn")
+  cancelledAt   DateTime?      @map("canceladoEn")
+  cancelledBy   String?        @map("canceladoPor")
+  cancelReason  String?        @db.Text @map("motivoCancelacion")
   
-  // Relaciones
-  usuario       Usuario       @relation(fields: [usuarioId], references: [id])
-  direccion     Direccion?    @relation("DireccionEnvio", fields: [direccionEnvioId], references: [id])
-  items         ItemPedido[]
-  pago          Pago?
-  factura       Factura?
-  mensajes      MensajePedido[]
-  movimientos   MovimientoInventario[]
+  user          User          @relation(fields: [userId], references: [id])
+  address       Address?      @relation("ShippingAddress", fields: [shippingAddressId], references: [id])
+  items         OrderItem[]
+  payment       Payment?
+  invoice       Invoice?
+  messages      OrderMessage[]
+  movements     InventoryMovement[]
   
-  @@index([usuarioId])
-  @@index([estado])
-  @@index([creadoEn])
-  @@index([numeroPedido])
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([orderNumber])
   @@map("pedidos")
 }
 
 // ============================================
-// MODELO 6: ITEMS DE PEDIDO (Snapshot)
+// MODEL 7: ORDER ITEMS
 // ============================================
 
-model ItemPedido {
+model OrderItem {
   id            String    @id @default(uuid())
-  pedidoId      String
-  productoId    String?
+  orderId       String    @map("pedidoId")
+  productId     String?   @map("productoId")
   
-  // Snapshot del producto (para histórico)
-  nombre        String    @db.VarChar(200)
-  descripcion   String?   @db.Text
-  precio        Decimal   @db.Decimal(10, 2)
-  cantidad      Int
-  categoria     Categoria
-  material      Material
-  imagenUrl     String?   @db.VarChar(500) // URL de la imagen principal
+  name          String    @db.VarChar(200) @map("nombre")
+  description   String?   @db.Text @map("descripcion")
+  price         Decimal   @db.Decimal(10, 2) @map("precio")
+  quantity      Int       @map("cantidad")
+  category      Category  @map("categoria")
+  material      Material  @map("material")
+  imageUrl      String?   @db.VarChar(500) @map("imagenUrl")
   
-  // Totales
-  subtotal      Decimal   @db.Decimal(10, 2)
+  subtotal      Decimal   @db.Decimal(10, 2) @map("subtotal")
   
-  // Auditoría
-  creadoEn      DateTime  @default(now())
+  createdAt     DateTime  @default(now()) @map("creadoEn")
   
-  // Relaciones
-  pedido        Pedido    @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
-  producto      Producto? @relation(fields: [productoId], references: [id])
+  order         Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product       Product?  @relation(fields: [productId], references: [id])
   
-  @@index([pedidoId])
-  @@index([productoId])
+  @@index([orderId])
+  @@index([productId])
   @@map("items_pedido")
 }
 
 // ============================================
-// MODELO 7: PAGOS (Stripe)
+// MODEL 8: PAYMENTS
 // ============================================
 
-model Pago {
+model Payment {
   id                    String      @id @default(uuid())
-  pedidoId              String      @unique
-  usuarioId             String
+  orderId               String      @unique @map("pedidoId")
+  userId                String      @map("usuarioId")
   
-  // Montos
-  monto                 Decimal     @db.Decimal(10, 2)
-  montoReembolsado      Decimal?    @db.Decimal(10, 2)
+  amount                Decimal     @db.Decimal(10, 2) @map("monto")
+  refundedAmount        Decimal?    @db.Decimal(10, 2) @map("montoReembolsado")
   
-  // Método
-  metodo                MetodoPago  @default(TARJETA)
-  estado                EstadoPago  @default(PENDIENTE)
+  method                PaymentMethod @default(TARJETA) @map("metodo")
+  status                PaymentStatus @default(PENDIENTE) @map("estado")
   
-  // Stripe
-  stripeSessionId       String?     @unique @db.VarChar(255)
-  stripePaymentIntentId String?     @unique @db.VarChar(255)
-  stripeClientSecret    String?     @db.VarChar(255)
-  stripeChargeId        String?     @db.VarChar(255)
+  stripeSessionId       String?     @unique @db.VarChar(255) @map("stripeSessionId")
+  stripePaymentIntentId String?     @unique @db.VarChar(255) @map("stripePaymentIntentId")
+  stripeClientSecret    String?     @db.VarChar(255) @map("stripeClientSecret")
+  stripeChargeId        String?     @db.VarChar(255) @map("stripeChargeId")
   
-  // Metadata
-  errorMensaje          String?     @db.Text
-  fechaProcesado        DateTime?
-  fechaReembolso        DateTime?
+  errorMessage          String?     @db.Text @map("errorMensaje")
+  processedAt           DateTime?   @map("fechaProcesado")
+  refundedAt            DateTime?   @map("fechaReembolso")
   
-  // Auditoría
-  creadoPor     String?   // ID del admin que creó el producto
-  creadoEn      DateTime  @default(now())
-  actualizadoEn DateTime  @updatedAt
+  createdBy     String?   @map("creadoPor")
+  createdAt     DateTime  @default(now()) @map("creadoEn")
+  updatedAt DateTime  @updatedAt @map("actualizadoEn")
   
-  // Relaciones
-  pedido                Pedido      @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
-  usuario               Usuario     @relation(fields: [usuarioId], references: [id])
+  order                 Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user                  User        @relation(fields: [userId], references: [id])
   
-  @@index([usuarioId])
-  @@index([estado])
-  @@index([creadoEn])
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
   @@map("pagos")
 }
 
 // ============================================
-// MODELO 8: MOVIMIENTOS DE INVENTARIO
+// MODEL 9: INVENTORY MOVEMENTS
 // ============================================
 
-model MovimientoInventario {
+model InventoryMovement {
   id            String        @id @default(uuid())
-  productoId    String
-  pedidoId      String?
+  productId     String        @map("productoId")
+  orderId       String?       @map("pedidoId")
 
-  // Tipo y cantidad
-  tipo          TipoMovimiento
-  cantidad      Int           // Positivo o negativo
-  stockAnterior Int
-  stockNuevo    Int
+  type          MovementType  @map("tipo")
+  quantity      Int           @map("cantidad")
+  previousStock Int           @map("stockAnterior")
+  newStock      Int           @map("stockNuevo")
 
-  // Motivo
-  motivo        String        @db.VarChar(255)
-  referencia    String?       @db.VarChar(100) // ID de pedido o ajuste
+  reason        String        @db.VarChar(255) @map("motivo")
+  reference     String?       @db.VarChar(100) @map("referencia")
 
-  // Auditoría
-  creadoEn      DateTime      @default(now())
-  creadoPor     String        // ID del usuario que realizó el movimiento
+  createdAt     DateTime      @default(now()) @map("creadoEn")
+  createdBy     String        @map("creadoPor")
 
-  // Relaciones
-  producto      Producto      @relation(fields: [productoId], references: [id])
-  pedido        Pedido?       @relation(fields: [pedidoId], references: [id])
-  usuario       Usuario       @relation(fields: [creadoPor], references: [id])
+  product       Product       @relation(fields: [productId], references: [id])
+  order         Order?        @relation(fields: [orderId], references: [id])
+  user          User          @relation(fields: [createdBy], references: [id])
 
-  @@index([productoId])
-  @@index([pedidoId])
-  @@index([tipo])
-  @@index([creadoEn])
+  @@index([productId])
+  @@index([orderId])
+  @@index([type])
+  @@index([createdAt])
   @@map("movimientos_inventario")
 }
 
 // ============================================
-// MODELO 9: ALERTAS DEL SISTEMA
+// MODEL 10: ALERTS
 // ============================================
 
-model Alerta {
+model Alert {
   id            String          @id @default(uuid())
-  tipo          TipoAlerta
-  severidad     SeveridadAlerta @default(MEDIA)
+  type          AlertType       @map("tipo")
+  severity      AlertSeverity   @default(MEDIA) @map("severidad")
   
-  // Contenido
-  titulo        String          @db.VarChar(200)
-  mensaje       String          @db.Text
+  title         String          @db.VarChar(200) @map("titulo")
+  message       String          @db.Text @map("mensaje")
   
-  // Referencias
-  productoId    String?
-  pedidoId      String?
-  usuarioId     String?
+  productId     String?         @map("productoId")
+  orderId       String?         @map("pedidoId")
+  userId        String?         @map("usuarioId")
   
-  // Estado
-  estado        EstadoAlerta    @default(PENDIENTE)
-  resueltaEn    DateTime?
-  resueltaPor   String?
-  notasResolucion String?       @db.Text
+  status        AlertStatus     @default(PENDIENTE) @map("estado")
+  resolvedAt    DateTime?       @map("resueltaEn")
+  resolvedBy    String?         @map("resueltaPor")
+  resolutionNotes String?       @db.Text @map("notasResolucion")
   
-  // Auditoría
-  creadoEn      DateTime        @default(now())
+  createdAt     DateTime        @default(now()) @map("creadoEn")
   
-  // Relaciones
-  producto      Producto?       @relation(fields: [productoId], references: [id], onDelete: SetNull)
-  resueltaPorUsuario Usuario?   @relation("AlertasResueltas", fields: [resueltaPor], references: [id])
+  product       Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
+  resolvedByUser User?          @relation("ResolvedAlerts", fields: [resolvedBy], references: [id])
   
-  @@index([tipo])
-  @@index([estado])
-  @@index([severidad])
-  @@index([productoId])
-  @@index([creadoEn])
+  @@index([type])
+  @@index([status])
+  @@index([severity])
+  @@index([productId])
+  @@index([createdAt])
   @@map("alertas")
 }
 
 // ============================================
-// MODELO 10: MENSAJES EN PEDIDOS
+// MODEL 11: ORDER MESSAGES
 // ============================================
 
-model MensajePedido {
+model OrderMessage {
   id            String    @id @default(uuid())
-  pedidoId      String
-  usuarioId     String
+  orderId       String    @map("pedidoId")
+  userId        String    @map("usuarioId")
   
-  // Contenido
-  mensaje       String    @db.Text
-  esDeCliente   Boolean   @default(true)
+  message       String    @db.Text @map("mensaje")
+  isFromCustomer Boolean  @default(true) @map("esDeCliente")
   
-  // Archivos adjuntos (JSON con URLs)
-  adjuntos      Json?     // [{url, nombre, tipo}]
+  attachments   Json?     @map("adjuntos")
   
-  // Estado
-  leido         Boolean   @default(false)
-  leidoEn       DateTime?
+  isRead        Boolean   @default(false) @map("leido")
+  readAt        DateTime? @map("leidoEn")
   
-  // Auditoría
-  creadoEn      DateTime  @default(now())
+  createdAt     DateTime  @default(now()) @map("creadoEn")
   
-  // Relaciones
-  pedido        Pedido    @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
-  usuario       Usuario   @relation(fields: [usuarioId], references: [id])
+  order         Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user          User      @relation(fields: [userId], references: [id])
   
-  @@index([pedidoId])
-  @@index([creadoEn])
-  @@index([esDeCliente])
+  @@index([orderId])
+  @@index([createdAt])
+  @@index([isFromCustomer])
   @@map("mensajes_pedido")
 }
 
 // ============================================
-// MODELO 11: FACTURAS (Datos fiscales españoles)
+// MODEL 12: INVOICES
 // ============================================
 
-model Factura {
+model Invoice {
   id            String    @id @default(uuid())
-  pedidoId      String    @unique
+  orderId       String    @unique @map("pedidoId")
   
-  // Número de factura legal
-  numeroFactura String    @unique @db.VarChar(50) // F-202400001
-  serie         String    @default("F") @db.VarChar(10)
-  numero        Int       // 1, 2, 3...
+  invoiceNumber String    @unique @db.VarChar(50) @map("numeroFactura")
+  series        String    @default("F") @db.VarChar(10) @map("serie")
+  number        Int       @map("numero")
   
-  // Datos del vendedor (tu empresa)
-  empresaNombre String    @db.VarChar(200)
-  empresaNif    String    @db.VarChar(20)
-  empresaDireccion String @db.VarChar(255)
-  empresaCiudad String    @db.VarChar(100)
-  empresaProvincia String @db.VarChar(100)
-  empresaCodigoPostal String @db.VarChar(10)
+  companyName     String    @db.VarChar(200) @map("empresaNombre")
+  companyTaxId    String    @db.VarChar(20) @map("empresaNif")
+  companyAddress  String    @db.VarChar(255) @map("empresaDireccion")
+  companyCity     String    @db.VarChar(100) @map("empresaCiudad")
+  companyProvince String    @db.VarChar(100) @map("empresaProvincia")
+  companyPostalCode String  @db.VarChar(10) @map("empresaCodigoPostal")
   
-  // Datos del cliente (snapshot)
-  clienteNombre String    @db.VarChar(200)
-  clienteNif    String    @db.VarChar(20)
-  clienteDireccion String @db.VarChar(255)
-  clienteCiudad String    @db.VarChar(100)
-  clienteProvincia String @db.VarChar(100)
-  clienteCodigoPostal String @db.VarChar(10)
-  clientePais   String    @db.VarChar(50)
+  clientName      String    @db.VarChar(200) @map("clienteNombre")
+  clientTaxId     String    @db.VarChar(20) @map("clienteNif")
+  clientAddress   String    @db.VarChar(255) @map("clienteDireccion")
+  clientCity      String    @db.VarChar(100) @map("clienteCiudad")
+  clientProvince  String    @db.VarChar(100) @map("clienteProvincia")
+  clientPostalCode String   @db.VarChar(10) @map("clienteCodigoPostal")
+  clientCountry   String    @db.VarChar(50) @map("clientePais")
   
-  // Totales (IVA 21% España)
-  baseImponible Decimal   @db.Decimal(10, 2)
-  tipoIva       Decimal   @default(21) @db.Decimal(5, 2)
-  cuotaIva      Decimal   @db.Decimal(10, 2)
-  total         Decimal   @db.Decimal(10, 2)
+  taxableAmount   Decimal   @db.Decimal(10, 2) @map("baseImponible")
+  vatRate         Decimal   @default(21) @db.Decimal(5, 2) @map("tipoIva")
+  vatAmount       Decimal   @db.Decimal(10, 2) @map("cuotaIva")
+  total           Decimal   @db.Decimal(10, 2) @map("total")
   
-  // Archivo PDF
-  pdfUrl        String?   @db.VarChar(500)
+  pdfUrl          String?   @db.VarChar(500) @map("pdfUrl")
   
-  // Estado
-  anulada       Boolean   @default(false)
-  anuladaEn     DateTime?
-  motivoAnulacion String?   @db.Text
+  isCancelled     Boolean   @default(false) @map("anulada")
+  cancelledAt     DateTime? @map("anuladaEn")
+  cancelReason    String?   @db.Text @map("motivoAnulacion")
   
-  // Auditoría
-  emitidaEn     DateTime  @default(now())
+  issuedAt        DateTime  @default(now()) @map("emitidaEn")
   
-  // Relaciones
-  pedido        Pedido    @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  order           Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
   
-  @@index([numeroFactura])
-  @@index([clienteNif])
-  @@index([emitidaEn])
+  @@index([invoiceNumber])
+  @@index([clientTaxId])
+  @@index([issuedAt])
   @@map("facturas")
 }
 
 // ============================================
-// MODELO 12: CONFIGURACIÓN DE ENVÍOS
+// MODEL 13: SHIPPING CONFIG
 // ============================================
 
-model ConfiguracionEnvio {
+model ShippingConfig {
   id                    String    @id @default(uuid())
   
-  // Datos del método
-  nombre                String    @db.VarChar(100) // "Envío Estándar"
-  descripcion           String?   @db.Text
-  precio                Decimal   @db.Decimal(10, 2)
+  name                  String    @db.VarChar(100) @map("nombre")
+  description           String?   @db.Text @map("descripcion")
+  price                 Decimal   @db.Decimal(10, 2) @map("precio")
   
-  // Umbral de envío gratis
-  envioGratisDesde      Decimal?  @db.Decimal(10, 2)
+  freeShippingFrom      Decimal?  @db.Decimal(10, 2) @map("envioGratisDesde")
   
-  // Tiempos estimados
-  diasMinimos           Int       @default(3)
-  diasMaximos           Int       @default(5)
+  minDays               Int       @default(3) @map("diasMinimos")
+  maxDays               Int       @default(5) @map("diasMaximos")
   
-  // Estado
-  activo                Boolean   @default(true)
-  esDefecto             Boolean   @default(false) // Método por defecto
+  isActive              Boolean   @default(true) @map("activo")
+  isDefault             Boolean   @default(false) @map("esDefecto")
   
-  // Orden de visualización
-  orden                 Int       @default(0)
+  displayOrder          Int       @default(0) @map("orden")
   
-  // Auditoría
-  creadoEn              DateTime  @default(now())
-  actualizadoEn         DateTime  @updatedAt
+  createdAt             DateTime  @default(now()) @map("creadoEn")
+  updatedAt         DateTime  @updatedAt @map("actualizadoEn")
   
-  @@index([activo])
-  @@index([esDefecto])
-  @@index([orden])
+  @@index([isActive])
+  @@index([isDefault])
+  @@index([displayOrder])
   @@map("configuracion_envios")
 }
 
 // ============================================
-// MODELO 13: CONFIGURACIÓN GLOBAL
+// MODEL 14: SITE CONFIG
 // ============================================
 
-model Configuracion {
+model SiteConfig {
   id                    String    @id @default(cuid())
   
-  // Empresa
-  nombreEmpresa         String    @db.VarChar(200)
-  nifEmpresa            String    @db.VarChar(20)
-  direccionEmpresa      String    @db.VarChar(255)
-  ciudadEmpresa         String    @db.VarChar(100)
-  provinciaEmpresa      String    @db.VarChar(100)
-  codigoPostalEmpresa   String    @db.VarChar(10)
-  telefonoEmpresa       String    @db.VarChar(20)
-  emailEmpresa          String    @db.VarChar(255)
+  companyName         String    @db.VarChar(200) @map("nombreEmpresa")
+  companyTaxId            String    @db.VarChar(20) @map("nifEmpresa")
+  companyAddress      String    @db.VarChar(255) @map("direccionEmpresa")
+  companyCity         String    @db.VarChar(100) @map("ciudadEmpresa")
+  companyProvince     String    @db.VarChar(100) @map("provinciaEmpresa")
+  companyPostalCode   String    @db.VarChar(10) @map("codigoPostalEmpresa")
+  companyPhone        String    @db.VarChar(20) @map("telefonoEmpresa")
+  companyEmail            String    @db.VarChar(255) @map("emailEmpresa")
   
-  // Configuración fiscal
-  tipoIvaDefecto        Decimal   @default(21) @db.Decimal(5, 2)
+  defaultVatRate      Decimal   @default(21) @db.Decimal(5, 2) @map("tipoIvaDefecto")
   
-  // Configuración de stock
-  umbralStockBajo       Int       @default(5)
+  lowStockThreshold       Int       @default(5) @map("umbralStockBajo")
   
-  // Auditoría
-  actualizadoEn         DateTime  @updatedAt
-  actualizadoPor        String?   // ID del admin
+  updatedAt         DateTime  @updatedAt @map("actualizadoEn")
+  updatedBy       String?   @map("actualizadoPor")
   
   @@map("configuracion")
 }
 
 // ============================================
-// MODELO 14: SESIONES (NextAuth)
+// MODEL 15: SESSIONS
 // ============================================
 
 model Session {
   id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         Usuario  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionToken String   @unique @map("sessionToken")
+  userId       String   @map("userId")
+  expires      DateTime @map("expires")
+  user         User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   @@index([userId])
   @@map("sesiones")
 }
 
 // ============================================
-// MODELO 15: TOKENS DE VERIFICACIÓN
+// MODEL 16: VERIFICATION TOKENS
 // ============================================
 
 model VerificationToken {
   identifier String
-  token      String   @unique
-  expires    DateTime
+  token      String   @unique @map("token")
+  expires    DateTime @map("expires")
 
   @@unique([identifier, token])
   @@map("tokens_verificacion")
 }
 
 // ============================================
-// MODELO 16: LOGS DE AUDITORÍA
+// MODEL 17: AUDIT LOGS
 // ============================================
 
-model LogAuditoria {
+model AuditLog {
   id            String    @id @default(uuid())
   
-  // Acción
-  accion        String    @db.VarChar(100) // "PEDIDO_CREADO", "ESTADO_CAMBIADO"
-  entidad       String    @db.VarChar(50) // "Pedido", "Usuario"
-  entidadId     String    @db.VarChar(255)
+  action        String    @db.VarChar(100) @map("accion")
+  entity        String    @db.VarChar(50) @map("entidad")
+  entityId      String    @db.VarChar(255) @map("entidadId")
   
-  // Datos
-  datosAnteriores Json?   // Estado anterior
-  datosNuevos   Json?     // Estado nuevo
+  previousData  Json?     @map("datosAnteriores")
+  newData       Json?     @map("datosNuevos")
   
-  // Usuario
-  usuarioId     String?
-  ipAddress     String?   @db.VarChar(45)
-  userAgent     String?   @db.Text
+  userId        String?   @map("usuarioId")
+  ipAddress     String?   @db.VarChar(45) @map("ipAddress")
+  userAgent     String?   @db.Text @map("userAgent")
   
-  // Timestamp
-  creadoEn      DateTime  @default(now())
+  createdAt     DateTime  @default(now()) @map("creadoEn")
   
-  @@index([accion])
-  @@index([entidad])
-  @@index([entidadId])
-  @@index([creadoEn])
+  @@index([action])
+  @@index([entity])
+  @@index([entityId])
+  @@index([createdAt])
   @@map("logs_auditoria")
 }
