@@ -18,81 +18,79 @@ datasource db {
 }
 
 // ============================================
-// ENUMS
+// ENUMS - 100% English
 // ============================================
 
 enum Role {
-  CLIENTE
+  CUSTOMER
   ADMIN
 }
 
 enum Category {
-  DECORACION
-  ACCESORIOS
-  FUNCIONAL
-  ARTICULADOS
-  JUGUETES
+  DECORATION
+  ACCESSORIES
+  FUNCTIONAL
+  ARTICULATED
+  TOYS
 }
 
 enum Material {
   PLA
   PETG
-  ABS
-  TPU
 }
 
 enum OrderStatus {
-  PENDIENTE
-  CONFIRMADO
-  PREPARANDO
-  ENVIADO
-  ENTREGADO
-  CANCELADO
+  PENDING
+  CONFIRMED
+  PREPARING
+  SHIPPED
+  DELIVERED
+  CANCELLED
 }
 
 enum PaymentMethod {
-  TARJETA
+  CARD
   BIZUM
-  TRANSFERENCIA
+  TRANSFER
 }
 
 enum PaymentStatus {
-  PENDIENTE
-  PROCESANDO
-  COMPLETADO
-  FALLIDO
-  REEMBOLSADO
-  PARCIAL
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+  PARTIAL
 }
 
 enum MovementType {
-  ENTRADA
-  SALIDA
-  AJUSTE
-  CANCELACION
-  DEVOLUCION
+  IN
+  OUT
+  ADJUSTMENT
+  CANCELLATION
+  RETURN
 }
 
 enum AlertType {
-  STOCK_BAJO
-  SIN_STOCK
-  PEDIDO_RETRASADO
-  PAGO_FALLIDO
-  ERROR_SISTEMA
+  LOW_STOCK
+  OUT_OF_STOCK
+  ORDER_DELAYED
+  PAYMENT_FAILED
+  SYSTEM_ERROR
 }
 
 enum AlertSeverity {
-  BAJA
-  MEDIA
-  ALTA
-  CRITICA
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
 }
 
 enum AlertStatus {
-  PENDIENTE
-  EN_PROGRESO
-  RESUELTA
-  IGNORADA
+  PENDING
+  IN_PROGRESS
+  RESOLVED
+  IGNORED
 }
 
 // ============================================
@@ -105,7 +103,7 @@ model User {
   password      String    @db.VarChar(255)
   name          String    @db.VarChar(100) @map("nombre")
   phone         String?   @db.VarChar(20) @map("telefono")
-  role          Role      @default(CLIENTE) @map("rol")
+  role          Role      @default(CUSTOMER) @map("rol")
   
   taxId         String?   @db.VarChar(20) @map("nif")
   fiscalName    String?   @db.VarChar(200) @map("nombreFiscal")
@@ -152,7 +150,7 @@ model Address {
   postalCode    String    @db.VarChar(10) @map("codigoPostal")
   city          String    @db.VarChar(100) @map("ciudad")
   province      String    @db.VarChar(100) @map("provincia")
-  country       String    @default("España") @db.VarChar(50) @map("pais")
+  country       String    @default("Spain") @db.VarChar(50) @map("pais")
   
   isDefault     Boolean   @default(false) @map("esPrincipal")
   
@@ -297,7 +295,7 @@ model Order {
   orderNumber   String        @unique @db.VarChar(20) @map("numeroPedido")
   userId        String        @map("usuarioId")
   
-  status        OrderStatus   @default(PENDIENTE) @map("estado")
+  status        OrderStatus   @default(PENDING) @map("estado")
   
   subtotal      Decimal       @db.Decimal(10, 2) @map("subtotal")
   shipping      Decimal       @db.Decimal(10, 2) @map("envio")
@@ -314,7 +312,7 @@ model Order {
   shippingProvince  String        @db.VarChar(100) @map("provinciaEnvio")
   shippingCountry   String        @db.VarChar(50) @map("paisEnvio")
   
-  paymentMethod    PaymentMethod @default(TARJETA) @map("metodoPago")
+  paymentMethod    PaymentMethod @default(CARD) @map("metodoPago")
   
   stripeSessionId String?   @unique @db.VarChar(255) @map("stripeSessionId")
   stripePaymentIntentId String? @db.VarChar(255) @map("stripePaymentIntentId")
@@ -393,8 +391,8 @@ model Payment {
   amount                Decimal     @db.Decimal(10, 2) @map("monto")
   refundedAmount        Decimal?    @db.Decimal(10, 2) @map("montoReembolsado")
   
-  method                PaymentMethod @default(TARJETA) @map("metodo")
-  status                PaymentStatus @default(PENDIENTE) @map("estado")
+  method                PaymentMethod @default(CARD) @map("metodo")
+  status                PaymentStatus @default(PENDING) @map("estado")
   
   stripeSessionId       String?     @unique @db.VarChar(255) @map("stripeSessionId")
   stripePaymentIntentId String?     @unique @db.VarChar(255) @map("stripePaymentIntentId")
@@ -456,7 +454,7 @@ model InventoryMovement {
 model Alert {
   id            String          @id @default(uuid())
   type          AlertType       @map("tipo")
-  severity      AlertSeverity   @default(MEDIA) @map("severidad")
+  severity      AlertSeverity   @default(MEDIUM) @map("severidad")
   
   title         String          @db.VarChar(200) @map("titulo")
   message       String          @db.Text @map("mensaje")
@@ -465,7 +463,7 @@ model Alert {
   orderId       String?         @map("pedidoId")
   userId        String?         @map("usuarioId")
   
-  status        AlertStatus     @default(PENDIENTE) @map("estado")
+  status        AlertStatus     @default(PENDING) @map("estado")
   resolvedAt    DateTime?       @map("resueltaEn")
   resolvedBy    String?         @map("resueltaPor")
   resolutionNotes String?       @db.Text @map("notasResolucion")

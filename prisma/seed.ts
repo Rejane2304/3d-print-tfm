@@ -48,7 +48,7 @@ async function main() {
           email: user.email,
           name: user.name,
           password: hashedPassword,
-          role: user.role === 'admin' ? 'ADMIN' : 'CLIENTE',
+          role: user.role === 'admin' ? 'ADMIN' : 'CUSTOMER',
           isActive: true,
           phone: user.phone,
         },
@@ -70,11 +70,11 @@ async function main() {
     }>('products.csv');
 
     const categoryMap: Record<string, string> = {
-      'DECOR': 'DECORACION',
-      'ACCESSORY': 'ACCESORIOS',
-      'FUNCTIONAL': 'FUNCIONAL',
-      'PIECE': 'ARTICULADOS',
-      'TOY': 'JUGUETES',
+      'DECOR': 'DECORATION',
+      'ACCESSORY': 'ACCESSORIES',
+      'FUNCTIONAL': 'FUNCTIONAL',
+      'PIECE': 'ARTICULATED',
+      'TOY': 'TOYS',
     };
 
     for (let i = 0; i < productsCSV.length; i++) {
@@ -92,7 +92,7 @@ async function main() {
           shortDescription: product.description.split(',')[0],
           price: parseFloat(product.price),
           stock: parseInt(product.stock),
-          category: (categoryMap[product.category] || 'ACCESORIOS') as 'DECORACION' | 'ACCESORIOS' | 'FUNCIONAL' | 'ARTICULADOS' | 'JUGUETES',
+          category: (categoryMap[product.category] || 'ACCESSORIES') as 'DECORATION' | 'ACCESSORIES' | 'FUNCTIONAL' | 'ARTICULATED' | 'TOYS',
           material: product.material as 'PLA' | 'PETG',
           isActive: true,
           isFeatured: i < 3,
@@ -125,12 +125,12 @@ async function main() {
     const users = await prisma.user.findMany();
     const products = await prisma.product.findMany();
 
-    const statusMap: Record<string, 'PENDIENTE' | 'CONFIRMADO' | 'PREPARANDO' | 'ENVIADO' | 'ENTREGADO' | 'CANCELADO'> = {
-      'PENDING': 'PENDIENTE',
-      'CONFIRMED': 'CONFIRMADO',
-      'SHIPPED': 'ENVIADO',
-      'COMPLETED': 'ENTREGADO',
-      'CANCELLED': 'CANCELADO',
+    const statusMap: Record<string, 'PENDING' | 'CONFIRMED' | 'PREPARING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED'> = {
+      'PENDING': 'PENDING',
+      'CONFIRMED': 'CONFIRMED',
+      'SHIPPED': 'SHIPPED',
+      'COMPLETED': 'DELIVERED',
+      'CANCELLED': 'CANCELLED',
     };
 
     for (let i = 0; i < ordersCSV.length; i++) {
@@ -141,7 +141,7 @@ async function main() {
       const postalCode = addressParts[1]?.split(' ')[0] || '28001';
       const city = addressParts[1]?.split(' ')[1] || 'Madrid';
       
-      const status = statusMap[order.status] || 'PENDIENTE';
+      const status = statusMap[order.status] || 'PENDING';
       
       const productIndex = i % products.length;
       const product = products[productIndex];
@@ -162,7 +162,7 @@ async function main() {
           shippingPostalCode: postalCode,
           shippingCity: city,
           shippingProvince: 'Madrid',
-          shippingCountry: 'España',
+          shippingCountry: 'Spain',
           customerNotes: order.notes || null,
           items: {
             create: {
@@ -192,22 +192,22 @@ async function main() {
       metadata: string;
     }>('alerts.csv');
 
-    const typeMap: Record<string, 'STOCK_BAJO' | 'SIN_STOCK' | 'PEDIDO_RETRASADO' | 'PAGO_FALLIDO' | 'ERROR_SISTEMA'> = {
-      'LOW_STOCK': 'STOCK_BAJO',
-      'OUT_OF_STOCK': 'SIN_STOCK',
-      'ORDER_DELAYED': 'PEDIDO_RETRASADO',
-      'PAYMENT_FAILED': 'PAGO_FALLIDO',
-      'SYSTEM_ERROR': 'ERROR_SISTEMA',
+    const typeMap: Record<string, 'LOW_STOCK' | 'OUT_OF_STOCK' | 'ORDER_DELAYED' | 'PAYMENT_FAILED' | 'SYSTEM_ERROR'> = {
+      'LOW_STOCK': 'LOW_STOCK',
+      'OUT_OF_STOCK': 'OUT_OF_STOCK',
+      'ORDER_DELAYED': 'ORDER_DELAYED',
+      'PAYMENT_FAILED': 'PAYMENT_FAILED',
+      'SYSTEM_ERROR': 'SYSTEM_ERROR',
     };
 
     for (const alert of alertsCSV) {
       await prisma.alert.create({
         data: {
-          type: typeMap[alert.type] || 'STOCK_BAJO',
-          title: alert.title || alert.message?.substring(0, 50) || 'Alerta',
+          type: typeMap[alert.type] || 'LOW_STOCK',
+          title: alert.title || alert.message?.substring(0, 50) || 'Alert',
           message: alert.message || '',
-          severity: alert.status === 'READ' ? 'BAJA' : 'MEDIA',
-          status: alert.status === 'READ' ? 'RESUELTA' : 'PENDIENTE',
+          severity: alert.status === 'READ' ? 'LOW' : 'MEDIUM',
+          status: alert.status === 'READ' ? 'RESOLVED' : 'PENDING',
         },
       });
     }
