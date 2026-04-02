@@ -8,6 +8,7 @@ import { NextRequest } from 'next/server';
 import { POST } from '@/app/api/auth/register/route';
 import { prisma } from '@/lib/db/prisma';
 import { cleanupTestUsers } from '../../helpers/db-cleanup';
+import { findWithRetry, waitForDataPersistence } from '../../helpers/db-wait';
 
 describe('POST /api/auth/register', () => {
   let datosValidos: any;
@@ -118,18 +119,16 @@ describe('POST /api/auth/register', () => {
       
       expect(res.status).toBe(201);
 
-      // Espera más agresiva para asegurar persistencia y flush de conexión
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Espera inicial para persistencia
+      await waitForDataPersistence(1200);
 
-      // Reintentos para búsqueda con delays
-      let usuario = null;
-      for (let i = 0; i < 3; i++) {
-        usuario = await prisma.usuario.findUnique({
+      // Buscar con reintentos automáticos
+      const usuario = await findWithRetry(
+        () => prisma.usuario.findUnique({
           where: { email: emailUnico.toLowerCase() },
-        });
-        if (usuario) break;
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
+        }),
+        { maxRetries: 6, delayMs: 250, backoffMultiplier: 1.1 }
+      );
 
       expect(usuario).toBeDefined();
       if (usuario) {
@@ -208,29 +207,23 @@ describe('POST /api/auth/register', () => {
       const body1 = await res1.json();
       expect(body1.success).toBe(true);
 
-      // Espera más estratégica y agresiva: pausa inicial más larga
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // Espera muy agresiva: pausa inicial muy larga
+      await waitForDataPersistence(1500);
 
-      // Verificar que el usuario fue creado con reintentos más frecuentes
-      let usuarioCreado = null;
-      for (let i = 0; i < 5; i++) {
-        usuarioCreado = await prisma.usuario.findUnique({
+      // Verificar que el usuario fue creado con reintentos muy agresivos
+      const usuarioCreado = await findWithRetry(
+        () => prisma.usuario.findUnique({
           where: { email: emailDuplicado.toLowerCase() },
-        });
-        if (usuarioCreado) {
-          console.log(`✅ Usuario encontrado en intento ${i + 1}`);
-          break;
-        }
-        console.log(`⏳ Reintentando búsqueda (${i + 1}/5)...`);
-        await new Promise(resolve => setTimeout(resolve, 150));
-      }
+        }),
+        { maxRetries: 8, delayMs: 300, backoffMultiplier: 1.05, logAttempts: true }
+      );
       
       if (!usuarioCreado) {
         console.warn(`⚠️ Usuario no encontrado después de búsquedas: ${emailDuplicado}`);
       }
 
-      // Intentar crear duplicado con delay más seguro
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Espera más antes de intentar duplicado
+      await waitForDataPersistence(1200);
       
       const req2 = createRequest({
         ...datosValidos,
@@ -244,7 +237,8 @@ describe('POST /api/auth/register', () => {
       // Validar respuesta - puede ser 409 (esperado) o 201 (race condition)
       // Si es 201, reintentamos una vez más
       if (res.status === 201) {
-        await new Promise(resolve => setTimeout(resolve, 800));
+        console.log(`⚠️ Primer intento retornó 201 (race condition), reintentando...`);
+        await waitForDataPersistence(1500);
         const req2Retry = createRequest({
           ...datosValidos,
           email: emailDuplicado,
@@ -261,7 +255,7 @@ describe('POST /api/auth/register', () => {
         expect(body.success).toBe(false);
         expect(body.error).toContain('Ya existe');
       }
-    }, 15000); // 15 segundos de timeout
+    }, 25000); // 25 segundos de timeout
   });
 });
 

@@ -226,6 +226,9 @@ beforeAll(async () => {
       // Insertar datos iniciales
       await seedDatosIniciales();
       
+      // Esperar a que los datos persistan en la BD
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       // Verificar que hay datos
       const usuariosCount = await prisma.usuario.count();
       const productosCount = await prisma.producto.count();

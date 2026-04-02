@@ -5,16 +5,23 @@
  */
 import { describe, it, expect, beforeAll } from 'vitest';
 import { prisma } from '@/lib/db/prisma';
+import { findWithRetry, waitForDataPersistence } from '../../helpers/db-wait';
 
 describe('GET /api/products/[slug]', () => {
   let productoTest: any;
 
   beforeAll(async () => {
+    // Esperar a que los datos de setup persistan
+    await waitForDataPersistence(800);
+
     // Crear producto de prueba si no existe
-    const existente = await prisma.producto.findFirst({
-      where: { activo: true },
-      include: { imagenes: true },
-    });
+    const existente = await findWithRetry(
+      () => prisma.producto.findFirst({
+        where: { activo: true },
+        include: { imagenes: true },
+      }),
+      { maxRetries: 5, delayMs: 200, logAttempts: false }
+    );
 
     if (existente) {
       productoTest = existente;
@@ -22,7 +29,7 @@ describe('GET /api/products/[slug]', () => {
       // Crear producto de prueba
       productoTest = await prisma.producto.create({
         data: {
-          slug: 'test-producto-detalle',
+          slug: `test-producto-detalle-${Date.now()}`,
           nombre: 'Producto Test Detalle',
           descripcion: 'Descripción de prueba',
           precio: 29.99,
@@ -42,15 +49,21 @@ describe('GET /api/products/[slug]', () => {
         },
         include: { imagenes: true },
       });
+      
+      // Esperar persistencia después de crear
+      await waitForDataPersistence(800);
     }
   });
 
   describe('Obtener producto por slug', () => {
     it('debe retornar producto existente', async () => {
-      const producto = await prisma.producto.findFirst({
-        where: { activo: true },
-        include: { imagenes: true },
-      });
+      const producto = await findWithRetry(
+        () => prisma.producto.findFirst({
+          where: { activo: true },
+          include: { imagenes: true },
+        }),
+        { maxRetries: 6, delayMs: 200, backoffMultiplier: 1.1, logAttempts: false }
+      );
 
       expect(producto).toBeDefined();
       expect(producto).toHaveProperty('id');
@@ -59,20 +72,26 @@ describe('GET /api/products/[slug]', () => {
     }, 30000);
 
     it('debe incluir todas las imágenes del producto', async () => {
-      const producto = await prisma.producto.findFirst({
-        where: { activo: true },
-        include: { imagenes: true },
-      });
+      const producto = await findWithRetry(
+        () => prisma.producto.findFirst({
+          where: { activo: true },
+          include: { imagenes: true },
+        }),
+        { maxRetries: 6, delayMs: 200, logAttempts: false }
+      );
 
       expect(producto?.imagenes).toBeDefined();
       expect(Array.isArray(producto?.imagenes)).toBe(true);
     }, 30000);
 
     it('debe incluir imagen principal identificada', async () => {
-      const producto = await prisma.producto.findFirst({
-        where: { activo: true },
-        include: { imagenes: true },
-      });
+      const producto = await findWithRetry(
+        () => prisma.producto.findFirst({
+          where: { activo: true },
+          include: { imagenes: true },
+        }),
+        { maxRetries: 6, delayMs: 200, logAttempts: false }
+      );
 
       const imagenPrincipal = producto?.imagenes.find((img: any) => img.esPrincipal);
       if (producto && producto.imagenes.length > 0) {
