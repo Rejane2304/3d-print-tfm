@@ -15,15 +15,17 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   const pageSize = parseInt(searchParams.get('pageSize') || '12', 10);
   const skip = (page - 1) * pageSize;
   
-  // Parámetros de filtrado
-  const categoria = searchParams.get('categoria') as Categoria | null;
+  // Parámetros de filtrado con soporte dual (EN/ES)
+  // Soporte temporal para parámetros en español (deprecados)
+  const categoria = searchParams.get('category') as Categoria | null 
+    || searchParams.get('categoria') as Categoria | null;
   const material = searchParams.get('material') as Material | null;
-  const minPrecio = searchParams.get('minPrecio');
-  const maxPrecio = searchParams.get('maxPrecio');
-  const enStock = searchParams.get('enStock') === 'true';
-  const ordenar = searchParams.get('ordenar') || 'nombre';
-  const orden = searchParams.get('orden') || 'asc';
-  const busqueda = searchParams.get('busqueda');
+  const minPrecio = searchParams.get('minPrice') || searchParams.get('minPrecio');
+  const maxPrecio = searchParams.get('maxPrice') || searchParams.get('maxPrecio');
+  const enStock = (searchParams.get('inStock') || searchParams.get('enStock')) === 'true';
+  const ordenar = searchParams.get('sortBy') || searchParams.get('ordenar') || 'nombre';
+  const orden = searchParams.get('sortOrder') || searchParams.get('orden') || 'asc';
+  const busqueda = searchParams.get('search') || searchParams.get('busqueda');
 
   // Construir where clause
   const where: Prisma.ProductoWhereInput = {

@@ -9,7 +9,7 @@ test.describe('Carrito de Compras', () => {
   
   test.beforeEach(async ({ page }) => {
     // Ir a la página de productos
-    await page.goto('/productos');
+    await page.goto('/products');
     
     // Agregar un producto al carrito
     const addToCartButton = page.locator('[data-testid="add-to-cart-button"]').first();
@@ -21,7 +21,7 @@ test.describe('Carrito de Compras', () => {
 
   test('debe agregar producto al carrito', async ({ page }) => {
     // Verificar que el carrito tiene items
-    await page.goto('/carrito');
+    await page.goto('/cart');
     
     const cartItems = page.locator('[data-testid="cart-item"]');
     expect(await cartItems.count()).toBeGreaterThan(0);

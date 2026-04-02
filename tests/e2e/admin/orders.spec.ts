@@ -11,10 +11,10 @@ test.describe('Admin - Gestión de Pedidos', () => {
     // Login como admin
     await page.goto('/auth');
     
-    const emailInput = page.locator('input[type="email"]').first();
+    const emailInput = page.locator('[data-testid="login-email-input"]');
     if (await emailInput.isVisible().catch(() => false)) {
       await emailInput.fill('admin@3dprint.com');
-      await page.locator('input[type="password"]').fill('admin123');
+      await page.locator('[data-testid="login-password-input"]').fill('admin123');
       await page.locator('button[type="submit"]').click();
       await page.waitForTimeout(1000);
     }

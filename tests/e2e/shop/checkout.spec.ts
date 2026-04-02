@@ -9,7 +9,7 @@ test.describe('Checkout y Pago', () => {
   
   test.beforeEach(async ({ page }) => {
     // Setup: Agregar producto al carrito y loguearse
-    await page.goto('/productos');
+    await page.goto('/products');
     
     // Agregar producto al carrito
     const addToCartButton = page.locator('[data-testid="add-to-cart-button"]').first();

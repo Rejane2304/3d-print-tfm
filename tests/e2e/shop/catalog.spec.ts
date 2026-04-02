@@ -8,7 +8,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Catálogo de Productos', () => {
   
   test.beforeEach(async ({ page }) => {
-    await page.goto('/productos');
+    await page.goto('/products');
   });
 
   test('debe mostrar listado de productos', async ({ page }) => {
@@ -30,7 +30,7 @@ test.describe('Catálogo de Productos', () => {
     await firstProduct.click();
     
     // Verificar que estamos en la página de detalle
-    await expect(page).toHaveURL(/\/productos\//);
+    await expect(page).toHaveURL(/\/products\//);
     
     // Verificar que se muestra el nombre del producto
     await expect(page.locator('h1')).toContainText(productName || '');

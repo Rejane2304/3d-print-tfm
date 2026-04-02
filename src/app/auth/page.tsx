@@ -292,6 +292,7 @@ export default function AuthPage() {
                     </div>
                     <input
                       id="login-email"
+                      data-testid="login-email-input"
                       type="email"
                       required
                       className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
@@ -313,6 +314,7 @@ export default function AuthPage() {
                     </div>
                     <input
                       id="login-password"
+                      data-testid="login-password-input"
                       type={showLoginPassword ? 'text' : 'password'}
                       required
                       className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
