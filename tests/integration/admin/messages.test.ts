@@ -11,14 +11,14 @@ import bcrypt from 'bcrypt';
 
 describe('Sistema de Mensajería - API Admin', () => {
   const adminTest = {
-    email: 'admin-mensajes@example.com',
+    email: `admin-mensajes-${Date.now()}-${Math.random().toString(36).substr(2, 9)}@example.com`,
     password: 'AdminPass123!',
     nombre: 'Admin Mensajes',
     rol: 'ADMIN',
   };
 
   const clienteTest = {
-    email: 'cliente-mensajes@example.com',
+    email: `cliente-mensajes-${Date.now()}-${Math.random().toString(36).substr(2, 9)}@example.com`,
     password: 'ClientPass123!',
     nombre: 'Cliente Mensajes',
     rol: 'CLIENTE',
@@ -29,68 +29,83 @@ describe('Sistema de Mensajería - API Admin', () => {
   let pedidoId: string;
 
   beforeAll(async () => {
-    // Limpiar usuarios de test
-    await prisma.usuario.deleteMany({
-      where: { email: { in: [adminTest.email, clienteTest.email] } }
-    });
+    try {
+      // Usar transacción para evitar deadlocks
+      await prisma.$transaction(async (tx) => {
+        // Limpiar usuarios de test
+        await tx.usuario.deleteMany({
+          where: { email: { in: [adminTest.email, clienteTest.email] } }
+        });
 
-    // Crear admin
-    const admin = await prisma.usuario.create({
-      data: {
-        email: adminTest.email,
-        password: await bcrypt.hash(adminTest.password, 12),
-        nombre: adminTest.nombre,
-        rol: 'ADMIN',
-        activo: true,
-      },
-    });
-    adminId = admin.id;
+        // Crear admin
+        const admin = await tx.usuario.create({
+          data: {
+            email: adminTest.email,
+            password: await bcrypt.hash(adminTest.password, 12),
+            nombre: adminTest.nombre,
+            rol: 'ADMIN',
+            activo: true,
+          },
+        });
+        adminId = admin.id;
 
-    // Crear cliente
-    const cliente = await prisma.usuario.create({
-      data: {
-        email: clienteTest.email,
-        password: await bcrypt.hash(clienteTest.password, 12),
-        nombre: clienteTest.nombre,
-        rol: 'CLIENTE',
-        activo: true,
-      },
-    });
-    clienteId = cliente.id;
+        // Crear cliente
+        const cliente = await tx.usuario.create({
+          data: {
+            email: clienteTest.email,
+            password: await bcrypt.hash(clienteTest.password, 12),
+            nombre: clienteTest.nombre,
+            rol: 'CLIENTE',
+            activo: true,
+          },
+        });
+        clienteId = cliente.id;
 
-    // Crear pedido de prueba
-    const pedido = await prisma.pedido.create({
-      data: {
-        numeroPedido: 'M-20240001',
-        usuarioId: clienteId,
-        estado: 'CONFIRMADO',
-        subtotal: 100.00,
-        envio: 5.00,
-        total: 105.00,
-        nombreEnvio: clienteTest.nombre,
-        telefonoEnvio: '+34600123456',
-        direccionEnvio: 'Calle Test 123',
-        codigoPostalEnvio: '28001',
-        ciudadEnvio: 'Madrid',
-        provinciaEnvio: 'Madrid',
-        paisEnvio: 'España',
-        metodoPago: 'TARJETA',
-      },
-    });
-    pedidoId = pedido.id;
+        // Crear pedido de prueba
+        const pedido = await tx.pedido.create({
+          data: {
+            numeroPedido: `M-${Date.now().toString().slice(-6)}`,
+            usuarioId: clienteId,
+            estado: 'CONFIRMADO',
+            subtotal: 100.00,
+            envio: 5.00,
+            total: 105.00,
+            nombreEnvio: clienteTest.nombre,
+            telefonoEnvio: '+34600123456',
+            direccionEnvio: 'Calle Test 123',
+            codigoPostalEnvio: '28001',
+            ciudadEnvio: 'Madrid',
+            provinciaEnvio: 'Madrid',
+            paisEnvio: 'España',
+            metodoPago: 'TARJETA',
+          },
+        });
+        pedidoId = pedido.id;
+      });
+    } catch (error) {
+      console.error('Error en beforeAll de messages:', error);
+      throw error;
+    }
   });
 
   afterAll(async () => {
-    // Limpiar datos de test
-    await prisma.mensajePedido.deleteMany({
-      where: { pedidoId }
-    });
-    await prisma.pedido.deleteMany({
-      where: { id: pedidoId }
-    });
-    await prisma.usuario.deleteMany({
-      where: { email: { in: [adminTest.email, clienteTest.email] } }
-    });
+    // Limpiar datos de test con transacción
+    try {
+      await prisma.$transaction(async (tx) => {
+        await tx.mensajePedido.deleteMany({
+          where: { pedidoId }
+        });
+        await tx.pedido.deleteMany({
+          where: { id: pedidoId }
+        });
+        await tx.usuario.deleteMany({
+          where: { email: { in: [adminTest.email, clienteTest.email] } }
+        });
+      });
+    } catch (error) {
+      // Ignorar errores en limpieza
+      console.error('Error en afterAll de messages:', error);
+    }
   });
 
   describe('GET /api/admin/messages', () => {

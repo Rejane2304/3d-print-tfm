@@ -8,7 +8,7 @@ import bcrypt from 'bcrypt';
 
 describe('Página de Checkout', () => {
   const usuarioTest = {
-    email: `test-checkout-page-${Date.now()}-${Math.random()}@example.com`,
+    email: `test-checkout-page-${Date.now()}-${Math.random().toString(36).substr(2, 9)}@example.com`,
     password: 'TestPassword123!',
     nombre: 'Usuario Checkout',
   };
@@ -17,9 +17,10 @@ describe('Página de Checkout', () => {
   let direccionId: string;
 
   beforeAll(async () => {
-    // Limpiar datos previos usando transacción para evitar deadlocks
     try {
-      await prisma.$transaction(async (tx) => {
+      // Usar transacción para toda la operación de setup para evitar deadlocks
+      const result = await prisma.$transaction(async (tx) => {
+        // Limpiar datos previos
         await tx.itemCarrito.deleteMany({
           where: { carrito: { usuario: { email: usuarioTest.email } } }
         });
@@ -32,48 +33,43 @@ describe('Página de Checkout', () => {
         await tx.usuario.deleteMany({
           where: { email: usuarioTest.email }
         });
+
+        // Crear usuario
+        const hashedPassword = await bcrypt.hash(usuarioTest.password, 12);
+        const usuario = await tx.usuario.create({
+          data: {
+            email: usuarioTest.email,
+            password: hashedPassword,
+            nombre: usuarioTest.nombre,
+            rol: 'CLIENTE',
+            activo: true,
+          },
+        });
+
+        // Crear dirección dentro de la misma transacción
+        const direccion = await tx.direccion.create({
+          data: {
+            usuarioId: usuario.id,
+            nombre: 'Casa',
+            destinatario: usuarioTest.nombre,
+            telefono: '612345678',
+            direccion: 'Calle Test 123',
+            codigoPostal: '28001',
+            ciudad: 'Madrid',
+            provincia: 'Madrid',
+            esPrincipal: true,
+          },
+        });
+
+        return { usuario, direccion };
       });
+
+      usuarioId = result.usuario.id;
+      direccionId = result.direccion.id;
     } catch (error) {
-      // Ignorar errores si no hay datos que limpiar
+      console.error('Error en beforeAll de checkout:', error);
+      throw error;
     }
-
-    // Crear usuario
-    const hashedPassword = await bcrypt.hash(usuarioTest.password, 12);
-    const usuario = await prisma.usuario.create({
-      data: {
-        email: usuarioTest.email,
-        password: hashedPassword,
-        nombre: usuarioTest.nombre,
-        rol: 'CLIENTE',
-        activo: true,
-      },
-    });
-    usuarioId = usuario.id;
-
-    // Verificar que el usuario se creó correctamente
-    const usuarioCreado = await prisma.usuario.findUnique({
-      where: { id: usuarioId },
-    });
-    
-    if (!usuarioCreado) {
-      throw new Error('Usuario no se creó correctamente');
-    }
-
-    // Crear dirección
-    const direccion = await prisma.direccion.create({
-      data: {
-        usuarioId: usuarioId,
-        nombre: 'Casa',
-        destinatario: usuarioTest.nombre,
-        telefono: '612345678',
-        direccion: 'Calle Test 123',
-        codigoPostal: '28001',
-        ciudad: 'Madrid',
-        provincia: 'Madrid',
-        esPrincipal: true,
-      },
-    });
-    direccionId = direccion.id;
   });
 
   afterAll(async () => {
