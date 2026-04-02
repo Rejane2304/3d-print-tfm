@@ -25,9 +25,9 @@ interface FilterSidebarProps {
   searchParams: {
     category?: string;
     material?: string;
-    minPrecio?: string;
-    maxPrecio?: string;
-    enStock?: string;
+    minPrice?: string;
+    maxPrice?: string;
+    inStock?: string;
   };
 }
 
@@ -57,9 +57,9 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
   const hayFiltrosActivos = 
     searchParams.category || 
     searchParams.material || 
-    searchParams.minPrecio || 
-    searchParams.maxPrecio || 
-    searchParams.enStock;
+    searchParams.minPrice || 
+    searchParams.maxPrice || 
+    searchParams.inStock;
   
   return (
     <div className="bg-white rounded-lg shadow-md p-6 sticky top-24">
@@ -120,16 +120,16 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
           <input
             type="number"
             placeholder="Min €"
-            value={searchParams.minPrecio || ''}
-            onChange={(e) => updateFilter('minPrecio', e.target.value)}
+            value={searchParams.minPrice || ''}
+            onChange={(e) => updateFilter('minPrice', e.target.value)}
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500"
             min="0"
           />
           <input
             type="number"
             placeholder="Max €"
-            value={searchParams.maxPrecio || ''}
-            onChange={(e) => updateFilter('maxPrecio', e.target.value)}
+            value={searchParams.maxPrice || ''}
+            onChange={(e) => updateFilter('maxPrice', e.target.value)}
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500"
             min="0"
           />
@@ -141,8 +141,8 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
         <label className="flex items-center gap-2 cursor-pointer">
           <input
             type="checkbox"
-            checked={searchParams.enStock === 'true'}
-            onChange={(e) => updateFilter('enStock', e.target.checked ? 'true' : '')}
+            checked={searchParams.inStock === 'true'}
+            onChange={(e) => updateFilter('inStock', e.target.checked ? 'true' : '')}
             className="rounded text-indigo-600 focus:ring-indigo-500"
           />
           <span className="text-sm text-gray-700">Solo en stock</span>

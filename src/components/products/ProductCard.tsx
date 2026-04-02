@@ -29,7 +29,7 @@ export default function ProductCard({ producto }: ProductCardProps) {
   
   return (
     <Link
-      href={`/products/${producto.slug}`}
+      href={`/products/${producto.slug}`} data-testid="product-card"
       className="group bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300"
     >
       <div className="relative aspect-square bg-gray-200">
