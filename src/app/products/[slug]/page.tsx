@@ -79,6 +79,7 @@ export default async function ProductoDetallePage({ params }: ProductoDetallePag
                   src={imagenPrincipal.url}
                   alt={producto.nombre}
                   fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 50vw"
                   className="object-cover"
                   priority
                 />
@@ -101,6 +102,7 @@ export default async function ProductoDetallePage({ params }: ProductoDetallePag
                       src={imagen.url}
                       alt={imagen.textoAlt || producto.nombre}
                       fill
+                      sizes="(max-width: 768px) 25vw, (max-width: 1200px) 12vw, 12vw"
                       className="object-cover"
                     />
                   </button>
@@ -230,6 +232,7 @@ export default async function ProductoDetallePage({ params }: ProductoDetallePag
                           src={producto.imagenes[0].url}
                           alt={producto.nombre}
                           fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                           className="object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       ) : (

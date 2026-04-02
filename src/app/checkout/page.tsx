@@ -233,21 +233,21 @@ export default function CheckoutPage() {
             {/* Resumen de items */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h2 className="text-xl font-semibold mb-4">Resumen del pedido</h2>
-              {carrito?.items.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center gap-4 py-3 border-b border-gray-100"
-                >
-                  <div className="flex-1">
-                    <p className="font-medium">{item.producto.nombre}</p>
-                    <p className="text-sm text-gray-600">
-                      {item.quantity} x {item.unitPrice.toFixed(2)} €
-                    </p>
-                  </div>
-                  <p className="font-semibold">
-                    {(item.quantity * item.unitPrice).toFixed(2)} €
-                  </p>
-                </div>
+               {carrito?.items.map((item) => (
+                 <div
+                   key={item.id}
+                   className="flex items-center gap-4 py-3 border-b border-gray-100"
+                 >
+                   <div className="flex-1">
+                     <p className="font-medium">{item.producto.nombre}</p>
+                     <p className="text-sm text-gray-600">
+                       {item.quantity} x {(item.unitPrice || 0).toFixed(2)} €
+                     </p>
+                   </div>
+                   <p className="font-semibold">
+                     {((item.quantity || 1) * (item.unitPrice || 0)).toFixed(2)} €
+                   </p>
+                 </div>
               ))}
             </div>
           </div>

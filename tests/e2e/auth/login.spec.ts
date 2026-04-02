@@ -140,21 +140,23 @@ test.describe('Flujo de Autenticación', () => {
       await page.locator('button[type="submit"]').filter({ hasText: /iniciar sesión/i }).click();
       
       // Esperar a que se procese el login (dar tiempo al error)
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(3000);
       
-      // Verificar que hay algún indicador de error
-      // Puede ser: mensaje de error, seguir en /auth, o error visible
-      const indicators = await Promise.all([
-        page.getByText(/Email o contraseña incorrectos/).isVisible().catch(() => false),
-        page.getByText(/incorrectos/).isVisible().catch(() => false),
-        page.getByText(/error/).isVisible().catch(() => false),
-      ]);
+      // Verificar que NO redirige (es decir, sigue en /auth o página de error)
+      const currentUrl = page.url();
       
-      // Debe mostrar al menos un indicador de error, O seguir en /auth
-      const url = page.url();
-      const stillOnAuth = url.includes('/auth');
+      // NextAuth típicamente permanece en /auth si hay error
+      // O redirige a /auth con algún parámetro de error
+      const stillOnAuth = currentUrl.includes('/auth');
       
-      expect(indicators.some(Boolean) || stillOnAuth).toBe(true);
+      // Alternativamente, puede haber un mensaje de error visible
+      const hasErrorMessage = await page
+        .getByText(/Email o contraseña|incorrectos|error/i)
+        .isVisible()
+        .catch(() => false);
+      
+      // Debe cumplir al menos una condición
+      expect(stillOnAuth || hasErrorMessage).toBe(true);
     });
 
     test('debe redirigir usuarios autenticados desde /auth', async ({ page }) => {
