@@ -12,8 +12,8 @@ describe('API de Productos', () => {
       
       expect(res.status).toBe(200);
       const data = await res.json();
-      expect(data.productos).toBeDefined();
-      expect(data.productos.length).toBeGreaterThan(0);
+      expect(data.data).toBeDefined();
+      expect(data.data.length).toBeGreaterThan(0);
     });
 
     it('debe filtrar por categoría', async () => {
@@ -23,8 +23,8 @@ describe('API de Productos', () => {
       expect(res.status).toBe(200);
       const data = await res.json();
       
-      if (data.productos.length > 0) {
-        expect(data.productos[0].categoria).toBe('DECORACION');
+      if (data.data.length > 0) {
+        expect(data.data[0].categoria).toBe('DECORACION');
       }
     });
 
@@ -34,27 +34,29 @@ describe('API de Productos', () => {
       
       expect(res.status).toBe(200);
       const data = await res.json();
-      expect(data.productos).toBeDefined();
+      expect(data.data).toBeDefined();
     });
 
     it('debe buscar por query', async () => {
-      const req = new NextRequest('http://localhost:3000/api/products?q=vaso');
+      const req = new NextRequest('http://localhost:3000/api/products?busqueda=vaso');
       const res = await getProducts(req);
       
       expect(res.status).toBe(200);
       const data = await res.json();
-      expect(data.productos).toBeDefined();
+      expect(data.data).toBeDefined();
     });
 
     it('debe ordenar por precio ascendente', async () => {
-      const req = new NextRequest('http://localhost:3000/api/products?sort=precio_asc');
+      const req = new NextRequest('http://localhost:3000/api/products?ordenar=precio&orden=asc');
       const res = await getProducts(req);
       
       expect(res.status).toBe(200);
       const data = await res.json();
       
-      if (data.productos.length > 1) {
-        expect(data.productos[0].precio).toBeLessThanOrEqual(data.productos[1].precio);
+      if (data.data.length > 1) {
+        const precio1 = parseFloat(data.data[0].precio);
+        const precio2 = parseFloat(data.data[1].precio);
+        expect(precio1).toBeLessThanOrEqual(precio2);
       }
     });
 
@@ -88,8 +90,8 @@ describe('API de Productos', () => {
       
       expect(res.status).toBe(200);
       const data = await res.json();
-      expect(data.producto).toBeDefined();
-      expect(data.producto.slug).toBe(productoTest.slug);
+      expect(data.data.producto).toBeDefined();
+      expect(data.data.producto.slug).toBe(productoTest.slug);
     });
 
     it('debe retornar 404 para producto inexistente', async () => {
@@ -106,7 +108,7 @@ describe('API de Productos', () => {
       const res = await getProductDetail(req, { params: { slug: productoTest.slug } });
       
       const data = await res.json();
-      expect(data.producto.imagenes).toBeDefined();
+      expect(data.data.producto.imagenes).toBeDefined();
     });
   });
 
