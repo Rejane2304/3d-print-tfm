@@ -113,42 +113,29 @@ La aplicación estará disponible en [http://localhost:3000](http://localhost:30
 
 ## 🧪 Testing
 
-### Tests Unitarios (Sin necesidad de BD)
+La suite de tests está siendo reconstruida para ser más enfocada y mantenible.
+
+### Ejecutar Tests
+
 ```bash
+# Todos los tests
+npm test
+
+# Unitarios (validaciones, componentes)
 npm run test:unit
-# o
-npm test -- tests/unit
-```
 
-### Tests de Integración (Requiere PostgreSQL)
-```bash
-# Configurar .env.test con DATABASE_URL de test
+# Integración (APIs, base de datos) - Requiere PostgreSQL
 npm run test:integration
-# o
-VITEST_ENV=integration npm test -- tests/integration
-```
 
-### Tests E2E (Requiere servidor corriendo)
-```bash
-# Terminal 1: Iniciar servidor
-npm run dev
-
-# Terminal 2: Ejecutar tests E2E
+# E2E (flujos completos) - Requiere servidor corriendo
 npm run test:e2e
-```
 
-### Tests con Cobertura
-```bash
+# Con cobertura
 npm run test:coverage
 ```
 
-### Verificación completa
-```bash
-npm run lint
-npm run test:unit
-npm run test:integration
-npm run test:e2e
-```
+📚 **Documentación completa:** [doc/TESTING.md](doc/TESTING.md)  
+📋 **Roadmap de mejoras:** [doc/ROADMAP.md](doc/ROADMAP.md)
 
 ## 📊 Estado de Tests
 
@@ -250,10 +237,10 @@ npm run test:e2e
 
 ## 📚 Documentación
 
-- [Plan de Implementación](private/PLAN_IMPLEMENTACION.md) - Roadmap completo del proyecto
+- **[Guía de Testing](doc/TESTING.md)** - Cómo ejecutar y mantener tests
+- **[Roadmap](doc/ROADMAP.md)** - Plan de mejoras y próximos pasos
 - [Guía de Variables de Entorno](private/GUIA_VARIABLES_ENTORNO.md) - Configuración paso a paso
-- [Comandos de Desarrollo](private/COMANDOS.md) - Comandos útiles y troubleshooting
-- Documentación académica en `/doc/`
+- Documentación académica TFM en [`/doc/`](doc/)
 
 ## 🔐 Seguridad
 
