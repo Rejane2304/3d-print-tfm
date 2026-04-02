@@ -54,6 +54,8 @@ async function limpiarBaseDeDatos() {
     'movimientos_inventario',
     'pagos',
     'items_pedido',
+    'items_carrito',
+    'carritos',
     'pedidos',
     'facturas',
     'imagenes_producto',
@@ -62,8 +64,6 @@ async function limpiarBaseDeDatos() {
     'usuarios',
     'configuracion_envios',
     'configuracion',
-    'carritos',
-    'items_carrito',
   ];
 
   for (const tabla of tablas) {
@@ -71,7 +71,7 @@ async function limpiarBaseDeDatos() {
       await prisma.$executeRawUnsafe(`TRUNCATE TABLE "${tabla}" CASCADE`);
     } catch (error) {
       // Ignorar errores si la tabla no existe o está vacía
-      console.log(`⚠️  Tabla ${tabla}: ${error instanceof Error ? error.message : 'error desconocido'}`);
+      // console.log(`⚠️  Tabla ${tabla}: ${error instanceof Error ? error.message : 'error desconocido'}`);
     }
   }
 }
@@ -174,6 +174,14 @@ beforeAll(async () => {
       
       // Insertar datos iniciales
       await seedDatosIniciales();
+      
+      // Verificar que hay datos
+      const usuariosCount = await prisma.usuario.count();
+      const productosCount = await prisma.producto.count();
+      
+      if (usuariosCount === 0 || productosCount === 0) {
+        console.log(`⚠️  Datos insuficientes: ${usuariosCount} usuarios, ${productosCount} productos`);
+      }
       
       console.log('✅ BD de test lista');
     } catch (error) {

@@ -3,10 +3,48 @@
  * GET /api/products/[slug] - Detalle de producto
  * TDD: Tests primero, implementación después
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import { prisma } from '@/lib/db/prisma';
 
 describe('GET /api/products/[slug]', () => {
+  let productoTest: any;
+
+  beforeAll(async () => {
+    // Crear producto de prueba si no existe
+    const existente = await prisma.producto.findFirst({
+      where: { activo: true },
+      include: { imagenes: true },
+    });
+
+    if (existente) {
+      productoTest = existente;
+    } else {
+      // Crear producto de prueba
+      productoTest = await prisma.producto.create({
+        data: {
+          slug: 'test-producto-detalle',
+          nombre: 'Producto Test Detalle',
+          descripcion: 'Descripción de prueba',
+          precio: 29.99,
+          stock: 10,
+          categoria: 'DECORACION',
+          material: 'PLA',
+          activo: true,
+          imagenes: {
+            create: {
+              url: 'https://example.com/test.jpg',
+              nombreArchivo: 'test.jpg',
+              textoAlt: 'Test',
+              esPrincipal: true,
+              orden: 0,
+            },
+          },
+        },
+        include: { imagenes: true },
+      });
+    }
+  });
+
   describe('Obtener producto por slug', () => {
     it('debe retornar producto existente', async () => {
       const producto = await prisma.producto.findFirst({

@@ -72,7 +72,7 @@ describe('NextAuth - Flujo de Login', () => {
 
     it('debe encontrar usuario por email insensible a mayúsculas', async () => {
       const usuario = await prisma.usuario.findUnique({
-        where: { email: 'TEST-LOGIN@EXAMPLE.COM' },
+        where: { email: usuarioTest.email.toUpperCase() },
       });
 
       // Supabase/PostgreSQL es case-insensitive por defecto en búsquedas

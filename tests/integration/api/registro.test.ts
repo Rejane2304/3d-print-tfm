@@ -10,23 +10,17 @@ import { prisma } from '@/lib/db/prisma';
 import { cleanupTestUsers } from '../../helpers/db-cleanup';
 
 describe('POST /api/auth/register', () => {
-  const datosValidos = {
-    nombre: 'Juan Pérez',
-    email: 'test-nuevo@example.com',
-    password: 'Password123!',
-    confirmarPassword: 'Password123!',
-    telefono: '+34 600 123 456',
-  };
+  let datosValidos: any;
 
   beforeEach(async () => {
-    // Limpiar TODOS los usuarios de test creados por estos tests
-    await prisma.usuario.deleteMany({
-      where: {
-        email: {
-          contains: 'test-',
-        },
-      },
-    });
+    // Generar email único con timestamp para evitar conflictos
+    datosValidos = {
+      nombre: 'Juan Pérez',
+      email: `test-${Date.now()}@example.com`,
+      password: 'Password123!',
+      confirmarPassword: 'Password123!',
+      telefono: '+34 600 123 456',
+    };
   });
 
   afterAll(async () => {
@@ -115,37 +109,51 @@ describe('POST /api/auth/register', () => {
     });
 
     it('debe hashear la contraseña', async () => {
-      const req = createRequest(datosValidos);
-      await POST(req);
+      const emailUnico = `test-hash-${Date.now()}@example.com`;
+      const datosTest = { ...datosValidos, email: emailUnico };
+      const req = createRequest(datosTest);
+      const res = await POST(req);
+      
+      expect(res.status).toBe(201);
 
       const usuario = await prisma.usuario.findUnique({
-        where: { email: datosValidos.email.toLowerCase() },
+        where: { email: emailUnico.toLowerCase() },
       });
 
       expect(usuario).toBeDefined();
-      expect(usuario!.password).not.toBe(datosValidos.password);
+      expect(usuario!.password).not.toBe(datosTest.password);
       expect(usuario!.password).toMatch(/^\$2[aby]\$/); // Formato bcrypt
     });
 
     it('debe asignar rol CLIENTE por defecto', async () => {
-      const req = createRequest(datosValidos);
-      await POST(req);
+      const emailUnico = `test-rol-${Date.now()}@example.com`;
+      const datosTest = { ...datosValidos, email: emailUnico };
+      const req = createRequest(datosTest);
+      const res = await POST(req);
+      
+      expect(res.status).toBe(201);
 
       const usuario = await prisma.usuario.findUnique({
-        where: { email: datosValidos.email.toLowerCase() },
+        where: { email: emailUnico.toLowerCase() },
       });
 
+      expect(usuario).toBeDefined();
       expect(usuario!.rol).toBe('CLIENTE');
     });
 
     it('debe activar usuario por defecto', async () => {
-      const req = createRequest(datosValidos);
-      await POST(req);
+      const emailUnico = `test-activo-${Date.now()}@example.com`;
+      const datosTest = { ...datosValidos, email: emailUnico };
+      const req = createRequest(datosTest);
+      const res = await POST(req);
+      
+      expect(res.status).toBe(201);
 
       const usuario = await prisma.usuario.findUnique({
-        where: { email: datosValidos.email.toLowerCase() },
+        where: { email: emailUnico.toLowerCase() },
       });
 
+      expect(usuario).toBeDefined();
       expect(usuario!.activo).toBe(true);
     });
   });
