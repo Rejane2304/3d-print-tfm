@@ -7,50 +7,50 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { prisma } from '@/lib/db/prisma';
 
-async function getProductosDestacados() {
-  const productos = await prisma.producto.findMany({
+async function getFeaturedProducts() {
+  const products = await prisma.product.findMany({
     where: {
-      activo: true,
+      isActive: true,
     },
     include: {
-      imagenes: {
-        where: { esPrincipal: true },
+      images: {
+        where: { isMain: true },
         take: 1,
       },
     },
   });
 
-  const pedidosEntregados = await prisma.pedido.findMany({
+  const deliveredOrders = await prisma.order.findMany({
     where: {
-      estado: 'ENTREGADO',
+      status: 'DELIVERED',
     },
     include: {
       items: true,
     },
   });
 
-  const ventasPorProducto: Record<string, number> = {};
-  for (const pedido of pedidosEntregados) {
-    for (const item of pedido.items) {
-      if (item.productoId) {
-        ventasPorProducto[item.productoId] = (ventasPorProducto[item.productoId] || 0) + item.cantidad;
+  const salesByProduct: Record<string, number> = {};
+  for (const order of deliveredOrders) {
+    for (const item of order.items) {
+      if (item.productId) {
+        salesByProduct[item.productId] = (salesByProduct[item.productId] || 0) + item.quantity;
       }
     }
   }
 
-  const productosConVentas = productos
-    .map((producto) => ({
-      ...producto,
-      ventas: ventasPorProducto[producto.id] || 0,
+  const productsWithSales = products
+    .map((product) => ({
+      ...product,
+      sales: salesByProduct[product.id] || 0,
     }))
-    .sort((a, b) => b.ventas - a.ventas)
+    .sort((a, b) => b.sales - a.sales)
     .slice(0, 3);
 
-  return productosConVentas;
+  return productsWithSales;
 }
 
 export default async function HomePage() {
-  const productosDestacados = await getProductosDestacados();
+  const featuredProducts = await getFeaturedProducts();
 
   return (
     <div className="bg-white">
@@ -124,20 +124,20 @@ export default async function HomePage() {
             </Link>
           </div>
           
-          {productosDestacados.length > 0 ? (
+          {featuredProducts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-              {productosDestacados.map((producto) => (
+              {featuredProducts.map((product) => (
                 <Link
-                  key={producto.id}
-                  href={`/products/${producto.slug}`}
+                  key={product.id}
+                  href={`/products/${product.slug}`}
                   className="group"
                 >
                   <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
                     <div className="relative aspect-square bg-gray-200">
-                      {producto.imagenes[0] ? (
+                      {product.images[0] ? (
                         <Image
-                          src={producto.imagenes[0].url}
-                          alt={producto.nombre}
+                          src={product.images[0].url}
+                          alt={product.name}
                           fill
                           className="object-cover group-hover:scale-105 transition-transform duration-300"
                         />
@@ -148,34 +148,34 @@ export default async function HomePage() {
                     
                     <div className="p-4 lg:p-6">
                       <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors">
-                        {producto.nombre}
+                        {product.name}
                       </h3>
                       
                        <p className="text-sm text-gray-500 mb-3 line-clamp-2">
-                         {producto.descripcionCorta || producto.descripcion}
-                       </p>
+                         {product.shortDescription || product.description}
+                        </p>
 
-                       <div className="flex justify-between items-center">
-                         <span className="text-xl font-bold text-indigo-600">
-                           {Number(producto.precio).toFixed(2)} €
-                        </span>
-                        
-                        <span className="text-sm text-gray-500">
-                          {producto.stock > 0 ? 'En stock' : 'Agotado'}
-                        </span>
+                        <div className="flex justify-between items-center">
+                          <span className="text-xl font-bold text-indigo-600">
+                            {Number(product.price).toFixed(2)} €
+                         </span>
+                          
+                          <span className="text-sm text-gray-500">
+                           {product.stock > 0 ? 'En stock' : 'Agotado'}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12 text-gray-500">
-              No hay productos destacados disponibles
-            </div>
-          )}
-        </div>
-      </section>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 text-gray-500">
+                No hay productos destacados disponibles
+              </div>
+            )}
+          </div>
+        </section>
 
       {/* Características */}
       <section className="py-16 lg:py-24 bg-indigo-50">
