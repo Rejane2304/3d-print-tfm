@@ -54,7 +54,7 @@ interface PedidoDetalle {
   ciudadEnvio: string;
   provinciaEnvio: string;
   paisEnvio: string;
-  metodoPago: string;
+  paymentMethod: string;
   numeroSeguimiento?: string;
   transportista?: string;
   notasInternas?: string;
@@ -313,7 +313,7 @@ export default function AdminPedidoDetallePage() {
               </div>
               <div className="p-6">
                 <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                  {pedido.metodoPago === 'TARJETA' ? 'Tarjeta' : 'Transferencia'}
+                  {pedido.paymentMethod === 'TARJETA' ? 'Tarjeta' : 'Transferencia'}
                 </span>
               </div>
             </div>

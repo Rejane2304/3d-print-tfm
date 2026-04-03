@@ -46,7 +46,7 @@ interface PedidoDetalle {
   ciudadEnvio: string;
   provinciaEnvio: string;
   paisEnvio: string;
-  metodoPago: string;
+  paymentMethod: string;
   numeroSeguimiento?: string;
   transportista?: string;
   notasCliente?: string;
@@ -494,7 +494,7 @@ export default function PedidoDetallePage() {
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Método:</span>
-                  <span className="font-medium">{metodosPago[pedido.metodoPago] || pedido.metodoPago}</span>
+                  <span className="font-medium">{metodosPago[pedido.paymentMethod] || pedido.paymentMethod}</span>
                 </div>
                 {pedido.pago && (
                   <>

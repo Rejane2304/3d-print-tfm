@@ -50,7 +50,7 @@ interface FacturaDetalle {
   clientePais: string;
   pedido: {
     orderNumber: string;
-    metodoPago: string;
+    paymentMethod: string;
     items: Array<{
       id: string;
       nombre: string;
@@ -339,7 +339,7 @@ export default function AdminFacturaDetallePage() {
               <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
                 <div>
                   <p><strong>Pedido:</strong> {factura.pedido.orderNumber}</p>
-                  <p><strong>Método de pago:</strong> {factura.pedido.metodoPago === 'TARJETA' ? 'Tarjeta de crédito' : 'Transferencia bancaria'}</p>
+                  <p><strong>Método de pago:</strong> {factura.pedido.paymentMethod === 'TARJETA' ? 'Tarjeta de crédito' : 'Transferencia bancaria'}</p>
                 </div>
                 <div>
                   <p><strong>Email:</strong> {factura.pedido.usuario.email}</p>

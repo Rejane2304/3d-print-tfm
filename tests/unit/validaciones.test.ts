@@ -96,7 +96,7 @@ describe('Validaciones de Productos', () => {
     descripcion: 'Un hermoso vaso con diseño floral para decoración del hogar',
     precio: 12.99,
     stock: 25,
-    category: 'DECORATION',
+    categoria: 'DECORATION',
     material: 'PLA',
   };
 
@@ -268,7 +268,7 @@ describe('Validaciones de Cambio de Estado', () => {
 
 describe('Validaciones de Pagos', () => {
   it('debe validar monto positivo', () => {
-    const result = validarPago({ monto: 0, metodo: 'TARJETA' });
+    const result = validarPago({ monto: 0, method: 'CARD' });
     expect(result.valido).toBe(false);
     expect(result.errores).toContain('El monto debe ser mayor a 0');
   });
@@ -280,7 +280,7 @@ describe('Validaciones de Pagos', () => {
   });
 
   it('debe aceptar pago válido', () => {
-    const result = validarPago({ monto: 99.99, metodo: 'TARJETA' });
+    const result = validarPago({ monto: 99.99, method: 'CARD' });
     expect(result.valido).toBe(true);
     expect(result.errores).toHaveLength(0);
   });
@@ -361,7 +361,7 @@ function validarProducto(datos: {
   material: string;
 }) {
   const errores: string[] = [];
-  const categoriasValidas = ['DECORACION', 'ACCESORIOS', 'FUNCIONAL', 'ARTICULADOS', 'JUGUETES'];
+  const categoriasValidas = ['DECORATION', 'ACCESSORIES', 'FUNCTIONAL', 'ARTICULATED', 'TOYS'];
   const materialesValidos = ['PLA', 'PETG', 'ABS', 'TPU'];
   
   if (!datos.nombre) errores.push('El nombre del producto es requerido');
@@ -407,12 +407,12 @@ function validarPedido(datos: {
 
 function validarCambioEstado(estadoActual: string, nuevoEstado: string) {
   const transicionesValidas: Record<string, string[]> = {
-    'PENDIENTE': ['CONFIRMADO', 'CANCELADO'],
-    'CONFIRMADO': ['PREPARANDO', 'CANCELADO'],
-    'PREPARANDO': ['ENVIADO'],
-    'ENVIADO': ['ENTREGADO'],
-    'ENTREGADO': [],
-    'CANCELADO': [],
+    'PENDING': ['CONFIRMED', 'CANCELLED'],
+    'CONFIRMED': ['PREPARING', 'CANCELLED'],
+    'PREPARING': ['SHIPPED'],
+    'SHIPPED': ['DELIVERED'],
+    'DELIVERED': [],
+    'CANCELLED': [],
   };
   
   if (estadoActual === nuevoEstado) {
@@ -434,11 +434,11 @@ function validarCambioEstado(estadoActual: string, nuevoEstado: string) {
 
 function validarPago(datos: { monto: number; metodo: string }) {
   const errores: string[] = [];
-  const metodosValidos = ['TARJETA', 'BIZUM', 'TRANSFERENCIA'];
-  
+  const metodosValidos = ['CARD', 'BIZUM', 'TRANSFER'];
+
   if (datos.monto <= 0) errores.push('El monto debe ser mayor a 0');
   if (!metodosValidos.includes(datos.metodo)) errores.push('Método de pago no válido');
-  
+
   return { valido: errores.length === 0, errores };
 }
 

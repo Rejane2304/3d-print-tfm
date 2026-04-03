@@ -155,7 +155,7 @@ function generarHTMLFactura(factura: any): string {
 
     <div style="margin-top: 50px; border-top: 1px solid #ccc; padding-top: 20px;">
         <p><strong>Notas:</strong></p>
-        <p>Forma de pago: ${factura.pedido?.metodoPago === 'TARJETA' ? 'Tarjeta de crédito' : 'Transferencia bancaria'}</p>
+        <p>Forma de pago: ${factura.pedido?.paymentMethod === 'TARJETA' ? 'Tarjeta de crédito' : 'Transferencia bancaria'}</p>
     </div>
 </body>
 </html>
