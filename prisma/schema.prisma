@@ -2,7 +2,7 @@
 // PRISMA SCHEMA - E-COMMERCE 3D PRINT TFM
 // ============================================
 // Stack: Next.js + PostgreSQL + Prisma
-// Locale: Code in English, UI in Spanish
+// Locale: Code in English, Database columns mapped to Spanish
 
 // ============================================
 // GENERATOR & DATASOURCE
@@ -18,7 +18,7 @@ datasource db {
 }
 
 // ============================================
-// ENUMS - 100% English
+// ENUMS
 // ============================================
 
 enum Role {
@@ -94,7 +94,7 @@ enum AlertStatus {
 }
 
 // ============================================
-// MODEL 1: USERS
+// MODELS
 // ============================================
 
 model User {
@@ -134,10 +134,6 @@ model User {
   @@map("usuarios")
 }
 
-// ============================================
-// MODEL 2: ADDRESSES
-// ============================================
-
 model Address {
   id            String    @id @default(uuid())
   userId        String    @map("usuarioId")
@@ -165,10 +161,6 @@ model Address {
   @@index([isDefault])
   @@map("direcciones")
 }
-
-// ============================================
-// MODEL 3: PRODUCTS
-// ============================================
 
 model Product {
   id            String    @id @default(uuid())
@@ -215,10 +207,6 @@ model Product {
   @@map("productos")
 }
 
-// ============================================
-// MODEL 4: PRODUCT IMAGES
-// ============================================
-
 model ProductImage {
   id            String    @id @default(uuid())
   productId     String    @map("productoId")
@@ -245,10 +233,6 @@ model ProductImage {
   @@index([isMain])
   @@map("imagenes_producto")
 }
-
-// ============================================
-// MODEL 5: CART
-// ============================================
 
 model Cart {
   id         String   @id @default(uuid())
@@ -285,10 +269,6 @@ model CartItem {
   @@unique([cartId, productId])
   @@map("items_carrito")
 }
-
-// ============================================
-// MODEL 6: ORDERS
-// ============================================
 
 model Order {
   id            String        @id @default(uuid())
@@ -350,10 +330,6 @@ model Order {
   @@map("pedidos")
 }
 
-// ============================================
-// MODEL 7: ORDER ITEMS
-// ============================================
-
 model OrderItem {
   id            String    @id @default(uuid())
   orderId       String    @map("pedidoId")
@@ -378,10 +354,6 @@ model OrderItem {
   @@index([productId])
   @@map("items_pedido")
 }
-
-// ============================================
-// MODEL 8: PAYMENTS
-// ============================================
 
 model Payment {
   id                    String      @id @default(uuid())
@@ -416,10 +388,6 @@ model Payment {
   @@map("pagos")
 }
 
-// ============================================
-// MODEL 9: INVENTORY MOVEMENTS
-// ============================================
-
 model InventoryMovement {
   id            String        @id @default(uuid())
   productId     String        @map("productoId")
@@ -446,10 +414,6 @@ model InventoryMovement {
   @@index([createdAt])
   @@map("movimientos_inventario")
 }
-
-// ============================================
-// MODEL 10: ALERTS
-// ============================================
 
 model Alert {
   id            String          @id @default(uuid())
@@ -481,10 +445,6 @@ model Alert {
   @@map("alertas")
 }
 
-// ============================================
-// MODEL 11: ORDER MESSAGES
-// ============================================
-
 model OrderMessage {
   id            String    @id @default(uuid())
   orderId       String    @map("pedidoId")
@@ -508,10 +468,6 @@ model OrderMessage {
   @@index([isFromCustomer])
   @@map("mensajes_pedido")
 }
-
-// ============================================
-// MODEL 12: INVOICES
-// ============================================
 
 model Invoice {
   id            String    @id @default(uuid())
@@ -557,10 +513,6 @@ model Invoice {
   @@map("facturas")
 }
 
-// ============================================
-// MODEL 13: SHIPPING CONFIG
-// ============================================
-
 model ShippingConfig {
   id                    String    @id @default(uuid())
   
@@ -587,10 +539,6 @@ model ShippingConfig {
   @@map("configuracion_envios")
 }
 
-// ============================================
-// MODEL 14: SITE CONFIG
-// ============================================
-
 model SiteConfig {
   id                    String    @id @default(cuid())
   
@@ -613,10 +561,6 @@ model SiteConfig {
   @@map("configuracion")
 }
 
-// ============================================
-// MODEL 15: SESSIONS
-// ============================================
-
 model Session {
   id           String   @id @default(cuid())
   sessionToken String   @unique @map("sessionToken")
@@ -628,10 +572,6 @@ model Session {
   @@map("sesiones")
 }
 
-// ============================================
-// MODEL 16: VERIFICATION TOKENS
-// ============================================
-
 model VerificationToken {
   identifier String
   token      String   @unique @map("token")
@@ -640,10 +580,6 @@ model VerificationToken {
   @@unique([identifier, token])
   @@map("tokens_verificacion")
 }
-
-// ============================================
-// MODEL 17: AUDIT LOGS
-// ============================================
 
 model AuditLog {
   id            String    @id @default(uuid())

@@ -152,30 +152,30 @@ export default async function HomePage() {
                       </h3>
                       
                        <p className="text-sm text-gray-500 mb-3 line-clamp-2">
-                         {product.shortDescription || product.description}
-                        </p>
+                          {product.shortDescription || product.description}
+                         </p>
 
-                        <div className="flex justify-between items-center">
-                          <span className="text-xl font-bold text-indigo-600">
-                            {Number(product.price).toFixed(2)} €
-                         </span>
-                          
-                          <span className="text-sm text-gray-500">
-                           {product.stock > 0 ? 'En stock' : 'Agotado'}
+                         <div className="flex justify-between items-center">
+                           <span className="text-xl font-bold text-indigo-600">
+                             {Number(product.price).toFixed(2)} €
                           </span>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12 text-gray-500">
-                No hay productos destacados disponibles
-              </div>
-            )}
-          </div>
-        </section>
+                           
+                           <span className="text-sm text-gray-500">
+                            {product.stock > 0 ? 'En stock' : 'Agotado'}
+                           </span>
+                         </div>
+                       </div>
+                     </div>
+                   </Link>
+                 ))}
+               </div>
+             ) : (
+               <div className="text-center py-12 text-gray-500">
+                 No hay productos destacados disponibles
+               </div>
+             )}
+           </div>
+         </section>
 
       {/* Características */}
       <section className="py-16 lg:py-24 bg-indigo-50">

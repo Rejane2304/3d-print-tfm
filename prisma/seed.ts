@@ -115,7 +115,7 @@ async function main(): Promise<void> {
       const slug = product.name
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-|-$/g, '');
+        .replace(/(^-|-$)/g, '');
 
       const category: Category = categoryMap[product.category] || 'ACCESSORIES';
       const material = product.material as Material;

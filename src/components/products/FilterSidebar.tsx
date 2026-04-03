@@ -8,11 +8,11 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 const CATEGORIAS = [
   { value: '', label: 'Todas las categorías' },
-  { value: 'DECORACION', label: 'Decoración' },
-  { value: 'ACCESORIOS', label: 'Accesorios' },
-  { value: 'FUNCIONAL', label: 'Funcional' },
-  { value: 'ARTICULADOS', label: 'Articulados' },
-  { value: 'JUGUETES', label: 'Juguetes' },
+  { value: 'DECORATION', label: 'Decoración' },
+  { value: 'ACCESSORIES', label: 'Accesorios' },
+  { value: 'FUNCTIONAL', label: 'Funcional' },
+  { value: 'ARTICULATED', label: 'Articulados' },
+  { value: 'TOYS', label: 'Juguetes' },
 ];
 
 const MATERIALES = [

@@ -9,22 +9,23 @@ import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
+import { Category, Material } from '@prisma/client';
 
-// Schema de validación (frontend envía campos en inglés, se mapean a español para Prisma)
-const productoSchema = z.object({
-  nombre: z.string().min(1),
+// Schema de validación
+const productSchema = z.object({
+  name: z.string().min(1),
   description: z.string(),
-  descriptionCorta: z.string().optional(),
+  shortDescription: z.string().optional(),
   price: z.number().positive(),
-  priceAnterior: z.number().optional(),
+  previousPrice: z.number().optional(),
   stock: z.number().int().min(0),
-  category: z.enum(['DECORACION', 'ACCESORIOS', 'FUNCIONAL', 'ARTICULADOS', 'JUGUETES']),
-  material: z.enum(['PLA', 'PETG', 'ABS', 'TPU']),
-  dimensiones: z.string().optional(),
-  peso: z.number().optional(),
-  tiempoImpresion: z.number().optional(),
+  category: z.nativeEnum(Category).optional(),
+  material: z.nativeEnum(Material).optional(),
+  dimensions: z.string().optional(),
+  weight: z.number().optional(),
+  printTime: z.number().optional(),
   isActive: z.boolean().default(true),
-  destacado: z.boolean().default(false),
+  isFeatured: z.boolean().default(false),
 });
 
 // GET - Listar productos
@@ -38,28 +39,28 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const usuario = await prisma.usuario.findUnique({
+    const user = await prisma.user.findUnique({
       where: { email: session.user.email },
     });
 
-    if (!usuario || usuario.rol !== 'ADMIN') {
+    if (!user || user.role !== 'ADMIN') {
       return NextResponse.json(
         { success: false, error: 'No autorizado' },
         { status: 403 }
       );
     }
 
-    const productos = await prisma.producto.findMany({
+    const products = await prisma.product.findMany({
       include: {
-        imagenes: {
-          where: { esPrincipal: true },
+        images: {
+          where: { isMain: true },
           take: 1,
         },
       },
-      orderBy: { creadoEn: 'desc' },
+      orderBy: { createdAt: 'desc' },
     });
 
-    return NextResponse.json({ success: true, productos });
+    return NextResponse.json({ success: true, products });
   } catch (error) {
     console.error('Error listando productos:', error);
     return NextResponse.json(
@@ -80,11 +81,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const usuario = await prisma.usuario.findUnique({
+    const user = await prisma.user.findUnique({
       where: { email: session.user.email },
     });
 
-    if (!usuario || usuario.rol !== 'ADMIN') {
+    if (!user || user.role !== 'ADMIN') {
       return NextResponse.json(
         { success: false, error: 'No autorizado' },
         { status: 403 }
@@ -92,36 +93,36 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const data = productoSchema.parse(body);
+    const data = productSchema.parse(body);
 
     // Generar slug
-    const slug = data.nombre
+    const slug = data.name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
 
-    // Mapear campos del esquema Zod (inglés) a campos de Prisma (español)
-    const producto = await prisma.producto.create({
+    // Crear producto con campos en inglés
+    const product = await prisma.product.create({
       data: {
-        nombre: data.nombre,
-        descripcion: data.description,
-        descripcionCorta: data.descriptionCorta,
-        precio: data.price,
-        precioAnterior: data.priceAnterior,
+        name: data.name,
+        description: data.description,
+        shortDescription: data.shortDescription,
+        price: data.price,
+        previousPrice: data.previousPrice,
         stock: data.stock,
-        categoria: data.category,
+        category: data.category,
         material: data.material,
-        dimensiones: data.dimensiones,
-        peso: data.peso,
-        tiempoImpresion: data.tiempoImpresion,
-        activo: data.isActive,
-        destacado: data.destacado,
+        dimensions: data.dimensions,
+        weight: data.weight,
+        printTime: data.printTime,
+        isActive: data.isActive,
+        isFeatured: data.isFeatured,
         slug,
       },
     });
 
     return NextResponse.json(
-      { success: true, producto },
+      { success: true, product },
       { status: 201 }
     );
   } catch (error) {

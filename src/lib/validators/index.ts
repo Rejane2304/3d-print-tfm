@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Categoria, Material, Rol, MetodoPago, EstadoPedido } from '@prisma/client';
+import { Categoria, Material, Rol, MetodoPago, EstadoPedido } from '@/types/prisma-enums';
 
 // ============================================
 // VALIDACIONES DE AUTENTICACIÓN
