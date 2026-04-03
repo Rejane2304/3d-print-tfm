@@ -1,0 +1,4 @@
+_ref,name,description,price,freeShippingFrom,minDays,maxDays,isActive,isDefault,displayOrder
+SHIP-0001,Standard Shipping,Standard delivery within 3-5 business days,4.99,50.00,3,5,true,true,1
+SHIP-0002,Express Shipping,Express delivery within 1-2 business days,9.99,100.00,1,2,true,false,2
+SHIP-0003,Free Shipping,Free shipping for orders over 50€,0.00,,5,7,true,false,3

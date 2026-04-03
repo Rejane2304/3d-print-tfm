@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
       }),
       prisma.order.aggregate({
         where: {
-          estado: { in: ['CONFIRMADO', 'PREPARANDO', 'ENVIADO', 'ENTREGADO'] },
+          status: { in: ['CONFIRMED', 'PREPARING', 'SHIPPED', 'DELIVERED'] },
           createdAt: {
             gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
           },

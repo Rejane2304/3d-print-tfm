@@ -14,19 +14,19 @@ import { ConfirmModal } from '@/components/ui/ConfirmModal';
 interface CartItemProps {
   item: {
     id: string;
-    productoId: string;
-    cantidad: number;
-    precioUnitario: number;
-    producto: {
+    productId: string;
+    quantity: number;
+    unitPrice: number;
+    product: {
       id: string;
-      nombre: string;
+      name: string;
       slug: string;
-      precio: number;
+      price: number;
       stock: number;
-      imagen: string | null;
+      image: string | null;
     };
   };
-  onUpdateQuantity: (itemId: string, cantidad: number) => void;
+  onUpdateQuantity: (itemId: string, quantity: number) => void;
   onRemove: (itemId: string) => void;
   isUpdating?: boolean;
 }
@@ -37,9 +37,9 @@ export default function CartItem({
   onRemove,
   isUpdating = false,
 }: CartItemProps) {
-  const [cantidad, setCantidad] = useState(item.cantidad);
+  const [quantity, setQuantity] = useState(item.quantity);
   const [modalOpen, setModalOpen] = useState(false);
-  const subtotal = item.precioUnitario * item.cantidad;
+  const subtotal = item.unitPrice * item.quantity;
 
   const handleRemoveClick = () => {
     setModalOpen(true);
@@ -50,10 +50,10 @@ export default function CartItem({
     onRemove(item.id);
   };
 
-  const handleQuantityChange = (nuevaCantidad: number) => {
-    if (nuevaCantidad < 1 || nuevaCantidad > item.producto.stock) return;
-    setCantidad(nuevaCantidad);
-    onUpdateQuantity(item.id, nuevaCantidad);
+  const handleQuantityChange = (newQuantity: number) => {
+    if (newQuantity < 1 || newQuantity > item.product.stock) return;
+    setQuantity(newQuantity);
+    onUpdateQuantity(item.id, newQuantity);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,24 +61,24 @@ export default function CartItem({
     if (isNaN(value)) return;
     
     // Limitar entre 1 y stock disponible
-    const clampedValue = Math.max(1, Math.min(value, item.producto.stock));
-    setCantidad(clampedValue);
+    const clampedValue = Math.max(1, Math.min(value, item.product.stock));
+    setQuantity(clampedValue);
   };
 
   const handleInputBlur = () => {
-    onUpdateQuantity(item.id, cantidad);
+    onUpdateQuantity(item.id, quantity);
   };
 
   return (
     <div className="flex flex-col sm:flex-row gap-4 p-4 bg-white rounded-lg shadow-sm border border-gray-200">
       {/* Imagen del producto */}
       <Link
-        href={`/products/${item.producto.slug}`}
+        href={`/products/${item.product.slug}`}
         className="relative w-full sm:w-32 h-32 flex-shrink-0"
       >
         <Image
-          src={item.producto.imagen || '/images/placeholder.jpg'}
-          alt={item.producto.nombre}
+          src={item.product.image || '/images/placeholder.jpg'}
+          alt={item.product.name}
           fill
           className="object-cover rounded-md"
           sizes="(max-width: 640px) 100vw, 128px"
@@ -89,13 +89,13 @@ export default function CartItem({
       <div className="flex-1 flex flex-col justify-between">
         <div>
           <Link
-            href={`/products/${item.producto.slug}`}
+            href={`/products/${item.product.slug}`}
             className="text-lg font-semibold text-gray-900 hover:text-indigo-600 transition-colors line-clamp-2"
           >
-            {item.producto.nombre}
+            {item.product.name}
           </Link>
           <p className="text-sm text-gray-500 mt-1">
-            {item.precioUnitario.toFixed(2)} € / unidad
+            {item.unitPrice.toFixed(2)} € / unidad
           </p>
         </div>
 
@@ -105,8 +105,8 @@ export default function CartItem({
             {/* Botón decrementar */}
             <button
               type="button"
-              onClick={() => handleQuantityChange(cantidad - 1)}
-              disabled={cantidad <= 1 || isUpdating}
+              onClick={() => handleQuantityChange(quantity - 1)}
+              disabled={quantity <= 1 || isUpdating}
               aria-label="Decrementar cantidad"
               className="p-2 rounded-md border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
@@ -116,11 +116,11 @@ export default function CartItem({
             {/* Input de cantidad */}
             <input
               type="number"
-              value={cantidad}
+              value={quantity}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
               min={1}
-              max={item.producto.stock}
+              max={item.product.stock}
               disabled={isUpdating}
               className="w-16 text-center border border-gray-300 rounded-md py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             />
@@ -128,8 +128,8 @@ export default function CartItem({
             {/* Botón incrementar */}
             <button
               type="button"
-              onClick={() => handleQuantityChange(cantidad + 1)}
-              disabled={cantidad >= item.producto.stock || isUpdating}
+              onClick={() => handleQuantityChange(quantity + 1)}
+              disabled={quantity >= item.product.stock || isUpdating}
               aria-label="Incrementar cantidad"
               className="p-2 rounded-md border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
@@ -137,7 +137,7 @@ export default function CartItem({
             </button>
 
             {/* Indicador de stock */}
-            {cantidad >= item.producto.stock && (
+            {quantity >= item.product.stock && (
               <span className="text-xs text-orange-600 ml-2">
                 Stock máximo
               </span>
@@ -151,7 +151,7 @@ export default function CartItem({
                 {subtotal.toFixed(2)} €
               </p>
               <p className="text-sm text-gray-500">
-                {item.cantidad} x {item.precioUnitario.toFixed(2)} €
+                {item.quantity} x {item.unitPrice.toFixed(2)} €
               </p>
               {isUpdating && (
                 <p className="text-xs text-gray-400 mt-1">Actualizando...</p>
@@ -181,7 +181,7 @@ export default function CartItem({
         onClose={() => setModalOpen(false)}
         onConfirm={handleConfirmRemove}
         title="¿Eliminar del carrito?"
-        description={`¿Estás seguro de que deseas eliminar "${item.producto.nombre}" del carrito?`}
+        description={`¿Estás seguro de que deseas eliminar "${item.product.name}" del carrito?`}
         confirmText="Eliminar"
         cancelText="Cancelar"
         type="danger"

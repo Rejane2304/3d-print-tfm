@@ -36,11 +36,11 @@ export async function GET(
     const factura = await prisma.invoice.findUnique({
       where: { id: params.id },
       include: {
-        pedido: {
+        order: {
           include: {
             items: {
               include: {
-                producto: true,
+                product: true,
               },
             },
           },
@@ -75,7 +75,7 @@ export async function GET(
 }
 
 function generarHTMLFactura(factura: any): string {
-  const items = factura.pedido?.items || [];
+  const items = factura.order?.items || [];
   
   return `
 <!DOCTYPE html>
@@ -102,28 +102,28 @@ function generarHTMLFactura(factura: any): string {
 <body>
     <div class="header">
         <div class="company-info">
-            <h1>${factura.empresaNombre}</h1>
-            <p>NIF: ${factura.empresaNif}</p>
-            <p>${factura.empresaDireccion}</p>
-            <p>${factura.empresaCodigoPostal} ${factura.empresaCiudad}</p>
-            <p>${factura.empresaProvincia}</p>
+            <h1>${factura.companyName}</h1>
+            <p>NIF: ${factura.companyTaxId}</p>
+            <p>${factura.companyAddress}</p>
+            <p>${factura.companyPostalCode} ${factura.companyCity}</p>
+            <p>${factura.companyProvince}</p>
         </div>
         <div class="invoice-info">
             <h2>FACTURA</h2>
             <p><strong>Nº:</strong> ${factura.invoiceNumber}</p>
-            <p><strong>Fecha:</strong> ${new Date(factura.emitidaEn).toLocaleDateString('es-ES')}</p>
-            ${factura.anulada ? '<p class="anulada">FACTURA ANULADA</p>' : ''}
+            <p><strong>Fecha:</strong> ${new Date(factura.issuedAt).toLocaleDateString('es-ES')}</p>
+            ${factura.isCancelled ? '<p class="anulada">FACTURA ANULADA</p>' : ''}
         </div>
         <div class="clear"></div>
     </div>
 
     <div class="client-info">
         <h3>Cliente</h3>
-        <p><strong>${factura.clienteNombre}</strong></p>
-        <p>NIF: ${factura.clienteNif}</p>
-        <p>${factura.clienteDireccion}</p>
-        <p>${factura.clienteCodigoPostal} ${factura.clienteCiudad}</p>
-        <p>${factura.clienteProvincia}, ${factura.clientePais}</p>
+        <p><strong>${factura.clientName}</strong></p>
+        <p>NIF: ${factura.clientTaxId}</p>
+        <p>${factura.clientAddress}</p>
+        <p>${factura.clientPostalCode} ${factura.clientCity}</p>
+        <p>${factura.clientProvince}, ${factura.clientCountry}</p>
     </div>
 
     <table>
@@ -148,14 +148,14 @@ function generarHTMLFactura(factura: any): string {
     </table>
 
     <div class="totals">
-        <p>Base Imponible: ${Number(factura.baseImponible).toFixed(2)} €</p>
-        <p>IVA (${factura.tipoIva}%): ${Number(factura.cuotaIva).toFixed(2)} €</p>
+        <p>Base Imponible: ${Number(factura.taxableAmount).toFixed(2)} €</p>
+        <p>IVA (${factura.vatRate}%): ${Number(factura.vatAmount).toFixed(2)} €</p>
         <p class="total">TOTAL: ${Number(factura.total).toFixed(2)} €</p>
     </div>
 
     <div style="margin-top: 50px; border-top: 1px solid #ccc; padding-top: 20px;">
         <p><strong>Notas:</strong></p>
-        <p>Forma de pago: ${factura.pedido?.paymentMethod === 'TARJETA' ? 'Tarjeta de crédito' : 'Transferencia bancaria'}</p>
+        <p>Forma de pago: ${factura.order?.paymentMethod === 'CARD' ? 'Tarjeta de crédito' : 'Transferencia bancaria'}</p>
     </div>
 </body>
 </html>

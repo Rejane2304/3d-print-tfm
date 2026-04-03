@@ -1,0 +1,9 @@
+_ref,question,answer,category,displayOrder,isActive
+FAQ-0001,What materials do you use for printing?,We primarily use PLA (biodegradable plant-based plastic) and PETG (stronger and more heat-resistant). Both are safe and eco-friendly.,Materials,1,true
+FAQ-0002,How long does shipping take?,Standard shipping takes 3-5 business days. Express shipping delivers in 1-2 business days. Orders over 50€ qualify for free shipping.,Shipping,2,true
+FAQ-0003,Can I return or exchange a product?,Yes! You have 14 days from delivery to return any product in its original condition. Contact us at info@3dprint.com to initiate a return.,Returns,3,true
+FAQ-0004,Do you accept custom orders?,Currently we only offer products from our fixed catalog. Custom orders may be available in the future.,Orders,4,true
+FAQ-0005,How should I care for my 3D printed items?,Keep away from direct sunlight and heat sources (especially PLA items). Clean with a damp cloth. Avoid submerging in water.,Care,5,true
+FAQ-0006,What payment methods do you accept?,We accept credit/debit cards (Visa Mastercard) and PayPal. All payments are processed securely through Stripe.,Payments,6,true
+FAQ-0007,Are your products safe for children?,Most of our products are suitable for children over 3 years old. Check individual product descriptions for specific age recommendations.,Safety,7,true
+FAQ-0008,Do you ship internationally?,Currently we only ship within Spain. International shipping will be available soon.,Shipping,8,true

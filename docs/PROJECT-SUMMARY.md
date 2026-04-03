@@ -130,7 +130,7 @@ Por Dispositivo E2E (19 tests cada uno):
 │   ├── unit/              # Tests unitarios (37)
 │   ├── integration/       # Tests de integración (227)
 │   └── e2e/               # Tests E2E (96, multi-device)
-└── doc/                   # Documentación TFM (10 docs)
+└── docs/                  # Documentación TFM (10 docs)
 ```
 
 ## 🎨 Características Implementadas

@@ -39,17 +39,17 @@ export async function GET(
     const pedido = await prisma.order.findFirst({
       where: {
         id: params.id,
-        usuarioId: usuario.id
+        userId: usuario.id
       },
       include: {
         items: {
           include: {
-            producto: {
+            product: {
               select: {
-                nombre: true,
+                name: true,
                 slug: true,
-                imagenes: {
-                  where: { esPrincipal: true },
+                images: {
+                  where: { isMain: true },
                   take: 1,
                   select: { url: true }
                 }
@@ -57,28 +57,28 @@ export async function GET(
             }
           }
         },
-        factura: {
+        invoice: {
           select: {
             id: true,
-            numeroFactura: true,
-            anulada: true,
-            emitidaEn: true
+            invoiceNumber: true,
+            isCancelled: true,
+            issuedAt: true
           }
         },
-        pago: {
+        payment: {
           select: {
-            estado: true,
-            metodo: true,
-            creadoEn: true
+            status: true,
+            method: true,
+            createdAt: true
           }
         },
-        mensajes: {
-          orderBy: { creadoEn: 'asc' },
+        messages: {
+          orderBy: { createdAt: 'asc' },
           select: {
             id: true,
-            mensaje: true,
-            esDeCliente: true,
-            creadoEn: true
+            message: true,
+            isFromCustomer: true,
+            createdAt: true
           }
         }
       }

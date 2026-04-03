@@ -5,63 +5,63 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🔍 Verificando usuarios...\n');
   
-  const usuarios = await prisma.user.findMany({
-    orderBy: { creadoEn: 'desc' },
+  const users = await prisma.user.findMany({
+    orderBy: { createdAt: 'desc' },
     take: 25,
     select: {
       id: true,
       email: true,
-      nombre: true,
-      rol: true,
+      name: true,
+      role: true,
       isActive: true,
-      creadoEn: true,
+      createdAt: true,
     },
   });
   
-  console.log(`Total de usuarios encontrados: ${usuarios.length}\n`);
+  console.log(`Total de usuarios encontrados: ${users.length}\n`);
   
-  const tablaUsuarios = usuarios.map((u: { 
+  const userTable = users.map((u: { 
     id: string; 
     email: string; 
-    nombre: string; 
-    rol: string; 
-    activo: boolean; 
-    creadoEn: Date;
+    name: string; 
+    role: string; 
+    isActive: boolean; 
+    createdAt: Date;
   }) => ({
     id: u.id.substring(0, 10) + '...',
     email: u.email,
-    nombre: u.nombre,
-    rol: u.rol,
-    activo: u.activo ? '✅' : '❌',
-    creado: u.creadoEn.toISOString().split('T')[0],
+    name: u.name,
+    role: u.role,
+    active: u.isActive ? '✅' : '❌',
+    created: u.createdAt.toISOString().split('T')[0],
   }));
   
-  console.table(tablaUsuarios);
+  console.table(userTable);
   
   // Contar por rol
-  const porRol = await prisma.user.groupBy({
-    by: ['rol'],
-    _count: { rol: true },
+  const byRole = await prisma.user.groupBy({
+    by: ['role'],
+    _count: { role: true },
   });
   
   console.log('\n📊 Distribución por rol:');
-  porRol.forEach((r: { rol: string; _count: { rol: number } }) => {
-    console.log(`  ${r.rol}: ${r._count.rol}`);
+  byRole.forEach((r: { role: string; _count: { role: number } }) => {
+    console.log(`  ${r.role}: ${r._count.role}`);
   });
   
   // Verificar si hay usuarios de test
-  const usuariosTest = await prisma.user.findMany({
+  const testUsers = await prisma.user.findMany({
     where: {
       OR: [
         { email: { contains: 'test' } },
-        { nombre: { contains: 'Test' } },
+        { name: { contains: 'Test' } },
       ],
     },
   });
   
-  console.log(`\n🧪 Usuarios de test encontrados: ${usuariosTest.length}`);
-  usuariosTest.forEach((u: { email: string; nombre: string }) => {
-    console.log(`  - ${u.email} (${u.nombre})`);
+  console.log(`\n🧪 Usuarios de test encontrados: ${testUsers.length}`);
+  testUsers.forEach((u: { email: string; name: string }) => {
+    console.log(`  - ${u.email} (${u.name})`);
   });
   
   await prisma.$disconnect();

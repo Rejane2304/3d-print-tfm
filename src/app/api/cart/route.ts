@@ -25,17 +25,17 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   }
 
   // Buscar usuario y su carrito
-  const usuario = await prisma.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: { email: session.user.email },
     include: {
-      carrito: {
+      cart: {
         include: {
           items: {
             include: {
-              producto: {
+              product: {
                 include: {
-                  imagenes: {
-                    where: { esPrincipal: true },
+                  images: {
+                    where: { isMain: true },
                     take: 1,
                   },
                 },
@@ -47,7 +47,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     },
   });
 
-  if (!usuario) {
+  if (!user) {
     return NextResponse.json(
       { success: false, error: 'Usuario no encontrado' },
       { status: 404 }
@@ -55,10 +55,10 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   }
 
   // Si no tiene carrito, devolver estructura vacía
-  if (!usuario.carrito) {
+  if (!user.cart) {
     return NextResponse.json({
       success: true,
-      carrito: {
+      cart: {
         id: null,
         items: [],
         subtotal: 0,
@@ -68,29 +68,29 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   }
 
   // Calcular totales
-  const carrito = usuario.carrito;
-  const totalItems = carrito.items.reduce((sum, item) => sum + item.cantidad, 0);
-  const subtotal = carrito.items.reduce(
-    (sum, item) => sum + Number(item.precioUnitario) * item.cantidad,
+  const cart = user.cart;
+  const totalItems = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+  const subtotal = cart.items.reduce(
+    (sum, item) => sum + Number(item.unitPrice) * item.quantity,
     0
   );
 
   return NextResponse.json({
     success: true,
-    carrito: {
-      id: carrito.id,
-      items: carrito.items.map((item) => ({
+    cart: {
+      id: cart.id,
+      items: cart.items.map((item) => ({
         id: item.id,
-        productoId: item.productoId,
-        cantidad: item.cantidad,
-        precioUnitario: Number(item.precioUnitario),
-        producto: {
-          id: item.producto.id,
-          nombre: item.producto.nombre,
-          slug: item.producto.slug,
-          precio: Number(item.producto.precio),
-          stock: item.producto.stock,
-          imagen: item.producto.imagenes[0]?.url || null,
+        productId: item.productId,
+        quantity: item.quantity,
+        unitPrice: Number(item.unitPrice),
+        product: {
+          id: item.product.id,
+          name: item.product.name,
+          slug: item.product.slug,
+          price: Number(item.product.price),
+          stock: item.product.stock,
+          image: item.product.images[0]?.url || null,
         },
       })),
       subtotal,
@@ -113,17 +113,17 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   // Obtener datos del body
   const body = await req.json();
-  const { productoId, cantidad = 1 } = body;
+  const { productId, quantity = 1 } = body;
 
   // Validaciones
-  if (!productoId) {
+  if (!productId) {
     return NextResponse.json(
       { success: false, error: 'Producto requerido' },
       { status: 400 }
     );
   }
 
-  if (cantidad <= 0) {
+  if (quantity <= 0) {
     return NextResponse.json(
       { success: false, error: 'Cantidad debe ser mayor a 0' },
       { status: 400 }
@@ -131,12 +131,12 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
 
   // Buscar usuario
-  const usuario = await prisma.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: { email: session.user.email },
-    include: { carrito: true },
+    include: { cart: true },
   });
 
-  if (!usuario) {
+  if (!user) {
     return NextResponse.json(
       { success: false, error: 'Usuario no encontrado' },
       { status: 404 }
@@ -144,25 +144,25 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
 
   // Buscar producto
-  const producto = await prisma.product.findUnique({
-    where: { id: productoId },
+  const product = await prisma.product.findUnique({
+    where: { id: productId },
   });
 
-  if (!producto) {
+  if (!product) {
     return NextResponse.json(
       { success: false, error: 'Producto no encontrado' },
       { status: 404 }
     );
   }
 
-  if (!producto.activo) {
+  if (!product.isActive) {
     return NextResponse.json(
       { success: false, error: 'Producto no disponible' },
       { status: 400 }
     );
   }
 
-  if (producto.stock < cantidad) {
+  if (product.stock < quantity) {
     return NextResponse.json(
       { success: false, error: 'Stock insuficiente' },
       { status: 400 }
@@ -170,29 +170,27 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
 
   // Crear carrito si no existe
-  let carrito = usuario.carrito;
-  if (!carrito) {
-    carrito = await prisma.cart.create({
-      data: {
-        usuarioId: usuario.id,
-        subtotal: 0,
-      },
-    });
-  }
-
-  // Verificar si el producto ya está en el carrito
-  const itemExistente = await prisma.cartItem.findFirst({
-    where: {
-      carritoId: carrito.id,
-      productoId: producto.id,
+  let cart = user.cart;
+  cart ??= await prisma.cart.create({
+    data: {
+      userId: user.id,
+      subtotal: 0,
     },
   });
 
-  if (itemExistente) {
+  // Verificar si el producto ya está en el carrito
+  const existingItem = await prisma.cartItem.findFirst({
+    where: {
+      cartId: cart.id,
+      productId: product.id,
+    },
+  });
+
+  if (existingItem) {
     // Actualizar cantidad
-    const nuevaCantidad = itemExistente.cantidad + cantidad;
+    const newQuantity = existingItem.quantity + quantity;
     
-    if (producto.stock < nuevaCantidad) {
+    if (product.stock < newQuantity) {
       return NextResponse.json(
         { success: false, error: 'Stock insuficiente para la cantidad total' },
         { status: 400 }
@@ -200,35 +198,35 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     }
 
     await prisma.cartItem.update({
-      where: { id: itemExistente.id },
-      data: { cantidad: nuevaCantidad },
+      where: { id: existingItem.id },
+      data: { quantity: newQuantity },
     });
   } else {
     // Crear nuevo item
     await prisma.cartItem.create({
       data: {
-        carritoId: carrito.id,
-        productoId: producto.id,
-        cantidad: cantidad,
-        precioUnitario: producto.precio,
+        cartId: cart.id,
+        productId: product.id,
+        quantity: quantity,
+        unitPrice: product.price,
       },
     });
   }
 
   // Recalcular subtotal del carrito
   const items = await prisma.cartItem.findMany({
-    where: { carritoId: carrito.id },
-    include: { producto: true },
+    where: { cartId: cart.id },
+    include: { product: true },
   });
 
-  const nuevoSubtotal = items.reduce(
-    (sum, item) => sum + Number(item.precioUnitario) * item.cantidad,
+  const newSubtotal = items.reduce(
+    (sum, item) => sum + Number(item.unitPrice) * item.quantity,
     0
   );
 
   await prisma.cart.update({
-    where: { id: carrito.id },
-    data: { subtotal: nuevoSubtotal },
+    where: { id: cart.id },
+    data: { subtotal: newSubtotal },
   });
 
   return NextResponse.json({

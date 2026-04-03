@@ -12,28 +12,28 @@ import { useRouter } from 'next/navigation';
 import { useCart } from '@/hooks/useCart';
 import { ShoppingCart, Check, Loader2 } from 'lucide-react';
 
-interface ProductoInfo {
+interface ProductInfo {
   id: string;
-  nombre: string;
+  name: string;
   slug: string;
-  precio: number;
+  price: number;
   stock: number;
-  imagen: string | null;
+  image: string | null;
 }
 
 interface AddToCartButtonProps {
-  productoId: string;
+  productId: string;
   stock: number;
-  producto: ProductoInfo;
+  product: ProductInfo;
 }
 
-export default function AddToCartButton({ productoId, stock, producto }: AddToCartButtonProps) {
+export default function AddToCartButton({ productId, stock, product }: AddToCartButtonProps) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { status } = useSession();
   const router = useRouter();
   const { addItem } = useCart();
   
-  const [quantity, setCantidad] = useState(1);
+  const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,7 +44,7 @@ export default function AddToCartButton({ productoId, stock, producto }: AddToCa
       setError(null);
       setSuccess(false);
 
-      const result = await addItem(productoId, quantity, producto);
+      const result = await addItem(productId, quantity, product);
 
       if (!result.success) {
         throw new Error(result.error || 'Error al añadir al carrito');
@@ -76,7 +76,7 @@ export default function AddToCartButton({ productoId, stock, producto }: AddToCa
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setCantidad(Math.max(1, quantity - 1))}
+            onClick={() => setQuantity(Math.max(1, quantity - 1))}
             disabled={quantity <= 1 || loading || isOutOfStock}
             className="p-2 rounded-md border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             aria-label="Decrementar quantity"
@@ -95,7 +95,7 @@ export default function AddToCartButton({ productoId, stock, producto }: AddToCa
             onChange={(e) => {
               const value = parseInt(e.target.value, 10);
               if (!isNaN(value)) {
-                setCantidad(Math.max(1, Math.min(value, stock)));
+                setQuantity(Math.max(1, Math.min(value, stock)));
               }
             }}
             min={1}
@@ -106,7 +106,7 @@ export default function AddToCartButton({ productoId, stock, producto }: AddToCa
           
           <button
             type="button"
-            onClick={() => setCantidad(Math.min(stock, quantity + 1))}
+            onClick={() => setQuantity(Math.min(stock, quantity + 1))}
             disabled={quantity >= stock || loading || isOutOfStock}
             className="p-2 rounded-md border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             aria-label="Incrementar quantity"

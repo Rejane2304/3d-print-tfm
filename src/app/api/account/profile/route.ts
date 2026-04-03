@@ -10,10 +10,10 @@ import { z } from 'zod';
 import bcrypt from 'bcrypt';
 
 // Schema de validación para actualizar perfil
-const perfilSchema = z.object({
-  nombre: z.string().min(2).max(100).optional(),
-  telefono: z.string().regex(/^\+?[0-9]{9,15}$/).optional(),
-  nif: z.string().regex(/^\d{8}[A-Z]$/).optional(),
+const profileSchema = z.object({
+  name: z.string().min(2).max(100).optional(),
+  phone: z.string().regex(/^\+?[0-9]{9,15}$/).optional(),
+  taxId: z.string().regex(/^\d{8}[A-Z]$/).optional(),
 });
 
 // Schema para cambiar contraseña
@@ -38,10 +38,10 @@ export async function GET() {
       select: {
         id: true,
         email: true,
-        nombre: true,
-        telefono: true,
-        nif: true,
-        rol: true,
+        name: true,
+        phone: true,
+        taxId: true,
+        role: true,
         createdAt: true,
       },
     });
@@ -118,18 +118,18 @@ export async function PATCH(req: NextRequest) {
     }
 
     // Actualizar datos del perfil
-    const perfilData = perfilSchema.parse(body);
+    const profileData = profileSchema.parse(body);
 
     const usuarioActualizado = await prisma.user.update({
       where: { id: usuario.id },
-      data: perfilData,
+      data: profileData,
       select: {
         id: true,
         email: true,
-        nombre: true,
-        telefono: true,
-        nif: true,
-        rol: true,
+        name: true,
+        phone: true,
+        taxId: true,
+        role: true,
       },
     });
 

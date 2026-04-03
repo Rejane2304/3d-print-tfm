@@ -1,13 +1,6 @@
 /**
  * Tests Unitarios - Componente CartSummary
  * TDD: Tests primero, implementación después
- * 
- * NOTA: El componente usa propiedades en español para coincidir con la base de datos:
- * - cantidad
- * - precioUnitario
- * - precio
- * 
- * Los tests usan los nombres correctos de las props del componente.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
@@ -17,26 +10,20 @@ describe('CartSummary', () => {
   const mockItems = [
     {
       id: 'item-1',
-      productoId: 'prod-1',
-      cantidad: 2,
-      precioUnitario: 29.99,
-      producto: {
-        id: 'prod-1',
-        nombre: 'Producto A',
-        precio: 29.99,
-        stock: 10,
+      quantity: 2,
+      unitPrice: 29.99,
+      product: {
+        name: 'Producto A',
+        price: 29.99,
       },
     },
     {
       id: 'item-2',
-      productoId: 'prod-2',
-      cantidad: 1,
-      precioUnitario: 49.99,
-      producto: {
-        id: 'prod-2',
-        nombre: 'Producto B',
-        precio: 49.99,
-        stock: 5,
+      quantity: 1,
+      unitPrice: 49.99,
+      product: {
+        name: 'Producto B',
+        price: 49.99,
       },
     },
   ];
@@ -64,7 +51,7 @@ describe('CartSummary', () => {
   });
 
   it('debe mostrar gastos de envío', () => {
-    render(<CartSummary items={mockItems} subtotal={109.97} gastosEnvio={5.99} {...mockHandlers} />);
+    render(<CartSummary items={mockItems} subtotal={109.97} shippingCost={5.99} {...mockHandlers} />);
 
     expect(screen.getByText('Envío')).toBeInTheDocument();
     expect(screen.getByText('5.99')).toBeInTheDocument();
@@ -75,8 +62,8 @@ describe('CartSummary', () => {
       <CartSummary 
         items={mockItems} 
         subtotal={60} 
-        gastosEnvio={0} 
-        envioGratisDesde={50}
+        shippingCost={0} 
+        freeShippingFrom={50}
         {...mockHandlers} 
       />
     );
@@ -90,7 +77,7 @@ describe('CartSummary', () => {
       <CartSummary 
         items={mockItems} 
         subtotal={109.97} 
-        gastosEnvio={5.99}
+        shippingCost={5.99}
         {...mockHandlers} 
       />
     );
@@ -140,7 +127,7 @@ describe('CartSummary', () => {
   });
 
   it('debe mostrar información de impuestos incluidos', () => {
-    render(<CartSummary items={mockItems} subtotal={109.97} impuestosIncluidos {...mockHandlers} />);
+    render(<CartSummary items={mockItems} subtotal={109.97} taxIncluded {...mockHandlers} />);
 
     expect(screen.getByText(/impuestos incluidos/i)).toBeInTheDocument();
   });

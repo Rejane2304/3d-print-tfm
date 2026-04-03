@@ -1,313 +1,335 @@
 import { z } from 'zod';
-import { Categoria, Material, Rol, MetodoPago, EstadoPedido } from '@/types/prisma-enums';
+import { Material, Role, PaymentMethod, OrderStatus } from '@/types/prisma-enums';
 
 // ============================================
-// VALIDACIONES DE AUTENTICACIÓN
+// AUTHENTICATION VALIDATIONS
 // ============================================
 
 export const loginSchema = z.object({
   email: z
     .string()
-    .min(1, 'El email es requerido')
-    .email('El formato del email no es válido'),
+    .min(1, 'Email is required')
+    .email('Invalid email format'),
   password: z
     .string()
-    .min(1, 'La contraseña es requerida')
-    .min(8, 'La contraseña debe tener al menos 8 caracteres'),
+    .min(1, 'Password is required')
+    .min(8, 'Password must be at least 8 characters'),
 });
 
-export const registroSchema = z.object({
-  nombre: z
+export const registerSchema = z.object({
+  name: z
     .string()
-    .min(1, 'El nombre es requerido')
-    .min(3, 'El nombre debe tener al menos 3 caracteres')
-    .max(100, 'El nombre no puede exceder los 100 caracteres'),
+    .min(1, 'Name is required')
+    .min(3, 'Name must be at least 3 characters')
+    .max(100, 'Name cannot exceed 100 characters'),
   email: z
     .string()
-    .min(1, 'El email es requerido')
-    .email('El formato del email no es válido'),
+    .min(1, 'Email is required')
+    .email('Invalid email format'),
   password: z
     .string()
-    .min(1, 'La contraseña es requerida')
-    .min(8, 'La contraseña debe tener al menos 8 caracteres')
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'La contraseña debe contener al menos una mayúscula, una minúscula y un número'),
-  confirmarPassword: z.string(),
-  telefono: z
+    .min(1, 'Password is required')
+    .min(8, 'Password must be at least 8 characters')
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Password must contain at least one uppercase, one lowercase and one number'),
+  confirmPassword: z.string(),
+  phone: z
     .string()
     .optional()
     .refine((val) => !val || /^\+34\s?\d{3}\s?\d{3}\s?\d{3}$/.test(val), {
-      message: 'El teléfono debe tener formato español: +34 600 123 456',
+      message: 'Phone must be in Spanish format: +34 600 123 456',
     }),
-}).refine((data) => data.password === data.confirmarPassword, {
-  message: 'Las contraseñas no coinciden',
-  path: ['confirmarPassword'],
+}).refine((data) => data.password === data.confirmPassword, {
+  message: 'Passwords do not match',
+  path: ['confirmPassword'],
 });
 
-export const cambiarPasswordSchema = z.object({
-  passwordActual: z.string().min(1, 'La contraseña actual es requerida'),
-  passwordNuevo: z
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, 'Current password is required'),
+  newPassword: z
     .string()
-    .min(8, 'La nueva contraseña debe tener al menos 8 caracteres')
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'La contraseña debe contener al menos una mayúscula, una minúscula y un número'),
-  confirmarPassword: z.string(),
-}).refine((data) => data.passwordNuevo === data.confirmarPassword, {
-  message: 'Las contraseñas no coinciden',
-  path: ['confirmarPassword'],
+    .min(8, 'New password must be at least 8 characters')
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Password must contain at least one uppercase, one lowercase and one number'),
+  confirmPassword: z.string(),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: 'Passwords do not match',
+  path: ['confirmPassword'],
 });
 
 // ============================================
-// VALIDACIONES DE USUARIOS
+// USER VALIDATIONS
 // ============================================
 
-export const usuarioSchema = z.object({
-  nombre: z
+export const userSchema = z.object({
+  name: z
     .string()
-    .min(1, 'El nombre es requerido')
-    .min(3, 'El nombre debe tener al menos 3 caracteres')
-    .max(100, 'El nombre no puede exceder los 100 caracteres'),
+    .min(1, 'Name is required')
+    .min(3, 'Name must be at least 3 characters')
+    .max(100, 'Name cannot exceed 100 characters'),
   email: z
     .string()
-    .email('El formato del email no es válido'),
-  telefono: z
+    .email('Invalid email format'),
+  phone: z
     .string()
     .optional()
     .refine((val) => !val || /^\+34\s?\d{3}\s?\d{3}\s?\d{3}$/.test(val), {
-      message: 'El teléfono debe tener formato español: +34 600 123 456',
+      message: 'Phone must be in Spanish format: +34 600 123 456',
     }),
-  nif: z
+  taxId: z
     .string()
     .optional()
     .refine((val) => !val || /^\d{8}[A-Z]$/.test(val), {
-      message: 'El NIF debe tener 8 números y una letra mayúscula',
+      message: 'Tax ID must have 8 numbers and one uppercase letter',
     }),
-  nombreFiscal: z
+  fiscalName: z
     .string()
-    .max(200, 'El nombre fiscal no puede exceder los 200 caracteres')
+    .max(200, 'Fiscal name cannot exceed 200 characters')
     .optional(),
-  rol: z.nativeEnum(Rol).optional(),
-  activo: z.boolean().default(true),
+  role: z.nativeEnum(Role).optional(),
+  isActive: z.boolean().default(true),
 });
 
-export const usuarioUpdateSchema = usuarioSchema.partial();
+export const userUpdateSchema = userSchema.partial();
 
 // ============================================
-// VALIDACIONES DE DIRECCIONES
+// ADDRESS VALIDATIONS
 // ============================================
 
-export const direccionSchema = z.object({
-  nombre: z
+export const addressSchema = z.object({
+  name: z
     .string()
-    .min(1, 'El nombre de la dirección es requerido')
-    .max(100, 'El nombre no puede exceder los 100 caracteres'),
-  destinatario: z
+    .min(1, 'Address name is required')
+    .max(100, 'Name cannot exceed 100 characters'),
+  recipient: z
     .string()
-    .min(1, 'El nombre del destinatario es requerido')
-    .max(100, 'El destinatario no puede exceder los 100 caracteres'),
-  telefono: z
+    .min(1, 'Recipient name is required')
+    .max(100, 'Recipient cannot exceed 100 characters'),
+  phone: z
     .string()
-    .regex(/^\+34\s?\d{3}\s?\d{3}\s?\d{3}$/, 'El teléfono debe tener formato español: +34 600 123 456'),
-  direccion: z
+    .regex(/^\+34\s?\d{3}\s?\d{3}\s?\d{3}$/, 'Phone must be in Spanish format: +34 600 123 456'),
+  address: z
     .string()
-    .min(1, 'La dirección es requerida')
-    .max(255, 'La dirección no puede exceder los 255 caracteres'),
-  complemento: z
+    .min(1, 'Address is required')
+    .max(255, 'Address cannot exceed 255 characters'),
+  complement: z
     .string()
-    .max(100, 'El complemento no puede exceder los 100 caracteres')
+    .max(100, 'Complement cannot exceed 100 characters')
     .optional(),
-  codigoPostal: z
+  postalCode: z
     .string()
-    .regex(/^\d{5}$/, 'El código postal debe tener 5 dígitos'),
-  ciudad: z
+    .regex(/^\d{5}$/, 'Postal code must have 5 digits'),
+  city: z
     .string()
-    .min(1, 'La ciudad es requerida')
-    .max(100, 'La ciudad no puede exceder los 100 caracteres'),
-  provincia: z
+    .min(1, 'City is required')
+    .max(100, 'City cannot exceed 100 characters'),
+  province: z
     .string()
-    .min(1, 'La provincia es requerida')
-    .max(100, 'La provincia no puede exceder los 100 caracteres'),
-  pais: z
+    .min(1, 'Province is required')
+    .max(100, 'Province cannot exceed 100 characters'),
+  country: z
     .string()
-    .min(1, 'El país es requerido')
-    .max(50, 'El país no puede exceder los 50 caracteres')
-    .default('España'),
-  esPrincipal: z.boolean().default(false),
+    .min(1, 'Country is required')
+    .max(50, 'Country cannot exceed 50 characters')
+    .default('Spain'),
+  isDefault: z.boolean().default(false),
 });
 
-export const direccionUpdateSchema = direccionSchema.partial();
+export const addressUpdateSchema = addressSchema.partial();
 
 // ============================================
-// VALIDACIONES DE PRODUCTOS
+// PRODUCT VALIDATIONS
 // ============================================
 
-export const productoSchema = z.object({
-  nombre: z
+export const productSchema = z.object({
+  name: z
     .string()
-    .min(1, 'El nombre del producto es requerido')
-    .max(200, 'El nombre no puede exceder los 200 caracteres'),
-  descripcion: z
+    .min(1, 'Product name is required')
+    .max(200, 'Name cannot exceed 200 characters'),
+  description: z
     .string()
-    .min(1, 'La descripción es requerida')
-    .max(5000, 'La descripción no puede exceder los 5000 caracteres'),
-  descripcionCorta: z
+    .min(1, 'Description is required')
+    .max(5000, 'Description cannot exceed 5000 characters'),
+  shortDescription: z
     .string()
-    .max(255, 'La descripción corta no puede exceder los 255 caracteres')
+    .max(255, 'Short description cannot exceed 255 characters')
     .optional(),
-  precio: z
+  price: z
     .number()
-    .min(0.01, 'El precio debe ser mayor a 0')
-    .max(99999.99, 'El precio máximo permitido es 99999.99'),
-  precioAnterior: z
+    .min(0.01, 'Price must be greater than 0')
+    .max(99999.99, 'Maximum price allowed is 99999.99'),
+  previousPrice: z
     .number()
-    .min(0, 'El precio anterior no puede ser negativo')
-    .max(99999.99, 'El precio anterior máximo es 99999.99')
+    .min(0, 'Previous price cannot be negative')
+    .max(99999.99, 'Maximum previous price is 99999.99')
     .optional()
     .nullable(),
   stock: z
     .number()
-    .int('El stock debe ser un número entero')
-    .min(0, 'El stock no puede ser negativo'),
-  stockMinimo: z
+    .int('Stock must be an integer')
+    .min(0, 'Stock cannot be negative'),
+  minStock: z
     .number()
-    .int('El stock mínimo debe ser un número entero')
-    .min(1, 'El stock mínimo debe ser al menos 1')
+    .int('Minimum stock must be an integer')
+    .min(1, 'Minimum stock must be at least 1')
     .default(5),
-  categoria: z.nativeEnum(Categoria).optional(),
+  categoryId: z.string().uuid('Invalid category ID').optional(),
   material: z.nativeEnum(Material).optional(),
-  dimensiones: z
+  dimensions: z
     .string()
-    .max(50, 'Las dimensiones no pueden exceder los 50 caracteres')
+    .max(50, 'Dimensions cannot exceed 50 characters')
     .optional(),
-  peso: z
+  weight: z
     .number()
-    .min(0, 'El peso no puede ser negativo')
+    .min(0, 'Weight cannot be negative')
     .optional()
     .nullable(),
-  tiempoImpresion: z
+  printTime: z
     .number()
-    .int('El tiempo debe ser un número entero')
-    .min(1, 'El tiempo debe ser al menos 1 minuto')
+    .int('Time must be an integer')
+    .min(1, 'Time must be at least 1 minute')
     .optional()
     .nullable(),
-  metaTitulo: z
+  metaTitle: z
     .string()
-    .max(200, 'El meta título no puede exceder los 200 caracteres')
+    .max(200, 'Meta title cannot exceed 200 characters')
     .optional(),
-  metaDescripcion: z
+  metaDescription: z
     .string()
-    .max(300, 'La meta descripción no puede exceder los 300 caracteres')
+    .max(300, 'Meta description cannot exceed 300 characters')
     .optional(),
-  activo: z.boolean().default(true),
-  destacado: z.boolean().default(false),
+  isActive: z.boolean().default(true),
+  isFeatured: z.boolean().default(false),
 });
 
-export const productoUpdateSchema = productoSchema.partial();
+export const productUpdateSchema = productSchema.partial();
 
 // ============================================
-// VALIDACIONES DE PEDIDOS
+// ORDER VALIDATIONS
 // ============================================
 
-export const itemPedidoSchema = z.object({
-  productoId: z.string().uuid('ID de producto inválido'),
-  cantidad: z
+export const orderItemSchema = z.object({
+  productId: z.string().uuid('Invalid product ID'),
+  quantity: z
     .number()
-    .int('La cantidad debe ser un número entero')
-    .min(1, 'La cantidad debe ser al menos 1')
-    .max(100, 'La cantidad máxima por producto es 100'),
+    .int('Quantity must be an integer')
+    .min(1, 'Quantity must be at least 1')
+    .max(100, 'Maximum quantity per product is 100'),
 });
 
-export const crearPedidoSchema = z.object({
+export const createOrderSchema = z.object({
   items: z
-    .array(itemPedidoSchema)
-    .min(1, 'El pedido debe contener al menos un producto'),
-  direccionEnvioId: z.string().uuid('Dirección de envío inválida'),
-  notas: z
+    .array(orderItemSchema)
+    .min(1, 'Order must contain at least one product'),
+  shippingAddressId: z.string().uuid('Invalid shipping address'),
+  customerNotes: z
     .string()
-    .max(1000, 'Las notas no pueden exceder los 1000 caracteres')
+    .max(1000, 'Notes cannot exceed 1000 characters')
     .optional(),
 });
 
-export const actualizarEstadoPedidoSchema = z.object({
-  estado: z.nativeEnum(EstadoPedido).optional(),
-  notas: z
+export const updateOrderStatusSchema = z.object({
+  status: z.nativeEnum(OrderStatus).optional(),
+  adminNotes: z
     .string()
-    .max(1000, 'Las notas no pueden exceder los 1000 caracteres')
+    .max(1000, 'Notes cannot exceed 1000 characters')
     .optional(),
 });
 
-export const cancelarPedidoSchema = z.object({
-  motivo: z
+export const cancelOrderSchema = z.object({
+  reason: z
     .string()
-    .min(1, 'El motivo de cancelación es requerido')
-    .max(500, 'El motivo no puede exceder los 500 caracteres'),
+    .min(1, 'Cancellation reason is required')
+    .max(500, 'Reason cannot exceed 500 characters'),
 });
 
 // ============================================
-// VALIDACIONES DE PAGOS
+// PAYMENT VALIDATIONS
 // ============================================
 
-export const crearPagoSchema = z.object({
-  pedidoId: z.string().uuid('ID de pedido inválido'),
-  metodo: z.nativeEnum(MetodoPago).optional(),
+export const createPaymentSchema = z.object({
+  orderId: z.string().uuid('Invalid order ID'),
+  method: z.nativeEnum(PaymentMethod).optional(),
 });
 
 // ============================================
-// VALIDACIONES DE INVENTARIO
+// INVENTORY VALIDATIONS
 // ============================================
 
-export const movimientoInventarioSchema = z.object({
-  productoId: z.string().uuid('ID de producto inválido'),
-  cantidad: z
+export const inventoryMovementSchema = z.object({
+  productId: z.string().uuid('Invalid product ID'),
+  quantity: z
     .number()
-    .int('La cantidad debe ser un número entero')
-    .refine((val) => val !== 0, 'La cantidad no puede ser 0'),
-  motivo: z
+    .int('Quantity must be an integer')
+    .refine((val) => val !== 0, 'Quantity cannot be 0'),
+  reason: z
     .string()
-    .min(1, 'El motivo es requerido')
-    .max(255, 'El motivo no puede exceder los 255 caracteres'),
+    .min(1, 'Reason is required')
+    .max(255, 'Reason cannot exceed 255 characters'),
 });
 
 // ============================================
-// VALIDACIONES DE IMÁGENES
+// IMAGE VALIDATIONS
 // ============================================
 
-export const imagenProductoSchema = z.object({
-  url: z.string().url('La URL de la imagen no es válida'),
-  nombreArchivo: z.string().min(1, 'El nombre del archivo es requerido'),
-  textoAlt: z
+export const productImageSchema = z.object({
+  url: z.string().url('Invalid image URL'),
+  filename: z.string().min(1, 'Filename is required'),
+  altText: z
     .string()
-    .max(255, 'El texto alternativo no puede exceder los 255 caracteres'),
-  esPrincipal: z.boolean().default(false),
-  orden: z.number().int().min(0).max(4, 'Máximo 5 imágenes por producto'),
+    .max(255, 'Alt text cannot exceed 255 characters'),
+  isMain: z.boolean().default(false),
+  displayOrder: z.number().int().min(0).max(4, 'Maximum 5 images per product'),
 });
 
 // ============================================
-// VALIDACIONES DE CONFIGURACIÓN
+// CONFIGURATION VALIDATIONS
 // ============================================
 
-export const configuracionEnvioSchema = z.object({
-  nombre: z.string().min(1, 'El nombre es requerido').max(100),
-  descripcion: z.string().max(500).optional(),
-  precio: z.number().min(0, 'El precio no puede ser negativo'),
-  envioGratisDesde: z.number().min(0).optional().nullable(),
-  diasMinimos: z.number().int().min(1).default(1),
-  diasMaximos: z.number().int().min(1).default(5),
-  activo: z.boolean().default(true),
-  esDefecto: z.boolean().default(false),
+export const shippingConfigSchema = z.object({
+  name: z.string().min(1, 'Name is required').max(100),
+  description: z.string().max(500).optional(),
+  price: z.number().min(0, 'Price cannot be negative'),
+  freeShippingFrom: z.number().min(0).optional().nullable(),
+  minDays: z.number().int().min(1).default(1),
+  maxDays: z.number().int().min(1).default(5),
+  isActive: z.boolean().default(true),
+  isDefault: z.boolean().default(false),
 });
 
 // ============================================
-// TIPOS EXPORTADOS
+// EXPORTED TYPES
 // ============================================
 
 export type LoginInput = z.infer<typeof loginSchema>;
-export type RegistroInput = z.infer<typeof registroSchema>;
-export type UsuarioInput = z.infer<typeof usuarioSchema>;
-export type UsuarioUpdateInput = z.infer<typeof usuarioUpdateSchema>;
-export type DireccionInput = z.infer<typeof direccionSchema>;
-export type ProductoInput = z.infer<typeof productoSchema>;
-export type ProductoUpdateInput = z.infer<typeof productoUpdateSchema>;
-export type CrearPedidoInput = z.infer<typeof crearPedidoSchema>;
-export type ActualizarEstadoPedidoInput = z.infer<typeof actualizarEstadoPedidoSchema>;
-export type CancelarPedidoInput = z.infer<typeof cancelarPedidoSchema>;
-export type MovimientoInventarioInput = z.infer<typeof movimientoInventarioSchema>;
-export type ImagenProductoInput = z.infer<typeof imagenProductoSchema>;
+export type RegisterInput = z.infer<typeof registerSchema>;
+export type UserInput = z.infer<typeof userSchema>;
+export type UserUpdateInput = z.infer<typeof userUpdateSchema>;
+export type AddressInput = z.infer<typeof addressSchema>;
+export type ProductInput = z.infer<typeof productSchema>;
+export type ProductUpdateInput = z.infer<typeof productUpdateSchema>;
+export type CreateOrderInput = z.infer<typeof createOrderSchema>;
+export type UpdateOrderStatusInput = z.infer<typeof updateOrderStatusSchema>;
+export type CancelOrderInput = z.infer<typeof cancelOrderSchema>;
+export type InventoryMovementInput = z.infer<typeof inventoryMovementSchema>;
+export type ProductImageInput = z.infer<typeof productImageSchema>;
+
+// Legacy aliases for backward compatibility
+export const registroSchema = registerSchema;
+export const usuarioSchema = userSchema;
+export const direccionSchema = addressSchema;
+export const productoSchema = productSchema;
+export const crearPedidoSchema = createOrderSchema;
+export const actualizarEstadoPedidoSchema = updateOrderStatusSchema;
+export const cancelarPedidoSchema = cancelOrderSchema;
+export const movimientoInventarioSchema = inventoryMovementSchema;
+export const imagenProductoSchema = productImageSchema;
+export const configuracionEnvioSchema = shippingConfigSchema;
+
+export type RegistroInput = RegisterInput;
+export type UsuarioInput = UserInput;
+export type DireccionInput = AddressInput;
+export type ProductoInput = ProductInput;
+export type CrearPedidoInput = CreateOrderInput;
+export type ActualizarEstadoPedidoInput = UpdateOrderStatusInput;
+export type CancelarPedidoInput = CancelOrderInput;
+export type MovimientoInventarioInput = InventoryMovementInput;
+export type ImagenProductoInput = ProductImageInput;

@@ -134,8 +134,8 @@ npm run test:e2e
 npm run test:coverage
 ```
 
-📚 **Documentación completa:** [doc/TESTING.md](doc/TESTING.md)  
-📋 **Roadmap de mejoras:** [doc/ROADMAP.md](doc/ROADMAP.md)
+📚 **Documentación completa:** [docs/TESTING.md](docs/TESTING.md)  
+📋 **Roadmap de mejoras:** [docs/ROADMAP.md](docs/ROADMAP.md)
 
 ## 📊 Estado de Tests
 
@@ -220,7 +220,7 @@ npm run test:coverage
 │   └── data/                 # CSV con datos iniciales
 ├── scripts/                  # Scripts de utilidad
 │   └── prepare-test-db.sh    # Preparar BD de test
-├── doc/                      # Documentación TFM
+├── docs/                     # Documentación TFM
 └── private/                  # Documentación privada
     ├── PLAN_IMPLEMENTACION.md
     ├── COMANDOS.md
@@ -237,10 +237,10 @@ npm run test:coverage
 
 ## 📚 Documentación
 
-- **[Guía de Testing](doc/TESTING.md)** - Cómo ejecutar y mantener tests
-- **[Roadmap](doc/ROADMAP.md)** - Plan de mejoras y próximos pasos
+- **[Guía de Testing](docs/TESTING.md)** - Cómo ejecutar y mantener tests
+- **[Roadmap](docs/ROADMAP.md)** - Plan de mejoras y próximos pasos
 - [Guía de Variables de Entorno](private/GUIA_VARIABLES_ENTORNO.md) - Configuración paso a paso
-- Documentación académica TFM en [`/doc/`](doc/)
+- Documentación académica TFM en [`/docs/`](docs/)
 
 ## 🔐 Seguridad
 

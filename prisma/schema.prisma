@@ -2,7 +2,7 @@
 // PRISMA SCHEMA - E-COMMERCE 3D PRINT TFM
 // ============================================
 // Stack: Next.js + PostgreSQL + Prisma
-// Locale: Code in English, Database columns mapped to Spanish
+// 100% English - Industry Standard
 
 // ============================================
 // GENERATOR & DATASOURCE
@@ -26,14 +26,6 @@ enum Role {
   ADMIN
 }
 
-enum Category {
-  DECORATION
-  ACCESSORIES
-  FUNCTIONAL
-  ARTICULATED
-  TOYS
-}
-
 enum Material {
   PLA
   PETG
@@ -50,6 +42,7 @@ enum OrderStatus {
 
 enum PaymentMethod {
   CARD
+  PAYPAL
   BIZUM
   TRANSFER
 }
@@ -93,6 +86,12 @@ enum AlertStatus {
   IGNORED
 }
 
+enum CouponType {
+  PERCENTAGE
+  FIXED
+  FREE_SHIPPING
+}
+
 // ============================================
 // MODELS
 // ============================================
@@ -101,22 +100,22 @@ model User {
   id            String    @id @default(uuid())
   email         String    @unique @db.VarChar(255)
   password      String    @db.VarChar(255)
-  name          String    @db.VarChar(100) @map("nombre")
-  phone         String?   @db.VarChar(20) @map("telefono")
-  role          Role      @default(CUSTOMER) @map("rol")
+  name          String    @db.VarChar(100)
+  phone         String?   @db.VarChar(20)
+  role          Role      @default(CUSTOMER)
   
-  taxId         String?   @db.VarChar(20) @map("nif")
-  fiscalName    String?   @db.VarChar(200) @map("nombreFiscal")
+  taxId         String?   @db.VarChar(20)
+  fiscalName    String?   @db.VarChar(200)
   
-  isActive      Boolean   @default(true) @map("activo")
-  emailVerified DateTime? @map("emailVerificado")
-  lastAccess    DateTime? @map("ultimoAcceso")
-  failedAttempts Int      @default(0) @map("intentosFallidos")
-  lockedUntil   DateTime? @map("bloqueadoHasta")
+  isActive      Boolean   @default(true)
+  emailVerified DateTime?
+  lastAccess    DateTime?
+  failedAttempts Int      @default(0)
+  lockedUntil   DateTime?
   
-  createdAt     DateTime  @default(now()) @map("creadoEn")
-  updatedAt     DateTime  @updatedAt @map("actualizadoEn")
-  createdBy     String?   @map("creadoPor")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  createdBy     String?
   
   addresses     Address[]
   orders        Order[]
@@ -126,32 +125,54 @@ model User {
   resolvedAlerts Alert[] @relation("ResolvedAlerts")
   sessions      Session[]
   cart          Cart?
+  reviews       Review[]
 
   @@index([email])
   @@index([role])
   @@index([isActive])
   @@index([createdAt])
-  @@map("usuarios")
+  @@map("users")
+}
+
+model Category {
+  id            String    @id @default(uuid())
+  name          String    @db.VarChar(100)
+  slug          String    @unique @db.VarChar(100)
+  description   String?   @db.Text
+  image         String?   @db.VarChar(500)
+  
+  displayOrder  Int       @default(0)
+  isActive      Boolean   @default(true)
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  products      Product[]
+  
+  @@index([slug])
+  @@index([isActive])
+  @@index([displayOrder])
+  @@map("categories")
 }
 
 model Address {
   id            String    @id @default(uuid())
-  userId        String    @map("usuarioId")
+  userId        String
   
-  name          String    @db.VarChar(100) @map("nombre")
-  recipient     String    @db.VarChar(100) @map("destinatario")
-  phone         String    @db.VarChar(20) @map("telefono")
-  address       String    @db.VarChar(255) @map("direccion")
-  complement    String?   @db.VarChar(100) @map("complemento")
-  postalCode    String    @db.VarChar(10) @map("codigoPostal")
-  city          String    @db.VarChar(100) @map("ciudad")
-  province      String    @db.VarChar(100) @map("provincia")
-  country       String    @default("Spain") @db.VarChar(50) @map("pais")
+  name          String    @db.VarChar(100)
+  recipient     String    @db.VarChar(100)
+  phone         String    @db.VarChar(20)
+  address       String    @db.VarChar(255)
+  complement    String?   @db.VarChar(100)
+  postalCode    String    @db.VarChar(10)
+  city          String    @db.VarChar(100)
+  province      String    @db.VarChar(100)
+  country       String    @default("Spain") @db.VarChar(50)
   
-  isDefault     Boolean   @default(false) @map("esPrincipal")
+  isDefault     Boolean   @default(false)
   
-  createdAt     DateTime  @default(now()) @map("creadoEn")
-  updatedAt     DateTime  @updatedAt @map("actualizadoEn")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
   
   user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   orderShipments Order[]  @relation("ShippingAddress")
@@ -159,161 +180,162 @@ model Address {
   
   @@index([userId])
   @@index([isDefault])
-  @@map("direcciones")
+  @@map("addresses")
 }
 
 model Product {
   id            String    @id @default(uuid())
   slug          String    @unique @db.VarChar(100)
   
-  name          String    @db.VarChar(200) @map("nombre")
-  description   String    @db.Text @map("descripcion")
-  shortDescription String? @db.VarChar(255) @map("descripcionCorta")
+  name          String    @db.VarChar(200)
+  description   String    @db.Text
+  shortDescription String? @db.VarChar(255)
   
-  price         Decimal   @db.Decimal(10, 2) @map("precio")
-  previousPrice Decimal?  @db.Decimal(10, 2) @map("precioAnterior")
+  price         Decimal   @db.Decimal(10, 2)
+  previousPrice Decimal?  @db.Decimal(10, 2)
   
-  stock         Int       @default(0) @map("stock")
-  minStock      Int       @default(5) @map("stockMinimo")
+  stock         Int       @default(0)
+  minStock      Int       @default(5)
   
-  category      Category  @map("categoria")
-  material      Material  @map("material")
-  dimensions    String?   @db.VarChar(50) @map("dimensiones")
-  weight        Decimal?  @db.Decimal(8, 2) @map("peso")
-  printTime     Int?      @map("tiempoImpresion")
+  categoryId    String
+  category      Category  @relation(fields: [categoryId], references: [id])
+  material      Material
+  dimensions    String?   @db.VarChar(50)
+  weight        Decimal?  @db.Decimal(8, 2)
+  printTime     Int?
   
-  metaTitle     String?   @db.VarChar(200) @map("metaTitulo")
-  metaDescription String? @db.VarChar(300) @map("metaDescripcion")
+  metaTitle     String?   @db.VarChar(200)
+  metaDescription String? @db.VarChar(300)
   
-  isActive      Boolean   @default(true) @map("activo")
-  isFeatured    Boolean   @default(false) @map("destacado")
+  isActive      Boolean   @default(true)
+  isFeatured    Boolean   @default(false)
   
   images        ProductImage[] @relation("ProductImages")
   
-  createdAt     DateTime  @default(now()) @map("creadoEn")
-  updatedAt     DateTime  @updatedAt @map("actualizadoEn")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
   
   orderItems    OrderItem[]
   movements     InventoryMovement[]
   alerts        Alert[]
   cartItems     CartItem[]
+  reviews       Review[]
   
-  @@index([category])
+  @@index([categoryId])
   @@index([isActive])
   @@index([isFeatured])
   @@index([stock])
   @@index([price])
   @@index([createdAt])
-  @@map("productos")
+  @@map("products")
 }
 
 model ProductImage {
   id            String    @id @default(uuid())
-  productId     String    @map("productoId")
+  productId     String
   
-  url           String    @db.VarChar(500) @map("url")
-  filename      String    @db.VarChar(255) @map("nombreArchivo")
-  size          Int?      @map("tamano")
-  mimeType      String?   @db.VarChar(50) @map("mimeType")
+  url           String    @db.VarChar(500)
+  filename      String    @db.VarChar(255)
+  size          Int?
+  mimeType      String?   @db.VarChar(50)
   
-  altText       String    @db.VarChar(255) @map("textoAlt")
-  isMain        Boolean   @default(false) @map("esPrincipal")
-  displayOrder  Int       @default(0) @map("orden")
+  altText       String    @db.VarChar(255)
+  isMain        Boolean   @default(false)
+  displayOrder  Int       @default(0)
   
-  urlSmall      String?   @db.VarChar(500) @map("urlSmall")
-  urlMedium     String?   @db.VarChar(500) @map("urlMedium")
-  urlLarge      String?   @db.VarChar(500) @map("urlLarge")
+  urlSmall      String?   @db.VarChar(500)
+  urlMedium     String?   @db.VarChar(500)
+  urlLarge      String?   @db.VarChar(500)
   
-  uploadedAt    DateTime  @default(now()) @map("subidoEn")
+  uploadedAt    DateTime  @default(now())
   
   product       Product   @relation("ProductImages", fields: [productId], references: [id], onDelete: Cascade)
   
   @@unique([productId, displayOrder])
   @@index([productId])
   @@index([isMain])
-  @@map("imagenes_producto")
+  @@map("product_images")
 }
 
 model Cart {
   id         String   @id @default(uuid())
-  userId     String   @unique @map("usuarioId")
+  userId     String   @unique
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   items      CartItem[]
 
-  shippingAddressId String? @map("direccionEnvioId")
+  shippingAddressId String?
   shippingAddress   Address? @relation(fields: [shippingAddressId], references: [id])
 
-  subtotal   Decimal  @db.Decimal(10, 2) @default(0) @map("subtotal")
+  subtotal   Decimal  @db.Decimal(10, 2) @default(0)
 
-  createdAt   DateTime @default(now()) @map("creadoEn")
-  updatedAt DateTime @updatedAt @map("actualizadoEn")
+  createdAt   DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  @@map("carritos")
+  @@map("carts")
 }
 
 model CartItem {
   id         String   @id @default(uuid())
-  cartId     String   @map("carritoId")
+  cartId     String
   cart       Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
 
-  productId String    @map("productoId")
+  productId String
   product   Product   @relation(fields: [productId], references: [id])
 
-  quantity   Int      @default(1) @map("cantidad")
-  unitPrice Decimal   @db.Decimal(10, 2) @map("precioUnitario")
+  quantity   Int      @default(1)
+  unitPrice Decimal   @db.Decimal(10, 2)
 
-  createdAt   DateTime @default(now()) @map("creadoEn")
-  updatedAt DateTime @updatedAt @map("actualizadoEn")
+  createdAt   DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([cartId, productId])
-  @@map("items_carrito")
+  @@map("cart_items")
 }
 
 model Order {
   id            String        @id @default(uuid())
-  orderNumber   String        @unique @db.VarChar(20) @map("numeroPedido")
-  userId        String        @map("usuarioId")
+  orderNumber   String        @unique @db.VarChar(20)
+  userId        String
   
-  status        OrderStatus   @default(PENDING) @map("estado")
+  status        OrderStatus   @default(PENDING)
   
-  subtotal      Decimal       @db.Decimal(10, 2) @map("subtotal")
-  shipping      Decimal       @db.Decimal(10, 2) @map("envio")
-  discount      Decimal?      @db.Decimal(10, 2) @map("descuento")
-  total         Decimal       @db.Decimal(10, 2) @map("total")
+  subtotal      Decimal       @db.Decimal(10, 2)
+  shipping      Decimal       @db.Decimal(10, 2)
+  discount      Decimal?      @db.Decimal(10, 2)
+  total         Decimal       @db.Decimal(10, 2)
   
-  shippingAddressId String?     @map("direccionEnvioId")
-  shippingName      String        @db.VarChar(100) @map("nombreEnvio")
-  shippingPhone     String        @db.VarChar(20) @map("telefonoEnvio")
-  shippingAddress   String        @db.VarChar(255) @map("direccionEnvio")
-  shippingComplement String?     @db.VarChar(100) @map("complementoEnvio")
-  shippingPostalCode String      @db.VarChar(10) @map("codigoPostalEnvio")
-  shippingCity      String        @db.VarChar(100) @map("ciudadEnvio")
-  shippingProvince  String        @db.VarChar(100) @map("provinciaEnvio")
-  shippingCountry   String        @db.VarChar(50) @map("paisEnvio")
+  shippingAddressId String?
+  shippingName      String        @db.VarChar(100)
+  shippingPhone     String        @db.VarChar(20)
+  shippingAddress   String        @db.VarChar(255)
+  shippingComplement String?     @db.VarChar(100)
+  shippingPostalCode String      @db.VarChar(10)
+  shippingCity      String        @db.VarChar(100)
+  shippingProvince  String        @db.VarChar(100)
+  shippingCountry   String        @db.VarChar(50)
   
-  paymentMethod    PaymentMethod @default(CARD) @map("metodoPago")
+  paymentMethod    PaymentMethod @default(CARD)
   
-  stripeSessionId String?   @unique @db.VarChar(255) @map("stripeSessionId")
-  stripePaymentIntentId String? @db.VarChar(255) @map("stripePaymentIntentId")
+  stripeSessionId String?   @unique @db.VarChar(255)
+  stripePaymentIntentId String? @db.VarChar(255)
   
-  customerNotes  String?       @db.Text @map("notasCliente")
-  internalNotes  String?       @db.Text @map("notasInternas")
+  customerNotes  String?       @db.Text
+  internalNotes  String?       @db.Text
   
-  shippedAt     DateTime?     @map("fechaEnvio")
-  trackingNumber String?   @db.VarChar(100) @map("numeroSeguimiento")
-  carrier       String?       @db.VarChar(100) @map("transportista")
-  deliveredAt   DateTime?     @map("fechaEntrega")
+  shippedAt     DateTime?
+  trackingNumber String?   @db.VarChar(100)
+  carrier       String?       @db.VarChar(100)
+  deliveredAt   DateTime?
   
-  createdAt       DateTime      @default(now()) @map("creadoEn")
-  updatedAt DateTime      @updatedAt @map("actualizadoEn")
-  confirmedAt  DateTime?      @map("confirmadoEn")
-  preparingAt  DateTime?      @map("preparandoEn")
-  sentAt     DateTime?         @map("enviadoEn")
-  deliveredAt2   DateTime?    @map("entregadoEn")
-  cancelledAt   DateTime?      @map("canceladoEn")
-  cancelledBy   String?        @map("canceladoPor")
-  cancelReason  String?        @db.Text @map("motivoCancelacion")
+  createdAt       DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  confirmedAt  DateTime?
+  preparingAt  DateTime?
+  sentAt     DateTime?
+  cancelledAt   DateTime?
+  cancelledBy   String?
+  cancelReason  String?        @db.Text
   
   user          User          @relation(fields: [userId], references: [id])
   address       Address?      @relation("ShippingAddress", fields: [shippingAddressId], references: [id])
@@ -327,57 +349,57 @@ model Order {
   @@index([status])
   @@index([createdAt])
   @@index([orderNumber])
-  @@map("pedidos")
+  @@map("orders")
 }
 
 model OrderItem {
   id            String    @id @default(uuid())
-  orderId       String    @map("pedidoId")
-  productId     String?   @map("productoId")
+  orderId       String
+  productId     String?
   
-  name          String    @db.VarChar(200) @map("nombre")
-  description   String?   @db.Text @map("descripcion")
-  price         Decimal   @db.Decimal(10, 2) @map("precio")
-  quantity      Int       @map("cantidad")
-  category      Category  @map("categoria")
-  material      Material  @map("material")
-  imageUrl      String?   @db.VarChar(500) @map("imagenUrl")
+  name          String    @db.VarChar(200)
+  description   String?   @db.Text
+  price         Decimal   @db.Decimal(10, 2)
+  quantity      Int
+  category      String    @db.VarChar(100)
+  material      Material
+  imageUrl      String?   @db.VarChar(500)
   
-  subtotal      Decimal   @db.Decimal(10, 2) @map("subtotal")
+  subtotal      Decimal   @db.Decimal(10, 2)
   
-  createdAt     DateTime  @default(now()) @map("creadoEn")
+  createdAt     DateTime  @default(now())
   
   order         Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product       Product?  @relation(fields: [productId], references: [id])
   
   @@index([orderId])
   @@index([productId])
-  @@map("items_pedido")
+  @@map("order_items")
 }
 
 model Payment {
   id                    String      @id @default(uuid())
-  orderId               String      @unique @map("pedidoId")
-  userId                String      @map("usuarioId")
+  orderId               String      @unique
+  userId                String
   
-  amount                Decimal     @db.Decimal(10, 2) @map("monto")
-  refundedAmount        Decimal?    @db.Decimal(10, 2) @map("montoReembolsado")
+  amount                Decimal     @db.Decimal(10, 2)
+  refundedAmount        Decimal?    @db.Decimal(10, 2)
   
-  method                PaymentMethod @default(CARD) @map("metodo")
-  status                PaymentStatus @default(PENDING) @map("estado")
+  method                PaymentMethod @default(CARD)
+  status                PaymentStatus @default(PENDING)
   
-  stripeSessionId       String?     @unique @db.VarChar(255) @map("stripeSessionId")
-  stripePaymentIntentId String?     @unique @db.VarChar(255) @map("stripePaymentIntentId")
-  stripeClientSecret    String?     @db.VarChar(255) @map("stripeClientSecret")
-  stripeChargeId        String?     @db.VarChar(255) @map("stripeChargeId")
+  stripeSessionId       String?     @unique @db.VarChar(255)
+  stripePaymentIntentId String?     @unique @db.VarChar(255)
+  stripeClientSecret    String?     @db.VarChar(255)
+  stripeChargeId        String?     @db.VarChar(255)
   
-  errorMessage          String?     @db.Text @map("errorMensaje")
-  processedAt           DateTime?   @map("fechaProcesado")
-  refundedAt            DateTime?   @map("fechaReembolso")
+  errorMessage          String?     @db.Text
+  processedAt           DateTime?
+  refundedAt            DateTime?
   
-  createdBy     String?   @map("creadoPor")
-  createdAt     DateTime  @default(now()) @map("creadoEn")
-  updatedAt DateTime  @updatedAt @map("actualizadoEn")
+  createdBy     String?
+  createdAt     DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   
   order                 Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
   user                  User        @relation(fields: [userId], references: [id])
@@ -385,24 +407,24 @@ model Payment {
   @@index([userId])
   @@index([status])
   @@index([createdAt])
-  @@map("pagos")
+  @@map("payments")
 }
 
 model InventoryMovement {
   id            String        @id @default(uuid())
-  productId     String        @map("productoId")
-  orderId       String?       @map("pedidoId")
+  productId     String
+  orderId       String?
 
-  type          MovementType  @map("tipo")
-  quantity      Int           @map("cantidad")
-  previousStock Int           @map("stockAnterior")
-  newStock      Int           @map("stockNuevo")
+  type          MovementType
+  quantity      Int
+  previousStock Int
+  newStock      Int
 
-  reason        String        @db.VarChar(255) @map("motivo")
-  reference     String?       @db.VarChar(100) @map("referencia")
+  reason        String        @db.VarChar(255)
+  reference     String?       @db.VarChar(100)
 
-  createdAt     DateTime      @default(now()) @map("creadoEn")
-  createdBy     String        @map("creadoPor")
+  createdAt     DateTime      @default(now())
+  createdBy     String
 
   product       Product       @relation(fields: [productId], references: [id])
   order         Order?        @relation(fields: [orderId], references: [id])
@@ -412,27 +434,27 @@ model InventoryMovement {
   @@index([orderId])
   @@index([type])
   @@index([createdAt])
-  @@map("movimientos_inventario")
+  @@map("inventory_movements")
 }
 
 model Alert {
   id            String          @id @default(uuid())
-  type          AlertType       @map("tipo")
-  severity      AlertSeverity   @default(MEDIUM) @map("severidad")
+  type          AlertType
+  severity      AlertSeverity   @default(MEDIUM)
   
-  title         String          @db.VarChar(200) @map("titulo")
-  message       String          @db.Text @map("mensaje")
+  title         String          @db.VarChar(200)
+  message       String          @db.Text
   
-  productId     String?         @map("productoId")
-  orderId       String?         @map("pedidoId")
-  userId        String?         @map("usuarioId")
+  productId     String?
+  orderId       String?
+  userId        String?
   
-  status        AlertStatus     @default(PENDING) @map("estado")
-  resolvedAt    DateTime?       @map("resueltaEn")
-  resolvedBy    String?         @map("resueltaPor")
-  resolutionNotes String?       @db.Text @map("notasResolucion")
+  status        AlertStatus     @default(PENDING)
+  resolvedAt    DateTime?
+  resolvedBy    String?
+  resolutionNotes String?       @db.Text
   
-  createdAt     DateTime        @default(now()) @map("creadoEn")
+  createdAt     DateTime        @default(now())
   
   product       Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
   resolvedByUser User?          @relation("ResolvedAlerts", fields: [resolvedBy], references: [id])
@@ -442,23 +464,23 @@ model Alert {
   @@index([severity])
   @@index([productId])
   @@index([createdAt])
-  @@map("alertas")
+  @@map("alerts")
 }
 
 model OrderMessage {
   id            String    @id @default(uuid())
-  orderId       String    @map("pedidoId")
-  userId        String    @map("usuarioId")
+  orderId       String
+  userId        String
   
-  message       String    @db.Text @map("mensaje")
-  isFromCustomer Boolean  @default(true) @map("esDeCliente")
+  message       String    @db.Text
+  isFromCustomer Boolean  @default(true)
   
-  attachments   Json?     @map("adjuntos")
+  attachments   Json?
   
-  isRead        Boolean   @default(false) @map("leido")
-  readAt        DateTime? @map("leidoEn")
+  isRead        Boolean   @default(false)
+  readAt        DateTime?
   
-  createdAt     DateTime  @default(now()) @map("creadoEn")
+  createdAt     DateTime  @default(now())
   
   order         Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
   user          User      @relation(fields: [userId], references: [id])
@@ -466,140 +488,219 @@ model OrderMessage {
   @@index([orderId])
   @@index([createdAt])
   @@index([isFromCustomer])
-  @@map("mensajes_pedido")
+  @@map("order_messages")
 }
 
 model Invoice {
   id            String    @id @default(uuid())
-  orderId       String    @unique @map("pedidoId")
+  orderId       String    @unique
   
-  invoiceNumber String    @unique @db.VarChar(50) @map("numeroFactura")
-  series        String    @default("F") @db.VarChar(10) @map("serie")
-  number        Int       @map("numero")
+  invoiceNumber String    @unique @db.VarChar(50)
+  series        String    @default("F") @db.VarChar(10)
+  number        Int
   
-  companyName     String    @db.VarChar(200) @map("empresaNombre")
-  companyTaxId    String    @db.VarChar(20) @map("empresaNif")
-  companyAddress  String    @db.VarChar(255) @map("empresaDireccion")
-  companyCity     String    @db.VarChar(100) @map("empresaCiudad")
-  companyProvince String    @db.VarChar(100) @map("empresaProvincia")
-  companyPostalCode String  @db.VarChar(10) @map("empresaCodigoPostal")
+  companyName     String    @db.VarChar(200)
+  companyTaxId    String    @db.VarChar(20)
+  companyAddress  String    @db.VarChar(255)
+  companyCity     String    @db.VarChar(100)
+  companyProvince String    @db.VarChar(100)
+  companyPostalCode String  @db.VarChar(10)
   
-  clientName      String    @db.VarChar(200) @map("clienteNombre")
-  clientTaxId     String    @db.VarChar(20) @map("clienteNif")
-  clientAddress   String    @db.VarChar(255) @map("clienteDireccion")
-  clientCity      String    @db.VarChar(100) @map("clienteCiudad")
-  clientProvince  String    @db.VarChar(100) @map("clienteProvincia")
-  clientPostalCode String   @db.VarChar(10) @map("clienteCodigoPostal")
-  clientCountry   String    @db.VarChar(50) @map("clientePais")
+  clientName      String    @db.VarChar(200)
+  clientTaxId     String    @db.VarChar(20)
+  clientAddress   String    @db.VarChar(255)
+  clientCity      String    @db.VarChar(100)
+  clientProvince  String    @db.VarChar(100)
+  clientPostalCode String   @db.VarChar(10)
+  clientCountry   String    @db.VarChar(50)
   
-  taxableAmount   Decimal   @db.Decimal(10, 2) @map("baseImponible")
-  vatRate         Decimal   @default(21) @db.Decimal(5, 2) @map("tipoIva")
-  vatAmount       Decimal   @db.Decimal(10, 2) @map("cuotaIva")
-  total           Decimal   @db.Decimal(10, 2) @map("total")
+  subtotal        Decimal   @db.Decimal(10, 2)
+  shipping        Decimal   @db.Decimal(10, 2)
+  discount        Decimal?  @db.Decimal(10, 2)
   
-  pdfUrl          String?   @db.VarChar(500) @map("pdfUrl")
+  taxableAmount   Decimal   @db.Decimal(10, 2)
+  vatRate         Decimal   @default(21) @db.Decimal(5, 2)
+  vatAmount       Decimal   @db.Decimal(10, 2)
+  total           Decimal   @db.Decimal(10, 2)
   
-  isCancelled     Boolean   @default(false) @map("anulada")
-  cancelledAt     DateTime? @map("anuladaEn")
-  cancelReason    String?   @db.Text @map("motivoAnulacion")
+  pdfUrl          String?   @db.VarChar(500)
   
-  issuedAt        DateTime  @default(now()) @map("emitidaEn")
+  isCancelled     Boolean   @default(false)
+  cancelledAt     DateTime?
+  cancelReason    String?   @db.Text
+  
+  issuedAt        DateTime  @default(now())
   
   order           Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
   
   @@index([invoiceNumber])
   @@index([clientTaxId])
   @@index([issuedAt])
-  @@map("facturas")
+  @@map("invoices")
 }
 
 model ShippingConfig {
   id                    String    @id @default(uuid())
   
-  name                  String    @db.VarChar(100) @map("nombre")
-  description           String?   @db.Text @map("descripcion")
-  price                 Decimal   @db.Decimal(10, 2) @map("precio")
+  name                  String    @db.VarChar(100)
+  description           String?   @db.Text
+  price                 Decimal   @db.Decimal(10, 2)
   
-  freeShippingFrom      Decimal?  @db.Decimal(10, 2) @map("envioGratisDesde")
+  freeShippingFrom      Decimal?  @db.Decimal(10, 2)
   
-  minDays               Int       @default(3) @map("diasMinimos")
-  maxDays               Int       @default(5) @map("diasMaximos")
+  minDays               Int       @default(3)
+  maxDays               Int       @default(5)
   
-  isActive              Boolean   @default(true) @map("activo")
-  isDefault             Boolean   @default(false) @map("esDefecto")
+  isActive              Boolean   @default(true)
+  isDefault             Boolean   @default(false)
   
-  displayOrder          Int       @default(0) @map("orden")
+  displayOrder          Int       @default(0)
   
-  createdAt             DateTime  @default(now()) @map("creadoEn")
-  updatedAt         DateTime  @updatedAt @map("actualizadoEn")
+  createdAt             DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
   
   @@index([isActive])
   @@index([isDefault])
   @@index([displayOrder])
-  @@map("configuracion_envios")
+  @@map("shipping_configs")
 }
 
 model SiteConfig {
   id                    String    @id @default(cuid())
   
-  companyName         String    @db.VarChar(200) @map("nombreEmpresa")
-  companyTaxId            String    @db.VarChar(20) @map("nifEmpresa")
-  companyAddress      String    @db.VarChar(255) @map("direccionEmpresa")
-  companyCity         String    @db.VarChar(100) @map("ciudadEmpresa")
-  companyProvince     String    @db.VarChar(100) @map("provinciaEmpresa")
-  companyPostalCode   String    @db.VarChar(10) @map("codigoPostalEmpresa")
-  companyPhone        String    @db.VarChar(20) @map("telefonoEmpresa")
-  companyEmail            String    @db.VarChar(255) @map("emailEmpresa")
+  companyName         String    @db.VarChar(200)
+  companyTaxId            String    @db.VarChar(20)
+  companyAddress      String    @db.VarChar(255)
+  companyCity         String    @db.VarChar(100)
+  companyProvince     String    @db.VarChar(100)
+  companyPostalCode   String    @db.VarChar(10)
+  companyPhone        String    @db.VarChar(20)
+  companyEmail            String    @db.VarChar(255)
   
-  defaultVatRate      Decimal   @default(21) @db.Decimal(5, 2) @map("tipoIvaDefecto")
+  defaultVatRate      Decimal   @default(21) @db.Decimal(5, 2)
   
-  lowStockThreshold       Int       @default(5) @map("umbralStockBajo")
+  lowStockThreshold       Int       @default(5)
   
-  updatedAt         DateTime  @updatedAt @map("actualizadoEn")
-  updatedBy       String?   @map("actualizadoPor")
+  updatedAt         DateTime  @updatedAt
+  updatedBy       String?
   
-  @@map("configuracion")
+  @@map("site_configs")
 }
 
 model Session {
   id           String   @id @default(cuid())
-  sessionToken String   @unique @map("sessionToken")
-  userId       String   @map("userId")
-  expires      DateTime @map("expires")
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
   user         User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   @@index([userId])
-  @@map("sesiones")
+  @@map("sessions")
 }
 
 model VerificationToken {
   identifier String
-  token      String   @unique @map("token")
-  expires    DateTime @map("expires")
+  token      String   @unique
+  expires    DateTime
 
   @@unique([identifier, token])
-  @@map("tokens_verificacion")
+  @@map("verification_tokens")
 }
 
 model AuditLog {
   id            String    @id @default(uuid())
   
-  action        String    @db.VarChar(100) @map("accion")
-  entity        String    @db.VarChar(50) @map("entidad")
-  entityId      String    @db.VarChar(255) @map("entidadId")
+  action        String    @db.VarChar(100)
+  entity        String    @db.VarChar(50)
+  entityId      String    @db.VarChar(255)
   
-  previousData  Json?     @map("datosAnteriores")
-  newData       Json?     @map("datosNuevos")
+  previousData  Json?
+  newData       Json?
   
-  userId        String?   @map("usuarioId")
-  ipAddress     String?   @db.VarChar(45) @map("ipAddress")
-  userAgent     String?   @db.Text @map("userAgent")
+  userId        String?
+  ipAddress     String?   @db.VarChar(45)
+  userAgent     String?   @db.Text
   
-  createdAt     DateTime  @default(now()) @map("creadoEn")
+  createdAt     DateTime  @default(now())
   
   @@index([action])
   @@index([entity])
   @@index([entityId])
   @@index([createdAt])
-  @@map("logs_auditoria")
+  @@map("audit_logs")
+}
+
+// ============================================
+// ADDITIONAL MODELS
+// ============================================
+
+model Review {
+  id            String    @id @default(uuid())
+  productId     String
+  userId        String
+  
+  rating        Int
+  title         String    @db.VarChar(200)
+  comment       String    @db.Text
+  
+  isVerified    Boolean   @default(false)
+  isApproved    Boolean   @default(false)
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  product       Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([productId, userId])
+  @@index([productId])
+  @@index([userId])
+  @@index([rating])
+  @@index([isApproved])
+  @@map("reviews")
+}
+
+model Coupon {
+  id            String    @id @default(uuid())
+  code          String    @unique @db.VarChar(50)
+  
+  type          CouponType
+  value         Decimal   @db.Decimal(10, 2)
+  
+  minOrderAmount Decimal? @db.Decimal(10, 2)
+  maxUses       Int?
+  usedCount     Int       @default(0)
+  
+  validFrom     DateTime
+  validUntil    DateTime
+  
+  isActive      Boolean   @default(true)
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  @@index([code])
+  @@index([isActive])
+  @@index([validFrom])
+  @@index([validUntil])
+  @@map("coupons")
+}
+
+model FAQ {
+  id            String    @id @default(uuid())
+  
+  question      String    @db.Text
+  answer        String    @db.Text
+  category      String    @db.VarChar(100)
+  
+  displayOrder  Int       @default(0)
+  isActive      Boolean   @default(true)
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  @@index([category])
+  @@index([isActive])
+  @@index([displayOrder])
+  @@map("faqs")
 }

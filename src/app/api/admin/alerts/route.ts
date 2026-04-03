@@ -13,8 +13,8 @@ import { z } from 'zod';
 // Schema de validación
 const actualizarAlertaSchema = z.object({
   id: z.string().uuid(),
-  estado: z.enum(['PENDIENTE', 'EN_PROCESO', 'RESUELTA', 'IGNORADA']),
-  notasResolucion: z.string().optional(),
+  status: z.enum(['PENDING', 'IN_PROGRESS', 'RESOLVED', 'IGNORED']),
+  resolutionNotes: z.string().optional(),
 });
 
 // GET - Listar alertas
@@ -40,48 +40,48 @@ export async function GET(req: NextRequest) {
     }
 
     const { searchParams } = new URL(req.url);
-    const tipo = searchParams.get('tipo');
-    const severidad = searchParams.get('severidad');
-    const estado = searchParams.get('estado');
+    const type = searchParams.get('type');
+    const severity = searchParams.get('severity');
+    const status = searchParams.get('status');
     const limit = parseInt(searchParams.get('limit') || '50');
     const page = parseInt(searchParams.get('page') || '1');
     const skip = (page - 1) * limit;
 
     const where: any = {};
     
-    if (tipo) {
-      where.tipo = tipo;
+    if (type) {
+      where.type = type;
     }
     
-    if (severidad) {
-      where.severidad = severidad;
+    if (severity) {
+      where.severity = severity;
     }
     
-    if (estado) {
-      where.estado = estado;
+    if (status) {
+      where.status = status;
     }
 
     const [alertas, total, pendientes] = await Promise.all([
       prisma.alert.findMany({
         where,
         include: {
-          producto: {
+          product: {
             select: {
               id: true,
-              nombre: true,
+              name: true,
               slug: true,
               stock: true,
             },
           },
-          resueltaPorUsuario: {
+          resolvedByUser: {
             select: {
               id: true,
-              nombre: true,
+              name: true,
             },
           },
         },
         orderBy: [
-          { severidad: 'desc' },
+          { severity: 'desc' },
           { createdAt: 'desc' },
         ],
         skip,
@@ -135,15 +135,15 @@ export async function PATCH(req: NextRequest) {
     const validatedData = actualizarAlertaSchema.parse(body);
 
     const updateData: any = {
-      estado: validatedData.estado,
+      status: validatedData.status,
     };
 
     // Si se resuelve, guardar quién y cuándo
-    if (validatedData.estado === 'RESUELTA') {
-      updateData.resueltaEn = new Date();
-      updateData.resueltaPor = usuario.id;
-      if (validatedData.notasResolucion) {
-        updateData.notasResolucion = validatedData.notasResolucion;
+    if (validatedData.status === 'RESOLVED') {
+      updateData.resolvedAt = new Date();
+      updateData.resolvedBy = usuario.id;
+      if (validatedData.resolutionNotes) {
+        updateData.resolutionNotes = validatedData.resolutionNotes;
       }
     }
 
@@ -151,17 +151,17 @@ export async function PATCH(req: NextRequest) {
       where: { id: validatedData.id },
       data: updateData,
       include: {
-        producto: {
+        product: {
           select: {
             id: true,
-            nombre: true,
+            name: true,
             slug: true,
           },
         },
-        resueltaPorUsuario: {
+        resolvedByUser: {
           select: {
             id: true,
-            nombre: true,
+            name: true,
           },
         },
       },

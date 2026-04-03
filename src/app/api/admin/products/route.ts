@@ -9,7 +9,7 @@ import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
-import { Category, Material } from '@prisma/client';
+import { Material } from '@prisma/client';
 
 // Schema de validación
 const productSchema = z.object({
@@ -19,8 +19,8 @@ const productSchema = z.object({
   price: z.number().positive(),
   previousPrice: z.number().optional(),
   stock: z.number().int().min(0),
-  category: z.nativeEnum(Category).optional(),
-  material: z.nativeEnum(Material).optional(),
+  categoryId: z.string().uuid(),
+  material: z.nativeEnum(Material),
   dimensions: z.string().optional(),
   weight: z.number().optional(),
   printTime: z.number().optional(),
@@ -101,7 +101,7 @@ export async function POST(req: NextRequest) {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
 
-    // Crear producto con campos en inglés
+    // Crear producto
     const product = await prisma.product.create({
       data: {
         name: data.name,
@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
         price: data.price,
         previousPrice: data.previousPrice,
         stock: data.stock,
-        category: data.category,
+        categoryId: data.categoryId,
         material: data.material,
         dimensions: data.dimensions,
         weight: data.weight,

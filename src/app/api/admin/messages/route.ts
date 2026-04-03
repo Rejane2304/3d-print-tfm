@@ -12,8 +12,8 @@ import { z } from 'zod';
 
 // Schema de validación
 const crearMensajeSchema = z.object({
-  pedidoId: z.string().uuid(),
-  mensaje: z.string().min(1).max(1000),
+  orderId: z.string().uuid(),
+  message: z.string().min(1).max(1000),
 });
 
 // GET - Listar mensajes de un pedido
@@ -39,18 +39,18 @@ export async function GET(req: NextRequest) {
     }
 
     const { searchParams } = new URL(req.url);
-    const pedidoId = searchParams.get('pedidoId');
+    const orderId = searchParams.get('orderId');
 
-    if (!pedidoId) {
+    if (!orderId) {
       return NextResponse.json(
-        { success: false, error: 'pedidoId es requerido' },
+        { success: false, error: 'orderId es requerido' },
         { status: 400 }
       );
     }
 
     // Verificar acceso al pedido (admin o dueño)
     const pedido = await prisma.order.findUnique({
-      where: { id: pedidoId },
+      where: { id: orderId },
     });
 
     if (!pedido) {
@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Solo admin o el dueño del pedido puede ver mensajes
-    if (usuario.role !== 'ADMIN' && pedido.usuarioId !== usuario.id) {
+    if (usuario.role !== 'ADMIN' && pedido.userId !== usuario.id) {
       return NextResponse.json(
         { success: false, error: 'No autorizado' },
         { status: 403 }
@@ -69,13 +69,13 @@ export async function GET(req: NextRequest) {
     }
 
     const mensajes = await prisma.orderMessage.findMany({
-      where: { pedidoId },
+      where: { orderId },
       include: {
-        usuario: {
+        user: {
           select: {
             id: true,
-            nombre: true,
-            rol: true,
+            name: true,
+            role: true,
           },
         },
       },
@@ -122,7 +122,7 @@ export async function POST(req: NextRequest) {
 
     // Verificar que el pedido existe
     const pedido = await prisma.order.findUnique({
-      where: { id: validatedData.pedidoId },
+      where: { id: validatedData.orderId },
     });
 
     if (!pedido) {
@@ -133,7 +133,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Solo admin o el dueño del pedido puede enviar mensajes
-    if (usuario.role !== 'ADMIN' && pedido.usuarioId !== usuario.id) {
+    if (usuario.role !== 'ADMIN' && pedido.userId !== usuario.id) {
       return NextResponse.json(
         { success: false, error: 'No autorizado' },
         { status: 403 }
@@ -141,26 +141,26 @@ export async function POST(req: NextRequest) {
     }
 
     // Crear mensaje
-    const mensaje = await prisma.orderMessage.create({
+    const newMessage = await prisma.orderMessage.create({
       data: {
-        pedidoId: validatedData.pedidoId,
-        usuarioId: usuario.id,
-        mensaje: validatedData.mensaje,
-        esDeCliente: usuario.role !== 'ADMIN',
+        orderId: validatedData.orderId,
+        userId: usuario.id,
+        message: validatedData.message,
+        isFromCustomer: usuario.role !== 'ADMIN',
       },
       include: {
-        usuario: {
+        user: {
           select: {
             id: true,
-            nombre: true,
-            rol: true,
+            name: true,
+            role: true,
           },
         },
       },
     });
 
     return NextResponse.json(
-      { success: true, mensaje },
+      { success: true, message: newMessage },
       { status: 201 }
     );
   } catch (error) {

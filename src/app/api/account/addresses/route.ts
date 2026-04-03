@@ -9,16 +9,16 @@ import { prisma } from '@/lib/db/prisma';
 import { z } from 'zod';
 
 // Schema de validación
-const direccionSchema = z.object({
-  nombre: z.string().min(1, 'El nombre es requerido'),
-  destinatario: z.string().min(1, 'El destinatario es requerido'),
-  telefono: z.string().min(9, 'Teléfono inválido'),
-  direccion: z.string().min(1, 'La dirección es requerida'),
-  complemento: z.string().optional(),
-  codigoPostal: z.string().regex(/^\d{5}$/, 'Código postal inválido'),
-  ciudad: z.string().min(1, 'La ciudad es requerida'),
-  provincia: z.string().min(1, 'La provincia es requerida'),
-  esPrincipal: z.boolean().default(false),
+const addressSchema = z.object({
+  name: z.string().min(1, 'El nombre es requerido'),
+  recipient: z.string().min(1, 'El destinatario es requerido'),
+  phone: z.string().min(9, 'Teléfono inválido'),
+  address: z.string().min(1, 'La dirección es requerida'),
+  complement: z.string().optional(),
+  postalCode: z.string().regex(/^\d{5}$/, 'Código postal inválido'),
+  city: z.string().min(1, 'La ciudad es requerida'),
+  province: z.string().min(1, 'La provincia es requerida'),
+  isDefault: z.boolean().default(false),
 });
 
 // GET - Listar direcciones del usuario
@@ -45,15 +45,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const direcciones = await prisma.direccion.findMany({
-      where: { usuarioId: usuario.id },
+    const addresses = await prisma.address.findMany({
+      where: { userId: usuario.id },
       orderBy: [
-        { esPrincipal: 'desc' },
-        { creadoEn: 'desc' }
+        { isDefault: 'desc' },
+        { createdAt: 'desc' }
       ]
     });
 
-    return NextResponse.json({ direcciones });
+    return NextResponse.json({ addresses });
   } catch (error) {
     console.error('Error al obtener direcciones:', error);
     return NextResponse.json(
@@ -90,34 +90,34 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     
     // Validar datos
-    const validatedData = direccionSchema.parse(body);
+    const validatedData = addressSchema.parse(body);
 
     // Si es principal, desmarcar las otras
-    if (validatedData.esPrincipal) {
-      await prisma.direccion.updateMany({
-        where: { usuarioId: usuario.id },
-        data: { esPrincipal: false }
+    if (validatedData.isDefault) {
+      await prisma.address.updateMany({
+        where: { userId: usuario.id },
+        data: { isDefault: false }
       });
     }
 
     // Contar direcciones existentes
-    const count = await prisma.direccion.count({
-      where: { usuarioId: usuario.id }
+    const count = await prisma.address.count({
+      where: { userId: usuario.id }
     });
 
     // Si es la primera dirección, marcarla como principal
     if (count === 0) {
-      validatedData.esPrincipal = true;
+      validatedData.isDefault = true;
     }
 
-    const direccion = await prisma.direccion.create({
+    const newAddress = await prisma.address.create({
       data: {
         ...validatedData,
-        usuarioId: usuario.id
+        userId: usuario.id
       }
     });
 
-    return NextResponse.json({ direccion }, { status: 201 });
+    return NextResponse.json({ address: newAddress }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -167,8 +167,8 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Verificar que la dirección pertenece al usuario
-    const existing = await prisma.direccion.findFirst({
-      where: { id, usuarioId: usuario.id }
+    const existing = await prisma.address.findFirst({
+      where: { id, userId: usuario.id }
     });
 
     if (!existing) {
@@ -179,19 +179,19 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Si se marca como principal, desmarcar las otras
-    if (data.esPrincipal) {
-      await prisma.direccion.updateMany({
-        where: { usuarioId: usuario.id, id: { not: id } },
-        data: { esPrincipal: false }
+    if (data.isDefault) {
+      await prisma.address.updateMany({
+        where: { userId: usuario.id, id: { not: id } },
+        data: { isDefault: false }
       });
     }
 
-    const direccion = await prisma.direccion.update({
+    const updatedAddress = await prisma.address.update({
       where: { id },
       data
     });
 
-    return NextResponse.json({ direccion });
+    return NextResponse.json({ address: updatedAddress });
   } catch (error) {
     console.error('Error al actualizar dirección:', error);
     return NextResponse.json(
@@ -236,8 +236,8 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Verificar que la dirección pertenece al usuario
-    const existing = await prisma.direccion.findFirst({
-      where: { id, usuarioId: usuario.id }
+    const existing = await prisma.address.findFirst({
+      where: { id, userId: usuario.id }
     });
 
     if (!existing) {
@@ -247,19 +247,19 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    await prisma.direccion.delete({ where: { id } });
+    await prisma.address.delete({ where: { id } });
 
     // Si era la principal, marcar otra como principal
-    if (existing.esPrincipal) {
-      const otra = await prisma.direccion.findFirst({
-        where: { usuarioId: usuario.id },
-        orderBy: { creadoEn: 'asc' }
+    if (existing.isDefault) {
+      const otra = await prisma.address.findFirst({
+        where: { userId: usuario.id },
+        orderBy: { createdAt: 'asc' }
       });
 
       if (otra) {
-        await prisma.direccion.update({
+        await prisma.address.update({
           where: { id: otra.id },
-          data: { esPrincipal: true }
+          data: { isDefault: true }
         });
       }
     }

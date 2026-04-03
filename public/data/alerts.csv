@@ -1,9 +1,3 @@
-id,type,title,message,status,metadata
-ALRT-0001,LOW_STOCK,Stock bajo,Vaso Decorativo Floral tiene stock bajo (7 unidades),READ,{"productId":"PROD-0001","currentStock":7}
-ALRT-0002,OUT_OF_STOCK,Producto agotado,Vaso Decorativo Floral tiene stock bajo (0 unidades),UNREAD,{"productId":"PROD-0001","currentStock":0}
-ALRT-0003,LOW_STOCK,Stock bajo,Lámpara Luna 3D tiene stock bajo (3 unidades),UNREAD,{"productId":"PROD-0009","currentStock":3}
-ALRT-0004,LOW_STOCK,Stock bajo,Coche Clásico Articulado tiene stock bajo (5 unidades),READ,{"productId":"PROD-0008","currentStock":5}
-ALRT-0005,LOW_STOCK,Stock bajo,Figura Articulada Dinosaurio Rex tiene stock bajo (4 unidades),UNREAD,{"productId":"PROD-0005","currentStock":4}
-ALRT-0006,LOW_STOCK,Stock bajo,Caja Secretera Medieval tiene stock bajo (6 unidades),UNREAD,{"productId":"PROD-0010","currentStock":6}
-ALRT-0007,OUT_OF_STOCK,Producto agotado,Impresora Miniature Casa tiene stock bajo (0 unidades),UNREAD,{"productId":"PROD-0006","currentStock":0}
-ALRT-0008,LOW_STOCK,Stock bajo,Soporte para Teléfono Ajustable tiene stock bajo (8 unidades),READ,{"productId":"PROD-0004","currentStock":8}
+_ref,type,severity,title,message,_productRef,status
+ALRT-0001,LOW_STOCK,HIGH,Low stock,3D Moon Lamp has low stock (2 units),PROD-0009,RESOLVED
+ALRT-0002,LOW_STOCK,MEDIUM,Low stock,Articulated Dinosaur Rex Figure has low stock (4 units),PROD-0005,PENDING

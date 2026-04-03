@@ -9,13 +9,14 @@
  * esté disponible antes de continuar
  */
 
-const { execSync } = require('child_process');
+import { execSync } from 'node:child_process';
 
 const MAX_RETRIES = 30;
 const RETRY_INTERVAL = 1000; // 1 segundo
 let retries = 0;
 
 console.log('⏳ Esperando a que PostgreSQL esté listo...');
+
 
 function checkPostgres() {
   try {
@@ -26,7 +27,7 @@ function checkPostgres() {
     );
     console.log('✅ PostgreSQL está listo');
     return true;
-  } catch (error) {
+  } catch {
     retries++;
     if (retries >= MAX_RETRIES) {
       console.error('❌ Error: PostgreSQL no está respondiendo después de 30 segundos');
@@ -34,10 +35,8 @@ function checkPostgres() {
       console.error('   docker-compose -f docker-compose.test.yml ps');
       process.exit(1);
     }
-    
     const dots = '.'.repeat((retries % 3) + 1);
     process.stdout.write(`\r⏳ Esperando PostgreSQL ${dots}  `);
-    
     setTimeout(checkPostgres, RETRY_INTERVAL);
   }
 }

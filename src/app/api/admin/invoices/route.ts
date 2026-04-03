@@ -22,7 +22,7 @@ const DATOS_EMPRESA = {
 
 // Schema de validación
 const crearFacturaSchema = z.object({
-  pedidoId: z.string().uuid(),
+  orderId: z.string().uuid(),
 });
 
 // GET - Listar facturas
@@ -62,29 +62,29 @@ export async function GET(req: NextRequest) {
     }
     
     if (desde || hasta) {
-      where.emitidaEn = {};
-      if (desde) where.emitidaEn.gte = new Date(desde);
-      if (hasta) where.emitidaEn.lte = new Date(hasta);
+      where.issuedAt = {};
+      if (desde) where.issuedAt.gte = new Date(desde);
+      if (hasta) where.issuedAt.lte = new Date(hasta);
     }
 
     const [facturas, total] = await Promise.all([
       prisma.invoice.findMany({
         where,
         include: {
-          pedido: {
+          order: {
             include: {
-              usuario: {
+              user: {
                 select: {
                   id: true,
-                  nombre: true,
+                  name: true,
                   email: true,
-                  nif: true,
+                  taxId: true,
                 },
               },
             },
           },
         },
-        orderBy: { emitidaEn: 'desc' },
+        orderBy: { issuedAt: 'desc' },
         skip,
         take: limit,
       }),
@@ -131,13 +131,13 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { pedidoId } = crearFacturaSchema.parse(body);
+    const { orderId } = crearFacturaSchema.parse(body);
 
     // Verificar que el pedido existe
     const pedido = await prisma.order.findUnique({
-      where: { id: pedidoId },
+      where: { id: orderId },
       include: {
-        usuario: true,
+        user: true,
         items: true,
       },
     });
@@ -150,7 +150,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Verificar que el pedido está entregado
-    if (pedido.estado !== 'ENTREGADO') {
+    if (pedido.status !== 'DELIVERED') {
       return NextResponse.json(
         { success: false, error: 'El pedido debe estar entregado para generar factura' },
         { status: 400 }
@@ -159,7 +159,7 @@ export async function POST(req: NextRequest) {
 
     // Verificar que no existe ya una factura
     const facturaExistente = await prisma.invoice.findFirst({
-      where: { pedidoId },
+      where: { orderId },
     });
 
     if (facturaExistente) {
@@ -173,57 +173,59 @@ export async function POST(req: NextRequest) {
     const year = new Date().getFullYear();
     const ultimaFactura = await prisma.invoice.findFirst({
       where: {
-        serie: 'F',
+        series: 'F',
       },
-      orderBy: { numero: 'desc' },
+      orderBy: { number: 'desc' },
     });
 
-    const numero = ultimaFactura ? ultimaFactura.numero + 1 : 1;
+    const numero = ultimaFactura ? ultimaFactura.number + 1 : 1;
     const invoiceNumber = `F-${year}-${String(numero).padStart(6, '0')}`;
 
     // Calcular totales (IVA 21%)
-    const baseImponible = Number(pedido.subtotal) + Number(pedido.envio);
-    const tipoIva = 21;
-    const cuotaIva = (baseImponible * tipoIva) / 100;
-    const total = baseImponible + cuotaIva;
+    const taxableAmount = Number(pedido.subtotal) + Number(pedido.shipping);
+    const vatRate = 21;
+    const vatAmount = (taxableAmount * vatRate) / 100;
+    const total = taxableAmount + vatAmount;
 
     // Crear factura
     const factura = await prisma.invoice.create({
       data: {
         invoiceNumber,
-        serie: 'F',
-        numero,
-        pedidoId,
+        series: 'F',
+        number: numero,
+        orderId,
         // Datos empresa
-        empresaNombre: DATOS_EMPRESA.nombre,
-        empresaNif: DATOS_EMPRESA.nif,
-        empresaDireccion: DATOS_EMPRESA.direccion,
-        empresaCiudad: DATOS_EMPRESA.ciudad,
-        empresaProvincia: DATOS_EMPRESA.provincia,
-        empresaCodigoPostal: DATOS_EMPRESA.postalCode,
+        companyName: DATOS_EMPRESA.nombre,
+        companyTaxId: DATOS_EMPRESA.nif,
+        companyAddress: DATOS_EMPRESA.direccion,
+        companyCity: DATOS_EMPRESA.ciudad,
+        companyProvince: DATOS_EMPRESA.provincia,
+        companyPostalCode: DATOS_EMPRESA.postalCode,
         // Datos cliente
-        clienteNombre: pedido.nombreEnvio,
-        clienteNif: pedido.usuario.nif || '',
-        clienteDireccion: pedido.shippingAddress,
-        clienteCiudad: pedido.ciudadEnvio,
-        clienteProvincia: pedido.provinciaEnvio,
-        clienteCodigoPostal: pedido.postalCodeEnvio,
-        clientePais: pedido.paisEnvio,
+        clientName: pedido.shippingName,
+        clientTaxId: pedido.user.taxId || '',
+        clientAddress: pedido.shippingAddress,
+        clientCity: pedido.shippingCity,
+        clientProvince: pedido.shippingProvince,
+        clientPostalCode: pedido.shippingPostalCode,
+        clientCountry: pedido.shippingCountry,
         // Totales
-        baseImponible,
-        tipoIva,
-        cuotaIva,
+        subtotal: Number(pedido.subtotal),
+        shipping: Number(pedido.shipping),
+        taxableAmount,
+        vatRate,
+        vatAmount,
         total,
       },
       include: {
-        pedido: {
+        order: {
           include: {
-            usuario: {
+            user: {
               select: {
                 id: true,
-                nombre: true,
+                name: true,
                 email: true,
-                nif: true,
+                taxId: true,
               },
             },
           },

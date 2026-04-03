@@ -1,0 +1,31 @@
+_ref,_productRef,url,filename,altText,isMain,displayOrder
+IMG-0001,PROD-0001,/images/products/p1/p1-1.jpg,p1-1.jpg,Floral Decorative Vase - Main view,true,0
+IMG-0002,PROD-0001,/images/products/p1/p1-2.png,p1-2.png,Floral Decorative Vase - Side view,false,1
+IMG-0003,PROD-0001,/images/products/p1/p1-3.webp,p1-3.webp,Floral Decorative Vase - Detail,false,2
+IMG-0004,PROD-0002,/images/products/p2/p2-1.jpg,p2-1.jpg,Hexagonal Desk Organizer - Main view,true,0
+IMG-0005,PROD-0002,/images/products/p2/p2-2.png,p2-2.png,Hexagonal Desk Organizer - Side view,false,1
+IMG-0006,PROD-0002,/images/products/p2/p2-3.webp,p2-3.webp,Hexagonal Desk Organizer - Detail,false,2
+IMG-0007,PROD-0003,/images/products/p3/p3-1.jpg,p3-1.jpg,Minimalist Geometric Planter - Main view,true,0
+IMG-0008,PROD-0003,/images/products/p3/p3-2.png,p3-2.png,Minimalist Geometric Planter - Side view,false,1
+IMG-0009,PROD-0003,/images/products/p3/p3-3.webp,p3-3.webp,Minimalist Geometric Planter - Detail,false,2
+IMG-0010,PROD-0004,/images/products/p4/p4-1.jpg,p4-1.jpg,Adjustable Phone Stand - Main view,true,0
+IMG-0011,PROD-0004,/images/products/p4/p4-2.png,p4-2.png,Adjustable Phone Stand - Side view,false,1
+IMG-0012,PROD-0004,/images/products/p4/p4-3.webp,p4-3.webp,Adjustable Phone Stand - Detail,false,2
+IMG-0013,PROD-0005,/images/products/p5/p5-1.jpg,p5-1.jpg,Articulated Dinosaur Rex Figure - Main view,true,0
+IMG-0014,PROD-0005,/images/products/p5/p5-2.png,p5-2.png,Articulated Dinosaur Rex Figure - Side view,false,1
+IMG-0015,PROD-0005,/images/products/p5/p5-3.webp,p5-3.webp,Articulated Dinosaur Rex Figure - Detail,false,2
+IMG-0016,PROD-0006,/images/products/p6/p6-1.jpg,p6-1.jpg,House Miniature - Main view,true,0
+IMG-0017,PROD-0006,/images/products/p6/p6-2.png,p6-2.png,House Miniature - Side view,false,1
+IMG-0018,PROD-0006,/images/products/p6/p6-3.webp,p6-3.webp,House Miniature - Detail,false,2
+IMG-0019,PROD-0007,/images/products/p7/p7-1.jpg,p7-1.jpg,Dragon Pencil/Brush Holder - Main view,true,0
+IMG-0020,PROD-0007,/images/products/p7/p7-2.png,p7-2.png,Dragon Pencil/Brush Holder - Side view,false,1
+IMG-0021,PROD-0007,/images/products/p7/p7-3.webp,p7-3.webp,Dragon Pencil/Brush Holder - Detail,false,2
+IMG-0022,PROD-0008,/images/products/p8/p8-1.jpg,p8-1.jpg,Articulated Classic Car - Main view,true,0
+IMG-0023,PROD-0008,/images/products/p8/p8-2.png,p8-2.png,Articulated Classic Car - Side view,false,1
+IMG-0024,PROD-0008,/images/products/p8/p8-3.webp,p8-3.webp,Articulated Classic Car - Detail,false,2
+IMG-0025,PROD-0009,/images/products/p9/p9-1.jpg,p9-1.jpg,3D Moon Lamp - Main view,true,0
+IMG-0026,PROD-0009,/images/products/p9/p9-2.png,p9-2.png,3D Moon Lamp - Side view,false,1
+IMG-0027,PROD-0009,/images/products/p9/p9-3.webp,p9-3.webp,3D Moon Lamp - Detail,false,2
+IMG-0028,PROD-0010,/images/products/p10/p10-1.jpg,p10-1.jpg,Medieval Secret Box - Main view,true,0
+IMG-0029,PROD-0010,/images/products/p10/p10-2.png,p10-2.png,Medieval Secret Box - Side view,false,1
+IMG-0030,PROD-0010,/images/products/p10/p10-3.webp,p10-3.webp,Medieval Secret Box - Detail,false,2

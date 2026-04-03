@@ -9,7 +9,7 @@
         "prisma/seed.ts",
         "prisma/migrations/**",
         "private/data/**",
-        "doc/**",
+        "docs/**",
         "tests/**",
         ".env*",
         "package.json",

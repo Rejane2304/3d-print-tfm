@@ -9,16 +9,16 @@ import { useSession } from 'next-auth/react';
 
 export interface CartItem {
   id: string;
-  productoId: string;
-  cantidad: number;
-  precioUnitario: number;
-  producto: {
+  productId: string;
+  quantity: number;
+  unitPrice: number;
+  product: {
     id: string;
-    nombre: string;
+    name: string;
     slug: string;
-    precio: number;
+    price: number;
     stock: number;
-    imagen: string | null;
+    image: string | null;
   };
 }
 
@@ -54,7 +54,7 @@ export function useCart() {
         if (response.ok) {
           const data = await response.json();
           if (data.success) {
-            setCart(data.carrito);
+            setCart(data.cart);
           }
         } else {
           throw new Error('Error al cargar el carrito');
@@ -64,9 +64,9 @@ export function useCart() {
         const cartData = localStorage.getItem(CART_STORAGE_KEY);
         if (cartData) {
           const items: CartItem[] = JSON.parse(cartData);
-          const totalItems = items.reduce((sum, item) => sum + item.cantidad, 0);
+          const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
           const subtotal = items.reduce(
-            (sum, item) => sum + item.precioUnitario * item.cantidad,
+            (sum, item) => sum + item.unitPrice * item.quantity,
             0
           );
           setCart({
@@ -92,14 +92,14 @@ export function useCart() {
   }, [isAuthenticated, isLoadingSession]);
 
   // Añadir item al carrito
-  const addItem = useCallback(async (productoId: string, cantidad: number, productoInfo: any) => {
+  const addItem = useCallback(async (productId: string, quantity: number, productInfo: any) => {
     try {
       if (isAuthenticated) {
         // Usar API
         const response = await fetch('/api/cart', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ productoId, cantidad }),
+          body: JSON.stringify({ productId, quantity }),
         });
         
         if (!response.ok) {
@@ -115,25 +115,25 @@ export function useCart() {
         const cartData = localStorage.getItem(CART_STORAGE_KEY);
         const items: CartItem[] = cartData ? JSON.parse(cartData) : [];
         
-        const existingItem = items.find(item => item.productoId === productoId);
+        const existingItem = items.find(item => item.productId === productId);
         
         if (existingItem) {
           // Actualizar cantidad
-          existingItem.cantidad += cantidad;
+          existingItem.quantity += quantity;
         } else {
           // Añadir nuevo item
           items.push({
             id: `local-${Date.now()}`,
-            productoId,
-            cantidad,
-            precioUnitario: productoInfo.precio,
-            producto: {
-              id: productoId,
-              nombre: productoInfo.nombre,
-              slug: productoInfo.slug,
-              precio: productoInfo.precio,
-              stock: productoInfo.stock,
-              imagen: productoInfo.imagen || null,
+            productId,
+            quantity,
+            unitPrice: productInfo.price,
+            product: {
+              id: productId,
+              name: productInfo.name,
+              slug: productInfo.slug,
+              price: productInfo.price,
+              stock: productInfo.stock,
+              image: productInfo.image || null,
             },
           });
         }
@@ -154,14 +154,14 @@ export function useCart() {
   }, [isAuthenticated, loadCart]);
 
   // Actualizar cantidad de un item
-  const updateQuantity = useCallback(async (itemId: string, cantidad: number) => {
+  const updateQuantity = useCallback(async (itemId: string, quantity: number) => {
     try {
       if (isAuthenticated) {
         // Usar API
         const response = await fetch(`/api/cart/${itemId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ cantidad }),
+          body: JSON.stringify({ quantity }),
         });
         
         if (!response.ok) {
@@ -176,12 +176,12 @@ export function useCart() {
         if (cartData) {
           let items: CartItem[] = JSON.parse(cartData);
           
-          if (cantidad <= 0) {
+          if (quantity <= 0) {
             items = items.filter(item => item.id !== itemId);
           } else {
             const item = items.find(i => i.id === itemId);
             if (item) {
-              item.cantidad = cantidad;
+              item.quantity = quantity;
             }
           }
           
@@ -265,8 +265,8 @@ export function useCart() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
-              productoId: item.productoId, 
-              cantidad: item.cantidad 
+              productId: item.productId, 
+              quantity: item.quantity 
             }),
           });
         } catch (err) {

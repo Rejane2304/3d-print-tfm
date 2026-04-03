@@ -1,87 +1,87 @@
 /**
  * ProductCard Component
- * Muestra un producto en formato tarjeta para el catálogo
+ * Product card for the catalog
  */
 import Link from 'next/link';
 import Image from 'next/image';
 
-interface Producto {
+interface Product {
   id: string;
   slug: string;
-  nombre: string;
-  descripcion?: string | null;
-  descripcionCorta?: string | null;
-  precio: number | Decimal;
+  name: string;
+  description?: string | null;
+  shortDescription?: string | null;
+  price: number | Decimal;
   stock: number;
-  imagenes: Array<{
+  images: Array<{
     url: string;
-    esPrincipal: boolean;
+    isMain: boolean;
   }>;
 }
 
 interface ProductCardProps {
-  producto: Producto;
+  product: Product;
 }
 
-export default function ProductCard({ producto }: ProductCardProps) {
-  const imagenPrincipal = producto.imagenes?.find(img => img.esPrincipal) || producto.imagenes?.[0];
-  const precio = Number(producto.precio);
+export default function ProductCard({ product }: ProductCardProps) {
+  const mainImage = product.images?.find(img => img.isMain) || product.images?.[0];
+  const price = Number(product.price);
   
   return (
     <Link
-      href={`/products/${producto.slug}`} data-testid="product-card"
+      href={`/products/${product.slug}`} data-testid="product-card"
       className="group bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300"
     >
       <div className="relative aspect-square bg-gray-200">
-        {imagenPrincipal ? (
+        {mainImage ? (
           <Image
-            src={imagenPrincipal.url}
-            alt={producto.nombre}
+            src={mainImage.url}
+            alt={product.name}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             className="object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
           <div className="flex items-center justify-center h-full text-gray-400">
-            Sin imagen
+            No image
           </div>
         )}
         
-        {/* Badge de stock bajo */}
-        {producto.stock > 0 && producto.stock < 5 && (
+        {/* Low stock badge */}
+        {product.stock > 0 && product.stock < 5 && (
           <span className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
-            ¡Últimas unidades!
+            Last units!
           </span>
         )}
         
-        {/* Badge de agotado */}
-        {producto.stock === 0 && (
+        {/* Out of stock badge */}
+        {product.stock === 0 && (
           <span className="absolute top-2 right-2 bg-gray-500 text-white text-xs px-2 py-1 rounded">
-            Agotado
+            Out of stock
           </span>
         )}
       </div>
       
       <div className="p-4">
         <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-indigo-600 transition-colors line-clamp-2" data-testid="product-name">
-          {producto.nombre}
+          {product.name}
         </h3>
         
-        {producto.descripcionCorta && (
+        {product.shortDescription && (
           <p className="text-sm text-gray-500 mb-2 line-clamp-2" data-testid="product-description">
-            {producto.descripcionCorta}
+            {product.shortDescription}
           </p>
         )}
         
         <div className="flex items-center justify-between">
           <span className="text-xl font-bold text-indigo-600" data-testid="product-price">
-            {precio.toFixed(2)} €
+            {price.toFixed(2)} €
           </span>
           
           <span className={`text-sm ${
-            producto.stock > 0 ? 'text-green-600' : 'text-red-600'
+            product.stock > 0 ? 'text-green-600' : 'text-red-600'
           }`} data-testid="product-stock">
-            {producto.stock > 0 ? 'En stock' : 'Agotado'}
+            {product.stock > 0 ? 'In stock' : 'Out of stock'}
           </span>
         </div>
       </div>

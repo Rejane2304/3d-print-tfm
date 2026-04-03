@@ -22,6 +22,7 @@ async function getProduct(slug: string) {
       images: {
         orderBy: { displayOrder: 'asc' },
       },
+      category: true,
     },
   });
   
@@ -33,7 +34,7 @@ async function getProduct(slug: string) {
   const related = await prisma.product.findMany({
     where: {
       isActive: true,
-      category: product.category,
+      categoryId: product.categoryId,
       id: { not: product.id },
     },
     include: {
@@ -120,7 +121,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
               
               <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
                 <span className="bg-indigo-100 text-indigo-800 px-2 py-1 rounded">
-                  {product.category}
+                  {product.category?.name}
                 </span>
                 <span className="bg-green-100 text-green-800 px-2 py-1 rounded">
                   {product.material}
@@ -193,13 +194,13 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
               <AddToCartButton
                 productId={product.id}
                 stock={product.stock}
-                producto={{
+                product={{
                   id: product.id,
-                  nombre: product.name,
+                  name: product.name,
                   slug: product.slug,
-                  precio: Number(product.price),
+                  price: Number(product.price),
                   stock: product.stock,
-                  imagen: product.images[0]?.url || null,
+                  image: product.images[0]?.url || null,
                 }}
               />
               

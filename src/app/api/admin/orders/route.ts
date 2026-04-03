@@ -12,11 +12,11 @@ import { z } from 'zod';
 
 // Schema de validación para actualización
 const actualizarPedidoSchema = z.object({
-  estado: z.enum(['PENDIENTE', 'PAGADO', 'EN_PREPARACION', 'ENVIADO', 'ENTREGADO', 'CANCELADO']),
-  notasInternas: z.string().optional(),
-  fechaEnvio: z.string().datetime().optional(),
-  numeroSeguimiento: z.string().optional(),
-  transportista: z.string().optional(),
+  status: z.enum(['PENDING', 'CONFIRMED', 'PREPARING', 'SHIPPED', 'DELIVERED', 'CANCELLED']),
+  internalNotes: z.string().optional(),
+  shippedAt: z.string().datetime().optional(),
+  trackingNumber: z.string().optional(),
+  carrier: z.string().optional(),
 });
 
 // GET - Listar pedidos
@@ -42,31 +42,31 @@ export async function GET(req: NextRequest) {
     }
 
     const { searchParams } = new URL(req.url);
-    const estado = searchParams.get('estado');
+    const status = searchParams.get('status');
     const limit = parseInt(searchParams.get('limit') || '50');
     const page = parseInt(searchParams.get('page') || '1');
     const skip = (page - 1) * limit;
 
     const where: any = {};
-    if (estado) {
-      where.estado = estado;
+    if (status) {
+      where.status = status;
     }
 
     const [pedidos, total] = await Promise.all([
       prisma.order.findMany({
         where,
         include: {
-          usuario: {
+          user: {
             select: {
               id: true,
-              nombre: true,
+              name: true,
               email: true,
             },
           },
           items: {
             take: 1,
           },
-          pago: true,
+          payment: true,
         },
         orderBy: { createdAt: 'desc' },
         skip,
@@ -128,15 +128,14 @@ export async function PATCH(req: NextRequest) {
 
     // Actualizar timestamps según el estado
     const updateData: any = { ...validatedData };
-    if (validatedData.estado === 'ENVIADO' && validatedData.fechaEnvio) {
-      updateData.enviadoEn = new Date(validatedData.fechaEnvio);
-    } else if (validatedData.estado === 'ENTREGADO') {
-      updateData.entregadoEn = new Date();
-      updateData.fechaEntrega = new Date();
-    } else if (validatedData.estado === 'EN_PREPARACION') {
-      updateData.preparandoEn = new Date();
-    } else if (validatedData.estado === 'CANCELADO') {
-      updateData.canceladoEn = new Date();
+    if (validatedData.status === 'SHIPPED' && validatedData.shippedAt) {
+      updateData.sentAt = new Date(validatedData.shippedAt);
+    } else if (validatedData.status === 'DELIVERED') {
+      updateData.deliveredAt = new Date();
+    } else if (validatedData.status === 'PREPARING') {
+      updateData.preparingAt = new Date();
+    } else if (validatedData.status === 'CANCELLED') {
+      updateData.cancelledAt = new Date();
     }
 
     const pedido = await prisma.order.update({

@@ -31,9 +31,9 @@ export const PATCH = withErrorHandler(async (
 
   // Obtener nueva cantidad
   const body = await req.json();
-  const { cantidad } = body;
+  const { quantity } = body;
 
-  if (cantidad === undefined || cantidad < 0) {
+  if (quantity === undefined || quantity < 0) {
     return NextResponse.json(
       { success: false, error: 'Cantidad inválida' },
       { status: 400 }
@@ -44,15 +44,15 @@ export const PATCH = withErrorHandler(async (
   const item = await prisma.cartItem.findFirst({
     where: {
       id: itemId,
-      carrito: {
-        usuario: {
+      cart: {
+        user: {
           email: session.user.email,
         },
       },
     },
     include: {
-      producto: true,
-      carrito: true,
+      product: true,
+      cart: true,
     },
   });
 
@@ -64,25 +64,25 @@ export const PATCH = withErrorHandler(async (
   }
 
   // Si cantidad es 0, eliminar el item
-  if (cantidad === 0) {
+  if (quantity === 0) {
     await prisma.cartItem.delete({
       where: { id: itemId },
     });
 
     // Recalcular subtotal
-    const itemsRestantes = await prisma.cartItem.findMany({
-      where: { carritoId: item.carritoId },
+    const remainingItems = await prisma.cartItem.findMany({
+      where: { cartId: item.cartId },
     });
 
-    const nuevoSubtotal = itemsRestantes.reduce(
-      (sum: number, i: { precioUnitario: { toString: () => string }; cantidad: number }) =>
-        sum + Number(i.precioUnitario) * i.cantidad,
+    const newSubtotal = remainingItems.reduce(
+      (sum: number, i: { unitPrice: { toString: () => string }; quantity: number }) =>
+        sum + Number(i.unitPrice) * i.quantity,
       0
     );
 
     await prisma.cart.update({
-      where: { id: item.carritoId },
-      data: { subtotal: nuevoSubtotal },
+      where: { id: item.cartId },
+      data: { subtotal: newSubtotal },
     });
 
     return NextResponse.json({
@@ -92,7 +92,7 @@ export const PATCH = withErrorHandler(async (
   }
 
   // Verificar stock
-  if (item.producto.stock < cantidad) {
+  if (item.product.stock < quantity) {
     return NextResponse.json(
       { success: false, error: 'Stock insuficiente' },
       { status: 400 }
@@ -102,23 +102,23 @@ export const PATCH = withErrorHandler(async (
   // Actualizar cantidad
   await prisma.cartItem.update({
     where: { id: itemId },
-    data: { cantidad },
+    data: { quantity },
   });
 
   // Recalcular subtotal
   const items = await prisma.cartItem.findMany({
-    where: { carritoId: item.carritoId },
+    where: { cartId: item.cartId },
   });
 
-  const nuevoSubtotal = items.reduce(
-    (sum: number, i: { precioUnitario: { toString: () => string }; cantidad: number }) =>
-      sum + Number(i.precioUnitario) * i.cantidad,
+  const newSubtotal = items.reduce(
+    (sum: number, i: { unitPrice: { toString: () => string }; quantity: number }) =>
+      sum + Number(i.unitPrice) * i.quantity,
     0
   );
 
   await prisma.cart.update({
-    where: { id: item.carritoId },
-    data: { subtotal: nuevoSubtotal },
+    where: { id: item.cartId },
+    data: { subtotal: newSubtotal },
   });
 
   return NextResponse.json({
@@ -148,14 +148,14 @@ export const DELETE = withErrorHandler(async (
   const item = await prisma.cartItem.findFirst({
     where: {
       id: itemId,
-      carrito: {
-        usuario: {
+      cart: {
+        user: {
           email: session.user.email,
         },
       },
     },
     include: {
-      carrito: true,
+      cart: true,
     },
   });
 
@@ -172,19 +172,19 @@ export const DELETE = withErrorHandler(async (
   });
 
   // Recalcular subtotal
-  const itemsRestantes = await prisma.cartItem.findMany({
-    where: { carritoId: item.carritoId },
+  const remainingItems = await prisma.cartItem.findMany({
+    where: { cartId: item.cartId },
   });
 
-  const nuevoSubtotal = itemsRestantes.reduce(
-    (sum: number, i: { precioUnitario: { toString: () => string }; cantidad: number }) =>
-      sum + Number(i.precioUnitario) * i.cantidad,
+  const newSubtotal = remainingItems.reduce(
+    (sum: number, i: { unitPrice: { toString: () => string }; quantity: number }) =>
+      sum + Number(i.unitPrice) * i.quantity,
     0
   );
 
   await prisma.cart.update({
-    where: { id: item.carritoId },
-    data: { subtotal: nuevoSubtotal },
+    where: { id: item.cartId },
+    data: { subtotal: newSubtotal },
   });
 
   return NextResponse.json({

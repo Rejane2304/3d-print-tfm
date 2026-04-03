@@ -127,7 +127,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Sidebar Filters */}
         <aside className="w-full lg:w-64 flex-shrink-0">
-          <FilterSidebar />
+          <FilterSidebar searchParams={searchParams} />
         </aside>
 
         {/* Product Grid */}
@@ -146,7 +146,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                   <Pagination
                     currentPage={page}
                     totalPages={totalPages}
-                    total={total}
+                    searchParams={searchParams}
                   />
                 </div>
               )}

@@ -22,45 +22,45 @@ export async function GET(
       );
     }
 
-    const usuario = await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { email: session.user.email },
     });
 
-    if (!usuario || usuario.role !== 'ADMIN') {
+    if (!user || user.role !== 'ADMIN') {
       return NextResponse.json(
         { success: false, error: 'No autorizado' },
         { status: 403 }
       );
     }
 
-    const pedido = await prisma.order.findUnique({
+    const order = await prisma.order.findUnique({
       where: { id: params.id },
       include: {
-        usuario: {
+        user: {
           select: {
             id: true,
-            nombre: true,
+            name: true,
             email: true,
           },
         },
         items: {
           include: {
-            producto: true,
+            product: true,
           },
         },
-        pago: true,
-        factura: true,
+        payment: true,
+        invoice: true,
       },
     });
 
-    if (!pedido) {
+    if (!order) {
       return NextResponse.json(
         { success: false, error: 'Pedido no encontrado' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ success: true, pedido });
+    return NextResponse.json({ success: true, order });
   } catch (error) {
     console.error('Error obteniendo pedido:', error);
     return NextResponse.json(

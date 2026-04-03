@@ -17,14 +17,14 @@ describe('API de Productos', () => {
     });
 
     it('debe filtrar por categoría', async () => {
-      const req = new NextRequest('http://localhost:3000/api/products?categoria=DECORACION');
+      const req = new NextRequest('http://localhost:3000/api/products?category=DECORATION');
       const res = await getProducts(req);
       
       expect(res.status).toBe(200);
       const data = await res.json();
       
       if (data.data.length > 0) {
-        expect(data.data[0].categoria).toBe('DECORACION');
+        expect(data.data[0].category).toBe('DECORATION');
       }
     });
 
@@ -38,7 +38,7 @@ describe('API de Productos', () => {
     });
 
     it('debe buscar por query', async () => {
-      const req = new NextRequest('http://localhost:3000/api/products?busqueda=vaso');
+      const req = new NextRequest('http://localhost:3000/api/products?search=vaso');
       const res = await getProducts(req);
       
       expect(res.status).toBe(200);
@@ -47,16 +47,16 @@ describe('API de Productos', () => {
     });
 
     it('debe ordenar por precio ascendente', async () => {
-      const req = new NextRequest('http://localhost:3000/api/products?ordenar=precio&orden=asc');
+      const req = new NextRequest('http://localhost:3000/api/products?sortBy=price&order=asc');
       const res = await getProducts(req);
       
       expect(res.status).toBe(200);
       const data = await res.json();
       
       if (data.data.length > 1) {
-        const precio1 = parseFloat(data.data[0].precio);
-        const precio2 = parseFloat(data.data[1].precio);
-        expect(precio1).toBeLessThanOrEqual(precio2);
+        const price1 = parseFloat(data.data[0].price);
+        const price2 = parseFloat(data.data[1].price);
+        expect(price1).toBeLessThanOrEqual(price2);
       }
     });
 
@@ -78,7 +78,7 @@ describe('API de Productos', () => {
       // Obtener un producto existente para testing
       productoTest = await prisma.product.findFirst({
         where: { isActive: true },
-        include: { imagenes: true },
+        include: { images: true },
       });
     });
 
@@ -108,7 +108,7 @@ describe('API de Productos', () => {
       const res = await getProductDetail(req, { params: { slug: productoTest.slug } });
       
       const data = await res.json();
-      expect(data.data.producto.imagenes).toBeDefined();
+      expect(data.data.producto.images).toBeDefined();
     });
   });
 
@@ -118,14 +118,26 @@ describe('API de Productos', () => {
       // Nota: Esto requiere autenticación de admin
       const slugUnico = `test-producto-${Date.now()}`;
       
+      // Obtener o crear una categoría para el test
+      let category = await prisma.category.findFirst({ where: { isActive: true } });
+      if (!category) {
+        category = await prisma.category.create({
+          data: {
+            name: 'Test Category',
+            slug: `test-category-${Date.now()}`,
+            isActive: true,
+          },
+        });
+      }
+      
       const producto = await prisma.product.create({
         data: {
           slug: slugUnico,
-          nombre: 'Producto Test',
-          descripcion: 'Descripción test',
-          precio: 29.99,
+          name: 'Producto Test',
+          description: 'Descripción test',
+          price: 29.99,
           stock: 10,
-          category: 'DECORATION',
+          categoryId: category.id,
           material: 'PLA',
           isActive: true,
         },
@@ -172,7 +184,7 @@ describe('API de Productos', () => {
         where: { id: producto.id },
       });
 
-      expect(desactivado!.activo).toBe(false);
+      expect(desactivado!.isActive).toBe(false);
 
       // Reactivar
       await prisma.product.update({

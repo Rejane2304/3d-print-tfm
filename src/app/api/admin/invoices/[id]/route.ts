@@ -36,19 +36,19 @@ export async function GET(
     const factura = await prisma.invoice.findUnique({
       where: { id: params.id },
       include: {
-        pedido: {
+        order: {
           include: {
-            usuario: {
+            user: {
               select: {
                 id: true,
-                nombre: true,
+                name: true,
                 email: true,
-                nif: true,
+                taxId: true,
               },
             },
             items: {
               include: {
-                producto: true,
+                product: true,
               },
             },
           },
@@ -101,8 +101,8 @@ export async function DELETE(
     const factura = await prisma.invoice.update({
       where: { id: params.id },
       data: {
-        anulada: true,
-        anuladaEn: new Date(),
+        isCancelled: true,
+        cancelledAt: new Date(),
       },
     });
 

@@ -41,14 +41,18 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
 
   // Buscar usuario con carrito
-  const usuario = await prisma.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: { email: session.user.email },
     include: {
-      carrito: {
+      cart: {
         include: {
           items: {
             include: {
-              producto: true,
+              product: {
+                include: {
+                  category: true,
+                },
+              },
             },
           },
         },
@@ -56,7 +60,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     },
   });
 
-  if (!usuario) {
+  if (!user) {
     return NextResponse.json(
       { success: false, error: 'Usuario no encontrado' },
       { status: 404 }
@@ -64,7 +68,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
 
   // Verificar que tiene carrito con items
-  if (!usuario.carrito || usuario.carrito.items.length === 0) {
+  if (!user.cart || user.cart.items.length === 0) {
     return NextResponse.json(
       { success: false, error: 'El carrito está vacío' },
       { status: 400 }
@@ -72,36 +76,36 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
 
   // Verificar stock disponible
-  for (const item of usuario.carrito.items) {
-    if (item.producto.stock < item.cantidad) {
+  for (const item of user.cart.items) {
+    if (item.product.stock < item.quantity) {
       return NextResponse.json(
-        { success: false, error: `Stock insuficiente para ${item.producto.nombre}` },
+        { success: false, error: `Stock insuficiente para ${item.product.name}` },
         { status: 400 }
       );
     }
   }
 
   // Calcular totales
-  const subtotal = Number(usuario.carrito.subtotal);
-  const gastosEnvio = subtotal >= 50 ? 0 : 5.99;
-  const total = subtotal + gastosEnvio;
+  const subtotal = Number(user.cart.subtotal);
+  const shippingCost = subtotal >= 50 ? 0 : 5.99;
+  const total = subtotal + shippingCost;
 
   try {
     // Crear line items para Stripe
-    const lineItems = usuario.carrito.items.map((item) => ({
+    const lineItems = user.cart.items.map((item) => ({
       price_data: {
         currency: 'eur',
         product_data: {
-          name: item.producto.nombre,
-          description: `Producto ID: ${item.producto.id}`,
+          name: item.product.name,
+          description: `Producto ID: ${item.product.id}`,
         },
-        unit_amount: Math.round(Number(item.precioUnitario) * 100), // Stripe usa céntimos
+        unit_amount: Math.round(Number(item.unitPrice) * 100), // Stripe usa céntimos
       },
-      quantity: item.cantidad,
+      quantity: item.quantity,
     }));
 
     // Añadir envío si aplica
-    if (gastosEnvio > 0) {
+    if (shippingCost > 0) {
       lineItems.push({
         price_data: {
           currency: 'eur',
@@ -109,7 +113,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
             name: 'Envío',
             description: 'Gastos de envío',
           },
-          unit_amount: Math.round(gastosEnvio * 100),
+          unit_amount: Math.round(shippingCost * 100),
         },
         quantity: 1,
       });
@@ -123,18 +127,18 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       success_url: `${process.env.NEXTAUTH_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXTAUTH_URL}/cart`,
       metadata: {
-        userId: usuario.id,
-        carritoId: usuario.carrito.id,
+        userId: user.id,
+        cartId: user.cart.id,
         shippingAddressId,
       },
     });
 
     // Obtener dirección de envío
-    const direccion = await prisma.direccion.findUnique({
+    const address = await prisma.address.findUnique({
       where: { id: shippingAddressId },
     });
 
-    if (!direccion) {
+    if (!address) {
       return NextResponse.json(
         { success: false, error: 'Dirección de envío no encontrada' },
         { status: 404 }
@@ -147,34 +151,33 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     const orderNumber = `P-${year}${String(count + 1).padStart(6, '0')}`;
 
     // Crear pedido en estado PENDIENTE
-    const pedido = await prisma.order.create({
+    const order = await prisma.order.create({
       data: {
         orderNumber,
-        usuarioId: usuario.id,
+        userId: user.id,
         status: 'PENDING',
         subtotal,
-        envio: gastosEnvio,
+        shipping: shippingCost,
         total,
         shippingAddressId,
-        nombreEnvio: direccion.nombre,
-        telefonoEnvio: direccion.telefono,
-        shippingAddress: direccion.direccion,
-        complementoEnvio: direccion.complemento,
-        postalCodeEnvio: direccion.postalCode,
-        ciudadEnvio: direccion.ciudad,
-        provinciaEnvio: direccion.provincia,
-        paisEnvio: direccion.pais,
+        shippingName: address.name,
+        shippingPhone: address.phone,
+        shippingAddress: address.address,
+        shippingComplement: address.complement,
+        shippingPostalCode: address.postalCode,
+        shippingCity: address.city,
+        shippingProvince: address.province,
+        shippingCountry: address.country,
         stripeSessionId: stripeSession.id,
         items: {
-          create: usuario.carrito.items.map((item) => ({
-            productoId: item.productoId,
-            cantidad: item.cantidad,
-            precio: item.precioUnitario,
-            subtotal: Number(item.precioUnitario) * item.cantidad,
-            nombre: item.producto.nombre,
-            precioProducto: item.producto.precio,
-            categoria: item.producto.categoria,
-            material: item.producto.material,
+          create: user.cart.items.map((item) => ({
+            productId: item.productId,
+            quantity: item.quantity,
+            price: item.unitPrice,
+            subtotal: Number(item.unitPrice) * item.quantity,
+            name: item.product.name,
+            category: item.product.category?.name || 'Sin categoría',
+            material: item.product.material,
           })),
         },
       },
@@ -187,7 +190,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       success: true,
       sessionId: stripeSession.id,
       url: stripeSession.url,
-      pedidoId: pedido.id,
+      orderId: order.id,
     });
   } catch (error) {
     console.error('Error creando sesión de Stripe:', error);

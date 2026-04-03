@@ -17,33 +17,33 @@ export const GET = withErrorHandler(async (
     throw new ApiError(ErrorCode.VALIDATION_INVALID_INPUT, 'Slug es requerido', 400);
   }
   
-  const producto = await prisma.product.findUnique({
+  const product = await prisma.product.findUnique({
     where: { slug },
     include: {
-      imagenes: {
-        orderBy: { orden: 'asc' },
+      images: {
+        orderBy: { displayOrder: 'asc' },
       },
     },
   });
   
-  if (!producto) {
+  if (!product) {
     throw new ApiError(ErrorCode.DB_NOT_FOUND, 'Producto no encontrado', 404);
   }
   
-  if (!producto.activo) {
+  if (!product.isActive) {
     throw new ApiError(ErrorCode.DB_NOT_FOUND, 'Producto no disponible', 404);
   }
   
   // Obtener productos relacionados (misma categoría, excluyendo el actual)
-  const relacionados = await prisma.product.findMany({
+  const related = await prisma.product.findMany({
     where: {
       isActive: true,
-      categoria: producto.categoria,
-      id: { not: producto.id },
+      categoryId: product.categoryId,
+      id: { not: product.id },
     },
     include: {
-      imagenes: {
-        where: { esPrincipal: true },
+      images: {
+        where: { isMain: true },
         take: 1,
       },
     },
@@ -53,8 +53,8 @@ export const GET = withErrorHandler(async (
   return NextResponse.json({
     success: true,
     data: {
-      producto,
-      relacionados,
+      product,
+      related,
     },
   });
 });

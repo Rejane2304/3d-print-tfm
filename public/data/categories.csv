@@ -1,0 +1,6 @@
+_ref,name,slug,description,image,displayOrder,isActive
+CAT-0001,Decoration,decoration,Beautiful 3D printed pieces to decorate your home and office,/images/categories/decoration.jpg,1,true
+CAT-0002,Accessories,accessories,Practical accessories for everyday use printed in high quality,/images/categories/accessories.jpg,2,true
+CAT-0003,Functional,functional,Useful objects with specific purposes for home and garden,/images/categories/functional.jpg,3,true
+CAT-0004,Articulated,articulated,Figures and models with movable joints for display and play,/images/categories/articulated.jpg,4,true
+CAT-0005,Toys,toys,Fun toys and collectibles for all ages,/images/categories/toys.jpg,5,true

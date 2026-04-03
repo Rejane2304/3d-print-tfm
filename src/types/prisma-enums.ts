@@ -1,15 +1,15 @@
-// Re-exportación de los enums de Prisma Client
-// Esto permite importar los enums usando alias de ruta
+// Re-export Prisma Client enums
+// Allows importing enums using path aliases
 
 export {
-  Rol,
-  Categoria,
+  Role,
   Material,
-  EstadoPedido,
-  MetodoPago,
-  EstadoPago,
-  TipoMovimiento,
-  TipoAlerta,
-  SeveridadAlerta,
-  EstadoAlerta,
+  OrderStatus,
+  PaymentMethod,
+  PaymentStatus,
+  MovementType,
+  AlertType,
+  AlertSeverity,
+  AlertStatus,
+  CouponType,
 } from '@prisma/client';

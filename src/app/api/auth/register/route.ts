@@ -13,15 +13,15 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const body = await req.json();
   
   const { 
-    nombre, 
+    name, 
     email, 
     password, 
-    telefono, 
-    direccion: datosDireccion 
+    phone, 
+    address: addressData 
   } = body;
   
   // Validaciones específicas por campo
-  if (!nombre || nombre.trim() === '') {
+  if (!name || name.trim() === '') {
     return NextResponse.json(
       { success: false, error: 'El campo nombre es obligatorio' },
       { status: 400 }
@@ -59,8 +59,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
   
   // Validar teléfono si se proporciona
-  if (telefono && telefono.trim() !== '') {
-    const phoneDigits = telefono.replace(/\D/g, '');
+  if (phone && phone.trim() !== '') {
+    const phoneDigits = phone.replace(/\D/g, '');
     if (phoneDigits.length < 9) {
       return NextResponse.json(
         { success: false, error: 'El teléfono debe tener al menos 9 dígitos' },
@@ -70,11 +70,11 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
   
   // Verificar si el email ya existe
-  const usuarioExistente = await prisma.user.findUnique({
+  const existingUser = await prisma.user.findUnique({
     where: { email: email.toLowerCase() },
   });
   
-  if (usuarioExistente) {
+  if (existingUser) {
     return NextResponse.json(
       { success: false, error: 'Ya existe un usuario con este email' },
       { status: 409 }
@@ -85,32 +85,32 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const hashedPassword = await bcrypt.hash(password, 12);
   
   // Crear usuario con dirección (si se proporciona)
-  const usuario = await prisma.user.create({
+  const user = await prisma.user.create({
     data: {
       email: email.toLowerCase(),
       password: hashedPassword,
-      nombre,
-      telefono: telefono || null,
+      name,
+      phone: phone || null,
       role: 'CUSTOMER',
       isActive: true,
       // Crear dirección si se proporcionan los datos
-      direcciones: datosDireccion ? {
+      addresses: addressData ? {
         create: {
-          nombre: datosDireccion.nombre || 'Principal',
-          destinatario: datosDireccion.destinatario || nombre,
-          telefono: datosDireccion.telefono || telefono || '',
-          direccion: datosDireccion.direccion,
-          complemento: datosDireccion.complemento,
-          codigoPostal: datosDireccion.codigoPostal,
-          ciudad: datosDireccion.ciudad,
-          provincia: datosDireccion.provincia,
-          pais: datosDireccion.pais || 'España',
-          esPrincipal: datosDireccion.esPrincipal ?? true,
+          name: addressData.name || 'Principal',
+          recipient: addressData.recipient || name,
+          phone: addressData.phone || phone || '',
+          address: addressData.address,
+          complement: addressData.complement,
+          postalCode: addressData.postalCode,
+          city: addressData.city,
+          province: addressData.province,
+          country: addressData.country || 'Spain',
+          isDefault: addressData.isDefault ?? true,
         }
       } : undefined
     },
     include: {
-      direcciones: true
+      addresses: true
     }
   });
   
@@ -118,11 +118,11 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     { 
       success: true, 
       message: 'Usuario registrado exitosamente',
-      usuario: {
-        id: usuario.id,
-        email: usuario.email,
-        nombre: usuario.nombre,
-        direccion: usuario.direcciones?.[0] || null
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        address: user.addresses?.[0] || null
       }
     },
     { status: 201 }

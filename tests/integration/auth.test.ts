@@ -15,7 +15,7 @@ describe('Autenticación y Autorización', () => {
   const usuarioTest = {
     email: `auth-test-${Date.now()}@example.com`,
     password: 'TestPassword123!',
-    nombre: 'Usuario Test',
+    name: 'Usuario Test',
   };
 
   beforeEach(async () => {
@@ -30,7 +30,7 @@ describe('Autenticación y Autorización', () => {
       data: {
         email: usuarioTest.email,
         password: hashedPassword,
-        nombre: usuarioTest.nombre,
+        name: usuarioTest.name,
         role: 'CUSTOMER',
         isActive: true,
       },
@@ -49,7 +49,7 @@ describe('Autenticación y Autorización', () => {
 
       expect(usuario).toBeDefined();
       expect(usuario!.email).toBe(usuarioTest.email);
-      expect(usuario!.activo).toBe(true);
+      expect(usuario!.isActive).toBe(true);
 
       const passwordValido = await bcrypt.compare(usuarioTest.password, usuario!.password);
       expect(passwordValido).toBe(true);

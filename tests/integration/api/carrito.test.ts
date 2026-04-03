@@ -16,27 +16,27 @@ describe('API del Carrito', () => {
   const usuarioTest = {
     email: `test-carrito-${Date.now()}-${Math.random()}@example.com`,
     password: 'TestPassword123!',
-    nombre: 'Usuario Carrito Test',
+    name: 'Usuario Carrito Test',
   };
 
   let usuarioId: string;
-  let productoTest: { id: string; slug: string; nombre: string; precio: number; stock: number };
+  let productoTest: { id: string; slug: string; name: string; price: number; stock: number };
 
   beforeAll(async () => {
     // Limpiar datos previos usando transacción para evitar deadlocks
     try {
       await prisma.$transaction(async (tx) => {
-        await tx.itemCarrito.deleteMany({
+        await tx.cartItem.deleteMany({
           where: {
-            carrito: {
-              usuario: { email: usuarioTest.email }
+            cart: {
+              user: { email: usuarioTest.email }
             }
           }
         });
-        await tx.carrito.deleteMany({
-          where: { usuario: { email: usuarioTest.email } }
+        await tx.cart.deleteMany({
+          where: { user: { email: usuarioTest.email } }
         });
-        await tx.usuario.deleteMany({
+        await tx.user.deleteMany({
           where: { email: usuarioTest.email }
         });
       });
@@ -49,7 +49,7 @@ describe('API del Carrito', () => {
       data: {
         email: usuarioTest.email,
         password: hashedPassword,
-        nombre: usuarioTest.nombre,
+        name: usuarioTest.name,
         role: 'CUSTOMER',
         isActive: true,
       },
@@ -64,8 +64,8 @@ describe('API del Carrito', () => {
       productoTest = {
         id: productoExistente.id,
         slug: productoExistente.slug,
-        nombre: productoExistente.nombre,
-        precio: Number(productoExistente.precio),
+        name: productoExistente.name,
+        price: Number(productoExistente.price),
         stock: productoExistente.stock
       };
     }
@@ -74,15 +74,15 @@ describe('API del Carrito', () => {
   afterAll(async () => {
     try {
       await prisma.$transaction(async (tx) => {
-        await tx.itemCarrito.deleteMany({
+        await tx.cartItem.deleteMany({
           where: {
-            carrito: { usuario: { email: usuarioTest.email } }
+            cart: { user: { email: usuarioTest.email } }
           }
         });
-        await tx.carrito.deleteMany({
-          where: { usuario: { email: usuarioTest.email } }
+        await tx.cart.deleteMany({
+          where: { user: { email: usuarioTest.email } }
         });
-        await tx.usuario.deleteMany({
+        await tx.user.deleteMany({
           where: { email: usuarioTest.email }
         });
       });
@@ -117,8 +117,8 @@ describe('API del Carrito', () => {
           'Cookie': 'next-auth.session-token=test-token'
         },
         body: JSON.stringify({
-          productoId: productoTest.id,
-          cantidad: 1
+          productId: productoTest.id,
+          quantity: 1
         })
       });
 
@@ -133,8 +133,8 @@ describe('API del Carrito', () => {
           'Cookie': 'next-auth.session-token=test-token'
         },
         body: JSON.stringify({
-          productoId: productoTest?.id || 'test-id',
-          cantidad: 0
+          productId: productoTest?.id || 'test-id',
+          quantity: 0
         })
       });
 
@@ -149,8 +149,8 @@ describe('API del Carrito', () => {
           'Cookie': 'next-auth.session-token=test-token'
         },
         body: JSON.stringify({
-          productoId: 'producto-inexistente-12345',
-          cantidad: 1
+          productId: 'producto-inexistente-12345',
+          quantity: 1
         })
       });
 
@@ -163,7 +163,7 @@ describe('API del Carrito', () => {
       const response = await fetch('http://localhost:3000/api/cart/item-123', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cantidad: 2 })
+        body: JSON.stringify({ quantity: 2 })
       });
 
       expect([401, 404, 500]).toContain(response.status);

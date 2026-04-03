@@ -10,17 +10,17 @@ import { ShoppingCart, ArrowRight, Loader2 } from 'lucide-react';
 interface CartSummaryProps {
   items: Array<{
     id: string;
-    cantidad: number;
-    precioUnitario: number;
-    producto: {
-      nombre: string;
-      precio: number;
+    quantity: number;
+    unitPrice: number;
+    product: {
+      name: string;
+      price: number;
     };
   }>;
   subtotal: number;
-  gastosEnvio?: number;
-  envioGratisDesde?: number;
-  impuestosIncluidos?: boolean;
+  shippingCost?: number;
+  freeShippingFrom?: number;
+  taxIncluded?: boolean;
   isProcessing?: boolean;
   onCheckout: () => void;
   onContinueShopping: () => void;
@@ -29,18 +29,18 @@ interface CartSummaryProps {
 export default function CartSummary({
   items,
   subtotal,
-  gastosEnvio = 5.99,
-  envioGratisDesde = 50,
-  impuestosIncluidos = true,
+  shippingCost = 5.99,
+  freeShippingFrom = 50,
+  taxIncluded = true,
   isProcessing = false,
   onCheckout,
   onContinueShopping,
 }: CartSummaryProps) {
-  const totalItems = items.reduce((sum, item) => sum + item.cantidad, 0);
-  const envioGratis = subtotal >= envioGratisDesde;
-  const envio = envioGratis ? 0 : gastosEnvio;
-  const total = subtotal + envio;
-  const hayItems = items.length > 0;
+  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+  const isFreeShipping = subtotal >= freeShippingFrom;
+  const shipping = isFreeShipping ? 0 : shippingCost;
+  const total = subtotal + shipping;
+  const hasItems = items.length > 0;
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-24">
@@ -49,7 +49,7 @@ export default function CartSummary({
         Resumen del pedido
       </h2>
 
-      {hayItems ? (
+      {hasItems ? (
         <>
           {/* Items count */}
           <div className="mb-4 text-sm text-gray-600">
@@ -65,15 +65,15 @@ export default function CartSummary({
           {/* Envío */}
           <div className="flex justify-between py-2 border-b border-gray-100">
             <span className="text-gray-600">Envío</span>
-            <span className={envioGratis ? 'text-green-600 font-medium' : 'font-medium'}>
-              {envioGratis ? 'Gratis' : `${envio.toFixed(2)} €`}
+            <span className={isFreeShipping ? 'text-green-600 font-medium' : 'font-medium'}>
+              {isFreeShipping ? 'Gratis' : `${shipping.toFixed(2)} €`}
             </span>
           </div>
 
           {/* Info envío gratis */}
-          {!envioGratis && subtotal > 0 && (
+          {!isFreeShipping && subtotal > 0 && (
             <div className="text-sm text-blue-600 mt-2">
-              Te falta {(envioGratisDesde - subtotal).toFixed(2)} € para envío gratis
+              Te falta {(freeShippingFrom - subtotal).toFixed(2)} € para envío gratis
             </div>
           )}
 
@@ -86,7 +86,7 @@ export default function CartSummary({
           </div>
 
           {/* Impuestos incluidos */}
-          {impuestosIncluidos && (
+          {taxIncluded && (
             <p className="text-xs text-gray-500 mt-1 text-right">
               Impuestos incluidos
             </p>
@@ -97,7 +97,7 @@ export default function CartSummary({
             <button
               type="button"
               onClick={onCheckout}
-              disabled={isProcessing || !hayItems}
+              disabled={isProcessing || !hasItems}
               className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
             >
               {isProcessing ? (

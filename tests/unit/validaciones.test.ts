@@ -224,39 +224,39 @@ describe('Validaciones de Pedidos', () => {
 
 describe('Validaciones de Cambio de Estado', () => {
   it('debe permitir cambiar de PENDIENTE a CONFIRMADO', () => {
-    const result = validarCambioEstado('PENDIENTE', 'CONFIRMADO');
+    const result = validarCambioEstado('PENDING', 'CONFIRMED');
     expect(result.valido).toBe(true);
   });
 
   it('debe permitir cambiar de CONFIRMADO a PREPARANDO', () => {
-    const result = validarCambioEstado('CONFIRMADO', 'PREPARANDO');
+    const result = validarCambioEstado('CONFIRMED', 'PREPARING');
     expect(result.valido).toBe(true);
   });
 
   it('debe permitir cancelar pedido en PENDIENTE', () => {
-    const result = validarCambioEstado('PENDIENTE', 'CANCELADO');
+    const result = validarCambioEstado('PENDING', 'CANCELLED');
     expect(result.valido).toBe(true);
   });
 
   it('debe permitir cancelar pedido en CONFIRMADO', () => {
-    const result = validarCambioEstado('CONFIRMADO', 'CANCELADO');
+    const result = validarCambioEstado('CONFIRMED', 'CANCELLED');
     expect(result.valido).toBe(true);
   });
 
   it('debe rechazar cancelar pedido ENTREGADO', () => {
-    const result = validarCambioEstado('ENTREGADO', 'CANCELADO');
+    const result = validarCambioEstado('DELIVERED', 'CANCELLED');
     expect(result.valido).toBe(false);
     expect(result.error).toBe('No se puede cancelar un pedido ya enviado o entregado');
   });
 
   it('debe rechazar retroceder estado', () => {
-    const result = validarCambioEstado('ENVIADO', 'CONFIRMADO');
+    const result = validarCambioEstado('SHIPPED', 'CONFIRMED');
     expect(result.valido).toBe(false);
     expect(result.error).toBe('No se puede retroceder el estado del pedido');
   });
 
   it('debe rechazar cambio al mismo estado', () => {
-    const result = validarCambioEstado('PENDIENTE', 'PENDIENTE');
+    const result = validarCambioEstado('PENDING', 'PENDING');
     expect(result.valido).toBe(false);
     expect(result.error).toBe('El nuevo estado debe ser diferente al actual');
   });
@@ -268,7 +268,7 @@ describe('Validaciones de Cambio de Estado', () => {
 
 describe('Validaciones de Pagos', () => {
   it('debe validar monto positivo', () => {
-    const result = validarPago({ monto: 0, method: 'CARD' });
+    const result = validarPago({ monto: 0, metodo: 'CARD' });
     expect(result.valido).toBe(false);
     expect(result.errores).toContain('El monto debe ser mayor a 0');
   });
@@ -280,7 +280,7 @@ describe('Validaciones de Pagos', () => {
   });
 
   it('debe aceptar pago válido', () => {
-    const result = validarPago({ monto: 99.99, method: 'CARD' });
+    const result = validarPago({ monto: 99.99, metodo: 'CARD' });
     expect(result.valido).toBe(true);
     expect(result.errores).toHaveLength(0);
   });

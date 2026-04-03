@@ -1,0 +1,16 @@
+_ref,_productRef,_userRef,rating,title,comment,isVerified,isApproved
+REV-0001,PROD-0002,USER-0002,5,Perfect for my desk,Exactly what I needed to organize my pens and supplies. Great quality!,true,true
+REV-0002,PROD-0002,USER-0006,4,Good quality,Nice organizer but I wish it came in more colors.,true,true
+REV-0003,PROD-0004,USER-0003,5,Best phone stand ever,Super sturdy and the angle is perfect for video calls.,true,true
+REV-0004,PROD-0004,USER-0005,5,Great value,Amazing quality for the price. Highly recommended!,true,true
+REV-0005,PROD-0005,USER-0004,5,My son loves it!,The articulated joints are so well made. Perfect gift for dinosaur fans.,true,true
+REV-0006,PROD-0005,USER-0008,4,Cool collectible,Very detailed and fun to pose. Missing some minor details but overall great.,true,true
+REV-0007,PROD-0008,USER-0006,5,Impressive craftsmanship,The wheels actually roll and the doors open. Amazing attention to detail!,true,true
+REV-0008,PROD-0008,USER-0009,5,Collector quality,Better than expected. Will definitely buy more from this shop.,true,true
+REV-0009,PROD-0009,USER-0002,5,Beautiful lamp,Creates such a cozy atmosphere in my bedroom. Love it!,true,true
+REV-0010,PROD-0009,USER-0007,5,Amazing gift,Bought this as a gift and they were thrilled. The moon texture is incredible.,true,true
+REV-0011,PROD-0009,USER-0004,4,Great but fragile,Beautiful product but handle with care during shipping.,true,true
+REV-0012,PROD-0001,USER-0003,4,Nice vase,Pretty design but smaller than I expected.,true,true
+REV-0013,PROD-0003,USER-0008,5,Perfect for succulents,Looks great on my windowsill with a small cactus.,true,true
+REV-0014,PROD-0006,USER-0005,5,Incredible detail,The level of detail on this miniature is stunning. Worth every euro.,true,true
+REV-0015,PROD-0010,USER-0002,5,Fun puzzle box,Took me 10 minutes to figure out how to open it. Great conversation piece!,true,true

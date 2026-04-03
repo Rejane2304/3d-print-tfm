@@ -17,11 +17,11 @@ describe('POST /api/auth/register', () => {
   beforeEach(async () => {
     // Generar email único con timestamp
     datosValidos = {
-      nombre: 'Juan Pérez',
+      name: 'Juan Pérez',
       email: `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}@example.com`,
       password: 'Password123!',
-      confirmarPassword: 'Password123!',
-      telefono: '+34 600 123 456',
+      confirmPassword: 'Password123!',
+      phone: '+34 600 123 456',
     };
   });
 
@@ -33,9 +33,9 @@ describe('POST /api/auth/register', () => {
 
       expect(res.status).toBe(201);
       expect(body.success).toBe(true);
-      expect(body.usuario).toBeDefined();
-      expect(body.usuario.email).toBe(datosValidos.email.toLowerCase());
-      expect(body.usuario.password).toBeUndefined();
+      expect(body.user).toBeDefined();
+      expect(body.user.email).toBe(datosValidos.email.toLowerCase());
+      expect(body.user.password).toBeUndefined();
     });
 
     it('debe guardar email en minúsculas', async () => {
@@ -45,7 +45,7 @@ describe('POST /api/auth/register', () => {
       const body = await res.json();
 
       expect(res.status).toBe(201);
-      expect(body.usuario.email).toBe(emailUpper.toLowerCase());
+      expect(body.user.email).toBe(emailUpper.toLowerCase());
     });
 
     it('debe hashear la contraseña', async () => {
@@ -61,7 +61,7 @@ describe('POST /api/auth/register', () => {
       expect(usuario!.password).toMatch(/^\$2[aby]\$/);
     });
 
-    it('debe asignar rol CLIENTE por defecto', async () => {
+    it('debe asignar rol CUSTOMER por defecto', async () => {
       const req = createRequest(datosValidos);
       await POST(req);
 
@@ -69,7 +69,7 @@ describe('POST /api/auth/register', () => {
         where: { email: datosValidos.email.toLowerCase() },
       });
 
-      expect(usuario!.rol).toBe('CLIENTE');
+      expect(usuario!.role).toBe('CUSTOMER');
     });
 
     it('debe activar usuario por defecto', async () => {
@@ -80,7 +80,7 @@ describe('POST /api/auth/register', () => {
         where: { email: datosValidos.email.toLowerCase() },
       });
 
-      expect(usuario!.activo).toBe(true);
+      expect(usuario!.isActive).toBe(true);
     });
   });
 

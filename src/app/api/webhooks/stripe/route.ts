@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
 }
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
-  const { userId, carritoId } = session.metadata || {};
+  const { userId, cartId } = session.metadata || {};
 
   if (!userId) {
     console.error('No userId in session metadata');
@@ -84,62 +84,64 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   try {
     // Buscar pedido por stripeSessionId
-    const pedido = await prisma.order.findFirst({
+    const order = await prisma.order.findFirst({
       where: { stripeSessionId: session.id },
       include: { items: true },
     });
 
-    if (!pedido) {
-      console.error('Pedido not found for session:', session.id);
+    if (!order) {
+      console.error('Order not found for session:', session.id);
       return;
     }
 
     // Actualizar pedido a CONFIRMADO (estado inicial después del pago)
     await prisma.order.update({
-      where: { id: pedido.id },
+      where: { id: order.id },
       data: {
         status: 'CONFIRMED',
-        confirmadoEn: new Date(),
+        confirmedAt: new Date(),
       },
     });
 
     // Crear registro de pago
     await prisma.payment.create({
       data: {
-        pedidoId: pedido.id,
-        usuarioId: userId,
-        monto: pedido.total,
+        orderId: order.id,
+        userId: userId,
+        amount: order.total,
         method: 'CARD',
-        estado: 'COMPLETADO',
+        status: 'COMPLETED',
         stripeSessionId: session.id,
         stripePaymentIntentId: session.payment_intent ? String(session.payment_intent) : undefined,
       },
     });
 
     // Actualizar stock de productos
-    for (const item of pedido.items) {
-      await prisma.product.update({
-        where: { id: item.productoId },
-        data: {
-          stock: {
-            decrement: item.cantidad,
+    for (const item of order.items) {
+      if (item.productId) {
+        await prisma.product.update({
+          where: { id: item.productId },
+          data: {
+            stock: {
+              decrement: item.quantity,
+            },
           },
-        },
-      });
+        });
+      }
     }
 
     // Vaciar carrito si existe
-    if (carritoId) {
+    if (cartId) {
       await prisma.cartItem.deleteMany({
-        where: { carritoId },
+        where: { cartId },
       });
       await prisma.cart.update({
-        where: { id: carritoId },
+        where: { id: cartId },
         data: { subtotal: 0 },
       });
     }
 
-    console.log('Payment processed successfully for pedido:', pedido.id);
+    console.log('Payment processed successfully for order:', order.id);
   } catch (error) {
     console.error('Error processing checkout completed:', error);
     throw error;
@@ -148,17 +150,17 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
 async function handleCheckoutExpired(session: Stripe.Checkout.Session) {
   try {
-    const pedido = await prisma.order.findFirst({
+    const order = await prisma.order.findFirst({
       where: { stripeSessionId: session.id },
     });
 
-    if (pedido && pedido.estado === 'PENDIENTE') {
+    if (order && order.status === 'PENDING') {
       await prisma.order.update({
-        where: { id: pedido.id },
+        where: { id: order.id },
         data: {
           status: 'CANCELLED',
-          canceladoEn: new Date(),
-          motivoCancelacion: 'Sesión de pago expirada',
+          cancelledAt: new Date(),
+          cancelReason: 'Sesión de pago expirada',
         },
       });
     }

@@ -34,7 +34,7 @@ export const authOptions: AuthOptions = {
             where: { email: credentials.email.toLowerCase() },
           });
 
-          if (!user || !user.activo) {
+          if (!user || !user.isActive) {
             return null;
           }
 
@@ -45,15 +45,15 @@ export const authOptions: AuthOptions = {
 
           await prisma.user.update({
             where: { id: user.id },
-            data: { ultimoAcceso: new Date() },
+            data: { lastAccess: new Date() },
           });
 
           // Devolvemos un objeto que coincide con el tipo User esperado
-          // El campo 'rol' se maneja a través del token JWT
+          // El campo 'role' se maneja a través del token JWT
           return {
             id: user.id,
             email: user.email,
-            name: user.nombre,
+            name: user.name,
             image: null,
           };
         } catch (error) {
@@ -70,10 +70,10 @@ export const authOptions: AuthOptions = {
         // Obtener el rol desde la base de datos
         const dbUser = await prisma.user.findUnique({
           where: { id: user.id },
-          select: { rol: true },
+          select: { role: true },
         });
         if (dbUser) {
-          token.rol = dbUser.rol;
+          token.role = dbUser.role;
         }
       }
       return token;
@@ -81,8 +81,8 @@ export const authOptions: AuthOptions = {
     async session({ session, token }: { session: any; token: any }) {
       if (token && session.user) {
         session.user.id = token.id as string;
-        if (token.rol) {
-          session.user.rol = token.rol;
+        if (token.role) {
+          session.user.role = token.role;
         }
       }
       return session;

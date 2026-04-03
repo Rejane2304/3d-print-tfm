@@ -34,17 +34,17 @@ export async function GET(request: NextRequest) {
 
     // Obtener pedidos del usuario
     const pedidos = await prisma.order.findMany({
-      where: { usuarioId: usuario.id },
+      where: { userId: usuario.id },
       orderBy: { createdAt: 'desc' },
       include: {
         items: {
           include: {
-            producto: {
+            product: {
               select: {
-                nombre: true,
+                name: true,
                 slug: true,
-                imagenes: {
-                  where: { esPrincipal: true },
+                images: {
+                  where: { isMain: true },
                   take: 1,
                   select: { url: true }
                 }
@@ -52,17 +52,17 @@ export async function GET(request: NextRequest) {
             }
           }
         },
-        factura: {
+        invoice: {
           select: {
             id: true,
-            numeroFactura: true,
-            anulada: true
+            invoiceNumber: true,
+            isCancelled: true
           }
         },
-        pago: {
+        payment: {
           select: {
-            estado: true,
-            metodo: true
+            status: true,
+            method: true
           }
         }
       }

@@ -14,22 +14,25 @@ const prisma = new PrismaClient();
  */
 export async function cleanupDB(): Promise<void> {
   const tables = [
-    'logs_auditoria',
-    'tokens_verificacion',
-    'sesiones',
-    'mensajes_pedido',
-    'alertas',
-    'movimientos_inventario',
-    'pagos',
-    'items_pedido',
-    'items_carrito',
-    'carritos',
-    'pedidos',
-    'facturas',
-    'imagenes_producto',
-    'productos',
-    'direcciones',
-    'usuarios',
+    'audit_logs',
+    'verification_tokens',
+    'sessions',
+    'order_messages',
+    'alerts',
+    'inventory_movements',
+    'payments',
+    'order_items',
+    'cart_items',
+    'carts',
+    'orders',
+    'invoices',
+    'product_images',
+    'reviews',
+    'products',
+    'categories',
+    'addresses',
+    'coupons',
+    'users',
   ];
 
   for (const table of tables) {
@@ -72,6 +75,25 @@ export async function seedTestData(): Promise<void> {
     skipDuplicates: true,
   });
 
+  // Crear categorías de test
+  await prisma.category.createMany({
+    data: [
+      {
+        id: 'test-category-decoration',
+        name: 'Decoración',
+        slug: 'decoracion',
+        isActive: true,
+      },
+      {
+        id: 'test-category-accessories',
+        name: 'Accesorios',
+        slug: 'accesorios',
+        isActive: true,
+      },
+    ],
+    skipDuplicates: true,
+  });
+
   // Crear productos de test
   await prisma.product.createMany({
     data: [
@@ -82,7 +104,7 @@ export async function seedTestData(): Promise<void> {
         description: 'Descripción del producto de test',
         price: 19.99,
         stock: 10,
-        category: 'DECORATION',
+        categoryId: 'test-category-decoration',
         material: 'PLA',
         isActive: true,
       },
@@ -93,7 +115,7 @@ export async function seedTestData(): Promise<void> {
         description: 'Otro producto de test',
         price: 29.99,
         stock: 5,
-        category: 'ACCESSORIES',
+        categoryId: 'test-category-accessories',
         material: 'PETG',
         isActive: true,
       },
