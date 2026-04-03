@@ -9,54 +9,54 @@ import Image from 'next/image';
 import Link from 'next/link';
 import AddToCartButton from '@/components/products/AddToCartButton';
 
-interface ProductoDetallePageProps {
+interface ProductDetailPageProps {
   params: {
     slug: string;
   };
 }
 
-async function getProducto(slug: string) {
-  const producto = await prisma.producto.findUnique({
+async function getProduct(slug: string) {
+  const product = await prisma.product.findUnique({
     where: { slug },
     include: {
-      imagenes: {
-        orderBy: { orden: 'asc' },
+      images: {
+        orderBy: { displayOrder: 'asc' },
       },
     },
   });
   
-  if (!producto || !producto.activo) {
+  if (!product || !product.isActive) {
     return null;
   }
   
   // Obtener productos relacionados
-  const relacionados = await prisma.producto.findMany({
+  const related = await prisma.product.findMany({
     where: {
-      activo: true,
-      categoria: producto.categoria,
-      id: { not: producto.id },
+      isActive: true,
+      category: product.category,
+      id: { not: product.id },
     },
     include: {
-      imagenes: {
-        where: { esPrincipal: true },
+      images: {
+        where: { isMain: true },
         take: 1,
       },
     },
     take: 4,
   });
   
-  return { producto, relacionados };
+  return { product, related };
 }
 
-export default async function ProductoDetallePage({ params }: ProductoDetallePageProps) {
-  const data = await getProducto(params.slug);
+export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
+  const data = await getProduct(params.slug);
   
   if (!data) {
     notFound();
   }
   
-  const { producto, relacionados } = data;
-  const imagenPrincipal = producto.imagenes[0];
+  const { product, related } = data;
+  const mainImage = product.images[0];
   
   return (
     <div className="min-h-screen bg-gray-50">
@@ -67,17 +67,17 @@ export default async function ProductoDetallePage({ params }: ProductoDetallePag
           <span className="mx-2">/</span>
           <Link href="/products" className="hover:text-indigo-600">Productos</Link>
           <span className="mx-2">/</span>
-          <span className="text-gray-900">{producto.nombre}</span>
+          <span className="text-gray-900">{product.name}</span>
         </nav>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Imágenes del Producto */}
           <div className="space-y-4">
             <div className="relative aspect-square bg-gray-200 rounded-lg overflow-hidden">
-              {imagenPrincipal ? (
+              {mainImage ? (
                 <Image
-                  src={imagenPrincipal.url}
-                  alt={producto.nombre}
+                  src={mainImage.url}
+                  alt={product.name}
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 50vw"
                   className="object-cover"
@@ -91,16 +91,16 @@ export default async function ProductoDetallePage({ params }: ProductoDetallePag
             </div>
             
             {/* Miniaturas */}
-            {producto.imagenes.length > 1 && (
+            {product.images.length > 1 && (
               <div className="grid grid-cols-4 gap-2">
-                {producto.imagenes.map((imagen) => (
+                {product.images.map((image) => (
                   <button
-                    key={imagen.id}
+                    key={image.id}
                     className="relative aspect-square bg-gray-200 rounded-md overflow-hidden hover:ring-2 hover:ring-indigo-500"
                   >
                     <Image
-                      src={imagen.url}
-                      alt={imagen.textoAlt || producto.nombre}
+                      src={image.url}
+                      alt={image.altText || product.name}
                       fill
                       sizes="(max-width: 768px) 25vw, (max-width: 1200px) 12vw, 12vw"
                       className="object-cover"
@@ -115,15 +115,15 @@ export default async function ProductoDetallePage({ params }: ProductoDetallePag
           <div className="space-y-6">
             <div>
               <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
-                {producto.nombre}
+                {product.name}
               </h1>
               
               <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
                 <span className="bg-indigo-100 text-indigo-800 px-2 py-1 rounded">
-                  {producto.categoria}
+                  {product.category}
                 </span>
                 <span className="bg-green-100 text-green-800 px-2 py-1 rounded">
-                  {producto.material}
+                  {product.material}
                 </span>
               </div>
             </div>
@@ -131,20 +131,20 @@ export default async function ProductoDetallePage({ params }: ProductoDetallePag
             {/* Precio */}
             <div className="flex items-baseline gap-2">
               <span className="text-4xl font-bold text-indigo-600">
-                {Number(producto.precio).toFixed(2)} €
+                {Number(product.price).toFixed(2)} €
               </span>
-              {producto.precioAnterior && (
+              {product.previousPrice && (
                 <span className="text-xl text-gray-500 line-through">
-                  {Number(producto.precioAnterior).toFixed(2)} €
+                  {Number(product.previousPrice).toFixed(2)} €
                 </span>
               )}
             </div>
             
             {/* Stock */}
             <div className="text-sm">
-              {producto.stock > 0 ? (
+              {product.stock > 0 ? (
                 <span className="text-green-600 font-medium">
-                  ✅ En stock ({producto.stock} unidades)
+                  ✅ En stock ({product.stock} unidades)
                 </span>
               ) : (
                 <span className="text-red-600 font-medium">
@@ -157,31 +157,31 @@ export default async function ProductoDetallePage({ params }: ProductoDetallePag
             <div className="prose max-w-none">
               <h3 className="text-lg font-semibold mb-2">Descripción</h3>
               <p className="text-gray-600">
-                {producto.descripcion}
+                {product.description}
               </p>
             </div>
             
             {/* Detalles */}
-            {(producto.dimensiones || producto.peso || producto.tiempoImpresion) && (
+            {(product.dimensions || product.weight || product.printTime) && (
               <div className="border-t pt-6">
                 <h3 className="text-lg font-semibold mb-4">Especificaciones</h3>
                 <dl className="grid grid-cols-2 gap-4">
-                  {producto.dimensiones && (
+                  {product.dimensions && (
                     <>
                       <dt className="text-gray-600">Dimensiones:</dt>
-                      <dd className="font-medium">{producto.dimensiones}</dd>
+                      <dd className="font-medium">{product.dimensions}</dd>
                     </>
                   )}
-                  {producto.peso && (
+                  {product.weight && (
                     <>
                       <dt className="text-gray-600">Peso:</dt>
-                      <dd className="font-medium">{Number(producto.peso)} g</dd>
+                      <dd className="font-medium">{Number(product.weight)} g</dd>
                     </>
                   )}
-                  {producto.tiempoImpresion && (
+                  {product.printTime && (
                     <>
                       <dt className="text-gray-600">Tiempo de impresión:</dt>
-                      <dd className="font-medium">{producto.tiempoImpresion} min</dd>
+                      <dd className="font-medium">{product.printTime} min</dd>
                     </>
                   )}
                 </dl>
@@ -191,15 +191,15 @@ export default async function ProductoDetallePage({ params }: ProductoDetallePag
             {/* Botones de acción */}
               <div className="border-t pt-6 space-y-4">
               <AddToCartButton
-                productoId={producto.id}
-                stock={producto.stock}
+                productId={product.id}
+                stock={product.stock}
                 producto={{
-                  id: producto.id,
-                  nombre: producto.nombre,
-                  slug: producto.slug,
-                  precio: Number(producto.precio),
-                  stock: producto.stock,
-                  imagen: producto.imagenes[0]?.url || null,
+                  id: product.id,
+                  nombre: product.name,
+                  slug: product.slug,
+                  precio: Number(product.price),
+                  stock: product.stock,
+                  imagen: product.images[0]?.url || null,
                 }}
               />
               
@@ -214,23 +214,23 @@ export default async function ProductoDetallePage({ params }: ProductoDetallePag
         </div>
         
         {/* Productos Relacionados */}
-        {relacionados.length > 0 && (
+        {related.length > 0 && (
           <div className="mt-16">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Productos Relacionados</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {relacionados.map((producto) => (
+              {related.map((product) => (
                 <Link
-                  key={producto.id}
-                  href={`/products/${producto.slug}`}
+                  key={product.id}
+                  href={`/products/${product.slug}`}
                   className="group"
                 >
                   <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow"
                   >
                     <div className="relative aspect-square bg-gray-200">
-                      {producto.imagenes[0] ? (
+                      {product.images[0] ? (
                         <Image
-                          src={producto.imagenes[0].url}
-                          alt={producto.nombre}
+                          src={product.images[0].url}
+                          alt={product.name}
                           fill
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                           className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -243,10 +243,10 @@ export default async function ProductoDetallePage({ params }: ProductoDetallePag
                     </div>
                     <div className="p-4">
                       <h3 className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
-                        {producto.nombre}
+                        {product.name}
                       </h3>
                       <p className="text-indigo-600 font-bold mt-1">
-                        {Number(producto.precio).toFixed(2)} €
+                        {Number(product.price).toFixed(2)} €
                       </p>
                     </div>
                   </div>
