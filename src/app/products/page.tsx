@@ -10,7 +10,7 @@ import Pagination from '@/components/products/Pagination';
 import SearchBar from '@/components/products/SearchBar';
 import SortSelector from '@/components/products/SortSelector';
 
-interface ProductosPageProps {
+interface ProductsPageProps {
   searchParams: {
     page?: string;
     category?: string;
@@ -25,16 +25,16 @@ interface ProductosPageProps {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function getProductos(searchParams: ProductosPageProps['searchParams']) {
+async function getProducts(searchParams: ProductsPageProps['searchParams']) {
   const page = parseInt(searchParams.page || '1', 10);
   const pageSize = 12;
   const skip = (page - 1) * pageSize;
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const where: any = { activo: true };
+  const where: any = { isActive: true };
 
   if (searchParams.category) {
-    where.categoria = searchParams.category;
+    where.category = searchParams.category;
   }
 
   if (searchParams.material) {
@@ -42,12 +42,12 @@ async function getProductos(searchParams: ProductosPageProps['searchParams']) {
   }
 
   if (searchParams.minPrice || searchParams.maxPrice) {
-    where.precio = {};
+    where.price = {};
     if (searchParams.minPrice) {
-      where.precio.gte = parseFloat(searchParams.minPrice);
+      where.price.gte = parseFloat(searchParams.minPrice);
     }
     if (searchParams.maxPrice) {
-      where.precio.lte = parseFloat(searchParams.maxPrice);
+      where.price.lte = parseFloat(searchParams.maxPrice);
     }
   }
 
@@ -57,27 +57,27 @@ async function getProductos(searchParams: ProductosPageProps['searchParams']) {
 
   if (searchParams.search) {
     where.OR = [
-      { nombre: { contains: searchParams.search, mode: 'insensitive' } },
-      { descripcion: { contains: searchParams.search, mode: 'insensitive' } },
+      { name: { contains: searchParams.search, mode: 'insensitive' } },
+      { description: { contains: searchParams.search, mode: 'insensitive' } },
     ];
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const orderBy: any = {};
   if (searchParams.sortBy === 'price') {
-    orderBy.precio = searchParams.sortOrder || 'asc';
+    orderBy.price = searchParams.sortOrder || 'asc';
   } else if (searchParams.sortBy === 'stock') {
     orderBy.stock = searchParams.sortOrder || 'desc';
   } else {
-    orderBy.nombre = searchParams.sortOrder || 'asc';
+    orderBy.name = searchParams.sortOrder || 'asc';
   }
 
-  const [productos, total] = await Promise.all([
-    prisma.producto.findMany({
+  const [products, total] = await Promise.all([
+    prisma.product.findMany({
       where,
       include: {
-        imagenes: {
-          where: { esPrincipal: true },
+        images: {
+          where: { isMain: true },
           take: 1,
         },
       },
@@ -85,91 +85,82 @@ async function getProductos(searchParams: ProductosPageProps['searchParams']) {
       skip,
       take: pageSize,
     }),
-    prisma.producto.count({ where }),
+    prisma.product.count({ where }),
   ]);
   
   return {
-    productos,
+    products,
     total,
     totalPages: Math.ceil(total / pageSize),
     page,
   };
 }
 
-export default async function ProductosPage({ searchParams }: ProductosPageProps) {
-  const { productos, total, totalPages, page } = await getProductos(searchParams);
-  
+export default async function ProductsPage({ searchParams }: ProductsPageProps) {
+  const { products, total, totalPages, page } = await getProducts(searchParams);
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 3xl:px-20 py-8 lg:py-12">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-            Catálogo de Productos
-          </h1>
-          <p className="text-gray-600 text-lg">
-            Descubre nuestra colección de productos impresos en 3D
+    <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 3xl:px-20 py-8">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+          Catálogo de Productos
+        </h1>
+        <p className="text-gray-600 max-w-3xl">
+          Descubre nuestra colección de productos impresos en 3D. 
+          Todos nuestros productos están fabricados con materiales de alta calidad.
+        </p>
+      </div>
+
+      {/* Search and Filters */}
+      <div className="mb-8 space-y-4">
+        <SearchBar />
+        
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <SortSelector />
+          <p className="text-sm text-gray-600">
+            Mostrando {products.length} de {total} productos
           </p>
         </div>
-        
-        {/* Search Bar */}
-        <div className="mb-6">
-          <SearchBar initialValue={searchParams.search} />
-        </div>
-        
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar de Filtros */}
-          <aside className="w-full lg:w-64 flex-shrink-0">
-            <FilterSidebar searchParams={searchParams} />
-          </aside>
-          
-          {/* Grid de Productos */}
-          <main className="flex-1">
-            {/* Resultados y ordenamiento */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-              <p className="text-gray-600">
-                Mostrando {productos.length} de {total} productos
-              </p>
-              
-              {/* Ordenamiento - Client Component */}
-              <SortSelector 
-                initialSortBy={searchParams.sortBy} 
-                initialSortOrder={searchParams.sortOrder} 
-              />
-            </div>
-            
-            {/* Grid */}
-            {productos.length > 0 ? (
+      </div>
+
+      <div className="flex flex-col lg:flex-row gap-8">
+        {/* Sidebar Filters */}
+        <aside className="w-full lg:w-64 flex-shrink-0">
+          <FilterSidebar />
+        </aside>
+
+        {/* Product Grid */}
+        <div className="flex-1">
+          {products.length > 0 ? (
+            <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {productos.map((producto) => (
-                  <ProductCard key={producto.id} producto={producto} />
+                {products.map((product) => (
+                  <ProductCard key={product.id} product={product} />
                 ))}
               </div>
-            ) : (
-              <div className="text-center py-16">
-                <p className="text-gray-500 text-lg mb-4">
-                  No se encontraron productos con los filtros seleccionados
-                </p>
-                <a
-                  href="/products"
-                  className="text-indigo-600 hover:text-indigo-800 font-medium"
-                >
-                  Ver todos los productos
-                </a>
-              </div>
-            )}
-            
-            {/* Paginación */}
-            {totalPages > 1 && (
-              <div className="mt-12">
-                <Pagination
-                  currentPage={page}
-                  totalPages={totalPages}
-                  searchParams={searchParams}
-                />
-              </div>
-            )}
-          </main>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="mt-12">
+                  <Pagination
+                    currentPage={page}
+                    totalPages={totalPages}
+                    total={total}
+                  />
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-center py-16">
+              <p className="text-lg text-gray-600 mb-2">
+                No se encontraron productos
+              </p>
+              <p className="text-gray-500">
+                Intenta ajustar los filtros o términos de búsqueda
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
