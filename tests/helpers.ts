@@ -50,77 +50,77 @@ export async function seedTestData(): Promise<void> {
   const passwordHash = await bcrypt.hash('test123', 10);
 
   // Crear usuarios de test
-  await prisma.usuario.createMany({
+  await prisma.user.createMany({
     data: [
       {
         id: 'test-admin-id',
         email: 'admin@test.com',
-        nombre: 'Admin Test',
+        name: 'Admin Test',
         password: passwordHash,
-        rol: 'ADMIN',
-        activo: true,
+        role: 'ADMIN',
+        isActive: true,
       },
       {
         id: 'test-client-id',
         email: 'cliente@test.com',
-        nombre: 'Cliente Test',
+        name: 'Cliente Test',
         password: passwordHash,
-        rol: 'CLIENTE',
-        activo: true,
+        role: 'CUSTOMER',
+        isActive: true,
       },
     ],
     skipDuplicates: true,
   });
 
   // Crear productos de test
-  await prisma.producto.createMany({
+  await prisma.product.createMany({
     data: [
       {
         id: 'test-product-1',
         slug: 'test-product-1',
-        nombre: 'Producto Test 1',
-        descripcion: 'Descripción del producto de test',
-        precio: 19.99,
+        name: 'Producto Test 1',
+        description: 'Descripción del producto de test',
+        price: 19.99,
         stock: 10,
-        categoria: 'DECORACION',
+        category: 'DECORATION',
         material: 'PLA',
-        activo: true,
+        isActive: true,
       },
       {
         id: 'test-product-2',
         slug: 'test-product-2',
-        nombre: 'Producto Test 2',
-        descripcion: 'Otro producto de test',
-        precio: 29.99,
+        name: 'Producto Test 2',
+        description: 'Otro producto de test',
+        price: 29.99,
         stock: 5,
-        categoria: 'ACCESORIOS',
+        category: 'ACCESSORIES',
         material: 'PETG',
-        activo: true,
+        isActive: true,
       },
     ],
     skipDuplicates: true,
   });
 
   // Crear imágenes
-  await prisma.imagenProducto.createMany({
+  await prisma.productImage.createMany({
     data: [
       {
         id: 'test-img-1',
-        productoId: 'test-product-1',
+        productId: 'test-product-1',
         url: 'https://example.com/img1.jpg',
-        nombreArchivo: 'img1.jpg',
-        textoAlt: 'Producto 1',
-        esPrincipal: true,
-        orden: 0,
+        filename: 'img1.jpg',
+        altText: 'Producto 1',
+        isMain: true,
+        displayOrder: 0,
       },
       {
         id: 'test-img-2',
-        productoId: 'test-product-2',
+        productId: 'test-product-2',
         url: 'https://example.com/img2.jpg',
-        nombreArchivo: 'img2.jpg',
-        textoAlt: 'Producto 2',
-        esPrincipal: true,
-        orden: 0,
+        filename: 'img2.jpg',
+        altText: 'Producto 2',
+        isMain: true,
+        displayOrder: 0,
       },
     ],
     skipDuplicates: true,
