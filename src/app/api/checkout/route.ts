@@ -41,7 +41,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
 
   // Buscar usuario con carrito
-  const usuario = await prisma.usuario.findUnique({
+  const usuario = await prisma.user.findUnique({
     where: { email: session.user.email },
     include: {
       carrito: {
@@ -143,15 +143,15 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
     // Generar número de pedido
     const year = new Date().getFullYear();
-    const count = await prisma.pedido.count();
+    const count = await prisma.order.count();
     const orderNumber = `P-${year}${String(count + 1).padStart(6, '0')}`;
 
     // Crear pedido en estado PENDIENTE
-    const pedido = await prisma.pedido.create({
+    const pedido = await prisma.order.create({
       data: {
         orderNumber,
         usuarioId: usuario.id,
-        estado: 'PENDIENTE',
+        status: 'PENDING',
         subtotal,
         envio: gastosEnvio,
         total,

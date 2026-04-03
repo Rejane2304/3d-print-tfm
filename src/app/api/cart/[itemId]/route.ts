@@ -41,7 +41,7 @@ export const PATCH = withErrorHandler(async (
   }
 
   // Buscar item y verificar que pertenece al usuario
-  const item = await prisma.itemCarrito.findFirst({
+  const item = await prisma.cartItem.findFirst({
     where: {
       id: itemId,
       carrito: {
@@ -65,12 +65,12 @@ export const PATCH = withErrorHandler(async (
 
   // Si cantidad es 0, eliminar el item
   if (cantidad === 0) {
-    await prisma.itemCarrito.delete({
+    await prisma.cartItem.delete({
       where: { id: itemId },
     });
 
     // Recalcular subtotal
-    const itemsRestantes = await prisma.itemCarrito.findMany({
+    const itemsRestantes = await prisma.cartItem.findMany({
       where: { carritoId: item.carritoId },
     });
 
@@ -80,7 +80,7 @@ export const PATCH = withErrorHandler(async (
       0
     );
 
-    await prisma.carrito.update({
+    await prisma.cart.update({
       where: { id: item.carritoId },
       data: { subtotal: nuevoSubtotal },
     });
@@ -100,13 +100,13 @@ export const PATCH = withErrorHandler(async (
   }
 
   // Actualizar cantidad
-  await prisma.itemCarrito.update({
+  await prisma.cartItem.update({
     where: { id: itemId },
     data: { cantidad },
   });
 
   // Recalcular subtotal
-  const items = await prisma.itemCarrito.findMany({
+  const items = await prisma.cartItem.findMany({
     where: { carritoId: item.carritoId },
   });
 
@@ -116,7 +116,7 @@ export const PATCH = withErrorHandler(async (
     0
   );
 
-  await prisma.carrito.update({
+  await prisma.cart.update({
     where: { id: item.carritoId },
     data: { subtotal: nuevoSubtotal },
   });
@@ -145,7 +145,7 @@ export const DELETE = withErrorHandler(async (
   }
 
   // Buscar item y verificar que pertenece al usuario
-  const item = await prisma.itemCarrito.findFirst({
+  const item = await prisma.cartItem.findFirst({
     where: {
       id: itemId,
       carrito: {
@@ -167,12 +167,12 @@ export const DELETE = withErrorHandler(async (
   }
 
   // Eliminar item
-  await prisma.itemCarrito.delete({
+  await prisma.cartItem.delete({
     where: { id: itemId },
   });
 
   // Recalcular subtotal
-  const itemsRestantes = await prisma.itemCarrito.findMany({
+  const itemsRestantes = await prisma.cartItem.findMany({
     where: { carritoId: item.carritoId },
   });
 
@@ -182,7 +182,7 @@ export const DELETE = withErrorHandler(async (
     0
   );
 
-  await prisma.carrito.update({
+  await prisma.cart.update({
     where: { id: item.carritoId },
     data: { subtotal: nuevoSubtotal },
   });

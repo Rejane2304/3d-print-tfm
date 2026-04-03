@@ -23,27 +23,27 @@ describe('Autenticación y Autorización', () => {
     mockGetToken.mockResolvedValue(null);
     
     // Limpiar y crear usuario de test
-    await prisma.usuario.deleteMany({ where: { email: usuarioTest.email } });
+    await prisma.user.deleteMany({ where: { email: usuarioTest.email } });
     
     const hashedPassword = await bcrypt.hash(usuarioTest.password, 12);
-    await prisma.usuario.create({
+    await prisma.user.create({
       data: {
         email: usuarioTest.email,
         password: hashedPassword,
         nombre: usuarioTest.nombre,
-        rol: 'CLIENTE',
-        activo: true,
+        role: 'CUSTOMER',
+        isActive: true,
       },
     });
   });
 
   afterAll(async () => {
-    await prisma.usuario.deleteMany({ where: { email: usuarioTest.email } });
+    await prisma.user.deleteMany({ where: { email: usuarioTest.email } });
   });
 
   describe('Login y Verificación de Credenciales', () => {
     it('debe autorizar con credenciales válidas', async () => {
-      const usuario = await prisma.usuario.findUnique({
+      const usuario = await prisma.user.findUnique({
         where: { email: usuarioTest.email },
       });
 
@@ -56,7 +56,7 @@ describe('Autenticación y Autorización', () => {
     });
 
     it('debe rechazar contraseña incorrecta', async () => {
-      const usuario = await prisma.usuario.findUnique({
+      const usuario = await prisma.user.findUnique({
         where: { email: usuarioTest.email },
       });
 
@@ -65,7 +65,7 @@ describe('Autenticación y Autorización', () => {
     });
 
     it('debe rechazar usuario inexistente', async () => {
-      const usuario = await prisma.usuario.findUnique({
+      const usuario = await prisma.user.findUnique({
         where: { email: 'nonexistent@example.com' },
       });
 
@@ -87,7 +87,7 @@ describe('Autenticación y Autorización', () => {
     it('debe redirigir a / clientes que intentan acceder', async () => {
       mockGetToken.mockResolvedValue({
         email: 'cliente@example.com',
-        rol: 'CLIENTE',
+        role: 'CUSTOMER',
       });
 
       const req = createRequest('/admin/dashboard');
@@ -100,7 +100,7 @@ describe('Autenticación y Autorización', () => {
     it('debe permitir acceso a ADMIN autenticados', async () => {
       mockGetToken.mockResolvedValue({
         email: 'admin@3dprint.com',
-        rol: 'ADMIN',
+        role: 'ADMIN',
       });
 
       const req = createRequest('/admin/dashboard');
@@ -135,7 +135,7 @@ describe('Autenticación y Autorización', () => {
     it('debe permitir acceso a /checkout para CLIENTE autenticado', async () => {
       mockGetToken.mockResolvedValue({
         email: 'cliente@example.com',
-        rol: 'CLIENTE',
+        role: 'CUSTOMER',
       });
 
       const req = createRequest('/checkout');
@@ -150,7 +150,7 @@ describe('Autenticación y Autorización', () => {
     it('debe redirigir ADMIN en /cart a /admin/dashboard', async () => {
       mockGetToken.mockResolvedValue({
         email: 'admin@3dprint.com',
-        rol: 'ADMIN',
+        role: 'ADMIN',
       });
 
       const req = createRequest('/cart');
@@ -163,7 +163,7 @@ describe('Autenticación y Autorización', () => {
     it('debe redirigir CLIENTE en /admin a /', async () => {
       mockGetToken.mockResolvedValue({
         email: 'cliente@example.com',
-        rol: 'CLIENTE',
+        role: 'CUSTOMER',
       });
 
       const req = createRequest('/admin/orders');
@@ -176,7 +176,7 @@ describe('Autenticación y Autorización', () => {
     it('debe redirigir autenticados en /auth a home según rol', async () => {
       mockGetToken.mockResolvedValue({
         email: 'cliente@example.com',
-        rol: 'CLIENTE',
+        role: 'CUSTOMER',
       });
 
       const req = createRequest('/auth');

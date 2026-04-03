@@ -76,8 +76,8 @@ describe('API de Productos', () => {
 
     beforeAll(async () => {
       // Obtener un producto existente para testing
-      productoTest = await prisma.producto.findFirst({
-        where: { activo: true },
+      productoTest = await prisma.product.findFirst({
+        where: { isActive: true },
         include: { imagenes: true },
       });
     });
@@ -118,16 +118,16 @@ describe('API de Productos', () => {
       // Nota: Esto requiere autenticación de admin
       const slugUnico = `test-producto-${Date.now()}`;
       
-      const producto = await prisma.producto.create({
+      const producto = await prisma.product.create({
         data: {
           slug: slugUnico,
           nombre: 'Producto Test',
           descripcion: 'Descripción test',
           precio: 29.99,
           stock: 10,
-          categoria: 'DECORACION',
+          category: 'DECORATION',
           material: 'PLA',
-          activo: true,
+          isActive: true,
         },
       });
 
@@ -135,16 +135,16 @@ describe('API de Productos', () => {
       expect(producto.slug).toBe(slugUnico);
 
       // Limpieza
-      await prisma.producto.delete({ where: { id: producto.id } });
+      await prisma.product.delete({ where: { id: producto.id } });
     });
 
     it('debe actualizar stock del producto', async () => {
-      const producto = await prisma.producto.findFirst({ where: { activo: true } });
+      const producto = await prisma.product.findFirst({ where: { isActive: true } });
       if (!producto) return;
 
       const nuevoStock = producto.stock + 5;
       
-      const actualizado = await prisma.producto.update({
+      const actualizado = await prisma.product.update({
         where: { id: producto.id },
         data: { stock: nuevoStock },
       });
@@ -152,32 +152,32 @@ describe('API de Productos', () => {
       expect(actualizado.stock).toBe(nuevoStock);
 
       // Restaurar stock original
-      await prisma.producto.update({
+      await prisma.product.update({
         where: { id: producto.id },
         data: { stock: producto.stock },
       });
     });
 
     it('debe activar/desactivar producto', async () => {
-      const producto = await prisma.producto.findFirst({ where: { activo: true } });
+      const producto = await prisma.product.findFirst({ where: { isActive: true } });
       if (!producto) return;
 
       // Desactivar
-      await prisma.producto.update({
+      await prisma.product.update({
         where: { id: producto.id },
-        data: { activo: false },
+        data: { isActive: false },
       });
 
-      const desactivado = await prisma.producto.findUnique({
+      const desactivado = await prisma.product.findUnique({
         where: { id: producto.id },
       });
 
       expect(desactivado!.activo).toBe(false);
 
       // Reactivar
-      await prisma.producto.update({
+      await prisma.product.update({
         where: { id: producto.id },
-        data: { activo: true },
+        data: { isActive: true },
       });
     });
   });

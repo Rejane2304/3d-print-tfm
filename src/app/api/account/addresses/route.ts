@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const usuario = await prisma.usuario.findUnique({
+    const usuario = await prisma.user.findUnique({
       where: { email: session.user.email },
       select: { id: true }
     });
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const usuario = await prisma.usuario.findUnique({
+    const usuario = await prisma.user.findUnique({
       where: { email: session.user.email },
       select: { id: true }
     });
@@ -145,7 +145,7 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const usuario = await prisma.usuario.findUnique({
+    const usuario = await prisma.user.findUnique({
       where: { email: session.user.email },
       select: { id: true }
     });
@@ -213,7 +213,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const usuario = await prisma.usuario.findUnique({
+    const usuario = await prisma.user.findUnique({
       where: { email: session.user.email },
       select: { id: true }
     });

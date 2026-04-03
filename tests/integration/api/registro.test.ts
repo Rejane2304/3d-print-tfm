@@ -52,7 +52,7 @@ describe('POST /api/auth/register', () => {
       const req = createRequest(datosValidos);
       await POST(req);
 
-      const usuario = await prisma.usuario.findUnique({
+      const usuario = await prisma.user.findUnique({
         where: { email: datosValidos.email.toLowerCase() },
       });
 
@@ -65,7 +65,7 @@ describe('POST /api/auth/register', () => {
       const req = createRequest(datosValidos);
       await POST(req);
 
-      const usuario = await prisma.usuario.findUnique({
+      const usuario = await prisma.user.findUnique({
         where: { email: datosValidos.email.toLowerCase() },
       });
 
@@ -76,7 +76,7 @@ describe('POST /api/auth/register', () => {
       const req = createRequest(datosValidos);
       await POST(req);
 
-      const usuario = await prisma.usuario.findUnique({
+      const usuario = await prisma.user.findUnique({
         where: { email: datosValidos.email.toLowerCase() },
       });
 

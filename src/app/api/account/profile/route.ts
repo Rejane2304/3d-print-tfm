@@ -33,7 +33,7 @@ export async function GET() {
       );
     }
 
-    const usuario = await prisma.usuario.findUnique({
+    const usuario = await prisma.user.findUnique({
       where: { email: session.user.email },
       select: {
         id: true,
@@ -74,7 +74,7 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    const usuario = await prisma.usuario.findUnique({
+    const usuario = await prisma.user.findUnique({
       where: { email: session.user.email },
     });
 
@@ -106,7 +106,7 @@ export async function PATCH(req: NextRequest) {
 
       // Actualizar contraseña
       const hashedPassword = await bcrypt.hash(passwordData.passwordNuevo, 12);
-      await prisma.usuario.update({
+      await prisma.user.update({
         where: { id: usuario.id },
         data: { password: hashedPassword },
       });
@@ -120,7 +120,7 @@ export async function PATCH(req: NextRequest) {
     // Actualizar datos del perfil
     const perfilData = perfilSchema.parse(body);
 
-    const usuarioActualizado = await prisma.usuario.update({
+    const usuarioActualizado = await prisma.user.update({
       where: { id: usuario.id },
       data: perfilData,
       select: {

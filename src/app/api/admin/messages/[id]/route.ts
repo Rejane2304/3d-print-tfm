@@ -22,7 +22,7 @@ export async function DELETE(
       );
     }
 
-    const usuario = await prisma.usuario.findUnique({
+    const usuario = await prisma.user.findUnique({
       where: { email: session.user.email },
     });
 
@@ -34,7 +34,7 @@ export async function DELETE(
     }
 
     // Solo admin puede eliminar mensajes
-    if (usuario.rol !== 'ADMIN') {
+    if (usuario.role !== 'ADMIN') {
       return NextResponse.json(
         { success: false, error: 'No autorizado' },
         { status: 403 }
@@ -42,7 +42,7 @@ export async function DELETE(
     }
 
     // Verificar que el mensaje existe
-    const mensaje = await prisma.mensajePedido.findUnique({
+    const mensaje = await prisma.orderMessage.findUnique({
       where: { id: params.id },
     });
 
@@ -54,7 +54,7 @@ export async function DELETE(
     }
 
     // Eliminar el mensaje
-    await prisma.mensajePedido.delete({
+    await prisma.orderMessage.delete({
       where: { id: params.id },
     });
 

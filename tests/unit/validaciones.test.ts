@@ -96,7 +96,7 @@ describe('Validaciones de Productos', () => {
     descripcion: 'Un hermoso vaso con diseño floral para decoración del hogar',
     precio: 12.99,
     stock: 25,
-    categoria: 'DECORACION',
+    category: 'DECORATION',
     material: 'PLA',
   };
 

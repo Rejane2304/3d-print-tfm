@@ -22,18 +22,18 @@ export async function GET(
       );
     }
 
-    const usuario = await prisma.usuario.findUnique({
+    const usuario = await prisma.user.findUnique({
       where: { email: session.user.email },
     });
 
-    if (!usuario || usuario.rol !== 'ADMIN') {
+    if (!usuario || usuario.role !== 'ADMIN') {
       return NextResponse.json(
         { success: false, error: 'No autorizado' },
         { status: 403 }
       );
     }
 
-    const factura = await prisma.factura.findUnique({
+    const factura = await prisma.invoice.findUnique({
       where: { id: params.id },
       include: {
         pedido: {
@@ -86,11 +86,11 @@ export async function DELETE(
       );
     }
 
-    const usuario = await prisma.usuario.findUnique({
+    const usuario = await prisma.user.findUnique({
       where: { email: session.user.email },
     });
 
-    if (!usuario || usuario.rol !== 'ADMIN') {
+    if (!usuario || usuario.role !== 'ADMIN') {
       return NextResponse.json(
         { success: false, error: 'No autorizado' },
         { status: 403 }
@@ -98,7 +98,7 @@ export async function DELETE(
     }
 
     // Anular la factura (no eliminar)
-    const factura = await prisma.factura.update({
+    const factura = await prisma.invoice.update({
       where: { id: params.id },
       data: {
         anulada: true,

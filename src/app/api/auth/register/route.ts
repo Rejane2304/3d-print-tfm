@@ -70,7 +70,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
   
   // Verificar si el email ya existe
-  const usuarioExistente = await prisma.usuario.findUnique({
+  const usuarioExistente = await prisma.user.findUnique({
     where: { email: email.toLowerCase() },
   });
   
@@ -85,14 +85,14 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const hashedPassword = await bcrypt.hash(password, 12);
   
   // Crear usuario con dirección (si se proporciona)
-  const usuario = await prisma.usuario.create({
+  const usuario = await prisma.user.create({
     data: {
       email: email.toLowerCase(),
       password: hashedPassword,
       nombre,
       telefono: telefono || null,
-      rol: 'CLIENTE',
-      activo: true,
+      role: 'CUSTOMER',
+      isActive: true,
       // Crear dirección si se proporcionan los datos
       direcciones: datosDireccion ? {
         create: {

@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const usuario = await prisma.usuario.findUnique({
+    const usuario = await prisma.user.findUnique({
       where: { email: session.user.email },
     });
 
@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Verificar acceso al pedido (admin o dueño)
-    const pedido = await prisma.pedido.findUnique({
+    const pedido = await prisma.order.findUnique({
       where: { id: pedidoId },
     });
 
@@ -61,14 +61,14 @@ export async function GET(req: NextRequest) {
     }
 
     // Solo admin o el dueño del pedido puede ver mensajes
-    if (usuario.rol !== 'ADMIN' && pedido.usuarioId !== usuario.id) {
+    if (usuario.role !== 'ADMIN' && pedido.usuarioId !== usuario.id) {
       return NextResponse.json(
         { success: false, error: 'No autorizado' },
         { status: 403 }
       );
     }
 
-    const mensajes = await prisma.mensajePedido.findMany({
+    const mensajes = await prisma.orderMessage.findMany({
       where: { pedidoId },
       include: {
         usuario: {
@@ -106,7 +106,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const usuario = await prisma.usuario.findUnique({
+    const usuario = await prisma.user.findUnique({
       where: { email: session.user.email },
     });
 
@@ -121,7 +121,7 @@ export async function POST(req: NextRequest) {
     const validatedData = crearMensajeSchema.parse(body);
 
     // Verificar que el pedido existe
-    const pedido = await prisma.pedido.findUnique({
+    const pedido = await prisma.order.findUnique({
       where: { id: validatedData.pedidoId },
     });
 
@@ -133,7 +133,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Solo admin o el dueño del pedido puede enviar mensajes
-    if (usuario.rol !== 'ADMIN' && pedido.usuarioId !== usuario.id) {
+    if (usuario.role !== 'ADMIN' && pedido.usuarioId !== usuario.id) {
       return NextResponse.json(
         { success: false, error: 'No autorizado' },
         { status: 403 }
@@ -141,12 +141,12 @@ export async function POST(req: NextRequest) {
     }
 
     // Crear mensaje
-    const mensaje = await prisma.mensajePedido.create({
+    const mensaje = await prisma.orderMessage.create({
       data: {
         pedidoId: validatedData.pedidoId,
         usuarioId: usuario.id,
         mensaje: validatedData.mensaje,
-        esDeCliente: usuario.rol !== 'ADMIN',
+        esDeCliente: usuario.role !== 'ADMIN',
       },
       include: {
         usuario: {

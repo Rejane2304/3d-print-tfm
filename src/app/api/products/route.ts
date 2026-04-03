@@ -29,7 +29,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
 
   // Construir where clause
   const where: Prisma.ProductoWhereInput = {
-    activo: true,
+    isActive: true,
   };
 
   if (categoria) {
@@ -73,7 +73,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
 
   // Ejecutar queries en paralelo
   const [productos, total] = await Promise.all([
-    prisma.producto.findMany({
+    prisma.product.findMany({
       where,
       include: {
         imagenes: {
@@ -85,7 +85,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       skip,
       take: pageSize,
     }),
-    prisma.producto.count({ where }),
+    prisma.product.count({ where }),
   ]);
 
   const totalPages = Math.ceil(total / pageSize);

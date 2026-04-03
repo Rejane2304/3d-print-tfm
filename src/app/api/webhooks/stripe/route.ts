@@ -84,7 +84,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   try {
     // Buscar pedido por stripeSessionId
-    const pedido = await prisma.pedido.findFirst({
+    const pedido = await prisma.order.findFirst({
       where: { stripeSessionId: session.id },
       include: { items: true },
     });
@@ -95,16 +95,16 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     }
 
     // Actualizar pedido a CONFIRMADO (estado inicial después del pago)
-    await prisma.pedido.update({
+    await prisma.order.update({
       where: { id: pedido.id },
       data: {
-        estado: 'CONFIRMADO',
+        status: 'CONFIRMED',
         confirmadoEn: new Date(),
       },
     });
 
     // Crear registro de pago
-    await prisma.pago.create({
+    await prisma.payment.create({
       data: {
         pedidoId: pedido.id,
         usuarioId: userId,
@@ -118,7 +118,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
     // Actualizar stock de productos
     for (const item of pedido.items) {
-      await prisma.producto.update({
+      await prisma.product.update({
         where: { id: item.productoId },
         data: {
           stock: {
@@ -130,10 +130,10 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
     // Vaciar carrito si existe
     if (carritoId) {
-      await prisma.itemCarrito.deleteMany({
+      await prisma.cartItem.deleteMany({
         where: { carritoId },
       });
-      await prisma.carrito.update({
+      await prisma.cart.update({
         where: { id: carritoId },
         data: { subtotal: 0 },
       });
@@ -148,15 +148,15 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
 async function handleCheckoutExpired(session: Stripe.Checkout.Session) {
   try {
-    const pedido = await prisma.pedido.findFirst({
+    const pedido = await prisma.order.findFirst({
       where: { stripeSessionId: session.id },
     });
 
     if (pedido && pedido.estado === 'PENDIENTE') {
-      await prisma.pedido.update({
+      await prisma.order.update({
         where: { id: pedido.id },
         data: {
-          estado: 'CANCELADO',
+          status: 'CANCELLED',
           canceladoEn: new Date(),
           motivoCancelacion: 'Sesión de pago expirada',
         },

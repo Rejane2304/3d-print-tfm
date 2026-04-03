@@ -30,7 +30,7 @@ export const authOptions: AuthOptions = {
         }
 
         try {
-          const user = await prisma.usuario.findUnique({
+          const user = await prisma.user.findUnique({
             where: { email: credentials.email.toLowerCase() },
           });
 
@@ -43,7 +43,7 @@ export const authOptions: AuthOptions = {
             return null;
           }
 
-          await prisma.usuario.update({
+          await prisma.user.update({
             where: { id: user.id },
             data: { ultimoAcceso: new Date() },
           });
@@ -68,7 +68,7 @@ export const authOptions: AuthOptions = {
       if (user) {
         token.id = user.id;
         // Obtener el rol desde la base de datos
-        const dbUser = await prisma.usuario.findUnique({
+        const dbUser = await prisma.user.findUnique({
           where: { id: user.id },
           select: { rol: true },
         });

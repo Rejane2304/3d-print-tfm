@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Obtener usuario
-    const usuario = await prisma.usuario.findUnique({
+    const usuario = await prisma.user.findUnique({
       where: { email: session.user.email },
       select: { id: true }
     });
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Obtener pedidos del usuario
-    const pedidos = await prisma.pedido.findMany({
+    const pedidos = await prisma.order.findMany({
       where: { usuarioId: usuario.id },
       orderBy: { createdAt: 'desc' },
       include: {

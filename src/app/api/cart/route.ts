@@ -25,7 +25,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   }
 
   // Buscar usuario y su carrito
-  const usuario = await prisma.usuario.findUnique({
+  const usuario = await prisma.user.findUnique({
     where: { email: session.user.email },
     include: {
       carrito: {
@@ -131,7 +131,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
 
   // Buscar usuario
-  const usuario = await prisma.usuario.findUnique({
+  const usuario = await prisma.user.findUnique({
     where: { email: session.user.email },
     include: { carrito: true },
   });
@@ -144,7 +144,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
 
   // Buscar producto
-  const producto = await prisma.producto.findUnique({
+  const producto = await prisma.product.findUnique({
     where: { id: productoId },
   });
 
@@ -172,7 +172,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   // Crear carrito si no existe
   let carrito = usuario.carrito;
   if (!carrito) {
-    carrito = await prisma.carrito.create({
+    carrito = await prisma.cart.create({
       data: {
         usuarioId: usuario.id,
         subtotal: 0,
@@ -181,7 +181,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
 
   // Verificar si el producto ya está en el carrito
-  const itemExistente = await prisma.itemCarrito.findFirst({
+  const itemExistente = await prisma.cartItem.findFirst({
     where: {
       carritoId: carrito.id,
       productoId: producto.id,
@@ -199,13 +199,13 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       );
     }
 
-    await prisma.itemCarrito.update({
+    await prisma.cartItem.update({
       where: { id: itemExistente.id },
       data: { cantidad: nuevaCantidad },
     });
   } else {
     // Crear nuevo item
-    await prisma.itemCarrito.create({
+    await prisma.cartItem.create({
       data: {
         carritoId: carrito.id,
         productoId: producto.id,
@@ -216,7 +216,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
 
   // Recalcular subtotal del carrito
-  const items = await prisma.itemCarrito.findMany({
+  const items = await prisma.cartItem.findMany({
     where: { carritoId: carrito.id },
     include: { producto: true },
   });
@@ -226,7 +226,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     0
   );
 
-  await prisma.carrito.update({
+  await prisma.cart.update({
     where: { id: carrito.id },
     data: { subtotal: nuevoSubtotal },
   });

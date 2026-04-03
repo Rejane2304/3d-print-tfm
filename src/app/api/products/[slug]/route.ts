@@ -17,7 +17,7 @@ export const GET = withErrorHandler(async (
     throw new ApiError(ErrorCode.VALIDATION_INVALID_INPUT, 'Slug es requerido', 400);
   }
   
-  const producto = await prisma.producto.findUnique({
+  const producto = await prisma.product.findUnique({
     where: { slug },
     include: {
       imagenes: {
@@ -35,9 +35,9 @@ export const GET = withErrorHandler(async (
   }
   
   // Obtener productos relacionados (misma categoría, excluyendo el actual)
-  const relacionados = await prisma.producto.findMany({
+  const relacionados = await prisma.product.findMany({
     where: {
-      activo: true,
+      isActive: true,
       categoria: producto.categoria,
       id: { not: producto.id },
     },

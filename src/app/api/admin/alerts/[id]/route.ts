@@ -22,11 +22,11 @@ export async function DELETE(
       );
     }
 
-    const usuario = await prisma.usuario.findUnique({
+    const usuario = await prisma.user.findUnique({
       where: { email: session.user.email },
     });
 
-    if (!usuario || usuario.rol !== 'ADMIN') {
+    if (!usuario || usuario.role !== 'ADMIN') {
       return NextResponse.json(
         { success: false, error: 'No autorizado' },
         { status: 403 }
@@ -34,7 +34,7 @@ export async function DELETE(
     }
 
     // Verificar que la alerta existe
-    const alerta = await prisma.alerta.findUnique({
+    const alerta = await prisma.alert.findUnique({
       where: { id: params.id },
     });
 
@@ -46,7 +46,7 @@ export async function DELETE(
     }
 
     // Eliminar la alerta
-    await prisma.alerta.delete({
+    await prisma.alert.delete({
       where: { id: params.id },
     });
 

@@ -36,11 +36,11 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const usuario = await prisma.usuario.findUnique({
+    const usuario = await prisma.user.findUnique({
       where: { email: session.user.email },
     });
 
-    if (!usuario || usuario.rol !== 'ADMIN') {
+    if (!usuario || usuario.role !== 'ADMIN') {
       return NextResponse.json(
         { success: false, error: 'No autorizado' },
         { status: 403 }
@@ -68,7 +68,7 @@ export async function GET(req: NextRequest) {
     }
 
     const [facturas, total] = await Promise.all([
-      prisma.factura.findMany({
+      prisma.invoice.findMany({
         where,
         include: {
           pedido: {
@@ -88,7 +88,7 @@ export async function GET(req: NextRequest) {
         skip,
         take: limit,
       }),
-      prisma.factura.count({ where }),
+      prisma.invoice.count({ where }),
     ]);
 
     return NextResponse.json({ 
@@ -119,11 +119,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const usuario = await prisma.usuario.findUnique({
+    const usuario = await prisma.user.findUnique({
       where: { email: session.user.email },
     });
 
-    if (!usuario || usuario.rol !== 'ADMIN') {
+    if (!usuario || usuario.role !== 'ADMIN') {
       return NextResponse.json(
         { success: false, error: 'No autorizado' },
         { status: 403 }
@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
     const { pedidoId } = crearFacturaSchema.parse(body);
 
     // Verificar que el pedido existe
-    const pedido = await prisma.pedido.findUnique({
+    const pedido = await prisma.order.findUnique({
       where: { id: pedidoId },
       include: {
         usuario: true,
@@ -158,7 +158,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Verificar que no existe ya una factura
-    const facturaExistente = await prisma.factura.findFirst({
+    const facturaExistente = await prisma.invoice.findFirst({
       where: { pedidoId },
     });
 
@@ -171,7 +171,7 @@ export async function POST(req: NextRequest) {
 
     // Generar número de factura: F-AAAA-NNNNNN
     const year = new Date().getFullYear();
-    const ultimaFactura = await prisma.factura.findFirst({
+    const ultimaFactura = await prisma.invoice.findFirst({
       where: {
         serie: 'F',
       },
@@ -188,7 +188,7 @@ export async function POST(req: NextRequest) {
     const total = baseImponible + cuotaIva;
 
     // Crear factura
-    const factura = await prisma.factura.create({
+    const factura = await prisma.invoice.create({
       data: {
         invoiceNumber,
         serie: 'F',

@@ -17,14 +17,14 @@ describe('Webhook de Stripe', () => {
   
   beforeAll(async () => {
     // Limpiar datos de test anteriores
-    await prisma.pedido.deleteMany({
+    await prisma.order.deleteMany({
       where: { stripeSessionId: mockSessionId }
     });
   });
 
   afterAll(async () => {
     // Limpiar datos de test
-    await prisma.pedido.deleteMany({
+    await prisma.order.deleteMany({
       where: { stripeSessionId: mockSessionId }
     });
   });

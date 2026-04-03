@@ -45,19 +45,19 @@ describe('API del Carrito', () => {
     }
 
     const hashedPassword = await bcrypt.hash(usuarioTest.password, 12);
-    const usuario = await prisma.usuario.create({
+    const usuario = await prisma.user.create({
       data: {
         email: usuarioTest.email,
         password: hashedPassword,
         nombre: usuarioTest.nombre,
-        rol: 'CLIENTE',
-        activo: true,
+        role: 'CUSTOMER',
+        isActive: true,
       },
     });
     usuarioId = usuario.id;
 
-    const productoExistente = await prisma.producto.findFirst({
-      where: { activo: true, stock: { gt: 10 } }
+    const productoExistente = await prisma.product.findFirst({
+      where: { isActive: true, stock: { gt: 10 } }
     });
 
     if (productoExistente) {

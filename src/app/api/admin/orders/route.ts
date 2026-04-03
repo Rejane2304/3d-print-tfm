@@ -30,11 +30,11 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const usuario = await prisma.usuario.findUnique({
+    const usuario = await prisma.user.findUnique({
       where: { email: session.user.email },
     });
 
-    if (!usuario || usuario.rol !== 'ADMIN') {
+    if (!usuario || usuario.role !== 'ADMIN') {
       return NextResponse.json(
         { success: false, error: 'No autorizado' },
         { status: 403 }
@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
     }
 
     const [pedidos, total] = await Promise.all([
-      prisma.pedido.findMany({
+      prisma.order.findMany({
         where,
         include: {
           usuario: {
@@ -72,7 +72,7 @@ export async function GET(req: NextRequest) {
         skip,
         take: limit,
       }),
-      prisma.pedido.count({ where }),
+      prisma.order.count({ where }),
     ]);
 
     return NextResponse.json({ 
@@ -103,11 +103,11 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    const usuario = await prisma.usuario.findUnique({
+    const usuario = await prisma.user.findUnique({
       where: { email: session.user.email },
     });
 
-    if (!usuario || usuario.rol !== 'ADMIN') {
+    if (!usuario || usuario.role !== 'ADMIN') {
       return NextResponse.json(
         { success: false, error: 'No autorizado' },
         { status: 403 }
@@ -139,7 +139,7 @@ export async function PATCH(req: NextRequest) {
       updateData.canceladoEn = new Date();
     }
 
-    const pedido = await prisma.pedido.update({
+    const pedido = await prisma.order.update({
       where: { id },
       data: updateData,
     });

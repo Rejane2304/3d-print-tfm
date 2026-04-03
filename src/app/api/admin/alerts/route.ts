@@ -28,11 +28,11 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const usuario = await prisma.usuario.findUnique({
+    const usuario = await prisma.user.findUnique({
       where: { email: session.user.email },
     });
 
-    if (!usuario || usuario.rol !== 'ADMIN') {
+    if (!usuario || usuario.role !== 'ADMIN') {
       return NextResponse.json(
         { success: false, error: 'No autorizado' },
         { status: 403 }
@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
     }
 
     const [alertas, total, pendientes] = await Promise.all([
-      prisma.alerta.findMany({
+      prisma.alert.findMany({
         where,
         include: {
           producto: {
@@ -87,8 +87,8 @@ export async function GET(req: NextRequest) {
         skip,
         take: limit,
       }),
-      prisma.alerta.count({ where }),
-      prisma.alerta.count({ where: { estado: 'PENDIENTE' } }),
+      prisma.alert.count({ where }),
+      prisma.alert.count({ where: { status: 'PENDING' } }),
     ]);
 
     return NextResponse.json({ 
@@ -120,11 +120,11 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    const usuario = await prisma.usuario.findUnique({
+    const usuario = await prisma.user.findUnique({
       where: { email: session.user.email },
     });
 
-    if (!usuario || usuario.rol !== 'ADMIN') {
+    if (!usuario || usuario.role !== 'ADMIN') {
       return NextResponse.json(
         { success: false, error: 'No autorizado' },
         { status: 403 }
@@ -147,7 +147,7 @@ export async function PATCH(req: NextRequest) {
       }
     }
 
-    const alerta = await prisma.alerta.update({
+    const alerta = await prisma.alert.update({
       where: { id: validatedData.id },
       data: updateData,
       include: {

@@ -21,11 +21,11 @@ export async function GET(req: NextRequest) {
     }
 
     // Verificar rol admin
-    const usuario = await prisma.usuario.findUnique({
+    const usuario = await prisma.user.findUnique({
       where: { email: session.user.email },
     });
 
-    if (!usuario || usuario.rol !== 'ADMIN') {
+    if (!usuario || usuario.role !== 'ADMIN') {
       return NextResponse.json(
         { success: false, error: 'No autorizado' },
         { status: 403 }
@@ -40,17 +40,17 @@ export async function GET(req: NextRequest) {
       pedidosMes,
       ventasMes,
     ] = await Promise.all([
-      prisma.pedido.count(),
-      prisma.producto.count(),
-      prisma.usuario.count({ where: { rol: 'CLIENTE' } }),
-      prisma.pedido.count({
+      prisma.order.count(),
+      prisma.product.count(),
+      prisma.user.count({ where: { role: 'CUSTOMER' } }),
+      prisma.order.count({
         where: {
           createdAt: {
             gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
           },
         },
       }),
-      prisma.pedido.aggregate({
+      prisma.order.aggregate({
         where: {
           estado: { in: ['CONFIRMADO', 'PREPARANDO', 'ENVIADO', 'ENTREGADO'] },
           createdAt: {
