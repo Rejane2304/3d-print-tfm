@@ -22,7 +22,7 @@ export async function middleware(request: NextRequest) {
   });
   
   const isAuthenticated = !!token;
-  const userRole = token?.role as string;
+  const userRole = token?.rol as string;
   
   // ============================================
   // RULE 1: Admin cannot shop

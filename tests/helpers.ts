@@ -249,34 +249,29 @@ export function withTestTransaction<T = any>(
     validateTestDBSync();
 
     let result: T;
-    let error: Error | null = null;
 
     // Run inside a transaction that will rollback
-    await prisma.$transaction(async (tx) => {
-      try {
+    try {
+      await prisma.$transaction(async (tx) => {
         // Execute the test function with the transaction client
         result = await testFn(tx);
         
         // If rollbackOnSuccess is true, throw a special error to force rollback
-        // This is caught by Prisma and causes the transaction to rollback
+        // This error propagates out of the transaction callback, causing Prisma to rollback
         if (rollbackOnSuccess) {
           throw new TestTransactionRollbackError();
         }
-      } catch (err) {
-        if (err instanceof TestTransactionRollbackError) {
-          // Expected - this triggers rollback
-          return;
-        }
-        // Re-throw actual test errors
-        error = err as Error;
+      }, {
+        maxWait: timeout,
+        timeout: timeout,
+      });
+    } catch (err) {
+      if (err instanceof TestTransactionRollbackError) {
+        // Expected - transaction was rolled back, return the result
+        return result!;
       }
-    }, {
-      maxWait: timeout,
-      timeout: timeout,
-    });
-
-    if (error) {
-      throw error;
+      // Re-throw actual test errors
+      throw err;
     }
 
     return result!;

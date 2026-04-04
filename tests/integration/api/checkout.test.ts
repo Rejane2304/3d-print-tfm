@@ -34,18 +34,23 @@ vi.mock('stripe', () => {
         },
       },
       webhooks: {
-        constructEvent: vi.fn().mockReturnValue({
-          type: 'checkout.session.completed',
-          data: {
-            object: {
-              id: 'cs_test_session123',
-              payment_status: 'paid',
-              metadata: {
-                userId: 'test-user-id',
-                cartId: 'test-cart-id',
+        constructEvent: vi.fn().mockImplementation((payload: string, signature: string) => {
+          if (!signature || signature === '') {
+            throw new Error('No signature provided');
+          }
+          return {
+            type: 'checkout.session.completed',
+            data: {
+              object: {
+                id: 'cs_test_session123',
+                payment_status: 'paid',
+                metadata: {
+                  userId: 'test-user-id',
+                  cartId: 'test-cart-id',
+                },
               },
             },
-          },
+          };
         }),
       },
     })),

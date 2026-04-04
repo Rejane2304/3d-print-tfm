@@ -70,9 +70,10 @@ describe('Invoices API', () => {
     });
 
     // Create delivered order
+    const timestamp = Date.now().toString().slice(-6);
     testOrder = await prisma.order.create({
       data: {
-        orderNumber: `P-${Date.now()}`,
+        orderNumber: `P-2024-${timestamp}`,
         userId: customerUser.id,
         status: 'DELIVERED',
         subtotal: 29.99,
@@ -175,7 +176,7 @@ describe('Invoices API', () => {
       const req = new NextRequest('http://localhost:3000/api/admin/invoices', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: 'non-existent-id' }),
+        body: JSON.stringify({ orderId: '00000000-0000-0000-0000-000000000000' }),
       });
 
       const res = await createInvoice(req);
@@ -214,18 +215,37 @@ describe('Invoices API', () => {
         user: { email: adminUser.email, name: adminUser.name },
       });
 
+      // Create a fresh order for this test to avoid cleanup issues
+      const freshOrder = await prisma.order.create({
+        data: {
+          orderNumber: `P-2024-${Date.now().toString().slice(-6)}`,
+          userId: customerUser.id,
+          status: 'DELIVERED',
+          subtotal: 29.99,
+          shipping: 5.99,
+          total: 35.98,
+          shippingName: 'Customer User',
+          shippingPhone: '+34 600 123 456',
+          shippingAddress: 'Calle Test 123',
+          shippingPostalCode: '28001',
+          shippingCity: 'Madrid',
+          shippingProvince: 'Madrid',
+          shippingCountry: 'Spain',
+        },
+      });
+
       // Create first invoice
       await createInvoice(new NextRequest('http://localhost:3000/api/admin/invoices', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: testOrder.id }),
+        body: JSON.stringify({ orderId: freshOrder.id }),
       }));
 
       // Try to create duplicate
       const req = new NextRequest('http://localhost:3000/api/admin/invoices', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: testOrder.id }),
+        body: JSON.stringify({ orderId: freshOrder.id }),
       });
 
       const res = await createInvoice(req);
@@ -239,7 +259,7 @@ describe('Invoices API', () => {
       // Create pending order
       const pendingOrder = await prisma.order.create({
         data: {
-          orderNumber: `P-PENDING-${Date.now()}`,
+          orderNumber: `P-PEND-${Date.now().toString().slice(-8)}`,
           userId: customerUser.id,
           status: 'PENDING',
           subtotal: 29.99,

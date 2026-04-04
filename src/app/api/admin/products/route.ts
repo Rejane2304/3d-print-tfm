@@ -31,7 +31,12 @@ const productSchema = z.object({
 // GET - Listar productos
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
+    let session;
+    try {
+      session = await getServerSession(authOptions);
+    } catch {
+      session = null;
+    }
     if (!session?.user?.email) {
       return NextResponse.json(
         { success: false, error: 'No autenticado' },
@@ -46,7 +51,7 @@ export async function GET() {
     if (!user || user.role !== 'ADMIN') {
       return NextResponse.json(
         { success: false, error: 'No autorizado' },
-        { status: 403 }
+        { status: 401 }
       );
     }
 
@@ -73,7 +78,12 @@ export async function GET() {
 // POST - Crear producto
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    let session;
+    try {
+      session = await getServerSession(authOptions);
+    } catch {
+      session = null;
+    }
     if (!session?.user?.email) {
       return NextResponse.json(
         { success: false, error: 'No autenticado' },
@@ -88,7 +98,7 @@ export async function POST(req: NextRequest) {
     if (!user || user.role !== 'ADMIN') {
       return NextResponse.json(
         { success: false, error: 'No autorizado' },
-        { status: 403 }
+        { status: 401 }
       );
     }
 

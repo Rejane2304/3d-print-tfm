@@ -287,6 +287,16 @@ export function useCart() {
     loadCart();
   }, [loadCart]);
 
+  // Listen for cart updates from other components
+  useEffect(() => {
+    const handleCartUpdate = () => {
+      loadCart();
+    };
+
+    window.addEventListener('cartUpdated', handleCartUpdate);
+    return () => window.removeEventListener('cartUpdated', handleCartUpdate);
+  }, [loadCart]);
+
   return {
     cart,
     loading,

@@ -313,8 +313,23 @@ describe('Cart API', () => {
 
   describe('PATCH /api/cart/[itemId] - Update Quantity', () => {
     let cartItem: { id: string };
+    let patchTestProduct: { id: string };
 
     beforeEach(async () => {
+      // Create a dedicated product for this test
+      patchTestProduct = await prisma.product.create({
+        data: {
+          name: 'Patch Test Product',
+          slug: `cart-test-patch-${Date.now()}`,
+          description: 'Test product for cart patch',
+          price: 29.99,
+          stock: 10,
+          categoryId: testCategory.id,
+          material: 'PLA',
+          isActive: true,
+        },
+      });
+
       // Create cart and item
       const newCart = await prisma.cart.create({
         data: {
@@ -326,10 +341,20 @@ describe('Cart API', () => {
       cartItem = await prisma.cartItem.create({
         data: {
           cartId: newCart.id,
-          productId: testProduct.id,
+          productId: patchTestProduct.id,
           quantity: 1,
           unitPrice: 29.99,
         },
+      });
+    });
+
+    afterEach(async () => {
+      // Clean up cart items first, then the product
+      await prisma.cartItem.deleteMany({
+        where: { product: { slug: { startsWith: 'cart-test-patch-' } } },
+      });
+      await prisma.product.deleteMany({
+        where: { slug: { startsWith: 'cart-test-patch-' } },
       });
     });
 
@@ -399,8 +424,23 @@ describe('Cart API', () => {
 
   describe('DELETE /api/cart/[itemId] - Remove Item', () => {
     let cartItem: { id: string };
+    let deleteTestProduct: { id: string };
 
     beforeEach(async () => {
+      // Create a dedicated product for this test
+      deleteTestProduct = await prisma.product.create({
+        data: {
+          name: 'Delete Test Product',
+          slug: `cart-test-delete-${Date.now()}`,
+          description: 'Test product for cart delete',
+          price: 29.99,
+          stock: 10,
+          categoryId: testCategory.id,
+          material: 'PLA',
+          isActive: true,
+        },
+      });
+
       // Create cart and item
       const newCart = await prisma.cart.create({
         data: {
@@ -412,10 +452,20 @@ describe('Cart API', () => {
       cartItem = await prisma.cartItem.create({
         data: {
           cartId: newCart.id,
-          productId: testProduct.id,
+          productId: deleteTestProduct.id,
           quantity: 1,
           unitPrice: 29.99,
         },
+      });
+    });
+
+    afterEach(async () => {
+      // Clean up cart items first, then the product
+      await prisma.cartItem.deleteMany({
+        where: { product: { slug: { startsWith: 'cart-test-delete-' } } },
+      });
+      await prisma.product.deleteMany({
+        where: { slug: { startsWith: 'cart-test-delete-' } },
       });
     });
 

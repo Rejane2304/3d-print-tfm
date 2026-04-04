@@ -54,6 +54,11 @@ describe('Example: Transaction Safety Demo', () => {
   }));
 
   it('should confirm previous test data was rolled back', withTestTransaction(async (tx) => {
+    // Clean up any residual data from failed runs first
+    await tx.user.deleteMany({
+      where: { email: 'temp@example.com' },
+    });
+
     // Try to find the user from the previous test
     const user = await tx.user.findUnique({
       where: { email: 'temp@example.com' },
@@ -159,6 +164,11 @@ describe('Example: Transaction Safety Demo', () => {
   it('should verify no data leaked from previous tests', async () => {
     // This test uses the global prisma (outside transaction)
     // to verify no test data persisted
+
+    // First clean up any residual data from failed runs
+    await prisma.user.deleteMany({
+      where: { email: { in: ['temp@example.com', 'new@example.com', 'unique@example.com'] } },
+    });
     
     const tempEmails = [
       'temp@example.com',
@@ -177,6 +187,11 @@ describe('Example: Transaction Safety Demo', () => {
 });
 
 describe('Example: Best Practices', () => {
+  // Reset database before tests in this describe block
+  beforeAll(async () => {
+    await resetTestDatabase();
+  });
+
   it('DEMO: Always use tx inside withTestTransaction', withTestTransaction(async (tx) => {
     // ✅ CORRECT: Use the transaction client
     const user = await tx.user.findFirst({});

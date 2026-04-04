@@ -11,7 +11,7 @@ import { ShoppingCart } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 
 export default function CartIcon() {
-  const { cart, loading } = useCart();
+  const { cart } = useCart();
   const itemCount = cart?.totalItems || 0;
 
   return (
@@ -24,9 +24,9 @@ export default function CartIcon() {
       <ShoppingCart className="h-5 w-5" />
       <span className="text-sm font-medium hidden lg:inline">Carrito</span>
 
-      {!loading && itemCount > 0 && (
-        <span data-testid="cart-count" className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-          {itemCount > 9 ? '9+' : itemCount}
+      {itemCount > 0 && (
+        <span data-testid="cart-count" className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-in fade-in zoom-in duration-200">
+          {itemCount > 99 ? '99+' : itemCount}
         </span>
       )}
     </Link>
