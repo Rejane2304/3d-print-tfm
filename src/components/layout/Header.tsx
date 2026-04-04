@@ -23,7 +23,9 @@ import {
   ShoppingBag,
   ChevronDown,
   ClipboardList,
-  Settings
+  Settings,
+  MapPin,
+  ShoppingCart
 } from 'lucide-react';
 import CartIcon from '@/components/cart/CartIcon';
 
@@ -164,27 +166,45 @@ export default function Header() {
                       </p>
                     </div>
 
-                    {/* Menu items */}
-                    <div className="py-1">
-                      <Link
-                        href="/account"
-                        onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
-                        role="menuitem"
-                      >
-                        <Settings className="h-4 w-4" />
-                        Mi Perfil
-                      </Link>
-                      <Link
-                        href="/account/orders"
-                        onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
-                        role="menuitem"
-                      >
-                        <ClipboardList className="h-4 w-4" />
-                        Mis Pedidos
-                      </Link>
-                    </div>
+                     {/* Menu items */}
+                     <div className="py-1">
+                       <Link
+                         href="/account"
+                         onClick={() => setUserMenuOpen(false)}
+                         className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                         role="menuitem"
+                       >
+                         <Settings className="h-4 w-4" />
+                         Mi Perfil
+                       </Link>
+                       <Link
+                         href="/account/orders"
+                         onClick={() => setUserMenuOpen(false)}
+                         className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                         role="menuitem"
+                       >
+                         <ClipboardList className="h-4 w-4" />
+                         Mis Pedidos
+                       </Link>
+                       <Link
+                         href="/account/addresses"
+                         onClick={() => setUserMenuOpen(false)}
+                         className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                         role="menuitem"
+                       >
+                         <MapPin className="h-4 w-4" />
+                         Mis Direcciones
+                       </Link>
+                       <Link
+                         href="/cart"
+                         onClick={() => setUserMenuOpen(false)}
+                         className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors md:hidden"
+                         role="menuitem"
+                       >
+                         <ShoppingCart className="h-4 w-4" />
+                         Mi Carrito
+                       </Link>
+                     </div>
 
                     {/* Divider */}
                     <div className="border-t border-gray-100 my-1"></div>
@@ -300,6 +320,22 @@ export default function Header() {
                 >
                   <ClipboardList className="h-5 w-5" />
                   <span className="font-medium">Mis Pedidos</span>
+                </Link>
+                <Link
+                  href="/account/addresses"
+                  className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <MapPin className="h-5 w-5" />
+                  <span className="font-medium">Mis Direcciones</span>
+                </Link>
+                <Link
+                  href="/cart"
+                  className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <ShoppingCart className="h-5 w-5" />
+                  <span className="font-medium">Mi Carrito</span>
                 </Link>
               </>
             )}
