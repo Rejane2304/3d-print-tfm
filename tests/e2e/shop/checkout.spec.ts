@@ -1,144 +1,144 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Tests E2E - Checkout y Pago
- * Flujo completo de compra (crítico para el negocio)
+ * E2E Tests - Checkout and Payment
+ * Complete purchase flow (critical for business)
  */
 
-test.describe('Checkout y Pago', () => {
+test.describe('Checkout and Payment', () => {
   
   test.beforeEach(async ({ page }) => {
-    // Setup: Agregar producto al carrito y loguearse
+    // Setup: Add product to cart and log in
     await page.goto('/products');
     
-    // Agregar producto al carrito
+    // Add product to cart
     const addToCartButton = page.locator('[data-testid="add-to-cart-button"]').first();
     await addToCartButton.click();
     await page.waitForTimeout(500);
     
-    // Login si es necesario
+    // Login if necessary
     await page.goto('/auth');
     const emailInput = page.locator('input[type="email"]').first();
     if (await emailInput.isVisible().catch(() => false)) {
-      await emailInput.fill('cliente@test.com');
+      await emailInput.fill('customer@test.com');
       await page.locator('input[type="password"]').fill('test123');
       await page.locator('button[type="submit"]').click();
       await page.waitForTimeout(1000);
     }
   });
 
-  test('debe acceder a la página de checkout', async ({ page }) => {
+  test('should access checkout page', async ({ page }) => {
     await page.goto('/checkout');
     
-    // Verificar que se muestra el formulario de checkout
+    // Verify checkout form is displayed
     await expect(page.locator('h1')).toContainText('Checkout');
     await expect(page.locator('[data-testid="checkout-form"]')).toBeVisible();
   });
 
-  test('debe completar formulario de envío', async ({ page }) => {
+  test('should complete shipping form', async ({ page }) => {
     await page.goto('/checkout');
     
-    // Llenar información de envío
-    await page.fill('[data-testid="shipping-name"]', 'Juan Pérez');
-    await page.fill('[data-testid="shipping-address"]', 'Calle Principal 123');
+    // Fill shipping information
+    await page.fill('[data-testid="shipping-name"]', 'John Smith');
+    await page.fill('[data-testid="shipping-address"]', 'Main Street 123');
     await page.fill('[data-testid="shipping-city"]', 'Madrid');
     await page.fill('[data-testid="shipping-postal-code"]', '28001');
     await page.fill('[data-testid="shipping-phone"]', '+34 600 123 456');
     
-    // Verificar que el botón de pago está habilitado
+    // Verify payment button is enabled
     const payButton = page.locator('[data-testid="proceed-to-payment"]');
     await expect(payButton).toBeVisible();
   });
 
-  test('debe validar campos requeridos del formulario', async ({ page }) => {
+  test('should validate required form fields', async ({ page }) => {
     await page.goto('/checkout');
     
-    // Intentar continuar sin llenar campos
+    // Try to continue without filling fields
     const submitButton = page.locator('[data-testid="proceed-to-payment"]');
     await submitButton.click();
     
-    // Verificar mensajes de error
+    // Verify error messages
     await expect(page.locator('[data-testid="error-name"]')).toBeVisible();
     await expect(page.locator('[data-testid="error-address"]')).toBeVisible();
   });
 
-  test('debe mostrar resumen del pedido', async ({ page }) => {
+  test('should display order summary', async ({ page }) => {
     await page.goto('/checkout');
     
-    // Verificar que se muestra el resumen
+    // Verify summary is displayed
     const orderSummary = page.locator('[data-testid="order-summary"]');
     await expect(orderSummary).toBeVisible();
     
-    // Verificar que hay items en el resumen
+    // Verify there are items in summary
     const summaryItems = orderSummary.locator('[data-testid="summary-item"]');
     expect(await summaryItems.count()).toBeGreaterThan(0);
     
-    // Verificar totales
+    // Verify totals
     await expect(orderSummary.locator('[data-testid="subtotal"]')).toBeVisible();
     await expect(orderSummary.locator('[data-testid="shipping"]')).toBeVisible();
     await expect(orderSummary.locator('[data-testid="total"]')).toBeVisible();
   });
 
-  test('debe redirigir a Stripe para pago', async ({ page }) => {
+  test('should redirect to Stripe for payment', async ({ page }) => {
     await page.goto('/checkout');
     
-    // Llenar información de envío
-    await page.fill('[data-testid="shipping-name"]', 'Juan Pérez');
-    await page.fill('[data-testid="shipping-address"]', 'Calle Principal 123');
+    // Fill shipping information
+    await page.fill('[data-testid="shipping-name"]', 'John Smith');
+    await page.fill('[data-testid="shipping-address"]', 'Main Street 123');
     await page.fill('[data-testid="shipping-city"]', 'Madrid');
     await page.fill('[data-testid="shipping-postal-code"]', '28001');
     await page.fill('[data-testid="shipping-phone"]', '+34 600 123 456');
     
-    // Proceder al pago
+    // Proceed to payment
     await page.click('[data-testid="proceed-to-payment"]');
     
-    // Esperar redirección a Stripe (o a página intermedia)
+    // Wait for redirect to Stripe (or intermediate page)
     await page.waitForTimeout(2000);
     
-    // Verificar que se redirigió (URL cambió)
+    // Verify redirected (URL changed)
     const currentUrl = page.url();
     expect(currentUrl).not.toContain('/checkout');
     
-    // Nota: En modo test, Stripe redirige a URL de éxito configurada
+    // Note: In test mode, Stripe redirects to configured success URL
   });
 
-  test('debe mostrar página de éxito después del pago', async ({ page }) => {
-    // Ir directamente a página de éxito (simulando retorno de Stripe)
+  test('should display success page after payment', async ({ page }) => {
+    // Go directly to success page (simulating return from Stripe)
     await page.goto('/checkout/success?session_id=test_session_123');
     
-    // Verificar mensaje de éxito
-    await expect(page.locator('h1')).toContainText('¡Gracias por tu compra!');
+    // Verify success message
+    await expect(page.locator('h1')).toContainText('Thank you for your purchase!');
     await expect(page.locator('[data-testid="success-message"]')).toBeVisible();
     
-    // Verificar número de pedido
+    // Verify order number
     await expect(page.locator('[data-testid="order-number"]')).toBeVisible();
   });
 
-  test('debe permitir volver a la tienda después de comprar', async ({ page }) => {
+  test('should allow returning to store after purchase', async ({ page }) => {
     await page.goto('/checkout/success');
     
-    // Click en botón de volver a la tienda
+    // Click return to store button
     const continueButton = page.locator('[data-testid="continue-shopping"]');
     
     if (await continueButton.isVisible().catch(() => false)) {
       await continueButton.click();
-      await expect(page).toHaveURL('/productos');
+      await expect(page).toHaveURL('/products');
     }
   });
 
-  test('debe mostrar historial de pedidos en cuenta', async ({ page }) => {
-    // Ir a la página de pedidos del usuario
+  test('should display order history in account', async ({ page }) => {
+    // Go to user orders page
     await page.goto('/account/orders');
     
-    // Verificar que hay pedidos listados
+    // Verify there are orders listed
     const orders = page.locator('[data-testid="order-item"]');
     
-    // Puede haber 0 o más pedidos
+    // May have 0 or more orders
     const count = await orders.count();
     expect(count).toBeGreaterThanOrEqual(0);
     
     if (count > 0) {
-      // Verificar información del primer pedido
+      // Verify information of first order
       const firstOrder = orders.first();
       await expect(firstOrder.locator('[data-testid="order-number"]')).toBeVisible();
       await expect(firstOrder.locator('[data-testid="order-status"]')).toBeVisible();
@@ -146,30 +146,30 @@ test.describe('Checkout y Pago', () => {
     }
   });
 
-  test('debe calcular costos de envío correctamente', async ({ page }) => {
+  test('should calculate shipping costs correctly', async ({ page }) => {
     await page.goto('/checkout');
     
-    // Verificar que se muestra el costo de envío
+    // Verify shipping cost is displayed
     const shippingCost = page.locator('[data-testid="shipping-cost"]');
     
     if (await shippingCost.isVisible().catch(() => false)) {
       const cost = await shippingCost.textContent();
-      // Verificar que es un valor numérico válido
+      // Verify it's a valid numeric value
       expect(cost).toMatch(/\d+[,.]?\d*/);
     }
   });
 
-  test('debe aplicar envío gratis en pedidos grandes', async ({ page }) => {
-    // Este test asume que hay una política de envío gratis
-    // Por ejemplo: pedidos mayores a X€ tienen envío gratis
+  test('should apply free shipping on large orders', async ({ page }) => {
+    // This test assumes there is a free shipping policy
+    // For example: orders over X€ have free shipping
     
     await page.goto('/checkout');
     
-    // Verificar el total del pedido
+    // Verify order total
     const subtotalText = await page.locator('[data-testid="subtotal-amount"]').textContent().catch(() => '0');
     const subtotalValue = subtotalText ? parseFloat(subtotalText.replace(/[^0-9,.]/g, '').replace(',', '.')) : 0;
     
-    // Si el subtotal es mayor a 50€ (ejemplo), verificar envío gratis
+    // If subtotal is greater than €50 (example), verify free shipping
     if (subtotalValue > 50) {
       const freeShipping = page.locator('[data-testid="free-shipping-badge"]');
       await expect(freeShipping).toBeVisible();

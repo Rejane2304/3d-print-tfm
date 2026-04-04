@@ -312,24 +312,25 @@ export type CancelOrderInput = z.infer<typeof cancelOrderSchema>;
 export type InventoryMovementInput = z.infer<typeof inventoryMovementSchema>;
 export type ProductImageInput = z.infer<typeof productImageSchema>;
 
-// Legacy aliases for backward compatibility
+// Legacy aliases for backward compatibility (deprecated - will be removed in future versions)
 export const registroSchema = registerSchema;
 export const usuarioSchema = userSchema;
 export const direccionSchema = addressSchema;
 export const productoSchema = productSchema;
 export const crearPedidoSchema = createOrderSchema;
-export const updateOrderStatusSchema = updateOrderStatusSchema;
+export const actualizarEstadoPedidoSchema = updateOrderStatusSchema;
 export const cancelarPedidoSchema = cancelOrderSchema;
 export const movimientoInventarioSchema = inventoryMovementSchema;
 export const imagenProductoSchema = productImageSchema;
 export const configuracionEnvioSchema = shippingConfigSchema;
 
+// Spanish type aliases (deprecated - will be removed in future versions)
 export type RegistroInput = RegisterInput;
 export type UsuarioInput = UserInput;
 export type DireccionInput = AddressInput;
 export type ProductoInput = ProductInput;
 export type CrearPedidoInput = CreateOrderInput;
-export type UpdateOrderStatusInput = UpdateOrderStatusInput;
+export type ActualizarEstadoPedidoInput = UpdateOrderStatusInput;
 export type CancelarPedidoInput = CancelOrderInput;
 export type MovimientoInventarioInput = InventoryMovementInput;
 export type ImagenProductoInput = ProductImageInput;

@@ -53,7 +53,7 @@ const tipoIconos: Record<string, React.ElementType> = {
   ERROR_SISTEMA: AlertCircle,
 };
 
-const severidadColores: Record<string, string> = {
+const severityColors: Record<string, string> = {
   BAJA: 'bg-blue-100 text-blue-800 border-blue-200',
   MEDIA: 'bg-yellow-100 text-yellow-800 border-yellow-200',
   ALTA: 'bg-orange-100 text-orange-800 border-orange-200',
@@ -305,7 +305,7 @@ export default function AdminAlertasPage() {
                 <div 
                   key={alerta.id} 
                   className={`bg-white rounded-lg shadow-sm border-2 p-6 ${
-                    alerta.estado === 'PENDIENTE' ? severidadColores[alerta.severidad] || 'border-gray-200' : 'border-gray-200'
+                    alerta.estado === 'PENDIENTE' ? severityColors[alerta.severidad] || 'border-gray-200' : 'border-gray-200'
                   }`}
                 >
                   <div className="flex items-start justify-between">

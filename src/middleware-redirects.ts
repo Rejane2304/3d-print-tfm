@@ -1,6 +1,6 @@
 /**
- * Middleware para redirigir /login y /register a /auth
- * Mantiene compatibilidad con URLs antiguas
+ * Middleware to redirect /login and /register to /auth
+ * Maintains compatibility with legacy URLs
  */
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
@@ -20,7 +20,7 @@ export function middleware(request: NextRequest) {
     if (search) {
       url.search = search;
     }
-    // Añadir parámetro para abrir tab de registro
+    // Add parameter to open register tab
     url.searchParams.set('tab', 'register');
     return NextResponse.redirect(url);
   }

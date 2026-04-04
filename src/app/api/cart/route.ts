@@ -12,9 +12,9 @@ import { withErrorHandler } from '@/lib/errors/api-wrapper';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 
-// GET /api/cart - Ver carrito del usuario
+// GET /api/cart - Get user's cart
 export const GET = withErrorHandler(async (req: NextRequest) => {
-  // Verificar autenticación
+  // Verify authentication
   const session = await getServerSession(authOptions);
   
   if (!session?.user?.email) {
@@ -54,7 +54,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     );
   }
 
-  // Si no tiene carrito, devolver estructura vacía
+  // If no cart, return empty structure
   if (!user.cart) {
     return NextResponse.json({
       success: true,
@@ -99,7 +99,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   });
 });
 
-// POST /api/cart - Añadir producto al carrito
+// POST /api/cart - Add product to cart
 export const POST = withErrorHandler(async (req: NextRequest) => {
   // Verificar autenticación
   const session = await getServerSession(authOptions);
@@ -178,7 +178,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     },
   });
 
-  // Verificar si el producto ya está en el carrito
+  // Check if product is already in cart
   const existingItem = await prisma.cartItem.findFirst({
     where: {
       cartId: cart.id,

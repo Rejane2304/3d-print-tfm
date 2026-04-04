@@ -1,412 +1,412 @@
 /**
- * Tests de validaciones Zod
- * TDD: Tests primero, implementación después
- * Validaciones para el backend - 100% en español
+ * Zod Validation Tests
+ * TDD: Tests first, implementation after
+ * Validations for the backend - 100% in English
  */
 import { describe, it, expect } from 'vitest';
 
 // ============================================
-// VALIDACIONES DE AUTENTICACIÓN
+// AUTHENTICATION VALIDATIONS
 // ============================================
 
-describe('Validaciones de Autenticación', () => {
+describe('Authentication Validations', () => {
   describe('Login', () => {
-    it('debe validar email requerido', () => {
-      const result = validarLogin({ email: '', password: 'password123' });
-      expect(result.valido).toBe(false);
-      expect(result.errores).toContain('El email es requerido');
+    it('should validate required email', () => {
+      const result = validateLogin({ email: '', password: 'password123' });
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain('Email is required');
     });
 
-    it('debe validar formato de email', () => {
-      const result = validarLogin({ email: 'email-invalido', password: 'password123' });
-      expect(result.valido).toBe(false);
-      expect(result.errores).toContain('El formato del email no es válido');
+    it('should validate email format', () => {
+      const result = validateLogin({ email: 'invalid-email', password: 'password123' });
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain('Invalid email format');
     });
 
-    it('debe validar contraseña requerida', () => {
-      const result = validarLogin({ email: 'test@example.com', password: '' });
-      expect(result.valido).toBe(false);
-      expect(result.errores).toContain('La contraseña es requerida');
+    it('should validate required password', () => {
+      const result = validateLogin({ email: 'test@example.com', password: '' });
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain('Password is required');
     });
 
-    it('debe validar longitud mínima de contraseña', () => {
-      const result = validarLogin({ email: 'test@example.com', password: '123' });
-      expect(result.valido).toBe(false);
-      expect(result.errores).toContain('La contraseña debe tener al menos 8 caracteres');
+    it('should validate minimum password length', () => {
+      const result = validateLogin({ email: 'test@example.com', password: '123' });
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain('Password must be at least 8 characters long');
     });
 
-    it('debe aceptar credenciales válidas', () => {
-      const result = validarLogin({ email: 'test@example.com', password: 'Password123!' });
-      expect(result.valido).toBe(true);
-      expect(result.errores).toHaveLength(0);
+    it('should accept valid credentials', () => {
+      const result = validateLogin({ email: 'test@example.com', password: 'Password123!' });
+      expect(result.valid).toBe(true);
+      expect(result.errors).toHaveLength(0);
     });
   });
 
-  describe('Registro', () => {
-    const datosValidos = {
-      email: 'nuevo@example.com',
+  describe('Registration', () => {
+    const validData = {
+      email: 'new@example.com',
       password: 'Password123!',
-      confirmarPassword: 'Password123!',
-      nombre: 'Juan Pérez',
-      telefono: '+34 600 123 456',
+      confirmPassword: 'Password123!',
+      name: 'John Doe',
+      phone: '+34 600 123 456',
     };
 
-    it('debe validar nombre requerido', () => {
-      const result = validarRegistro({ ...datosValidos, nombre: '' });
-      expect(result.valido).toBe(false);
-      expect(result.errores).toContain('El nombre es requerido');
+    it('should validate required name', () => {
+      const result = validateRegistration({ ...validData, name: '' });
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain('Name is required');
     });
 
-    it('debe validar longitud del nombre', () => {
-      const result = validarRegistro({ ...datosValidos, nombre: 'Jo' });
-      expect(result.valido).toBe(false);
-      expect(result.errores).toContain('El nombre debe tener al menos 3 caracteres');
+    it('should validate name length', () => {
+      const result = validateRegistration({ ...validData, name: 'Jo' });
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain('Name must be at least 3 characters long');
     });
 
-    it('debe validar coincidencia de contraseñas', () => {
-      const result = validarRegistro({
-        ...datosValidos,
-        confirmarPassword: 'OtraPassword123!',
+    it('should validate password matching', () => {
+      const result = validateRegistration({
+        ...validData,
+        confirmPassword: 'AnotherPassword123!',
       });
-      expect(result.valido).toBe(false);
-      expect(result.errores).toContain('Las contraseñas no coinciden');
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain('Passwords do not match');
     });
 
-    it('debe validar formato de teléfono español', () => {
-      const result = validarRegistro({ ...datosValidos, telefono: '123' });
-      expect(result.valido).toBe(false);
-      expect(result.errores).toContain('El teléfono no tiene un formato válido');
+    it('should validate Spanish phone format', () => {
+      const result = validateRegistration({ ...validData, phone: '123' });
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain('Invalid phone format');
     });
 
-    it('debe aceptar registro válido', () => {
-      const result = validarRegistro(datosValidos);
-      expect(result.valido).toBe(true);
-      expect(result.errores).toHaveLength(0);
+    it('should accept valid registration', () => {
+      const result = validateRegistration(validData);
+      expect(result.valid).toBe(true);
+      expect(result.errors).toHaveLength(0);
     });
   });
 });
 
 // ============================================
-// VALIDACIONES DE PRODUCTOS
+// PRODUCT VALIDATIONS
 // ============================================
 
-describe('Validaciones de Productos', () => {
-  const productoValido = {
-    nombre: 'Vaso Decorativo Floral',
-    descripcion: 'Un hermoso vaso con diseño floral para decoración del hogar',
-    precio: 12.99,
+describe('Product Validations', () => {
+  const validProduct = {
+    name: 'Floral Decorative Vase',
+    description: 'A beautiful vase with floral design for home decoration',
+    price: 12.99,
     stock: 25,
-    categoria: 'DECORATION',
+    category: 'DECORATION',
     material: 'PLA',
   };
 
-  it('debe validar nombre requerido', () => {
-    const result = validarProducto({ ...productoValido, nombre: '' });
-    expect(result.valido).toBe(false);
-    expect(result.errores).toContain('El nombre del producto es requerido');
+  it('should validate required name', () => {
+    const result = validateProduct({ ...validProduct, name: '' });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain('Product name is required');
   });
 
-  it('debe validar longitud máxima del nombre', () => {
-    const result = validarProducto({
-      ...productoValido,
-      nombre: 'a'.repeat(201),
+  it('should validate maximum name length', () => {
+    const result = validateProduct({
+      ...validProduct,
+      name: 'a'.repeat(201),
     });
-    expect(result.valido).toBe(false);
-    expect(result.errores).toContain('El nombre no puede exceder los 200 caracteres');
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain('Name cannot exceed 200 characters');
   });
 
-  it('debe validar descripción requerida', () => {
-    const result = validarProducto({ ...productoValido, descripcion: '' });
-    expect(result.valido).toBe(false);
-    expect(result.errores).toContain('La descripción es requerida');
+  it('should validate required description', () => {
+    const result = validateProduct({ ...validProduct, description: '' });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain('Description is required');
   });
 
-  it('debe validar precio positivo', () => {
-    const result = validarProducto({ ...productoValido, precio: -5 });
-    expect(result.valido).toBe(false);
-    expect(result.errores).toContain('El precio debe ser mayor a 0');
+  it('should validate positive price', () => {
+    const result = validateProduct({ ...validProduct, price: -5 });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain('Price must be greater than 0');
   });
 
-  it('debe validar precio máximo', () => {
-    const result = validarProducto({ ...productoValido, precio: 100000 });
-    expect(result.valido).toBe(false);
-    expect(result.errores).toContain('El precio máximo permitido es 99999.99');
+  it('should validate maximum price', () => {
+    const result = validateProduct({ ...validProduct, price: 100000 });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain('Maximum allowed price is 99999.99');
   });
 
-  it('debe validar stock no negativo', () => {
-    const result = validarProducto({ ...productoValido, stock: -1 });
-    expect(result.valido).toBe(false);
-    expect(result.errores).toContain('El stock no puede ser negativo');
+  it('should validate non-negative stock', () => {
+    const result = validateProduct({ ...validProduct, stock: -1 });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain('Stock cannot be negative');
   });
 
-  it('debe validar categoría válida', () => {
-    const result = validarProducto({ ...productoValido, categoria: 'INVALIDA' });
-    expect(result.valido).toBe(false);
-    expect(result.errores).toContain('Categoría no válida');
+  it('should validate valid category', () => {
+    const result = validateProduct({ ...validProduct, category: 'INVALID' });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain('Invalid category');
   });
 
-  it('debe validar material válido', () => {
-    const result = validarProducto({ ...productoValido, material: 'INVALIDO' });
-    expect(result.valido).toBe(false);
-    expect(result.errores).toContain('Material no válido');
+  it('should validate valid material', () => {
+    const result = validateProduct({ ...validProduct, material: 'INVALID' });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain('Invalid material');
   });
 
-  it('debe aceptar producto válido', () => {
-    const result = validarProducto(productoValido);
-    expect(result.valido).toBe(true);
-    expect(result.errores).toHaveLength(0);
+  it('should accept valid product', () => {
+    const result = validateProduct(validProduct);
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
   });
 });
 
 // ============================================
-// VALIDACIONES DE PEDIDOS
+// ORDER VALIDATIONS
 // ============================================
 
-describe('Validaciones de Pedidos', () => {
-  const pedidoValido = {
+describe('Order Validations', () => {
+  const validOrder = {
     items: [
-      { productoId: 'PROD-001', cantidad: 2 },
-      { productoId: 'PROD-002', cantidad: 1 },
+      { productId: 'PROD-001', quantity: 2 },
+      { productId: 'PROD-002', quantity: 1 },
     ],
-    direccionEnvioId: 'DIR-001',
-    notas: 'Entregar por la mañana',
+    shippingAddressId: 'ADDR-001',
+    notes: 'Deliver in the morning',
   };
 
-  it('debe validar items requeridos', () => {
-    const result = validarPedido({ ...pedidoValido, items: [] });
-    expect(result.valido).toBe(false);
-    expect(result.errores).toContain('El pedido debe contener al menos un producto');
+  it('should validate required items', () => {
+    const result = validateOrder({ ...validOrder, items: [] });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain('Order must contain at least one product');
   });
 
-  it('debe validar cantidad mínima de items', () => {
-    const result = validarPedido({
-      ...pedidoValido,
-      items: [{ productoId: 'PROD-001', cantidad: 0 }],
+  it('should validate minimum item quantity', () => {
+    const result = validateOrder({
+      ...validOrder,
+      items: [{ productId: 'PROD-001', quantity: 0 }],
     });
-    expect(result.valido).toBe(false);
-    expect(result.errores).toContain('La cantidad debe ser mayor a 0');
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain('Quantity must be greater than 0');
   });
 
-  it('debe validar cantidad máxima por item', () => {
-    const result = validarPedido({
-      ...pedidoValido,
-      items: [{ productoId: 'PROD-001', cantidad: 1000 }],
+  it('should validate maximum item quantity', () => {
+    const result = validateOrder({
+      ...validOrder,
+      items: [{ productId: 'PROD-001', quantity: 1000 }],
     });
-    expect(result.valido).toBe(false);
-    expect(result.errores).toContain('La cantidad máxima por producto es 100 unidades');
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain('Maximum quantity per product is 100 units');
   });
 
-  it('debe validar dirección de envío requerida', () => {
-    const result = validarPedido({ ...pedidoValido, direccionEnvioId: '' });
-    expect(result.valido).toBe(false);
-    expect(result.errores).toContain('La dirección de envío es requerida');
+  it('should validate required shipping address', () => {
+    const result = validateOrder({ ...validOrder, shippingAddressId: '' });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain('Shipping address is required');
   });
 
-  it('debe validar longitud máxima de notas', () => {
-    const result = validarPedido({
-      ...pedidoValido,
-      notas: 'a'.repeat(1001),
+  it('should validate maximum notes length', () => {
+    const result = validateOrder({
+      ...validOrder,
+      notes: 'a'.repeat(1001),
     });
-    expect(result.valido).toBe(false);
-    expect(result.errores).toContain('Las notas no pueden exceder los 1000 caracteres');
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain('Notes cannot exceed 1000 characters');
   });
 
-  it('debe aceptar pedido válido', () => {
-    const result = validarPedido(pedidoValido);
-    expect(result.valido).toBe(true);
-    expect(result.errores).toHaveLength(0);
+  it('should accept valid order', () => {
+    const result = validateOrder(validOrder);
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
   });
 });
 
 // ============================================
-// VALIDACIONES DE CAMBIO DE ESTADO
+// STATUS CHANGE VALIDATIONS
 // ============================================
 
-describe('Validaciones de Cambio de Estado', () => {
-  it('debe permitir cambiar de PENDIENTE a CONFIRMADO', () => {
-    const result = validarCambioEstado('PENDING', 'CONFIRMED');
-    expect(result.valido).toBe(true);
+describe('Status Change Validations', () => {
+  it('should allow changing from PENDING to CONFIRMED', () => {
+    const result = validateStatusChange('PENDING', 'CONFIRMED');
+    expect(result.valid).toBe(true);
   });
 
-  it('debe permitir cambiar de CONFIRMADO a PREPARANDO', () => {
-    const result = validarCambioEstado('CONFIRMED', 'PREPARING');
-    expect(result.valido).toBe(true);
+  it('should allow changing from CONFIRMED to PREPARING', () => {
+    const result = validateStatusChange('CONFIRMED', 'PREPARING');
+    expect(result.valid).toBe(true);
   });
 
-  it('debe permitir cancelar pedido en PENDIENTE', () => {
-    const result = validarCambioEstado('PENDING', 'CANCELLED');
-    expect(result.valido).toBe(true);
+  it('should allow canceling order in PENDING', () => {
+    const result = validateStatusChange('PENDING', 'CANCELLED');
+    expect(result.valid).toBe(true);
   });
 
-  it('debe permitir cancelar pedido en CONFIRMADO', () => {
-    const result = validarCambioEstado('CONFIRMED', 'CANCELLED');
-    expect(result.valido).toBe(true);
+  it('should allow canceling order in CONFIRMED', () => {
+    const result = validateStatusChange('CONFIRMED', 'CANCELLED');
+    expect(result.valid).toBe(true);
   });
 
-  it('debe rechazar cancelar pedido ENTREGADO', () => {
-    const result = validarCambioEstado('DELIVERED', 'CANCELLED');
-    expect(result.valido).toBe(false);
-    expect(result.error).toBe('No se puede cancelar un pedido ya enviado o entregado');
+  it('should reject canceling DELIVERED order', () => {
+    const result = validateStatusChange('DELIVERED', 'CANCELLED');
+    expect(result.valid).toBe(false);
+    expect(result.error).toBe('Cannot cancel an order that has already been shipped or delivered');
   });
 
-  it('debe rechazar retroceder estado', () => {
-    const result = validarCambioEstado('SHIPPED', 'CONFIRMED');
-    expect(result.valido).toBe(false);
-    expect(result.error).toBe('No se puede retroceder el estado del pedido');
+  it('should reject reverting status', () => {
+    const result = validateStatusChange('SHIPPED', 'CONFIRMED');
+    expect(result.valid).toBe(false);
+    expect(result.error).toBe('Cannot revert order status');
   });
 
-  it('debe rechazar cambio al mismo estado', () => {
-    const result = validarCambioEstado('PENDING', 'PENDING');
-    expect(result.valido).toBe(false);
-    expect(result.error).toBe('El nuevo estado debe ser diferente al actual');
+  it('should reject change to same status', () => {
+    const result = validateStatusChange('PENDING', 'PENDING');
+    expect(result.valid).toBe(false);
+    expect(result.error).toBe('New status must be different from current status');
   });
 });
 
 // ============================================
-// VALIDACIONES DE PAGOS
+// PAYMENT VALIDATIONS
 // ============================================
 
-describe('Validaciones de Pagos', () => {
-  it('debe validar monto positivo', () => {
-    const result = validarPago({ monto: 0, metodo: 'CARD' });
-    expect(result.valido).toBe(false);
-    expect(result.errores).toContain('El monto debe ser mayor a 0');
+describe('Payment Validations', () => {
+  it('should validate positive amount', () => {
+    const result = validatePayment({ amount: 0, method: 'CARD' });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain('Amount must be greater than 0');
   });
 
-  it('debe validar método de pago válido', () => {
-    const result = validarPago({ monto: 100, metodo: 'INVALIDO' });
-    expect(result.valido).toBe(false);
-    expect(result.errores).toContain('Método de pago no válido');
+  it('should validate valid payment method', () => {
+    const result = validatePayment({ amount: 100, method: 'INVALID' });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain('Invalid payment method');
   });
 
-  it('debe aceptar pago válido', () => {
-    const result = validarPago({ monto: 99.99, metodo: 'CARD' });
-    expect(result.valido).toBe(true);
-    expect(result.errores).toHaveLength(0);
+  it('should accept valid payment', () => {
+    const result = validatePayment({ amount: 99.99, method: 'CARD' });
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
   });
 });
 
 // ============================================
-// VALIDACIONES DE USUARIOS
+// USER VALIDATIONS
 // ============================================
 
-describe('Validaciones de Usuarios', () => {
-  const usuarioValido = {
-    nombre: 'Juan Pérez',
-    email: 'juan@example.com',
-    telefono: '+34 600 123 456',
+describe('User Validations', () => {
+  const validUser = {
+    name: 'John Doe',
+    email: 'john@example.com',
+    phone: '+34 600 123 456',
     nif: '12345678A',
   };
 
-  it('debe validar NIF español', () => {
-    const result = validarUsuario({ ...usuarioValido, nif: 'INVALIDO' });
-    expect(result.valido).toBe(false);
-    expect(result.errores).toContain('El NIF no tiene un formato válido');
+  it('should validate Spanish NIF', () => {
+    const result = validateUser({ ...validUser, nif: 'INVALID' });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain('Invalid NIF format');
   });
 
-  it('debe aceptar usuario válido', () => {
-    const result = validarUsuario(usuarioValido);
-    expect(result.valido).toBe(true);
+  it('should accept valid user', () => {
+    const result = validateUser(validUser);
+    expect(result.valid).toBe(true);
   });
 });
 
 // ============================================
-// STUBS - Implementación temporal
+// STUBS - Temporary implementation
 // ============================================
 
-function validarLogin(datos: { email: string; password: string }) {
-  const errores: string[] = [];
+function validateLogin(data: { email: string; password: string }) {
+  const errors: string[] = [];
   
-  if (!datos.email) errores.push('El email es requerido');
-  else if (!datos.email.includes('@')) errores.push('El formato del email no es válido');
+  if (!data.email) errors.push('Email is required');
+  else if (!data.email.includes('@')) errors.push('Invalid email format');
   
-  if (!datos.password) errores.push('La contraseña es requerida');
-  else if (datos.password.length < 8) errores.push('La contraseña debe tener al menos 8 caracteres');
+  if (!data.password) errors.push('Password is required');
+  else if (data.password.length < 8) errors.push('Password must be at least 8 characters long');
   
-  return { valido: errores.length === 0, errores };
+  return { valid: errors.length === 0, errors };
 }
 
-function validarRegistro(datos: {
+function validateRegistration(data: {
   email: string;
   password: string;
-  confirmarPassword: string;
-  nombre: string;
-  telefono: string;
+  confirmPassword: string;
+  name: string;
+  phone: string;
 }) {
-  const errores: string[] = [];
+  const errors: string[] = [];
   
-  if (!datos.nombre) errores.push('El nombre es requerido');
-  else if (datos.nombre.length < 3) errores.push('El nombre debe tener al menos 3 caracteres');
+  if (!data.name) errors.push('Name is required');
+  else if (data.name.length < 3) errors.push('Name must be at least 3 characters long');
   
-  if (datos.password !== datos.confirmarPassword) errores.push('Las contraseñas no coinciden');
+  if (data.password !== data.confirmPassword) errors.push('Passwords do not match');
   
-  const telefonoRegex = /^\+34\s?\d{3}\s?\d{3}\s?\d{3}$/;
-  if (datos.telefono && !telefonoRegex.test(datos.telefono)) {
-    errores.push('El teléfono no tiene un formato válido');
+  const phoneRegex = /^\+34\s?\d{3}\s?\d{3}\s?\d{3}$/;
+  if (data.phone && !phoneRegex.test(data.phone)) {
+    errors.push('Invalid phone format');
   }
   
-  // Validaciones de login también aplican
-  const loginValidation = validarLogin({ email: datos.email, password: datos.password });
-  errores.push(...loginValidation.errores);
+  // Login validations also apply
+  const loginValidation = validateLogin({ email: data.email, password: data.password });
+  errors.push(...loginValidation.errors);
   
-  return { valido: errores.length === 0, errores };
+  return { valid: errors.length === 0, errors };
 }
 
-function validarProducto(datos: {
-  nombre: string;
-  descripcion: string;
-  precio: number;
+function validateProduct(data: {
+  name: string;
+  description: string;
+  price: number;
   stock: number;
-  categoria: string;
+  category: string;
   material: string;
 }) {
-  const errores: string[] = [];
-  const categoriasValidas = ['DECORATION', 'ACCESSORIES', 'FUNCTIONAL', 'ARTICULATED', 'TOYS'];
-  const materialesValidos = ['PLA', 'PETG', 'ABS', 'TPU'];
+  const errors: string[] = [];
+  const validCategories = ['DECORATION', 'ACCESSORIES', 'FUNCTIONAL', 'ARTICULATED', 'TOYS'];
+  const validMaterials = ['PLA', 'PETG', 'ABS', 'TPU'];
   
-  if (!datos.nombre) errores.push('El nombre del producto es requerido');
-  else if (datos.nombre.length > 200) errores.push('El nombre no puede exceder los 200 caracteres');
+  if (!data.name) errors.push('Product name is required');
+  else if (data.name.length > 200) errors.push('Name cannot exceed 200 characters');
   
-  if (!datos.descripcion) errores.push('La descripción es requerida');
+  if (!data.description) errors.push('Description is required');
   
-  if (datos.precio <= 0) errores.push('El precio debe ser mayor a 0');
-  else if (datos.precio > 99999.99) errores.push('El precio máximo permitido es 99999.99');
+  if (data.price <= 0) errors.push('Price must be greater than 0');
+  else if (data.price > 99999.99) errors.push('Maximum allowed price is 99999.99');
   
-  if (datos.stock < 0) errores.push('El stock no puede ser negativo');
+  if (data.stock < 0) errors.push('Stock cannot be negative');
   
-  if (!categoriasValidas.includes(datos.categoria)) errores.push('Categoría no válida');
-  if (!materialesValidos.includes(datos.material)) errores.push('Material no válido');
+  if (!validCategories.includes(data.category)) errors.push('Invalid category');
+  if (!validMaterials.includes(data.material)) errors.push('Invalid material');
   
-  return { valido: errores.length === 0, errores };
+  return { valid: errors.length === 0, errors };
 }
 
-function validarPedido(datos: {
-  items: Array<{ productoId: string; cantidad: number }>;
-  direccionEnvioId: string;
-  notas?: string;
+function validateOrder(data: {
+  items: Array<{ productId: string; quantity: number }>;
+  shippingAddressId: string;
+  notes?: string;
 }) {
-  const errores: string[] = [];
+  const errors: string[] = [];
   
-  if (!datos.items || datos.items.length === 0) {
-    errores.push('El pedido debe contener al menos un producto');
+  if (!data.items || data.items.length === 0) {
+    errors.push('Order must contain at least one product');
   } else {
-    for (const item of datos.items) {
-      if (item.cantidad <= 0) errores.push('La cantidad debe ser mayor a 0');
-      if (item.cantidad > 100) errores.push('La cantidad máxima por producto es 100 unidades');
+    for (const item of data.items) {
+      if (item.quantity <= 0) errors.push('Quantity must be greater than 0');
+      if (item.quantity > 100) errors.push('Maximum quantity per product is 100 units');
     }
   }
   
-  if (!datos.direccionEnvioId) errores.push('La dirección de envío es requerida');
+  if (!data.shippingAddressId) errors.push('Shipping address is required');
   
-  if (datos.notas && datos.notas.length > 1000) {
-    errores.push('Las notas no pueden exceder los 1000 caracteres');
+  if (data.notes && data.notes.length > 1000) {
+    errors.push('Notes cannot exceed 1000 characters');
   }
   
-  return { valido: errores.length === 0, errores };
+  return { valid: errors.length === 0, errors };
 }
 
-function validarCambioEstado(estadoActual: string, nuevoEstado: string) {
-  const transicionesValidas: Record<string, string[]> = {
+function validateStatusChange(currentStatus: string, newStatus: string) {
+  const validTransitions: Record<string, string[]> = {
     'PENDING': ['CONFIRMED', 'CANCELLED'],
     'CONFIRMED': ['PREPARING', 'CANCELLED'],
     'PREPARING': ['SHIPPED'],
@@ -415,40 +415,40 @@ function validarCambioEstado(estadoActual: string, nuevoEstado: string) {
     'CANCELLED': [],
   };
   
-  if (estadoActual === nuevoEstado) {
-    return { valido: false, error: 'El nuevo estado debe ser diferente al actual' };
+  if (currentStatus === newStatus) {
+    return { valid: false, error: 'New status must be different from current status' };
   }
   
-  if (!transicionesValidas[estadoActual]?.includes(nuevoEstado)) {
-    if (nuevoEstado === 'CANCELADO' && ['ENVIADO', 'ENTREGADO'].includes(estadoActual)) {
-      return { valido: false, error: 'No se puede cancelar un pedido ya enviado o entregado' };
+  if (!validTransitions[currentStatus]?.includes(newStatus)) {
+    if (newStatus === 'CANCELLED' && ['SHIPPED', 'DELIVERED'].includes(currentStatus)) {
+      return { valid: false, error: 'Cannot cancel an order that has already been shipped or delivered' };
     }
-    if (transicionesValidas[estadoActual] && nuevoEstado < estadoActual) {
-      return { valido: false, error: 'No se puede retroceder el estado del pedido' };
+    if (validTransitions[currentStatus] && newStatus < currentStatus) {
+      return { valid: false, error: 'Cannot revert order status' };
     }
-    return { valido: false, error: `Transición no válida de ${estadoActual} a ${nuevoEstado}` };
+    return { valid: false, error: `Invalid transition from ${currentStatus} to ${newStatus}` };
   }
   
-  return { valido: true, error: null };
+  return { valid: true, error: null };
 }
 
-function validarPago(datos: { monto: number; metodo: string }) {
-  const errores: string[] = [];
-  const metodosValidos = ['CARD', 'BIZUM', 'TRANSFER'];
+function validatePayment(data: { amount: number; method: string }) {
+  const errors: string[] = [];
+  const validMethods = ['CARD', 'BIZUM', 'TRANSFER'];
 
-  if (datos.monto <= 0) errores.push('El monto debe ser mayor a 0');
-  if (!metodosValidos.includes(datos.metodo)) errores.push('Método de pago no válido');
+  if (data.amount <= 0) errors.push('Amount must be greater than 0');
+  if (!validMethods.includes(data.method)) errors.push('Invalid payment method');
 
-  return { valido: errores.length === 0, errores };
+  return { valid: errors.length === 0, errors };
 }
 
-function validarUsuario(datos: { nombre: string; email: string; telefono?: string; nif?: string }) {
-  const errores: string[] = [];
+function validateUser(data: { name: string; email: string; phone?: string; nif?: string }) {
+  const errors: string[] = [];
   
-  if (datos.nif) {
+  if (data.nif) {
     const nifRegex = /^\d{8}[A-Z]$/;
-    if (!nifRegex.test(datos.nif)) errores.push('El NIF no tiene un formato válido');
+    if (!nifRegex.test(data.nif)) errors.push('Invalid NIF format');
   }
   
-  return { valido: errores.length === 0, errores };
+  return { valid: errors.length === 0, errors };
 }

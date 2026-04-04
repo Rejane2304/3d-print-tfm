@@ -1,36 +1,36 @@
 /**
- * Tests de Integración - Webhook de Stripe
- * TDD: Tests primero, implementación después
+ * Integration Tests - Stripe Webhook
+ * TDD: Tests first, implementation after
  * 
  * Endpoint: POST /api/webhooks/stripe
  * 
- * Eventos manejados:
- * - checkout.session.completed - Pago exitoso
- * - checkout.session.expired - Sesión expirada
- * - payment_intent.payment_failed - Pago fallido
+ * Handled events:
+ * - checkout.session.completed - Successful payment
+ * - checkout.session.expired - Session expired
+ * - payment_intent.payment_failed - Payment failed
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { prisma } from '@/lib/db/prisma';
 
-describe('Webhook de Stripe', () => {
+describe('Stripe Webhook', () => {
   const mockSessionId = 'cs_test_mock123';
   
   beforeAll(async () => {
-    // Limpiar datos de test anteriores
-    await prisma.order.deleteMany({
+    // Clean previous test data
+    await prisma.pedido.deleteMany({
       where: { stripeSessionId: mockSessionId }
     });
   });
 
   afterAll(async () => {
-    // Limpiar datos de test
-    await prisma.order.deleteMany({
+    // Clean test data
+    await prisma.pedido.deleteMany({
       where: { stripeSessionId: mockSessionId }
     });
   });
 
   describe('POST /api/webhooks/stripe', () => {
-    it('debe procesar evento checkout.session.completed', async () => {
+    it('should process checkout.session.completed event', async () => {
       const payload = {
         id: 'evt_test_123',
         type: 'checkout.session.completed',
@@ -41,7 +41,7 @@ describe('Webhook de Stripe', () => {
             amount_total: 5999,
             metadata: {
               userId: 'user_test_123',
-              pedidoId: 'pedido_test_123',
+              orderId: 'order_test_123',
             },
           },
         },
@@ -56,11 +56,11 @@ describe('Webhook de Stripe', () => {
         body: JSON.stringify(payload),
       });
 
-      // Debe aceptar el webhook
+      // Must accept the webhook
       expect([200, 400, 500]).toContain(response.status);
     });
 
-    it('debe rechazar webhook sin firma', async () => {
+    it('should reject webhook without signature', async () => {
       const response = await fetch('http://localhost:3000/api/webhooks/stripe', {
         method: 'POST',
         headers: {
@@ -71,11 +71,11 @@ describe('Webhook de Stripe', () => {
         }),
       });
 
-      // Debe rechazar por falta de firma
+      // Must reject due to missing signature
       expect([400, 401]).toContain(response.status);
     });
 
-    it('debe ignorar eventos no soportados', async () => {
+    it('should ignore unsupported events', async () => {
       const response = await fetch('http://localhost:3000/api/webhooks/stripe', {
         method: 'POST',
         headers: {
@@ -83,46 +83,46 @@ describe('Webhook de Stripe', () => {
           'Stripe-Signature': 'test_signature',
         },
         body: JSON.stringify({
-          type: 'invoice.payment_succeeded', // Evento no manejado
+          type: 'invoice.payment_succeeded', // Unhandled event
           data: { object: {} },
         }),
       });
 
-      // Debe aceptar pero ignorar
+      // Should accept but ignore
       expect([200, 400]).toContain(response.status);
     });
   });
 
-  describe('Procesamiento de pagos', () => {
-    it('debe actualizar estado del pedido a PAGADO', async () => {
-      // Verificar que el pedido se marca como pagado
+  describe('Payment processing', () => {
+    it('should update order status to PAID', async () => {
+      // Verify that the order is marked as paid
       expect(true).toBe(true);
     });
 
-    it('debe vaciar el carrito del usuario', async () => {
-      // Verificar que se vacía el carrito
+    it('should clear user cart', async () => {
+      // Verify that the cart is cleared
       expect(true).toBe(true);
     });
 
-    it('debe actualizar stock de productos', async () => {
-      // Verificar que se reduce el stock
+    it('should update product stock', async () => {
+      // Verify that stock is reduced
       expect(true).toBe(true);
     });
 
-    it('debe crear registro de pago', async () => {
-      // Verificar que se crea el pago
+    it('should create payment record', async () => {
+      // Verify that the payment is created
       expect(true).toBe(true);
     });
   });
 
-  describe('Manejo de errores', () => {
-    it('debe manejar pedido no encontrado', async () => {
-      // Verificar manejo de error
+  describe('Error handling', () => {
+    it('should handle order not found', async () => {
+      // Verify error handling
       expect(true).toBe(true);
     });
 
-    it('debe manejar pago duplicado', async () => {
-      // Verificar idempotencia
+    it('should handle duplicate payment', async () => {
+      // Verify idempotency
       expect(true).toBe(true);
     });
   });

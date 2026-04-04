@@ -71,20 +71,20 @@ export class ApiError extends Error {
 export const Errors = {
   // Authentication
   invalidCredentials: () => 
-    new ApiError(ErrorCode.AUTH_INVALID_CREDENTIALS, 'Email o contraseña incorrectos', 401),
-  
+    new ApiError(ErrorCode.AUTH_INVALID_CREDENTIALS, 'Invalid email or password', 401),
+   
   sessionExpired: () => 
-    new ApiError(ErrorCode.AUTH_SESSION_EXPIRED, 'Sesión expirada, por favor inicia sesión nuevamente', 401),
-  
+    new ApiError(ErrorCode.AUTH_SESSION_EXPIRED, 'Session expired, please log in again', 401),
+   
   unauthorized: () => 
-    new ApiError(ErrorCode.AUTH_UNAUTHORIZED, 'No tienes permisos para realizar esta acción', 403),
-  
+    new ApiError(ErrorCode.AUTH_UNAUTHORIZED, 'You do not have permission to perform this action', 403),
+   
   // Validation
   invalidInput: (field: string) => 
-    new ApiError(ErrorCode.VALIDATION_INVALID_INPUT, `El campo ${field} no es válido`, 400, field),
-  
+    new ApiError(ErrorCode.VALIDATION_INVALID_INPUT, `The field ${field} is not valid`, 400, field),
+   
   requiredField: (field: string) => 
-    new ApiError(ErrorCode.VALIDATION_REQUIRED_FIELD, `El campo ${field} is required`, 400, field),
+    new ApiError(ErrorCode.VALIDATION_REQUIRED_FIELD, `The field ${field} is required`, 400, field),
   
   // Database
   notFound: (resource: string) => 
@@ -94,11 +94,11 @@ export const Errors = {
     new ApiError(ErrorCode.DB_DUPLICATE_ENTRY, `Already exists a record with that ${field}`, 409, field),
   
   // Business
-  insufficientStock: (producto: string) => 
-    new ApiError(ErrorCode.BUSINESS_INSUFFICIENT_STOCK, `Insufficient stock para ${producto}`, 400),
+  insufficientStock: (product: string) => 
+    new ApiError(ErrorCode.BUSINESS_INSUFFICIENT_STOCK, `Insufficient stock for ${product}`, 400),
   
   invalidState: (action: string, state: string) => 
-    new ApiError(ErrorCode.BUSINESS_INVALID_STATE, `No se puede ${action} en estado ${state}`, 400),
+    new ApiError(ErrorCode.BUSINESS_INVALID_STATE, `Cannot ${action} in state ${state}`, 400),
   
   paymentFailed: (reason: string) => 
     new ApiError(ErrorCode.BUSINESS_PAYMENT_FAILED, `Payment failed: ${reason}`, 400),
@@ -116,19 +116,19 @@ export const Errors = {
 // ============================================
 
 export function handleError(error: unknown): ApiError {
-  // Si ya es un ApiError, devolverlo
+  // If already an ApiError, return it
   if (error instanceof ApiError) {
     return error;
   }
   
-  // Si es un Error estándar
+  // If it's a standard Error
   if (error instanceof Error) {
-    console.error('Error unhandled:', error);
+    console.error('Unhandled error:', error);
     return Errors.internalError();
   }
   
-  // Error unknown
-  console.error('Error unknown:', error);
+  // Unknown error
+  console.error('Unknown error:', error);
   return Errors.internalError();
 }
 

@@ -1,21 +1,21 @@
 /**
- * Middleware de Autorización
- * Protege rutas según el rol del usuario
- * Redirecciones automáticas según plan de implementación
+ * Authorization Middleware
+ * Protects routes based on user role
+ * Automatic redirects according to implementation plan
  */
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
-  // Rutas protegidas por rol
-// NOTA: /cart ya NO está protegido, funciona con localStorage para invitados
+  // Role-protected routes
+// NOTE: /cart is NOT protected, works with localStorage for guests
 const PROTECTED_CLIENT_ROUTES = ['/checkout', '/account'];
 const AUTH_ROUTES = ['/login', '/auth'];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
-  // Obtener token JWT de la sesión
+  // Get JWT token from session
   const token = await getToken({ 
     req: request, 
     secret: process.env.NEXTAUTH_SECRET 
@@ -25,99 +25,99 @@ export async function middleware(request: NextRequest) {
   const userRole = token?.rol as string;
   
   // ============================================
-  // REGLA 1: Admin NO puede comprar
-  // Si es ADMIN e intenta acceder a rutas de tienda
+  // RULE 1: Admin cannot shop
+  // If ADMIN and trying to access shop routes
   // ============================================
   if (userRole === 'ADMIN') {
-    // Verificar si intenta acceder a rutas de cliente protegidas
-    const isProtectedRoute = PROTECTED_CLIENT_ROUTES.some((route: string) => 
+    // Check if trying to access protected client routes
+    const isProtectedRoute = PROTECTED_CLIENT_ROUTES.some((route: string) =>
       pathname.startsWith(route)
     );
-    
-    // Verificar /cart, /checkout, /account
+
+    // Check /cart, /checkout, /account
     const isShopRoute = pathname === '/cart' ||
                        pathname.startsWith('/checkout') ||
                        pathname.startsWith('/account');
     
     if (isProtectedRoute || isShopRoute) {
-      console.log(`🚫 ADMIN intentó acceder a ${pathname} - Redirigiendo a /admin/dashboard`);
+      console.log(`🚫 ADMIN tried to access ${pathname} - Redirecting to /admin/dashboard`);
       return NextResponse.redirect(new URL('/admin/dashboard', request.url));
     }
   }
-  
+
   // ============================================
-  // REGLA 2: Rutas de Admin solo para ADMIN
+  // RULE 2: Admin routes only for ADMIN
   // ============================================
   if (pathname.startsWith('/admin')) {
     if (!isAuthenticated) {
-      // No autenticado, redirigir a auth
-      console.log(`🔒 Usuario no autenticado intentó acceder a ${pathname}`);
+      // Not authenticated, redirect to auth
+      console.log(`🔒 Unauthenticated user tried to access ${pathname}`);
       return NextResponse.redirect(new URL('/auth', request.url));
     }
-    
+
     if (userRole !== 'ADMIN') {
-      // Autenticado pero no es admin, redirigir a home
-      console.log(`🚫 CLIENTE intentó acceder a ${pathname} - Redirigiendo a /`);
+      // Authenticated but not admin, redirect to home
+      console.log(`🚫 CLIENT tried to access ${pathname} - Redirecting to /`);
       return NextResponse.redirect(new URL('/', request.url));
     }
-    
-    // Es admin, permitir acceso
+
+    // Is admin, allow access
     return NextResponse.next();
   }
   
   // ============================================
-  // REGLA 3: Rutas de Cliente (protegidas)
-  // NOTA: /cart NO está protegido, funciona con localStorage para invitados
-  // Solo /checkout y /account requieren autenticación
+  // RULE 3: Client routes (protected)
+  // NOTE: /cart is NOT protected, works with localStorage for guests
+  // Only /checkout and /account require authentication
   // ============================================
-  const isProtectedClientRoute = PROTECTED_CLIENT_ROUTES.some((route: string) => 
+  const isProtectedClientRoute = PROTECTED_CLIENT_ROUTES.some((route: string) =>
     pathname.startsWith(route)
   );
-  
+
   if (isProtectedClientRoute) {
     if (!isAuthenticated) {
-      // No autenticado, redirigir a auth con callback
-      console.log(`🔒 Usuario no autenticado intentó acceder a ${pathname}`);
+      // Not authenticated, redirect to auth with callback
+      console.log(`🔒 Unauthenticated user tried to access ${pathname}`);
       const callbackUrl = encodeURIComponent(pathname);
       return NextResponse.redirect(
         new URL(`/auth?callbackUrl=${callbackUrl}`, request.url)
       );
     }
-    
+
     if (userRole === 'ADMIN') {
-      // Admin intenta acceder a ruta de cliente
-      console.log(`🚫 ADMIN intentó acceder a ${pathname} - Redirigiendo a /admin/dashboard`);
+      // Admin tries to access client route
+      console.log(`🚫 ADMIN tried to access ${pathname} - Redirecting to /admin/dashboard`);
       return NextResponse.redirect(new URL('/admin/dashboard', request.url));
     }
-    
-    // Es cliente autenticado, permitir acceso
+
+    // Is authenticated client, allow access
     return NextResponse.next();
   }
   
   // ============================================
-  // REGLA 4: Redirección de Login/Registro
-  // Usuarios autenticados no deben ver estas páginas
+  // RULE 4: Login/Register Redirects
+  // Authenticated users should not see these pages
   // ============================================
   const isAuthRoute = AUTH_ROUTES.some(route => pathname.startsWith(route));
   
   if (isAuthRoute && isAuthenticated) {
     if (userRole === 'ADMIN') {
-      // Admin autenticado en login → redirigir a admin
-      console.log(`✅ Admin autenticado en ${pathname} - Redirigiendo a /admin/dashboard`);
+      // Admin authenticated on login → redirect to admin
+      console.log(`✅ Admin authenticated on ${pathname} - Redirecting to /admin/dashboard`);
       return NextResponse.redirect(new URL('/admin/dashboard', request.url));
     } else {
-      // Cliente autenticado en login → redirigir a home
-      console.log(`✅ Cliente autenticado en ${pathname} - Redirigiendo a /`);
+      // Client authenticated on login → redirect to home
+      console.log(`✅ Client authenticated on ${pathname} - Redirecting to /`);
       return NextResponse.redirect(new URL('/', request.url));
     }
   }
-  
-  // Permitir acceso a todas las demás rutas
+
+  // Allow access to all other routes
   return NextResponse.next();
 }
 
-// Configuración de matcher
-// Aplicar middleware solo a rutas específicas
+// Matcher configuration
+// Apply middleware only to specific routes
 export const config = {
   matcher: [
     /*
@@ -130,9 +130,9 @@ export const config = {
      */
     '/((?!_next/static|_next/image|favicon.ico|public|api).*)',
     
-    // Rutas específicas que necesitan protección
+    // Specific routes that need protection
     '/admin/:path*',
-    // '/cart' ya no está protegido - funciona con localStorage
+    // '/cart' is not protected - works with localStorage
     '/checkout/:path*',
     '/account/:path*',
     '/login',

@@ -1,6 +1,6 @@
 /**
- * Prisma Client con soporte para múltiples entornos
- * Usa DATABASE_URL de .env.test cuando NODE_ENV=test
+ * Prisma Client with support for multiple environments
+ * Uses DATABASE_URL from .env.test when NODE_ENV=test
  */
 import { PrismaClient } from '@prisma/client';
 

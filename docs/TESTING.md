@@ -1,6 +1,30 @@
-# Guía de Testing - 3D Print TFM
+# Testing Guide - 3D Print TFM
 
 ## 🚀 Commands
+
+### Run Tests
+
+```bash
+# All tests
+npm test
+
+# Unit tests (validation, components)
+npm run test:unit
+
+# Integration tests (APIs, database) - Requires PostgreSQL
+npm run test:integration
+
+# E2E tests (full flows) - Requires server running
+npm run test:e2e
+
+# With coverage
+npm run test:coverage
+
+# With UI
+npm run test:ui
+```
+
+---
 
 ## 🔧 Configuration
 
@@ -32,10 +56,10 @@ See `playwright.config.ts` for browser and device configuration.
 
 ```bash
 # Check that Docker is running
-1. Añadir `await` donde falte
+1. Add `await` where missing
 
 # If not running:
-2. Verificar limpieza de BD entre tests
+2. Verify DB cleanup between tests
 
 # Wait 5 seconds and retry
 sleep 5 && npm run test:integration
@@ -143,90 +167,3 @@ npm run test:unit -- tests/unit/my-feature.test.ts
 
 **Last updated:** April 2, 2026  
 **Maintainer:** 3D Print TFM Team
-3. Aumentar timeout si es necesario: `it('...', async () => { ... }, 15000)`
-
----
-
-## 📊 Cobertura
-
-### Métricas Actuales (Objetivo)
-
-| Tipo | Tests Actuales | Objetivo | Estado |
-|------|---------------|----------|--------|
-| Unitarios | ~25 | 60+ | 🟡 En progreso |
-| Integración | ~290 | ~100 (focalizados) | 🟡 En consolidación |
-| E2E | 19 | 60+ | 🔴 Pendiente |
-
-### Ver Cobertura
-
-```bash
-npm run test:coverage
-# Abrir coverage/index.html
-```
-
----
-
-## 🎯 Buenas Prácticas
-
-### ✅ Hacer
-
-- **Testear comportamiento**, no implementación
-- **Un assert por test** (idealmente)
-- **Nombres descriptivos**: `it('debe retornar 401 cuando no autenticado')`
-- **Limpiar después**: usar `afterEach` o `afterAll` para limpiar BD
-- **Datos de test predecibles**: usar IDs fijos, no aleatorios
-
-### ❌ No Hacer
-
-- No testear implementación interna (cambiar implementación no debe romper tests)
-- No usar `setTimeout` arbitrarios para "esperar"
-- No hardcodear IDs de producción
-- No dejar tests con `expect(true).toBe(true)` (placeholders)
-- No repetir tests de validación en 3 capas (unit, integration, E2E)
-
----
-
-## 📝 Añadir Nuevos Tests
-
-### Paso 1: Decidir el Tipo
-
-- **¿Es pura lógica?** → `tests/unit/`
-- **¿Usa base de datos o APIs?** → `tests/integration/`
-- **¿Es un flujo completo de usuario?** → `tests/e2e/`
-
-### Paso 2: Crear el Archivo
-
-```bash
-# Unitario
-touch tests/unit/mi-feature.test.ts
-
-# Integración
-touch tests/integration/api/mi-endpoint.test.ts
-
-# E2E
-touch tests/e2e/mi-flujo.spec.ts
-```
-
-### Paso 3: Escribir el Test
-
-Ver ejemplos en "Convenciones" arriba.
-
-### Paso 4: Ejecutar y Verificar
-
-```bash
-npm run test:unit -- tests/unit/mi-feature.test.ts
-```
-
----
-
-## 📚 Recursos
-
-- [Vitest Docs](https://vitest.dev/)
-- [Playwright Docs](https://playwright.dev/)
-- [Testing Library](https://testing-library.com/)
-- [Prisma Testing Guide](https://www.prisma.io/docs/guides/testing)
-
----
-
-**Última actualización:** 2 de Abril de 2026  
-**Mantenedor:** Equipo 3D Print TFM

@@ -1,14 +1,14 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Tests E2E - Admin: Gestión de Productos
- * Flujos críticos de administración del catálogo
+ * E2E Tests - Admin: Product Management
+ * Critical catalog administration flows
  */
 
-test.describe('Admin - Gestión de Productos', () => {
+test.describe('Admin - Product Management', () => {
   
   test.beforeEach(async ({ page }) => {
-    // Login como admin
+    // Login as admin
     await page.goto('/auth');
     
     const emailInput = page.locator('[data-testid="login-email-input"]');
@@ -19,15 +19,15 @@ test.describe('Admin - Gestión de Productos', () => {
       await page.waitForTimeout(1000);
     }
     
-    // Ir al panel de admin
+    // Go to admin panel
     await page.goto('/admin/products');
   });
 
-  test('debe mostrar listado de productos', async ({ page }) => {
-    // Verificar que se muestra la página de admin
-    await expect(page.locator('h1')).toContainText('Productos');
+  test('should display product listing', async ({ page }) => {
+    // Verify admin page is displayed
+    await expect(page.locator('h1')).toContainText('Products');
     
-    // Verificar que hay productos o mensaje de vacío
+    // Verify there are products or empty message
     const products = page.locator('[data-testid="admin-product-item"]');
     const emptyMessage = page.locator('[data-testid="no-products-message"]');
     
@@ -37,163 +37,163 @@ test.describe('Admin - Gestión de Productos', () => {
     expect(hasProducts || hasEmptyMessage).toBeTruthy();
   });
 
-  test('debe navegar a crear nuevo producto', async ({ page }) => {
-    // Click en botón de crear producto
+  test('should navigate to create new product', async ({ page }) => {
+    // Click create product button
     const createButton = page.locator('[data-testid="create-product-button"]');
     
     if (await createButton.isVisible().catch(() => false)) {
       await createButton.click();
       
-      // Verificar que estamos en la página de creación
+      // Verify we are on creation page
       await expect(page).toHaveURL('/admin/products/new');
-      await expect(page.locator('h1')).toContainText('Nuevo Producto');
+      await expect(page.locator('h1')).toContainText('New Product');
     }
   });
 
-  test('debe completar formulario de nuevo producto', async ({ page }) => {
+  test('should complete new product form', async ({ page }) => {
     await page.goto('/admin/products/new');
     
-    // Llenar información del producto
-    await page.fill('[data-testid="product-name"]', 'Producto Test E2E');
-    await page.fill('[data-testid="product-description"]', 'Descripción de prueba para E2E');
+    // Fill product information
+    await page.fill('[data-testid="product-name"]', 'E2E Test Product');
+    await page.fill('[data-testid="product-description"]', 'E2E test description');
     await page.fill('[data-testid="product-price"]', '29.99');
     await page.fill('[data-testid="product-stock"]', '50');
     
-    // Seleccionar categoría
-    await page.selectOption('[data-testid="product-category"]', 'DECORACION');
+    // Select category
+    await page.selectOption('[data-testid="product-category"]', 'DECORATION');
     
-    // Seleccionar material
+    // Select material
     await page.selectOption('[data-testid="product-material"]', 'PLA');
     
-    // Verificar que el botón de guardar está visible
+    // Verify save button is visible
     const saveButton = page.locator('[data-testid="save-product-button"]');
     await expect(saveButton).toBeVisible();
   });
 
-  test('debe validar campos requeridos del producto', async ({ page }) => {
+  test('should validate required product fields', async ({ page }) => {
     await page.goto('/admin/products/new');
     
-    // Intentar guardar sin completar campos
+    // Try to save without completing fields
     const saveButton = page.locator('[data-testid="save-product-button"]');
     await saveButton.click();
     
-    // Verificar mensajes de error
+    // Verify error messages
     await expect(page.locator('[data-testid="error-name"]')).toBeVisible();
     await expect(page.locator('[data-testid="error-price"]')).toBeVisible();
   });
 
-  test('debe editar producto existente', async ({ page }) => {
-    // Ir a la lista de productos
+  test('should edit existing product', async ({ page }) => {
+    // Go to product list
     await page.goto('/admin/products');
     
-    // Click en editar del primer producto
+    // Click edit on first product
     const editButton = page.locator('[data-testid="edit-product"]').first();
     
     if (await editButton.isVisible().catch(() => false)) {
       await editButton.click();
       
-      // Verificar que estamos en modo edición
-      await expect(page.locator('h1')).toContainText('Editar');
+      // Verify we are in edit mode
+      await expect(page.locator('h1')).toContainText('Edit');
       
-      // Modificar precio
+      // Modify price
       const priceInput = page.locator('[data-testid="product-price"]');
       await priceInput.fill('39.99');
       
-      // Guardar cambios
+      // Save changes
       await page.click('[data-testid="save-product-button"]');
       
-      // Verificar mensaje de éxito
+      // Verify success message
       await expect(page.locator('[data-testid="success-message"]')).toBeVisible();
     }
   });
 
-  test('debe activar/desactivar producto', async ({ page }) => {
+  test('should activate/deactivate product', async ({ page }) => {
     await page.goto('/admin/products');
     
-    // Buscar toggle de activación del primer producto
+    // Find first product's active toggle
     const toggle = page.locator('[data-testid="toggle-product-active"]').first();
     
     if (await toggle.isVisible().catch(() => false)) {
-      // Obtener estado actual
+      // Get current state
       const isChecked = await toggle.isChecked().catch(() => false);
       
-      // Cambiar estado
+      // Change state
       await toggle.click();
       
-      // Esperar a que se actualice
+      // Wait for update
       await page.waitForTimeout(500);
       
-      // Verificar que el estado cambió
+      // Verify state changed
       const newState = await toggle.isChecked().catch(() => !isChecked);
       expect(newState).toBe(!isChecked);
     }
   });
 
-  test('debe buscar productos en el admin', async ({ page }) => {
+  test('should search products in admin', async ({ page }) => {
     await page.goto('/admin/products');
     
-    // Usar campo de búsqueda
+    // Use search field
     const searchInput = page.locator('[data-testid="admin-search-input"]');
     
     if (await searchInput.isVisible().catch(() => false)) {
-      await searchInput.fill('vaso');
+      await searchInput.fill('vase');
       await page.press('[data-testid="admin-search-input"]', 'Enter');
       
-      // Esperar resultados
+      // Wait for results
       await page.waitForTimeout(500);
       
-      // Verificar que se filtraron los productos
+      // Verify products were filtered
       const products = page.locator('[data-testid="admin-product-item"]');
-      // Puede haber resultados o no
+      // May have results or not
       expect(await products.count()).toBeGreaterThanOrEqual(0);
     }
   });
 
-  test('debe filtrar productos por categoría', async ({ page }) => {
+  test('should filter products by category', async ({ page }) => {
     await page.goto('/admin/products');
     
-    // Seleccionar filtro de categoría
+    // Select category filter
     const categoryFilter = page.locator('[data-testid="category-filter"]');
     
     if (await categoryFilter.isVisible().catch(() => false)) {
-      await categoryFilter.selectOption('DECORACION');
+      await categoryFilter.selectOption('DECORATION');
       
-      // Esperar a que se filtren
+      // Wait for filtering
       await page.waitForTimeout(500);
       
-      // Verificar que se muestran solo productos de esa categoría
+      // Verify only products from that category are displayed
       const products = page.locator('[data-testid="admin-product-item"]');
       expect(await products.count()).toBeGreaterThanOrEqual(0);
     }
   });
 
-  test('debe mostrar estadísticas de productos', async ({ page }) => {
+  test('should display product statistics', async ({ page }) => {
     await page.goto('/admin/dashboard');
     
-    // Verificar que hay métricas de productos
+    // Verify there are product metrics
     const stats = page.locator('[data-testid="product-stats"]');
     
     if (await stats.isVisible().catch(() => false)) {
-      await expect(stats).toContainText(/productos/i);
+      await expect(stats).toContainText(/products/i);
     }
   });
 
-  test('debe prevenir acceso no autorizado', async ({ page }) => {
+  test('should prevent unauthorized access', async ({ page }) => {
     // Logout
     await page.goto('/api/auth/signout');
     await page.waitForTimeout(500);
     
-    // Intentar acceder como cliente
+    // Try to access as customer
     await page.goto('/auth');
-    await page.fill('input[type="email"]', 'cliente@test.com');
+    await page.fill('input[type="email"]', 'customer@test.com');
     await page.fill('input[type="password"]', 'test123');
     await page.click('button[type="submit"]');
     await page.waitForTimeout(1000);
     
-    // Intentar acceder al admin
+    // Try to access admin
     await page.goto('/admin/products');
     
-    // Debe redirigir a home o mostrar error 403
+    // Should redirect to home or show 403 error
     const currentUrl = page.url();
     expect(currentUrl).not.toContain('/admin/products');
   });

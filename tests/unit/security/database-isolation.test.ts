@@ -1,13 +1,13 @@
 /**
  * ============================================
- * TESTS DE VALIDACIÓN - AISLAMIENTO DE BD
+ * VALIDATION TESTS - DB ISOLATION
  * ============================================
  * 
- * Valida que los tests se ejecutan contra una BD aislada
- * y NUNCA contra BD de desarrollo/producción
+ * Validates that tests run against an isolated database
+ * and NEVER against development/production databases
  * 
- * NOTA: Estos tests están deshabilitados cuando se usa una BD de producción
- * para testing (SKIP_DB_VALIDATION=true)
+ * NOTE: These tests are disabled when using a production database
+ * for testing (SKIP_DB_VALIDATION=true)
  */
 import { describe, it, expect } from 'vitest';
 import { getDBInfo } from '../../helpers';
@@ -16,49 +16,49 @@ import { getDBInfo } from '../../helpers';
 const skipTests = process.env.SKIP_DB_VALIDATION === 'true';
 const describeFunc = skipTests ? describe.skip : describe;
 
-describeFunc('🔒 Seguridad - Aislamiento de Base de Datos', () => {
-  it('debe estar ejecutando contra BD de test', () => {
+describeFunc('🔒 Security - Database Isolation', () => {
+  it('should be running against test database', () => {
     const dbInfo = getDBInfo();
 
-    // Verificar que es una BD de test (o permitir producción si SKIP_DB_VALIDATION está habilitado)
+    // Verify it's a test database (or allow production if SKIP_DB_VALIDATION is enabled)
     if (process.env.SKIP_DB_VALIDATION !== 'true') {
       expect(dbInfo.isTest).toBe(true);
       expect(dbInfo.isProduction).toBe(false);
     }
   });
 
-  it('NODE_ENV debe ser "test"', () => {
-    // Permitir que NODE_ENV sea 'test' o que SKIP_DB_VALIDATION esté habilitado
+  it('NODE_ENV should be "test"', () => {
+    // Allow NODE_ENV to be 'test' or SKIP_DB_VALIDATION to be enabled
     if (process.env.SKIP_DB_VALIDATION !== 'true') {
       expect(process.env.NODE_ENV).toBe('test');
     }
   });
 
-  it('DATABASE_URL no debe apuntar a DB default de producción', () => {
+  it('DATABASE_URL should not point to default production DB', () => {
     const url = process.env.DATABASE_URL || '';
     
-    // Permitir si SKIP_DB_VALIDATION está habilitado
+    // Allow if SKIP_DB_VALIDATION is enabled
     if (process.env.SKIP_DB_VALIDATION !== 'true') {
-      // No debe ser la BD "postgres" default de Supabase
+      // Should not be the default "postgres" Supabase database
       expect(url).not.toContain('/postgres?');
       expect(url).not.toContain(':5432/postgres');
     }
   });
 
-  it('DATABASE_URL debe contener indicador de test', () => {
+  it('DATABASE_URL should contain test indicator', () => {
     const url = process.env.DATABASE_URL || '';
     const isTestDb = 
       url.includes('test') ||
-      url.includes('5433') || // Puerto de Docker
+      url.includes('5433') || // Docker port
       url.includes('file:./test.db'); // SQLite
     
-    // Permitir si SKIP_DB_VALIDATION está habilitado
+    // Allow if SKIP_DB_VALIDATION is enabled
     if (process.env.SKIP_DB_VALIDATION !== 'true') {
       expect(isTestDb).toBe(true);
     }
   });
 
-  it('debe mostrar información de BD correcta', () => {
+  it('should display correct database information', () => {
     const dbInfo = getDBInfo();
 
     console.log('📊 Database Info:');

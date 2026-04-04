@@ -1,9 +1,9 @@
 /**
- * API Route para Checkout con Stripe
+ * API Route for Checkout with Stripe
  * 
- * POST /api/checkout - Crear sesión de checkout
+ * POST /api/checkout - Create checkout session
  * 
- * Requiere autenticación y carrito con items
+ * Requires authentication and cart with items
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
@@ -17,9 +17,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2023-10-16' as any,
 });
 
-// POST /api/checkout - Crear sesión de checkout
+// POST /api/checkout - Create checkout session
 export const POST = withErrorHandler(async (req: NextRequest) => {
-  // Verificar autenticación
+  // Verify authentication
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.email) {

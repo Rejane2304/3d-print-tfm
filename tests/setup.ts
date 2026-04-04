@@ -1,13 +1,13 @@
 /**
- * Setup para tests de Vitest
- * Configuración simplificada del entorno de pruebas
+ * Setup for Vitest tests
+ * Simplified test environment configuration
  */
 import { vi, afterAll, beforeAll } from 'vitest';
 import '@testing-library/jest-dom';
 import { prisma } from '@/lib/db/prisma';
 import { cleanupDB, seedTestData, validateTestDB } from './helpers';
 
-// Mock global de next/navigation
+// Global mock of next/navigation
 vi.mock('next/navigation', () => ({
   useRouter: () => ({
     push: vi.fn(),
@@ -21,12 +21,12 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
-// Mock de next/head
+// Mock of next/head
 vi.mock('next/head', () => ({
   default: ({ children }: { children: React.ReactNode }) => children || null,
 }));
 
-// Configuración global (solo en ambiente jsdom)
+// Global configuration (only in jsdom environment)
 if (typeof window !== 'undefined') {
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
@@ -43,7 +43,7 @@ if (typeof window !== 'undefined') {
   });
 }
 
-// Setup para tests de integración
+// Setup for integration tests
 beforeAll(async () => {
   if (process.env.VITEST_ENV !== 'integration') return;
   if (process.env.SKIP_DB_TESTS === 'true') return;
@@ -52,14 +52,14 @@ beforeAll(async () => {
   await cleanupDB();
   await seedTestData();
   
-  console.log('✅ Setup completado');
+  console.log('✅ Setup completed');
 });
 
-// Cleanup después de todos los tests
+// Cleanup after all tests
 afterAll(async () => {
   try {
     await prisma.$disconnect();
   } catch {
-    // Ignorar errores de desconexión
+    // Ignore disconnection errors
   }
 });

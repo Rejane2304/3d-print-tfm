@@ -1,14 +1,14 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Tests E2E - Admin: Gestión de Pedidos
- * Flujos críticos de administración de órdenes
+ * E2E Tests - Admin: Order Management
+ * Critical order administration flows
  */
 
-test.describe('Admin - Gestión de Pedidos', () => {
+test.describe('Admin - Order Management', () => {
   
   test.beforeEach(async ({ page }) => {
-    // Login como admin
+    // Login as admin
     await page.goto('/auth');
     
     const emailInput = page.locator('[data-testid="login-email-input"]');
@@ -19,15 +19,15 @@ test.describe('Admin - Gestión de Pedidos', () => {
       await page.waitForTimeout(1000);
     }
     
-    // Ir al panel de pedidos
+    // Go to orders panel
     await page.goto('/admin/orders');
   });
 
-  test('debe mostrar listado de pedidos', async ({ page }) => {
-    // Verificar que se muestra la página de pedidos
-    await expect(page.locator('h1')).toContainText('Pedidos');
+  test('should display order listing', async ({ page }) => {
+    // Verify orders page is displayed
+    await expect(page.locator('h1')).toContainText('Orders');
     
-    // Verificar que hay pedidos o mensaje de vacío
+    // Verify there are orders or empty message
     const orders = page.locator('[data-testid="order-row"]');
     const emptyMessage = page.locator('[data-testid="no-orders-message"]');
     
@@ -37,13 +37,13 @@ test.describe('Admin - Gestión de Pedidos', () => {
     expect(hasOrders || hasEmptyMessage).toBeTruthy();
   });
 
-  test('debe mostrar información del pedido', async ({ page }) => {
+  test('should display order information', async ({ page }) => {
     const orders = page.locator('[data-testid="order-row"]');
     
     if (await orders.count() > 0) {
       const firstOrder = orders.first();
       
-      // Verificar información básica
+      // Verify basic information
       await expect(firstOrder.locator('[data-testid="order-id"]')).toBeVisible();
       await expect(firstOrder.locator('[data-testid="order-customer"]')).toBeVisible();
       await expect(firstOrder.locator('[data-testid="order-total"]')).toBeVisible();
@@ -52,129 +52,129 @@ test.describe('Admin - Gestión de Pedidos', () => {
     }
   });
 
-  test('debe navegar al detalle del pedido', async ({ page }) => {
+  test('should navigate to order detail', async ({ page }) => {
     const viewButtons = page.locator('[data-testid="view-order"]');
     
     if (await viewButtons.count() > 0) {
       await viewButtons.first().click();
       
-      // Verificar que estamos en la página de detalle
+      // Verify we are on detail page
       await expect(page).toHaveURL(/\/admin\/orders\/\w+/);
-      await expect(page.locator('h1')).toContainText('Pedido');
+      await expect(page.locator('h1')).toContainText('Order');
     }
   });
 
-  test('debe mostrar detalle completo del pedido', async ({ page }) => {
-    // Ir a un pedido específico (si existe)
+  test('should display complete order detail', async ({ page }) => {
+    // Go to a specific order (if exists)
     const orders = page.locator('[data-testid="order-row"]');
     
     if (await orders.count() > 0) {
       await orders.first().click();
       
-      // Verificar secciones del detalle
+      // Verify detail sections
       await expect(page.locator('[data-testid="order-items"]')).toBeVisible();
       await expect(page.locator('[data-testid="order-customer-info"]')).toBeVisible();
       await expect(page.locator('[data-testid="order-shipping-info"]')).toBeVisible();
       await expect(page.locator('[data-testid="order-payment-info"]')).toBeVisible();
       
-      // Verificar totales
+      // Verify totals
       await expect(page.locator('[data-testid="order-subtotal"]')).toBeVisible();
       await expect(page.locator('[data-testid="order-total-final"]')).toBeVisible();
     }
   });
 
-  test('debe cambiar estado del pedido', async ({ page }) => {
+  test('should change order status', async ({ page }) => {
     await page.goto('/admin/orders');
     
     const statusSelect = page.locator('[data-testid="order-status-select"]').first();
     
     if (await statusSelect.isVisible().catch(() => false)) {
-      // Obtener estado actual
+      // Get current status
       const currentStatus = await statusSelect.inputValue();
       
-      // Cambiar a un estado diferente
-      const newStatus = currentStatus === 'PENDIENTE' ? 'CONFIRMADO' : 'PENDIENTE';
+      // Change to a different status
+      const newStatus = currentStatus === 'PENDING' ? 'CONFIRMED' : 'PENDING';
       await statusSelect.selectOption(newStatus);
       
-      // Esperar a que se guarde
+      // Wait for save
       await page.waitForTimeout(500);
       
-      // Verificar que el estado cambió
+      // Verify status changed
       const updatedStatus = await statusSelect.inputValue();
       expect(updatedStatus).toBe(newStatus);
     }
   });
 
-  test('debe filtrar pedidos por estado', async ({ page }) => {
+  test('should filter orders by status', async ({ page }) => {
     const statusFilter = page.locator('[data-testid="status-filter"]');
     
     if (await statusFilter.isVisible().catch(() => false)) {
-      // Seleccionar filtro
-      await statusFilter.selectOption('PENDIENTE');
+      // Select filter
+      await statusFilter.selectOption('PENDING');
       
-      // Esperar a que se filtren
+      // Wait for filtering
       await page.waitForTimeout(500);
       
-      // Verificar que todos los pedidos mostrados tienen ese estado
+      // Verify all displayed orders have that status
       const orders = page.locator('[data-testid="order-row"]');
       const count = await orders.count();
       
       if (count > 0) {
         const firstStatus = await orders.first().locator('[data-testid="order-status"]').textContent();
-        expect(firstStatus).toContain('PENDIENTE');
+        expect(firstStatus).toContain('PENDING');
       }
     }
   });
 
-  test('debe filtrar pedidos por fecha', async ({ page }) => {
+  test('should filter orders by date', async ({ page }) => {
     const dateFromFilter = page.locator('[data-testid="date-from-filter"]');
     
     if (await dateFromFilter.isVisible().catch(() => false)) {
-      // Seleccionar fecha desde
+      // Select date from
       await dateFromFilter.fill('2024-01-01');
       
-      // Aplicar filtro
+      // Apply filter
       await page.click('[data-testid="apply-filters"]');
       
-      // Esperar resultados
+      // Wait for results
       await page.waitForTimeout(500);
       
-      // Verificar que hay resultados
+      // Verify there are results
       const orders = page.locator('[data-testid="order-row"]');
       expect(await orders.count()).toBeGreaterThanOrEqual(0);
     }
   });
 
-  test('debe buscar pedidos por ID o cliente', async ({ page }) => {
+  test('should search orders by ID or customer', async ({ page }) => {
     const searchInput = page.locator('[data-testid="order-search"]');
     
     if (await searchInput.isVisible().catch(() => false)) {
       await searchInput.fill('test');
       await page.press('[data-testid="order-search"]', 'Enter');
       
-      // Esperar resultados
+      // Wait for results
       await page.waitForTimeout(500);
       
-      // Verificar resultados
+      // Verify results
       const orders = page.locator('[data-testid="order-row"]');
       expect(await orders.count()).toBeGreaterThanOrEqual(0);
     }
   });
 
-  test('debe mostrar historial de mensajes del pedido', async ({ page }) => {
-    // Ir a detalle de pedido
+  test('should display order message history', async ({ page }) => {
+    // Go to order detail
     const orders = page.locator('[data-testid="order-row"]');
     
     if (await orders.count() > 0) {
       await orders.first().click();
       
-      // Verificar sección de mensajes
+      // Verify messages section
       const messagesSection = page.locator('[data-testid="order-messages"]');
       
       if (await messagesSection.isVisible().catch(() => false)) {
         await expect(messagesSection).toBeVisible();
         
-        // Verificar que se pueden enviar mensajes
+        // Verify messages can be sent
         const messageInput = page.locator('[data-testid="message-input"]');
         if (await messageInput.isVisible().catch(() => false)) {
           await expect(messageInput).toBeVisible();
@@ -183,20 +183,20 @@ test.describe('Admin - Gestión de Pedidos', () => {
     }
   });
 
-  test('debe generar factura para pedido completado', async ({ page }) => {
+  test('should generate invoice for completed order', async ({ page }) => {
     const orders = page.locator('[data-testid="order-row"]');
     
     if (await orders.count() > 0) {
-      // Buscar un pedido con estado ENTREGADO
+      // Find an order with DELIVERED status
       const orderRows = await orders.all();
       
       for (const row of orderRows) {
         const status = await row.locator('[data-testid="order-status"]').textContent();
         
-        if (status?.includes('ENTREGADO')) {
+        if (status?.includes('DELIVERED')) {
           await row.click();
           
-          // Verificar botón de generar factura
+          // Verify generate invoice button
           const invoiceButton = page.locator('[data-testid="generate-invoice"]');
           
           if (await invoiceButton.isVisible().catch(() => false)) {
@@ -209,39 +209,39 @@ test.describe('Admin - Gestión de Pedidos', () => {
     }
   });
 
-  test('debe mostrar métricas de pedidos en dashboard', async ({ page }) => {
+  test('should display order metrics on dashboard', async ({ page }) => {
     await page.goto('/admin/dashboard');
     
-    // Verificar que hay métricas de pedidos
+    // Verify there are order metrics
     const orderStats = page.locator('[data-testid="order-stats"]');
     
     if (await orderStats.isVisible().catch(() => false)) {
-      await expect(orderStats).toContainText(/pedidos/i);
+      await expect(orderStats).toContainText(/orders/i);
       
-      // Verificar totales
+      // Verify totals
       const totalOrdersText = await orderStats.locator('[data-testid="total-orders"]').textContent().catch(() => '0');
       const totalOrders = totalOrdersText ? parseInt(totalOrdersText) : 0;
       expect(totalOrders).toBeGreaterThanOrEqual(0);
     }
   });
 
-  test('debe actualizar notas del pedido', async ({ page }) => {
+  test('should update order notes', async ({ page }) => {
     const orders = page.locator('[data-testid="order-row"]');
     
     if (await orders.count() > 0) {
       await orders.first().click();
       
-      // Buscar campo de notas
+      // Find notes field
       const notesInput = page.locator('[data-testid="order-notes"]');
       
       if (await notesInput.isVisible().catch(() => false)) {
-        // Agregar nota
-        await notesInput.fill('Nota de prueba E2E');
+        // Add note
+        await notesInput.fill('E2E test note');
         
-        // Guardar
+        // Save
         await page.click('[data-testid="save-notes"]');
         
-        // Verificar mensaje de éxito
+        // Verify success message
         await expect(page.locator('[data-testid="notes-saved"]')).toBeVisible();
       }
     }

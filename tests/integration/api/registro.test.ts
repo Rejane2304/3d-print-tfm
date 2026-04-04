@@ -1,10 +1,10 @@
 /**
- * Tests de Integración - API de Register
+ * Integration Tests - Register API
  * POST /api/auth/register
  * 
- * NOTA: Tests de validación pura (email, contraseña, teléfono)
- * están en tests/unit/validaciones.test.ts
- * Este archivo testea comportamiento de integración con BD.
+ * NOTE: Validation tests (email, password, phone)
+ * are in tests/unit/validaciones.test.ts
+ * This file tests integration behavior with database.
  */
 import { describe, it, expect, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
@@ -12,12 +12,12 @@ import { POST } from '@/app/api/auth/register/route';
 import { prisma } from '@/lib/db/prisma';
 
 describe('POST /api/auth/register', () => {
-  let datosValidos: any;
+  let validData: any;
 
   beforeEach(async () => {
-    // Generar email único con timestamp
-    datosValidos = {
-      name: 'Juan Pérez',
+    // Generate unique email with timestamp
+    validData = {
+      name: 'John Smith',
       email: `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}@example.com`,
       password: 'Password123!',
       confirmPassword: 'Password123!',
@@ -25,22 +25,22 @@ describe('POST /api/auth/register', () => {
     };
   });
 
-  describe('Registro exitoso', () => {
-    it('debe crear usuario con datos válidos', async () => {
-      const req = createRequest(datosValidos);
+  describe('Successful registration', () => {
+    it('should create user with valid data', async () => {
+      const req = createRequest(validData);
       const res = await POST(req);
       const body = await res.json();
 
       expect(res.status).toBe(201);
       expect(body.success).toBe(true);
       expect(body.user).toBeDefined();
-      expect(body.user.email).toBe(datosValidos.email.toLowerCase());
+      expect(body.user.email).toBe(validData.email.toLowerCase());
       expect(body.user.password).toBeUndefined();
     });
 
-    it('debe guardar email en minúsculas', async () => {
+    it('should store email in lowercase', async () => {
       const emailUpper = `TEST-${Date.now()}@EXAMPLE.COM`;
-      const req = createRequest({ ...datosValidos, email: emailUpper });
+      const req = createRequest({ ...validData, email: emailUpper });
       const res = await POST(req);
       const body = await res.json();
 
@@ -48,65 +48,65 @@ describe('POST /api/auth/register', () => {
       expect(body.user.email).toBe(emailUpper.toLowerCase());
     });
 
-    it('debe hashear la contraseña', async () => {
-      const req = createRequest(datosValidos);
+    it('should hash the password', async () => {
+      const req = createRequest(validData);
       await POST(req);
 
-      const usuario = await prisma.user.findUnique({
-        where: { email: datosValidos.email.toLowerCase() },
+      const user = await prisma.usuario.findUnique({
+        where: { email: validData.email.toLowerCase() },
       });
 
-      expect(usuario).toBeDefined();
-      expect(usuario!.password).not.toBe(datosValidos.password);
-      expect(usuario!.password).toMatch(/^\$2[aby]\$/);
+      expect(user).toBeDefined();
+      expect(user!.password).not.toBe(validData.password);
+      expect(user!.password).toMatch(/^\$2[aby]\$/);
     });
 
-    it('debe asignar rol CUSTOMER por defecto', async () => {
-      const req = createRequest(datosValidos);
+    it('should assign CUSTOMER role by default', async () => {
+      const req = createRequest(validData);
       await POST(req);
 
-      const usuario = await prisma.user.findUnique({
-        where: { email: datosValidos.email.toLowerCase() },
+      const user = await prisma.usuario.findUnique({
+        where: { email: validData.email.toLowerCase() },
       });
 
-      expect(usuario!.role).toBe('CUSTOMER');
+      expect(user!.role).toBe('CUSTOMER');
     });
 
-    it('debe activar usuario por defecto', async () => {
-      const req = createRequest(datosValidos);
+    it('should activate user by default', async () => {
+      const req = createRequest(validData);
       await POST(req);
 
-      const usuario = await prisma.user.findUnique({
-        where: { email: datosValidos.email.toLowerCase() },
+      const user = await prisma.usuario.findUnique({
+        where: { email: validData.email.toLowerCase() },
       });
 
-      expect(usuario!.isActive).toBe(true);
+      expect(user!.isActive).toBe(true);
     });
   });
 
-  describe('Manejo de errores', () => {
-    it('debe rechazar email duplicado', async () => {
-      // Crear usuario primero
-      const req1 = createRequest(datosValidos);
+  describe('Error handling', () => {
+    it('should reject duplicate email', async () => {
+      // Create user first
+      const req1 = createRequest(validData);
       const res1 = await POST(req1);
       expect(res1.status).toBe(201);
 
-      // Intentar crear duplicado
+      // Attempt to create duplicate
       const req2 = createRequest({
-        ...datosValidos,
-        nombre: 'Otro Nombre',
+        ...validData,
+        name: 'Another Name',
       });
       const res2 = await POST(req2);
       const body2 = await res2.json();
 
       expect(res2.status).toBe(409);
       expect(body2.success).toBe(false);
-      expect(body2.error).toContain('Ya existe');
+      expect(body2.error).toContain('Already exists');
     }, 15000);
 
-    // Los tests de validación (email inválido, contraseña débil, etc.)
-    // están en tests/unit/validaciones.test.ts
-    // Aquí solo testeamos comportamiento de BD y API
+    // Validation tests (invalid email, weak password, etc.)
+    // are in tests/unit/validaciones.test.ts
+    // Here we only test database and API behavior
   });
 });
 

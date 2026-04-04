@@ -9,8 +9,8 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 /**
- * Limpia la base de datos de test
- * Trunca todas las tablas en orden correcto para respetar FKs
+ * Cleans the test database
+ * Truncates all tables in correct order to respect FKs
  */
 export async function cleanupDB(): Promise<void> {
   const tables = [
@@ -39,20 +39,20 @@ export async function cleanupDB(): Promise<void> {
     try {
       await prisma.$executeRawUnsafe(`TRUNCATE TABLE "${table}" CASCADE`);
     } catch {
-      // Ignorar errores si tabla no existe o ya está vacía
+      // Ignore errors if table doesn't exist or is already empty
     }
   }
 }
 
 /**
- * Crea datos básicos de test
- * Usuarios y productos mínimos necesarios
+ * Creates basic test data
+ * Minimum users and products required
  */
 export async function seedTestData(): Promise<void> {
   const bcrypt = await import('bcrypt');
   const passwordHash = await bcrypt.hash('test123', 10);
 
-  // Crear usuarios de test
+  // Create test users
   await prisma.user.createMany({
     data: [
       {
@@ -75,7 +75,7 @@ export async function seedTestData(): Promise<void> {
     skipDuplicates: true,
   });
 
-  // Crear categorías de test
+  // Create test categories
   await prisma.category.createMany({
     data: [
       {
@@ -94,7 +94,7 @@ export async function seedTestData(): Promise<void> {
     skipDuplicates: true,
   });
 
-  // Crear productos de test
+  // Create test products
   await prisma.product.createMany({
     data: [
       {
@@ -123,7 +123,7 @@ export async function seedTestData(): Promise<void> {
     skipDuplicates: true,
   });
 
-  // Crear imágenes
+  // Create images
   await prisma.productImage.createMany({
     data: [
       {
@@ -150,8 +150,8 @@ export async function seedTestData(): Promise<void> {
 }
 
 /**
- * Valida que estamos usando BD de test
- * Lanza error si detecta producción
+ * Validates that we are using a test database
+ * Throws error if production is detected
  */
 export async function validateTestDB(): Promise<void> {
   const url = process.env.DATABASE_URL || '';
@@ -159,12 +159,12 @@ export async function validateTestDB(): Promise<void> {
 
   if (nodeEnv !== 'test') {
     throw new Error(
-      `NODE_ENV debe ser 'test', pero es '${nodeEnv}'\n` +
-      `Estás intentando ejecutar tests contra BD de ${nodeEnv}!`
+      `NODE_ENV must be 'test', but is '${nodeEnv}'\n` +
+      `You are trying to run tests against a ${nodeEnv} database!`
     );
   }
 
-  // Detectar BD de producción
+  // Detect production database
   const isProdUrl = 
     url.includes('/postgres?') ||
     url.includes(':5432/postgres') ||
@@ -173,30 +173,30 @@ export async function validateTestDB(): Promise<void> {
 
   if (isProdUrl) {
     throw new Error(
-      `Detectado intento de ejecutar tests contra BD de PRODUCCIÓN\n` +
+      `Detected attempt to run tests against PRODUCTION database\n` +
       `DATABASE_URL: ${url}\n` +
-      `Crea una BD separada para tests`
+      `Create a separate database for tests`
     );
   }
 
   if (!url.includes('test') && !url.includes(':5433')) {
-    console.warn('⚠️  DATABASE_URL no contiene "test" - ¿estás seguro?');
+    console.warn('⚠️  DATABASE_URL does not contain "test" - are you sure?');
     await new Promise(resolve => setTimeout(resolve, 2000));
   }
 
-  console.log('✅ Validación de BD: OK');
+  console.log('✅ DB Validation: OK');
 }
 
 /**
- * Espera un tiempo específico
- * Útil para esperar a que la BD persista datos
+ * Waits a specific time
+ * Useful for waiting for the database to persist data
  */
 export async function wait(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 /**
- * Obtiene información de la BD actual
+ * Gets information about the current database
  */
 export function getDBInfo() {
   const url = process.env.DATABASE_URL || '';

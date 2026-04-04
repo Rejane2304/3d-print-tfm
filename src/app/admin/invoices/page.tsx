@@ -106,7 +106,7 @@ export default function AdminFacturasPage() {
       const response = await fetch('/api/admin/invoices', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pedidoId: pedidoIdInput }),
+        body: JSON.stringify({ orderId: pedidoIdInput }),
       });
 
       const data = await response.json();

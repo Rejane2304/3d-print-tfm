@@ -1,139 +1,139 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Tests E2E - Carrito de Compras
- * Flujos críticos de gestión del carrito
+ * E2E Tests - Shopping Cart
+ * Critical cart management flows
  */
 
-test.describe('Carrito de Compras', () => {
+test.describe('Shopping Cart', () => {
   
   test.beforeEach(async ({ page }) => {
-    // Ir a la página de productos
+    // Go to products page
     await page.goto('/products');
     
-    // Agregar un producto al carrito
+    // Add a product to cart
     const addToCartButton = page.locator('[data-testid="add-to-cart-button"]').first();
     await addToCartButton.click();
     
-    // Esperar a que se agregue al carrito
+    // Wait for it to be added to cart
     await page.waitForTimeout(500);
   });
 
-  test('debe agregar producto al carrito', async ({ page }) => {
-    // Verificar que el carrito tiene items
+  test('should add product to cart', async ({ page }) => {
+    // Verify cart has items
     await page.goto('/cart');
     
     const cartItems = page.locator('[data-testid="cart-item"]');
     expect(await cartItems.count()).toBeGreaterThan(0);
   });
 
-  test('debe mostrar información del producto en carrito', async ({ page }) => {
-    await page.goto('/carrito');
+  test('should display product information in cart', async ({ page }) => {
+    await page.goto('/cart');
     
     const cartItem = page.locator('[data-testid="cart-item"]').first();
     
-    // Verificar información del producto
+    // Verify product information
     await expect(cartItem.locator('[data-testid="cart-item-name"]')).toBeVisible();
     await expect(cartItem.locator('[data-testid="cart-item-price"]')).toBeVisible();
     await expect(cartItem.locator('[data-testid="cart-item-quantity"]')).toBeVisible();
   });
 
-  test('debe actualizar cantidad del producto', async ({ page }) => {
-    await page.goto('/carrito');
+  test('should update product quantity', async ({ page }) => {
+    await page.goto('/cart');
     
-    // Incrementar cantidad
+    // Increase quantity
     const increaseButton = page.locator('[data-testid="increase-quantity"]').first();
     await increaseButton.click();
     
-    // Esperar actualización
+    // Wait for update
     await page.waitForTimeout(500);
     
-    // Verificar que la cantidad cambió
+    // Verify quantity changed
     const quantityInput = page.locator('[data-testid="cart-item-quantity-input"]').first();
     const value = await quantityInput.inputValue();
     expect(parseInt(value)).toBeGreaterThanOrEqual(1);
   });
 
-  test('debe eliminar producto del carrito', async ({ page }) => {
-    await page.goto('/carrito');
+  test('should remove product from cart', async ({ page }) => {
+    await page.goto('/cart');
     
-    // Obtener cantidad inicial
+    // Get initial quantity
     const initialCount = await page.locator('[data-testid="cart-item"]').count();
     
     if (initialCount > 0) {
-      // Eliminar el primer producto
+      // Remove first product
       const removeButton = page.locator('[data-testid="remove-item"]').first();
       await removeButton.click();
       
-      // Esperar a que se elimine
+      // Wait for removal
       await page.waitForTimeout(500);
       
-      // Verificar que el carrito está vacío o tiene menos items
+      // Verify cart is empty or has fewer items
       const newCount = await page.locator('[data-testid="cart-item"]').count();
       expect(newCount).toBeLessThan(initialCount);
     }
   });
 
-  test('debe calcular total correctamente', async ({ page }) => {
-    await page.goto('/carrito');
+  test('should calculate total correctly', async ({ page }) => {
+    await page.goto('/cart');
     
-    // Verificar que se muestra el total
+    // Verify total is displayed
     const totalElement = page.locator('[data-testid="cart-total"]');
     await expect(totalElement).toBeVisible();
     
-    // Verificar que el total es un número válido
+    // Verify total is a valid number
     const totalText = await totalElement.textContent();
     expect(totalText).toMatch(/\d+[,.]?\d*/);
   });
 
-  test('debe persistir carrito al recargar página', async ({ page }) => {
-    await page.goto('/carrito');
+  test('should persist cart after page reload', async ({ page }) => {
+    await page.goto('/cart');
     
-    // Obtener información del carrito
+    // Get cart information
     const initialCount = await page.locator('[data-testid="cart-item"]').count();
     
     if (initialCount > 0) {
-      // Recargar la página
+      // Reload page
       await page.reload();
       
-      // Verificar que el carrito sigue con items
+      // Verify cart still has items
       const newCount = await page.locator('[data-testid="cart-item"]').count();
       expect(newCount).toBe(initialCount);
     }
   });
 
-  test('debe mostrar carrito vacío cuando no hay items', async ({ page }) => {
-    // Ir directamente al carrito sin agregar productos
-    await page.goto('/carrito');
+  test('should display empty cart when no items', async ({ page }) => {
+    // Go directly to cart without adding products
+    await page.goto('/cart');
     
-    // Si hay items, eliminarlos todos
+    // If there are items, remove them all
     const items = page.locator('[data-testid="cart-item"]');
     while (await items.count() > 0) {
       await page.locator('[data-testid="remove-item"]').first().click();
       await page.waitForTimeout(300);
     }
     
-    // Verificar mensaje de carrito vacío
+    // Verify empty cart message
     await expect(page.locator('[data-testid="empty-cart-message"]')).toBeVisible();
-    await expect(page.locator('text=Carrito vacío')).toBeVisible();
+    await expect(page.locator('text=Empty cart')).toBeVisible();
   });
 
-  test('debe navegar al checkout desde el carrito', async ({ page }) => {
-    await page.goto('/carrito');
+  test('should navigate to checkout from cart', async ({ page }) => {
+    await page.goto('/cart');
     
-    // Click en botón de checkout
+    // Click checkout button
     const checkoutButton = page.locator('[data-testid="checkout-button"]');
     
     if (await checkoutButton.isVisible().catch(() => false)) {
       await checkoutButton.click();
       
-      // Verificar redirección al checkout
+      // Verify redirect to checkout
       await expect(page).toHaveURL('/checkout');
     }
   });
 
-  test('debe mostrar indicador de items en el header', async ({ page }) => {
-    // Verificar que el icono del carrito muestra cantidad
+  test('should display item count indicator in header', async ({ page }) => {
+    // Verify cart icon shows count
     const cartBadge = page.locator('[data-testid="cart-badge"]');
     
     if (await cartBadge.isVisible().catch(() => false)) {

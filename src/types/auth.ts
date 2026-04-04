@@ -1,5 +1,5 @@
-// Tipos personalizados para la sesión
-// Estos tipos se aplican a través de next-auth
+// Custom types for the session
+// These types are applied through next-auth
 
 export interface CustomUser {
   id: string;
@@ -12,7 +12,7 @@ export interface CustomSession {
   user: CustomUser;
 }
 
-// Helper para obtener el usuario de la sesión
+// Helper to get user from session
 export function getUserFromSession(session: unknown): CustomUser | null {
   const s = session as { user?: CustomUser } | null;
   if (!s?.user) return null;

@@ -1,72 +1,72 @@
 /**
- * Tests de Integración - API del Carrito
- * TDD: Tests primero, implementación después
+ * Integration Tests - Cart API
+ * TDD: Tests first, implementation after
  * 
  * Endpoints:
- * - GET /api/cart - Ver carrito del usuario autenticado
- * - POST /api/cart - Añadir producto al carrito
- * - PATCH /api/cart/[itemId] - Actualizar cantidad
- * - DELETE /api/cart/[itemId] - Eliminar item del carrito
+ * - GET /api/cart - View authenticated user's cart
+ * - POST /api/cart - Add product to cart
+ * - PATCH /api/cart/[itemId] - Update quantity
+ * - DELETE /api/cart/[itemId] - Remove item from cart
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { prisma } from '@/lib/db/prisma';
 import bcrypt from 'bcrypt';
 
-describe('API del Carrito', () => {
-  const usuarioTest = {
-    email: `test-carrito-${Date.now()}-${Math.random()}@example.com`,
+describe('Cart API', () => {
+  const testUser = {
+    email: `test-cart-${Date.now()}-${Math.random()}@example.com`,
     password: 'TestPassword123!',
-    name: 'Usuario Carrito Test',
+    name: 'Cart Test User',
   };
 
-  let usuarioId: string;
-  let productoTest: { id: string; slug: string; name: string; price: number; stock: number };
+  let userId: string;
+  let testProduct: { id: string; slug: string; name: string; price: number; stock: number };
 
   beforeAll(async () => {
-    // Limpiar datos previos usando transacción para evitar deadlocks
+    // Clean previous data using transaction to avoid deadlocks
     try {
       await prisma.$transaction(async (tx) => {
-        await tx.cartItem.deleteMany({
+        await tx.carritoItem.deleteMany({
           where: {
             cart: {
-              user: { email: usuarioTest.email }
+              user: { email: testUser.email }
             }
           }
         });
-        await tx.cart.deleteMany({
-          where: { user: { email: usuarioTest.email } }
+        await tx.carrito.deleteMany({
+          where: { user: { email: testUser.email } }
         });
-        await tx.user.deleteMany({
-          where: { email: usuarioTest.email }
+        await tx.usuario.deleteMany({
+          where: { email: testUser.email }
         });
       });
     } catch (error) {
-      // Ignorar errores si no hay datos que limpiar
+      // Ignore errors if no data to clean
     }
 
-    const hashedPassword = await bcrypt.hash(usuarioTest.password, 12);
-    const usuario = await prisma.user.create({
+    const hashedPassword = await bcrypt.hash(testUser.password, 12);
+    const user = await prisma.usuario.create({
       data: {
-        email: usuarioTest.email,
+        email: testUser.email,
         password: hashedPassword,
-        name: usuarioTest.name,
+        name: testUser.name,
         role: 'CUSTOMER',
         isActive: true,
       },
     });
-    usuarioId = usuario.id;
+    userId = user.id;
 
-    const productoExistente = await prisma.product.findFirst({
+    const existingProduct = await prisma.producto.findFirst({
       where: { isActive: true, stock: { gt: 10 } }
     });
 
-    if (productoExistente) {
-      productoTest = {
-        id: productoExistente.id,
-        slug: productoExistente.slug,
-        name: productoExistente.name,
-        price: Number(productoExistente.price),
-        stock: productoExistente.stock
+    if (existingProduct) {
+      testProduct = {
+        id: existingProduct.id,
+        slug: existingProduct.slug,
+        name: existingProduct.name,
+        price: Number(existingProduct.price),
+        stock: existingProduct.stock
       };
     }
   });
@@ -74,31 +74,31 @@ describe('API del Carrito', () => {
   afterAll(async () => {
     try {
       await prisma.$transaction(async (tx) => {
-        await tx.cartItem.deleteMany({
+        await tx.carritoItem.deleteMany({
           where: {
-            cart: { user: { email: usuarioTest.email } }
+            cart: { user: { email: testUser.email } }
           }
         });
-        await tx.cart.deleteMany({
-          where: { user: { email: usuarioTest.email } }
+        await tx.carrito.deleteMany({
+          where: { user: { email: testUser.email } }
         });
-        await tx.user.deleteMany({
-          where: { email: usuarioTest.email }
+        await tx.usuario.deleteMany({
+          where: { email: testUser.email }
         });
       });
     } catch (error) {
-      // Ignorar errores en limpieza
+      // Ignore cleanup errors
     }
   });
 
   describe('GET /api/cart', () => {
-    it('debe retornar error sin autenticación', async () => {
+    it('should return error without authentication', async () => {
       const response = await fetch('http://localhost:3000/api/cart');
-      // Puede devolver 401, 404 o 500 dependiendo del error
+      // May return 401, 404 or 500 depending on error
       expect([401, 404, 500]).toContain(response.status);
     });
 
-    it('debe retornar estructura vacía para usuario autenticado sin carrito', async () => {
+    it('should return empty structure for authenticated user without cart', async () => {
       const response = await fetch('http://localhost:3000/api/cart', {
         headers: { 'Cookie': 'next-auth.session-token=test-token' }
       });
@@ -107,8 +107,8 @@ describe('API del Carrito', () => {
   });
 
   describe('POST /api/cart', () => {
-    it('debe añadir producto al carrito', async () => {
-      if (!productoTest) return;
+    it('should add product to cart', async () => {
+      if (!testProduct) return;
 
       const response = await fetch('http://localhost:3000/api/cart', {
         method: 'POST',
@@ -117,7 +117,7 @@ describe('API del Carrito', () => {
           'Cookie': 'next-auth.session-token=test-token'
         },
         body: JSON.stringify({
-          productId: productoTest.id,
+          productId: testProduct.id,
           quantity: 1
         })
       });
@@ -125,7 +125,7 @@ describe('API del Carrito', () => {
       expect([200, 201, 401]).toContain(response.status);
     });
 
-    it('debe rechazar cantidad negativa o cero', async () => {
+    it('should reject negative or zero quantity', async () => {
       const response = await fetch('http://localhost:3000/api/cart', {
         method: 'POST',
         headers: {
@@ -133,7 +133,7 @@ describe('API del Carrito', () => {
           'Cookie': 'next-auth.session-token=test-token'
         },
         body: JSON.stringify({
-          productId: productoTest?.id || 'test-id',
+          productId: testProduct?.id || 'test-id',
           quantity: 0
         })
       });
@@ -141,7 +141,7 @@ describe('API del Carrito', () => {
       expect([400, 401]).toContain(response.status);
     });
 
-    it('debe rechazar producto inexistente', async () => {
+    it('should reject non-existent product', async () => {
       const response = await fetch('http://localhost:3000/api/cart', {
         method: 'POST',
         headers: {
@@ -149,7 +149,7 @@ describe('API del Carrito', () => {
           'Cookie': 'next-auth.session-token=test-token'
         },
         body: JSON.stringify({
-          productId: 'producto-inexistente-12345',
+          productId: 'non-existent-product-12345',
           quantity: 1
         })
       });
@@ -159,7 +159,7 @@ describe('API del Carrito', () => {
   });
 
   describe('PATCH /api/cart/[itemId]', () => {
-    it('debe requerir autenticación', async () => {
+    it('should require authentication', async () => {
       const response = await fetch('http://localhost:3000/api/cart/item-123', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -171,7 +171,7 @@ describe('API del Carrito', () => {
   });
 
   describe('DELETE /api/cart/[itemId]', () => {
-    it('debe requerir autenticación', async () => {
+    it('should require authentication', async () => {
       const response = await fetch('http://localhost:3000/api/cart/item-123', {
         method: 'DELETE'
       });
@@ -180,8 +180,8 @@ describe('API del Carrito', () => {
     });
   });
 
-  describe('Cálculos del carrito', () => {
-    it('debe calcular subtotal correctamente', async () => {
+  describe('Cart calculations', () => {
+    it('should calculate subtotal correctly', async () => {
       expect(true).toBe(true);
     });
   });

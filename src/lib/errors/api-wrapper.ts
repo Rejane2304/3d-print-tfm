@@ -1,6 +1,6 @@
 /**
- * Wrapper para manejar errores en API routes de Next.js
- * Asegura que los errores no lleguen crudos al cliente
+ * Wrapper for handling errors in Next.js API routes
+ * Ensures errors don't reach the client unhandled
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { ApiError, ErrorCode, handleError } from '../errors';
@@ -9,8 +9,8 @@ import { ApiError, ErrorCode, handleError } from '../errors';
 type RouteHandler = (req: NextRequest, ...args: any[]) => Promise<NextResponse>;
 
 /**
- * Envuelve un handler de API route con error handling
- * Uso: export const GET = withErrorHandler(async (req) => { ... })
+ * Wraps an API route handler with error handling
+ * Usage: export const GET = withErrorHandler(async (req) => { ... })
  */
 export function withErrorHandler(handler: RouteHandler): RouteHandler {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -20,16 +20,16 @@ export function withErrorHandler(handler: RouteHandler): RouteHandler {
     } catch (error) {
       const apiError = handleError(error);
       
-      // Log del error para debugging (solo en desarrollo)
+      // Log error for debugging (development only)
       if (process.env.NODE_ENV === 'development') {
-        console.error('🔴 Error en API route:', {
+        console.error('🔴 API route error:', {
           code: apiError.code,
           message: apiError.message,
           stack: error instanceof Error ? error.stack : undefined,
         });
       }
       
-      // Siempre devolver JSON con estructura consistente
+      // Always return JSON with consistent structure
       return NextResponse.json(apiError.toResponse(), { 
         status: apiError.statusCode 
       });
@@ -38,8 +38,8 @@ export function withErrorHandler(handler: RouteHandler): RouteHandler {
 }
 
 /**
- * Wrapper para validación de input con Zod
- * Lanza ApiError si la validación falla
+ * Wrapper for Zod input validation
+ * Throws ApiError if validation fails
  */
 export function validateInput<T>(
   schema: { parse: (data: unknown) => T },
@@ -49,16 +49,16 @@ export function validateInput<T>(
   try {
     return schema.parse(data);
   } catch (error: unknown) {
-    // Extraer mensaje de error de Zod
+    // Extract error message from Zod
     const zodError = error as { errors?: [{ message?: string }] };
-    const message = zodError.errors?.[0]?.message || `Error de validación en ${context}`;
+    const message = zodError.errors?.[0]?.message || `Validation error in ${context}`;
     throw new ApiError(ErrorCode.VALIDATION_INVALID_INPUT, message, 400);
   }
 }
 
 /**
- * Wrapper para operaciones de base de datos
- * Convierte errores de Prisma a ApiErrors
+ * Wrapper for database operations
+ * Converts Prisma errors to ApiErrors
  */
 export async function withDbOperation<T>(
   operation: () => Promise<T>,
@@ -68,10 +68,10 @@ export async function withDbOperation<T>(
     return await operation();
   } catch (error: unknown) {
     const prismaError = error as { code?: string; meta?: { target?: string[] } };
-    // Manejar errores específicos de Prisma
+    // Handle specific Prisma errors
     if (prismaError.code === 'P2002') {
       // Unique constraint violation
-      const field = prismaError.meta?.target?.[0] || 'campo';
+      const field = prismaError.meta?.target?.[0] || 'field';
       throw new ApiError(
         ErrorCode.DB_DUPLICATE_ENTRY,
         `Already exists a record with that ${field}`,
@@ -93,12 +93,12 @@ export async function withDbOperation<T>(
       // Foreign key constraint
       throw new ApiError(
         ErrorCode.VALIDATION_INVALID_INPUT,
-        `Referencia inválida en ${context}`,
+        `Invalid reference in ${context}`,
         400
       );
     }
     
-    // Re-lanzar otros errores
+    // Re-throw other errors
     throw error;
   }
 }

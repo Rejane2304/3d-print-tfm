@@ -1,7 +1,7 @@
 /**
- * Hook useCart
- * Maneja el carrito de compras tanto para usuarios autenticados (API)
- * como para usuarios no autenticados (localStorage)
+ * useCart Hook
+ * Manages shopping cart for both authenticated users (API)
+ * and unauthenticated users (localStorage)
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -40,7 +40,7 @@ export function useCart() {
   const isAuthenticated = status === 'authenticated';
   const isLoadingSession = status === 'loading';
 
-  // Cargar carrito
+  // Load cart
   const loadCart = useCallback(async () => {
     if (isLoadingSession) return;
 
@@ -49,7 +49,7 @@ export function useCart() {
 
     try {
       if (isAuthenticated) {
-        // Cargar desde API
+        // Load from API
         const response = await fetch('/api/cart');
         if (response.ok) {
           const data = await response.json();
@@ -57,10 +57,10 @@ export function useCart() {
             setCart(data.cart);
           }
         } else {
-          throw new Error('Error al cargar el carrito');
+          throw new Error('Error loading cart');
         }
       } else {
-        // Cargar desde localStorage
+        // Load from localStorage
         const cartData = localStorage.getItem(CART_STORAGE_KEY);
         if (cartData) {
           const items: CartItem[] = JSON.parse(cartData);
@@ -91,11 +91,11 @@ export function useCart() {
     }
   }, [isAuthenticated, isLoadingSession]);
 
-  // Añadir item al carrito
+  // Add item to cart
   const addItem = useCallback(async (productId: string, quantity: number, productInfo: any) => {
     try {
       if (isAuthenticated) {
-        // Usar API
+        // Use API
         const response = await fetch('/api/cart', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -104,24 +104,24 @@ export function useCart() {
         
         if (!response.ok) {
           const data = await response.json();
-          throw new Error(data.error || 'Error al añadir al carrito');
+          throw new Error(data.error || 'Error adding to cart');
         }
         
-        // Recargar carrito
+        // Reload cart
         await loadCart();
         return { success: true };
       } else {
-        // Usar localStorage
+        // Use localStorage
         const cartData = localStorage.getItem(CART_STORAGE_KEY);
         const items: CartItem[] = cartData ? JSON.parse(cartData) : [];
         
         const existingItem = items.find(item => item.productId === productId);
         
         if (existingItem) {
-          // Actualizar cantidad
+          // Update quantity
           existingItem.quantity += quantity;
         } else {
-          // Añadir nuevo item
+          // Add new item
           items.push({
             id: `local-${Date.now()}`,
             productId,
@@ -140,10 +140,10 @@ export function useCart() {
         
         localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
         
-        // Disparar evento para actualizar el contador
+        // Dispatch event to update counter
         window.dispatchEvent(new Event('cartUpdated'));
         
-        // Recargar carrito
+        // Reload cart
         await loadCart();
         return { success: true };
       }
@@ -153,11 +153,11 @@ export function useCart() {
     }
   }, [isAuthenticated, loadCart]);
 
-  // Actualizar cantidad de un item
+  // Update item quantity
   const updateQuantity = useCallback(async (itemId: string, quantity: number) => {
     try {
       if (isAuthenticated) {
-        // Usar API
+        // Use API
         const response = await fetch(`/api/cart/${itemId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
@@ -166,12 +166,12 @@ export function useCart() {
         
         if (!response.ok) {
           const data = await response.json();
-          throw new Error(data.error || 'Error al actualizar');
+          throw new Error(data.error || 'Error updating');
         }
         
         await loadCart();
       } else {
-        // Usar localStorage
+        // Use localStorage
         const cartData = localStorage.getItem(CART_STORAGE_KEY);
         if (cartData) {
           let items: CartItem[] = JSON.parse(cartData);
@@ -199,23 +199,23 @@ export function useCart() {
     }
   }, [isAuthenticated, loadCart]);
 
-  // Eliminar item del carrito
+  // Remove item from cart
   const removeItem = useCallback(async (itemId: string) => {
     try {
       if (isAuthenticated) {
-        // Usar API
+        // Use API
         const response = await fetch(`/api/cart/${itemId}`, {
           method: 'DELETE',
         });
         
         if (!response.ok) {
           const data = await response.json();
-          throw new Error(data.error || 'Error al eliminar');
+          throw new Error(data.error || 'Error removing item');
         }
         
         await loadCart();
       } else {
-        // Usar localStorage
+        // Use localStorage
         const cartData = localStorage.getItem(CART_STORAGE_KEY);
         if (cartData) {
           let items: CartItem[] = JSON.parse(cartData);
@@ -234,14 +234,14 @@ export function useCart() {
     }
   }, [isAuthenticated, loadCart]);
 
-  // Vaciar carrito (útil para checkout)
+  // Clear cart (useful for checkout)
   const clearCart = useCallback(async () => {
     try {
       if (!isAuthenticated) {
         localStorage.removeItem(CART_STORAGE_KEY);
         window.dispatchEvent(new Event('cartUpdated'));
       }
-      // Para usuarios autenticados, el carrito se vacía en el servidor durante el checkout
+      // For authenticated users, cart is cleared on the server during checkout
       await loadCart();
       return { success: true };
     } catch (err) {
@@ -250,7 +250,7 @@ export function useCart() {
     }
   }, [isAuthenticated, loadCart]);
 
-  // Migrar carrito de localStorage a la API (útil al loguearse)
+  // Migrate cart from localStorage to API (useful when logging in)
   const migrateCart = useCallback(async () => {
     if (!isAuthenticated) return;
     
@@ -258,7 +258,7 @@ export function useCart() {
     if (cartData) {
       const items: CartItem[] = JSON.parse(cartData);
       
-      // Añadir cada item a la API
+      // Add each item to API
       for (const item of items) {
         try {
           await fetch('/api/cart', {
@@ -270,19 +270,19 @@ export function useCart() {
             }),
           });
         } catch (err) {
-          console.error('Error migrando item:', err);
+          console.error('Error migrating item:', err);
         }
       }
       
-      // Limpiar localStorage
+      // Clear localStorage
       localStorage.removeItem(CART_STORAGE_KEY);
       
-      // Recargar carrito desde API
+      // Reload cart from API
       await loadCart();
     }
   }, [isAuthenticated, loadCart]);
 
-  // Cargar carrito inicial
+  // Load initial cart
   useEffect(() => {
     loadCart();
   }, [loadCart]);

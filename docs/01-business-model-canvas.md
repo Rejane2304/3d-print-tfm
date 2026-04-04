@@ -33,7 +33,7 @@
 ### Primary Customers
 1. **Households and Decorators**
    - Looking for unique decorative pieces
-   - Medium-high budget
+- Medium-high budget
    - Value design and exclusivity
 
 2. **Technology Enthusiasts**
@@ -58,215 +58,215 @@
 
 ### Distribution Channels
 | Channel | Purpose | Priority |
-|-------|-----------|-----------|
-| **Web E-commerce** | Venta principal | Alta |
-| **Redes Sociales** | Marketing y engagement | Alta |
-| **Marketplaces** | Expansión (Etsy, Amazon) | Media |
-| **Email Marketing** | Retención y promociones | Media |
-| **SEO/SEM** | Adquisición orgánica | Alta |
+|---------|-----------|-----------|
+| **Web E-commerce** | Main sales | High |
+| **Social Media** | Marketing and engagement | High |
+| **Marketplaces** | Expansion (Etsy, Amazon) | Medium |
+| **Email Marketing** | Retention and promotions | Medium |
+| **SEO/SEM** | Organic acquisition | High |
 
 ### Touchpoints
-- Landing pages optimizadas
-- Proceso de checkout simplificado
-- Notificaciones de pedido
-- Seguimiento de envíos
-- Soporte post-venta
+- Optimized landing pages
+- Simplified checkout process
+- Order notifications
+- Shipping tracking
+- Post-sales support
 
 ---
 
-## 4. RELACIONES CON CLIENTES
+## 4. CUSTOMER RELATIONSHIPS
 
-### Estrategias
-1. **Automatización**
-   - Confirmaciones de pedido automáticas
-   - Tracking de envíos
-   - Recomendaciones personalizadas
+### Strategies
+1. **Automation**
+   - Automatic order confirmations
+   - Shipping tracking
+   - Personalized recommendations
 
-2. **Soporte Personalizado**
-   - Chat en pedidos (sistema implementado)
-   - Atención para customizaciones
-   - Resolución de incidencias
+2. **Personalized Support**
+   - Chat on orders (implemented system)
+   - Attention for customizations
+   - Incident resolution
 
-3. **Comunidad**
-   - Newsletter mensual
-   - Nuevos diseños destacados
-   - Feedback de clientes
+3. **Community**
+   - Monthly newsletter
+   - Featured new designs
+   - Customer feedback
 
-4. **Programa de Fidelización** (Futuro)
-   - Puntos por compra
-   - Descuentos por volumen
-   - Acceso anticipado a novedades
-
----
-
-## 5. FUENTES DE INGRESOS
-
-### Modelo Freemium
-
-| Producto | Precio | Margen |
-|----------|--------|--------|
-| Productos estándar | 10-50€ | 40-60% |
-| Productos personalizados | 20-100€ | 50-70% |
-| Pedidos corporativos | 100-500€ | 30-50% |
-| Envío | 5-10€ | Coste real |
-
-### Estrategias de Monetización
-1. **Venta Directa**: Productos del catálogo
-2. **Personalización**: Sobreprecio por diseño custom
-3. **Suscripción** (futuro): Modelo "Maker Box" mensual
-4. **Licencias**: Diseños exclusivos para empresas
+4. **Loyalty Program** (Future)
+   - Points per purchase
+   - Volume discounts
+   - Early access to new products
 
 ---
 
-## 6. RECURSOS CLAVE
+## 5. REVENUE STREAM
 
-### Recursos Físicos
-- 🖨️ Impresoras 3D (Prusa, Bambu Lab)
-- 📦 Material (filamento PLA, PETG)
-- 🏭 Espacio de producción
-- 📦 Infraestructura de packaging
+### Freemium Model
 
-### Recursos Intelectuales
-- 🎨 Catálogo de diseños propios
-- 💻 Software de modelado 3D
-- 🔧 Configuraciones de impresión optimizadas
-- 📚 Base de conocimiento
+| Product | Price | Margin |
+|---------|--------|--------|
+| Standard products | 10-50€ | 40-60% |
+| Custom products | 20-100€ | 50-70% |
+| Corporate orders | 100-500€ | 30-50% |
+| Shipping | 5-10€ | Actual cost |
 
-### Recursos Humanos
-- 👨‍💻 Fundador/Técnico (Desarrollo + Producción)
-- 👩‍💼 Soporte al cliente (parcial)
-- 🤝 Proveedores de filamento
-- 📦 Servicio de mensajería
+### Monetization Strategies
+1. **Direct Sales**: Catalog products
+2. **Customization**: Premium for custom design
+3. **Subscription** (future): Monthly "Maker Box" model
+4. **Licenses**: Exclusive designs for companies
 
-### Recursos Tecnológicos
-- 💻 Plataforma Next.js + Prisma
-- ☁️ Hosting Vercel + Supabase
-- 💳 Stripe para pagos
+---
+
+## 6. KEY RESOURCES
+
+### Physical Resources
+- 🖨️ 3D Printers (Prusa, Bambu Lab)
+- 📦 Material (PLA filament, PETG)
+- 🏭 Production space
+- 📦 Packaging infrastructure
+
+### Intellectual Resources
+- 🎨 Own design catalog
+- 💻 3D modeling software
+- 🔧 Optimized printing configurations
+- 📚 Knowledge base
+
+### Human Resources
+- 👨‍💻 Founder/Technician (Development + Production)
+- 👩‍💼 Customer support (part-time)
+- 🤝 Filament suppliers
+- 📦 Courier service
+
+### Technological Resources
+- 💻 Next.js + Prisma platform
+- ☁️ Vercel + Supabase hosting
+- 💳 Stripe for payments
 - 📊 Analytics (Vercel + Google)
 
 ---
 
-## 7. ACTIVIDADES CLAVE
+## 7. KEY ACTIVITIES
 
-### Producción
-1. Diseño y modelado 3D
-2. Preparación de archivos (slicing)
-3. Impresión y post-procesado
-4. Control de calidad
-5. Packaging y envío
+### Production
+1. 3D design and modeling
+2. File preparation (slicing)
+3. Printing and post-processing
+4. Quality control
+5. Packaging and shipping
 
-### Desarrollo
-1. Desarrollo de software e-commerce
-2. Mantenimiento de la plataforma
-3. Testing y QA
-4. Optimización de performance
-5. Seguridad y backups
+### Development
+1. E-commerce software development
+2. Platform maintenance
+3. Testing and QA
+4. Performance optimization
+5. Security and backups
 
 ### Marketing
-1. Gestión de redes sociales
-2. Creación de contenido
-3. SEO y posicionamiento
+1. Social media management
+2. Content creation
+3. SEO and positioning
 4. Email marketing
-5. Atención al cliente
+5. Customer service
 
-### Administración
-1. Gestión de inventario
-2. Contabilidad y facturación
-3. Gestión de pedidos
-4. Proveedores
-5. Cumplimiento legal (RGPD, etc.)
-
----
-
-## 8. ALIANZAS CLAVE
-
-### Proveedores
-| Proveedor | Servicio | Importancia |
-|-----------|----------|-------------|
-| **Supabase** | Base de datos PostgreSQL | Crítica |
-| **Vercel** | Hosting y CDN | Crítica |
-| **Stripe** | Procesamiento de pagos | Crítica |
-| **Proveedor Filamento** | Material de impresión | Alta |
-| **Mensajería** | Envíos (Correos, SEUR) | Alta |
-
-### Partners Estratégicos
-- 🎨 Diseñadores 3D freelance
-- 📱 Influencers de tech/maker
-- 🏢 Makerspaces locales
-- 📦 Dropshipping partners (futuro)
+### Administration
+1. Inventory management
+2. Accounting and invoicing
+3. Order management
+4. Suppliers
+5. Legal compliance (GDPR, etc.)
 
 ---
 
-## 9. ESTRUCTURA DE COSTES
+## 8. KEY PARTNERSHIPS
 
-### Costes Fijos (Mensuales)
+### Suppliers
+| Supplier | Service | Importance |
+|----------|----------|-------------|
+| **Supabase** | PostgreSQL database | Critical |
+| **Vercel** | Hosting and CDN | Critical |
+| **Stripe** | Payment processing | Critical |
+| **Filament Supplier** | Printing material | High |
+| **Courier** | Shipping (Correos, SEUR) | High |
 
-| Concepto | Coste Estimado |
-|----------|----------------|
-| Infraestructura cloud | 50-100€ |
-| Licencias software | 30-50€ |
-| Alquiler espacio | 200-500€ |
+### Strategic Partners
+- 🎨 Freelance 3D designers
+- 📱 Tech/maker influencers
+- 🏢 Local makerspaces
+- 📦 Dropshipping partners (future)
+
+---
+
+## 9. COST STRUCTURE
+
+### Fixed Costs (Monthly)
+
+| Concept | Estimated Cost |
+|---------|----------------|
+| Cloud infrastructure | 50-100€ |
+| Software licenses | 30-50€ |
+| Space rent | 200-500€ |
 | Marketing | 100-200€ |
-| **Total Fijos** | **380-850€** |
+| **Total Fixed** | **380-850€** |
 
-### Costes Variables (Por producto)
+### Variable Costs (Per product)
 
-| Concepto | Coste |
-|----------|-------|
-| Filamento | 2-5€ |
-| Electricidad | 0.5-2€ |
+| Concept | Cost |
+|---------|-------|
+| Filament | 2-5€ |
+| Electricity | 0.5-2€ |
 | Packaging | 1-3€ |
-| Envío | 5-10€ |
-| Comisiones Stripe | 2-3% |
-| **Total Variable** | **15-35% del precio** |
+| Shipping | 5-10€ |
+| Stripe fees | 2-3% |
+| **Total Variable** | **15-35% of price** |
 
 ### Break-even Analysis
-- **Precio medio producto**: 30€
-- **Margen bruto**: 60%
-- **Ventas mensuales necesarias**: ~30 productos
+- **Average product price**: 30€
+- **Gross margin**: 60%
+- **Required monthly sales**: ~30 products
 
 ---
 
-## 📊 Resumen del Modelo
+## 📊 Model Summary
 
-### Fortalezas
-- ✅ Bajo coste inicial
-- ✅ Escalable gradualmente
-- ✅ Tecnología probada
-- ✅ Nicho en crecimiento
-- ✅ Diferenciación por personalización
+### Strengths
+- ✅ Low initial cost
+- ✅ Gradually scalable
+- ✅ Proven technology
+- ✅ Growing niche
+- ✅ Differentiation through customization
 
-### Debilidades
-- ⚠️ Dependencia de impresoras
-- ⚠️ Tiempo de producción
-- ⚠️ Curva de aprendizaje técnica
-- ⚠️ Capital inicial limitado
+### Weaknesses
+- ⚠️ Printer dependency
+- ⚠️ Production time
+- ⚠️ Technical learning curve
+- ⚠️ Limited initial capital
 
-### Oportunidades
-- 🚀 Crecimiento del mercado 3D
-- 🚀 Sostenibilidad (PLA biodegradable)
-- 🚀 Impresión a demanda
-- 🚀 Expansión B2B
+### Opportunities
+- 🚀 3D market growth
+- 🚀 Sustainability (biodegradable PLA)
+- 🚀 On-demand printing
+- 🚀 B2B expansion
 
-### Amenazas
-- ⚡ Competencia de grandes plataformas
-- ⚡ Volatilidad de costes de material
-- ⚡ Dependencia de mensajería
-- ⚡ Fallos técnicos en impresión
+### Threats
+- ⚡ Competition from large platforms
+- ⚡ Material cost volatility
+- ⚡ Courier dependency
+- ⚡ Technical printing failures
 
 ---
 
-## 🎯 KPIs del Negocio
+## 🎯 Business KPIs
 
-| KPI | Meta 6 meses | Meta 1 año |
+| KPI | 6 Month Target | 1 Year Target |
 |-----|--------------|------------|
-| Ventas mensuales | 50 productos | 200 productos |
-| Ticket medio | 35€ | 40€ |
-| Clientes recurrentes | 20% | 30% |
-| Margen bruto | 55% | 60% |
-| Satisfacción | >4.5/5 | >4.7/5 |
+| Monthly sales | 50 products | 200 products |
+| Average ticket | 35€ | 40€ |
+| Recurring customers | 20% | 30% |
+| Gross margin | 55% | 60% |
+| Satisfaction | >4.5/5 | >4.7/5 |
 
 ---
 
-**Estado**: ✅ Documento completado  
-**Próximo paso**: Implementación MVP
+**Status**: ✅ Document completed  
+**Next step**: MVP Implementation

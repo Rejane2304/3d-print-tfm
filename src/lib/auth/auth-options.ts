@@ -1,6 +1,6 @@
 /**
- * Configuración de NextAuth
- * Archivo separado para evitar problemas de importación en Route Handlers
+ * NextAuth Configuration
+ * Separate file to avoid import issues in Route Handlers
  */
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcrypt';
@@ -48,8 +48,8 @@ export const authOptions: AuthOptions = {
             data: { lastAccess: new Date() },
           });
 
-          // Devolvemos un objeto que coincide con el tipo User esperado
-          // El campo 'role' se maneja a través del token JWT
+          // Return an object that matches the expected User type
+          // The 'role' field is handled through the JWT token
           return {
             id: user.id,
             email: user.email,
@@ -57,7 +57,7 @@ export const authOptions: AuthOptions = {
             image: null,
           };
         } catch (error) {
-          console.error('Error en authorize:', error);
+          console.error('Error in authorize:', error);
           return null;
         }
       },
@@ -67,7 +67,7 @@ export const authOptions: AuthOptions = {
     async jwt({ token, user }: { token: any; user: any }) {
       if (user) {
         token.id = user.id;
-        // Obtener el rol desde la base de datos
+        // Get role from database
         const dbUser = await prisma.user.findUnique({
           where: { id: user.id },
           select: { role: true },

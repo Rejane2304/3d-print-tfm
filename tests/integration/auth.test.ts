@@ -3,34 +3,34 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import bcrypt from 'bcrypt';
 
-// Mock de next-auth/jwt
+// Mock next-auth/jwt
 vi.mock('next-auth/jwt', () => ({
   getToken: vi.fn(),
 }));
 import { getToken } from 'next-auth/jwt';
 
-describe('Autenticación y Autorización', () => {
+describe('Authentication and Authorization', () => {
   const mockGetToken = vi.mocked(getToken);
   
-  const usuarioTest = {
+  const testUser = {
     email: `auth-test-${Date.now()}@example.com`,
     password: 'TestPassword123!',
-    name: 'Usuario Test',
+    name: 'Test User',
   };
 
   beforeEach(async () => {
     mockGetToken.mockReset();
     mockGetToken.mockResolvedValue(null);
     
-    // Limpiar y crear usuario de test
-    await prisma.user.deleteMany({ where: { email: usuarioTest.email } });
+    // Clean and create test user
+    await prisma.usuario.deleteMany({ where: { email: testUser.email } });
     
-    const hashedPassword = await bcrypt.hash(usuarioTest.password, 12);
-    await prisma.user.create({
+    const hashedPassword = await bcrypt.hash(testUser.password, 12);
+    await prisma.usuario.create({
       data: {
-        email: usuarioTest.email,
+        email: testUser.email,
         password: hashedPassword,
-        name: usuarioTest.name,
+        name: testUser.name,
         role: 'CUSTOMER',
         isActive: true,
       },
@@ -38,43 +38,43 @@ describe('Autenticación y Autorización', () => {
   });
 
   afterAll(async () => {
-    await prisma.user.deleteMany({ where: { email: usuarioTest.email } });
+    await prisma.usuario.deleteMany({ where: { email: testUser.email } });
   });
 
-  describe('Login y Verificación de Credenciales', () => {
-    it('debe autorizar con credenciales válidas', async () => {
-      const usuario = await prisma.user.findUnique({
-        where: { email: usuarioTest.email },
+  describe('Login and Credential Verification', () => {
+    it('should authorize with valid credentials', async () => {
+      const user = await prisma.usuario.findUnique({
+        where: { email: testUser.email },
       });
 
-      expect(usuario).toBeDefined();
-      expect(usuario!.email).toBe(usuarioTest.email);
-      expect(usuario!.isActive).toBe(true);
+      expect(user).toBeDefined();
+      expect(user!.email).toBe(testUser.email);
+      expect(user!.isActive).toBe(true);
 
-      const passwordValido = await bcrypt.compare(usuarioTest.password, usuario!.password);
-      expect(passwordValido).toBe(true);
+      const isValidPassword = await bcrypt.compare(testUser.password, user!.password);
+      expect(isValidPassword).toBe(true);
     });
 
-    it('debe rechazar contraseña incorrecta', async () => {
-      const usuario = await prisma.user.findUnique({
-        where: { email: usuarioTest.email },
+    it('should reject incorrect password', async () => {
+      const user = await prisma.usuario.findUnique({
+        where: { email: testUser.email },
       });
 
-      const passwordValido = await bcrypt.compare('wrong-password', usuario!.password);
-      expect(passwordValido).toBe(false);
+      const isValidPassword = await bcrypt.compare('wrong-password', user!.password);
+      expect(isValidPassword).toBe(false);
     });
 
-    it('debe rechazar usuario inexistente', async () => {
-      const usuario = await prisma.user.findUnique({
+    it('should reject non-existent user', async () => {
+      const user = await prisma.usuario.findUnique({
         where: { email: 'nonexistent@example.com' },
       });
 
-      expect(usuario).toBeNull();
+      expect(user).toBeNull();
     });
   });
 
-  describe('Middleware - Rutas de Admin', () => {
-    it('debe redirigir a /auth usuarios no autenticados', async () => {
+  describe('Middleware - Admin Routes', () => {
+    it('should redirect to /auth unauthenticated users', async () => {
       mockGetToken.mockResolvedValue(null);
 
       const req = createRequest('/admin/dashboard');
@@ -84,9 +84,9 @@ describe('Autenticación y Autorización', () => {
       expect(res.headers.get('location')).toContain('/auth');
     });
 
-    it('debe redirigir a / clientes que intentan acceder', async () => {
+    it('should redirect CUSTOMER users attempting to access admin', async () => {
       mockGetToken.mockResolvedValue({
-        email: 'cliente@example.com',
+        email: 'customer@example.com',
         role: 'CUSTOMER',
       });
 
@@ -97,7 +97,7 @@ describe('Autenticación y Autorización', () => {
       expect(res.headers.get('location')).toBe('http://localhost:3000/');
     });
 
-    it('debe permitir acceso a ADMIN autenticados', async () => {
+    it('should allow access to authenticated ADMIN', async () => {
       mockGetToken.mockResolvedValue({
         email: 'admin@3dprint.com',
         role: 'ADMIN',
@@ -111,8 +111,8 @@ describe('Autenticación y Autorización', () => {
     });
   });
 
-  describe('Middleware - Rutas de Cliente', () => {
-    it('debe permitir acceso a /cart para invitados', async () => {
+  describe('Middleware - Customer Routes', () => {
+    it('should allow access to /cart for guests', async () => {
       mockGetToken.mockResolvedValue(null);
 
       const req = createRequest('/cart');
@@ -122,7 +122,7 @@ describe('Autenticación y Autorización', () => {
       expect(res.headers.get('location')).toBeNull();
     });
 
-    it('debe redirigir a /auth para /checkout si no autenticado', async () => {
+    it('should redirect to /auth for /checkout if not authenticated', async () => {
       mockGetToken.mockResolvedValue(null);
 
       const req = createRequest('/checkout');
@@ -132,9 +132,9 @@ describe('Autenticación y Autorización', () => {
       expect(res.headers.get('location')).toContain('/auth');
     });
 
-    it('debe permitir acceso a /checkout para CLIENTE autenticado', async () => {
+    it('should allow access to /checkout for authenticated CUSTOMER', async () => {
       mockGetToken.mockResolvedValue({
-        email: 'cliente@example.com',
+        email: 'customer@example.com',
         role: 'CUSTOMER',
       });
 
@@ -146,8 +146,8 @@ describe('Autenticación y Autorización', () => {
     });
   });
 
-  describe('Middleware - Redirecciones de Rol', () => {
-    it('debe redirigir ADMIN en /cart a /admin/dashboard', async () => {
+  describe('Middleware - Role Redirects', () => {
+    it('should redirect ADMIN from /cart to /admin/dashboard', async () => {
       mockGetToken.mockResolvedValue({
         email: 'admin@3dprint.com',
         role: 'ADMIN',
@@ -160,9 +160,9 @@ describe('Autenticación y Autorización', () => {
       expect(res.headers.get('location')).toBe('http://localhost:3000/admin/dashboard');
     });
 
-    it('debe redirigir CLIENTE en /admin a /', async () => {
+    it('should redirect CUSTOMER from /admin to /', async () => {
       mockGetToken.mockResolvedValue({
-        email: 'cliente@example.com',
+        email: 'customer@example.com',
         role: 'CUSTOMER',
       });
 
@@ -173,9 +173,9 @@ describe('Autenticación y Autorización', () => {
       expect(res.headers.get('location')).toBe('http://localhost:3000/');
     });
 
-    it('debe redirigir autenticados en /auth a home según rol', async () => {
+    it('should redirect authenticated users from /auth to home based on role', async () => {
       mockGetToken.mockResolvedValue({
-        email: 'cliente@example.com',
+        email: 'customer@example.com',
         role: 'CUSTOMER',
       });
 

@@ -6,7 +6,7 @@
 
 - **Stack**: Next.js 14 + Prisma + PostgreSQL + Stripe
 - **Approach**: TDD with 378 tests (100% passing)
-- **Language**: 100% English (in migration)
+- **Language**: 100% English
 - **Responsive**: Mobile → 4K
 - **Security**: Enterprise-grade
 
@@ -118,76 +118,76 @@ E2E by Device (19 tests each):
 │   │   └── api/             # API routes (30+ endpoints)
 │   ├── components/
 │   │   ├── ui/              # Base components
-│   │   ├── shop/            # Componentes tienda
-│   │   ├── admin/           # Componentes admin
+│   │   ├── shop/            # Shop components
+│   │   ├── admin/           # Admin components
 │   │   └── layout/          # Header, Footer, Navigation
 │   ├── lib/
-│   │   ├── db/              # Prisma + conexión
-│   │   ├── validators/        # Zod schemas
-│   │   └── errors/            # Manejo de errores
+│   │   ├── db/              # Prisma + connection
+│   │   ├── validators/      # Zod schemas
+│   │   └── errors/          # Error handling
 │   └── hooks/               # Custom React hooks
 ├── tests/
-│   ├── unit/              # Tests unitarios (37)
-│   ├── integration/       # Tests de integración (227)
-│   └── e2e/               # Tests E2E (96, multi-device)
-└── docs/                  # Documentación TFM (10 docs)
+│   ├── unit/                # Unit tests (37)
+│   ├── integration/         # Integration tests (227)
+│   └── e2e/                 # E2E tests (96, multi-device)
+└── docs/                    # TFM Documentation (10 docs)
 ```
 
-## 🎨 Características Implementadas
+## 🎨 Implemented Features
 
-### Públicas
-- ✅ Home con hero y destacados
-- ✅ Catálogo con filtros (categoría, material, precio, stock)
-- ✅ Búsqueda por texto
-- ✅ Paginación y ordenamiento
-- ✅ Detalle de producto con galería
-- ✅ Carrito persistente
-- ✅ Checkout con Stripe
-- ✅ Auth unificada `/auth` con tabs (UI moderna)
+### Public
+- ✅ Home with hero and featured products
+- ✅ Catalog with filters (category, material, price, stock)
+- ✅ Text search
+- ✅ Pagination and sorting
+- ✅ Product detail with gallery
+- ✅ Persistent cart
+- ✅ Checkout with Stripe
+- ✅ Unified auth `/auth` with tabs (modern UI)
 
-### Administración
-- ✅ Dashboard con métricas
-- ✅ CRUD completo de productos
-- ✅ Gestión de pedidos con estados
-- ✅ Sistema de facturación PDF
-- ✅ Alertas automáticas
-- ✅ Mensajería con clientes
+### Admin
+- ✅ Dashboard with metrics
+- ✅ Complete product CRUD
+- ✅ Order management with states
+- ✅ PDF invoicing system
+- ✅ Automatic alerts
+- ✅ Customer messaging
 
-### Usuarios
-- ✅ Registro/Login (página unificada /auth)
-- ✅ Perfil editable
-- ✅ Historial de pedidos
-- ✅ Cambio de contraseña
-- ✅ Navegación role-based (admin no ve carrito)
+### Users
+- ✅ Registration/Login (unified /auth page)
+- ✅ Editable profile
+- ✅ Order history
+- ✅ Password change
+- ✅ Role-based navigation (admin doesn't see cart)
 
-## 🔐 Seguridad
+## 🔐 Security
 
-### Autenticación
-- JWT con refresh tokens
+### Authentication
+- JWT with refresh tokens
 - Sessions httpOnly, secure, sameSite
-- Rate limiting en login
+- Rate limiting on login
 - Password hashing bcrypt (salt 12)
 
-### Autorización
-- RBAC (CLIENTE/ADMIN)
-- Middleware de protección
-- Verificación de propiedad
+### Authorization
+- RBAC (CUSTOMER/ADMIN)
+- Middleware protection
+- Resource ownership verification
 
-### Validación
-- Zod para todas las entradas
-- Sanitización de inputs
+### Validation
+- Zod for all inputs
+- Input sanitization
 - SQL Injection prevention (Prisma)
 - XSS prevention
 
-### Headers de Seguridad
+### Security Headers
 - X-Frame-Options: DENY
 - X-Content-Type-Options: nosniff
-- Content-Security-Policy configurado
+- Content-Security-Policy configured
 - Referrer-Policy
 
-## 📦 Tecnologías
+## 📦 Technologies
 
-| Categoría | Tecnología | Versión |
+| Category | Technology | Version |
 |-----------|------------|---------|
 | Framework | Next.js | 14.2.35 |
 | React | React | 18 |
@@ -199,43 +199,43 @@ E2E by Device (19 tests each):
 | Styling | Tailwind CSS | 3.4.1 |
 | Validation | Zod | 3.23.8 |
 
-## 📚 Documentación
+## 📚 Documentation
 
-| Documento | Descripción |
-|-----------|-------------|
-| `01-business-model-canvas.md` | Modelo de negocio |
-| `02-entity-analysis.md` | Análisis de entidades |
-| `03-business-processes.md` | Procesos de negocio |
-| `04-use-cases.md` | Casos de uso |
-| `05-monetization-strategy.md` | Estrategia de monetización |
-| `06-customer-segments.md` | Segmentos de clientes |
-| `07-competitive-analysis.md` | Análisis competitivo |
-| `08-implementation-roadmap.md` | Roadmap de implementación |
-| `09-quality-audit.md` | Auditoría de calidad |
-| `10-deployment-guide.md` | Guía de despliegue |
+| Document | Description |
+|----------|-------------|
+| `01-business-model-canvas.md` | Business model |
+| `02-entity-analysis.md` | Entity analysis |
+| `03-business-processes.md` | Business processes |
+| `04-use-cases.md` | Use cases |
+| `05-monetization-strategy.md` | Monetization strategy |
+| `06-customer-segments.md` | Customer segments |
+| `07-competitive-analysis.md` | Competitive analysis |
+| `08-implementation-roadmap.md` | Implementation roadmap |
+| `09-quality-audit.md` | Quality audit |
+| `10-deployment-guide.md` | Deployment guide |
 
-## 🚀 Despliegue
+## 🚀 Deployment
 
-### Opciones Recomendadas
+### Recommended Options
 
 1. **Vercel** (Frontend)
-   - Hosting Next.js optimizado
-   - CI/CD automático
+   - Optimized Next.js hosting
+   - Automatic CI/CD
    - Preview deployments
 
 2. **Supabase** (Database)
-   - PostgreSQL gestionado
+   - Managed PostgreSQL
    - Connection pooling
-   - Backups automáticos
+   - Automatic backups
 
 3. **Stripe** (Payments)
-   - Webhooks configurados
-   - Modo test/producción
+   - Configured webhooks
+   - Test/production mode
 
-### Comandos
+### Commands
 
 ```bash
-# Desarrollo
+# Development
 npm run dev
 
 # Tests
@@ -243,50 +243,50 @@ npm run test:unit
 npm run test:integration
 npm run test:e2e
 
-# Producción
+# Production
 npm run build
 npm start
 ```
 
-## 📈 Estadísticas de Desarrollo
+## 📈 Development Statistics
 
-- **Tiempo total**: ~8 semanas
-- **Líneas de código**: ~20,000+
+- **Total time**: ~8 weeks
+- **Lines of code**: ~20,000+
 - **Commits**: 50+
-- **Archivos**: 200+
+- **Files**: 200+
 - **Tests**: 378
-- **Cobertura**: 80%+ configurado
+- **Coverage**: 80%+ configured
 
-## 🔄 Cambios Recientes (Unificación Auth)
+## 🔄 Recent Changes (Auth Unification)
 
-### 2026-04-01: Unificación Login/Registro
-- **Antes**: Páginas separadas `/login` y `/registro`
-- **Ahora**: Página unificada `/auth` con tabs modernos
-- **Beneficios**:
-  - UX mejorada (cambio instantáneo entre login/register)
-  - Email compartido entre tabs
-  - Header moderno con iconos Lucide
-  - Código más mantenible
-- **Compatibilidad**: URLs antiguas redirigen automáticamente a `/auth`
-- **Tests**: 114 tests E2E actualizados y pasando en todos los dispositivos
+### 2026-04-01: Login/Register Unification
+- **Before**: Separate pages `/login` and `/register`
+- **Now**: Unified `/auth` page with modern tabs
+- **Benefits**:
+  - Improved UX (instant switch between login/register)
+  - Email shared between tabs
+  - Modern header with Lucide icons
+  - More maintainable code
+- **Compatibility**: Old URLs redirect automatically to `/auth`
+- **Tests**: 114 E2E tests updated and passing on all devices
 
-## 🎓 Créditos
+## 🎓 Credits
 
-**Desarrollado por**: Rejane Rodrigues  
-**Título**: Trabajo de Fin de Máster  
-**Institución**: Universidad  
-**Año**: 2026
+**Developed by**: Rejane Rodrigues  
+**Title**: Master's Thesis  
+**Institution**: University  
+**Year**: 2026
 
-## 📄 Licencia
+## 📄 License
 
-Proyecto académico - Uso educativo únicamente.
+Academic project - Educational use only.
 
 ---
 
-**Estado**: ✅ Completado y listo para entrega
+**Status**: ✅ Completed and ready for delivery
 
-**Próximos pasos**:
-1. [ ] Deploy a Vercel (despliegue en producción)
-2. [ ] Crear presentación del TFM
-3. [ ] Demo en vivo
-4. [ ] Entrega de documentación impresa
+**Next steps**:
+1. [ ] Deploy to Vercel (production deployment)
+2. [ ] Create TFM presentation
+3. [ ] Live demo
+4. [ ] Printed documentation delivery

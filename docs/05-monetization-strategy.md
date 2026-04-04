@@ -1,122 +1,122 @@
 # Monetization Strategy - 3D Print TFM
 
-## 💰 Modelo de Negocio
+## 💰 Business Model
 
 ### Revenue Streams
 
-#### 1. Venta Directa de Productos (Principal)
-**Descripción**: Venta de productos impresos en 3D del catálogo
+#### 1. Direct Product Sales (Main)
+**Description**: Sale of 3D printed products from the catalog
 
-| Categoría | Precio Medio | Margen Bruto |
-|-----------|--------------|--------------|
-| Decoración | 25€ | 55% |
-| Técnico | 35€ | 50% |
-| Joyería | 20€ | 60% |
-| Arte | 40€ | 45% |
-| Hogar | 30€ | 50% |
+| Category | Average Price | Gross Margin |
+|----------|--------------|--------------|
+| Decoration | 25€ | 55% |
+| Technical | 35€ | 50% |
+| Jewelry | 20€ | 60% |
+| Art | 40€ | 45% |
+| Home | 30€ | 50% |
 
-**Volumen Esperado**:
-- Mes 1-3: 20-50 unidades/mes
-- Mes 4-6: 50-100 unidades/mes
-- Mes 7-12: 100-200 unidades/mes
-
----
-
-#### 2. Personalización Premium
-**Descripción**: Sobreprecio por diseños personalizados
-
-| Servicio | Precio | Tiempo |
-|----------|--------|--------|
-| Modificación de color | +5€ | Instantáneo |
-| Texto personalizado | +10€ | 1 día |
-| Diseño simple modificado | +20€ | 2-3 días |
-| Diseño completo custom | Desde 50€ | 3-5 días |
-
-**Tasa de conversión esperada**: 15% de pedidos
+**Expected Volume**:
+- Month 1-3: 20-50 units/month
+- Month 4-6: 50-100 units/month
+- Month 7-12: 100-200 units/month
 
 ---
 
-#### 3. Pedidos Corporativos (B2B)
-**Descripción**: Regalos corporativos, eventos, merchandising
+#### 2. Premium Customization
+**Description**: Premium for custom designs
 
-| Tipo de pedido | Volumen | Descuento | Margen |
-|----------------|---------|-----------|--------|
-| 10-50 unidades | 10% | 45% |
-| 50-100 unidades | 15% | 40% |
-| 100+ unidades | 20% | 35% |
+| Service | Price | Time |
+|---------|--------|--------|
+| Color modification | +5€ | Instant |
+| Custom text | +10€ | 1 day |
+| Simple design modified | +20€ | 2-3 days |
+| Complete custom design | From 50€ | 3-5 days |
 
-**Ejemplos**:
-- Regalos de empresa (Navidad, aniversarios)
-- Eventos (ferias, congresos)
-- Merchandising personalizado
-- Trofeos y reconocimientos
+**Expected conversion rate**: 15% of orders
 
 ---
 
-#### 4. Envíos (Cost Recovery)
-**Descripción**: Recuperación de costes logísticos
+#### 3. Corporate Orders (B2B)
+**Description**: Corporate gifts, events, merchandising
 
-| Zona | Coste | Precio Cliente |
+| Order Type | Volume | Discount | Margin |
+|------------|---------|----------|--------|
+| 10-50 units | 10% | 45% |
+| 50-100 units | 15% | 40% |
+| 100+ units | 20% | 35% |
+
+**Examples**:
+- Company gifts (Christmas, anniversaries)
+- Events (trade shows, conferences)
+- Custom merchandising
+- Trophies and recognitions
+
+---
+
+#### 4. Shipping (Cost Recovery)
+**Description**: Logistics cost recovery
+
+| Zone | Cost | Customer Price |
 |------|-------|-----------------|
-| España Peninsular | 5-7€ | 5-7€ |
-| Baleares/Canarias | 8-10€ | 8-10€ |
-| Internacional EU | 12-15€ | 12-15€ |
+| Spain Peninsula | 5-7€ | 5-7€ |
+| Balearics/Canaries | 8-10€ | 8-10€ |
+| International EU | 12-15€ | 12-15€ |
 
-**Política**: Envío gratuito >100€ (incentiva ticket medio)
+**Policy**: Free shipping >100€ (incentivizes average ticket)
 
 ---
 
-### Estructura de Precios
+### Price Structure
 
-#### Cálculo de Precio
+#### Price Calculation
 
 ```
-PRECIO_VENTA = COSTE_PRODUCCION + MARGEN + COSTES_FIJOS
+SALE_PRICE = PRODUCTION_COST + MARGIN + FIXED_COSTS
 
-Donde:
-COSTE_PRODUCCION = Filamento + Electricidad + Post-procesado
-MARGEN = 40-60% sobre coste
-COSTES_FIJOS = Amortización impresora + Packaging + Marketing
+Where:
+PRODUCTION_COST = Filament + Electricity + Post-processing
+MARGIN = 40-60% on cost
+FIXED_COSTS = Printer amortization + Packaging + Marketing
 ```
 
-#### Ejemplo: Soporte Móvil
+#### Example: Phone Stand
 
-| Concepto | Coste | % del precio |
-|----------|-------|--------------|
-| Filamento (50g) | 1.50€ | 6% |
-| Electricidad (2h) | 0.50€ | 2% |
+| Concept | Cost | % of price |
+|---------|-------|--------------|
+| Filament (50g) | 1.50€ | 6% |
+| Electricity (2h) | 0.50€ | 2% |
 | Packaging | 1.00€ | 4% |
-| **Coste directo** | **3.00€** | **12%** |
-| Margen (50%) | 3.00€ | 12% |
-| Amortización | 1.00€ | 4% |
+| **Direct cost** | **3.00€** | **12%** |
+| Margin (50%) | 3.00€ | 12% |
+| Amortization | 1.00€ | 4% |
 | Marketing (10%) | 2.50€ | 10% |
-| Contingencia | 1.00€ | 4% |
-| **PRECIO VENTA** | **10.50€** | **42%** |
-| IVA (21%) | 2.21€ | - |
-| **PVP** | **12.71€** | - |
+| Contingency | 1.00€ | 4% |
+| **SALE PRICE** | **10.50€** | **42%** |
+| VAT (21%) | 2.21€ | - |
+| **Final Price** | **12.71€** | - |
 
-**Precio redondeado**: 12.90€
+**Rounded price**: 12.90€
 
 ---
 
-## 📊 Proyección Financiera
+## 📊 Financial Projection
 
-### Año 1 (2026)
+### Year 1 (2026)
 
-#### Escenario Conservador
+#### Conservative Scenario
 
-| Mes | Unidades | Ingresos | Costes | Beneficio |
-|-----|----------|----------|--------|-----------|
+| Month | Units | Revenue | Costs | Profit |
+|-------|----------|----------|--------|-----------|
 | 1 | 20 | 600€ | 400€ | 200€ |
 | 3 | 40 | 1,200€ | 800€ | 400€ |
 | 6 | 80 | 2,400€ | 1,600€ | 800€ |
 | 12 | 150 | 4,500€ | 3,000€ | 1,500€ |
 | **Total** | **1,000** | **30,000€** | **20,000€** | **10,000€** |
 
-#### Escenario Optimista
+#### Optimistic Scenario
 
-| Mes | Unidades | Ingresos | Costes | Beneficio |
-|-----|----------|----------|--------|-----------|
+| Month | Units | Revenue | Costs | Profit |
+|-------|----------|----------|--------|-----------|
 | 1 | 30 | 900€ | 600€ | 300€ |
 | 6 | 150 | 4,500€ | 3,000€ | 1,500€ |
 | 12 | 300 | 9,000€ | 6,000€ | 3,000€ |
@@ -125,171 +125,171 @@ COSTES_FIJOS = Amortización impresora + Packaging + Marketing
 ### Break-even Analysis
 
 ```
-Punto de Equilibrio = Costes Fijos / (Precio Medio - Coste Variable)
+Break-even Point = Fixed Costs / (Average Price - Variable Cost)
 
-Costes Fijos Mensuales: 600€
-Precio Medio: 30€
-Coste Variable: 12€
-Margen Unitario: 18€
+Monthly Fixed Costs: 600€
+Average Price: 30€
+Variable Cost: 12€
+Unit Margin: 18€
 
-Break-even = 600€ / 18€ = 34 unidades/mes
+Break-even = 600€ / 18€ = 34 units/month
 ```
 
-**Conclusión**: Necesitamos vender ~34 productos/mes para cubrir gastos fijos.
+**Conclusion**: We need to sell ~34 products/month to cover fixed costs.
 
 ---
 
-## 🎯 Estrategias de Precio
+## 🎯 Pricing Strategies
 
-### 1. Penetración de Mercado
-**Objetivo**: Ganar cuota rápidamente
+### 1. Market Penetration
+**Objective**: Gain market share quickly
 
-- Precios 10-15% bajo competencia inicialmente
-- Aumentar gradualmente según madurez
-- **Duración**: Primeros 3 meses
+- Prices 10-15% below competition initially
+- Gradually increase according to maturity
+- **Duration**: First 3 months
 
 ### 2. Bundling
-**Objetivo**: Incrementar ticket medio
+**Objective**: Increase average ticket
 
-| Pack | Contenido | Precio | Ahorro |
+| Pack | Content | Price | Savings |
 |------|-----------|--------|--------|
-| Starter | 3 productos pequeños | 25€ | 15% |
-| Home Decor | 5 piezas decoración | 80€ | 20% |
-| Office Kit | Organización escritorio | 45€ | 15% |
+| Starter | 3 small products | 25€ | 15% |
+| Home Decor | 5 decoration pieces | 80€ | 20% |
+| Office Kit | Desk organization | 45€ | 15% |
 
-### 3. Precios Psicológicos
-**Técnica**: Precios terminados en .90 o .95
+### 3. Psychological Pricing
+**Technique**: Prices ending in .90 or .95
 
-- 9.90€ en lugar de 10€
-- 29.95€ en lugar of 30€
-- Percibido como significativamente menor
+- 9.90€ instead of 10€
+- 29.95€ instead of 30€
+- Perceived as significantly lower
 
-### 4. Descuentos Temporales
-**Estrategia**: Generar urgencia
+### 4. Temporary Discounts
+**Strategy**: Generate urgency
 
 - **Flash sales**: 24h, -20%
-- **Early bird**: -15% nuevos lanzamientos
-- **Seasonal**: Navidad, Black Friday
-- **Abandoned cart**: -10% para recuperar
+- **Early bird**: -15% new releases
+- **Seasonal**: Christmas, Black Friday
+- **Abandoned cart**: -10% to recover
 
 ---
 
-## 📈 KPIs Financieros
+## 📈 Financial KPIs
 
-### Métricas Mensuales
+### Monthly Metrics
 
-| KPI | Meta M3 | Meta M6 | Meta M12 |
+| KPI | Month 3 Target | Month 6 Target | Month 12 Target |
 |-----|---------|---------|----------|
 | Revenue | 1,500€ | 3,000€ | 6,000€ |
-| Ticket Medio | 35€ | 38€ | 40€ |
-| Margen Bruto | 50% | 52% | 55% |
+| Average Ticket | 35€ | 38€ | 40€ |
+| Gross Margin | 50% | 52% | 55% |
 | CAC* | 10€ | 8€ | 6€ |
 | LTV** | 70€ | 90€ | 120€ |
 
 *Customer Acquisition Cost
 **Lifetime Value
 
-### Métricas Unitarias
+### Unit Metrics
 
-| Métrica | Valor Objetivo |
+| Metric | Target Value |
 |---------|----------------|
 | AOV (Average Order Value) | 40€ |
-| Conversión visita→compra | 2.5% |
-| Tasa de carrito abandonado | <60% |
-| Tasa de retención (3 meses) | 25% |
-| Coste de envío/recuperado | 100% |
+| Visit→purchase conversion | 2.5% |
+| Abandoned cart rate | <60% |
+| Retention rate (3 months) | 25% |
+| Shipping cost/recovered | 100% |
 
 ---
 
-## 💳 Costes de Transacción
+## 💳 Transaction Costs
 
 ### Stripe Fees
 
-| Tipo | Coste |
+| Type | Cost |
 |------|-------|
-| Tarjetas europeas | 1.5% + 0.25€ |
-| Tarjetas no-europeas | 3.25% + 0.25€ |
-| Transferencia SEPA | 0.8€ fijo |
+| European cards | 1.5% + 0.25€ |
+| Non-European cards | 3.25% + 0.25€ |
+| SEPA transfer | 0.8€ fixed |
 
-**Impacto**: ~2% del revenue total
+**Impact**: ~2% of total revenue
 
-### Estrategia de Minimización
+### Minimization Strategy
 
-1. **Incentivar transferencias**: Descuento 1% para SEPA
-2. **Ticket mínimo**: 10€ para evitar micro-transacciones
-3. **Suscripciones**: Modelo futuro para recurrentes
+1. **Incentivize transfers**: 1% discount for SEPA
+2. **Minimum ticket**: 10€ to avoid micro-transactions
+3. **Subscriptions**: Future model for recurring payments
 
 ---
 
-## 🎁 Estrategia de Fidelización
+## 🎁 Loyalty Strategy
 
-### Programa de Puntos (Futuro)
+### Points Program (Future)
 
 ```
-1€ gastado = 1 punto
-100 puntos = 5€ descuento
+1€ spent = 1 point
+100 points = 5€ discount
 
-Beneficios escalonados:
-- Bronce (0-500€): Envío gratis >50€
-- Plata (500-1000€): -5% permanente
-- Oro (>1000€): -10% + acceso anticipado
+Tiered benefits:
+- Bronze (0-500€): Free shipping >50€
+- Silver (500-1000€): -5% permanent
+- Gold (>1000€): -10% + early access
 ```
 
 ### Email Marketing
 
-| Trigger | Email | Objetivo |
+| Trigger | Email | Objective |
 |---------|-------|----------|
-| Registro | Bienvenida + 10% | Activación |
-| 7 días sin compra | Catálogo destacado | Conversión |
-| Compra | Gracias + tracking | Retención |
-| 30 días post-compra | Review + cross-sell | LTV |
-| Cumpleaños | 15% descuento | Engagement |
+| Registration | Welcome + 10% | Activation |
+| 7 days without purchase | Featured catalog | Conversion |
+| Purchase | Thanks + tracking | Retention |
+| 30 days post-purchase | Review + cross-sell | LTV |
+| Birthday | 15% discount | Engagement |
 
 ---
 
-## 🚀 Escalabilidad
+## 🚀 Scalability
 
-### Fases de Crecimiento
+### Growth Phases
 
-#### Fase 1: MVP (M1-M3)
-- Productos estándar del catálogo
-- Precios competitivos
-- Enfoque en adquisición
+#### Phase 1: MVP (M1-M3)
+- Standard catalog products
+- Competitive prices
+- Focus on acquisition
 
-#### Fase 2: Optimización (M4-M6)
-- Introducir personalización
-- Aumentar ticket medio
-- Fidelización básica
+#### Phase 2: Optimization (M4-M6)
+- Introduce customization
+- Increase average ticket
+- Basic loyalty program
 
-#### Fase 3: Expansión (M7-M12)
-- B2B corporativo
-- Suscripciones (Maker Box)
-- Marketplace externos
+#### Phase 3: Expansion (M7-M12)
+- B2B corporate
+- Subscriptions (Maker Box)
+- External marketplaces
 
-### Inversión Requerida
+### Required Investment
 
-| Concepto | Inversión | ROI Esperado |
+| Concept | Investment | Expected ROI |
 |----------|-----------|--------------|
-| Marketing digital | 300€/mes | 3:1 |
-| Nuevos diseños | 500€/mes | 2:1 |
-| Equipamiento | 2000€ | 6 meses |
-| **Total Año 1** | **~8,000€** | **1.5:1** |
+| Digital marketing | 300€/month | 3:1 |
+| New designs | 500€/month | 2:1 |
+| Equipment | 2000€ | 6 months |
+| **Total Year 1** | **~8,000€** | **1.5:1** |
 
 ---
 
-## ✅ Checklist de Implementación
+## ✅ Implementation Checklist
 
-- [x] Estructura de precios definida
-- [x] Márgenes calculados por producto
-- [x] Política de descuentos establecida
-- [x] Envío: integrado con costes reales
-- [x] Stripe configurado con tarifas
-- [x] Umbral envío gratis: 100€
-- [ ] Programa de fidelización (M6)
-- [ ] Email marketing automatizado (M3)
-- [ ] Análisis de cohortes (M6)
+- [x] Price structure defined
+- [x] Margins calculated per product
+- [x] Discount policy established
+- [x] Shipping: integrated with real costs
+- [x] Stripe configured with fees
+- [x] Free shipping threshold: 100€
+- [ ] Loyalty program (M6)
+- [ ] Automated email marketing (M3)
+- [ ] Cohort analysis (M6)
 
 ---
 
-**Estado**: ✅ Estrategia de monetización implementada
-**Revisión**: Mensual primer año, trimestral después
+**Status**: ✅ Monetization strategy implemented
+**Review**: Monthly first year, quarterly afterwards

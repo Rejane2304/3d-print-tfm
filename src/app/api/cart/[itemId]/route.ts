@@ -1,10 +1,10 @@
 /**
- * API Route para items individuales del carrito
+ * API Route for individual cart items
  * 
- * PATCH /api/cart/[itemId] - Actualizar cantidad
- * DELETE /api/cart/[itemId] - Eliminar item
+ * PATCH /api/cart/[itemId] - Update quantity
+ * DELETE /api/cart/[itemId] - Remove item
  * 
- * Requiere autenticación
+ * Requires authentication
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
@@ -12,14 +12,14 @@ import { withErrorHandler } from '@/lib/errors/api-wrapper';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 
-// PATCH /api/cart/[itemId] - Actualizar cantidad
+// PATCH /api/cart/[itemId] - Update quantity
 export const PATCH = withErrorHandler(async (
   req: NextRequest,
   { params }: { params: { itemId: string } }
 ) => {
   const { itemId } = params;
 
-  // Verificar autenticación
+  // Verify authentication
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.email) {
@@ -127,14 +127,14 @@ export const PATCH = withErrorHandler(async (
   });
 });
 
-// DELETE /api/cart/[itemId] - Eliminar item
+// DELETE /api/cart/[itemId] - Remove item
 export const DELETE = withErrorHandler(async (
   req: NextRequest,
   { params }: { params: { itemId: string } }
 ) => {
   const { itemId } = params;
 
-  // Verificar autenticación
+  // Verify authentication
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.email) {

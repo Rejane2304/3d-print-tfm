@@ -1,188 +1,188 @@
 /**
- * Tests E2E - Flujo de Autenticación
- * Tests con Playwright para el flujo completo de login/logout
+ * E2E Tests - Authentication Flow
+ * Playwright tests for the complete login/logout flow
  * 
- * NOTA: Ahora usando página unificada /auth con tabs
+ * NOTE: Now using unified /auth page with tabs
  */
 import { test, expect } from '@playwright/test';
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
-test.describe('Flujo de Autenticación', () => {
-  test.describe('Página /auth unificada', () => {
-    test('debe mostrar tabs de login y registro', async ({ page }) => {
+test.describe('Authentication Flow', () => {
+  test.describe('Unified /auth page', () => {
+    test('should display login and register tabs', async ({ page }) => {
       await page.goto(`${BASE_URL}/auth`);
       
-      // Verificar que existen ambos tabs (usando .first() para evitar strict mode violation)
-      await expect(page.getByRole('button', { name: /iniciar sesión/i }).first()).toBeVisible();
-      await expect(page.getByRole('button', { name: /registrarse/i }).first()).toBeVisible();
+      // Verify both tabs exist (using .first() to avoid strict mode violation)
+      await expect(page.getByRole('button', { name: /sign in/i }).first()).toBeVisible();
+      await expect(page.getByRole('button', { name: /register/i }).first()).toBeVisible();
       
-      // El tab de login debe estar activo por defecto
+      // Login tab should be active by default
       await expect(page.locator('input#login-email')).toBeVisible();
     });
 
-    test('debe redirigir /login a /auth', async ({ page }) => {
+    test('should redirect /login to /auth', async ({ page }) => {
       await page.goto(`${BASE_URL}/login`);
       
-      // Debe redirigir a /auth
+      // Should redirect to /auth
       await expect(page).toHaveURL(/auth/);
-      await expect(page.getByRole('button', { name: /iniciar sesión/i }).first()).toBeVisible();
+      await expect(page.getByRole('button', { name: /sign in/i }).first()).toBeVisible();
     });
 
-    test('debe redirigir /register a /auth con tab register', async ({ page }) => {
+    test('should redirect /register to /auth with register tab', async ({ page }) => {
       await page.goto(`${BASE_URL}/register`);
       
-      // Debe redirigir a /auth con tab=register
+      // Should redirect to /auth with tab=register
       await expect(page).toHaveURL(/auth.*tab=register/);
       
-      // El tab de registro debe estar activo
-      await expect(page.locator('input#register-nombre')).toBeVisible();
+      // Register tab should be active
+      await expect(page.locator('input#register-name')).toBeVisible();
     });
   });
 
-  test.describe('Registro de usuario', () => {
-    test('debe mostrar formulario de registro', async ({ page }) => {
+  test.describe('User registration', () => {
+    test('should display registration form', async ({ page }) => {
       await page.goto(`${BASE_URL}/auth?tab=register`);
       
-      // Verificar que el formulario existe
-      await expect(page.getByRole('heading', { name: /bienvenido/i })).toBeVisible();
-      await expect(page.locator('input#register-nombre')).toBeVisible();
+      // Verify form exists
+      await expect(page.getByRole('heading', { name: /welcome/i })).toBeVisible();
+      await expect(page.locator('input#register-name')).toBeVisible();
       await expect(page.locator('input#register-email')).toBeVisible();
       await expect(page.locator('input#register-password')).toBeVisible();
     });
 
-    test('debe validar campos requeridos en registro', async ({ page }) => {
+    test('should validate required fields in registration', async ({ page }) => {
       await page.goto(`${BASE_URL}/auth?tab=register`);
       
-      // Intentar enviar formulario vacío
-      await page.locator('button[type="submit"]').filter({ hasText: /registrarse/i }).click();
+      // Try to submit empty form
+      await page.locator('button[type="submit"]').filter({ hasText: /register/i }).click();
       
-      // Debe seguir en la misma página (validación HTML5)
+      // Should stay on the same page (HTML5 validation)
       await expect(page).toHaveURL(/auth/);
     });
 
-    test('debe registrar usuario correctamente', async ({ page }) => {
+    test('should register user successfully', async ({ page }) => {
       await page.goto(`${BASE_URL}/auth?tab=register`);
       
-      // Generar email único
+      // Generate unique email
       const uniqueEmail = `test-e2e-${Date.now()}@example.com`;
       
-      // Llenar formulario
-      await page.locator('input#register-nombre').fill('Usuario Test E2E');
+      // Fill form
+      await page.locator('input#register-name').fill('E2E Test User');
       await page.locator('input#register-email').fill(uniqueEmail);
       await page.locator('input#register-password').fill('TestPassword123!');
       await page.locator('input#register-confirm').fill('TestPassword123!');
       
-      // Enviar formulario
-      await page.locator('button[type="submit"]').filter({ hasText: /registrarse/i }).click();
+      // Submit form
+      await page.locator('button[type="submit"]').filter({ hasText: /register/i }).click();
       
-      // Esperar procesamiento
+      // Wait for processing
       await page.waitForTimeout(4000);
       
-      // Verificar éxito: debe mostrar mensaje de éxito o redirigir
+      // Verify success: should show success message or redirect
       const currentUrl = page.url();
-      const hasSuccessMessage = await page.getByText(/registro exitoso|cuenta creada/i).isVisible().catch(() => false);
+      const hasSuccessMessage = await page.getByText(/registration successful|account created/i).isVisible().catch(() => false);
       const isAuthPage = currentUrl.includes('/auth');
       
       expect(hasSuccessMessage || isAuthPage).toBe(true);
     });
 
-    test('debe rechazar email duplicado', async ({ page }) => {
+    test('should reject duplicate email', async ({ page }) => {
       await page.goto(`${BASE_URL}/auth?tab=register`);
       
-      await page.locator('input#register-nombre').fill('Usuario Test');
+      await page.locator('input#register-name').fill('Test User');
       await page.locator('input#register-email').fill('juan@example.com');
       await page.locator('input#register-password').fill('TestPassword123!');
       await page.locator('input#register-confirm').fill('TestPassword123!');
       
-      await page.locator('button[type="submit"]').filter({ hasText: /registrarse/i }).click();
+      await page.locator('button[type="submit"]').filter({ hasText: /register/i }).click();
       
       await page.waitForTimeout(2000);
       
-      // Debe mostrar error de email duplicado
-      const errorVisible = await page.getByText(/ya existe|email|error/i).isVisible().catch(() => false);
+      // Should show duplicate email error
+      const errorVisible = await page.getByText(/already exists|email|error/i).isVisible().catch(() => false);
       expect(errorVisible).toBe(true);
     });
   });
 
-  test.describe('Login de usuario', () => {
-    test('debe mostrar formulario de login', async ({ page }) => {
+  test.describe('User login', () => {
+    test('should display login form', async ({ page }) => {
       await page.goto(`${BASE_URL}/auth`);
       
-      await expect(page.getByRole('heading', { name: /bienvenido/i })).toBeVisible();
+      await expect(page.getByRole('heading', { name: /welcome/i })).toBeVisible();
       await expect(page.locator('input#login-email')).toBeVisible();
       await expect(page.locator('input#login-password')).toBeVisible();
     });
 
-    test('debe iniciar sesión con credenciales válidas', async ({ page }) => {
+    test('should sign in with valid credentials', async ({ page }) => {
       await page.goto(`${BASE_URL}/auth`);
       
-      // Credenciales del seed
+      // Seed credentials
       await page.locator('input#login-email').fill('juan@example.com');
       await page.locator('input#login-password').fill('pass123');
       
-      await page.locator('button[type="submit"]').filter({ hasText: /iniciar sesión/i }).click();
+      await page.locator('button[type="submit"]').filter({ hasText: /sign in/i }).click();
       
-      // Esperar a que la URL cambie (salga de /auth)
-      // Usar timeout más largo para evitar flakiness en mobile
+      // Wait for URL to change (leave /auth)
+      // Use longer timeout to avoid flakiness on mobile
       try {
         await page.waitForURL((url) => !url.pathname.includes('/auth'), { timeout: 10000 });
       } catch {
-        // Si el waitForURL falla, validar manualmente
+        // If waitForURL fails, validate manually
         await page.waitForTimeout(2000);
       }
       
-      // Verificar que ya no estamos en auth
+      // Verify we are no longer on auth
       const currentUrl = page.url();
       expect(currentUrl).not.toContain('/auth');
     });
 
-    test('debe rechazar credenciales inválidas', async ({ page }) => {
+    test('should reject invalid credentials', async ({ page }) => {
       await page.goto(`${BASE_URL}/auth`);
       
       await page.locator('input#login-email').fill('juan@example.com');
-      await page.locator('input#login-password').fill('contraseña-incorrecta');
+      await page.locator('input#login-password').fill('wrong-password');
       
-      await page.locator('button[type="submit"]').filter({ hasText: /iniciar sesión/i }).click();
+      await page.locator('button[type="submit"]').filter({ hasText: /sign in/i }).click();
       
-      // Esperar a que se procese el login (dar tiempo al error)
+      // Wait for login to process (give time for error)
       await page.waitForTimeout(3000);
       
-      // Verificar que NO redirige fuera de /auth
-      // NextAuth redirige a /auth con parámetro error si las credenciales son inválidas
+      // Verify NO redirect out of /auth
+      // NextAuth redirects to /auth with error parameter if credentials are invalid
       const currentUrl = page.url();
       
-      // Debe estar en /auth (con o sin parámetros de error)
+      // Should be on /auth (with or without error parameters)
       const stillOnAuth = currentUrl.includes('/auth');
       
-      // Alternativamente, puede haber un mensaje de error visible
+      // Alternatively, there may be a visible error message
       const hasErrorMessage = await page
-        .getByText(/Email o contraseña|incorrectos|error/i)
+        .getByText(/email or password|incorrect|error/i)
         .isVisible()
         .catch(() => false);
       
-      // Debe cumplir al menos una condición: estar en /auth O mostrar error
+      // Must meet at least one condition: be on /auth OR show error
       expect(stillOnAuth || hasErrorMessage).toBe(true);
     });
 
-    test('debe redirigir usuarios autenticados desde /auth', async ({ page }) => {
-      // Primero iniciar sesión
+    test('should redirect authenticated users from /auth', async ({ page }) => {
+      // First sign in
       await page.goto(`${BASE_URL}/auth`);
       await page.locator('input#login-email').fill('juan@example.com');
       await page.locator('input#login-password').fill('pass123');
-      await page.locator('button[type="submit"]').filter({ hasText: /iniciar sesión/i }).click();
+      await page.locator('button[type="submit"]').filter({ hasText: /sign in/i }).click();
       
-      // Esperar a que redirija fuera de /auth (login exitoso)
+      // Wait for redirect out of /auth (successful login)
       await page.waitForURL((url) => !url.pathname.includes('/auth'), { timeout: 15000 });
       
-      // Intentar volver a auth - ahora debería redirigir automáticamente
+      // Try to go back to auth - should redirect automatically
       await page.goto(`${BASE_URL}/auth`);
       
-      // Esperar redirección automática (usuarios autenticados no pueden ver /auth)
+      // Wait for automatic redirect (authenticated users cannot see /auth)
       try {
         await page.waitForURL((url) => !url.pathname.includes('/auth'), { timeout: 5000 });
       } catch {
-        // Si no redirige automáticamente, verificar que al menos no estamos en auth
+        // If it doesn't redirect automatically, verify at least that we're not on auth
         await page.waitForTimeout(2000);
       }
       
@@ -192,22 +192,22 @@ test.describe('Flujo de Autenticación', () => {
   });
 
   test.describe('Logout', () => {
-    test('debe cerrar sesión correctamente', async ({ page, isMobile }) => {
-      // Iniciar sesión primero
+    test('should sign out successfully', async ({ page, isMobile }) => {
+      // Sign in first
       await page.goto(`${BASE_URL}/auth`);
       await page.locator('input#login-email').fill('juan@example.com');
       await page.locator('input#login-password').fill('pass123');
-      await page.locator('button[type="submit"]').filter({ hasText: /iniciar sesión/i }).click();
+      await page.locator('button[type="submit"]').filter({ hasText: /sign in/i }).click();
       
-      // Esperar redirección completa
+      // Wait for complete redirect
       await page.waitForTimeout(4000);
       
-      // Verificar que estamos autenticados (no en /auth)
+      // Verify we are authenticated (not on /auth)
       let currentUrl = page.url();
       expect(currentUrl).not.toContain('/auth');
       
       if (isMobile) {
-        // En mobile, abrir menú hamburguesa primero
+        // On mobile, open hamburger menu first
         const menuButton = page.locator('header button').filter({ has: page.locator('svg') }).first();
         if (await menuButton.isVisible().catch(() => false)) {
           await menuButton.click();
@@ -215,27 +215,27 @@ test.describe('Flujo de Autenticación', () => {
         }
       }
       
-      // Buscar y hacer clic en cerrar sesión
+      // Find and click sign out
       const logoutLink = page.locator('a[href="/api/auth/signout"]').first();
       if (await logoutLink.isVisible().catch(() => false)) {
         await logoutLink.click();
       } else {
-        // Si no hay link visible, intentar hacer clic en botón de logout si existe
-        const logoutButton = page.locator('button:has-text("Cerrar sesión"), button:has-text("Salir")').first();
+        // If no visible link, try clicking logout button if it exists
+        const logoutButton = page.locator('button:has-text("Sign out"), button:has-text("Logout")').first();
         if (await logoutButton.isVisible().catch(() => false)) {
           await logoutButton.click();
         }
       }
       
-      // Esperar a que se complete el logout
+      // Wait for logout to complete
       await page.waitForTimeout(4000);
       
-      // Refrescar página para verificar que se cerró sesión
+      // Refresh page to verify session is closed
       await page.reload();
       await page.waitForTimeout(2000);
       
       if (isMobile) {
-        // En mobile, abrir menú hamburguesa para ver el botón de login
+        // On mobile, open hamburger menu to see login button
         const menuButton = page.locator('header button').filter({ has: page.locator('svg') }).first();
         if (await menuButton.isVisible().catch(() => false)) {
           await menuButton.click();
@@ -243,11 +243,11 @@ test.describe('Flujo de Autenticación', () => {
         }
       }
       
-      // Verificar que se muestra el botón de iniciar sesión
+      // Verify sign in button is displayed
       const loginLink = page.locator('a[href="/auth"]').first();
       const loginVisible = await loginLink.isVisible().catch(() => false);
       
-      // Alternativa: buscar formulario de login
+      // Alternative: look for login form
       if (!loginVisible) {
         const loginForm = await page.locator('input#login-email').isVisible().catch(() => false);
         expect(loginForm || loginVisible).toBe(true);
@@ -257,19 +257,19 @@ test.describe('Flujo de Autenticación', () => {
     });
   });
 
-  test.describe('Acceso protegido', () => {
-    test('debe PERMITIR acceso a /cart para usuarios no autenticados (invitados)', async ({ page }) => {
-      // CAMBIO: El carrito ahora es accesible para invitados (usa localStorage)
+  test.describe('Protected access', () => {
+    test('should ALLOW access to /cart for unauthenticated users (guests)', async ({ page }) => {
+      // CHANGE: Cart is now accessible to guests (uses localStorage)
       await page.goto(`${BASE_URL}/cart`);
       await page.waitForTimeout(2000);
       
       const currentUrl = page.url();
-      // Ya no redirige, permite ver el carrito vacío
+      // No longer redirects, allows viewing empty cart
       expect(currentUrl).toContain('/cart');
       expect(currentUrl).toContain("/cart");
     });
 
-    test('debe redirigir usuarios no autenticados de /account a /auth', async ({ page }) => {
+    test('should redirect unauthenticated users from /account to /auth', async ({ page }) => {
       await page.goto(`${BASE_URL}/account/orders`);
       await page.waitForTimeout(2000);
       
@@ -277,34 +277,34 @@ test.describe('Flujo de Autenticación', () => {
       expect(currentUrl).toContain('auth');
     });
 
-    test('debe redirigir clientes de /admin a /', async ({ page }) => {
-      // Iniciar sesión como cliente
+    test('should redirect customers from /admin to /', async ({ page }) => {
+      // Sign in as customer
       await page.goto(`${BASE_URL}/auth`);
       await page.locator('input#login-email').fill('juan@example.com');
       await page.locator('input#login-password').fill('pass123');
-      await page.locator('button[type="submit"]').filter({ hasText: /iniciar sesión/i }).click();
+      await page.locator('button[type="submit"]').filter({ hasText: /sign in/i }).click();
       
       await page.waitForTimeout(4000);
       
-      // Intentar acceder a admin
+      // Try to access admin
       await page.goto(`${BASE_URL}/admin/dashboard`);
       await page.waitForTimeout(2000);
       
-      // Debe redirigir a home
+      // Should redirect to home
       const currentUrl = page.url();
       expect(currentUrl).not.toContain('/admin');
     });
 
-    test('debe permitir acceso a admin autenticado', async ({ page }) => {
-      // Iniciar sesión como admin
+    test('should allow access to authenticated admin', async ({ page }) => {
+      // Sign in as admin
       await page.goto(`${BASE_URL}/auth`);
       await page.locator('input#login-email').fill('admin@3dprint.com');
       await page.locator('input#login-password').fill('admin123');
-      await page.locator('button[type="submit"]').filter({ hasText: /iniciar sesión/i }).click();
+      await page.locator('button[type="submit"]').filter({ hasText: /sign in/i }).click();
       
       await page.waitForTimeout(4000);
       
-      // Intentar acceder a admin
+      // Try to access admin
       await page.goto(`${BASE_URL}/admin/dashboard`);
       await page.waitForTimeout(2000);
       
@@ -312,19 +312,19 @@ test.describe('Flujo de Autenticación', () => {
       expect(is404).toBe(false);
     });
 
-    test('debe redirigir admin de /cart a área admin', async ({ page }) => {
-      // Iniciar sesión como admin
+    test('should redirect admin from /cart to admin area', async ({ page }) => {
+      // Sign in as admin
       await page.goto(`${BASE_URL}/auth`);
       await page.locator('input#login-email').fill('admin@3dprint.com');
       await page.locator('input#login-password').fill('admin123');
-      await page.locator('button[type="submit"]').filter({ hasText: /iniciar sesión/i }).click();
+      await page.locator('button[type="submit"]').filter({ hasText: /sign in/i }).click();
       
       await page.waitForTimeout(4000);
       
-      // Intentar acceder a cart - debe redirigir a admin
+      // Try to access cart - should redirect to admin
       await page.goto(`${BASE_URL}/cart`);
       
-      // Esperar redirección al área de admin
+      // Wait for redirect to admin area
       try {
         await page.waitForURL((url) => url.pathname.includes('/admin') || !url.pathname.includes('/cart'), { timeout: 5000 });
       } catch {
@@ -332,13 +332,13 @@ test.describe('Flujo de Autenticación', () => {
       }
       
       const currentUrl = page.url();
-      // Debe estar en /admin/dashboard o cualquier página que no sea /cart
+      // Should be on /admin/dashboard or any page that is not /cart
       expect(currentUrl === `${BASE_URL}/` || currentUrl.includes('/admin') || !currentUrl.includes('/cart')).toBe(true);
     });
   });
 
-  test.describe('Navegación', () => {
-    test('debe mostrar Header en páginas principales', async ({ page }) => {
+  test.describe('Navigation', () => {
+    test('should display Header on main pages', async ({ page }) => {
       await page.goto(`${BASE_URL}/`);
       await expect(page.locator('header')).toBeVisible({ timeout: 15000 });
       
@@ -346,7 +346,7 @@ test.describe('Flujo de Autenticación', () => {
       await expect(page.locator('header')).toBeVisible({ timeout: 15000 });
     });
 
-    test('debe mostrar Footer en todas las páginas', async ({ page }) => {
+    test('should display Footer on all pages', async ({ page }) => {
       await page.goto(`${BASE_URL}/`);
       await expect(page.locator('footer')).toBeVisible();
     });

@@ -58,135 +58,136 @@ Action plan for the gradual reconstruction of tests and documentation.
 
 **Tasks:**
 - [ ] Keep validations in tests/unit/validation.test.ts
-- [ ] Simplificar tests/integration/api/registro.test.ts
-- [ ] Simplificar tests/e2e/auth/login.spec.ts
+- [ ] Simplify tests/integration/api/register.test.ts
+- [ ] Simplify tests/e2e/auth/login.spec.ts
 
-**Resultado esperado:** ~15 tests menos, ~2 minutos más rápido
+**Expected result:** ~15 fewer tests, ~2 minutes faster
 
 ---
 
-### Fase 4: Crear Tests E2E Críticos
-**Prioridad:** Alta  
-**Tiempo estimado:** 6-8 horas
+### Phase 4: Create Critical E2E Tests
+**Priority:** High  
+**Estimated time:** 6-8 hours
 
-**Problema:** Solo 19 tests E2E actualmente. Faltan flujos críticos.
+**Problem:** Only 19 E2E tests currently. Critical flows are missing.
 
-**Archivos a crear:**
+**Files to create:**
 1. `tests/e2e/shop/catalog.spec.ts`
-   - Navegar catálogo
-   - Filtrar por categoría
-   - Buscar productos
-   - Ver detalle
+   - Navigate product catalog
+   - Filter by category
+   - Search products
+   - View detail
 
 2. `tests/e2e/shop/cart.spec.ts`
-   - Agregar al carrito
-   - Actualizar cantidad
-   - Eliminar producto
-   - Persistencia
+   - Add to cart
+   - Update quantity
+   - Remove product
+   - Persistence
 
 3. `tests/e2e/shop/checkout.spec.ts`
-   - Proceso completo de checkout
-   - Integración Stripe
-   - Página de éxito
+   - Complete checkout process
+   - Stripe integration
+   - Success page
 
 4. `tests/e2e/admin/products.spec.ts`
-   - Login como admin
-   - Crear/editar/eliminar producto
-   - Subir imágenes
+   - Login as admin
+   - Create/edit/delete product
+   - Upload images
 
 5. `tests/e2e/admin/orders.spec.ts`
-   - Ver pedidos
-   - Actualizar estado
-   - Ver detalle
+   - View orders
+   - Update status
+   - View detail
 
-**Resultado esperado:** +40-50 tests E2E nuevos
-
----
-
-### Fase 5: Limpiar Tests de Integración Redundantes
-**Prioridad:** Media-Alta  
-**Tiempo estimado:** 3-4 horas
-
-**Objetivo:** Reducir 17 archivos de integración a ~5-6 focalizados.
-
-**Consolidaciones propuestas:**
-- [ ] Crear tests/integration/auth.test.ts (fusionar login + middleware + registro)
-- [ ] Crear tests/integration/products.test.ts (fusionar productos + detalle + admin)
-- [ ] Eliminar tests no críticos:
-  - admin/alerts.test.ts
-  - admin/dashboard-ui.test.ts
-  - admin/invoices.test.ts
-  - admin/messages.test.ts
-  - admin/panel.test.ts
-  - account/perfil.test.ts
-  - pages/*.test.ts
-
-**Resultado esperado:** ~50% menos líneas, tests más enfocados
+**Expected result:** +40-50 new E2E tests
 
 ---
 
-### Fase 6: Simplificar Helpers de Tests
-**Prioridad:** Media  
-**Tiempo estimado:** 1-2 horas
+### Phase 5: Clean Redundant Integration Tests
+**Priority:** Medium-High  
+**Estimated time:** 3-4 hours
 
-**Objetivo:** De 7 archivos helpers a 1-2.
+**Objective:** Reduce 17 integration test files to ~5-6 focused ones.
 
-**Acciones:**
-- [ ] Crear tests/helpers.ts consolidado (~80 líneas)
-- [ ] Simplificar tests/setup.ts (~40 líneas)
-- [ ] Eliminar:
-  - db-integration-setup.ts
-  - db-cleanup.ts
-  - db-wait.ts
-  - db-mutex.ts
-  - db-transactions.ts
+**Proposed consolidations:**
+- [ ] Create tests/integration/auth.test.ts (merge login + middleware + register)
+- [ ] Create tests/integration/products.test.ts (merge products + detail + admin)
+- [ ] Remove non-critical tests:
+   - admin/alerts.test.ts
+   - admin/dashboard-ui.test.ts
+   - admin/invoices.test.ts
+   - admin/messages.test.ts
+   - admin/panel.test.ts
+   - admin/orders.test.ts
+   - account/profile.test.ts
+   - pages/*.test.ts
 
-**Resultado esperado:** Código más mantenible
-
----
-
-## 📊 Métricas Objetivo
-
-### Antes vs Después
-
-| Métrica | Actual | Objetivo | Cambio |
-|---------|--------|----------|--------|
-| Archivos docs (raíz) | 26 | 2 | -92% |
-| Tests unitarios | 25 | 60+ | +140% |
-| Tests integración | ~290 | ~100 | -65% |
-| Tests E2E | 19 | 60+ | +215% |
-| Helpers tests | 7 | 1-2 | -75% |
-| Total líneas tests | ~5,900 | ~2,500 | -58% |
+**Expected result:** ~50% fewer lines, more focused tests
 
 ---
 
-## 🔮 Prioridad Baja (Futuro)
+### Phase 6: Simplify Test Helpers
+**Priority:** Medium  
+**Estimated time:** 1-2 hours
 
-### Ideas para Después
+**Objective:** From 7 helper files to 1-2.
 
-- [ ] Tests de rendimiento (lighthouse CI)
-- [ ] Tests de accesibilidad (axe-core)
-- [ ] Tests de seguridad automatizados
-- [ ] Tests de carga (k6 o similar)
+**Actions:**
+- [ ] Create tests/helpers.ts consolidated (~80 lines)
+- [ ] Simplify tests/setup.ts (~40 lines)
+- [ ] Remove:
+   - db-integration-setup.ts
+   - db-cleanup.ts
+   - db-wait.ts
+   - db-mutex.ts
+   - db-transactions.ts
+
+**Expected result:** More maintainable code
+
+---
+
+## 📊 Target Metrics
+
+### Before vs After
+
+| Metric | Current | Target | Change |
+|--------|---------|--------|--------|
+| Docs files (root) | 26 | 2 | -92% |
+| Unit tests | ~25 | 60+ | +140% |
+| Integration tests | ~290 | ~100 | -65% |
+| E2E tests | 19 | 60+ | +215% |
+| Test helpers | 7 | 1-2 | -75% |
+| Total test lines | ~5,900 | ~2,500 | -58% |
+
+---
+
+## 🔮 Low Priority (Future)
+
+### Ideas for Later
+
+- [ ] Performance tests (lighthouse CI)
+- [ ] Accessibility tests (axe-core)
+- [ ] Automated security tests
+- [ ] Load tests (k6 or similar)
 - [ ] Visual regression testing
 - [ ] Mutation testing
 
 ---
 
-## 📝 Notas
+## 📝 Notes
 
-**Fecha inicio del plan:** 2 de Abril de 2026  
-**Responsable:** OpenCode AI  
+**Plan start date:** April 2, 2026  
+**Responsible:** OpenCode AI  
 **Branch:** refactor/reconstruccion-tests-docs
 
-**Reglas:**
-1. Una fase a la vez
-2. Verificar antes de continuar
-3. Commit después de cada fase
-4. Rollback disponible siempre
+**Rules:**
+1. One phase at a time
+2. Verify before continuing
+3. Commit after each phase
+4. Rollback always available
 
-**Backup creado:** `backup-docs-20260402-XXXXXX.tar.gz`
+**Backup created:** `backup-docs-20260402-XXXXXX.tar.gz`
 
 ---
 
-**Última actualización:** 2 de Abril de 2026
+**Last updated:** April 2, 2026

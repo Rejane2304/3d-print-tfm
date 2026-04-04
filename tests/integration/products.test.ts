@@ -4,9 +4,9 @@ import { prisma } from '@/lib/db/prisma';
 import { GET as getProducts } from '@/app/api/products/route';
 import { GET as getProductDetail } from '@/app/api/products/[slug]/route';
 
-describe('API de Productos', () => {
-  describe('GET /api/products - Listado', () => {
-    it('debe retornar lista de productos activos', async () => {
+describe('Products API', () => {
+  describe('GET /api/products - Listing', () => {
+    it('should return list of active products', async () => {
       const req = new NextRequest('http://localhost:3000/api/products');
       const res = await getProducts(req);
       
@@ -16,7 +16,7 @@ describe('API de Productos', () => {
       expect(data.data.length).toBeGreaterThan(0);
     });
 
-    it('debe filtrar por categoría', async () => {
+    it('should filter by category', async () => {
       const req = new NextRequest('http://localhost:3000/api/products?category=DECORATION');
       const res = await getProducts(req);
       
@@ -28,7 +28,7 @@ describe('API de Productos', () => {
       }
     });
 
-    it('debe filtrar por material', async () => {
+    it('should filter by material', async () => {
       const req = new NextRequest('http://localhost:3000/api/products?material=PLA');
       const res = await getProducts(req);
       
@@ -37,8 +37,8 @@ describe('API de Productos', () => {
       expect(data.data).toBeDefined();
     });
 
-    it('debe buscar por query', async () => {
-      const req = new NextRequest('http://localhost:3000/api/products?search=vaso');
+    it('should search by query', async () => {
+      const req = new NextRequest('http://localhost:3000/api/products?search=vase');
       const res = await getProducts(req);
       
       expect(res.status).toBe(200);
@@ -46,7 +46,7 @@ describe('API de Productos', () => {
       expect(data.data).toBeDefined();
     });
 
-    it('debe ordenar por precio ascendente', async () => {
+    it('should sort by price ascending', async () => {
       const req = new NextRequest('http://localhost:3000/api/products?sortBy=price&order=asc');
       const res = await getProducts(req);
       
@@ -60,7 +60,7 @@ describe('API de Productos', () => {
       }
     });
 
-    it('debe paginar resultados', async () => {
+    it('should paginate results', async () => {
       const req = new NextRequest('http://localhost:3000/api/products?page=1');
       const res = await getProducts(req);
       
@@ -71,57 +71,57 @@ describe('API de Productos', () => {
     });
   });
 
-  describe('GET /api/products/[slug] - Detalle', () => {
-    let productoTest: any;
+  describe('GET /api/products/[slug] - Detail', () => {
+    let testProduct: any;
 
     beforeAll(async () => {
-      // Obtener un producto existente para testing
-      productoTest = await prisma.product.findFirst({
+      // Get an existing product for testing
+      testProduct = await prisma.producto.findFirst({
         where: { isActive: true },
         include: { images: true },
       });
     });
 
-    it('debe retornar detalle de producto por slug', async () => {
-      if (!productoTest) return;
+    it('should return product detail by slug', async () => {
+      if (!testProduct) return;
 
-      const req = new NextRequest(`http://localhost:3000/api/products/${productoTest.slug}`);
-      const res = await getProductDetail(req, { params: { slug: productoTest.slug } });
+      const req = new NextRequest(`http://localhost:3000/api/products/${testProduct.slug}`);
+      const res = await getProductDetail(req, { params: { slug: testProduct.slug } });
       
       expect(res.status).toBe(200);
       const data = await res.json();
-      expect(data.data.producto).toBeDefined();
-      expect(data.data.producto.slug).toBe(productoTest.slug);
+      expect(data.data.product).toBeDefined();
+      expect(data.data.product.slug).toBe(testProduct.slug);
     });
 
-    it('debe retornar 404 para producto inexistente', async () => {
-      const req = new NextRequest('http://localhost:3000/api/products/producto-inexistente-12345');
-      const res = await getProductDetail(req, { params: { slug: 'producto-inexistente-12345' } });
+    it('should return 404 for non-existent product', async () => {
+      const req = new NextRequest('http://localhost:3000/api/products/non-existent-product-12345');
+      const res = await getProductDetail(req, { params: { slug: 'non-existent-product-12345' } });
       
       expect(res.status).toBe(404);
     });
 
-    it('debe incluir imágenes del producto', async () => {
-      if (!productoTest) return;
+    it('should include product images', async () => {
+      if (!testProduct) return;
 
-      const req = new NextRequest(`http://localhost:3000/api/products/${productoTest.slug}`);
-      const res = await getProductDetail(req, { params: { slug: productoTest.slug } });
+      const req = new NextRequest(`http://localhost:3000/api/products/${testProduct.slug}`);
+      const res = await getProductDetail(req, { params: { slug: testProduct.slug } });
       
       const data = await res.json();
-      expect(data.data.producto.images).toBeDefined();
+      expect(data.data.product.images).toBeDefined();
     });
   });
 
-  describe('Gestión Admin de Productos', () => {
-    it('debe crear producto con datos válidos', async () => {
-      // Verificar que podemos crear productos vía API
-      // Nota: Esto requiere autenticación de admin
-      const slugUnico = `test-producto-${Date.now()}`;
+  describe('Admin Product Management', () => {
+    it('should create product with valid data', async () => {
+      // Verify we can create products via API
+      // Note: This requires admin authentication
+      const uniqueSlug = `test-product-${Date.now()}`;
       
-      // Obtener o crear una categoría para el test
-      let category = await prisma.category.findFirst({ where: { isActive: true } });
+      // Get or create a category for the test
+      let category = await prisma.categoria.findFirst({ where: { isActive: true } });
       if (!category) {
-        category = await prisma.category.create({
+        category = await prisma.categoria.create({
           data: {
             name: 'Test Category',
             slug: `test-category-${Date.now()}`,
@@ -130,11 +130,11 @@ describe('API de Productos', () => {
         });
       }
       
-      const producto = await prisma.product.create({
+      const product = await prisma.producto.create({
         data: {
-          slug: slugUnico,
-          name: 'Producto Test',
-          description: 'Descripción test',
+          slug: uniqueSlug,
+          name: 'Test Product',
+          description: 'Test description',
           price: 29.99,
           stock: 10,
           categoryId: category.id,
@@ -143,52 +143,52 @@ describe('API de Productos', () => {
         },
       });
 
-      expect(producto).toBeDefined();
-      expect(producto.slug).toBe(slugUnico);
+      expect(product).toBeDefined();
+      expect(product.slug).toBe(uniqueSlug);
 
-      // Limpieza
-      await prisma.product.delete({ where: { id: producto.id } });
+      // Cleanup
+      await prisma.producto.delete({ where: { id: product.id } });
     });
 
-    it('debe actualizar stock del producto', async () => {
-      const producto = await prisma.product.findFirst({ where: { isActive: true } });
-      if (!producto) return;
+    it('should update product stock', async () => {
+      const product = await prisma.producto.findFirst({ where: { isActive: true } });
+      if (!product) return;
 
-      const nuevoStock = producto.stock + 5;
+      const newStock = product.stock + 5;
       
-      const actualizado = await prisma.product.update({
-        where: { id: producto.id },
-        data: { stock: nuevoStock },
+      const updated = await prisma.producto.update({
+        where: { id: product.id },
+        data: { stock: newStock },
       });
 
-      expect(actualizado.stock).toBe(nuevoStock);
+      expect(updated.stock).toBe(newStock);
 
-      // Restaurar stock original
-      await prisma.product.update({
-        where: { id: producto.id },
-        data: { stock: producto.stock },
+      // Restore original stock
+      await prisma.producto.update({
+        where: { id: product.id },
+        data: { stock: product.stock },
       });
     });
 
-    it('debe activar/desactivar producto', async () => {
-      const producto = await prisma.product.findFirst({ where: { isActive: true } });
-      if (!producto) return;
+    it('should activate/deactivate product', async () => {
+      const product = await prisma.producto.findFirst({ where: { isActive: true } });
+      if (!product) return;
 
-      // Desactivar
-      await prisma.product.update({
-        where: { id: producto.id },
+      // Deactivate
+      await prisma.producto.update({
+        where: { id: product.id },
         data: { isActive: false },
       });
 
-      const desactivado = await prisma.product.findUnique({
-        where: { id: producto.id },
+      const deactivated = await prisma.producto.findUnique({
+        where: { id: product.id },
       });
 
-      expect(desactivado!.isActive).toBe(false);
+      expect(deactivated!.isActive).toBe(false);
 
-      // Reactivar
-      await prisma.product.update({
-        where: { id: producto.id },
+      // Reactivate
+      await prisma.producto.update({
+        where: { id: product.id },
         data: { isActive: true },
       });
     });
