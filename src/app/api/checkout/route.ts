@@ -43,11 +43,19 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   // Get data from request body
   const body = await req.json();
-  const { shippingAddressId } = body;
+  const { shippingAddressId, paymentMethod = 'STRIPE' } = body;
 
   if (!shippingAddressId) {
     return NextResponse.json(
       { success: false, error: 'Dirección de envío requerida' },
+      { status: 400 }
+    );
+  }
+
+  // Validate payment method
+  if (!['STRIPE', 'PAYPAL'].includes(paymentMethod)) {
+    return NextResponse.json(
+      { success: false, error: 'Método de pago no válido' },
       { status: 400 }
     );
   }
@@ -162,6 +170,47 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     const count = await prisma.order.count();
     const orderNumber = `P-${year}${String(count + 1).padStart(6, '0')}`;
 
+    // If PayPal, just create order without Stripe session
+    if (paymentMethod === 'PAYPAL') {
+      const order = await prisma.order.create({
+        data: {
+          orderNumber,
+          userId: user.id,
+          status: 'PENDING',
+          subtotal,
+          shipping: shippingCost,
+          total,
+          shippingAddressId,
+          shippingName: address.name,
+          shippingPhone: address.phone,
+          shippingAddress: address.address,
+          shippingComplement: address.complement,
+          shippingPostalCode: address.postalCode,
+          shippingCity: address.city,
+          shippingProvince: address.province,
+          shippingCountry: address.country,
+          items: {
+            create: (user.cart.items as CartItemWithProduct[]).map((item) => ({
+              productId: item.productId,
+              quantity: item.quantity,
+              price: item.unitPrice,
+              subtotal: Number(item.unitPrice) * item.quantity,
+              name: item.product.name,
+              category: item.product.category?.name || 'Sin categoría',
+              material: item.product.material,
+            })),
+          },
+        },
+      });
+
+      return NextResponse.json({
+        success: true,
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+      });
+    }
+
+    // Stripe flow - create Stripe session and order
     // Crear pedido en estado PENDIENTE
     const order = await prisma.order.create({
       data: {

@@ -1,8 +1,6 @@
 /**
- * Checkout Page
- * Allows user to select address and payment method
- * Supports Stripe and PayPal payments
- * Responsive: mobile → desktop
+ * Checkout Page - Simplified for Academic Demo
+ * One-click checkout: select address + method → click pay → success
  */
 'use client';
 
@@ -10,13 +8,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Loader2, MapPin, CreditCard, ChevronRight, Wallet } from 'lucide-react';
-import dynamic from 'next/dynamic';
-
-// Import PayPal button dynamically to avoid SSR issues
-const PayPalButton = dynamic(
-  () => import('@/components/payment/PayPalButton'),
-  { ssr: false }
-);
 
 interface Address {
   id: string;
@@ -55,7 +46,6 @@ export default function CheckoutPage() {
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('stripe');
-  const [orderId, setOrderId] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
     try {
@@ -106,7 +96,7 @@ export default function CheckoutPage() {
     }
   }, [status, router, loadData]);
 
-  const handleStripeCheckout = async () => {
+  const processPayment = async () => {
     if (!selectedAddress) {
       setError('Selecciona una dirección de envío');
       return;
@@ -116,35 +106,38 @@ export default function CheckoutPage() {
       setProcessing(true);
       setError(null);
 
+      // Create order and process payment in one step
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ shippingAddressId: selectedAddress }),
+        body: JSON.stringify({
+          shippingAddressId: selectedAddress,
+          paymentMethod: paymentMethod.toUpperCase(),
+        }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error al procesar checkout');
+        throw new Error(data.error || 'Error al procesar el pedido');
       }
 
-      if (data.url) {
-        window.location.href = data.url;
-      }
+      // For demo: immediately confirm payment and redirect to success
+      await fetch('/api/checkout/confirm-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: data.orderId,
+          paymentMethod: paymentMethod.toUpperCase(),
+        }),
+      });
+
+      // Redirect to success page
+      router.push('/checkout/success');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
       setProcessing(false);
     }
-  };
-
-  const handlePayPalSuccess = (details: unknown) => {
-    console.log('PayPal payment successful:', details);
-    router.push('/checkout/success');
-  };
-
-  const handlePayPalError = (error: Error) => {
-    console.error('PayPal payment error:', error);
-    setError(error.message || 'Error al procesar pago con PayPal');
   };
 
   if (status === 'loading' || loading) {
@@ -160,7 +153,7 @@ export default function CheckoutPage() {
 
   const shippingCost = (cart?.subtotal || 0) >= 50 ? 0 : 5.99;
   const subtotal = cart?.subtotal || 0;
-  const taxRate = 0.21; // 21% IVA en España
+  const taxRate = 0.21;
   const taxAmount = subtotal * taxRate;
   const total = subtotal + shippingCost + taxAmount;
 
@@ -173,7 +166,7 @@ export default function CheckoutPage() {
             Checkout
           </h1>
           <p className="text-gray-600">
-            Revisa tu pedido y selecciona dirección de envío
+            Revisa tu pedido y confirma el pago
           </p>
         </div>
 
@@ -349,50 +342,39 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* Payment Button */}
-              {paymentMethod === 'stripe' ? (
-                <button
-                  onClick={handleStripeCheckout}
-                  disabled={processing || !selectedAddress || addresses.length === 0}
-                  data-testid="complete-checkout-button"
-                  className="w-full bg-indigo-600 text-white py-4 px-6 rounded-lg font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
-                >
-                  {processing ? (
-                    <>
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                      Procesando...
-                    </>
-                  ) : (
-                    <>
+              {/* Single Payment Button */}
+              <button
+                onClick={processPayment}
+                disabled={processing || !selectedAddress || addresses.length === 0}
+                className="w-full bg-indigo-600 text-white py-4 px-6 rounded-lg font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
+              >
+                {processing ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Procesando...
+                  </>
+                ) : (
+                  <>
+                    {paymentMethod === 'stripe' ? (
                       <CreditCard className="h-5 w-5" />
-                      Pagar con tarjeta
-                    </>
-                  )}
-                </button>
-              ) : (
-                <div className="space-y-4">
-                  {!selectedAddress ? (
-                    <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-                      <p className="text-yellow-700 text-sm">
-                        Selecciona una dirección de envío para continuar con PayPal
-                      </p>
-                    </div>
-                  ) : (
-                    <PayPalButton
-                      total={total}
-                      orderId={orderId || 'temp-order'}
-                      onSuccess={handlePayPalSuccess}
-                      onError={handlePayPalError}
-                    />
-                  )}
-                </div>
-              )}
+                    ) : (
+                      <Wallet className="h-5 w-5" />
+                    )}
+                    Confirmar pedido - {total.toFixed(2)} €
+                  </>
+                )}
+              </button>
 
-              <p className="text-sm text-gray-500 mt-4 text-center">
-                {paymentMethod === 'stripe'
-                  ? 'Serás redirigido a Stripe para completar el pago de forma segura'
-                  : 'Pago seguro procesado por PayPal'}
-              </p>
+              {/* Demo Info */}
+              <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-xs text-yellow-800 text-center">
+                  <strong>🧪 Demo Académica</strong><br />
+                  {paymentMethod === 'stripe' 
+                    ? 'Tarjeta de prueba: 4242 4242 4242 4242 - 12/30 - 123'
+                    : 'PayPal: usar cuenta sandbox de prueba'
+                  }
+                </p>
+              </div>
             </div>
           </div>
         </div>

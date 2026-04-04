@@ -15,7 +15,11 @@ interface PayPalButtonProps {
   onError: (error: Error) => void;
 }
 
-export default function PayPalButton({ total, orderId = 'temp', onSuccess, onError }: PayPalButtonProps) {
+export default function PayPalButton({ total, orderId, onSuccess, onError }: PayPalButtonProps) {
+  // Validate that orderId is provided
+  if (!orderId) {
+    throw new Error('orderId is required');
+  }
   const [{ isPending }] = usePayPalScriptReducer();
   const [isProcessing, setIsProcessing] = useState(false);
 

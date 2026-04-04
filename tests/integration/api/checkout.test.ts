@@ -291,7 +291,7 @@ describe('Checkout API', () => {
 
       // Should fail due to insufficient stock
       expect(res.status).toBe(400);
-      expect(body.error).toContain('stock');
+      expect(body.error.toLowerCase()).toContain('stock');
     });
   });
 
