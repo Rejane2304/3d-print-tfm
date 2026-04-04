@@ -209,13 +209,14 @@ export function useCart() {
         const response = await fetch(`/api/cart/${itemId}`, {
           method: 'DELETE',
         });
-        
+
         if (!response.ok) {
           const data = await response.json();
           throw new Error(data.error || 'Error removing item');
         }
-        
+
         await loadCart();
+        window.dispatchEvent(new Event('cartUpdated'));
       } else {
         // Use localStorage
         const cartData = localStorage.getItem(CART_STORAGE_KEY);
@@ -225,10 +226,10 @@ export function useCart() {
           localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
           window.dispatchEvent(new Event('cartUpdated'));
         }
-        
+
         await loadCart();
       }
-      
+
       return { success: true };
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error unknown');
