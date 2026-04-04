@@ -1,4 +1,10 @@
 import { defineConfig, devices } from '@playwright/test';
+import path from 'path';
+
+// Cargar variables de entorno de test si no están ya cargadas
+if (!process.env.NODE_ENV) {
+  require('dotenv').config({ path: path.resolve(__dirname, '.env.test') });
+}
 
 /**
  * Configuración de Playwright para tests E2E
@@ -23,11 +29,11 @@ export default defineConfig({
   projects: [
     {
       name: 'setup',
-      testMatch: '**/*.setup.ts',
+      testMatch: /global\.setup\.ts/,
     },
     {
       name: 'Desktop Chrome',
-      use: { 
+      use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1920, height: 1080 },
       },
@@ -35,7 +41,7 @@ export default defineConfig({
     },
     {
       name: 'Desktop Firefox',
-      use: { 
+      use: {
         ...devices['Desktop Firefox'],
         viewport: { width: 1920, height: 1080 },
       },
@@ -43,7 +49,7 @@ export default defineConfig({
     },
     {
       name: 'Desktop Safari',
-      use: { 
+      use: {
         ...devices['Desktop Safari'],
         viewport: { width: 1920, height: 1080 },
       },
@@ -51,7 +57,7 @@ export default defineConfig({
     },
     {
       name: 'Tablet iPad',
-      use: { 
+      use: {
         ...devices['iPad Pro 11'],
         viewport: { width: 834, height: 1194 },
       },
@@ -59,7 +65,7 @@ export default defineConfig({
     },
     {
       name: 'Mobile iPhone',
-      use: { 
+      use: {
         ...devices['iPhone 14'],
         viewport: { width: 390, height: 844 },
       },
@@ -68,7 +74,7 @@ export default defineConfig({
     // Pantallas muy grandes (4K)
     {
       name: 'Desktop 4K',
-      use: { 
+      use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 3840, height: 2160 },
       },
@@ -76,9 +82,12 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run dev',
+    command: 'NODE_ENV=test npx next dev',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120000,
+    env: {
+      NODE_ENV: 'test',
+    },
   },
 });

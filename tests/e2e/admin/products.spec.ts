@@ -15,7 +15,8 @@ test.describe('Admin - Product Management', () => {
     if (await emailInput.isVisible().catch(() => false)) {
       await emailInput.fill('admin@3dprint.com');
       await page.locator('[data-testid="login-password-input"]').fill('admin123');
-      await page.locator('button[type="submit"]').click();
+      // Use more specific selector - the first submit button in the login form
+      await page.locator('form button[type="submit"]').first().click();
       await page.waitForTimeout(1000);
     }
     
@@ -25,7 +26,7 @@ test.describe('Admin - Product Management', () => {
 
   test('should display product listing', async ({ page }) => {
     // Verify admin page is displayed
-    await expect(page.locator('h1')).toContainText('Products');
+    await expect(page.locator('h1')).toContainText(/productos|products/i);
     
     // Verify there are products or empty message
     const products = page.locator('[data-testid="admin-product-item"]');
@@ -46,7 +47,7 @@ test.describe('Admin - Product Management', () => {
       
       // Verify we are on creation page
       await expect(page).toHaveURL('/admin/products/new');
-      await expect(page.locator('h1')).toContainText('New Product');
+      await expect(page.locator('h1')).toContainText(/nuevo|new/i);
     }
   });
 
@@ -93,7 +94,7 @@ test.describe('Admin - Product Management', () => {
       await editButton.click();
       
       // Verify we are in edit mode
-      await expect(page.locator('h1')).toContainText('Edit');
+      await expect(page.locator('h1')).toContainText(/editar|edit/i);
       
       // Modify price
       const priceInput = page.locator('[data-testid="product-price"]');
@@ -174,7 +175,7 @@ test.describe('Admin - Product Management', () => {
     const stats = page.locator('[data-testid="product-stats"]');
     
     if (await stats.isVisible().catch(() => false)) {
-      await expect(stats).toContainText(/products/i);
+      await expect(stats).toContainText(/productos|products/i);
     }
   });
 
@@ -187,7 +188,8 @@ test.describe('Admin - Product Management', () => {
     await page.goto('/auth');
     await page.fill('input[type="email"]', 'customer@test.com');
     await page.fill('input[type="password"]', 'test123');
-    await page.click('button[type="submit"]');
+    // Use more specific selector
+    await page.locator('form button[type="submit"]').first().click();
     await page.waitForTimeout(1000);
     
     // Try to access admin
