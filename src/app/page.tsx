@@ -3,11 +3,19 @@
  * Muestra productos destacados y bienvenida
  * Responsive: mobile → 4K
  */
+
+// Force dynamic rendering to prevent static caching
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { prisma } from '@/lib/db/prisma';
 
 async function getFeaturedProducts() {
+  // Debug: Log the actual query
+  console.log('Fetching featured products from database...');
+  
   const products = await prisma.product.findMany({
     where: {
       isActive: true,
@@ -19,6 +27,9 @@ async function getFeaturedProducts() {
       },
     },
   });
+
+  // Debug: Log what we got from DB
+  console.log(`Found ${products.length} products from database:`, products.map(p => ({ id: p.id, name: p.name, slug: p.slug })));
 
   const deliveredOrders = await prisma.order.findMany({
     where: {
@@ -45,6 +56,9 @@ async function getFeaturedProducts() {
     }))
     .sort((a, b) => b.sales - a.sales)
     .slice(0, 3);
+
+  // Debug: Log final result
+  console.log('Returning products with sales:', productsWithSales.map(p => p.name));
 
   return productsWithSales;
 }
