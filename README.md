@@ -430,3 +430,27 @@ Este proyecto es desarrollado para fines académicos como Trabajo de Fin de Más
 ---
 
 **Desarrollado con ❤️ por Rejane Rodrigues**
+
+## 🗄️ Poblar bases de datos (desarrollo y test)
+
+Para poblar las bases de datos de desarrollo (Supabase) y test local (Docker), usa los siguientes comandos según el entorno:
+
+### Poblar base de datos de desarrollo (Supabase)
+
+Asegúrate de tener configurado `.env` con la DATABASE_URL de Supabase:
+
+```bash
+npx -y ts-node -r dotenv/config prisma/seed.ts dotenv_config_path=.env
+```
+
+### Poblar base de datos de test local (Docker)
+
+Asegúrate de tener configurado `.env.local` con la DATABASE_URL de test (Docker):
+
+```bash
+npx -y ts-node -r dotenv/config prisma/seed.ts dotenv_config_path=.env.local
+```
+
+> **Nota:** Solo necesitas el archivo `.env.local` para el entorno de test local. Elimina `.env.test` para evitar duplicidades.
+
+Esto garantiza que cada entorno se pobla de forma separada y segura.

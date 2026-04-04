@@ -1,3 +1,4 @@
+import 'dotenv/config';
 /**
  * Seed Script for 3D Print TFM
  * Initial database population with CSV data
