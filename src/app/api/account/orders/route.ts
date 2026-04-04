@@ -1,7 +1,7 @@
 /**
  * API - Listado de Pedidos del Usuario Autenticado
  * GET /api/account/orders
- * Devuelve todos los pedidos del usuario logueado
+ * Devuelve todos los pedidos del usuario logueado con nombres en español
  */
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
@@ -27,13 +27,13 @@ export async function GET() {
 
     if (!usuario) {
       return NextResponse.json(
-        { error: 'Usuario not found' },
+        { error: 'Usuario no encontrado' },
         { status: 404 }
       );
     }
 
     // Obtener pedidos del usuario
-    const pedidos = await prisma.order.findMany({
+    const pedidosRaw = await prisma.order.findMany({
       where: { userId: usuario.id },
       orderBy: { createdAt: 'desc' },
       include: {
@@ -67,6 +67,34 @@ export async function GET() {
         }
       }
     });
+
+    // Transformar a formato español esperado por el frontend
+    const pedidos = pedidosRaw.map(pedido => ({
+      id: pedido.id,
+      orderNumber: pedido.orderNumber,
+      estado: pedido.status,
+      total: pedido.total,
+      createdAt: pedido.createdAt,
+      items: pedido.items.map(item => ({
+        id: item.id,
+        quantity: item.quantity,
+        unitPrice: item.price,
+        producto: {
+          nombre: item.product?.name || 'Producto',
+          slug: item.product?.slug || '',
+          images: item.product?.images || []
+        }
+      })),
+      factura: pedido.invoice ? {
+        id: pedido.invoice.id,
+        invoiceNumber: pedido.invoice.invoiceNumber,
+        anulada: pedido.invoice.isCancelled
+      } : undefined,
+      pago: pedido.payment ? {
+        estado: pedido.payment.status,
+        metodo: pedido.payment.method
+      } : undefined
+    }));
 
     return NextResponse.json({ pedidos });
   } catch (error) {

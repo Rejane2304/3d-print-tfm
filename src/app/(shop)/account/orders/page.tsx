@@ -27,43 +27,37 @@ import {
 interface Order {
   id: string;
   orderNumber: string;
-  status: string;
+  estado: string;
   total: number;
   createdAt: string;
   items: Array<{
     id: string;
     quantity: number;
     unitPrice: number;
-    product: {
-      name: string;
+    producto: {
+      nombre: string;
       slug: string;
       images: Array<{ url: string }>;
     };
   }>;
-  invoice?: {
+  factura?: {
     id: string;
     invoiceNumber: string;
-    isCancelled: boolean;
+    anulada: boolean;
   };
-  payment?: {
-    status: string;
-    method: string;
+  pago?: {
+    estado: string;
+    metodo: string;
   };
 }
 
-const statusConfig: Record<string, { color: string; icon: React.ElementType; label: string }> = {
+const estadosConfig: Record<string, { color: string; icon: React.ElementType; label: string }> = {
   PENDING: { color: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: Clock, label: 'Pendiente' },
-  PAID: { color: 'bg-blue-100 text-blue-800 border-blue-200', icon: CheckCircle2, label: 'Pagado' },
-  PROCESSING: { color: 'bg-indigo-100 text-indigo-800 border-indigo-200', icon: Package, label: 'En preparación' },
+  CONFIRMED: { color: 'bg-blue-100 text-blue-800 border-blue-200', icon: CheckCircle2, label: 'Confirmado' },
+  PREPARING: { color: 'bg-indigo-100 text-indigo-800 border-indigo-200', icon: Package, label: 'En preparación' },
   SHIPPED: { color: 'bg-purple-100 text-purple-800 border-purple-200', icon: Truck, label: 'Enviado' },
   DELIVERED: { color: 'bg-green-100 text-green-800 border-green-200', icon: CheckCircle2, label: 'Entregado' },
   CANCELLED: { color: 'bg-red-100 text-red-800 border-red-200', icon: XCircle, label: 'Cancelado' },
-  PENDIENTE: { color: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: Clock, label: 'Pendiente' },
-  PAGADO: { color: 'bg-blue-100 text-blue-800 border-blue-200', icon: CheckCircle2, label: 'Pagado' },
-  EN_PREPARACION: { color: 'bg-indigo-100 text-indigo-800 border-indigo-200', icon: Package, label: 'En preparación' },
-  ENVIADO: { color: 'bg-purple-100 text-purple-800 border-purple-200', icon: Truck, label: 'Enviado' },
-  ENTREGADO: { color: 'bg-green-100 text-green-800 border-green-200', icon: CheckCircle2, label: 'Entregado' },
-  CANCELADO: { color: 'bg-red-100 text-red-800 border-red-200', icon: XCircle, label: 'Cancelado' },
 };
 
 export default function MyOrdersPage() {
@@ -97,16 +91,16 @@ export default function MyOrdersPage() {
         throw new Error(data.error || 'Error al cargar pedidos');
       }
 
-      setOrders(data.orders || data.pedidos || []);
+      setOrders(data.pedidos || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error unknown');
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
     }
   };
 
   const filteredOrders = statusFilter
-    ? orders.filter(o => o.status === statusFilter)
+    ? orders.filter(o => o.estado === statusFilter)
     : orders;
 
   if (status === 'loading' || loading) {
@@ -168,15 +162,15 @@ export default function MyOrdersPage() {
             >
               Todos
             </button>
-            {Object.entries(statusConfig).slice(0, 6).map(([statusKey, config]) => {
+            {Object.entries(estadosConfig).map(([estado, config]) => {
               const Icon = config.icon;
-              const count = orders.filter(o => o.status === statusKey).length;
+              const count = orders.filter(o => o.estado === estado).length;
               return (
                 <button
-                  key={statusKey}
-                  onClick={() => setStatusFilter(statusKey)}
+                  key={estado}
+                  onClick={() => setStatusFilter(estado)}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2 ${
-                    statusFilter === statusKey
+                    statusFilter === estado
                       ? 'bg-indigo-600 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
@@ -185,7 +179,7 @@ export default function MyOrdersPage() {
                   {config.label}
                   {count > 0 && (
                     <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${
-                      statusFilter === statusKey ? 'bg-indigo-500' : 'bg-gray-300 text-gray-700'
+                      statusFilter === estado ? 'bg-indigo-500' : 'bg-gray-300 text-gray-700'
                     }`}>
                       {count}
                     </span>
@@ -219,11 +213,10 @@ export default function MyOrdersPage() {
         ) : (
           <div className="space-y-4">
             {filteredOrders.map((order) => {
-              const currentStatus = order.status || 'PENDING';
-              const config = statusConfig[currentStatus] || statusConfig.PENDING;
-              const StatusIcon = config.icon;
+              const statusConfig = estadosConfig[order.estado] || estadosConfig.PENDING;
+              const StatusIcon = statusConfig.icon;
               const firstItem = order.items?.[0];
-              const firstImage = firstItem?.product?.images?.[0]?.url;
+              const firstImage = firstItem?.producto?.images?.[0]?.url;
 
               return (
                 <div
@@ -239,7 +232,7 @@ export default function MyOrdersPage() {
                           {firstImage ? (
                             <Image
                               src={firstImage}
-                              alt={firstItem?.product?.name || 'Producto'}
+                              alt={firstItem?.producto?.nombre || 'Producto'}
                               fill
                               className="object-cover"
                               unoptimized
@@ -255,9 +248,9 @@ export default function MyOrdersPage() {
                             <span className="text-lg font-semibold text-gray-900">
                               {order.orderNumber}
                             </span>
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium border flex items-center gap-1 ${config.color}`}>
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium border flex items-center gap-1 ${statusConfig.color}`}>
                               <StatusIcon className="h-3 w-3" />
-                              {config.label}
+                              {statusConfig.label}
                             </span>
                           </div>
                           <div className="flex items-center gap-4 text-sm text-gray-500">
@@ -302,10 +295,10 @@ export default function MyOrdersPage() {
                               {item.quantity}x
                             </span>
                             <Link
-                              href={`/products/${item.product?.slug || '#'}`}
+                              href={`/products/${item.producto?.slug || '#'}`}
                               className="text-gray-700 hover:text-indigo-600"
                             >
-                              {item.product?.name || 'Producto'}
+                              {item.producto?.nombre || 'Producto'}
                             </Link>
                           </div>
                           <span className="text-gray-600">
@@ -322,9 +315,9 @@ export default function MyOrdersPage() {
 
                     {/* Acciones */}
                     <div className="mt-4 pt-4 border-t flex flex-wrap items-center gap-3">
-                      {order.invoice && !order.invoice.isCancelled && (
+                      {order.factura && !order.factura.anulada && (
                         <a
-                          href={`/api/admin/invoices/${order.invoice.id}/pdf`}
+                          href={`/api/admin/invoices/${order.factura.id}/pdf`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 font-medium"
@@ -334,18 +327,18 @@ export default function MyOrdersPage() {
                         </a>
                       )}
 
-                      {order.status === 'SHIPPED' || order.status === 'ENVIADO' ? (
+                      {order.estado === 'SHIPPED' && (
                         <span className="text-sm text-purple-600">
                           Pedido en camino
                         </span>
-                      ) : null}
+                      )}
 
-                      {order.status === 'DELIVERED' || order.status === 'ENTREGADO' ? (
+                      {order.estado === 'DELIVERED' && (
                         <span className="text-sm text-green-600 flex items-center gap-1">
                           <CheckCircle2 className="h-4 w-4" />
                           Entregado
                         </span>
-                      ) : null}
+                      )}
                     </div>
                   </div>
                 </div>
