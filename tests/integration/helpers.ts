@@ -6,7 +6,7 @@
 
 import { prisma } from '../helpers';
 import bcrypt from 'bcrypt';
-import { Material } from '@prisma/client';
+import { Material, OrderStatus } from '@/types/prisma-enums';
 
 // Test data interfaces
 export interface TestUser {
@@ -275,10 +275,10 @@ export async function createTestAddress(userId: string, options?: Partial<TestAd
  * Create a test order
  */
 export async function createTestOrder(userId: string, options?: {
-  status?: string;
+  status?: OrderStatus;
   total?: number;
   shippingAddressId?: string;
-}): Promise<{ id: string; orderNumber: string; status: string; total: number }> {
+}): Promise<{ id: string; orderNumber: string; status: OrderStatus; total: number }> {
   const timestamp = Date.now();
   const year = new Date().getFullYear();
   const count = await prisma.order.count();
@@ -295,10 +295,10 @@ export async function createTestOrder(userId: string, options?: {
     data: {
       orderNumber,
       userId,
-      status: options?.status || 'PENDING',
-      subtotal: options?.total || 29.99,
+      status: options?.status ?? OrderStatus.PENDING,
+      subtotal: options?.total ?? 29.99,
       shipping: 5.99,
-      total: options?.total || 35.98,
+      total: options?.total ?? 35.98,
       shippingAddressId: addressId,
       shippingName: 'Test User',
       shippingPhone: '+34 600 123 456',
@@ -314,7 +314,7 @@ export async function createTestOrder(userId: string, options?: {
   return {
     id: order.id,
     orderNumber: order.orderNumber,
-    status: order.status,
+    status: order.status as OrderStatus,
     total: Number(order.total),
   };
 }

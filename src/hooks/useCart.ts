@@ -126,13 +126,13 @@ export function useCart() {
             id: `local-${Date.now()}`,
             productId,
             quantity,
-            unitPrice: productInfo.price,
+            unitPrice: productInfo.price ?? 0,
             product: {
               id: productId,
-              name: productInfo.name,
-              slug: productInfo.slug,
-              price: productInfo.price,
-              stock: productInfo.stock,
+              name: productInfo.name ?? 'Unknown',
+              slug: productInfo.slug ?? '',
+              price: productInfo.price ?? 0,
+              stock: productInfo.stock ?? 0,
               image: productInfo.image || null,
             },
           });

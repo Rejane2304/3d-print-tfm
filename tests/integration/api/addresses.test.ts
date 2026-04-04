@@ -63,8 +63,7 @@ describe('Addresses API', () => {
     it('should return 401 without authentication', async () => {
       vi.mocked(getServerSession).mockResolvedValue(null);
 
-      const req = new NextRequest('http://localhost:3000/api/account/addresses');
-      const res = await GET(req);
+      const res = await GET();
 
       expect(res.status).toBe(401);
     });
@@ -74,8 +73,7 @@ describe('Addresses API', () => {
         user: { email: customerUser.email, name: customerUser.name },
       });
 
-      const req = new NextRequest('http://localhost:3000/api/account/addresses');
-      const res = await GET(req);
+      const res = await GET();
       const body = await res.json();
 
       expect(res.status).toBe(200);
@@ -118,8 +116,7 @@ describe('Addresses API', () => {
         user: { email: customerUser.email, name: customerUser.name },
       });
 
-      const req = new NextRequest('http://localhost:3000/api/account/addresses');
-      const res = await GET(req);
+      const res = await GET();
       const body = await res.json();
 
       expect(res.status).toBe(200);

@@ -77,7 +77,7 @@ describe('Cart API', () => {
         material: 'PLA',
         isActive: true,
       },
-    });
+    }) as unknown as { id: string; name: string; slug: string; stock: number; price: number };
 
     // Reset mocks
     vi.mocked(getServerSession).mockReset();
@@ -158,7 +158,7 @@ describe('Cart API', () => {
       expect(body.success).toBe(true);
       expect(body.cart.items.length).toBe(1);
       expect(body.cart.totalItems).toBe(2);
-      expect(body.cart.subtotal).toBe(59.98);
+      expect(body.cart.subtotal).toBeCloseTo(59.98, 2);
     });
   });
 
@@ -202,7 +202,7 @@ describe('Cart API', () => {
       expect(cart).toBeTruthy();
       expect(cart!.items.length).toBe(1);
       expect(cart!.items[0].quantity).toBe(2);
-      expect(Number(cart!.subtotal)).toBe(59.98);
+      expect(Number(cart!.subtotal)).toBeCloseTo(59.98, 2);
     });
 
     it('should reject quantity greater than stock', async () => {

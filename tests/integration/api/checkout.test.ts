@@ -117,7 +117,7 @@ describe('Checkout API', () => {
         material: 'PLA',
         isActive: true,
       },
-    });
+    }) as unknown as { id: string; name: string; stock: number; price: number };
 
     // Create test address
     testAddress = await prisma.address.create({
