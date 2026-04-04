@@ -11,6 +11,7 @@ import { useState, useEffect } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { useCart } from '@/hooks/useCart';
 import { 
   User, 
   Mail, 
@@ -33,6 +34,7 @@ export default function AuthPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();
+  const { migrateCart } = useCart();
   const callbackUrl = searchParams.get('callbackUrl') || '/';
   const registrationSuccessful = searchParams.get('registro') === 'exitoso';
   
@@ -118,6 +120,8 @@ export default function AuthPage() {
       if (result?.error) {
         setLoginError('Email o contraseña incorrectos');
       } else {
+        // Migrate cart from localStorage to API after login
+        await migrateCart();
         router.push(callbackUrl);
         router.refresh();
       }
