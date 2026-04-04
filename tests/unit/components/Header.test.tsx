@@ -5,7 +5,7 @@
  * CAMBIOS REALIZADOS:
  * - Carrito ahora visible para usuarios no autenticados (invitados)
  * - El carrito funciona con localStorage para invitados y API para autenticados
- * - Solo CLIENTE puede ver el link de "Cuenta"
+ * - CLIENTE tiene dropdown menu con "Mi Perfil" y "Mis Pedidos"
  * - Icon + text navigation for main menu items
  * - Cart always visible except for Admin
  */
@@ -106,10 +106,10 @@ describe('Header Component', () => {
       expect(screen.getByTestId('cart-icon')).toBeInTheDocument();
     });
 
-    it('debe OCULTAR el link de cuenta para usuarios no autenticados', () => {
+    it('debe OCULTAR el menú de usuario para invitados', () => {
       render(<Header />);
 
-      expect(screen.queryByText('Cuenta')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('user-menu-button')).not.toBeInTheDocument();
     });
   });
 
@@ -130,29 +130,66 @@ describe('Header Component', () => {
       });
     });
 
-    it('debe mostrar saludo con el nombre del usuario', () => {
+    it('debe mostrar el botón del menú de usuario con el nombre', () => {
       render(<Header />);
 
+      const userMenuButton = screen.getByTestId('user-menu-button');
+      expect(userMenuButton).toBeInTheDocument();
       expect(screen.getByText('Juan Pérez')).toBeInTheDocument();
     });
 
-    it('debe mostrar botón de cerrar sesión con title', () => {
+    it('debe abrir el menú desplegable al hacer clic', () => {
       render(<Header />);
 
-      const logoutButton = screen.getByTitle('Cerrar sesión');
-      expect(logoutButton).toBeInTheDocument();
+      const userMenuButton = screen.getByTestId('user-menu-button');
+      fireEvent.click(userMenuButton);
+
+      // El menú debe estar visible
+      expect(screen.getByRole('menu')).toBeInTheDocument();
+      expect(screen.getByRole('menuitem', { name: /mi perfil/i })).toBeInTheDocument();
+      expect(screen.getByRole('menuitem', { name: /mis pedidos/i })).toBeInTheDocument();
+    });
+
+    it('debe tener enlace a Mi Perfil en el menú desplegable', () => {
+      render(<Header />);
+
+      const userMenuButton = screen.getByTestId('user-menu-button');
+      fireEvent.click(userMenuButton);
+
+      const perfilLink = screen.getByRole('menuitem', { name: /mi perfil/i });
+      expect(perfilLink).toHaveAttribute('href', '/account');
+    });
+
+    it('debe tener enlace a Mis Pedidos en el menú desplegable', () => {
+      render(<Header />);
+
+      const userMenuButton = screen.getByTestId('user-menu-button');
+      fireEvent.click(userMenuButton);
+
+      const pedidosLink = screen.getByRole('menuitem', { name: /mis pedidos/i });
+      expect(pedidosLink).toHaveAttribute('href', '/account/orders');
+    });
+
+    it('debe cerrar el menú al hacer clic fuera', () => {
+      render(<Header />);
+
+      const userMenuButton = screen.getByTestId('user-menu-button');
+      fireEvent.click(userMenuButton);
+
+      // Menú está abierto
+      expect(screen.getByRole('menu')).toBeInTheDocument();
+
+      // Click fuera del menú
+      fireEvent.mouseDown(document.body);
+
+      // Menú debería cerrarse (no estar en el documento)
+      expect(screen.queryByRole('menu')).not.toBeInTheDocument();
     });
 
     it('debe mostrar el carrito para CLIENTE', () => {
       render(<Header />);
 
       expect(screen.getByTestId('cart-icon')).toBeInTheDocument();
-    });
-
-    it('debe mostrar el link de cuenta para CLIENTE', () => {
-      render(<Header />);
-
-      expect(screen.getByText('Cuenta')).toBeInTheDocument();
     });
 
     it('debe mostrar navegación con icono + texto (Inicio)', () => {
@@ -173,10 +210,13 @@ describe('Header Component', () => {
       expect(screen.queryByTitle('Iniciar sesión')).not.toBeInTheDocument();
     });
 
-    it('debe llamar a signOut al hacer clic en cerrar sesión', async () => {
+    it('debe llamar a signOut al hacer clic en cerrar sesión en el menú', async () => {
       render(<Header />);
 
-      const logoutButton = screen.getByTitle('Cerrar sesión');
+      const userMenuButton = screen.getByTestId('user-menu-button');
+      fireEvent.click(userMenuButton);
+
+      const logoutButton = screen.getByRole('menuitem', { name: /cerrar sesión/i });
       fireEvent.click(logoutButton);
 
       expect(mockSignOut).toHaveBeenCalledWith({ callbackUrl: '/' });
@@ -213,10 +253,18 @@ describe('Header Component', () => {
       expect(screen.queryByTestId('cart-icon')).not.toBeInTheDocument();
     });
 
-    it('debe OCULTAR el link de cuenta para ADMIN', () => {
+    it('debe OCULTAR el menú desplegable de cuenta para ADMIN', () => {
       render(<Header />);
 
-      expect(screen.queryByText('Cuenta')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('user-menu-button')).not.toBeInTheDocument();
+    });
+
+    it('debe mostrar el nombre del admin y botón de logout', () => {
+      render(<Header />);
+
+      expect(screen.getByText('Admin User')).toBeInTheDocument();
+      expect(screen.getByTestId('user-menu')).toBeInTheDocument();
+      expect(screen.getByTestId('logout-button')).toBeInTheDocument();
     });
 
     it('debe mostrar navegación con icono + texto (Inicio)', () => {
@@ -256,6 +304,34 @@ describe('Header Component', () => {
 
       // El menú debe estar visible (contiene los enlaces móviles con texto)
       expect(screen.getAllByText('Inicio').length).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  describe('Menu móvil para CLIENTE', () => {
+    beforeEach(() => {
+      mockUseSession.mockReturnValue({
+        data: {
+          user: {
+            id: 'user-123',
+            name: 'Juan Pérez',
+            email: 'juan@example.com',
+            rol: 'CLIENTE',
+          },
+          expires: '2024-12-31',
+        },
+        status: 'authenticated',
+        update: vi.fn(),
+      });
+    });
+
+    it('debe mostrar enlaces de Mi Perfil y Mis Pedidos en menú móvil', () => {
+      render(<Header />);
+
+      const menuButton = screen.getByLabelText(/abrir menú/i);
+      fireEvent.click(menuButton);
+
+      expect(screen.getByText('Mi Perfil')).toBeInTheDocument();
+      expect(screen.getByText('Mis Pedidos')).toBeInTheDocument();
     });
   });
 

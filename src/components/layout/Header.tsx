@@ -3,12 +3,13 @@
  * Responsive: mobile → 4K
  * Icon + text navigation for clarity
  * Cart always visible on the right (except for Admin)
+ * User dropdown menu for authenticated clients
  */
 'use client';
 
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { 
   Home, 
@@ -19,13 +20,18 @@ import {
   Menu,
   X,
   Package,
-  ShoppingBag
+  ShoppingBag,
+  ChevronDown,
+  ClipboardList,
+  Settings
 } from 'lucide-react';
 import CartIcon from '@/components/cart/CartIcon';
 
 export default function Header() {
   const { data: session, status } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   const isLoading = status === 'loading';
   const isAuthenticated = status === 'authenticated';
@@ -35,6 +41,18 @@ export default function Header() {
   const handleLogout = async () => {
     await signOut({ callbackUrl: '/' });
   };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-gray-100">
@@ -75,18 +93,6 @@ export default function Header() {
               <span className="text-sm font-medium">Catálogo</span>
             </Link>
 
-            {/* Account - ONLY for CLIENTE */}
-            {!isLoading && isAuthenticated && isCliente && (
-              <Link
-                href="/account"
-                className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
-                title="Mi Cuenta"
-              >
-                <User className="h-5 w-5" />
-                <span className="text-sm font-medium">Cuenta</span>
-              </Link>
-            )}
-
             {/* Admin Dashboard - ONLY for ADMIN */}
             {!isLoading && isAuthenticated && isAdmin && (
               <Link
@@ -117,14 +123,89 @@ export default function Header() {
             {/* Auth Buttons */}
             {isLoading ? (
               <div className="h-8 w-8 bg-gray-200 animate-pulse rounded-full"></div>
-            ) : isAuthenticated ? (
+            ) : isAuthenticated && isCliente ? (
+              /* User Dropdown Menu for CLIENTE */
+              <div ref={userMenuRef} className="relative">
+                <button
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  data-testid="user-menu-button"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
+                  aria-expanded={userMenuOpen}
+                  aria-haspopup="true"
+                >
+                  <User className="h-5 w-5" />
+                  <span className="text-sm font-medium hidden xl:block max-w-[120px] truncate">
+                    {session?.user?.name}
+                  </span>
+                  <ChevronDown 
+                    className={`h-4 w-4 transition-transform duration-200 ${userMenuOpen ? 'rotate-180' : ''}`} 
+                  />
+                </button>
+
+                {/* Dropdown Menu */}
+                {userMenuOpen && (
+                  <div 
+                    className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-100 py-2 z-50"
+                    role="menu"
+                    aria-orientation="vertical"
+                    aria-labelledby="user-menu-button"
+                  >
+                    {/* User info header */}
+                    <div className="px-4 py-3 border-b border-gray-100">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {session?.user?.name}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">
+                        {session?.user?.email}
+                      </p>
+                    </div>
+
+                    {/* Menu items */}
+                    <div className="py-1">
+                      <Link
+                        href="/account"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                        role="menuitem"
+                      >
+                        <Settings className="h-4 w-4" />
+                        Mi Perfil
+                      </Link>
+                      <Link
+                        href="/account/orders"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                        role="menuitem"
+                      >
+                        <ClipboardList className="h-4 w-4" />
+                        Mis Pedidos
+                      </Link>
+                    </div>
+
+                    {/* Divider */}
+                    <div className="border-t border-gray-100 my-1"></div>
+
+                    {/* Logout */}
+                    <button
+                      onClick={() => {
+                        setUserMenuOpen(false);
+                        handleLogout();
+                      }}
+                      className="flex w-full items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                      role="menuitem"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Cerrar sesión
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : isAuthenticated && isAdmin ? (
+              /* Simple logout button for ADMIN */
               <div data-testid="user-menu" className="flex items-center space-x-2">
-                {/* User greeting */}
                 <span className="text-sm text-gray-600 hidden xl:block max-w-[150px] truncate">
                   {session?.user?.name}
                 </span>
-                
-                {/* Logout - Icon only */}
                 <button
                   onClick={handleLogout}
                   data-testid="logout-button"
@@ -135,6 +216,7 @@ export default function Header() {
                 </button>
               </div>
             ) : (
+              /* Login button for unauthenticated users */
               <Link
                 href="/auth"
                 className="flex items-center justify-center w-10 h-10 rounded-full text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
@@ -196,16 +278,26 @@ export default function Header() {
               </Link>
             )}
 
-            {/* Account - ONLY for CLIENTE */}
+            {/* Account links for CLIENTE */}
             {!isLoading && isAuthenticated && isCliente && (
-              <Link
-                href="/account"
-                className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <User className="h-5 w-5" />
-                <span className="font-medium">Mi Cuenta</span>
-              </Link>
+              <>
+                <Link
+                  href="/account"
+                  className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Settings className="h-5 w-5" />
+                  <span className="font-medium">Mi Perfil</span>
+                </Link>
+                <Link
+                  href="/account/orders"
+                  className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <ClipboardList className="h-5 w-5" />
+                  <span className="font-medium">Mis Pedidos</span>
+                </Link>
+              </>
             )}
 
             {/* Admin - ONLY for ADMIN */}
