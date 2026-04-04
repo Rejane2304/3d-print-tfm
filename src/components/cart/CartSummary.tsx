@@ -13,8 +13,8 @@ interface CartSummaryProps {
     quantity: number;
     unitPrice: number;
     product: {
-      nombre: string;
-      precio: number;
+      name: string;
+      price: number;
     };
   }>;
   subtotal: number;
