@@ -1,63 +1,63 @@
 # Business Model Canvas - 3D Print TFM
 
-## 🎯 Proyecto: E-commerce de Impresión 3D
+## 🎯 Project: 3D Printing E-commerce
 
-**Versión**: 1.0  
-**Fecha**: Abril 2026  
-**Autor**: Rejane Rodrigues
-
----
-
-## 1. PROPUESTA DE VALOR
-
-### ¿Qué problema resolvemos?
-- Acceso limitado a productos impresos en 3D de calidad
-- Falta de personalización en productos existentes
-- Complejidad para usuarios sin conocimientos técnicos
-- Precios elevados en mercados tradicionales
-
-### Propuesta Única de Valor
-> **"Productos impresos en 3D personalizados, de calidad y accesibles, con entrega directa a tu puerta"**
-
-### Características Diferenciadoras
-- ✅ Personalización de diseños
-- ✅ Materiales eco-friendly (PLA biodegradable)
-- ✅ Precios competitivos
-- ✅ Catálogo variado (decoración, técnico, joyería)
-- ✅ Experiencia de compra simplificada
+**Version**: 1.0  
+**Date**: April 2026  
+**Author**: Rejane Rodrigues
 
 ---
 
-## 2. SEGMENTOS DE CLIENTES
+## 1. VALUE PROPOSITION
 
-### Clientes Primarios
-1. **Hogares y Decoradores**
-   - Buscando piezas únicas para decoración
-   - Presupuesto medio-alto
-   - Valoran el diseño y exclusividad
+### What problem do we solve?
+- Limited access to quality 3D printed products
+- Lack of customization in existing products
+- Complexity for non-technical users
+- High prices in traditional markets
 
-2. **Entusiastas de la Tecnología**
+### Unique Value Proposition
+> **"Personalized, high-quality, and affordable 3D printed products delivered directly to your door"**
+
+### Differentiating Features
+- ✅ Design customization
+- ✅ Eco-friendly materials (biodegradable PLA)
+- ✅ Competitive prices
+- ✅ Diverse catalog (decoration, technical, jewelry)
+- ✅ Simplified shopping experience
+
+---
+
+## 2. CUSTOMER SEGMENTS
+
+### Primary Customers
+1. **Households and Decorators**
+   - Looking for unique decorative pieces
+   - Medium-high budget
+   - Value design and exclusivity
+
+2. **Technology Enthusiasts**
    - Early adopters
-   - Interés en tecnología 3D
-   - Compran gadgets y accesorios técnicos
+   - Interest in 3D technology
+   - Buy gadgets and technical accessories
 
-### Clientes Secundarios
-3. **Regalos Corporativos**
-   - Empresas buscando regalos personalizados
-   - Pedidos en volumen
-   - Mayor margen de beneficio
+### Secondary Customers
+3. **Corporate Gifts**
+   - Companies seeking personalized gifts
+   - Bulk orders
+   - Higher profit margin
 
 4. **Maker Community**
-   - Diseñadores que necesitan fabricación
-   - Colaboraciones
-   - Feedback de producto
+   - Designers needing manufacturing
+   - Collaborations
+   - Product feedback
 
 ---
 
-## 3. CANALES
+## 3. CHANNELS
 
-### Canales de Distribución
-| Canal | Propósito | Prioridad |
+### Distribution Channels
+| Channel | Purpose | Priority |
 |-------|-----------|-----------|
 | **Web E-commerce** | Venta principal | Alta |
 | **Redes Sociales** | Marketing y engagement | Alta |

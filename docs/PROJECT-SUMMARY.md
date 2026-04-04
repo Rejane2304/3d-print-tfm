@@ -1,67 +1,67 @@
-# RESUMEN DEL PROYECTO - 3D PRINT TFM
+# PROJECT SUMMARY - 3D PRINT TFM
 
-## 📖 Visión General
+## 📖 Overview
 
-**E-commerce de Impresión 3D** desarrollado como Trabajo de Fin de Máster con enfoque TDD (Test-Driven Development).
+**3D Printing E-commerce** developed as a Master's Thesis project with a TDD (Test-Driven Development) approach.
 
 - **Stack**: Next.js 14 + Prisma + PostgreSQL + Stripe
-- **Enfoque**: TDD con 378 tests (100% pasando)
-- **Idioma**: 100% Español
+- **Approach**: TDD with 378 tests (100% passing)
+- **Language**: 100% English (in migration)
 - **Responsive**: Mobile → 4K
-- **Seguridad**: Enterprise-grade
+- **Security**: Enterprise-grade
 
-## 🎯 Fases Completadas
+## 🎯 Completed Phases
 
-### Fase 1: Fundamentos ✅
-- Setup proyecto
-- Configuración Prisma + NextAuth
-- Tests unitarios base (37 tests)
+### Phase 1: Fundamentals ✅
+- Project setup
+- Prisma + NextAuth configuration
+- Base unit tests (37 tests)
 
-### Fase 2: Autenticación ✅
-- Login/Registro
-- Middleware de autorización
-- Tests E2E (16 tests)
+### Phase 2: Authentication ✅
+- Login/Register
+- Authorization middleware
+- E2E tests (16 tests)
 
-### Fase 3: Catálogo de Productos ✅
-- Grid con filtros, búsqueda, paginación
-- Detalle de producto
+### Phase 3: Product Catalog ✅
+- Grid with filters, search, pagination
+- Product detail
 - Tests: 33 tests
 
-### Fase 4: Checkout + Pagos ✅
-- Carrito de compras
-- Integración Stripe (test mode)
-- Webhooks de confirmación
+### Phase 4: Checkout + Payments ✅
+- Shopping cart
+- Stripe integration (test mode)
+- Confirmation webhooks
 - Tests: 31 tests
 
-### Fase 5: Panel Admin ✅
-- Dashboard con métricas
-- Gestión de productos
-- Gestión de pedidos
+### Phase 5: Admin Panel ✅
+- Dashboard with metrics
+- Product management
+- Order management
 - Tests: 41 tests
 
-### Fase 6: Features Avanzadas ✅
-- **Facturación**: Sistema completo PDF (30 tests)
-- **Alertas**: Stock bajo, pedidos pendientes (20 tests)
-- **Mensajería**: Chat en pedidos (15 tests)
-- **Perfiles**: Edición de datos personales (17 tests)
+### Phase 6: Advanced Features ✅
+- **Invoicing**: Full PDF system (30 tests)
+- **Alerts**: Low stock, pending orders (20 tests)
+- **Messaging**: Order chat (15 tests)
+- **Profiles**: Personal data editing (17 tests)
 
-### Fase 7: Calidad ✅
-- Audit de cobertura (80% threshold)
-- Optimización performance (Lighthouse 90+)
-- Accesibilidad WCAG 2.1 AA
-- Documentación completa
+### Phase 7: Quality ✅
+- Coverage audit (80% threshold)
+- Performance optimization (Lighthouse 90+)
+- Accessibility WCAG 2.1 AA
+- Complete documentation
 
-## 📊 Métricas del Proyecto
+## 📊 Project Metrics
 
 ### Tests
 
 ```
 Total: 378 tests
-├── Unitarios: 37 (100% ✅)
-├── Integración: 227 (100% ✅)
+├── Unit: 37 (100% ✅)
+├── Integration: 227 (100% ✅)
 └── E2E: 114 (100% ✅)
 
-Por Dispositivo E2E (19 tests cada uno):
+E2E by Device (19 tests each):
 ├── Desktop Chrome: 19 ✅
 ├── Desktop Firefox: 19 ✅
 ├── Desktop Safari: 19 ✅
@@ -70,27 +70,27 @@ Por Dispositivo E2E (19 tests cada uno):
 └── Desktop 4K: 19 ✅
 ```
 
-### Cobertura de Código
+### Code Coverage
 
-| Componente | Tests | Cobertura |
-|------------|-------|-----------|
+| Component | Tests | Coverage |
+|-----------|-------|----------|
 | API Auth | 27 | 85%+ |
-| API Productos | 33 | 90%+ |
-| API Carrito | 8 | 95%+ |
+| API Products | 33 | 90%+ |
+| API Cart | 8 | 95%+ |
 | API Checkout | 15 | 85%+ |
 | API Admin | 114 | 80%+ |
 | Middleware | 15 | 90%+ |
-| Páginas | 50 | 75%+ |
+| Pages | 50 | 75%+ |
 | UI Components | 61 | 70%+ |
 
 ### Performance (Lighthouse)
 
-| Página | Performance | Accessibility | Best Practices | SEO |
-|--------|-------------|---------------|----------------|-----|
+| Page | Performance | Accessibility | Best Practices | SEO |
+|------|-------------|---------------|----------------|-----|
 | Home | 92 | 98 | 100 | 100 |
-| Productos | 90 | 95 | 100 | 100 |
-| Producto Detalle | 88 | 96 | 100 | 100 |
-| Carrito | 94 | 97 | 100 | 100 |
+| Products | 90 | 95 | 100 | 100 |
+| Product Detail | 88 | 96 | 100 | 100 |
+| Cart | 94 | 97 | 100 | 100 |
 | Checkout | 89 | 95 | 100 | 100 |
 | Admin Dashboard | 86 | 92 | 100 | N/A |
 
@@ -100,24 +100,24 @@ Por Dispositivo E2E (19 tests cada uno):
 - **FID**: <100ms ✅
 - **CLS**: <0.1 ✅
 
-## 🏗️ Arquitectura
+## 🏗️ Architecture
 
 ```
 3d-print-tfm/
 ├── prisma/
-│   ├── schema.prisma      # 18 modelos de datos
-│   └── seed.ts            # Datos iniciales desde CSV
+│   ├── schema.prisma      # 18 data models
+│   └── seed.ts            # Initial data from CSV
 ├── src/
 │   ├── app/               # Next.js App Router
-│   │   ├── (auth)/         # Login, Registro (unificados en /auth)
-│   │   │   ├── auth/         # Página auth unificada con tabs
-│   │   │   ├── login/        # Redirecciona a /auth
-│   │   │   └── registro/     # Redirecciona a /auth?tab=register
-│   │   ├── (shop)/          # Tienda pública
-│   │   ├── (admin)/         # Panel admin
+│   │   ├── (auth)/         # Login, Register (unified in /auth)
+│   │   │   ├── auth/         # Unified auth page with tabs
+│   │   │   ├── login/        # Redirects to /auth
+│   │   │   └── register/     # Redirects to /auth?tab=register
+│   │   ├── (shop)/          # Public shop
+│   │   ├── (admin)/         # Admin panel
 │   │   └── api/             # API routes (30+ endpoints)
 │   ├── components/
-│   │   ├── ui/              # Componentes base
+│   │   ├── ui/              # Base components
 │   │   ├── shop/            # Componentes tienda
 │   │   ├── admin/           # Componentes admin
 │   │   └── layout/          # Header, Footer, Navigation

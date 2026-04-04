@@ -39,145 +39,145 @@ Aplicación web de comercio electrónico especializada en productos impresos en 
 | **Autenticación** | NextAuth.js 4.24 |
 | **Pagos** | Stripe (modo test) |
 | **Testing** | Vitest, Playwright |
-| **Validación** | Zod |
-| **Despliegue** | Vercel (recomendado) |
+| **Validation** | Zod |
+| **Deployment** | Vercel (recommended) |
 | **Icons** | Lucide React |
 
-## 📦 Instalación
+## 📦 Installation
 
-### Requisitos previos
+### Prerequisites
 
 - Node.js 18+
-- Cuenta en Supabase (para base de datos)
-- Cuenta en Stripe (para pagos de prueba)
-- npm o yarn
+- Supabase account (for database)
+- Stripe account (for test payments)
+- npm or yarn
 
-### Pasos
+### Steps
 
-1. **Clonar el repositorio**
+1. **Clone the repository**
    ```bash
-   git clone https://github.com/tu-usuario/3d-print-tfm.git
+   git clone https://github.com/your-user/3d-print-tfm.git
    cd 3d-print-tfm
    ```
 
-2. **Instalar dependencias**
+2. **Install dependencies**
    ```bash
    npm install
    ```
 
-3. **Configurar variables de entorno**
+3. **Configure environment variables**
    
-   Ver guía completa en: [private/GUIA_VARIABLES_ENTORNO.md](private/GUIA_VARIABLES_ENTORNO.md)
+   See the full guide at: [private/ENV_VARIABLES_GUIDE.md](private/ENV_VARIABLES_GUIDE.md)
    
    ```bash
-   # Copiar archivo de ejemplo
+   # Copy example file
    cp .env.example .env.local
    
-   # O editar directamente .env
-   # Completar DATABASE_URL, NEXTAUTH_SECRET, STRIPE_SECRET_KEY, etc.
+   # Or edit .env directly
+   # Fill in DATABASE_URL, NEXTAUTH_SECRET, STRIPE_SECRET_KEY, etc.
    ```
 
-4. **Configurar base de datos**
+4. **Set up the database**
    ```bash
-   # Generar cliente Prisma
+   # Generate Prisma client
    npx prisma generate
    
-   # Crear migraciones (primera vez)
+   # Create migrations (first time)
    npx prisma migrate dev --name init
    
-   # Cargar datos iniciales
+   # Seed initial data
    npm run db:seed
    ```
 
-5. **Iniciar servidor de desarrollo**
+5. **Start development server**
    ```bash
    npm run dev
    ```
 
-La aplicación estará disponible en [http://localhost:3000](http://localhost:3000)
+The app will be available at [http://localhost:3000](http://localhost:3000)
 
-## 🔧 Variables de Entorno Requeridas
+## 🔧 Required Environment Variables
 
-| Variable | Origen | Descripción |
+| Variable | Source | Description |
 |----------|--------|-------------|
-| `DATABASE_URL` | Supabase (Session Pooler) | URL de conexión PostgreSQL |
-| `NEXTAUTH_SECRET` | Generar localmente | Secreto para JWT (`openssl rand -base64 32`) |
-| `NEXTAUTH_URL` | Configurar | URL base de la app (`http://localhost:3000`) |
-| `STRIPE_SECRET_KEY` | Stripe Dashboard | Clave secreta de Stripe (modo test) |
-| `STRIPE_PUBLISHABLE_KEY` | Stripe Dashboard | Clave pública de Stripe (modo test) |
-| `STRIPE_WEBHOOK_SECRET` | Stripe CLI | Secreto para webhooks de Stripe |
+| `DATABASE_URL` | Supabase (Session Pooler) | PostgreSQL connection URL |
+| `NEXTAUTH_SECRET` | Generate locally | JWT secret (`openssl rand -base64 32`) |
+| `NEXTAUTH_URL` | Configure | Base app URL (`http://localhost:3000`) |
+| `STRIPE_SECRET_KEY` | Stripe Dashboard | Stripe secret key (test mode) |
+| `STRIPE_PUBLISHABLE_KEY` | Stripe Dashboard | Stripe public key (test mode) |
+| `STRIPE_WEBHOOK_SECRET` | Stripe CLI | Stripe webhook secret |
 
-**Arquitectura de base de datos:** Supabase con 2 proyectos separados (desarrollo + producción)
+**Database architecture:** Supabase with 2 separate projects (development + production)
 
-**Ver guía paso a paso:** [private/GUIA_VARIABLES_ENTORNO.md](private/GUIA_VARIABLES_ENTORNO.md)
+**Step-by-step guide:** [private/ENV_VARIABLES_GUIDE.md](private/ENV_VARIABLES_GUIDE.md)
 
 ## 🧪 Testing
 
-La suite de tests está siendo reconstruida para ser más enfocada y mantenible.
+The test suite is being rebuilt for better focus and maintainability.
 
-### Ejecutar Tests
+### Run Tests
 
 ```bash
-# Todos los tests
+# All tests
 npm test
 
-# Unitarios (validaciones, componentes)
+# Unit tests (validation, components)
 npm run test:unit
 
-# Integración (APIs, base de datos) - Requiere PostgreSQL
+# Integration (APIs, database) - Requires PostgreSQL
 npm run test:integration
 
-# E2E (flujos completos) - Requiere servidor corriendo
+# E2E (full flows) - Requires server running
 npm run test:e2e
 
-# Con cobertura
+# With coverage
 npm run test:coverage
 ```
 
-📚 **Documentación completa:** [docs/TESTING.md](docs/TESTING.md)  
-📋 **Roadmap de mejoras:** [docs/ROADMAP.md](docs/ROADMAP.md)
+📚 **Full documentation:** [docs/TESTING.md](docs/TESTING.md)  
+📋 **Improvement roadmap:** [docs/ROADMAP.md](docs/ROADMAP.md)
 
-## 📊 Estado de Tests
+## 📊 Test Status
 
-- ✅ **Unitarios:** 37 tests (validaciones)
-- ✅ **Integración:** 227 tests (API, auth, carrito, checkout, páginas, admin)
-- ✅ **E2E:** 114 tests en 6 dispositivos (Chrome, Firefox, Safari, iPad, iPhone, 4K)
-- ✅ **Total:** 378 tests pasando (100%)
+- ✅ **Unit:** 37 tests (validation)
+- ✅ **Integration:** 227 tests (API, auth, cart, checkout, pages, admin)
+- ✅ **E2E:** 114 tests on 6 devices (Chrome, Firefox, Safari, iPad, iPhone, 4K)
+- ✅ **Total:** 378 tests passing (100%)
 
-## 🗄️ Estructura del Proyecto
+## 🗄️ Project Structure
 
 ```
 3d-print-tfm/
 ├── prisma/
-│   ├── schema.prisma          # Esquema de base de datos (18 modelos)
-│   └── seed.ts                # Datos iniciales desde CSV
+│   ├── schema.prisma          # Database schema (18 models)
+│   └── seed.ts                # Initial data from CSV
 ├── src/
 │   ├── app/                   # Next.js App Router
-│   │   ├── (auth)/            # Login, Registro
-│   │   ├── (shop)/            # Tienda pública
-│   │   │   ├── page.tsx        # Home con productos destacados
-│   │   │   ├── productos/      # Catálogo de productos
-│   │   │   ├── productos/[slug]/  # Detalle de producto
-│   │   │   └── carrito/        # Carrito de compras
-│   │   ├── (admin)/           # Panel admin
-│   │   │   └── dashboard/      # Dashboard administrativo
+│   │   ├── (auth)/            # Login, Register
+│   │   ├── (shop)/            # Public shop
+│   │   │   ├── page.tsx        # Home with featured products
+│   │   │   ├── products/      # Product catalog
+│   │   │   ├── products/[slug]/  # Product detail
+│   │   │   └── cart/          # Shopping cart
+│   │   ├── (admin)/           # Admin panel
+│   │   │   └── dashboard/      # Admin dashboard
 │   │   └── api/               # API routes
 │   │       ├── auth/
 │   │       │   └── [...nextauth]/
-│   │       │       └── route.ts   # Configuración NextAuth
-│   │       ├── auth/registro/     # API de registro
-│   │       ├── carrito/            # API del carrito
-│   │       │   └── [itemId]/       # Actualizar/eliminar items
-│   │       ├── checkout/           # API de checkout Stripe
-│   │       ├── productos/          # API de catálogo
-│   │       ├── productos/[slug]/  # API de detalle
-│   │       └── webhooks/stripe/   # Webhook para pagos
+│   │       │       └── route.ts   # NextAuth config
+│   │       ├── auth/register/     # Register API
+│   │       ├── cart/              # Cart API
+│   │       │   └── [itemId]/      # Update/delete items
+│   │       ├── checkout/          # Stripe checkout API
+│   │       ├── products/          # Catalog API
+│   │       ├── products/[slug]/   # Product detail API
+│   │       └── webhooks/stripe/   # Stripe webhook
 │   ├── components/
-│   │   ├── cart/               # Componentes del carrito
+│   │   ├── cart/               # Cart components
 │   │   │   ├── CartItem.tsx
 │   │   │   ├── CartSummary.tsx
 │   │   │   └── CartIcon.tsx
-│   │   ├── products/           # Componentes de catálogo
+│   │   ├── products/           # Catalog components
 │   │   │   ├── ProductCard.tsx
 │   │   │   ├── FilterSidebar.tsx
 │   │   │   ├── Pagination.tsx
@@ -185,24 +185,24 @@ npm run test:coverage
 │   │   │   ├── SortSelector.tsx
 │   │   │   └── AddToCartButton.tsx
 │   │   ├── layout/            # Header, Footer
-│   │   └── ui/               # Componentes base
+│   │   └── ui/                # Base components
 │   ├── lib/
-│   │   ├── db/prisma.ts      # Conexión Prisma
-│   │   ├── auth/             # Configuración auth
-│   │   ├── validators/       # Validaciones Zod
-│   │   └── errors/           # Manejo de errores
+│   │   ├── db/prisma.ts      # Prisma connection
+│   │   ├── auth/             # Auth config
+│   │   ├── validators/       # Zod validations
+│   │   └── errors/           # Error handling
 │   ├── hooks/                # Custom hooks
-│   └── types/                # Tipos TypeScript
+│   └── types/                # TypeScript types
 ├── tests/
-│   ├── unit/                 # Tests unitarios
-│   │   └── validaciones.test.ts
-│   ├── integration/          # Tests de integración
+│   ├── unit/                 # Unit tests
+│   │   └── validation.test.ts
+│   ├── integration/          # Integration tests
 │   │   ├── api/
-│   │   │   ├── registro.test.ts
-│   │   │   ├── carrito.test.ts
+│   │   │   ├── register.test.ts
+│   │   │   ├── cart.test.ts
 │   │   │   ├── checkout.test.ts
-│   │   │   ├── productos.test.ts
-│   │   │   ├── producto-detalle.test.ts
+│   │   │   ├── products.test.ts
+│   │   │   ├── product-detail.test.ts
 │   │   │   └── webhook-stripe.test.ts
 │   │   ├── auth/
 │   │   │   └── login.test.ts
@@ -210,72 +210,72 @@ npm run test:coverage
 │   │   └── pages/
 │   │       ├── home.test.ts
 │   │       └── checkout.test.ts
-│   └── e2e/                  # Tests E2E
+│   └── e2e/                  # E2E tests
 │       └── auth/
 │           └── login.spec.ts
 ├── public/
 │   ├── images/
 │   │   ├── logo.svg
-│   │   └── products/         # p1-p10 con imágenes
-│   └── data/                 # CSV con datos iniciales
-├── scripts/                  # Scripts de utilidad
-│   └── prepare-test-db.sh    # Preparar BD de test
-├── docs/                     # Documentación TFM
-└── private/                  # Documentación privada
-    ├── PLAN_IMPLEMENTACION.md
-    ├── COMANDOS.md
-    └── GUIA_VARIABLES_ENTORNO.md
+│   │   └── products/         # p1-p10 with images
+│   └── data/                 # Initial data CSV
+├── scripts/                  # Utility scripts
+│   └── prepare-test-db.sh    # Prepare test DB
+├── docs/                     # Project documentation
+└── private/                  # Private documentation
+   ├── PLAN_IMPLEMENTATION.md
+   ├── COMMANDS.md
+   └── ENV_VARIABLES_GUIDE.md
 ```
 
-## 👥 Usuarios de Prueba
+## 👥 Test Users
 
-| Rol | Email | Contraseña |
-|-----|-------|------------|
+| Role | Email | Password |
+|------|-------|----------|
 | Admin | admin@3dprint.com | admin123 |
-| Cliente | juan@example.com | pass123 |
-| Cliente | maria@example.com | pass123 |
+| Customer | juan@example.com | pass123 |
+| Customer | maria@example.com | pass123 |
 
-## 📚 Documentación
+## 📚 Documentation
 
-- **[Guía de Testing](docs/TESTING.md)** - Cómo ejecutar y mantener tests
-- **[Roadmap](docs/ROADMAP.md)** - Plan de mejoras y próximos pasos
-- [Guía de Variables de Entorno](private/GUIA_VARIABLES_ENTORNO.md) - Configuración paso a paso
-- Documentación académica TFM en [`/docs/`](docs/)
+- **[Testing Guide](docs/TESTING.md)** - How to run and maintain tests
+- **[Roadmap](docs/ROADMAP.md)** - Improvement plan and next steps
+- [Environment Variables Guide](private/ENV_VARIABLES_GUIDE.md) - Step-by-step configuration
+- Academic documentation in [`/docs/`](docs/)
 
-## 🔐 Seguridad
+## 🔐 Security
 
-- Autenticación JWT con NextAuth.js
-- Validación estricta en backend con Zod
-- Protección contra SQL Injection (Prisma)
-- Sanitización de inputs
-- Rate limiting en login
-- Sesiones seguras (httpOnly, secure, sameSite)
-- Manejo centralizado de errores (sin leaks al cliente)
+- JWT authentication with NextAuth.js
+- Strict backend validation with Zod
+- SQL Injection protection (Prisma)
+- Input sanitization
+- Rate limiting on login
+- Secure sessions (httpOnly, secure, sameSite)
+- Centralized error handling (no client leaks)
 
-## 🛠️ Comandos Útiles
+## 🛠️ Useful Commands
 
 ```bash
-# Desarrollo
-npm run dev                    # Iniciar servidor de desarrollo
-npm run lint                   # Ejecutar ESLint
-npm run lint -- --fix          # Corregir errores de ESLint
+# Development
+npm run dev                    # Start development server
+npm run lint                   # Run ESLint
+npm run lint -- --fix          # Fix ESLint errors
 
-# Base de datos
-npm run db:generate            # Generar cliente Prisma
-npm run db:migrate             # Crear migración
-npm run db:seed                # Cargar datos iniciales
-npm run db:reset               # Resetear BD + seed
-npm run db:studio              # Abrir Prisma Studio
+# Database
+npm run db:generate            # Generate Prisma client
+npm run db:migrate             # Create migration
+npm run db:seed                # Seed initial data
+npm run db:reset               # Reset DB + seed
+npm run db:studio              # Open Prisma Studio
 
 # Testing
-npm run test:unit              # Tests unitarios
-npm run test:integration       # Tests de integración
-npm run test:e2e               # Tests E2E con Playwright
-npm run test:e2e:ui            # Tests E2E con interfaz
-npm run test:coverage          # Tests con cobertura
+npm run test:unit              # Unit tests
+npm run test:integration       # Integration tests
+npm run test:e2e               # E2E tests with Playwright
+npm run test:e2e:ui            # E2E tests with UI
+npm run test:coverage          # Tests with coverage
 
 # Scripts
-./scripts/prepare-test-db.sh   # Preparar BD de test
+./scripts/prepare-test-db.sh   # Prepare test DB
 ```
 
 ## 📝 Historial de Cambios Recientes

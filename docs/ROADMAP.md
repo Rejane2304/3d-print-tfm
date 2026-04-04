@@ -1,63 +1,63 @@
-# Roadmap de Mejoras - 3D Print TFM
+# Improvement Roadmap - 3D Print TFM
 
-Plan de acción para la reconstrucción gradual de tests y documentación.
-
----
-
-## ✅ Completado
-
-### Fase 1: Limpieza de Documentación Temporal
-**Fecha:** 2 de Abril de 2026  
-**Estado:** ✅ COMPLETADO
-
-**Logros:**
-- ✅ Eliminados 19 archivos temporales de documentación
-- ✅ Raíz del proyecto limpia
-- ✅ Creado doc/TESTING.md (guía única)
-- ✅ Creado doc/ROADMAP.md (este documento)
-
-**Archivos eliminados:**
-- AUDIT_*.md (5 archivos)
-- TEST_ANALYSIS_*.md (4 archivos)
-- IMPLEMENTATION_*.md (2 archivos)
-- QUICK_*.md (3 archivos)
-- Otros temporales (5 archivos)
-
-**Reducción:** De 26 archivos en raíz a 2 (README.md y DELETION_RULES.md)
+Action plan for the gradual reconstruction of tests and documentation.
 
 ---
 
-## 🚧 En Progreso
+## ✅ Completed
 
-### Fase 2: Habilitar Tests de Componentes
-**Estado:** 🟡 PENDIENTE  
-**Tiempo estimado:** 1-2 horas
+### Phase 1: Temporary Documentation Cleanup
+**Date:** April 2, 2026  
+**Status:** ✅ COMPLETED
 
-**Objetivo:** Habilitar los 63 tests de componentes React actualmente excluidos.
+**Achievements:**
+- ✅ Removed 19 temporary documentation files
+- ✅ Clean project root
+- ✅ Created docs/TESTING.md (single guide)
+- ✅ Created docs/ROADMAP.md (this document)
 
-**Tareas:**
-- [ ] Actualizar vitest.config.ts (cambiar environment a jsdom)
-- [ ] Configurar React Testing Library
-- [ ] Verificar que 4 archivos de componentes pasan:
-  - CartItem.test.tsx
-  - CartSummary.test.tsx
-  - Header.test.tsx
-  - Footer.test.tsx
+**Files removed:**
+- AUDIT_*.md (5 files)
+- TEST_ANALYSIS_*.md (4 files)
+- IMPLEMENTATION_*.md (2 files)
+- QUICK_*.md (3 files)
+- Other temporary (5 files)
+
+**Reduction:** From 26 files in root to 2 (README.md and DELETION_RULES.md)
 
 ---
 
-## 📋 Próximos Pasos (Prioridad Alta)
+## 🛠️ In Progress
 
-### Fase 3: Consolidar Tests de Validación
-**Prioridad:** Alta  
-**Tiempo estimado:** 2-3 horas
+### Phase 2: Enable Component Tests
+**Status:** 🟡 PENDING  
+**Estimated time:** 1-2 hours
 
-**Problema:** Validaciones duplicadas en unit + integration + E2E.
+**Goal:** Enable the 63 React component tests currently excluded.
 
-**Solución:** Mantener solo en unit/.
+**Tasks:**
+- [ ] Update vitest.config.ts (set environment to jsdom)
+- [ ] Configure React Testing Library
+- [ ] Verify that 4 component files pass:
+   - CartItem.test.tsx
+   - CartSummary.test.tsx
+   - Header.test.tsx
+   - Footer.test.tsx
 
-**Tareas:**
-- [ ] Mantener validaciones en tests/unit/validaciones.test.ts
+---
+
+## 📋 Next Steps (High Priority)
+
+### Phase 3: Consolidate Validation Tests
+**Priority:** High  
+**Estimated time:** 2-3 hours
+
+**Problem:** Duplicate validations in unit + integration + E2E.
+
+**Solution:** Keep only in unit/.
+
+**Tasks:**
+- [ ] Keep validations in tests/unit/validation.test.ts
 - [ ] Simplificar tests/integration/api/registro.test.ts
 - [ ] Simplificar tests/e2e/auth/login.spec.ts
 

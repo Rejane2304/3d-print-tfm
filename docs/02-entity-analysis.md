@@ -201,191 +201,303 @@ CANCELADO (en cualquier punto)
 | stripePaymentIntentId | String | ID de pago Stripe |
 | monto | Decimal | Cantidad pagada |
 | estado | Enum | PENDIENTE / COMPLETADO / FALLIDO / REEMBOLSADO |
-| metodo | String | Tarjeta, transferencia |
-| comprobante | String | URL de comprobante |
+# Entity Analysis - 3D Print TFM
 
----
+## 📊 Data Model
 
-### Factura
-**Propósito**: Facturación legal española
+### Entity Overview
 
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| id | UUID | Identificador |
-| numeroFactura | String | F-2026-000001 (único) |
-| serie | String | F (fijo) |
-| numero | Int | Secuencial numérico |
-| pedidoId | UUID | Pedido facturado |
-| empresaNombre | String | Datos del vendedor |
-| empresaNif | String | B12345678 |
-| clienteNombre | String | Datos del comprador |
-| clienteNif | String | NIF del cliente |
-| baseImponible | Decimal | Subtotal |
-| tipoIva | Decimal | 21% (IVA español) |
-| cuotaIva | Decimal | Cantidad IVA |
-| total | Decimal | Total con IVA |
-| anulada | Boolean | Factura anulada |
-| pdfUrl | String | URL del PDF generado |
-
-**Formato Legal**:
-- Numeración: F-AAAA-NNNNNN
-- IVA 21% aplicable
-- Datos completos emisor y receptor
-- No se pueden eliminar (solo anular)
-
----
-
-## 📍 ENTIDADES AUXILIARES
-
-### Direccion
-**Propósito**: Direcciones de envío guardadas
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| id | UUID | Identificador |
-| usuarioId | UUID | Propietario |
-| nombre | String | Título ("Casa", "Oficina") |
-| calle | String | Dirección completa |
-| ciudad | String | Ciudad |
-| provincia | String | Provincia |
-| cp | String | Código postal |
-| pais | String | España (por defecto) |
-| principal | Boolean | Dirección por defecto |
-
----
-
-## 🔔 ENTIDADES DE ADMIN
-
-### Alerta
-**Propósito**: Sistema de notificaciones del sistema
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| id | UUID | Identificador |
-| tipo | Enum | STOCK_BAJO / STOCK_AGOTADO / PEDIDO_SIN_PAGAR / PEDIDO_ATRASADO / ERROR_SISTEMA |
-| severidad | Enum | BAJA / MEDIA / ALTA / CRITICA |
-| titulo | String | Resumen breve |
-| mensaje | String | Descripción completa |
-| productoId | UUID | Producto relacionado (opcional) |
-| pedidoId | UUID | Pedido relacionado (opcional) |
-| estado | Enum | PENDIENTE / EN_PROCESO / RESUELTA / IGNORADA |
-| resueltaPor | UUID | Admin que resolvió |
-| resueltaEn | DateTime | Fecha resolución |
-| notasResolucion | String | Notas internas |
-
-**Reglas**:
-- Generadas automáticamente por el sistema
-- Stock bajo: cuando stock < stockMinimo
-- Pedido sin pagar: >24h desde creación
-
----
-
-### MensajePedido
-**Propósito**: Chat entre admin y clientes en pedidos
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| id | UUID | Identificador |
-| pedidoId | UUID | Pedido asociado |
-| usuarioId | UUID | Autor del mensaje |
-| mensaje | String | Contenido (max 1000 chars) |
-| esDeCliente | Boolean | true = cliente, false = admin |
-| adjuntos | Json | URLs archivos adjuntos |
-| leido | Boolean | Estado de lectura |
-| leidoEn | DateTime | Fecha lectura |
-| creadoEn | DateTime | Fecha envío |
-
-**Reglas**:
-- Solo participantes: admin y dueño del pedido
-- Mensajes ordenados por fecha
-- Marcado de leído
-
----
-
-### MovimientoInventario
-**Propósito**: Tracking de cambios de stock
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| id | UUID | Identificador |
-| productoId | UUID | Producto afectado |
-| tipo | Enum | ENTRADA / SALIDA / AJUSTE |
-| cantidad | Int | Positivo o negativo |
-| stockAnterior | Int | Stock antes del movimiento |
-| stockNuevo | Int | Stock después |
-| motivo | String | Razón del movimiento |
-| referencia | String | ID de pedido o ajuste |
-| creadoPor | UUID | Usuario que realizó |
-| creadoEn | DateTime | Fecha del movimiento |
-
-**Reglas**:
-- Trazabilidad completa
-- No se pueden eliminar (solo anular con movimiento contrario)
-- Automático en ventas, manual en ajustes
-
----
-
-## 🔐 AUTENTICACIÓN (NextAuth)
-
-### Cuenta, Session, VerificationToken
-**Uso**: Interno de NextAuth.js
-
-- **Cuenta**: Vinculación con proveedores OAuth (Google, etc.)
-- **Session**: Sesiones activas del usuario
-- **VerificationToken**: Tokens para verificación de email
-
----
-
-## 📐 Diagrama ER Simplificado
+The system has **18 main models** organized into 4 functional categories:
 
 ```
-USUARIO ||--o{ PEDIDO : realiza
-USUARIO ||--o{ CARRITO : posee
-USUARIO ||--o{ DIRECCION : tiene
-USUARIO ||--o{ FACTURA : emite
+┌──────────────────────────────┐
+│           USERS & AUTH                │
+├──────────────────────────────┤
+│ • User                                 │
+│ • Account (NextAuth)                   │
+│ • Session                              │
+│ • VerificationToken                    │
+└──────────────────────────────┘
 
-PRODUCTO }o--|| CATEGORIA : pertenece
-PRODUCTO }o--|| MATERIAL : usa
-PRODUCTO ||--o{ ITEM_CARRITO : en
-PRODUCTO ||--o{ DETALLE_PEDIDO : incluido
-PRODUCTO ||--o{ MOVIMIENTO_INVENTARIO : afecta
-PRODUCTO ||--o{ ALERTA : genera
+┌──────────────────────────────┐
+│           CATALOG & SHOP               │
+├──────────────────────────────┤
+│ • Product                              │
+│ • Category                             │
+│ • Material                             │
+│ • Stock/Movements                      │
+└──────────────────────────────┘
 
-PEDIDO ||--|{ DETALLE_PEDIDO : contiene
-PEDIDO ||--o| PAGO : tiene
-PEDIDO ||--o| FACTURA : genera
-PEDIDO ||--o{ MENSAJE : incluye
+┌──────────────────────────────┐
+│           PURCHASES & PAYMENTS         │
+├──────────────────────────────┤
+│ • Cart                                 │
+│ • CartItem                             │
+│ • Order                                │
+│ • OrderDetail                          │
+│ • Payment                              │
+│ • Invoice                              │
+└──────────────────────────────┘
 
-CARRITO ||--|{ ITEM_CARRITO : contiene
+┌──────────────────────────────┐
+│           ADMIN & LOGS                 │
+├──────────────────────────────┤
+│ • Address                              │
+│ • Alert                                │
+│ • OrderMessage                         │
+│ • AuditLog                             │
+│ • InventoryMovement                    │
+└──────────────────────────────┘
 ```
 
 ---
 
-## 🎯 Índices de Rendimiento
+## 👤 USER ENTITIES
 
-### Índices Creados (Optimización)
+### User
+**Purpose**: System user management
 
-| Tabla | Índice | Uso |
-|-------|--------|-----|
-| Producto | slug | Búsquedas URL |
-| Producto | categoria + activo | Filtrado catálogo |
-| Producto | destacado | Home page |
-| Pedido | usuarioId + creadoEn | Historial de cliente |
-| Pedido | estado | Gestión de pedidos admin |
-| Pedido | numeroPedido | Búsqueda de pedidos |
-| Factura | numeroFactura | Búsqueda única |
-| Factura | clienteNif | Filtrado por cliente |
-| Alerta | tipo + estado | Dashboard admin |
-| Alerta | severidad | Priorización |
+| Field | Type | Description |
+|-------|------|-------------|
+| id | UUID | Unique identifier |
+| email | String | Unique email for login |
+| password | String | Bcrypt password hash |
+| name | String | Full name |
+| role | Enum | CUSTOMER / ADMIN |
+| nif | String | Spanish NIF (billing) |
+| phone | String | Contact phone |
+| active | Boolean | Account status |
+| emailVerified | DateTime | Email verification |
+| createdAt | DateTime | Registration date |
+
+**Relations**:
+- One-to-many: Orders, Invoices, Addresses, Alerts
+- One-to-one: Account (NextAuth)
+
+**Business Rules**:
+- Email must be unique
+- Default role: CUSTOMER
+- NIF validated (Spanish format: 8 digits + letter)
 
 ---
 
-## 📈 Estadísticas de Modelo
+## 🛍️ CATALOG ENTITIES
 
-- **Tablas principales**: 18
-- **Relaciones**: 25+
-- **Enums**: 8
-- **Índices**: 40+
-- **Campos validados**: 150+
+### Product
+**Purpose**: 3D printed product catalog
 
-**Estado**: ✅ Modelo finalizado y probado
+| Field | Type | Description |
+|-------|------|-------------|
+| id | UUID | Unique identifier |
+| name | String | Product name |
+| slug | String | Unique SEO-friendly URL |
+| description | String | Long description |
+| shortDescription | String | Summary (140 chars) |
+| price | Decimal | Price in EUR |
+| stock | Int | Available units |
+| minStock | Int | Low stock alert threshold |
+| sku | String | Unique product code |
+| category | Enum | DECORATION / TECHNICAL / JEWELRY / ART / HOME |
+| material | Enum | PLA / PETG / ABS / FLEX / RESIN |
+| color | String | Available color |
+| printTime | Int | Estimated minutes |
+| weight | Decimal | Filament grams |
+| dimensions | Json | {length, width, height} |
+| images | Json | Array of URLs |
+| active | Boolean | Visible in store |
+| featured | Boolean | Appears on home |
+
+**Relations**:
+- One-to-many: CartItems, OrderDetail, InventoryMovements, Alerts
+- Many-to-one: Category (implicit), Material (implicit)
+
+**Business Rules**:
+- Unique, SEO-friendly slug
+- Stock cannot be negative
+- Price > 0
+- Main image required
+
+---
+
+### Material
+**Purpose**: Available filament types
+
+| Field | Type | Description |
+|-------|------|-------------|
+| type | Enum | PLA / PETG / ABS / FLEX / RESIN |
+| name | String | Commercial name |
+| description | String | Features |
+| pricePerKg | Decimal | Cost per kg |
+| biodegradable | Boolean | Eco-friendly |
+| temperature | Int | Print temp (°C) |
+
+**Supported Materials**:
+- **PLA**: Biodegradable, easy to print, many colors
+- **PETG**: Resistant, transparent, food-safe
+- **ABS**: Impact resistant, high temp
+- **FLEX**: Flexible, TPU
+- **RESIN**: High quality, fine detail
+
+---
+
+## 🛒 PURCHASE ENTITIES
+
+### Cart
+**Purpose**: Temporary shopping cart
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | UUID | Identifier |
+| userId | UUID | Cart owner |
+| sessionId | String | For anonymous users |
+| items | Relation | Products in cart |
+| createdAt | DateTime | Creation date |
+| updatedAt | DateTime | Last modification |
+
+**Business Rules**:
+- One cart per user
+- Items expire after 30 days
+- Stock checked at checkout
+
+---
+
+### Order
+**Purpose**: Completed purchase record
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | UUID | Unique identifier |
+| orderNumber | String | P-20260001 (sequential) |
+| userId | UUID | Customer |
+| status | Enum | PENDING / CONFIRMED / PREPARING / SHIPPED / DELIVERED / CANCELLED |
+| subtotal | Decimal | Item sum |
+| shipping | Decimal | Shipping cost |
+| total | Decimal | Total to pay |
+| shippingName | String | Recipient |
+| shippingAddress | String | Full address |
+| shippingPhone | String | Contact phone |
+| paymentMethod | Enum | CARD / TRANSFER |
+| notes | String | Special instructions |
+| createdAt | DateTime | Order date |
+
+**Relations**:
+- Many-to-one: User
+- One-to-many: OrderDetail, Payment, Invoice, Messages
+
+**Lifecycle**:
+```
+PENDING → CONFIRMED → PREPARING → SHIPPED → DELIVERED
+     ↓
+CANCELLED (at any point)
+```
+
+---
+
+### Payment
+**Purpose**: Payment transaction record
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | UUID | Identifier |
+| orderId | UUID | Associated order |
+| stripeSessionId | String | Stripe reference |
+| stripePaymentIntentId | String | Stripe payment ID |
+| amount | Decimal | Amount paid |
+| status | Enum | PENDING / COMPLETED / FAILED / REFUNDED |
+| method | String | Card, transfer |
+| receipt | String | Receipt URL |
+
+---
+
+### Invoice
+**Purpose**: Spanish legal invoicing
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | UUID | Identifier |
+| invoiceNumber | String | F-2026-000001 (unique) |
+| series | String | F (fixed) |
+| number | Int | Sequential number |
+| orderId | UUID | Invoiced order |
+| companyName | String | Seller data |
+| companyNif | String | B12345678 |
+| customerName | String | Buyer data |
+| customerNif | String | Customer NIF |
+| baseAmount | Decimal | Subtotal |
+| vatRate | Decimal | 21% (Spanish VAT) |
+| vatAmount | Decimal | VAT amount |
+| total | Decimal | Total with VAT |
+| cancelled | Boolean | Cancelled invoice |
+| pdfUrl | String | Generated PDF URL |
+
+**Legal Format**:
+- Numbering: F-YYYY-NNNNNN
+- 21% VAT applicable
+- Full issuer and receiver data
+- Cannot be deleted (only cancelled)
+
+---
+
+## 📍 AUXILIARY ENTITIES
+
+### Address
+**Purpose**: Saved shipping addresses
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | UUID | Identifier |
+| userId | UUID | Owner |
+| name | String | Title ("Home", "Office") |
+| street | String | Full address |
+| city | String | City |
+| province | String | Province |
+| zip | String | Postal code |
+| country | String | Spain (default) |
+| main | Boolean | Default address |
+
+---
+
+## 🔔 ADMIN ENTITIES
+
+### Alert
+**Purpose**: System notification system
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | UUID | Identifier |
+| type | Enum | LOW_STOCK / OUT_OF_STOCK / UNPAID_ORDER / LATE_ORDER / SYSTEM_ERROR |
+| severity | Enum | LOW / MEDIUM / HIGH / CRITICAL |
+| title | String | Short summary |
+| message | String | Full description |
+| productId | UUID | Related product (optional) |
+| orderId | UUID | Related order (optional) |
+| status | Enum | PENDING / IN_PROGRESS / RESOLVED / IGNORED |
+| resolvedBy | UUID | Admin who resolved |
+| resolvedAt | DateTime | Resolution date |
+| resolutionNotes | String | Internal notes |
+
+**Rules**:
+- Automatically generated by the system
+- Low stock: when stock < minStock
+- Unpaid order: >24h since creation
+
+---
+
+### OrderMessage
+**Purpose**: Chat between admin and customers in orders
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | UUID | Identifier |
+| orderId | UUID | Associated order |
+| userId | UUID | Message author |
+| message | String | Content (max 1000 chars) |
+| fromCustomer | Boolean | true = customer, false = admin |
+| attachments | Json | URLs of attached files |
+| read | Boolean | Read status |
+| readAt | DateTime | Read date |
+| createdAt | DateTime | Sent date |
+
+**Rules**:
+- Only participants: admin and order owner
+- Messages ordered by date
