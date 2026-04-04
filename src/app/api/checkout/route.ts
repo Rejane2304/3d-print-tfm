@@ -91,7 +91,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   for (const item of user.cart.items as CartItemWithProduct[]) {
     if (item.product.stock < item.quantity) {
       return NextResponse.json(
-        { success: false, error: `Insufficient stock para ${item.product.name}` },
+        { success: false, error: `Stock insuficiente para ${item.product.name}` },
         { status: 400 }
       );
     }

@@ -14,11 +14,11 @@ export interface CartItem {
   unitPrice: number;
   product: {
     id: string;
-    name: string;
+    nombre: string;
     slug: string;
-    price: number;
+    precio: number;
     stock: number;
-    image: string | null;
+    imagen: string | null;
   };
 }
 
@@ -122,7 +122,7 @@ export function useCart() {
           // Update quantity
           existingItem.quantity += quantity;
         } else {
-          // Add new item
+          // Add new item - Backend transforms to Spanish, so we use Spanish field names
           items.push({
             id: `local-${Date.now()}`,
             productId,
@@ -130,11 +130,11 @@ export function useCart() {
             unitPrice: productInfo.price ?? 0,
             product: {
               id: productId,
-              name: productInfo.name ?? 'Unknown',
+              nombre: productInfo.name ?? 'Desconocido',
               slug: productInfo.slug ?? '',
-              price: productInfo.price ?? 0,
+              precio: productInfo.price ?? 0,
               stock: productInfo.stock ?? 0,
-              image: productInfo.image || null,
+              imagen: productInfo.image || null,
             },
           });
         }

@@ -23,17 +23,17 @@ interface Address {
   isPrimary: boolean;
 }
 
-interface CartItem {
-  id: string;
-  quantity: number;
-  unitPrice: number;
-  product: {
+  interface CartItem {
     id: string;
-    name: string;
-    slug: string;
-    image: string | null;
-  };
-}
+    quantity: number;
+    unitPrice: number;
+    product: {
+      id: string;
+      nombre: string;
+      slug: string;
+      imagen: string | null;
+    };
+  }
 
 export default function CheckoutPage() {
   const { status } = useSession();
@@ -246,7 +246,7 @@ export default function CheckoutPage() {
                    className="flex items-center gap-4 py-3 border-b border-gray-100"
                  >
                    <div className="flex-1">
-                     <p className="font-medium">{item.product.name}</p>
+                      <p className="font-medium">{item.product.nombre}</p>
                      <p className="text-sm text-gray-600">
                        {item.quantity} x {(item.unitPrice || 0).toFixed(2)} €
                      </p>

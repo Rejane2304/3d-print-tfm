@@ -216,13 +216,14 @@ export default function Header() {
                 </button>
               </div>
             ) : (
-              /* Login button for unauthenticated users */
+              /* Login button for unauthenticated users - User silhouette icon */
               <Link
                 href="/auth"
-                className="flex items-center justify-center w-10 h-10 rounded-full text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
                 title="Iniciar sesión"
               >
-                <LogIn className="h-5 w-5" />
+                <User className="h-5 w-5" />
+                <span className="text-sm font-medium hidden xl:block">Entrar</span>
               </Link>
             )}
           </div>

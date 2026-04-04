@@ -19,11 +19,11 @@ interface CartItemProps {
     unitPrice: number;
     product?: {
       id: string;
-      name: string;
+      nombre: string;
       slug: string;
-      price: number;
+      precio: number;
       stock: number;
-      image: string | null;
+      imagen: string | null;
     } | null;
   };
   onUpdateQuantity: (itemId: string, quantity: number) => void;
@@ -102,8 +102,8 @@ export default function CartItem({
         className="relative w-full sm:w-32 h-32 flex-shrink-0"
       >
         <Image
-          src={product.image || '/images/placeholder.jpg'}
-          alt={product.name}
+          src={product.imagen || '/images/placeholder.jpg'}
+          alt={product.nombre}
           fill
           className="object-cover rounded-md"
           sizes="(max-width: 640px) 100vw, 128px"
@@ -117,7 +117,7 @@ export default function CartItem({
             href={`/products/${product.slug}`}
             className="text-lg font-semibold text-gray-900 hover:text-indigo-600 transition-colors line-clamp-2"
           >
-            {product.name}
+            {product.nombre}
           </Link>
           <p className="text-sm text-gray-500 mt-1">
             {item.unitPrice.toFixed(2)} € / unidad
@@ -209,7 +209,7 @@ export default function CartItem({
         onClose={() => setModalOpen(false)}
         onConfirm={handleConfirmRemove}
         title="¿Eliminar del carrito?"
-        description={`¿Estás seguro de que deseas eliminar "${product.name}" del carrito?`}
+        description={`¿Estás seguro de que deseas eliminar "${product.nombre}" del carrito?`}
         confirmText="Eliminar"
         cancelText="Cancelar"
         type="danger"
