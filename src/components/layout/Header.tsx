@@ -1,8 +1,8 @@
 /**
  * Header Component - Modern Professional Design
  * Responsive: mobile → 4K
- * Icons only for cleaner, more modern UX
- * Cart always visible in the right side
+ * Icon + text navigation for clarity
+ * Cart always visible on the right (except for Admin)
  */
 'use client';
 
@@ -53,34 +53,37 @@ export default function Header() {
             />
           </Link>
 
-          {/* Desktop Navigation - Center */}
+          {/* Desktop Navigation - Center (Icon + Text) */}
           <nav className="hidden md:flex items-center space-x-1">
             {/* Home */}
             <Link
               href="/"
-              className="flex items-center justify-center w-10 h-10 rounded-full text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
               title="Inicio"
             >
               <Home className="h-5 w-5" />
+              <span className="text-sm font-medium">Inicio</span>
             </Link>
 
-            {/* Products */}
+            {/* Products/Catalog */}
             <Link
               href="/products"
-              className="flex items-center justify-center w-10 h-10 rounded-full text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
-              title="Productos"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
+              title="Catálogo"
             >
               <Package className="h-5 w-5" />
+              <span className="text-sm font-medium">Catálogo</span>
             </Link>
 
             {/* Account - ONLY for CLIENTE */}
             {!isLoading && isAuthenticated && isCliente && (
               <Link
                 href="/account"
-                className="flex items-center justify-center w-10 h-10 rounded-full text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
                 title="Mi Cuenta"
               >
                 <User className="h-5 w-5" />
+                <span className="text-sm font-medium">Cuenta</span>
               </Link>
             )}
 
@@ -88,25 +91,28 @@ export default function Header() {
             {!isLoading && isAuthenticated && isAdmin && (
               <Link
                 href="/admin/dashboard"
-                className="flex items-center justify-center w-10 h-10 rounded-full text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
                 title="Panel Admin"
               >
                 <LayoutDashboard className="h-5 w-5" />
+                <span className="text-sm font-medium">Admin</span>
               </Link>
             )}
           </nav>
 
           {/* Right Side: Cart + Auth */}
           <div className="hidden md:flex items-center space-x-2">
-            {/* Cart - Always visible on the right */}
-            {!isLoading && (!isAuthenticated || isCliente) && (
+            {/* Cart - Always visible except for Admin */}
+            {!isLoading && !isAdmin && (
               <div className="flex items-center">
                 <CartIcon />
               </div>
             )}
 
-            {/* Divider */}
-            <div className="h-6 w-px bg-gray-200 mx-2" />
+            {/* Divider - only show if cart is visible or user is authenticated */}
+            {(!isLoading && !isAdmin) || (!isLoading && isAuthenticated) ? (
+              <div className="h-6 w-px bg-gray-200 mx-2" />
+            ) : null}
 
             {/* Auth Buttons */}
             {isLoading ? (
@@ -168,18 +174,18 @@ export default function Header() {
               <span className="font-medium">Inicio</span>
             </Link>
 
-            {/* Products */}
+            {/* Products/Catalog */}
             <Link
               href="/products"
               className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
               <Package className="h-5 w-5" />
-              <span className="font-medium">Productos</span>
+              <span className="font-medium">Catálogo</span>
             </Link>
 
-            {/* Cart */}
-            {!isLoading && (!isAuthenticated || isCliente) && (
+            {/* Cart - Always visible except for Admin */}
+            {!isLoading && !isAdmin && (
               <Link
                 href="/cart"
                 className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"

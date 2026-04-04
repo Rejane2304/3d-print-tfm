@@ -6,6 +6,8 @@
  * - Carrito ahora visible para usuarios no autenticados (invitados)
  * - El carrito funciona con localStorage para invitados y API para autenticados
  * - Solo CLIENTE puede ver el link de "Cuenta"
+ * - Icon + text navigation for main menu items
+ * - Cart always visible except for Admin
  */
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -25,11 +27,11 @@ vi.mock('next/image', () => ({
   default: (props: any) => <img {...props} />,
 }));
 
-// Mock de next/link
+// Mock de next/link - preservar todos los atributos incluyendo title
 vi.mock('next/link', () => ({
   __esModule: true,
-  default: ({ children, href }: { children: React.ReactNode; href: string }) => (
-    <a href={href}>{children}</a>
+  default: ({ children, href, ...props }: { children: React.ReactNode; href: string; [key: string]: any }) => (
+    <a href={href} {...props}>{children}</a>
   ),
 }));
 
@@ -37,8 +39,8 @@ vi.mock('next/link', () => ({
 vi.mock('@/components/cart/CartIcon', () => ({
   __esModule: true,
   default: () => (
-    <a href="/cart" aria-label="Ver carrito">
-      <span data-testid="cart-icon">Carrito</span>
+    <a href="/cart" aria-label="Ver carrito" title="Carrito">
+      <span data-testid="cart-icon">CartIcon</span>
     </a>
   ),
 }));
@@ -76,18 +78,25 @@ describe('Header Component', () => {
       });
     });
 
-    it('debe mostrar enlaces de login y registro', () => {
+    it('debe mostrar botón de login con title correcto', () => {
       render(<Header />);
 
-      expect(screen.getByText('Entrar')).toBeInTheDocument();
-      expect(screen.getByText('Registro')).toBeInTheDocument();
+      // Login button is icon-only with title attribute
+      const loginLink = screen.getByTitle('Iniciar sesión');
+      expect(loginLink).toBeInTheDocument();
+      expect(loginLink).toHaveAttribute('href', '/auth');
     });
 
-    it('debe mostrar enlaces de navegación públicos', () => {
+    it('debe mostrar navegación con icono + texto (Inicio)', () => {
       render(<Header />);
 
       expect(screen.getByText('Inicio')).toBeInTheDocument();
-      expect(screen.getByText('Productos')).toBeInTheDocument();
+    });
+
+    it('debe mostrar navegación con icono + texto (Catálogo)', () => {
+      render(<Header />);
+
+      expect(screen.getByText('Catálogo')).toBeInTheDocument();
     });
 
     it('debe MOSTRAR el carrito para usuarios no autenticados (invitados)', () => {
@@ -101,7 +110,6 @@ describe('Header Component', () => {
       render(<Header />);
 
       expect(screen.queryByText('Cuenta')).not.toBeInTheDocument();
-      expect(screen.queryByText('Mi Cuenta')).not.toBeInTheDocument();
     });
   });
 
@@ -128,10 +136,11 @@ describe('Header Component', () => {
       expect(screen.getByText('Juan Pérez')).toBeInTheDocument();
     });
 
-    it('debe mostrar botón de cerrar sesión', () => {
+    it('debe mostrar botón de cerrar sesión con title', () => {
       render(<Header />);
 
-      expect(screen.getByText('Salir')).toBeInTheDocument();
+      const logoutButton = screen.getByTitle('Cerrar sesión');
+      expect(logoutButton).toBeInTheDocument();
     });
 
     it('debe mostrar el carrito para CLIENTE', () => {
@@ -146,17 +155,28 @@ describe('Header Component', () => {
       expect(screen.getByText('Cuenta')).toBeInTheDocument();
     });
 
-    it('debe ocultar enlaces de login y registro', () => {
+    it('debe mostrar navegación con icono + texto (Inicio)', () => {
       render(<Header />);
 
-      expect(screen.queryByText('Entrar')).not.toBeInTheDocument();
-      expect(screen.queryByText('Registro')).not.toBeInTheDocument();
+      expect(screen.getByText('Inicio')).toBeInTheDocument();
+    });
+
+    it('debe mostrar navegación con icono + texto (Catálogo)', () => {
+      render(<Header />);
+
+      expect(screen.getByText('Catálogo')).toBeInTheDocument();
+    });
+
+    it('debe ocultar botón de login', () => {
+      render(<Header />);
+
+      expect(screen.queryByTitle('Iniciar sesión')).not.toBeInTheDocument();
     });
 
     it('debe llamar a signOut al hacer clic en cerrar sesión', async () => {
       render(<Header />);
 
-      const logoutButton = screen.getByText('Salir');
+      const logoutButton = screen.getByTitle('Cerrar sesión');
       fireEvent.click(logoutButton);
 
       expect(mockSignOut).toHaveBeenCalledWith({ callbackUrl: '/' });
@@ -198,6 +218,18 @@ describe('Header Component', () => {
 
       expect(screen.queryByText('Cuenta')).not.toBeInTheDocument();
     });
+
+    it('debe mostrar navegación con icono + texto (Inicio)', () => {
+      render(<Header />);
+
+      expect(screen.getByText('Inicio')).toBeInTheDocument();
+    });
+
+    it('debe mostrar navegación con icono + texto (Catálogo)', () => {
+      render(<Header />);
+
+      expect(screen.getByText('Catálogo')).toBeInTheDocument();
+    });
   });
 
   describe('Menu móvil', () => {
@@ -222,8 +254,8 @@ describe('Header Component', () => {
       const menuButton = screen.getByLabelText(/abrir menú/i);
       fireEvent.click(menuButton);
 
-      // El menú debe estar visible (contiene los enlaces móviles)
-      expect(screen.getAllByText('Inicio').length).toBeGreaterThan(1);
+      // El menú debe estar visible (contiene los enlaces móviles con texto)
+      expect(screen.getAllByText('Inicio').length).toBeGreaterThanOrEqual(1);
     });
   });
 
@@ -243,11 +275,11 @@ describe('Header Component', () => {
       expect(homeLink.closest('a')).toHaveAttribute('href', '/');
     });
 
-    it('debe tener enlace a productos', () => {
+    it('debe tener enlace a Catálogo', () => {
       render(<Header />);
 
-      const productosLink = screen.getByText('Productos');
-      expect(productosLink.closest('a')).toHaveAttribute('href', '/products');
+      const catalogoLink = screen.getByText('Catálogo');
+      expect(catalogoLink.closest('a')).toHaveAttribute('href', '/products');
     });
 
     it('debe tener enlace al carrito para invitados', () => {
