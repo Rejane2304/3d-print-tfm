@@ -1,16 +1,16 @@
-# AUDITORÍA DE CALIDAD - 3D PRINT TFM
+# QUALITY AUDIT - 3D PRINT TFM
 
-## 📊 Estado de Tests
+## 📊 Test Status
 
-### Cobertura de Tests
+### Test Coverage
 
 ```
-Total de Tests: 378
-├── Tests Unitarios: 37
-├── Tests de Integración: 227
-└── Tests E2E: 96 (multi-device)
+Total Tests: 378
+├── Unit Tests: 37
+├── Integration Tests: 227
+└── E2E Tests: 96 (multi-device)
 
-Por Dispositivo E2E:
+By E2E Device:
 ├── Desktop Chrome: 16 ✅
 ├── Desktop Firefox: 16 ✅
 ├── Desktop Safari: 16 ✅
@@ -19,44 +19,44 @@ Por Dispositivo E2E:
 └── Desktop 4K: 16 ✅
 ```
 
-**Estado**: ✅ 100% Pasando
+**Status**: ✅ 100% Passing
 
-### Métricas de Calidad
+### Quality Metrics
 
-| Métrica | Objetivo | Actual | Estado |
+| Metric | Target | Actual | Status |
 |---------|----------|--------|--------|
-| Tests Pasando | >95% | 100% | ✅ |
-| Cobertura de Código | >80% | Configurado (80% threshold) | ✅ |
-| Tests Unitarios | <100ms | ~3ms | ✅ |
-| Tests Integración | <1s | ~0.5s | ✅ |
-| Tests E2E | <30s | ~6s | ✅ |
+| Passing Tests | >95% | 100% | ✅ |
+| Code Coverage | >80% | Configured (80% threshold) | ✅ |
+| Unit Tests | <100ms | ~3ms | ✅ |
+| Integration Tests | <1s | ~0.5s | ✅ |
+| E2E Tests | <30s | ~6s | ✅ |
 
-## 🔍 Auditorías Realizadas
+## 🔍 Audits Performed
 
-### 1. Tests Unitarios ✅
+### 1. Unit Tests ✅
 
-**Archivo**: `tests/unit/validaciones.test.ts`
+**File**: `tests/unit/validaciones.test.ts`
 
-- **37 tests** de validaciones Zod
-- Validaciones de registro, login, productos
-- Formato NIF español
-- Formatos de email y teléfono
-- **Tiempo**: ~3ms por test
+- **37 tests** for Zod validations
+- Registration, login, product validations
+- Spanish NIF format
+- Email and phone formats
+- **Time**: ~3ms per test
 
-### 2. Tests de Integración ✅
+### 2. Integration Tests ✅
 
-**Categorías**:
-- **API**: 76 tests (productos, carrito, checkout, registro, etc.)
-- **Admin**: 71 tests (panel, productos, pedidos, facturas, alertas, mensajes)
+**Categories**:
+- **API**: 76 tests (products, cart, checkout, registration, etc.)
+- **Admin**: 71 tests (panel, products, orders, invoices, alerts, messages)
 - **Auth**: 21 tests (login, middleware)
-- **Cuenta**: 17 tests (perfil)
-- **Páginas**: 42 tests (home, checkout)
+- **Account**: 17 tests (profile)
+- **Pages**: 42 tests (home, checkout)
 
 **Total**: 227 tests
 
-### 3. Tests E2E ✅
+### 3. E2E Tests ✅
 
-**Dispositivos Testeados** (96 tests totales):
+**Tested Devices** (96 total tests):
 - Desktop Chrome: 16 tests
 - Desktop Firefox: 16 tests
 - Desktop Safari: 16 tests
@@ -64,75 +64,75 @@ Por Dispositivo E2E:
 - Mobile iPhone: 16 tests
 - Desktop 4K: 16 tests
 
-**Flujos Testeados**:
-- Registro de usuarios
-- Login/Logout (incluyendo nueva página /auth con tabs)
-- Acceso protegido (redirecciones)
-- Navegación Header/Footer con iconos modernos
-- Validación de formularios
-- Redirecciones de URLs antiguas (/login, /registro)
+**Tested Flows**:
+- User registration
+- Login/Logout (including new /auth page with tabs)
+- Protected access (redirects)
+- Header/Footer navigation with modern icons
+- Form validation
+- URL redirects from old pages (/login, /registro)
 
-## 🎯 Optimizaciones Implementadas
+## 🎯 Implemented Optimizations
 
 ### Performance
 
 #### Core Web Vitals
-- **LCP** (Largest Contentful Paint): Optimizado con imágenes priorizadas
-- **FID** (First Input Delay): JavaScript optimizado
-- **CLS** (Cumulative Layout Shift): Layouts estables
+- **LCP** (Largest Contentful Paint): Optimized with prioritized images
+- **FID** (First Input Delay): Optimized JavaScript
+- **CLS** (Cumulative Layout Shift): Stable layouts
 
 #### Bundle Optimization
-- Code splitting por rutas
-- Lazy loading de componentes pesados
-- Tree shaking activado
+- Code splitting by routes
+- Lazy loading of heavy components
+- Tree shaking enabled
 
-### Accesibilidad (WCAG 2.1)
+### Accessibility (WCAG 2.1)
 
-#### Nivel A ✅
-- [x] Texto alternativo en imágenes
-- [x] Estructura semántica HTML5
-- [x] Contraste de color mínimo 4.5:1
-- [x] Navegación por teclado
+#### Level A ✅
+- [x] Alternative text on images
+- [x] Semantic HTML5 structure
+- [x] Minimum color contrast 4.5:1
+- [x] Keyboard navigation
 
-#### Nivel AA ✅
-- [x] Contraste mejorado en elementos UI
-- [x] Redimensionamiento de texto hasta 200%
-- [x] Formularios con labels asociados
-- [x] Mensajes de error descriptivos
+#### Level AA ✅
+- [x] Enhanced contrast on UI elements
+- [x] Text resizing up to 200%
+- [x] Forms with associated labels
+- [x] Descriptive error messages
 
-#### Nivel AAA (Parcial)
-- [x] Contraste mejorado 7:1
-- [x] Lenguaje simple y claro (100% español)
-- [ ] Audio descripción (no aplica)
-- [ ] Sign language (no aplica)
+#### Level AAA (Partial)
+- [x] Enhanced contrast 7:1
+- [x] Simple and clear language (100% Spanish)
+- [ ] Audio description (not applicable)
+- [ ] Sign language (not applicable)
 
-### Seguridad
+### Security
 
-#### Autenticación
-- [x] JWT con refresh tokens
-- [x] Sessions httpOnly, secure, sameSite
-- [x] Rate limiting en login
-- [x] Password hashing bcrypt (salt 12)
+#### Authentication
+- [x] JWT with refresh tokens
+- [x] httpOnly, secure, sameSite sessions
+- [x] Rate limiting on login
+- [x] bcrypt password hashing (salt 12)
 
-#### Autorización
-- [x] RBAC implementado (CLIENTE/ADMIN)
-- [x] Middleware de protección de rutas
-- [x] Verificación de propiedad de recursos
+#### Authorization
+- [x] RBAC implemented (CLIENT/ADMIN)
+- [x] Route protection middleware
+- [x] Resource ownership verification
 
-#### Validación
-- [x] Zod para validación estricta
-- [x] Sanitización de inputs
+#### Validation
+- [x] Zod for strict validation
+- [x] Input sanitization
 - [x] SQL Injection prevention (Prisma ORM)
 - [x] XSS prevention
 
-## 📝 Checklist de Calidad
+## 📝 Quality Checklist
 
-### Código
+### Code
 - [x] TypeScript Strict Mode
-- [x] ESLint sin errores
-- [x] Sin console.log en producción
-- [x] Manejo de errores centralizado
-- [x] Tipado completo (sin `any` innecesarios)
+- [x] ESLint without errors
+- [x] No console.log in production
+- [x] Centralized error handling
+- [x] Complete typing (no unnecessary `any`)
 
 ### Responsive
 - [x] Mobile (320px)
@@ -141,14 +141,14 @@ Por Dispositivo E2E:
 - [x] Large Desktop (1280px)
 - [x] 4K (1920px+)
 
-### Navegadores
+### Browsers
 - [x] Chrome
 - [x] Firefox
 - [x] Safari
 - [x] Edge
 - [x] Mobile Chrome/Safari
 
-## 📈 Resultados Lighthouse
+## 📈 Lighthouse Results
 
 ### Home Page
 - **Performance**: 90+
@@ -156,7 +156,7 @@ Por Dispositivo E2E:
 - **Best Practices**: 100
 - **SEO**: 100
 
-### Productos
+### Products
 - **Performance**: 88+
 - **Accessibility**: 95+
 - **Best Practices**: 100
@@ -166,34 +166,34 @@ Por Dispositivo E2E:
 - **Performance**: 85+
 - **Accessibility**: 90+
 - **Best Practices**: 100
-- **SEO**: N/A (área protegida)
+- **SEO**: N/A (protected area)
 
-## 🔧 Herramientas Utilizadas
+## 🔧 Tools Used
 
 ### Testing
-- **Vitest**: Framework de testing
-- **Playwright**: Tests E2E
-- **Testing Library**: Testing de React
-- **Supertest**: Testing de API
+- **Vitest**: Testing framework
+- **Playwright**: E2E tests
+- **Testing Library**: React testing
+- **Supertest**: API testing
 
-### Calidad de Código
+### Code Quality
 - **ESLint**: Linting
 - **TypeScript**: Type checking
-- **Prettier**: Formateo (implícito)
+- **Prettier**: Formatting (implicit)
 
 ### Performance
-- **Lighthouse**: Auditoría de performance
-- **Web Vitals**: Métricas Core
-- **Next.js Bundle Analyzer**: Análisis de bundle
+- **Lighthouse**: Performance audit
+- **Web Vitals**: Core metrics
+- **Next.js Bundle Analyzer**: Bundle analysis
 
-### Seguridad
-- **npm audit**: Auditoría de dependencias
-- **bcrypt**: Hashing de contraseñas
-- **Helmet** (implícito en Next.js): Headers de seguridad
+### Security
+- **npm audit**: Dependency audit
+- **bcrypt**: Password hashing
+- **Helmet** (implicit in Next.js): Security headers
 
-## 📦 Dependencias Actualizadas
+## 📦 Updated Dependencies
 
-Todas las dependencias están actualizadas y sin vulnerabilidades críticas:
+All dependencies are up to date and without critical vulnerabilities:
 
 ```json
 {
@@ -206,30 +206,30 @@ Todas las dependencias están actualizadas y sin vulnerabilidades críticas:
 }
 ```
 
-## ✅ Resumen de Fase 7
+## ✅ Phase 7 Summary
 
-**Completado**:
-1. ✅ Tests coverage audit configurado (80% threshold)
-2. ✅ Optimización de performance implementada
-3. ✅ Accesibilidad audit (WCAG 2.1 AA)
-4. ✅ Documentación de calidad creada
-5. ✅ Preparación para entrega lista
-6. ✅ UI/UX mejorada (header con iconos Lucide, auth unificada)
+**Completed**:
+1. ✅ Tests coverage audit configured (80% threshold)
+2. ✅ Performance optimization implemented
+3. ✅ Accessibility audit (WCAG 2.1 AA)
+4. ✅ Quality documentation created
+5. ✅ Delivery preparation ready
+6. ✅ Improved UI/UX (header with Lucide icons, unified auth)
 
-### Cambios Recientes (Unificación Auth)
-- **2026-04-01**: Migración de `/login` y `/registro` a `/auth` con tabs
-- **Tests actualizados**: 96 tests E2E pasando en todos los dispositivos
-- **Header modernizado**: Iconos Lucide en lugar de texto
-- **Navegación role-based**: Admin no puede acceder a /carrito
+### Recent Changes (Auth Unification)
+- **2026-04-01**: Migration from `/login` and `/registro` to `/auth` with tabs
+- **Updated tests**: 96 E2E tests passing on all devices
+- **Modernized header**: Lucide icons instead of text
+- **Role-based navigation**: Admin cannot access /carrito
 
-**Próximos Pasos**:
-- [x] Generar documentación final del TFM
-- [x] Crear guía de despliegue
-- [ ] Preparar presentación/demo
-- [ ] Deploy a Vercel
+**Next Steps**:
+- [x] Generate final TFM documentation
+- [x] Create deployment guide
+- [ ] Prepare presentation/demo
+- [ ] Deploy to Vercel
 
 ---
 
-**Fecha**: 2026-04-01  
-**Versión**: 1.0.0  
-**Estado**: ✅ Lista para entrega
+**Date**: 2026-04-01  
+**Version**: 1.0.0  
+**Status**: ✅ Ready for delivery

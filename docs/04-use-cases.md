@@ -1,328 +1,328 @@
-# Casos de Uso - 3D Print TFM
+# Use Cases - 3D Print TFM
 
-## 👤 Casos de Uso de Cliente
+## 👤 Customer Use Cases
 
-### UC-001: Registrarse
-**Actor**: Cliente potencial
-**Descripción**: Crear una cuenta nueva
-**Precondiciones**: No estar logueado
-**Flujo Principal**:
-1. Usuario accede a /auth (tab de registro)
-2. Completa: nombre, email, password, confirmarPassword
-3. Sistema valida datos (Zod)
-4. Sistema verifica email único
-5. Sistema crea usuario (bcrypt hash)
-6. Sistema muestra mensaje de éxito y cambia a tab de login
+### UC-001: Register
+**Actor**: Potential Customer
+**Description**: Create a new account
+**Preconditions**: Not logged in
+**Main Flow**:
+1. User accesses /auth (register tab)
+2. Completes: name, email, password, confirmPassword
+3. System validates data (Zod)
+4. System verifies unique email
+5. System creates user (bcrypt hash)
+6. System displays success message and switches to login tab
 
-**Flujos Alternativos**:
-- Email duplicado: Mostrar error
-- Password débil: Mostrar requisitos
-- Campos vacíos: Validación HTML5
-- URLs antiguas (/registro): Redirigen a /auth?tab=register
+**Alternative Flows**:
+- Duplicate email: Display error
+- Weak password: Display requirements
+- Empty fields: HTML5 validation
+- Old URLs (/register): Redirect to /auth?tab=register
 
-**Postcondiciones**: Usuario creado en BD
-
----
-
-### UC-002: Iniciar Sesión
-**Actor**: Usuario registrado
-**Descripción**: Autenticarse en el sistema
-**Precondiciones**: Tener cuenta
-**Flujo Principal**:
-1. Usuario accede a /auth (tab de login)
-2. Introduce email y password
-3. Sistema verifica credenciales
-4. Sistema crea sesión (JWT)
-5. Redirección a página anterior o home
-
-**Flujos Alternativos**:
-- Credenciales inválidas: Mostrar error
-- Cuenta no verificada: Mensaje apropiado
-- Usuario ADMIN: Redirección a /admin/dashboard
-- URLs antiguas (/login): Redirigen a /auth
-
-**Postcondiciones**: Sesión activa
+**Postconditions**: User created in DB
 
 ---
 
-### UC-003: Navegar Catálogo
-**Actor**: Cualquier usuario
-**Descripción**: Ver productos disponibles
-**Flujo Principal**:
-1. Accede a /productos
-2. Ve grid de productos paginado
-3. Aplica filtros (categoría, material, precio)
-4. Ordena por precio o novedad
-5. Selecciona producto para detalle
+### UC-002: Log In
+**Actor**: Registered User
+**Description**: Authenticate in the system
+**Preconditions**: Have an account
+**Main Flow**:
+1. User accesses /auth (login tab)
+2. Enters email and password
+3. System verifies credentials
+4. System creates session (JWT)
+5. Redirect to previous page or home
 
-**Flujos Alternativos**:
-- Sin resultados: Mensaje "No hay productos"
-- Error carga: Reintentar automático
+**Alternative Flows**:
+- Invalid credentials: Display error
+- Unverified account: Appropriate message
+- ADMIN user: Redirect to /admin/dashboard
+- Old URLs (/login): Redirect to /auth
 
----
-
-### UC-004: Añadir al Carrito
-**Actor**: Usuario autenticado
-**Descripción**: Guardar producto para compra
-**Precondiciones**: Estar logueado
-**Flujo Principal**:
-1. En detalle de producto, selecciona cantidad
-2. Click "Añadir al carrito"
-3. Sistema verifica stock
-4. Sistema actualiza carrito en BD
-5. Notificación visual de éxito
-
-**Flujos Alternativos**:
-- Stock insuficiente: Mostrar cantidad máxima disponible
-- Producto ya en carrito: Incrementar cantidad
+**Postconditions**: Active session
 
 ---
 
-### UC-005: Realizar Checkout
-**Actor**: Usuario con items en carrito
-**Descripción**: Completar compra
-**Precondiciones**: Items en carrito, estar logueado
-**Flujo Principal**:
-1. Va a /carrito
-2. Revisa items y totales
-3. Procede a checkout
-4. Selecciona dirección de envío
-5. Revisa resumen del pedido
-6. Click "Pagar con Stripe"
-7. Redirección a Stripe Checkout
-8. Completa pago en Stripe
-9. Webhook confirma pago
-10. Sistema crea pedido CONFIRMADO
-11. Redirección a /checkout/success
+### UC-003: Browse Catalog
+**Actor**: Any user
+**Description**: View available products
+**Main Flow**:
+1. Accesses /productos
+2. Sees paginated product grid
+3. Applies filters (category, material, price)
+4. Sorts by price or newest
+5. Selects product for detail
 
-**Flujos Alternativos**:
-- Pago fallido: Volver a checkout con error
-- Cancelar en Stripe: Pedido PENDIENTE (esperando)
-- Stock agotado: Alertar y remover item
-
-**Postcondiciones**: Pedido creado, pago procesado
+**Alternative Flows**:
+- No results: "No products" message
+- Loading error: Automatic retry
 
 ---
 
-### UC-006: Ver Historial de Pedidos
-**Actor**: Cliente
-**Descripción**: Consultar pedidos anteriores
-**Flujo Principal**:
-1. Accede a /cuenta/pedidos
-2. Ve lista de pedidos ordenados
-3. Click en pedido para detalle
-4. Ve: productos, estado, tracking, total
+### UC-004: Add to Cart
+**Actor**: Authenticated user
+**Description**: Save product for purchase
+**Preconditions**: Be logged in
+**Main Flow**:
+1. On product detail, selects quantity
+2. Click "Add to cart"
+3. System checks stock
+4. System updates cart in DB
+5. Visual success notification
+
+**Alternative Flows**:
+- Insufficient stock: Display maximum available quantity
+- Product already in cart: Increment quantity
 
 ---
 
-### UC-007: Editar Perfil
-**Actor**: Cliente
-**Descripción**: Actualizar datos personales
-**Flujo Principal**:
-1. Va a /cuenta/perfil
-2. Modifica: nombre, teléfono, NIF
-3. Guarda cambios
-4. Sistema valida (Zod)
-5. Actualiza BD
-6. Confirma éxito
+### UC-005: Checkout
+**Actor**: User with items in cart
+**Description**: Complete purchase
+**Preconditions**: Items in cart, be logged in
+**Main Flow**:
+1. Goes to /carrito
+2. Reviews items and totals
+3. Proceeds to checkout
+4. Selects shipping address
+5. Reviews order summary
+6. Click "Pay with Stripe"
+7. Redirect to Stripe Checkout
+8. Completes payment in Stripe
+9. Webhook confirms payment
+10. System creates CONFIRMED order
+11. Redirect to /checkout/success
 
-**Flujos Alternativos**:
-- Cambiar password: Requiere password actual
+**Alternative Flows**:
+- Failed payment: Return to checkout with error
+- Cancel in Stripe: Order PENDING (waiting)
+- Out of stock: Alert and remove item
+
+**Postconditions**: Order created, payment processed
 
 ---
 
-## 👔 Casos de Uso de Administrador
+### UC-006: View Order History
+**Actor**: Customer
+**Description**: Check previous orders
+**Main Flow**:
+1. Accesses /cuenta/pedidos
+2. Sees ordered list of orders
+3. Click on order for detail
+4. Sees: products, status, tracking, total
 
-### UC-101: Dashboard de Métricas
+---
+
+### UC-007: Edit Profile
+**Actor**: Customer
+**Description**: Update personal data
+**Main Flow**:
+1. Goes to /cuenta/perfil
+2. Modifies: name, phone, NIF
+3. Saves changes
+4. System validates (Zod)
+5. Updates DB
+6. Confirms success
+
+**Alternative Flows**:
+- Change password: Requires current password
+
+---
+
+## 👔 Administrator Use Cases
+
+### UC-101: Metrics Dashboard
 **Actor**: Admin
-**Descripción**: Ver resumen de negocio
-**Flujo Principal**:
-1. Login como admin
-2. Redirección a /admin/dashboard
-3. Ve widgets: pedidos hoy, ventas mes, stock bajo, alertas
-4. Acceso rápido a secciones
+**Description**: View business summary
+**Main Flow**:
+1. Login as admin
+2. Redirect to /admin/dashboard
+3. Sees widgets: today's orders, monthly sales, low stock, alerts
+4. Quick access to sections
 
 ---
 
-### UC-102: Crear Producto
+### UC-102: Create Product
 **Actor**: Admin
-**Descripción**: Añadir nuevo producto al catálogo
-**Flujo Principal**:
-1. Va a /admin/productos/nuevo
-2. Completa formulario:
-   - Nombre, descripción
-   - Categoría, material
-   - Precio, stock
-   - Dimensiones, peso
-   - Imágenes
-3. Sistema valida
-4. Genera slug automático
-5. Guarda en BD
-6. Producto visible en tienda
+**Description**: Add new product to catalog
+**Main Flow**:
+1. Goes to /admin/productos/nuevo
+2. Completes form:
+   - Name, description
+   - Category, material
+   - Price, stock
+   - Dimensions, weight
+   - Images
+3. System validates
+4. Generates automatic slug
+5. Saves in DB
+6. Product visible in store
 
 ---
 
-### UC-103: Gestionar Pedidos
+### UC-103: Manage Orders
 **Actor**: Admin
-**Descripción**: Actualizar estado de pedidos
-**Flujo Principal**:
-1. Va a /admin/pedidos
-2. Ve lista con filtros (estado, fecha)
-3. Click en pedido para detalle
-4. Actualiza estado:
-   - PENDIENTE → CONFIRMADO
-   - CONFIRMADO → PREPARANDO
-   - PREPARANDO → ENVIADO (+tracking)
-   - ENVIADO → ENTREGADO
-5. Cliente recibe notificación
+**Description**: Update order status
+**Main Flow**:
+1. Goes to /admin/pedidos
+2. Sees list with filters (status, date)
+3. Click on order for detail
+4. Updates status:
+   - PENDING → CONFIRMED
+   - CONFIRMED → PREPARING
+   - PREPARING → SHIPPED (+tracking)
+   - SHIPPED → DELIVERED
+5. Customer receives notification
 
-**Flujos Alternativos**:
-- Cancelar pedido: Solo si PENDIENTE o CONFIRMADO
+**Alternative Flows**:
+- Cancel order: Only if PENDING or CONFIRMED
 
 ---
 
-### UC-104: Generar Factura
+### UC-104: Generate Invoice
 **Actor**: Admin
-**Descripción**: Crear factura para pedido entregado
-**Precondiciones**: Pedido ENTREGADO
-**Flujo Principal**:
-1. Va a detalle de pedido
-2. Click "Generar Factura"
-3. Sistema verifica pedido entregado
-4. Genera número F-2026-NNNNNN
-5. Calcula IVA 21%
-6. Guarda factura en BD
-7. Genera PDF (HTML)
-8. Muestra vista previa
-9. Opción descargar PDF
+**Description**: Create invoice for delivered order
+**Preconditions**: Order DELIVERED
+**Main Flow**:
+1. Goes to order detail
+2. Click "Generate Invoice"
+3. System verifies order delivered
+4. Generates number F-2026-NNNNNN
+5. Calculates 21% VAT
+6. Saves invoice in DB
+7. Generates PDF (HTML)
+8. Shows preview
+9. Option to download PDF
 
 ---
 
-### UC-105: Responder Alertas
+### UC-105: Respond to Alerts
 **Actor**: Admin
-**Descripción**: Gestionar alertas del sistema
-**Flujo Principal**:
-1. Ve notificación de alerta
-2. Va a /admin/alertas
-3. Filtra por: tipo, severidad, estado
-4. Click en alerta para detalle
-5. Marca como "En proceso" o "Resuelta"
-6. Añade notas de resolución
-7. Si stock bajo: Reponer stock
+**Description**: Manage system alerts
+**Main Flow**:
+1. Sees alert notification
+2. Goes to /admin/alertas
+3. Filters by: type, severity, status
+4. Click on alert for detail
+5. Marks as "In progress" or "Resolved"
+6. Adds resolution notes
+7. If low stock: Restock
 
-**Tipos de Alertas**:
-- STOCK_BAJO: Producto por debajo de mínimo
-- PEDIDO_SIN_PAGAR: >24h sin pago
-- ERROR_SISTEMA: Fallo webhook, etc.
+**Alert Types**:
+- LOW_STOCK: Product below minimum
+- UNPAID_ORDER: >24h without payment
+- SYSTEM_ERROR: Webhook failure, etc.
 
 ---
 
-### UC-106: Mensajería con Cliente
+### UC-106: Messaging with Customer
 **Actor**: Admin
-**Descripción**: Chat en pedidos
-**Flujo Principal**:
-1. Va a detalle de pedido
-2. Ve sección mensajes
-3. Escribe mensaje al cliente
-4. Marca "esAdmin: true"
-5. Cliente recibe notificación
-6. Cliente responde
-7. Ciclo continúa hasta resolución
+**Description**: Chat in orders
+**Main Flow**:
+1. Goes to order detail
+2. Sees messages section
+3. Writes message to customer
+4. Marks "isAdmin: true"
+5. Customer receives notification
+6. Customer responds
+7. Cycle continues until resolution
 
 ---
 
-## 🔒 Casos de Uso de Sistema
+## 🔒 System Use Cases
 
-### UC-201: Generar Alerta Stock Bajo
-**Actor**: Sistema (automático)
-**Descripción**: Detectar y notificar stock bajo
+### UC-201: Generate Low Stock Alert
+**Actor**: System (automatic)
+**Description**: Detect and notify low stock
 **Trigger**: Stock < stockMinimo
-**Flujo**:
-1. Verificar stock periódicamente
-2. Si stock < mínimo:
-3. Crear alerta STOCK_BAJO
-4. Notificar admin en dashboard
-5. Mostrar en listado de alertas
+**Flow**:
+1. Check stock periodically
+2. If stock < minimum:
+3. Create LOW_STOCK alert
+4. Notify admin on dashboard
+5. Show in alerts list
 
 ---
 
-### UC-202: Procesar Webhook Stripe
-**Actor**: Sistema
-**Descripción**: Confirmar pagos
-**Trigger**: Evento Stripe
-**Flujo**:
-1. Recibe POST /api/webhooks/stripe
-2. Verifica firma del webhook
-3. Procesa evento:
+### UC-202: Process Stripe Webhook
+**Actor**: System
+**Description**: Confirm payments
+**Trigger**: Stripe event
+**Flow**:
+1. Receives POST /api/webhooks/stripe
+2. Verifies webhook signature
+3. Processes event:
    - checkout.session.completed
    - payment_intent.succeeded
-4. Actualiza estado de pago
-5. Actualiza estado de pedido
-6. Envia email de confirmación
+4. Updates payment status
+5. Updates order status
+6. Sends confirmation email
 
 ---
 
-### UC-203: Middleware de Autorización
-**Actor**: Sistema
-**Descripción**: Proteger rutas
-**Flujo**:
-1. Usuario solicita ruta protegida
-2. Middleware verifica sesión
-3. Si no autenticado → /auth
-4. Si autenticado, verifica rol:
-   - Ruta /admin → Solo ADMIN
-   - Ruta /carrito → No ADMIN (redirigir)
-5. Si autorizado → Continuar
+### UC-203: Authorization Middleware
+**Actor**: System
+**Description**: Protect routes
+**Flow**:
+1. User requests protected route
+2. Middleware verifies session
+3. If not authenticated → /auth
+4. If authenticated, verifies role:
+   - Route /admin → ADMIN only
+   - Route /carrito → No ADMIN (redirect)
+5. If authorized → Continue
 
 ---
 
-## 📊 Matriz de Actores vs Casos de Uso
+## 📊 Actors vs Use Cases Matrix
 
-| Caso de Uso | Cliente | Admin | Sistema |
-|-------------|---------|-------|---------|
-| UC-001 Registro | ✅ | ❌ | ❌ |
+| Use Case | Customer | Admin | System |
+|----------|----------|-------|--------|
+| UC-001 Registration | ✅ | ❌ | ❌ |
 | UC-002 Login | ✅ | ✅ | ❌ |
-| UC-003 Navegar | ✅ | ✅ | ❌ |
-| UC-004 Carrito | ✅ | ❌ | ❌ |
+| UC-003 Browse | ✅ | ✅ | ❌ |
+| UC-004 Cart | ✅ | ❌ | ❌ |
 | UC-005 Checkout | ✅ | ❌ | ❌ |
-| UC-006 Historial | ✅ | ❌ | ❌ |
-| UC-007 Perfil | ✅ | ❌ | ❌ |
+| UC-006 History | ✅ | ❌ | ❌ |
+| UC-007 Profile | ✅ | ❌ | ❌ |
 | UC-101 Dashboard | ❌ | ✅ | ❌ |
-| UC-102 Productos | ❌ | ✅ | ❌ |
-| UC-103 Pedidos | ❌ | ✅ | ❌ |
-| UC-104 Facturas | ❌ | ✅ | ❌ |
-| UC-105 Alertas | ❌ | ✅ | ❌ |
-| UC-106 Mensajes | ✅ | ✅ | ❌ |
+| UC-102 Products | ❌ | ✅ | ❌ |
+| UC-103 Orders | ❌ | ✅ | ❌ |
+| UC-104 Invoices | ❌ | ✅ | ❌ |
+| UC-105 Alerts | ❌ | ✅ | ❌ |
+| UC-106 Messages | ✅ | ✅ | ❌ |
 | UC-201 Stock | ❌ | ❌ | ✅ |
 | UC-202 Webhook | ❌ | ❌ | ✅ |
 | UC-203 Auth | ❌ | ❌ | ✅ |
 
-**Total**: 16 casos de uso principales
+**Total**: 16 main use cases
 
-## 🔄 Cambios Recientes (Unificación Auth)
+## 🔄 Recent Changes (Auth Unification)
 
-### 2026-04-01: Unificación Login/Registro
-- **Antes**: Páginas separadas `/login` y `/registro`
-- **Ahora**: Página unificada `/auth` con tabs
-- **Beneficios**:
-  - UX mejorada (cambio instantáneo entre login/register)
-  - Email compartido entre tabs
-  - Código más mantenible
-  - Header moderno con iconos
-- **Compatibilidad**: URLs antiguas redirigen a `/auth`
-- **Tests**: 96 tests E2E actualizados y pasando
+### 2026-04-01: Login/Register Unification
+- **Before**: Separate pages `/login` and `/register`
+- **Now**: Unified page `/auth` with tabs
+- **Benefits**:
+  - Improved UX (instant switch between login/register)
+  - Shared email between tabs
+  - More maintainable code
+  - Modern header with icons
+- **Compatibility**: Old URLs redirect to `/auth`
+- **Tests**: 96 E2E tests updated and passing
 
 ---
 
-## ✅ Criterios de Aceptación
+## ✅ Acceptance Criteria
 
-### Para cada Caso de Uso
+### For each Use Case
 
-- [ ] Flujo principal documentado
-- [ ] Flujos alternativos identificados
-- [ ] Pre/post condiciones definidas
-- [ ] Tests E2E implementados
-- [ ] Tests de integración pasando
-- [ ] Validación Zod completa
+- [ ] Main flow documented
+- [ ] Alternative flows identified
+- [ ] Pre/post conditions defined
+- [ ] E2E tests implemented
+- [ ] Integration tests passing
+- [ ] Complete Zod validation
 
-**Estado**: ✅ 16/16 casos de uso implementados y probados
+**Status**: ✅ 16/16 use cases implemented and tested
