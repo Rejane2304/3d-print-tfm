@@ -68,7 +68,7 @@ export async function GET(
   } catch (error) {
     console.error('Error generando PDF:', error);
     return NextResponse.json(
-      { success: false, error: 'Error interno' },
+      { success: false, error: 'Internal error' },
       { status: 500 }
     );
   }

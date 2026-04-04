@@ -10,8 +10,8 @@ import { z } from 'zod';
 
 // Schema de validación
 const addressSchema = z.object({
-  name: z.string().min(1, 'El nombre es requerido'),
-  recipient: z.string().min(1, 'El destinatario es requerido'),
+  name: z.string().min(1, 'El nombre is required'),
+  recipient: z.string().min(1, 'El destinatario is required'),
   phone: z.string().min(9, 'Teléfono inválido'),
   address: z.string().min(1, 'La dirección es requerida'),
   complement: z.string().optional(),
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
 
     if (!usuario) {
       return NextResponse.json(
-        { error: 'Usuario no encontrado' },
+        { error: 'Usuario not found' },
         { status: 404 }
       );
     }
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
 
     if (!usuario) {
       return NextResponse.json(
-        { error: 'Usuario no encontrado' },
+        { error: 'Usuario not found' },
         { status: 404 }
       );
     }
@@ -152,7 +152,7 @@ export async function PATCH(request: NextRequest) {
 
     if (!usuario) {
       return NextResponse.json(
-        { error: 'Usuario no encontrado' },
+        { error: 'Usuario not found' },
         { status: 404 }
       );
     }
@@ -220,7 +220,7 @@ export async function DELETE(request: NextRequest) {
 
     if (!usuario) {
       return NextResponse.json(
-        { error: 'Usuario no encontrado' },
+        { error: 'Usuario not found' },
         { status: 404 }
       );
     }

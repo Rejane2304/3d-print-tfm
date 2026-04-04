@@ -49,7 +49,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
 
   if (!user) {
     return NextResponse.json(
-      { success: false, error: 'Usuario no encontrado' },
+      { success: false, error: 'Usuario not found' },
       { status: 404 }
     );
   }
@@ -138,7 +138,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   if (!user) {
     return NextResponse.json(
-      { success: false, error: 'Usuario no encontrado' },
+      { success: false, error: 'Usuario not found' },
       { status: 404 }
     );
   }
@@ -150,7 +150,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   if (!product) {
     return NextResponse.json(
-      { success: false, error: 'Producto no encontrado' },
+      { success: false, error: 'Producto not found' },
       { status: 404 }
     );
   }
@@ -164,7 +164,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   if (product.stock < quantity) {
     return NextResponse.json(
-      { success: false, error: 'Stock insuficiente' },
+      { success: false, error: 'Insufficient stock' },
       { status: 400 }
     );
   }
@@ -192,7 +192,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     
     if (product.stock < newQuantity) {
       return NextResponse.json(
-        { success: false, error: 'Stock insuficiente para la cantidad total' },
+        { success: false, error: 'Insufficient stock para la cantidad total' },
         { status: 400 }
       );
     }

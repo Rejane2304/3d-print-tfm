@@ -37,7 +37,7 @@ export default function CarritoPage() {
         throw new Error(result.error || 'Error al actualizar');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : 'Error unknown');
     } finally {
       setUpdatingItem(null);
     }
@@ -51,7 +51,7 @@ export default function CarritoPage() {
         throw new Error(result.error || 'Error al eliminar item');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : 'Error unknown');
     } finally {
       setUpdatingItem(null);
     }

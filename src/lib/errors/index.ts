@@ -1,33 +1,33 @@
 /**
- * Sistema de manejo de errores básico
- * Para evitar que errores no controlados lleguen al usuario
+ * Basic error handling system
+ * To prevent unhandled errors from reaching the user
  */
 
 // ============================================
-// TIPOS DE ERROR
+// ERROR TYPES
 // ============================================
 
 export enum ErrorCode {
-  // Errores de autenticación
+  // Authentication errors
   AUTH_INVALID_CREDENTIALS = 'AUTH_INVALID_CREDENTIALS',
   AUTH_SESSION_EXPIRED = 'AUTH_SESSION_EXPIRED',
   AUTH_UNAUTHORIZED = 'AUTH_UNAUTHORIZED',
   
-  // Errores de validación
+  // Validation errors
   VALIDATION_INVALID_INPUT = 'VALIDATION_INVALID_INPUT',
   VALIDATION_REQUIRED_FIELD = 'VALIDATION_REQUIRED_FIELD',
   
-  // Errores de base de datos
+  // Database errors
   DB_CONNECTION_ERROR = 'DB_CONNECTION_ERROR',
   DB_NOT_FOUND = 'DB_NOT_FOUND',
   DB_DUPLICATE_ENTRY = 'DB_DUPLICATE_ENTRY',
   
-  // Errores de negocio
+  // Business errors
   BUSINESS_INSUFFICIENT_STOCK = 'BUSINESS_INSUFFICIENT_STOCK',
   BUSINESS_INVALID_STATE = 'BUSINESS_INVALID_STATE',
   BUSINESS_PAYMENT_FAILED = 'BUSINESS_PAYMENT_FAILED',
   
-  // Errores del servidor
+  // Server errors
   SERVER_INTERNAL_ERROR = 'SERVER_INTERNAL_ERROR',
   SERVER_SERVICE_UNAVAILABLE = 'SERVER_SERVICE_UNAVAILABLE',
 }
@@ -40,7 +40,7 @@ export interface ApiErrorResponse {
 }
 
 // ============================================
-// CLASE DE ERROR PERSONALIZADA
+// CUSTOM ERROR CLASS
 // ============================================
 
 export class ApiError extends Error {
@@ -65,11 +65,11 @@ export class ApiError extends Error {
 }
 
 // ============================================
-// ERRORES COMUNES
+// COMMON ERRORS
 // ============================================
 
 export const Errors = {
-  // Autenticación
+  // Authentication
   invalidCredentials: () => 
     new ApiError(ErrorCode.AUTH_INVALID_CREDENTIALS, 'Email o contraseña incorrectos', 401),
   
@@ -79,40 +79,40 @@ export const Errors = {
   unauthorized: () => 
     new ApiError(ErrorCode.AUTH_UNAUTHORIZED, 'No tienes permisos para realizar esta acción', 403),
   
-  // Validación
+  // Validation
   invalidInput: (field: string) => 
     new ApiError(ErrorCode.VALIDATION_INVALID_INPUT, `El campo ${field} no es válido`, 400, field),
   
   requiredField: (field: string) => 
-    new ApiError(ErrorCode.VALIDATION_REQUIRED_FIELD, `El campo ${field} es requerido`, 400, field),
+    new ApiError(ErrorCode.VALIDATION_REQUIRED_FIELD, `El campo ${field} is required`, 400, field),
   
-  // Base de datos
+  // Database
   notFound: (resource: string) => 
-    new ApiError(ErrorCode.DB_NOT_FOUND, `${resource} no encontrado`, 404),
+    new ApiError(ErrorCode.DB_NOT_FOUND, `${resource} not found`, 404),
   
   duplicateEntry: (field: string) => 
-    new ApiError(ErrorCode.DB_DUPLICATE_ENTRY, `Ya existe un registro con ese ${field}`, 409, field),
+    new ApiError(ErrorCode.DB_DUPLICATE_ENTRY, `Already exists a record with that ${field}`, 409, field),
   
-  // Negocio
+  // Business
   insufficientStock: (producto: string) => 
-    new ApiError(ErrorCode.BUSINESS_INSUFFICIENT_STOCK, `Stock insuficiente para ${producto}`, 400),
+    new ApiError(ErrorCode.BUSINESS_INSUFFICIENT_STOCK, `Insufficient stock para ${producto}`, 400),
   
   invalidState: (action: string, state: string) => 
     new ApiError(ErrorCode.BUSINESS_INVALID_STATE, `No se puede ${action} en estado ${state}`, 400),
   
   paymentFailed: (reason: string) => 
-    new ApiError(ErrorCode.BUSINESS_PAYMENT_FAILED, `El pago falló: ${reason}`, 400),
+    new ApiError(ErrorCode.BUSINESS_PAYMENT_FAILED, `Payment failed: ${reason}`, 400),
   
-  // Servidor
+  // Server
   internalError: () => 
-    new ApiError(ErrorCode.SERVER_INTERNAL_ERROR, 'Error interno del servidor', 500),
+    new ApiError(ErrorCode.SERVER_INTERNAL_ERROR, 'Internal error of the server', 500),
   
   serviceUnavailable: () => 
-    new ApiError(ErrorCode.SERVER_SERVICE_UNAVAILABLE, 'Servicio no disponible, intenta más tarde', 503),
+    new ApiError(ErrorCode.SERVER_SERVICE_UNAVAILABLE, 'Service unavailable, try again later', 503),
 };
 
 // ============================================
-// UTILIDADES
+// UTILITIES
 // ============================================
 
 export function handleError(error: unknown): ApiError {
@@ -123,12 +123,12 @@ export function handleError(error: unknown): ApiError {
   
   // Si es un Error estándar
   if (error instanceof Error) {
-    console.error('Error no controlado:', error);
+    console.error('Error unhandled:', error);
     return Errors.internalError();
   }
   
-  // Error desconocido
-  console.error('Error desconocido:', error);
+  // Error unknown
+  console.error('Error unknown:', error);
   return Errors.internalError();
 }
 
@@ -143,5 +143,5 @@ export function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
   }
-  return 'Error desconocido';
+  return 'Error unknown';
 }

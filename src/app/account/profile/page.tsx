@@ -79,7 +79,7 @@ export default function PerfilPage() {
         nif: data.usuario.nif || ''
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : 'Error unknown');
     } finally {
       setLoading(false);
     }
@@ -139,7 +139,7 @@ export default function PerfilPage() {
       // Actualizar sesión
       await update();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : 'Error unknown');
     } finally {
       setSaving(false);
     }

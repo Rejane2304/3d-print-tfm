@@ -102,7 +102,7 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error('Error listando facturas:', error);
     return NextResponse.json(
-      { success: false, error: 'Error interno' },
+      { success: false, error: 'Internal error' },
       { status: 500 }
     );
   }
@@ -144,7 +144,7 @@ export async function POST(req: NextRequest) {
 
     if (!pedido) {
       return NextResponse.json(
-        { success: false, error: 'Pedido no encontrado' },
+        { success: false, error: 'Pedido not found' },
         { status: 404 }
       );
     }
@@ -164,7 +164,7 @@ export async function POST(req: NextRequest) {
 
     if (facturaExistente) {
       return NextResponse.json(
-        { success: false, error: 'Ya existe una factura para este pedido' },
+        { success: false, error: 'Already exists una factura para este pedido' },
         { status: 400 }
       );
     }
@@ -246,7 +246,7 @@ export async function POST(req: NextRequest) {
     }
     console.error('Error creando factura:', error);
     return NextResponse.json(
-      { success: false, error: 'Error interno' },
+      { success: false, error: 'Internal error' },
       { status: 500 }
     );
   }

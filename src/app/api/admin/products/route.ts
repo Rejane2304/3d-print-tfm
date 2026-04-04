@@ -64,7 +64,7 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error('Error listando productos:', error);
     return NextResponse.json(
-      { success: false, error: 'Error interno' },
+      { success: false, error: 'Internal error' },
       { status: 500 }
     );
   }
@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
     }
     console.error('Error creando producto:', error);
     return NextResponse.json(
-      { success: false, error: 'Error interno' },
+      { success: false, error: 'Internal error' },
       { status: 500 }
     );
   }

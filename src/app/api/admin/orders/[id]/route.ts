@@ -55,7 +55,7 @@ export async function GET(
 
     if (!order) {
       return NextResponse.json(
-        { success: false, error: 'Pedido no encontrado' },
+        { success: false, error: 'Pedido not found' },
         { status: 404 }
       );
     }
@@ -64,7 +64,7 @@ export async function GET(
   } catch (error) {
     console.error('Error obteniendo pedido:', error);
     return NextResponse.json(
-      { success: false, error: 'Error interno' },
+      { success: false, error: 'Internal error' },
       { status: 500 }
     );
   }

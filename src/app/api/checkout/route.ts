@@ -62,7 +62,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   if (!user) {
     return NextResponse.json(
-      { success: false, error: 'Usuario no encontrado' },
+      { success: false, error: 'Usuario not found' },
       { status: 404 }
     );
   }
@@ -79,7 +79,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   for (const item of user.cart.items) {
     if (item.product.stock < item.quantity) {
       return NextResponse.json(
-        { success: false, error: `Stock insuficiente para ${item.product.name}` },
+        { success: false, error: `Insufficient stock para ${item.product.name}` },
         { status: 400 }
       );
     }

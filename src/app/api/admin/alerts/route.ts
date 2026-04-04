@@ -103,7 +103,7 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error('Error listando alertas:', error);
     return NextResponse.json(
-      { success: false, error: 'Error interno' },
+      { success: false, error: 'Internal error' },
       { status: 500 }
     );
   }
@@ -177,7 +177,7 @@ export async function PATCH(req: NextRequest) {
     }
     console.error('Error actualizando alerta:', error);
     return NextResponse.json(
-      { success: false, error: 'Error interno' },
+      { success: false, error: 'Internal error' },
       { status: 500 }
     );
   }

@@ -67,7 +67,7 @@ export async function GET(
   } catch (error) {
     console.error('Error obteniendo factura:', error);
     return NextResponse.json(
-      { success: false, error: 'Error interno' },
+      { success: false, error: 'Internal error' },
       { status: 500 }
     );
   }
@@ -110,7 +110,7 @@ export async function DELETE(
   } catch (error) {
     console.error('Error anulando factura:', error);
     return NextResponse.json(
-      { success: false, error: 'Error interno' },
+      { success: false, error: 'Internal error' },
       { status: 500 }
     );
   }

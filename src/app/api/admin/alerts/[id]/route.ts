@@ -54,7 +54,7 @@ export async function DELETE(
   } catch (error) {
     console.error('Error eliminando alerta:', error);
     return NextResponse.json(
-      { success: false, error: 'Error interno' },
+      { success: false, error: 'Internal error' },
       { status: 500 }
     );
   }

@@ -48,7 +48,7 @@ export async function GET() {
 
     if (!usuario) {
       return NextResponse.json(
-        { success: false, error: 'Usuario no encontrado' },
+        { success: false, error: 'Usuario not found' },
         { status: 404 }
       );
     }
@@ -57,7 +57,7 @@ export async function GET() {
   } catch (error) {
     console.error('Error obteniendo perfil:', error);
     return NextResponse.json(
-      { success: false, error: 'Error interno' },
+      { success: false, error: 'Internal error' },
       { status: 500 }
     );
   }
@@ -80,7 +80,7 @@ export async function PATCH(req: NextRequest) {
 
     if (!usuario) {
       return NextResponse.json(
-        { success: false, error: 'Usuario no encontrado' },
+        { success: false, error: 'Usuario not found' },
         { status: 404 }
       );
     }
@@ -146,7 +146,7 @@ export async function PATCH(req: NextRequest) {
     }
     console.error('Error actualizando perfil:', error);
     return NextResponse.json(
-      { success: false, error: 'Error interno' },
+      { success: false, error: 'Internal error' },
       { status: 500 }
     );
   }

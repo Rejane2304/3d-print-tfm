@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
 
     if (!usuario) {
       return NextResponse.json(
-        { error: 'Usuario no encontrado' },
+        { error: 'Usuario not found' },
         { status: 404 }
       );
     }

@@ -57,7 +57,7 @@ export default function AddToCartButton({ productId, stock, product }: AddToCart
       // Refrescar la página para actualizar el carrito en el header
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : 'Error unknown');
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,6 @@
 /**
  * Página de Gestión de Alertas - Admin
- * Sistema de alertas y notificaciones
+ * System for alertas y notificaciones
  */
 'use client';
 
@@ -119,7 +119,7 @@ export default function AdminAlertasPage() {
       setAlertas(data.alertas || []);
       setPendientes(data.pendientes || 0);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : 'Error unknown');
     } finally {
       setLoading(false);
     }

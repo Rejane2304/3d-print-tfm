@@ -121,7 +121,7 @@ export default function CheckoutPage() {
         window.location.href = data.url;
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : 'Error unknown');
       setProcesando(false);
     }
   };

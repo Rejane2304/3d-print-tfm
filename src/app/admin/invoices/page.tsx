@@ -89,7 +89,7 @@ export default function AdminFacturasPage() {
 
       setFacturas(data.facturas || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : 'Error unknown');
     } finally {
       setLoading(false);
     }
@@ -119,7 +119,7 @@ export default function AdminFacturasPage() {
       setPedidoIdInput('');
       await cargarFacturas();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : 'Error unknown');
     }
   };
 

@@ -159,7 +159,7 @@ export default function PedidoDetallePage() {
 
       setPedido(data.pedido);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : 'Error unknown');
     } finally {
       setLoading(false);
     }
@@ -191,7 +191,7 @@ export default function PedidoDetallePage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="h-12 w-12 text-red-600 mx-auto mb-4" />
-          <p className="text-gray-900 font-medium">Pedido no encontrado</p>
+          <p className="text-gray-900 font-medium">Pedido not found</p>
           <Link href="/account/orders" className="text-indigo-600 hover:text-indigo-800 mt-2 inline-block">
             ← Volver a mis pedidos
           </Link>

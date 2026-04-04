@@ -58,7 +58,7 @@ export const PATCH = withErrorHandler(async (
 
   if (!item) {
     return NextResponse.json(
-      { success: false, error: 'Item no encontrado' },
+      { success: false, error: 'Item not found' },
       { status: 404 }
     );
   }
@@ -94,7 +94,7 @@ export const PATCH = withErrorHandler(async (
   // Verificar stock
   if (item.product.stock < quantity) {
     return NextResponse.json(
-      { success: false, error: 'Stock insuficiente' },
+      { success: false, error: 'Insufficient stock' },
       { status: 400 }
     );
   }
@@ -161,7 +161,7 @@ export const DELETE = withErrorHandler(async (
 
   if (!item) {
     return NextResponse.json(
-      { success: false, error: 'Item no encontrado' },
+      { success: false, error: 'Item not found' },
       { status: 404 }
     );
   }

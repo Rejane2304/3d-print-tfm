@@ -74,7 +74,7 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error('Error obteniendo métricas:', error);
     return NextResponse.json(
-      { success: false, error: 'Error interno' },
+      { success: false, error: 'Internal error' },
       { status: 500 }
     );
   }

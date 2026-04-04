@@ -1,5 +1,5 @@
 /**
- * Página de Autenticación Unificada
+ * Página de Authentication Unificada
  * Login y Registro en la misma página con tabs
  * Incluye campos de dirección en el registro
  * Estado compartido del email entre formularios

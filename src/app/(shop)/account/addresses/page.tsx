@@ -89,7 +89,7 @@ export default function MisDireccionesPage() {
 
       setDirecciones(data.direcciones || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : 'Error unknown');
     } finally {
       setLoading(false);
     }
@@ -122,7 +122,7 @@ export default function MisDireccionesPage() {
       await cargarDirecciones();
       cerrarModal();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : 'Error unknown');
     } finally {
       setSaving(false);
     }
@@ -145,7 +145,7 @@ export default function MisDireccionesPage() {
       setModalEliminarOpen(false);
       setDireccionAEliminar(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : 'Error unknown');
     }
   };
 
@@ -164,7 +164,7 @@ export default function MisDireccionesPage() {
 
       await cargarDirecciones();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : 'Error unknown');
     }
   };
 

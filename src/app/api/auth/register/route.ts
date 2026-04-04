@@ -76,7 +76,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   
   if (existingUser) {
     return NextResponse.json(
-      { success: false, error: 'Ya existe un usuario con este email' },
+      { success: false, error: 'Already exists un usuario con este email' },
       { status: 409 }
     );
   }

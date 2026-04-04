@@ -9,7 +9,7 @@ import { ApiError, ErrorCode, handleError } from '../errors';
 type RouteHandler = (req: NextRequest, ...args: any[]) => Promise<NextResponse>;
 
 /**
- * Envuelve un handler de API route con manejo de errores
+ * Envuelve un handler de API route con error handling
  * Uso: export const GET = withErrorHandler(async (req) => { ... })
  */
 export function withErrorHandler(handler: RouteHandler): RouteHandler {
@@ -74,7 +74,7 @@ export async function withDbOperation<T>(
       const field = prismaError.meta?.target?.[0] || 'campo';
       throw new ApiError(
         ErrorCode.DB_DUPLICATE_ENTRY,
-        `Ya existe un registro con ese ${field}`,
+        `Already exists a record with that ${field}`,
         409,
         field
       );
@@ -84,7 +84,7 @@ export async function withDbOperation<T>(
       // Record not found
       throw new ApiError(
         ErrorCode.DB_NOT_FOUND,
-        `${context} no encontrado`,
+        `${context} not found`,
         404
       );
     }
