@@ -64,7 +64,7 @@ export const authOptions: AuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }: { token: any; user: any }) {
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         // Get role from database
@@ -73,16 +73,16 @@ export const authOptions: AuthOptions = {
           select: { role: true },
         });
         if (dbUser) {
-          token.role = dbUser.role;
+          token.rol = dbUser.role;
         }
       }
       return token;
     },
-    async session({ session, token }: { session: any; token: any }) {
+    async session({ session, token }) {
       if (token && session.user) {
         session.user.id = token.id as string;
-        if (token.role) {
-          session.user.role = token.role;
+        if (token.rol) {
+          session.user.rol = token.rol;
         }
       }
       return session;

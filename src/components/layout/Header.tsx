@@ -12,7 +12,6 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { 
   Home, 
-  ShoppingBag, 
   User, 
   LogOut, 
   LogIn, 
@@ -20,8 +19,7 @@ import {
   LayoutDashboard,
   Menu,
   X,
-  Package,
-  Bell
+  Package
 } from 'lucide-react';
 import CartIcon from '@/components/cart/CartIcon';
 

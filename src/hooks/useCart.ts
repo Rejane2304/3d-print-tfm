@@ -92,7 +92,7 @@ export function useCart() {
   }, [isAuthenticated, isLoadingSession]);
 
   // Add item to cart
-  const addItem = useCallback(async (productId: string, quantity: number, productInfo: any) => {
+  const addItem = useCallback(async (productId: string, quantity: number, productInfo: {price?: number; name?: string; slug?: string; stock?: number; image?: string | null}) => {
     try {
       if (isAuthenticated) {
         // Use API

@@ -5,7 +5,7 @@
  */
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Loader2, MapPin, CreditCard, ChevronRight } from 'lucide-react';
@@ -36,7 +36,7 @@ interface CarritoItem {
 }
 
 export default function CheckoutPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [direcciones, setDirecciones] = useState<Direccion[]>([]);
@@ -45,18 +45,7 @@ export default function CheckoutPage() {
   const [procesando, setProcesando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login?callbackUrl=/checkout');
-      return;
-    }
-
-    if (status === 'authenticated') {
-      cargarDatos();
-    }
-  }, [status, router]);
-
-  const cargarDatos = async () => {
+  const cargarDatos = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -83,12 +72,23 @@ export default function CheckoutPage() {
           router.push('/cart');
         }
       }
-    } catch (err) {
+    } catch {
       setError('Error al cargar datos');
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login?callbackUrl=/checkout');
+      return;
+    }
+
+    if (status === 'authenticated') {
+      cargarDatos();
+    }
+  }, [status, router, cargarDatos]);
 
   const handleProcederPago = async () => {
     if (!direccionSeleccionada) {

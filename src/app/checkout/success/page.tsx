@@ -4,7 +4,7 @@
  */
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle, Package, ArrowRight } from 'lucide-react';
@@ -12,17 +12,10 @@ import { CheckCircle, Package, ArrowRight } from 'lucide-react';
 export default function CheckoutSuccessPage() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
-  const [pedido, setPedido] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [pedido, setPedido] = useState<{orderNumber?: string; total?: number; estado?: string} | null>(null);
+  const [, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (sessionId) {
-      // Verificar estado del pago
-      verificarPago();
-    }
-  }, [sessionId]);
-
-  const verificarPago = async () => {
+  const verificarPago = useCallback(async () => {
     try {
       const response = await fetch(`/api/checkout/verify?session_id=${sessionId}`);
       if (response.ok) {
@@ -34,7 +27,14 @@ export default function CheckoutSuccessPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [sessionId]);
+
+  useEffect(() => {
+    if (sessionId) {
+      // Verificar estado del pago
+      verificarPago();
+    }
+  }, [sessionId, verificarPago]);
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">

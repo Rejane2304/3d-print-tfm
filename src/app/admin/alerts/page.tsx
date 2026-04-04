@@ -332,8 +332,8 @@ export default function AdminAlertasPage() {
                             </span>
                           )}
                           {alerta.notasResolucion && (
-                            <span className="italic">
-                              "{alerta.notasResolucion}"
+                             <span className="italic">
+                              &quot;{alerta.notasResolucion}&quot;
                             </span>
                           )}
                         </div>
