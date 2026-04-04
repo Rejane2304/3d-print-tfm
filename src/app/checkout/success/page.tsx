@@ -20,7 +20,12 @@ export default function CheckoutSuccessPage() {
       const response = await fetch(`/api/checkout/verify?session_id=${sessionId}`);
       if (response.ok) {
         const data = await response.json();
-        setPedido(data.pedido);
+        setPedido(data.order || data.pedido);
+        
+        // Dispatch event to clear cart counter in header
+        if (data.success) {
+          window.dispatchEvent(new Event('cartUpdated'));
+        }
       }
     } catch (error) {
       console.error('Error verificando pago:', error);
