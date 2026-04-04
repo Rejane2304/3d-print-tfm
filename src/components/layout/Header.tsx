@@ -1,9 +1,6 @@
 /**
- * Header Component - Modern Professional Design
- * Responsive: mobile → 4K
- * Icon + text navigation for clarity
- * Cart always visible on the right (except for Admin)
- * User dropdown menu for authenticated clients
+ * Header Component with Avatar Menu
+ * Shows avatar with first letter for authenticated users
  */
 'use client';
 
@@ -15,7 +12,6 @@ import {
   Home, 
   User, 
   LogOut, 
-  LogIn, 
   LayoutDashboard,
   Menu,
   X,
@@ -40,10 +36,12 @@ export default function Header() {
   const isAdmin = session?.user?.rol === 'ADMIN';
   const isCliente = session?.user?.rol === 'CLIENTE';
 
+  // Get first letter of user's name
+  const userName = session?.user?.name || '';
+  const firstLetter = userName.charAt(0).toUpperCase();
+
   const handleLogout = async () => {
-    // Limpiar carrito del localStorage antes de cerrar sesión
     localStorage.removeItem('cart');
-    // Dispatch event para actualizar el contador del carrito
     window.dispatchEvent(new Event('cartUpdated'));
     await signOut({ callbackUrl: '/' });
   };
@@ -77,46 +75,31 @@ export default function Header() {
             />
           </Link>
 
-          {/* Desktop Navigation - Center (Icon + Text) */}
+          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-1">
             {/* Home */}
             <Link
               href="/"
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
-              title="Inicio"
             >
               <Home className="h-5 w-5" />
               <span className="text-sm font-medium">Inicio</span>
             </Link>
 
-            {/* Products/Catalog */}
+            {/* Products */}
             <Link
               href="/products"
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
-              title="Catálogo"
             >
               <Package className="h-5 w-5" />
               <span className="text-sm font-medium">Catálogo</span>
             </Link>
 
-            {/* My Account - for authenticated CLIENTE */}
-            {!isLoading && isAuthenticated && isCliente && (
-              <Link
-                href="/account"
-                className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
-                title="Mi Cuenta"
-              >
-                <User className="h-5 w-5" />
-                <span className="text-sm font-medium">Mi Cuenta</span>
-              </Link>
-            )}
-
-            {/* Admin Dashboard - ONLY for ADMIN */}
-            {!isLoading && isAuthenticated && isAdmin && (
+            {/* Admin Dashboard */}
+            {isAdmin && (
               <Link
                 href="/admin/dashboard"
                 className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
-                title="Panel Admin"
               >
                 <LayoutDashboard className="h-5 w-5" />
                 <span className="text-sm font-medium">Admin</span>
@@ -124,269 +107,186 @@ export default function Header() {
             )}
           </nav>
 
-          {/* Right Side: Cart + Auth - Always visible */}
-          <div className="flex items-center space-x-2">
-            {/* Cart - Always visible except for Admin */}
-            {!isLoading && !isAdmin && (
-              <div className="flex items-center">
-                <CartIcon />
-              </div>
-            )}
+          {/* Right Side */}
+          <div className="flex items-center space-x-3">
+            {/* Cart */}
+            {!isAdmin && <CartIcon />}
 
-            {/* Divider - only show if cart is visible or user is authenticated */}
-            {(!isLoading && !isAdmin) || (!isLoading && isAuthenticated) ? (
-              <div className="h-6 w-px bg-gray-200 mx-2 hidden md:block" />
-            ) : null}
-
-            {/* Auth Buttons */}
-            {isLoading ? (
-              <div className="h-8 w-8 bg-gray-200 animate-pulse rounded-full"></div>
-            ) : isAuthenticated && isCliente ? (
-              /* User Dropdown Menu for CLIENTE */
+            {/* Avatar Menu for Authenticated Users */}
+            {isAuthenticated ? (
               <div ref={userMenuRef} className="relative">
+                {/* Avatar Button */}
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  data-testid="user-menu-button"
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
-                  aria-expanded={userMenuOpen}
-                  aria-haspopup="true"
+                  className="flex items-center gap-2 focus:outline-none"
                 >
-                  <User className="h-5 w-5" />
-                  <span className="text-sm font-medium hidden xl:block max-w-[120px] truncate">
-                    {session?.user?.name}
-                  </span>
+                  {/* Avatar Circle */}
+                  <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-lg hover:bg-indigo-700 transition-colors">
+                    {firstLetter || <User className="h-5 w-5" />}
+                  </div>
+                  {/* Dropdown Arrow */}
                   <ChevronDown 
-                    className={`h-4 w-4 transition-transform duration-200 ${userMenuOpen ? 'rotate-180' : ''}`} 
+                    className={`h-4 w-4 text-gray-500 transition-transform duration-200 ${userMenuOpen ? 'rotate-180' : ''}`} 
                   />
                 </button>
 
-                {/* Dropdown Menu */}
+                {/* Horizontal Dropdown Menu */}
                 {userMenuOpen && (
-                  <div 
-                    className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-100 py-2 z-50"
-                    role="menu"
-                    aria-orientation="vertical"
-                    aria-labelledby="user-menu-button"
-                  >
-                    {/* User info header */}
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {session?.user?.name}
-                      </p>
-                      <p className="text-xs text-gray-500 truncate">
-                        {session?.user?.email}
-                      </p>
+                  <div className="absolute right-0 mt-3 w-64 bg-white rounded-lg shadow-xl border border-gray-100 z-50">
+                    {/* User Info */}
+                    <div className="px-4 py-3 border-b border-gray-100 bg-indigo-50 rounded-t-lg">
+                      <p className="font-medium text-gray-900">{session?.user?.name}</p>
+                      <p className="text-xs text-gray-500">{session?.user?.email}</p>
                     </div>
 
-                     {/* Menu items */}
-                     <div className="py-1">
-                       <Link
-                         href="/account"
-                         onClick={() => setUserMenuOpen(false)}
-                         className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
-                         role="menuitem"
-                       >
-                         <Settings className="h-4 w-4" />
-                         Mi Perfil
-                       </Link>
-                       <Link
-                         href="/account/orders"
-                         onClick={() => setUserMenuOpen(false)}
-                         className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
-                         role="menuitem"
-                       >
-                         <ClipboardList className="h-4 w-4" />
-                         Mis Pedidos
-                       </Link>
-                       <Link
-                         href="/account/addresses"
-                         onClick={() => setUserMenuOpen(false)}
-                         className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
-                         role="menuitem"
-                       >
-                         <MapPin className="h-4 w-4" />
-                         Mis Direcciones
-                       </Link>
-                       <Link
-                         href="/cart"
-                         onClick={() => setUserMenuOpen(false)}
-                         className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors md:hidden"
-                         role="menuitem"
-                       >
-                         <ShoppingCart className="h-4 w-4" />
-                         Mi Carrito
-                       </Link>
-                     </div>
-
-                    {/* Divider */}
-                    <div className="border-t border-gray-100 my-1"></div>
+                    {/* Menu Links */}
+                    <div className="py-2">
+                      <Link
+                        href="/account"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                      >
+                        <Settings className="h-4 w-4" />
+                        <span className="text-sm">Mi Perfil</span>
+                      </Link>
+                      <Link
+                        href="/account/orders"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                      >
+                        <ClipboardList className="h-4 w-4" />
+                        <span className="text-sm">Mis Pedidos</span>
+                      </Link>
+                      <Link
+                        href="/account/addresses"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                      >
+                        <MapPin className="h-4 w-4" />
+                        <span className="text-sm">Mis Direcciones</span>
+                      </Link>
+                      <Link
+                        href="/cart"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors md:hidden"
+                      >
+                        <ShoppingCart className="h-4 w-4" />
+                        <span className="text-sm">Mi Carrito</span>
+                      </Link>
+                    </div>
 
                     {/* Logout */}
-                    <button
-                      onClick={() => {
-                        setUserMenuOpen(false);
-                        handleLogout();
-                      }}
-                      className="flex w-full items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                      role="menuitem"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      Cerrar sesión
-                    </button>
+                    <div className="border-t border-gray-100 py-2">
+                      <button
+                        onClick={() => {
+                          setUserMenuOpen(false);
+                          handleLogout();
+                        }}
+                        className="flex w-full items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        <span className="text-sm">Cerrar sesión</span>
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
-            ) : isAuthenticated && isAdmin ? (
-              /* Simple logout button for ADMIN */
-              <div data-testid="user-menu" className="flex items-center space-x-2">
-                <span className="text-sm text-gray-600 hidden xl:block max-w-[150px] truncate">
-                  {session?.user?.name}
-                </span>
-                <button
-                  onClick={handleLogout}
-                  data-testid="logout-button"
-                  className="flex items-center justify-center w-10 h-10 rounded-full text-gray-500 hover:text-red-600 hover:bg-red-50 transition-all duration-200"
-                  title="Cerrar sesión"
-                >
-                  <LogOut className="h-5 w-5" />
-                </button>
-              </div>
-            ) : (
-              /* Login button for unauthenticated users - User silhouette icon */
-              <Link
-                href="/auth"
-                className="flex items-center justify-center w-10 h-10 rounded-full text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
-                title="Iniciar sesión"
-              >
-                <User className="h-5 w-5" />
-              </Link>
-            )}
+            ) : null}
           </div>
 
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-full text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
-            aria-label={mobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
+            className="md:hidden p-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50"
           >
-            {mobileMenuOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
+            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
       </div>
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white/95 backdrop-blur-md border-t border-gray-100 shadow-lg">
+        <div className="md:hidden bg-white border-t border-gray-100 shadow-lg">
           <div className="px-4 py-3 space-y-1">
-            {/* Home */}
             <Link
               href="/"
-              className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+              className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50"
               onClick={() => setMobileMenuOpen(false)}
             >
               <Home className="h-5 w-5" />
-              <span className="font-medium">Inicio</span>
+              <span>Inicio</span>
             </Link>
-
-            {/* Products/Catalog */}
             <Link
               href="/products"
-              className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+              className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50"
               onClick={() => setMobileMenuOpen(false)}
             >
               <Package className="h-5 w-5" />
-              <span className="font-medium">Catálogo</span>
+              <span>Catálogo</span>
             </Link>
-
-            {/* Cart - Always visible except for Admin */}
-            {!isLoading && !isAdmin && (
+            {!isAdmin && (
               <Link
                 href="/cart"
-                className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <ShoppingBag className="h-5 w-5" />
-                <span className="font-medium">Carrito</span>
+                <span>Carrito</span>
               </Link>
             )}
-
-            {/* Account links for CLIENTE */}
-            {!isLoading && isAuthenticated && isCliente && (
+            {isCliente && (
               <>
+                <hr className="my-2 border-gray-200" />
                 <Link
                   href="/account"
-                  className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                  className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <Settings className="h-5 w-5" />
-                  <span className="font-medium">Mi Perfil</span>
+                  <span>Mi Perfil</span>
                 </Link>
                 <Link
                   href="/account/orders"
-                  className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                  className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <ClipboardList className="h-5 w-5" />
-                  <span className="font-medium">Mis Pedidos</span>
+                  <span>Mis Pedidos</span>
                 </Link>
                 <Link
                   href="/account/addresses"
-                  className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                  className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <MapPin className="h-5 w-5" />
-                  <span className="font-medium">Mis Direcciones</span>
-                </Link>
-                <Link
-                  href="/cart"
-                  className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <ShoppingCart className="h-5 w-5" />
-                  <span className="font-medium">Mi Carrito</span>
+                  <span>Mis Direcciones</span>
                 </Link>
               </>
             )}
-
-            {/* Admin - ONLY for ADMIN */}
-            {!isLoading && isAuthenticated && isAdmin && (
+            {isAdmin && (
               <Link
                 href="/admin/dashboard"
-                className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <LayoutDashboard className="h-5 w-5" />
-                <span className="font-medium">Panel Admin</span>
+                <span>Panel Admin</span>
               </Link>
             )}
-
-            <hr className="my-2 border-gray-200" />
-
-            {/* Auth buttons for mobile */}
-            {!isLoading && isAuthenticated ? (
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  handleLogout();
-                }}
-                className="flex w-full items-center gap-3 px-3 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
-              >
-                <LogOut className="h-5 w-5" />
-                <span className="font-medium">Cerrar sesión</span>
-              </button>
-            ) : (
-              <Link
-                href="/auth"
-                className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <LogIn className="h-5 w-5" />
-                <span className="font-medium">Iniciar sesión</span>
-              </Link>
+            {isAuthenticated && (
+              <>
+                <hr className="my-2 border-gray-200" />
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    handleLogout();
+                  }}
+                  className="flex w-full items-center gap-3 px-3 py-3 rounded-lg text-red-600 hover:bg-red-50"
+                >
+                  <LogOut className="h-5 w-5" />
+                  <span>Cerrar sesión</span>
+                </button>
+              </>
             )}
           </div>
         </div>
