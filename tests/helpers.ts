@@ -5,8 +5,10 @@
  */
 
 import { PrismaClient } from '@prisma/client';
+import { prisma as prismaInstance } from '../src/lib/db/prisma';
 
-const prisma = new PrismaClient();
+// Re-export the prisma instance from the main app for tests
+const prisma = prismaInstance;
 
 /**
  * Cleans the test database
@@ -65,8 +67,8 @@ export async function seedTestData(): Promise<void> {
       },
       {
         id: 'test-client-id',
-        email: 'cliente@test.com',
-        name: 'Cliente Test',
+        email: 'customer@test.com',
+        name: 'Customer Test',
         password: passwordHash,
         role: 'CUSTOMER',
         isActive: true,
@@ -75,19 +77,19 @@ export async function seedTestData(): Promise<void> {
     skipDuplicates: true,
   });
 
-  // Create test categories
+      // Create test categories
   await prisma.category.createMany({
     data: [
       {
         id: 'test-category-decoration',
-        name: 'Decoración',
-        slug: 'decoracion',
+        name: 'Decoration',
+        slug: 'decoration',
         isActive: true,
       },
       {
         id: 'test-category-accessories',
-        name: 'Accesorios',
-        slug: 'accesorios',
+        name: 'Accessories',
+        slug: 'accessories',
         isActive: true,
       },
     ],
@@ -100,8 +102,8 @@ export async function seedTestData(): Promise<void> {
       {
         id: 'test-product-1',
         slug: 'test-product-1',
-        name: 'Producto Test 1',
-        description: 'Descripción del producto de test',
+        name: 'Test Product 1',
+        description: 'Description of test product',
         price: 19.99,
         stock: 10,
         categoryId: 'test-category-decoration',
@@ -111,8 +113,8 @@ export async function seedTestData(): Promise<void> {
       {
         id: 'test-product-2',
         slug: 'test-product-2',
-        name: 'Producto Test 2',
-        description: 'Otro producto de test',
+        name: 'Test Product 2',
+        description: 'Another test product',
         price: 29.99,
         stock: 5,
         categoryId: 'test-category-accessories',
@@ -131,7 +133,7 @@ export async function seedTestData(): Promise<void> {
         productId: 'test-product-1',
         url: 'https://example.com/img1.jpg',
         filename: 'img1.jpg',
-        altText: 'Producto 1',
+        altText: 'Product 1',
         isMain: true,
         displayOrder: 0,
       },
@@ -140,7 +142,7 @@ export async function seedTestData(): Promise<void> {
         productId: 'test-product-2',
         url: 'https://example.com/img2.jpg',
         filename: 'img2.jpg',
-        altText: 'Producto 2',
+        altText: 'Product 2',
         isMain: true,
         displayOrder: 0,
       },

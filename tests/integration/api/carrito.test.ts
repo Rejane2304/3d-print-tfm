@@ -9,8 +9,8 @@
  * - DELETE /api/cart/[itemId] - Remove item from cart
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { prisma } from '@/lib/db/prisma';
-import bcrypt from 'bcrypt';
+import { prisma } from '../../helpers';
+import * as bcrypt from 'bcrypt';
 
 describe('Cart API', () => {
   const testUser = {
@@ -26,17 +26,17 @@ describe('Cart API', () => {
     // Clean previous data using transaction to avoid deadlocks
     try {
       await prisma.$transaction(async (tx) => {
-        await tx.carritoItem.deleteMany({
+        await tx.cartItem.deleteMany({
           where: {
             cart: {
               user: { email: testUser.email }
             }
           }
         });
-        await tx.carrito.deleteMany({
+        await tx.cart.deleteMany({
           where: { user: { email: testUser.email } }
         });
-        await tx.usuario.deleteMany({
+        await tx.user.deleteMany({
           where: { email: testUser.email }
         });
       });
@@ -45,7 +45,7 @@ describe('Cart API', () => {
     }
 
     const hashedPassword = await bcrypt.hash(testUser.password, 12);
-    const user = await prisma.usuario.create({
+    const user = await prisma.user.create({
       data: {
         email: testUser.email,
         password: hashedPassword,
@@ -56,7 +56,7 @@ describe('Cart API', () => {
     });
     userId = user.id;
 
-    const existingProduct = await prisma.producto.findFirst({
+    const existingProduct = await prisma.product.findFirst({
       where: { isActive: true, stock: { gt: 10 } }
     });
 
@@ -74,15 +74,15 @@ describe('Cart API', () => {
   afterAll(async () => {
     try {
       await prisma.$transaction(async (tx) => {
-        await tx.carritoItem.deleteMany({
+        await tx.cartItem.deleteMany({
           where: {
             cart: { user: { email: testUser.email } }
           }
         });
-        await tx.carrito.deleteMany({
+        await tx.cart.deleteMany({
           where: { user: { email: testUser.email } }
         });
-        await tx.usuario.deleteMany({
+        await tx.user.deleteMany({
           where: { email: testUser.email }
         });
       });

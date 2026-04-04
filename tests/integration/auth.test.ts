@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
-import bcrypt from 'bcrypt';
+import { prisma } from '../helpers';
+import * as bcrypt from 'bcrypt';
 
 // Mock next-auth/jwt
 vi.mock('next-auth/jwt', () => ({
@@ -23,10 +23,10 @@ describe('Authentication and Authorization', () => {
     mockGetToken.mockResolvedValue(null);
     
     // Clean and create test user
-    await prisma.usuario.deleteMany({ where: { email: testUser.email } });
+    await prisma.user.deleteMany({ where: { email: testUser.email } });
     
     const hashedPassword = await bcrypt.hash(testUser.password, 12);
-    await prisma.usuario.create({
+    await prisma.user.create({
       data: {
         email: testUser.email,
         password: hashedPassword,
@@ -38,12 +38,12 @@ describe('Authentication and Authorization', () => {
   });
 
   afterAll(async () => {
-    await prisma.usuario.deleteMany({ where: { email: testUser.email } });
+    await prisma.user.deleteMany({ where: { email: testUser.email } });
   });
 
   describe('Login and Credential Verification', () => {
     it('should authorize with valid credentials', async () => {
-      const user = await prisma.usuario.findUnique({
+      const user = await prisma.user.findUnique({
         where: { email: testUser.email },
       });
 
@@ -56,7 +56,7 @@ describe('Authentication and Authorization', () => {
     });
 
     it('should reject incorrect password', async () => {
-      const user = await prisma.usuario.findUnique({
+      const user = await prisma.user.findUnique({
         where: { email: testUser.email },
       });
 
@@ -65,7 +65,7 @@ describe('Authentication and Authorization', () => {
     });
 
     it('should reject non-existent user', async () => {
-      const user = await prisma.usuario.findUnique({
+      const user = await prisma.user.findUnique({
         where: { email: 'nonexistent@example.com' },
       });
 

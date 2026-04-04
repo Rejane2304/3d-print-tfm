@@ -8,8 +8,8 @@
  */
 import { describe, it, expect, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
-import { POST } from '@/app/api/auth/register/route';
-import { prisma } from '@/lib/db/prisma';
+import { POST } from '../../../src/app/api/auth/register/route';
+import { prisma } from '../../helpers';
 
 describe('POST /api/auth/register', () => {
   let validData: any;
@@ -52,7 +52,7 @@ describe('POST /api/auth/register', () => {
       const req = createRequest(validData);
       await POST(req);
 
-      const user = await prisma.usuario.findUnique({
+      const user = await prisma.user.findUnique({
         where: { email: validData.email.toLowerCase() },
       });
 
@@ -65,7 +65,7 @@ describe('POST /api/auth/register', () => {
       const req = createRequest(validData);
       await POST(req);
 
-      const user = await prisma.usuario.findUnique({
+      const user = await prisma.user.findUnique({
         where: { email: validData.email.toLowerCase() },
       });
 
@@ -76,7 +76,7 @@ describe('POST /api/auth/register', () => {
       const req = createRequest(validData);
       await POST(req);
 
-      const user = await prisma.usuario.findUnique({
+      const user = await prisma.user.findUnique({
         where: { email: validData.email.toLowerCase() },
       });
 

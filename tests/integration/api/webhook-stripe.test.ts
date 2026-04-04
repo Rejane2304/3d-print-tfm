@@ -10,21 +10,21 @@
  * - payment_intent.payment_failed - Payment failed
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { prisma } from '@/lib/db/prisma';
+import { prisma } from '../../helpers';
 
 describe('Stripe Webhook', () => {
   const mockSessionId = 'cs_test_mock123';
   
   beforeAll(async () => {
     // Clean previous test data
-    await prisma.pedido.deleteMany({
+    await prisma.order.deleteMany({
       where: { stripeSessionId: mockSessionId }
     });
   });
 
   afterAll(async () => {
     // Clean test data
-    await prisma.pedido.deleteMany({
+    await prisma.order.deleteMany({
       where: { stripeSessionId: mockSessionId }
     });
   });

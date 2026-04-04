@@ -4,8 +4,7 @@
  */
 import { vi, afterAll, beforeAll } from 'vitest';
 import '@testing-library/jest-dom';
-import { prisma } from '@/lib/db/prisma';
-import { cleanupDB, seedTestData, validateTestDB } from './helpers';
+import { prisma, cleanupDB, seedTestData, validateTestDB } from './helpers';
 
 // Global mock of next/navigation
 vi.mock('next/navigation', () => ({

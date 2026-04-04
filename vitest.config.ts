@@ -3,14 +3,23 @@ import path from 'path';
 import dotenv from 'dotenv';
 import fs from 'fs';
 
-// Cargar .env.test si está usando ambiente de tests
-const envFile = process.env.NODE_ENV === 'test' || process.env.VITEST_ENV === 'integration' 
-  ? '.env.test' 
-  : '.env';
-
-if (fs.existsSync(envFile)) {
-  const envContent = dotenv.parse(fs.readFileSync(envFile));
-  Object.assign(process.env, envContent);
+// Load .env.test first for tests to ensure test environment variables take priority
+// This prevents accidentally using production database URLs during tests
+const envFiles = ['.env.test', '.env'];
+for (const file of envFiles) {
+  if (fs.existsSync(file)) {
+    const envContent = dotenv.parse(fs.readFileSync(file));
+    // Only set values that aren't already set (unless it's .env.test which should override)
+    if (file === '.env.test') {
+      Object.assign(process.env, envContent);
+    } else {
+      for (const [key, value] of Object.entries(envContent)) {
+        if (!process.env[key]) {
+          process.env[key] = value;
+        }
+      }
+    }
+  }
 }
 
 export default defineConfig({
