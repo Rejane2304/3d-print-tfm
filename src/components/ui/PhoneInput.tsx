@@ -1,7 +1,7 @@
 /**
- * Componente PhoneInput
- * Input de teléfono con formato automático (grupos de 3 dígitos)
- * Compatible con números españoles (9 dígitos) e internacionales
+ * PhoneInput Component
+ * Phone input with automatic formatting (groups of 3 digits)
+ * Compatible with Spanish (9 digits) and international numbers
  */
 
 import { Phone } from 'lucide-react';
@@ -23,12 +23,12 @@ export default function PhoneInput({
   disabled = false,
   className = ""
 }: PhoneInputProps) {
-  // Función para formatear el número
+  // Function to format the phone number
   const formatPhoneNumber = (input: string): string => {
-    // Eliminar todo excepto dígitos
+    // Remove everything except digits
     const digits = input.replace(/\D/g, '');
     
-    // Para números españoles (9 dígitos) o internacionales
+    // For Spanish numbers (9 digits) or international
     if (digits.length <= 9) {
       // Formato: XXX XXX XXX
       const groups = [];
@@ -37,12 +37,12 @@ export default function PhoneInput({
       }
       return groups.join(' ');
     } else {
-      // Para números internacionales (más de 9 dígitos)
-      // Detectar si empieza con prefijo internacional
+      // For international numbers (more than 9 digits)
+      // Detect if it starts with international prefix
       let formatted = '';
       let remaining = digits;
       
-      // Si empieza con 34 (España) o +34
+      // If it starts with 34 (Spain) or +34
       if (digits.startsWith('34') && digits.length > 2) {
         formatted = '+34 ';
         remaining = digits.slice(2);
@@ -51,7 +51,7 @@ export default function PhoneInput({
         remaining = digits.slice(4);
       }
       
-      // Agrupar el resto en grupos de 3
+      // Group the rest in sets of 3
       const groups = [];
       for (let i = 0; i < remaining.length; i += 3) {
         groups.push(remaining.slice(i, i + 3));
@@ -61,28 +61,28 @@ export default function PhoneInput({
     }
   };
 
-  // Handler para el cambio
+  // Handler for input change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value;
     
-    // Si el usuario está borrando, permitirlo
+    // If user is deleting, allow it
     if (rawValue.length < value.length) {
-      // Eliminar el último carácter significativo
+      // Remove the last significant character
       const newValue = value.replace(/\s$/, '').slice(0, -1);
       onChange(newValue.replace(/\s/g, ''));
       return;
     }
     
-    // Obtener solo los dígitos del nuevo valor
+    // Get only digits from the new value
     const digits = rawValue.replace(/\D/g, '');
     
-    // Limitar a 15 dígitos máximo (número internacional completo)
+    // Limit to maximum 15 digits (complete international number)
     const limitedDigits = digits.slice(0, 15);
     
     onChange(limitedDigits);
   };
 
-  // Handler para keydown (manejar backspace en espacios)
+  // Handler for keydown (handle backspace on spaces)
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Backspace' && value.endsWith(' ')) {
       e.preventDefault();

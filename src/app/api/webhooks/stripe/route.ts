@@ -1,18 +1,18 @@
 /**
- * Webhook de Stripe
- * Procesa eventos de Stripe para confirmar pagos
- * 
+ * Stripe Webhook
+ * Processes Stripe events to confirm payments
+ *
  * POST /api/webhooks/stripe
- * 
- * Eventos manejados:
- * - checkout.session.completed - Pago exitoso
- * - checkout.session.expired - Sesión expirada
+ *
+ * Handled events:
+ * - checkout.session.completed - Successful payment
+ * - checkout.session.expired - Session expired
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import Stripe from 'stripe';
 
-// Inicializar Stripe
+// Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2024-04-10',
 });
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     const payload = await req.text();
     const signature = req.headers.get('stripe-signature') || '';
 
-    // Verificar firma del webhook
+    // Verify webhook signature
     let event: Stripe.Event;
     try {
       event = stripe.webhooks.constructEvent(
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Procesar evento
+    // Process event
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
@@ -83,7 +83,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
 
   try {
-    // Buscar pedido por stripeSessionId
+    // Find order by stripeSessionId
     const order = await prisma.order.findFirst({
       where: { stripeSessionId: session.id },
       include: { items: true },
@@ -94,7 +94,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       return;
     }
 
-    // Actualizar pedido a CONFIRMADO (estado inicial después del pago)
+    // Update order to CONFIRMED (initial status after payment)
     await prisma.order.update({
       where: { id: order.id },
       data: {
@@ -103,7 +103,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       },
     });
 
-    // Crear registro de pago
+    // Create payment record
     await prisma.payment.create({
       data: {
         orderId: order.id,
@@ -116,7 +116,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       },
     });
 
-    // Actualizar stock de productos
+    // Update product stock
     for (const item of order.items) {
       if (item.productId) {
         await prisma.product.update({
@@ -130,7 +130,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       }
     }
 
-    // Vaciar carrito si existe
+    // Clear cart if it exists
     if (cartId) {
       await prisma.cartItem.deleteMany({
         where: { cartId },
@@ -171,7 +171,7 @@ async function handleCheckoutExpired(session: Stripe.Checkout.Session) {
 
 async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
   try {
-    // Opcional: enviar email de notificación de pago fallido
+    // Optional: send payment failed notification email
     console.log('Payment failed:', paymentIntent.id);
   } catch (error) {
     console.error('Error handling payment failed:', error);

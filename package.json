@@ -29,6 +29,7 @@
     "test:db:migrate": "DATABASE_URL='postgresql://testuser:testpassword123@localhost:5433/3dprint_tfm_test' npx prisma migrate deploy",
     "test:db:seed": "DATABASE_URL='postgresql://testuser:testpassword123@localhost:5433/3dprint_tfm_test' tsx prisma/seed.ts",
     "test:all": "npm run test:docker:setup && npm run test:integration && npm run test:e2e && npm run test:docker:down",
+    "test:validate-db": "NODE_ENV=test tsx scripts/validate-db-safety.ts",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",

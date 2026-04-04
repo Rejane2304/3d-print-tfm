@@ -1,10 +1,10 @@
 /**
- * API Route para el carrito de compras
- * 
- * GET /api/cart - Obtener carrito del usuario autenticado
- * POST /api/cart - Añadir producto al carrito
- * 
- * Requiere autenticación (session token)
+ * API Route for Shopping Cart
+ *
+ * GET /api/cart - Get authenticated user's cart
+ * POST /api/cart - Add product to cart
+ *
+ * Requires authentication (session token)
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
@@ -24,7 +24,7 @@ export const GET = withErrorHandler(async () => {
     );
   }
 
-  // Buscar usuario y su carrito
+  // Find user and their cart
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
     include: {
@@ -67,7 +67,7 @@ export const GET = withErrorHandler(async () => {
     });
   }
 
-  // Calcular totales
+  // Calculate totals
   const cart = user.cart;
   const totalItems = cart.items.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = cart.items.reduce(
@@ -101,7 +101,7 @@ export const GET = withErrorHandler(async () => {
 
 // POST /api/cart - Add product to cart
 export const POST = withErrorHandler(async (req: NextRequest) => {
-  // Verificar autenticación
+  // Verify authentication
   const session = await getServerSession(authOptions);
   
   if (!session?.user?.email) {
@@ -111,11 +111,11 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     );
   }
 
-  // Obtener datos del body
+  // Get data from request body
   const body = await req.json();
   const { productId, quantity = 1 } = body;
 
-  // Validaciones
+  // Validations
   if (!productId) {
     return NextResponse.json(
       { success: false, error: 'Producto requerido' },
@@ -130,7 +130,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     );
   }
 
-  // Buscar usuario
+  // Find user
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
     include: { cart: true },
@@ -143,7 +143,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     );
   }
 
-  // Buscar producto
+  // Find product
   const product = await prisma.product.findUnique({
     where: { id: productId },
   });
@@ -169,7 +169,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     );
   }
 
-  // Crear carrito si no existe
+  // Create cart if it doesn't exist
   let cart = user.cart;
   cart ??= await prisma.cart.create({
     data: {
@@ -187,7 +187,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   });
 
   if (existingItem) {
-    // Actualizar cantidad
+    // Update quantity
     const newQuantity = existingItem.quantity + quantity;
     
     if (product.stock < newQuantity) {
@@ -202,7 +202,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       data: { quantity: newQuantity },
     });
   } else {
-    // Crear nuevo item
+    // Create new item
     await prisma.cartItem.create({
       data: {
         cartId: cart.id,
@@ -213,7 +213,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     });
   }
 
-  // Recalcular subtotal del carrito
+  // Recalculate cart subtotal
   const items = await prisma.cartItem.findMany({
     where: { cartId: cart.id },
     include: { product: true },

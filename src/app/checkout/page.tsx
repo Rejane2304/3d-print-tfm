@@ -1,6 +1,6 @@
 /**
- * Página de Checkout
- * Permite al usuario seleccionar dirección y proceder al pago con Stripe
+ * Checkout Page
+ * Allows user to select address and proceed to payment with Stripe
  * Responsive: mobile → desktop
  */
 'use client';
@@ -10,7 +10,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Loader2, MapPin, CreditCard, ChevronRight } from 'lucide-react';
 
-interface Direccion {
+interface Address {
   id: string;
   nombre: string;
   destinatario: string;
@@ -23,11 +23,11 @@ interface Direccion {
   isPrimary: boolean;
 }
 
-interface CarritoItem {
+interface CartItem {
   id: string;
   quantity: number;
   unitPrice: number;
-  producto: {
+  product: {
     id: string;
     nombre: string;
     slug: string;
@@ -39,33 +39,33 @@ export default function CheckoutPage() {
   const { status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [direcciones, setDirecciones] = useState<Direccion[]>([]);
-  const [direccionSeleccionada, setDireccionSeleccionada] = useState<string>('');
-  const [carrito, setCarrito] = useState<{ items: CarritoItem[]; subtotal: number } | null>(null);
-  const [procesando, setProcesando] = useState(false);
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [selectedAddress, setSelectedAddress] = useState<string>('');
+  const [cart, setCart] = useState<{ items: CartItem[]; subtotal: number } | null>(null);
+  const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const cargarDatos = useCallback(async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
 
-      // Cargar direcciones
+      // Load addresses
       const resDirecciones = await fetch('/api/direcciones');
       if (resDirecciones.ok) {
         const data = await resDirecciones.json();
-        setDirecciones(data.direcciones || []);
-        // Seleccionar dirección principal por defecto
-        const principal = data.direcciones?.find((d: Direccion) => d.isPrimary);
+        setAddresses(data.direcciones || []);
+        // Select primary address by default
+        const principal = data.direcciones?.find((d: Address) => d.isPrimary);
         if (principal) {
-          setDireccionSeleccionada(principal.id);
+          setSelectedAddress(principal.id);
         }
       }
 
-      // Cargar carrito
+      // Load cart
       const resCarrito = await fetch('/api/cart');
       if (resCarrito.ok) {
         const data = await resCarrito.json();
-        setCarrito(data.carrito);
+        setCart(data.carrito);
 
         // Si el carrito está vacío, redirigir
         if (!data.carrito?.items?.length) {
@@ -86,18 +86,18 @@ export default function CheckoutPage() {
     }
 
     if (status === 'authenticated') {
-      cargarDatos();
+      loadData();
     }
-  }, [status, router, cargarDatos]);
+  }, [status, router, loadData]);
 
-  const handleProcederPago = async () => {
-    if (!direccionSeleccionada) {
+  const handleProceedToPayment = async () => {
+    if (!selectedAddress) {
       setError('Selecciona una dirección de envío');
       return;
     }
 
     try {
-      setProcesando(true);
+      setProcessing(true);
       setError(null);
 
       const response = await fetch('/api/checkout', {
@@ -106,7 +106,7 @@ export default function CheckoutPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          shippingAddressId: direccionSeleccionada,
+          shippingAddressId: selectedAddress,
         }),
       });
 
@@ -122,7 +122,7 @@ export default function CheckoutPage() {
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error unknown');
-      setProcesando(false);
+      setProcessing(false);
     }
   };
 
@@ -137,8 +137,8 @@ export default function CheckoutPage() {
     );
   }
 
-  const gastosEnvio = (carrito?.subtotal || 0) >= 50 ? 0 : 5.99;
-  const total = (carrito?.subtotal || 0) + gastosEnvio;
+  const shippingCost = (cart?.subtotal || 0) >= 50 ? 0 : 5.99;
+  const total = (cart?.subtotal || 0) + shippingCost;
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -169,7 +169,7 @@ export default function CheckoutPage() {
                 <h2 className="text-xl font-semibold">Dirección de envío</h2>
               </div>
 
-              {direcciones.length === 0 ? (
+              {addresses.length === 0 ? (
                 <div className="text-center py-8">
                   <p className="text-gray-600 mb-4">
                     No tienes direcciones guardadas
@@ -183,11 +183,11 @@ export default function CheckoutPage() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {direcciones.map((direccion) => (
+                  {addresses.map((address) => (
                     <label
-                      key={direccion.id}
+                      key={address.id}
                       className={`flex items-start gap-4 p-4 rounded-lg border-2 cursor-pointer transition-colors ${
-                        direccionSeleccionada === direccion.id
+                        selectedAddress === address.id
                           ? 'border-indigo-600 bg-indigo-50'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
@@ -195,33 +195,33 @@ export default function CheckoutPage() {
                       <input
                         type="radio"
                         name="direccion"
-                        value={direccion.id}
-                        checked={direccionSeleccionada === direccion.id}
-                        onChange={(e) => setDireccionSeleccionada(e.target.value)}
+                        value={address.id}
+                        checked={selectedAddress === address.id}
+                        onChange={(e) => setSelectedAddress(e.target.value)}
                         className="mt-1"
                       />
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="font-medium">{direccion.nombre}</span>
-                          {direccion.isPrimary && (
+                          <span className="font-medium">{address.nombre}</span>
+                          {address.isPrimary && (
                             <span className="text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded">
                               Principal
                             </span>
                           )}
                         </div>
                         <p className="text-sm text-gray-600">
-                          {direccion.destinatario}
+                          {address.destinatario}
                         </p>
                         <p className="text-sm text-gray-600">
-                          {direccion.direccion}
-                          {direccion.complemento && `, ${direccion.complemento}`}
+                          {address.direccion}
+                          {address.complemento && `, ${address.complemento}`}
                         </p>
                         <p className="text-sm text-gray-600">
-                          {direccion.postalCode} {direccion.ciudad},{' '}
-                          {direccion.provincia}
+                          {address.postalCode} {address.ciudad},{' '}
+                          {address.provincia}
                         </p>
                         <p className="text-sm text-gray-600">
-                          Tel: {direccion.telefono}
+                          Tel: {address.telefono}
                         </p>
                       </div>
                     </label>
@@ -233,13 +233,13 @@ export default function CheckoutPage() {
             {/* Resumen de items */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h2 className="text-xl font-semibold mb-4">Resumen del pedido</h2>
-               {carrito?.items.map((item) => (
+               {cart?.items.map((item) => (
                  <div
                    key={item.id}
                    className="flex items-center gap-4 py-3 border-b border-gray-100"
                  >
                    <div className="flex-1">
-                     <p className="font-medium">{item.producto.nombre}</p>
+                     <p className="font-medium">{item.product.nombre}</p>
                      <p className="text-sm text-gray-600">
                        {item.quantity} x {(item.unitPrice || 0).toFixed(2)} €
                      </p>
@@ -260,17 +260,17 @@ export default function CheckoutPage() {
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between text-gray-600">
                   <span>Subtotal</span>
-                  <span>{carrito?.subtotal.toFixed(2) || '0.00'} €</span>
+                  <span>{cart?.subtotal.toFixed(2) || '0.00'} €</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Envío</span>
-                  <span className={gastosEnvio === 0 ? 'text-green-600' : ''}>
-                    {gastosEnvio === 0 ? 'Gratis' : `${gastosEnvio.toFixed(2)} €`}
+                  <span className={shippingCost === 0 ? 'text-green-600' : ''}>
+                    {shippingCost === 0 ? 'Gratis' : `${shippingCost.toFixed(2)} €`}
                   </span>
                 </div>
-                {gastosEnvio > 0 && (
+                {shippingCost > 0 && (
                   <p className="text-sm text-blue-600">
-                    Te faltan {(50 - (carrito?.subtotal || 0)).toFixed(2)} € para envío gratis
+                    Te faltan {(50 - (cart?.subtotal || 0)).toFixed(2)} € para envío gratis
                   </p>
                 )}
                 <div className="flex justify-between text-xl font-bold border-t pt-3">
@@ -280,11 +280,11 @@ export default function CheckoutPage() {
               </div>
 
               <button
-                onClick={handleProcederPago}
-                disabled={procesando || !direccionSeleccionada || direcciones.length === 0}
+                onClick={handleProceedToPayment}
+                disabled={processing || !selectedAddress || addresses.length === 0}
                 className="w-full bg-indigo-600 text-white py-4 px-6 rounded-lg font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
               >
-                {procesando ? (
+                {processing ? (
                   <>
                     <Loader2 className="h-5 w-5 animate-spin" />
                     Procesando...

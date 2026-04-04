@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
-interface Direccion {
+interface Address {
   id: string;
   nombre: string;
   destinatario: string;
@@ -37,16 +37,16 @@ interface Direccion {
   createdAt: string;
 }
 
-export default function MisDireccionesPage() {
+export default function MyAddressesPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [direcciones, setDirecciones] = useState<Direccion[]>([]);
+  const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [modalEliminarOpen, setModalEliminarOpen] = useState(false);
-  const [direccionAEliminar, setDireccionAEliminar] = useState<Direccion | null>(null);
-  const [modalFormOpen, setModalFormOpen] = useState(false);
-  const [direccionEditando, setDireccionEditando] = useState<Direccion | null>(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [addressToDelete, setAddressToDelete] = useState<Address | null>(null);
+  const [formModalOpen, setFormModalOpen] = useState(false);
+  const [editingAddress, setEditingAddress] = useState<Address | null>(null);
   const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -68,11 +68,11 @@ export default function MisDireccionesPage() {
     }
 
     if (status === 'authenticated') {
-      cargarDirecciones();
+      loadAddresses();
     }
   }, [status, router]);
 
-  const cargarDirecciones = async () => {
+  const loadAddresses = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -84,7 +84,7 @@ export default function MisDireccionesPage() {
         throw new Error(data.error || 'Error al cargar direcciones');
       }
 
-      setDirecciones(data.direcciones || []);
+      setAddresses(data.direcciones || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error unknown');
     } finally {
@@ -99,9 +99,9 @@ export default function MisDireccionesPage() {
 
     try {
       const url = '/api/account/direcciones';
-      const method = direccionEditando ? 'PATCH' : 'POST';
-      const body = direccionEditando 
-        ? { id: direccionEditando.id, ...formData }
+      const method = editingAddress ? 'PATCH' : 'POST';
+      const body = editingAddress 
+        ? { id: editingAddress.id, ...formData }
         : formData;
 
       const response = await fetch(url, {
@@ -116,8 +116,8 @@ export default function MisDireccionesPage() {
         throw new Error(data.error || 'Error al guardar dirección');
       }
 
-      await cargarDirecciones();
-      cerrarModal();
+      await loadAddresses();
+      closeModal();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error unknown');
     } finally {
@@ -125,11 +125,11 @@ export default function MisDireccionesPage() {
     }
   };
 
-  const eliminarDireccion = async () => {
-    if (!direccionAEliminar) return;
+  const deleteAddress = async () => {
+    if (!addressToDelete) return;
 
     try {
-      const response = await fetch(`/api/account/direcciones?id=${direccionAEliminar.id}`, {
+      const response = await fetch(`/api/account/direcciones?id=${addressToDelete.id}`, {
         method: 'DELETE'
       });
 
@@ -138,15 +138,15 @@ export default function MisDireccionesPage() {
         throw new Error(data.error || 'Error al eliminar');
       }
 
-      await cargarDirecciones();
-      setModalEliminarOpen(false);
-      setDireccionAEliminar(null);
+      await loadAddresses();
+      setDeleteModalOpen(false);
+      setAddressToDelete(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error unknown');
     }
   };
 
-  const marcarComoPrincipal = async (id: string) => {
+  const setAsPrimary = async (id: string) => {
     try {
       const response = await fetch('/api/account/direcciones', {
         method: 'PATCH',
@@ -159,14 +159,14 @@ export default function MisDireccionesPage() {
         throw new Error(data.error || 'Error al actualizar');
       }
 
-      await cargarDirecciones();
+      await loadAddresses();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error unknown');
     }
   };
 
-  const abrirModalNueva = () => {
-    setDireccionEditando(null);
+  const openNewModal = () => {
+    setEditingAddress(null);
     setFormData({
       nombre: '',
       destinatario: session?.user?.name || '',
@@ -176,38 +176,38 @@ export default function MisDireccionesPage() {
       postalCode: '',
       ciudad: '',
       provincia: '',
-      isPrimary: direcciones.length === 0
+      isPrimary: addresses.length === 0
     });
-    setModalFormOpen(true);
+    setFormModalOpen(true);
     setError(null);
   };
 
-  const abrirModalEditar = (direccion: Direccion) => {
-    setDireccionEditando(direccion);
+  const openEditModal = (address: Address) => {
+    setEditingAddress(address);
     setFormData({
-      nombre: direccion.nombre,
-      destinatario: direccion.destinatario,
-      telefono: direccion.telefono,
-      direccion: direccion.direccion,
-      complemento: direccion.complemento || '',
-      postalCode: direccion.postalCode,
-      ciudad: direccion.ciudad,
-      provincia: direccion.provincia,
-      isPrimary: direccion.isPrimary
+      nombre: address.nombre,
+      destinatario: address.destinatario,
+      telefono: address.telefono,
+      direccion: address.direccion,
+      complemento: address.complemento || '',
+      postalCode: address.postalCode,
+      ciudad: address.ciudad,
+      provincia: address.provincia,
+      isPrimary: address.isPrimary
     });
-    setModalFormOpen(true);
+    setFormModalOpen(true);
     setError(null);
   };
 
-  const cerrarModal = () => {
-    setModalFormOpen(false);
-    setDireccionEditando(null);
+  const closeModal = () => {
+    setFormModalOpen(false);
+    setEditingAddress(null);
     setError(null);
   };
 
-  const confirmarEliminar = (direccion: Direccion) => {
-    setDireccionAEliminar(direccion);
-    setModalEliminarOpen(true);
+  const confirmDelete = (address: Address) => {
+    setAddressToDelete(address);
+    setDeleteModalOpen(true);
   };
 
   if (status === 'loading' || loading) {
@@ -230,7 +230,7 @@ export default function MisDireccionesPage() {
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Mis Direcciones</h1>
               <p className="mt-2 text-gray-600">
-                {direcciones.length} de 2 direcciones guardadas
+                {addresses.length} de 2 direcciones guardadas
               </p>
             </div>
             <Link
@@ -245,7 +245,7 @@ export default function MisDireccionesPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Error */}
-        {error && !modalFormOpen && (
+        {error && !formModalOpen && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
             <AlertCircle className="h-5 w-5 text-red-600" />
             <p className="text-red-700">{error}</p>
@@ -253,7 +253,7 @@ export default function MisDireccionesPage() {
         )}
 
         {/* Lista de direcciones */}
-        {direcciones.length === 0 ? (
+        {addresses.length === 0 ? (
           <div className="bg-white rounded-lg shadow-sm border p-12 text-center">
             <MapPin className="h-16 w-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">No tienes direcciones guardadas</h3>
@@ -261,7 +261,7 @@ export default function MisDireccionesPage() {
               Agrega una dirección para poder realizar pedidos
             </p>
             <button
-              onClick={abrirModalNueva}
+              onClick={openNewModal}
               className="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
             >
               <Plus className="h-5 w-5" />
@@ -271,19 +271,19 @@ export default function MisDireccionesPage() {
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {direcciones.map((direccion) => (
+              {addresses.map((address) => (
                 <div
-                  key={direccion.id}
+                  key={address.id}
                   className={`bg-white rounded-lg shadow-sm border overflow-hidden ${
-                    direccion.isPrimary ? 'border-indigo-500 ring-1 ring-indigo-500' : ''
+                    address.isPrimary ? 'border-indigo-500 ring-1 ring-indigo-500' : ''
                   }`}
                 >
                   {/* Header de la dirección */}
                   <div className="p-6 border-b">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-gray-900">{direccion.nombre}</h3>
-                        {direccion.isPrimary && (
+                        <h3 className="font-semibold text-gray-900">{address.nombre}</h3>
+                        {address.isPrimary && (
                           <span className="inline-flex items-center gap-1 px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded-full">
                             <Star className="h-3 w-3 fill-current" />
                             Principal
@@ -292,14 +292,14 @@ export default function MisDireccionesPage() {
                       </div>
                       <div className="flex items-center gap-1">
                         <button
-                          onClick={() => abrirModalEditar(direccion)}
+                          onClick={() => openEditModal(address)}
                           className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
                           title="Editar"
                         >
                           <Edit2 className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => confirmarEliminar(direccion)}
+                          onClick={() => confirmDelete(address)}
                           className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                           title="Eliminar"
                         >
@@ -314,35 +314,35 @@ export default function MisDireccionesPage() {
                     <div className="flex items-start gap-3">
                       <User className="h-5 w-5 text-gray-400 mt-0.5" />
                       <div>
-                        <p className="font-medium text-gray-900">{direccion.destinatario}</p>
+                        <p className="font-medium text-gray-900">{address.destinatario}</p>
                       </div>
                     </div>
 
                     <div className="flex items-start gap-3">
                       <MapPin className="h-5 w-5 text-gray-400 mt-0.5" />
                       <div className="text-sm">
-                        <p className="text-gray-900">{direccion.direccion}</p>
-                        {direccion.complemento && (
-                          <p className="text-gray-600">{direccion.complemento}</p>
+                        <p className="text-gray-900">{address.direccion}</p>
+                        {address.complemento && (
+                          <p className="text-gray-600">{address.complemento}</p>
                         )}
                         <p className="text-gray-900">
-                          {direccion.postalCode} {direccion.ciudad}
+                          {address.postalCode} {address.ciudad}
                         </p>
-                        <p className="text-gray-600">{direccion.provincia}</p>
+                        <p className="text-gray-600">{address.provincia}</p>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-3">
                       <Phone className="h-5 w-5 text-gray-400" />
-                      <span className="text-sm text-gray-700">{direccion.telefono}</span>
+                      <span className="text-sm text-gray-700">{address.telefono}</span>
                     </div>
                   </div>
 
                   {/* Footer */}
                   <div className="px-6 py-4 bg-gray-50 border-t">
-                    {!direccion.isPrimary ? (
+                    {!address.isPrimary ? (
                       <button
-                        onClick={() => marcarComoPrincipal(direccion.id)}
+                        onClick={() => setAsPrimary(address.id)}
                         className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
                       >
                         Establecer como dirección principal
@@ -359,10 +359,10 @@ export default function MisDireccionesPage() {
             </div>
 
             {/* Botón agregar más */}
-            {direcciones.length < 2 && (
+            {addresses.length < 2 && (
               <div className="mt-6 text-center">
                 <button
-                  onClick={abrirModalNueva}
+                  onClick={openNewModal}
                   className="inline-flex items-center gap-2 border-2 border-dashed border-gray-300 text-gray-600 px-6 py-3 rounded-lg font-medium hover:border-indigo-500 hover:text-indigo-600 transition-colors"
                 >
                   <Plus className="h-5 w-5" />
@@ -375,18 +375,18 @@ export default function MisDireccionesPage() {
       </div>
 
       {/* Modal de formulario */}
-      {modalFormOpen && (
+      {formModalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-4">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75" onClick={cerrarModal} />
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75" onClick={closeModal} />
             
             <div className="relative bg-white rounded-2xl shadow-xl max-w-lg w-full p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-gray-900">
-                  {direccionEditando ? 'Editar dirección' : 'Nueva dirección'}
+                  {editingAddress ? 'Editar dirección' : 'Nueva dirección'}
                 </h2>
                 <button
-                  onClick={cerrarModal}
+                  onClick={closeModal}
                   className="text-gray-400 hover:text-gray-600"
                 >
                   <X className="h-6 w-6" />
@@ -515,7 +515,7 @@ export default function MisDireccionesPage() {
                   />
                 </div>
 
-                {!direccionEditando?.isPrimary && direcciones.length > 0 && (
+                {!editingAddress?.isPrimary && addresses.length > 0 && (
                   <div className="flex items-center gap-2">
                     <input
                       type="checkbox"
@@ -533,7 +533,7 @@ export default function MisDireccionesPage() {
                 <div className="flex gap-3 pt-4">
                   <button
                     type="button"
-                    onClick={cerrarModal}
+                    onClick={closeModal}
                     className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50"
                   >
                     Cancelar
@@ -544,7 +544,7 @@ export default function MisDireccionesPage() {
                     className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2"
                   >
                     {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-                    {direccionEditando ? 'Guardar cambios' : 'Agregar dirección'}
+                    {editingAddress ? 'Guardar cambios' : 'Agregar dirección'}
                   </button>
                 </div>
               </form>
@@ -555,14 +555,14 @@ export default function MisDireccionesPage() {
 
       {/* Modal de confirmación para eliminar */}
       <ConfirmModal
-        isOpen={modalEliminarOpen}
+        isOpen={deleteModalOpen}
         onClose={() => {
-          setModalEliminarOpen(false);
-          setDireccionAEliminar(null);
+          setDeleteModalOpen(false);
+          setAddressToDelete(null);
         }}
-        onConfirm={eliminarDireccion}
+        onConfirm={deleteAddress}
         title="¿Eliminar dirección?"
-        description={`¿Estás seguro de que deseas eliminar la dirección "${direccionAEliminar?.nombre}"? Esta acción no se puede deshacer.`}
+        description={`¿Estás seguro de que deseas eliminar la dirección "${addressToDelete?.nombre}"? Esta acción no se puede deshacer.`}
         confirmText="Eliminar"
         type="danger"
       />

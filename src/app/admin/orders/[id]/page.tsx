@@ -25,7 +25,7 @@ import {
   Edit
 } from 'lucide-react';
 
-interface PedidoDetalle {
+interface OrderDetail {
   id: string;
   orderNumber: string;
   estado: string;
@@ -60,7 +60,7 @@ interface PedidoDetalle {
   notasInternas?: string;
 }
 
-const estadosPedido: Record<string, { color: string; icon: React.ElementType; label: string }> = {
+const orderStatuses: Record<string, { color: string; icon: React.ElementType; label: string }> = {
   PENDIENTE: { color: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: Clock, label: 'Pendiente' },
   PAGADO: { color: 'bg-blue-100 text-blue-800 border-blue-200', icon: CheckCircle2, label: 'Pagado' },
   EN_PREPARACION: { color: 'bg-indigo-100 text-indigo-800 border-indigo-200', icon: Box, label: 'En preparación' },
@@ -73,16 +73,16 @@ export default function AdminPedidoDetallePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const params = useParams();
-  const [pedido, setPedido] = useState<PedidoDetalle | null>(null);
+  const [order, setOrder] = useState<OrderDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [nuevoEstado, setNuevoEstado] = useState('');
+  const [newStatus, setNewStatus] = useState('');
   const [notas, setNotas] = useState('');
   const [numeroSeguimiento, setNumeroSeguimiento] = useState('');
   const [transportista, setTransportista] = useState('');
-  const [mostrarFormEstado, setMostrarFormEstado] = useState(false);
+  const [showStatusForm, setShowStatusForm] = useState(false);
 
-  const cargarPedido = useCallback(async () => {
+  const loadOrder = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -94,8 +94,8 @@ export default function AdminPedidoDetallePage() {
         throw new Error(data.error || 'Error al cargar pedido');
       }
 
-      setPedido(data.pedido);
-      setNuevoEstado(data.pedido.estado);
+      setOrder(data.pedido);
+      setNewStatus(data.pedido.estado);
       setNotas(data.pedido.notasInternas || '');
       setNumeroSeguimiento(data.pedido.numeroSeguimiento || '');
       setTransportista(data.pedido.transportista || '');
@@ -118,18 +118,18 @@ export default function AdminPedidoDetallePage() {
         router.push('/');
         return;
       }
-      cargarPedido();
+      loadOrder();
     }
-  }, [status, session, router, cargarPedido]);
+  }, [status, session, router, loadOrder]);
 
-  const actualizarEstado = async () => {
+  const updateStatus = async () => {
     try {
       const response = await fetch('/api/admin/orders', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id: params.id,
-          estado: nuevoEstado,
+          estado: newStatus,
           notasInternas: notas,
           numeroSeguimiento: numeroSeguimiento || undefined,
           transportista: transportista || undefined,
@@ -137,8 +137,8 @@ export default function AdminPedidoDetallePage() {
       });
 
       if (response.ok) {
-        await cargarPedido();
-        setMostrarFormEstado(false);
+        await loadOrder();
+        setShowStatusForm(false);
       } else {
         const data = await response.json();
         setError(data.error || 'Error al actualizar');
@@ -159,7 +159,7 @@ export default function AdminPedidoDetallePage() {
     );
   }
 
-  if (!pedido) {
+  if (!order) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -173,8 +173,8 @@ export default function AdminPedidoDetallePage() {
     );
   }
 
-  const estadoConfig = estadosPedido[pedido.estado] || { color: 'bg-gray-100 text-gray-800 border-gray-200', icon: Package, label: pedido.estado };
-  const EstadoIcon = estadoConfig.icon;
+  const statusConfig = orderStatuses[order.estado] || { color: 'bg-gray-100 text-gray-800 border-gray-200', icon: Package, label: order.estado };
+  const StatusIcon = statusConfig.icon;
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -187,15 +187,15 @@ export default function AdminPedidoDetallePage() {
                 <ArrowLeft className="h-6 w-6" />
               </Link>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Pedido {pedido.orderNumber}</h1>
+                <h1 className="text-2xl font-bold text-gray-900">Pedido {order.orderNumber}</h1>
                 <p className="text-sm text-gray-500">
-                  {new Date(pedido.createdAt).toLocaleDateString('es-ES')} - {new Date(pedido.createdAt).toLocaleTimeString('es-ES')}
+                  {new Date(order.createdAt).toLocaleDateString('es-ES')} - {new Date(order.createdAt).toLocaleTimeString('es-ES')}
                 </p>
               </div>
             </div>
-            <span className={`px-4 py-2 inline-flex items-center gap-2 text-sm font-semibold rounded-full border-2 ${estadoConfig.color}`}>
-              <EstadoIcon className="h-5 w-5" />
-              {estadoConfig.label}
+            <span className={`px-4 py-2 inline-flex items-center gap-2 text-sm font-semibold rounded-full border-2 ${statusConfig.color}`}>
+              <StatusIcon className="h-5 w-5" />
+              {statusConfig.label}
             </span>
           </div>
         </div>
@@ -222,7 +222,7 @@ export default function AdminPedidoDetallePage() {
                 </h2>
               </div>
               <div className="divide-y divide-gray-200">
-                {pedido.items.map((item) => (
+                {order.items.map((item) => (
                   <div key={item.id} className="p-6 flex items-center gap-4">
                     {item.imagenUrl ? (
                       <Image
@@ -253,15 +253,15 @@ export default function AdminPedidoDetallePage() {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Subtotal</span>
-                    <span className="font-medium">{Number(pedido.subtotal).toFixed(2)} €</span>
+                    <span className="font-medium">{Number(order.subtotal).toFixed(2)} €</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Envío</span>
-                    <span className="font-medium">{Number(pedido.envio).toFixed(2)} €</span>
+                    <span className="font-medium">{Number(order.envio).toFixed(2)} €</span>
                   </div>
                   <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-200">
                     <span className="text-gray-900">Total</span>
-                    <span className="text-gray-900">{Number(pedido.total).toFixed(2)} €</span>
+                    <span className="text-gray-900">{Number(order.total).toFixed(2)} €</span>
                   </div>
                 </div>
               </div>
@@ -276,16 +276,16 @@ export default function AdminPedidoDetallePage() {
                 </h2>
               </div>
               <div className="p-6">
-                <p className="font-medium text-gray-900">{pedido.nombreEnvio}</p>
-                <p className="text-gray-600">{pedido.shippingAddress}</p>
-                {pedido.complementoEnvio && (
-                  <p className="text-gray-600">{pedido.complementoEnvio}</p>
+                <p className="font-medium text-gray-900">{order.nombreEnvio}</p>
+                <p className="text-gray-600">{order.shippingAddress}</p>
+                {order.complementoEnvio && (
+                  <p className="text-gray-600">{order.complementoEnvio}</p>
                 )}
                 <p className="text-gray-600">
-                  {pedido.postalCodeEnvio} {pedido.ciudadEnvio}, {pedido.provinciaEnvio}
+                  {order.postalCodeEnvio} {order.ciudadEnvio}, {order.provinciaEnvio}
                 </p>
-                <p className="text-gray-600">{pedido.paisEnvio}</p>
-                <p className="text-gray-600 mt-2">Tel: {pedido.telefonoEnvio}</p>
+                <p className="text-gray-600">{order.paisEnvio}</p>
+                <p className="text-gray-600 mt-2">Tel: {order.telefonoEnvio}</p>
               </div>
             </div>
           </div>
@@ -301,8 +301,8 @@ export default function AdminPedidoDetallePage() {
                 </h2>
               </div>
               <div className="p-6">
-                <p className="font-medium text-gray-900">{pedido.usuario.nombre}</p>
-                <p className="text-sm text-gray-600">{pedido.usuario.email}</p>
+                <p className="font-medium text-gray-900">{order.usuario.nombre}</p>
+                <p className="text-sm text-gray-600">{order.usuario.email}</p>
               </div>
             </div>
 
@@ -316,7 +316,7 @@ export default function AdminPedidoDetallePage() {
               </div>
               <div className="p-6">
                 <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                  {pedido.paymentMethod === 'TARJETA' ? 'Tarjeta' : 'Transferencia'}
+                  {order.paymentMethod === 'TARJETA' ? 'Tarjeta' : 'Transferencia'}
                 </span>
               </div>
             </div>
@@ -330,9 +330,9 @@ export default function AdminPedidoDetallePage() {
                 </h2>
               </div>
               <div className="p-6 space-y-4">
-                {!mostrarFormEstado ? (
+                {!showStatusForm ? (
                   <button
-                    onClick={() => setMostrarFormEstado(true)}
+                    onClick={() => setShowStatusForm(true)}
                     className="w-full bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
                   >
                     Actualizar estado
@@ -344,8 +344,8 @@ export default function AdminPedidoDetallePage() {
                         Estado
                       </label>
                       <select
-                        value={nuevoEstado}
-                        onChange={(e) => setNuevoEstado(e.target.value)}
+                        value={newStatus}
+                        onChange={(e) => setNewStatus(e.target.value)}
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                       >
                         <option value="PENDIENTE">Pendiente</option>
@@ -357,7 +357,7 @@ export default function AdminPedidoDetallePage() {
                       </select>
                     </div>
 
-                    {nuevoEstado === 'ENVIADO' && (
+                    {newStatus === 'ENVIADO' && (
                       <>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -401,13 +401,13 @@ export default function AdminPedidoDetallePage() {
 
                     <div className="flex gap-2">
                       <button
-                        onClick={actualizarEstado}
+                        onClick={updateStatus}
                         className="flex-1 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
                       >
                         Guardar
                       </button>
                       <button
-                        onClick={() => setMostrarFormEstado(false)}
+                        onClick={() => setShowStatusForm(false)}
                         className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-300 transition-colors"
                       >
                         Cancelar

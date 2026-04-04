@@ -1,13 +1,13 @@
 import { defineConfig, devices } from '@playwright/test';
 import path from 'path';
 
-// Cargar variables de entorno de test si no están ya cargadas
+// Load test environment variables if not already loaded
 if (!process.env.NODE_ENV) {
   require('dotenv').config({ path: path.resolve(__dirname, '.env.test') });
 }
 
 /**
- * Configuración de Playwright para tests E2E
+ * Playwright configuration for E2E tests
  * @see https://playwright.dev/docs/test-configuration
  */
 export default defineConfig({
@@ -71,7 +71,7 @@ export default defineConfig({
       },
       dependencies: ['setup'],
     },
-    // Pantallas muy grandes (4K)
+    // Very large screens (4K)
     {
       name: 'Desktop 4K',
       use: {

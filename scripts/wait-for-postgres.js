@@ -2,11 +2,11 @@
 
 /**
  * ============================================
- * ESPERA A QUE POSTGRESQL ESTÉ LISTO
+ * WAIT FOR POSTGRESQL TO BE READY
  * ============================================
- * 
- * Script que espera a que PostgreSQL en Docker
- * esté disponible antes de continuar
+ *
+ * Script that waits for PostgreSQL in Docker
+ * to be available before continuing
  */
 
 import { execSync } from 'node:child_process';
@@ -15,12 +15,12 @@ const MAX_RETRIES = 30;
 const RETRY_INTERVAL = 1000; // 1 segundo
 let retries = 0;
 
-console.log('⏳ Esperando a que PostgreSQL esté listo...');
+console.log('⏳ Waiting for PostgreSQL to be ready...');
 
 
 function checkPostgres() {
   try {
-    // Usar pg_isready directamente en el contenedor
+    // Use pg_isready directly in the container
     execSync(
       "docker exec 3dprint-test-db pg_isready -U testuser -d 3dprint_tfm_test > /dev/null 2>&1",
       { stdio: 'pipe' }
@@ -30,13 +30,13 @@ function checkPostgres() {
   } catch {
     retries++;
     if (retries >= MAX_RETRIES) {
-      console.error('❌ Error: PostgreSQL no está respondiendo después de 30 segundos');
-      console.error('   Verifica que Docker está corriendo:');
+      console.error('❌ Error: PostgreSQL is not responding after 30 seconds');
+      console.error('   Verify that Docker is running:');
       console.error('   docker-compose -f docker-compose.test.yml ps');
       process.exit(1);
     }
     const dots = '.'.repeat((retries % 3) + 1);
-    process.stdout.write(`\r⏳ Esperando PostgreSQL ${dots}  `);
+    process.stdout.write(`\r⏳ Waiting for PostgreSQL ${dots}  `);
     setTimeout(checkPostgres, RETRY_INTERVAL);
   }
 }

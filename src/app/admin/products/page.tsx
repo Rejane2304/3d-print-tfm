@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
-interface Producto {
+interface Product {
   id: string;
   slug: string;
   nombre: string;
@@ -33,16 +33,16 @@ interface Producto {
   imagenes: Array<{ url: string }>;
 }
 
-export default function AdminProductosPage() {
+export default function AdminProductsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [productos, setProductos] = useState<Producto[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [busqueda, setBusqueda] = useState('');
+  const [search, setSearch] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
-  const [productoAEliminar, setProductoAEliminar] = useState<string | null>(null);
+  const [productToDelete, setProductToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -56,11 +56,11 @@ export default function AdminProductosPage() {
         router.push('/');
         return;
       }
-      cargarProductos();
+      loadProducts();
     }
   }, [status, session, router]);
 
-  const cargarProductos = async () => {
+  const loadProducts = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -72,7 +72,7 @@ export default function AdminProductosPage() {
         throw new Error(data.error || 'Error al cargar productos');
       }
 
-      setProductos(data.productos || []);
+      setProducts(data.productos || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error unknown');
     } finally {
@@ -80,33 +80,33 @@ export default function AdminProductosPage() {
     }
   };
 
-  const handleEliminar = (id: string) => {
-    setProductoAEliminar(id);
+  const handleDelete = (id: string) => {
+    setProductToDelete(id);
     setModalOpen(true);
   };
 
-  const confirmarEliminar = async () => {
-    if (!productoAEliminar) return;
+  const confirmDelete = async () => {
+    if (!productToDelete) return;
 
     try {
-      const response = await fetch(`/api/admin/products/${productoAEliminar}`, {
+      const response = await fetch(`/api/admin/products/${productToDelete}`, {
         method: 'DELETE',
       });
 
       if (response.ok) {
-        setProductos(productos.filter(p => p.id !== productoAEliminar));
+        setProducts(products.filter(p => p.id !== productToDelete));
       }
     } catch {
       setError('Error al eliminar producto');
     } finally {
       setModalOpen(false);
-      setProductoAEliminar(null);
+      setProductToDelete(null);
     }
   };
 
-  const productosFiltrados = productos.filter(producto => {
-    const matchesSearch = producto.nombre.toLowerCase().includes(busqueda.toLowerCase());
-    const matchesCategory = !filterCategory || producto.categoria === filterCategory;
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = product.nombre.toLowerCase().includes(search.toLowerCase());
+    const matchesCategory = !filterCategory || product.categoria === filterCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -159,8 +159,8 @@ export default function AdminProductosPage() {
               <input
                 type="text"
                 placeholder="Buscar productos..."
-                value={busqueda}
-                onChange={(e) => setBusqueda(e.target.value)}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               />
             </div>
@@ -208,23 +208,23 @@ export default function AdminProductosPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {productosFiltrados.length === 0 ? (
+              {filteredProducts.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
                     No se encontraron productos
                   </td>
                 </tr>
               ) : (
-                productosFiltrados.map((producto) => (
-                  <tr key={producto.id} className="hover:bg-gray-50">
+                filteredProducts.map((product) => (
+                  <tr key={product.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
-                          {producto.imagenes?.[0] ? (
+                          {product.imagenes?.[0] ? (
                             <Image
                               className="h-10 w-10 rounded-full object-cover"
-                              src={producto.imagenes[0].url}
-                              alt={producto.nombre}
+                              src={product.imagenes[0].url}
+                              alt={product.nombre}
                               width={40}
                               height={40}
                               unoptimized
@@ -237,47 +237,47 @@ export default function AdminProductosPage() {
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">
-                            {producto.nombre}
+                            {product.nombre}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {producto.material}
+                            {product.material}
                           </div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                        {producto.categoria}
+                        {product.categoria}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {Number(producto.precio).toFixed(2)} €
+                      {Number(product.precio).toFixed(2)} €
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`text-sm ${producto.stock < 10 ? 'text-red-600 font-medium' : 'text-gray-900'}`}>
-                        {producto.stock}
+                      <span className={`text-sm ${product.stock < 10 ? 'text-red-600 font-medium' : 'text-gray-900'}`}>
+                        {product.stock}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        producto.activo
+                        product.activo
                           ? 'bg-green-100 text-green-800'
                           : 'bg-gray-100 text-gray-800'
                       }`}>
-                        {producto.activo ? 'Activo' : 'Inactivo'}
+                        {product.activo ? 'Activo' : 'Inactivo'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end gap-2">
                         <Link
-                          href={`/admin/products/${producto.slug}/editar`}
+                          href={`/admin/products/${product.slug}/editar`}
                           className="text-indigo-600 hover:text-indigo-900 p-2"
                           title="Editar"
                         >
                           <Edit className="h-4 w-4" />
                         </Link>
                         <button
-                          onClick={() => handleEliminar(producto.id)}
+                          onClick={() => handleDelete(product.id)}
                           className="text-red-600 hover:text-red-900 p-2"
                           title="Eliminar"
                         >
@@ -294,7 +294,7 @@ export default function AdminProductosPage() {
 
         {/* Resumen */}
         <div className="mt-4 text-sm text-gray-600">
-          Mostrando {productosFiltrados.length} de {productos.length} productos
+          Mostrando {filteredProducts.length} de {products.length} productos
         </div>
       </div>
 
@@ -302,9 +302,9 @@ export default function AdminProductosPage() {
         isOpen={modalOpen}
         onClose={() => {
           setModalOpen(false);
-          setProductoAEliminar(null);
+          setProductToDelete(null);
         }}
-        onConfirm={confirmarEliminar}
+        onConfirm={confirmDelete}
         title="¿Eliminar producto?"
         description="Esta acción no se puede deshacer. El producto se eliminará permanentemente del catálogo."
         confirmText="Eliminar"

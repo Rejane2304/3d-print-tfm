@@ -24,7 +24,7 @@ import {
   Calendar
 } from 'lucide-react';
 
-interface Pedido {
+interface Order {
   id: string;
   orderNumber: string;
   estado: string;
@@ -60,13 +60,13 @@ const estadosConfig: Record<string, { color: string; icon: React.ElementType; la
   CANCELADO: { color: 'bg-red-100 text-red-800 border-red-200', icon: XCircle, label: 'Cancelado' },
 };
 
-export default function MisPedidosPage() {
+export default function MyOrdersPage() {
   const { status } = useSession();
   const router = useRouter();
-  const [pedidos, setPedidos] = useState<Pedido[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filtroEstado, setFiltroEstado] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -75,11 +75,11 @@ export default function MisPedidosPage() {
     }
 
     if (status === 'authenticated') {
-      cargarPedidos();
+      loadOrders();
     }
   }, [status, router]);
 
-  const cargarPedidos = async () => {
+  const loadOrders = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -91,7 +91,7 @@ export default function MisPedidosPage() {
         throw new Error(data.error || 'Error al cargar pedidos');
       }
 
-      setPedidos(data.pedidos || []);
+      setOrders(data.pedidos || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error unknown');
     } finally {
@@ -99,9 +99,9 @@ export default function MisPedidosPage() {
     }
   };
 
-  const pedidosFiltrados = filtroEstado
-    ? pedidos.filter(p => p.estado === filtroEstado)
-    : pedidos;
+  const filteredOrders = statusFilter
+    ? orders.filter(o => o.estado === statusFilter)
+    : orders;
 
   if (status === 'loading' || loading) {
     return (
@@ -123,7 +123,7 @@ export default function MisPedidosPage() {
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Mis Pedidos</h1>
               <p className="mt-2 text-gray-600">
-                {pedidos.length} {pedidos.length === 1 ? 'pedido' : 'pedidos'} en total
+                {orders.length} {orders.length === 1 ? 'pedido' : 'pedidos'} en total
               </p>
             </div>
             <Link
@@ -153,9 +153,9 @@ export default function MisPedidosPage() {
           </div>
           <div className="flex flex-wrap gap-2">
             <button
-              onClick={() => setFiltroEstado('')}
+              onClick={() => setStatusFilter('')}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                filtroEstado === ''
+                statusFilter === ''
                   ? 'bg-indigo-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
@@ -164,13 +164,13 @@ export default function MisPedidosPage() {
             </button>
             {Object.entries(estadosConfig).map(([estado, config]) => {
               const Icon = config.icon;
-              const count = pedidos.filter(p => p.estado === estado).length;
+              const count = orders.filter(o => o.estado === estado).length;
               return (
                 <button
                   key={estado}
-                  onClick={() => setFiltroEstado(estado)}
+                  onClick={() => setStatusFilter(estado)}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2 ${
-                    filtroEstado === estado
+                    statusFilter === estado
                       ? 'bg-indigo-600 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
@@ -179,7 +179,7 @@ export default function MisPedidosPage() {
                   {config.label}
                   {count > 0 && (
                     <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${
-                      filtroEstado === estado ? 'bg-indigo-500' : 'bg-gray-300 text-gray-700'
+                      statusFilter === estado ? 'bg-indigo-500' : 'bg-gray-300 text-gray-700'
                     }`}>
                       {count}
                     </span>
@@ -191,14 +191,14 @@ export default function MisPedidosPage() {
         </div>
 
         {/* Lista de pedidos */}
-        {pedidosFiltrados.length === 0 ? (
+        {filteredOrders.length === 0 ? (
           <div className="bg-white rounded-lg shadow-sm border p-12 text-center">
             <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              {filtroEstado ? 'No hay pedidos con este estado' : 'No tienes pedidos'}
+              {statusFilter ? 'No hay pedidos con este estado' : 'No tienes pedidos'}
             </h3>
             <p className="text-gray-500 mb-6">
-              {filtroEstado
+              {statusFilter
                 ? 'Prueba con otro filtro o espera a que se actualicen tus pedidos'
                 : 'Aún no has realizado ningún pedido. ¡Explora nuestro catálogo!'}
             </p>
@@ -212,14 +212,14 @@ export default function MisPedidosPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {pedidosFiltrados.map((pedido) => {
-              const estadoConfig = estadosConfig[pedido.estado] || estadosConfig.PENDIENTE;
-              const EstadoIcon = estadoConfig.icon;
-              const primeraImagen = pedido.items[0]?.producto.images[0]?.url;
+            {filteredOrders.map((order) => {
+              const statusConfig = estadosConfig[order.estado] || estadosConfig.PENDIENTE;
+              const StatusIcon = statusConfig.icon;
+              const firstImage = order.items[0]?.producto.images[0]?.url;
 
               return (
                 <div
-                  key={pedido.id}
+                  key={order.id}
                   className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow"
                 >
                   {/* Header del pedido */}
@@ -228,10 +228,10 @@ export default function MisPedidosPage() {
                       <div className="flex items-start gap-4">
                         {/* Imagen del primer producto */}
                         <div className="w-20 h-20 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden relative">
-                          {primeraImagen ? (
+                          {firstImage ? (
                             <Image
-                              src={primeraImagen}
-                              alt={pedido.items[0]?.producto.nombre}
+                              src={firstImage}
+                              alt={order.items[0]?.producto.nombre}
                               fill
                               className="object-cover"
                               unoptimized
@@ -245,21 +245,21 @@ export default function MisPedidosPage() {
                         <div>
                           <div className="flex items-center gap-2 mb-1">
                             <span className="text-lg font-semibold text-gray-900">
-                              {pedido.orderNumber}
+                              {order.orderNumber}
                             </span>
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium border flex items-center gap-1 ${estadoConfig.color}`}>
-                              <EstadoIcon className="h-3 w-3" />
-                              {estadoConfig.label}
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium border flex items-center gap-1 ${statusConfig.color}`}>
+                              <StatusIcon className="h-3 w-3" />
+                              {statusConfig.label}
                             </span>
                           </div>
                           <div className="flex items-center gap-4 text-sm text-gray-500">
                             <span className="flex items-center gap-1">
                               <Calendar className="h-4 w-4" />
-                              {new Date(pedido.createdAt).toLocaleDateString('es-ES')}
+                              {new Date(order.createdAt).toLocaleDateString('es-ES')}
                             </span>
                             <span className="flex items-center gap-1">
                               <Package className="h-4 w-4" />
-                              {pedido.items.length} {pedido.items.length === 1 ? 'producto' : 'productos'}
+                              {order.items.length} {order.items.length === 1 ? 'producto' : 'productos'}
                             </span>
                           </div>
                         </div>
@@ -268,11 +268,11 @@ export default function MisPedidosPage() {
                       {/* Total y acciones */}
                       <div className="flex flex-col items-end gap-2">
                         <span className="text-2xl font-bold text-gray-900">
-                          {Number(pedido.total).toFixed(2)} €
+                          {Number(order.total).toFixed(2)} €
                         </span>
                         <div className="flex items-center gap-2">
                           <Link
-                            href={`/account/orders/${pedido.id}`}
+                            href={`/account/orders/${order.id}`}
                             className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-800 font-medium text-sm"
                           >
                             <Eye className="h-4 w-4" />
@@ -287,7 +287,7 @@ export default function MisPedidosPage() {
                   {/* Productos */}
                   <div className="p-6 bg-gray-50">
                     <div className="space-y-3">
-                      {pedido.items.slice(0, 3).map((item) => (
+                      {order.items.slice(0, 3).map((item) => (
                         <div key={item.id} className="flex items-center justify-between text-sm">
                           <div className="flex items-center gap-3">
                             <span className="font-medium text-gray-900">
@@ -305,18 +305,18 @@ export default function MisPedidosPage() {
                           </span>
                         </div>
                       ))}
-                      {pedido.items.length > 3 && (
+                      {order.items.length > 3 && (
                         <p className="text-sm text-gray-500 italic">
-                          +{pedido.items.length - 3} productos más...
+                          +{order.items.length - 3} productos más...
                         </p>
                       )}
                     </div>
 
                     {/* Acciones */}
                     <div className="mt-4 pt-4 border-t flex flex-wrap items-center gap-3">
-                      {pedido.factura && !pedido.factura.anulada && (
+                      {order.factura && !order.factura.anulada && (
                         <a
-                          href={`/api/admin/invoices/${pedido.factura.id}/pdf`}
+                          href={`/api/admin/invoices/${order.factura.id}/pdf`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 font-medium"
@@ -326,13 +326,13 @@ export default function MisPedidosPage() {
                         </a>
                       )}
 
-                      {pedido.estado === 'ENVIADO' && (
+                      {order.estado === 'ENVIADO' && (
                         <span className="text-sm text-purple-600">
                           Pedido en camino
                         </span>
                       )}
 
-                      {pedido.estado === 'ENTREGADO' && (
+                      {order.estado === 'ENTREGADO' && (
                         <span className="text-sm text-green-600 flex items-center gap-1">
                           <CheckCircle2 className="h-4 w-4" />
                           Entregado

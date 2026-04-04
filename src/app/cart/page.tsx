@@ -1,7 +1,7 @@
 /**
- * Página del Carrito de Compras
- * Muestra items del carrito y permite gestionarlos
- * Funciona para usuarios autenticados (API) y no autenticados (localStorage)
+ * Shopping Cart Page
+ * Displays cart items and allows managing them
+ * Works for authenticated (API) and unauthenticated (localStorage) users
  * Responsive: mobile → desktop
  */
 'use client';
@@ -72,7 +72,7 @@ export default function CarritoPage() {
     router.push('/products');
   };
 
-  // Mostrar loading mientras carga
+  // Show loading while loading
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">

@@ -26,7 +26,7 @@ import {
   Download
 } from 'lucide-react';
 
-interface PedidoDetalle {
+interface OrderDetail {
   id: string;
   orderNumber: string;
   estado: string;
@@ -69,7 +69,7 @@ interface PedidoDetalle {
     metodo: string;
     createdAt: string;
   };
-  mensajes: Array<{
+  messages: Array<{
     id: string;
     mensaje: string;
     tipoRemitente: string;
@@ -123,15 +123,15 @@ const metodosPago: Record<string, string> = {
   PAYPAL: 'PayPal',
 };
 
-export default function PedidoDetallePage() {
+export default function OrderDetailPage() {
   const { status } = useSession();
   const router = useRouter();
   const params = useParams();
-  const [pedido, setPedido] = useState<PedidoDetalle | null>(null);
+  const [order, setOrder] = useState<OrderDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const cargarPedido = useCallback(async () => {
+  const loadOrder = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -143,7 +143,7 @@ export default function PedidoDetallePage() {
         throw new Error(data.error || 'Error al cargar pedido');
       }
 
-      setPedido(data.pedido);
+      setOrder(data.pedido);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error unknown');
     } finally {
@@ -158,17 +158,17 @@ export default function PedidoDetallePage() {
     }
 
     if (status === 'authenticated' && params.id) {
-      cargarPedido();
+      loadOrder();
     }
-  }, [status, router, params.id, cargarPedido]);
+  }, [status, router, params.id, loadOrder]);
 
-  const descargarFactura = () => {
-    if (pedido?.factura && !pedido.factura.anulada) {
-      window.open(`/api/admin/invoices/${pedido.factura.id}/pdf`, '_blank');
+  const downloadInvoice = () => {
+    if (order?.factura && !order.factura.anulada) {
+      window.open(`/api/admin/invoices/${order.factura.id}/pdf`, '_blank');
     }
   };
 
-  const imprimirPedido = () => {
+  const printOrder = () => {
     window.print();
   };
 
@@ -183,7 +183,7 @@ export default function PedidoDetallePage() {
     );
   }
 
-  if (!pedido) {
+  if (!order) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -197,12 +197,12 @@ export default function PedidoDetallePage() {
     );
   }
 
-  const estadoConfig = estadosConfig[pedido.estado] || estadosConfig.PENDIENTE;
-  const EstadoIcon = estadoConfig.icon;
+  const statusConfig = estadosConfig[order.estado] || estadosConfig.PENDIENTE;
+  const StatusIcon = statusConfig.icon;
 
   // Timeline de estados
-  const estadosOrden = ['PENDIENTE', 'PAGADO', 'EN_PREPARACION', 'ENVIADO', 'ENTREGADO'];
-  const estadoActualIndex = estadosOrden.indexOf(pedido.estado);
+  const statusOrder = ['PENDIENTE', 'PAGADO', 'EN_PREPARACION', 'ENVIADO', 'ENTREGADO'];
+  const currentStatusIndex = statusOrder.indexOf(order.estado);
 
   return (
     <div className="min-h-screen bg-gray-50 print:bg-white">
@@ -218,9 +218,9 @@ export default function PedidoDetallePage() {
                 <ArrowLeft className="h-6 w-6" />
               </Link>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Pedido {pedido.orderNumber}</h1>
+                <h1 className="text-2xl font-bold text-gray-900">Pedido {order.orderNumber}</h1>
                 <p className="text-sm text-gray-500">
-                  Realizado el {new Date(pedido.createdAt).toLocaleDateString('es-ES', {
+                  Realizado el {new Date(order.createdAt).toLocaleDateString('es-ES', {
                     weekday: 'long',
                     year: 'numeric',
                     month: 'long',
@@ -231,7 +231,7 @@ export default function PedidoDetallePage() {
             </div>
             <div className="flex items-center gap-2">
               <button
-                onClick={imprimirPedido}
+                onClick={printOrder}
                 className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 font-medium"
               >
                 <Printer className="h-5 w-5" />
@@ -255,24 +255,24 @@ export default function PedidoDetallePage() {
           {/* Columna principal */}
           <div className="lg:col-span-2 space-y-6">
             {/* Estado del pedido */}
-            <div className={`bg-white rounded-lg shadow-sm border p-6 ${pedido.estado === 'CANCELADO' ? 'border-red-200' : ''}`}>
+            <div className={`bg-white rounded-lg shadow-sm border p-6 ${order.estado === 'CANCELADO' ? 'border-red-200' : ''}`}>
               <div className="flex items-start gap-4">
-                <div className={`p-3 rounded-full ${estadoConfig.color.split(' ')[0]}`}>
-                  <EstadoIcon className={`h-8 w-8 ${estadoConfig.color.split(' ')[1]}`} />
+                <div className={`p-3 rounded-full ${statusConfig.color.split(' ')[0]}`}>
+                  <StatusIcon className={`h-8 w-8 ${statusConfig.color.split(' ')[1]}`} />
                 </div>
                 <div className="flex-1">
                   <h2 className="text-lg font-semibold text-gray-900">
-                    {estadoConfig.label}
+                    {statusConfig.label}
                   </h2>
-                  <p className="text-gray-600 mt-1">{estadoConfig.description}</p>
+                  <p className="text-gray-600 mt-1">{statusConfig.description}</p>
 
-                  {pedido.numeroSeguimiento && (
+                  {order.numeroSeguimiento && (
                     <div className="mt-4 p-4 bg-blue-50 rounded-lg">
                       <p className="text-sm font-medium text-blue-900 mb-1">Número de seguimiento</p>
-                      <p className="text-lg font-mono text-blue-700">{pedido.numeroSeguimiento}</p>
-                      {pedido.transportista && (
+                      <p className="text-lg font-mono text-blue-700">{order.numeroSeguimiento}</p>
+                      {order.transportista && (
                         <p className="text-sm text-blue-600 mt-1">
-                          Transportista: {pedido.transportista}
+                          Transportista: {order.transportista}
                         </p>
                       )}
                     </div>
@@ -281,21 +281,21 @@ export default function PedidoDetallePage() {
               </div>
 
               {/* Timeline */}
-              {pedido.estado !== 'CANCELADO' && (
+              {order.estado !== 'CANCELADO' && (
                 <div className="mt-8">
                   <div className="flex items-center justify-between">
-                    {estadosOrden.map((estado, index) => {
+                    {statusOrder.map((estado, index) => {
                       const config = estadosConfig[estado];
                       const Icon = config.icon;
-                      const completado = index <= estadoActualIndex;
-                      const esActual = index === estadoActualIndex;
+                      const completed = index <= currentStatusIndex;
+                      const isCurrent = index === currentStatusIndex;
 
                       return (
                         <div key={estado} className="flex flex-col items-center flex-1">
                           <div
                             className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-                              completado
-                                ? esActual
+                              completed
+                                ? isCurrent
                                   ? 'bg-indigo-600 text-white'
                                   : 'bg-green-500 text-white'
                                 : 'bg-gray-200 text-gray-400'
@@ -305,7 +305,7 @@ export default function PedidoDetallePage() {
                           </div>
                           <span
                             className={`text-xs mt-2 font-medium text-center ${
-                              completado ? 'text-gray-900' : 'text-gray-400'
+                              completed ? 'text-gray-900' : 'text-gray-400'
                             }`}
                           >
                             {config.label}
@@ -315,11 +315,11 @@ export default function PedidoDetallePage() {
                     })}
                   </div>
                   <div className="flex items-center justify-between mt-2 px-5">
-                    {estadosOrden.slice(0, -1).map((_, index) => (
+                    {statusOrder.slice(0, -1).map((_, index) => (
                       <div
                         key={index}
                         className={`h-1 flex-1 mx-2 ${
-                          index < estadoActualIndex ? 'bg-green-500' : 'bg-gray-200'
+                          index < currentStatusIndex ? 'bg-green-500' : 'bg-gray-200'
                         }`}
                       />
                     ))}
@@ -333,11 +333,11 @@ export default function PedidoDetallePage() {
               <div className="p-6 border-b">
                 <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                   <Package className="h-5 w-5" />
-                  Productos ({pedido.items.length})
+                  Productos ({order.items.length})
                 </h2>
               </div>
               <div className="divide-y">
-                {pedido.items.map((item) => (
+                {order.items.map((item) => (
                   <div key={item.id} className="p-6 flex gap-4">
                     {/* Imagen */}
                     <div className="w-24 h-24 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden relative">
@@ -382,52 +382,52 @@ export default function PedidoDetallePage() {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Subtotal</span>
-                    <span>{Number(pedido.subtotal).toFixed(2)} €</span>
+                    <span>{Number(order.subtotal).toFixed(2)} €</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Envío</span>
-                    <span>{Number(pedido.envio).toFixed(2)} €</span>
+                    <span>{Number(order.envio).toFixed(2)} €</span>
                   </div>
                   <div className="flex justify-between text-lg font-semibold pt-2 border-t">
                     <span className="text-gray-900">Total</span>
-                    <span className="text-indigo-600">{Number(pedido.total).toFixed(2)} €</span>
+                    <span className="text-indigo-600">{Number(order.total).toFixed(2)} €</span>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Mensajes */}
-            {pedido.mensajes.length > 0 && (
+            {order.messages.length > 0 && (
               <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
                 <div className="p-6 border-b">
                   <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                     <MessageSquare className="h-5 w-5" />
-                    Mensajes ({pedido.mensajes.length})
+                    Mensajes ({order.messages.length})
                   </h2>
                 </div>
                 <div className="p-6 space-y-4">
-                  {pedido.mensajes.map((mensaje) => (
+                  {order.messages.map((message) => (
                     <div
-                      key={mensaje.id}
+                      key={message.id}
                       className={`p-4 rounded-lg ${
-                        mensaje.tipoRemitente === 'ADMIN'
+                        message.tipoRemitente === 'ADMIN'
                           ? 'bg-indigo-50 border border-indigo-100'
                           : 'bg-gray-50 border border-gray-100'
                       }`}
                     >
                       <div className="flex items-center gap-2 mb-2">
                         <span className={`text-sm font-medium ${
-                          mensaje.tipoRemitente === 'ADMIN'
+                          message.tipoRemitente === 'ADMIN'
                             ? 'text-indigo-700'
                             : 'text-gray-700'
                         }`}>
-                          {mensaje.tipoRemitente === 'ADMIN' ? 'Administrador' : 'Tú'}
+                          {message.tipoRemitente === 'ADMIN' ? 'Administrador' : 'Tú'}
                         </span>
                         <span className="text-xs text-gray-400">
-                          {new Date(mensaje.createdAt).toLocaleDateString('es-ES')} {new Date(mensaje.createdAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+                          {new Date(message.createdAt).toLocaleDateString('es-ES')} {new Date(message.createdAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
-                      <p className="text-gray-700">{mensaje.mensaje}</p>
+                      <p className="text-gray-700">{message.mensaje}</p>
                     </div>
                   ))}
                 </div>
@@ -438,20 +438,20 @@ export default function PedidoDetallePage() {
           {/* Columna lateral */}
           <div className="space-y-6">
             {/* Acciones rápidas */}
-            {pedido.factura && !pedido.factura.anulada && (
+            {order.factura && !order.factura.anulada && (
               <div className="bg-white rounded-lg shadow-sm border p-6">
                 <h3 className="font-semibold text-gray-900 mb-4">Factura</h3>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600">Número:</span>
-                    <span className="font-mono">{pedido.factura.invoiceNumber}</span>
+                    <span className="font-mono">{order.factura.invoiceNumber}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600">Fecha:</span>
-                    <span>{new Date(pedido.factura.emitidaEn).toLocaleDateString('es-ES')}</span>
+                    <span>{new Date(order.factura.emitidaEn).toLocaleDateString('es-ES')}</span>
                   </div>
                   <button
-                    onClick={descargarFactura}
+                    onClick={downloadInvoice}
                     className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
                   >
                     <Download className="h-5 w-5" />
@@ -468,18 +468,18 @@ export default function PedidoDetallePage() {
                 Dirección de envío
               </h3>
               <div className="space-y-2 text-sm">
-                <p className="font-medium text-gray-900">{pedido.nombreEnvio}</p>
-                <p className="text-gray-600">{pedido.shippingAddress}</p>
-                {pedido.complementoEnvio && (
-                  <p className="text-gray-600">{pedido.complementoEnvio}</p>
+                <p className="font-medium text-gray-900">{order.nombreEnvio}</p>
+                <p className="text-gray-600">{order.shippingAddress}</p>
+                {order.complementoEnvio && (
+                  <p className="text-gray-600">{order.complementoEnvio}</p>
                 )}
                 <p className="text-gray-600">
-                  {pedido.postalCodeEnvio} {pedido.ciudadEnvio}
+                  {order.postalCodeEnvio} {order.ciudadEnvio}
                 </p>
-                <p className="text-gray-600">{pedido.provinciaEnvio}, {pedido.paisEnvio}</p>
+                <p className="text-gray-600">{order.provinciaEnvio}, {order.paisEnvio}</p>
                 <div className="flex items-center gap-2 pt-2 text-gray-600">
                   <Phone className="h-4 w-4" />
-                  {pedido.telefonoEnvio}
+                  {order.telefonoEnvio}
                 </div>
               </div>
             </div>
@@ -493,21 +493,21 @@ export default function PedidoDetallePage() {
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Método:</span>
-                  <span className="font-medium">{metodosPago[pedido.paymentMethod] || pedido.paymentMethod}</span>
+                  <span className="font-medium">{metodosPago[order.paymentMethod] || order.paymentMethod}</span>
                 </div>
-                {pedido.pago && (
+                {order.pago && (
                   <>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Estado:</span>
                       <span className={`font-medium ${
-                        pedido.pago.estado === 'COMPLETADO' ? 'text-green-600' : 'text-yellow-600'
+                        order.pago.estado === 'COMPLETADO' ? 'text-green-600' : 'text-yellow-600'
                       }`}>
-                        {pedido.pago.estado === 'COMPLETADO' ? 'Pagado' : pedido.pago.estado}
+                        {order.pago.estado === 'COMPLETADO' ? 'Pagado' : order.pago.estado}
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Fecha:</span>
-                      <span>{new Date(pedido.pago.createdAt).toLocaleDateString('es-ES')}</span>
+                      <span>{new Date(order.pago.createdAt).toLocaleDateString('es-ES')}</span>
                     </div>
                   </>
                 )}
@@ -520,15 +520,15 @@ export default function PedidoDetallePage() {
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Número:</span>
-                  <span className="font-mono">{pedido.orderNumber}</span>
+                  <span className="font-mono">{order.orderNumber}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Fecha:</span>
-                  <span>{new Date(pedido.createdAt).toLocaleDateString('es-ES')}</span>
+                  <span>{new Date(order.createdAt).toLocaleDateString('es-ES')}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Última actualización:</span>
-                  <span>{new Date(pedido.updatedAt).toLocaleDateString('es-ES')}</span>
+                  <span>{new Date(order.updatedAt).toLocaleDateString('es-ES')}</span>
                 </div>
               </div>
             </div>

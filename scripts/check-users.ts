@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🔍 Verificando usuarios...\n');
+  console.log('🔍 Checking users...\n');
   
   const users = await prisma.user.findMany({
     orderBy: { createdAt: 'desc' },
@@ -18,7 +18,7 @@ async function main() {
     },
   });
   
-  console.log(`Total de usuarios encontrados: ${users.length}\n`);
+  console.log(`Total users found: ${users.length}\n`);
   
   const userTable = users.map((u: { 
     id: string; 
@@ -38,18 +38,18 @@ async function main() {
   
   console.table(userTable);
   
-  // Contar por rol
+  // Count by role
   const byRole = await prisma.user.groupBy({
     by: ['role'],
     _count: { role: true },
   });
   
-  console.log('\n📊 Distribución por rol:');
+  console.log('\n📊 Distribution by role:');
   byRole.forEach((r: { role: string; _count: { role: number } }) => {
     console.log(`  ${r.role}: ${r._count.role}`);
   });
   
-  // Verificar si hay usuarios de test
+  // Check if there are test users
   const testUsers = await prisma.user.findMany({
     where: {
       OR: [
@@ -59,7 +59,7 @@ async function main() {
     },
   });
   
-  console.log(`\n🧪 Usuarios de test encontrados: ${testUsers.length}`);
+  console.log(`\n🧪 Test users found: ${testUsers.length}`);
   testUsers.forEach((u: { email: string; name: string }) => {
     console.log(`  - ${u.email} (${u.name})`);
   });

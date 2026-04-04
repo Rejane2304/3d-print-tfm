@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
-interface Alerta {
+interface Alert {
   id: string;
   tipo: string;
   severidad: string;
@@ -44,7 +44,7 @@ interface Alerta {
   };
 }
 
-const tipoIconos: Record<string, React.ElementType> = {
+const typeIcons: Record<string, React.ElementType> = {
   STOCK_BAJO: Package,
   STOCK_AGOTADO: XCircle,
   PEDIDO_SIN_PAGAR: Clock,
@@ -62,28 +62,28 @@ const severityColors: Record<string, string> = {
 export default function AdminAlertasPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [alertas, setAlertas] = useState<Alerta[]>([]);
+  const [alerts, setAlerts] = useState<Alert[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filtroTipo, setFiltroTipo] = useState('');
-  const [filtroSeveridad, setFiltroSeveridad] = useState('');
-  const [filtroEstado, setFiltroEstado] = useState('PENDIENTE');
-  const [pendientes, setPendientes] = useState(0);
-  const [alertaSeleccionada, setAlertaSeleccionada] = useState<Alerta | null>(null);
-  const [notasResolucion, setNotasResolucion] = useState('');
-  const [mostrarModal, setMostrarModal] = useState(false);
-  const [modalEliminarOpen, setModalEliminarOpen] = useState(false);
-  const [alertaAEliminar, setAlertaAEliminar] = useState<string | null>(null);
+  const [typeFilter, setTypeFilter] = useState('');
+  const [severityFilter, setSeverityFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('PENDIENTE');
+  const [pendingCount, setPendingCount] = useState(0);
+  const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
+  const [resolutionNotes, setResolutionNotes] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [alertToDelete, setAlertToDelete] = useState<string | null>(null);
 
-  const cargarAlertas = useCallback(async () => {
+  const loadAlerts = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
       const params = new URLSearchParams();
-      if (filtroTipo) params.append('tipo', filtroTipo);
-      if (filtroSeveridad) params.append('severidad', filtroSeveridad);
-      if (filtroEstado) params.append('estado', filtroEstado);
+      if (typeFilter) params.append('tipo', typeFilter);
+      if (severityFilter) params.append('severidad', severityFilter);
+      if (statusFilter) params.append('estado', statusFilter);
 
       const response = await fetch(`/api/admin/alerts?${params.toString()}`);
       const data = await response.json();
@@ -92,14 +92,14 @@ export default function AdminAlertasPage() {
         throw new Error(data.error || 'Error al cargar alertas');
       }
 
-      setAlertas(data.alertas || []);
-      setPendientes(data.pendientes || 0);
+      setAlerts(data.alertas || []);
+      setPendingCount(data.pendientes || 0);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error unknown');
     } finally {
       setLoading(false);
     }
-  }, [filtroTipo, filtroSeveridad, filtroEstado]);
+  }, [typeFilter, severityFilter, statusFilter]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -113,11 +113,11 @@ export default function AdminAlertasPage() {
         router.push('/');
         return;
       }
-      cargarAlertas();
+      loadAlerts();
     }
-  }, [status, session, router, cargarAlertas]);
+  }, [status, session, router, loadAlerts]);
 
-  const actualizarEstado = async (id: string, nuevoEstado: string) => {
+  const updateStatus = async (id: string, nuevoEstado: string) => {
     try {
       const response = await fetch('/api/admin/alerts', {
         method: 'PATCH',
@@ -125,15 +125,15 @@ export default function AdminAlertasPage() {
         body: JSON.stringify({ 
           id, 
           estado: nuevoEstado,
-          notasResolucion: notasResolucion || undefined,
+          notasResolucion: resolutionNotes || undefined,
         }),
       });
 
       if (response.ok) {
-        await cargarAlertas();
-        setMostrarModal(false);
-        setNotasResolucion('');
-        setAlertaSeleccionada(null);
+        await loadAlerts();
+        setShowModal(false);
+        setResolutionNotes('');
+        setSelectedAlert(null);
       } else {
         const data = await response.json();
         setError(data.error || 'Error al actualizar');
@@ -143,21 +143,21 @@ export default function AdminAlertasPage() {
     }
   };
 
-  const eliminarAlerta = (id: string) => {
-    setAlertaAEliminar(id);
-    setModalEliminarOpen(true);
+  const deleteAlert = (id: string) => {
+    setAlertToDelete(id);
+    setDeleteModalOpen(true);
   };
 
-  const confirmarEliminarAlerta = async () => {
-    if (!alertaAEliminar) return;
+  const confirmDeleteAlert = async () => {
+    if (!alertToDelete) return;
 
     try {
-      const response = await fetch(`/api/admin/alerts/${alertaAEliminar}`, {
+      const response = await fetch(`/api/admin/alerts/${alertToDelete}`, {
         method: 'DELETE',
       });
 
       if (response.ok) {
-        await cargarAlertas();
+        await loadAlerts();
       } else {
         const data = await response.json();
         setError(data.error || 'Error al eliminar');
@@ -165,15 +165,15 @@ export default function AdminAlertasPage() {
     } catch {
       setError('Error al eliminar alerta');
     } finally {
-      setModalEliminarOpen(false);
-      setAlertaAEliminar(null);
+      setDeleteModalOpen(false);
+      setAlertToDelete(null);
     }
   };
 
-  const abrirModalResolver = (alerta: Alerta) => {
-    setAlertaSeleccionada(alerta);
-    setNotasResolucion('');
-    setMostrarModal(true);
+  const openResolveModal = (alert: Alert) => {
+    setSelectedAlert(alert);
+    setResolutionNotes('');
+    setShowModal(true);
   };
 
   if (status === 'loading' || loading) {
@@ -196,16 +196,16 @@ export default function AdminAlertasPage() {
             <div className="flex items-center gap-3">
               <div className="relative">
                 <Bell className="h-8 w-8 text-indigo-600" />
-                {pendientes > 0 && (
+                {pendingCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
-                    {pendientes}
+                    {pendingCount}
                   </span>
                 )}
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Alertas del Sistema</h1>
                 <p className="text-sm text-gray-500">
-                  {pendientes} alertas pendientes
+                  {pendingCount} alertas pendientes
                 </p>
               </div>
             </div>
@@ -234,8 +234,8 @@ export default function AdminAlertasPage() {
             <div className="flex items-center gap-2">
               <Filter className="h-5 w-5 text-gray-500" />
               <select
-                value={filtroTipo}
-                onChange={(e) => setFiltroTipo(e.target.value)}
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value)}
                 className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               >
                 <option value="">Todos los tipos</option>
@@ -248,8 +248,8 @@ export default function AdminAlertasPage() {
             </div>
             <div className="flex items-center gap-2">
               <select
-                value={filtroSeveridad}
-                onChange={(e) => setFiltroSeveridad(e.target.value)}
+                value={severityFilter}
+                onChange={(e) => setSeverityFilter(e.target.value)}
                 className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               >
                 <option value="">Todas las severidades</option>
@@ -261,8 +261,8 @@ export default function AdminAlertasPage() {
             </div>
             <div className="flex items-center gap-2">
               <select
-                value={filtroEstado}
-                onChange={(e) => setFiltroEstado(e.target.value)}
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
                 className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               >
                 <option value="">Todos los estados</option>
@@ -273,7 +273,7 @@ export default function AdminAlertasPage() {
               </select>
             </div>
             <button
-              onClick={cargarAlertas}
+              onClick={loadAlerts}
               className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
             >
               Filtrar
@@ -283,20 +283,20 @@ export default function AdminAlertasPage() {
 
         {/* Lista de alertas */}
         <div className="space-y-4">
-          {alertas.length === 0 ? (
+          {alerts.length === 0 ? (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
               <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto mb-4" />
               <p className="text-gray-500">No hay alertas que mostrar</p>
             </div>
           ) : (
-            alertas.map((alerta) => {
-              const TipoIcon = tipoIconos[alerta.tipo] || Bell;
+            alerts.map((alert) => {
+              const TipoIcon = typeIcons[alert.tipo] || Bell;
               
               return (
                 <div 
-                  key={alerta.id} 
+                  key={alert.id} 
                   className={`bg-white rounded-lg shadow-sm border-2 p-6 ${
-                    alerta.estado === 'PENDIENTE' ? severityColors[alerta.severidad] || 'border-gray-200' : 'border-gray-200'
+                    alert.estado === 'PENDIENTE' ? severityColors[alert.severidad] || 'border-gray-200' : 'border-gray-200'
                   }`}
                 >
                   <div className="flex items-start justify-between">
@@ -306,34 +306,34 @@ export default function AdminAlertasPage() {
                       </div>
                       <div>
                         <h3 className="text-lg font-semibold text-gray-900">
-                          {alerta.titulo}
+                          {alert.titulo}
                         </h3>
-                        <p className="text-gray-600 mt-1">{alerta.mensaje}</p>
+                        <p className="text-gray-600 mt-1">{alert.mensaje}</p>
                         
-                        {alerta.producto && (
+                        {alert.producto && (
                           <div className="mt-2 flex items-center gap-2 text-sm">
                             <Package className="h-4 w-4" />
                             <Link 
-                              href={`/admin/products/${alerta.producto.slug}/editar`}
+                              href={`/admin/products/${alert.producto.slug}/editar`}
                               className="text-indigo-600 hover:text-indigo-800"
                             >
-                              {alerta.producto.nombre} (Stock: {alerta.producto.stock})
+                              {alert.producto.nombre} (Stock: {alert.producto.stock})
                             </Link>
                           </div>
                         )}
                         
                         <div className="mt-2 flex items-center gap-4 text-sm text-gray-500">
                           <span>
-                            {new Date(alerta.createdAt).toLocaleDateString('es-ES')}
+                            {new Date(alert.createdAt).toLocaleDateString('es-ES')}
                           </span>
-                          {alerta.resueltaPorUsuario && (
+                          {alert.resueltaPorUsuario && (
                             <span>
-                              Resuelta por: {alerta.resueltaPorUsuario.nombre}
+                              Resuelta por: {alert.resueltaPorUsuario.nombre}
                             </span>
                           )}
-                          {alerta.notasResolucion && (
+                          {alert.notasResolucion && (
                              <span className="italic">
-                              &quot;{alerta.notasResolucion}&quot;
+                              &quot;{alert.notasResolucion}&quot;
                             </span>
                           )}
                         </div>
@@ -341,24 +341,24 @@ export default function AdminAlertasPage() {
                     </div>
                     
                     <div className="flex items-center gap-2">
-                      {alerta.estado === 'PENDIENTE' && (
+                      {alert.estado === 'PENDIENTE' && (
                         <>
                           <button
-                            onClick={() => actualizarEstado(alerta.id, 'EN_PROCESO')}
+                            onClick={() => updateStatus(alert.id, 'EN_PROCESO')}
                             className="text-blue-600 hover:text-blue-800 p-2"
                             title="Marcar en proceso"
                           >
                             <Clock className="h-5 w-5" />
                           </button>
                           <button
-                            onClick={() => abrirModalResolver(alerta)}
+                            onClick={() => openResolveModal(alert)}
                             className="text-green-600 hover:text-green-800 p-2"
                             title="Resolver"
                           >
                             <CheckCircle2 className="h-5 w-5" />
                           </button>
                           <button
-                            onClick={() => actualizarEstado(alerta.id, 'IGNORADA')}
+                            onClick={() => updateStatus(alert.id, 'IGNORADA')}
                             className="text-gray-600 hover:text-gray-800 p-2"
                             title="Ignorar"
                           >
@@ -366,9 +366,9 @@ export default function AdminAlertasPage() {
                           </button>
                         </>
                       )}
-                      {alerta.estado === 'EN_PROCESO' && (
+                      {alert.estado === 'EN_PROCESO' && (
                         <button
-                          onClick={() => abrirModalResolver(alerta)}
+                          onClick={() => openResolveModal(alert)}
                           className="text-green-600 hover:text-green-800 p-2"
                           title="Resolver"
                         >
@@ -376,7 +376,7 @@ export default function AdminAlertasPage() {
                         </button>
                       )}
                       <button
-                        onClick={() => eliminarAlerta(alerta.id)}
+                        onClick={() => deleteAlert(alert.id)}
                         className="text-red-600 hover:text-red-800 p-2"
                         title="Eliminar"
                       >
@@ -392,22 +392,22 @@ export default function AdminAlertasPage() {
       </div>
 
       {/* Modal de Resolución */}
-      {mostrarModal && alertaSeleccionada && (
+      {showModal && selectedAlert && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">
               Resolver Alerta
             </h2>
             <p className="text-gray-600 mb-4">
-              {alertaSeleccionada.titulo}
+              {selectedAlert.titulo}
             </p>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Notas de resolución (opcional)
               </label>
               <textarea
-                value={notasResolucion}
-                onChange={(e) => setNotasResolucion(e.target.value)}
+                value={resolutionNotes}
+                onChange={(e) => setResolutionNotes(e.target.value)}
                 placeholder="Describe cómo se resolvió la alerta..."
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 rows={3}
@@ -415,16 +415,16 @@ export default function AdminAlertasPage() {
             </div>
             <div className="flex gap-3">
               <button
-                onClick={() => actualizarEstado(alertaSeleccionada.id, 'RESUELTA')}
+                onClick={() => updateStatus(selectedAlert.id, 'RESUELTA')}
                 className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors"
               >
                 Marcar como Resuelta
               </button>
               <button
                 onClick={() => {
-                  setMostrarModal(false);
-                  setAlertaSeleccionada(null);
-                  setNotasResolucion('');
+                  setShowModal(false);
+                  setSelectedAlert(null);
+                  setResolutionNotes('');
                 }}
                 className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-300 transition-colors"
               >
@@ -436,12 +436,12 @@ export default function AdminAlertasPage() {
       )}
 
       <ConfirmModal
-        isOpen={modalEliminarOpen}
+        isOpen={deleteModalOpen}
         onClose={() => {
-          setModalEliminarOpen(false);
-          setAlertaAEliminar(null);
+          setDeleteModalOpen(false);
+          setAlertToDelete(null);
         }}
-        onConfirm={confirmarEliminarAlerta}
+        onConfirm={confirmDeleteAlert}
         title="¿Eliminar alerta?"
         description="Esta acción no se puede deshacer. La alerta se eliminará permanentemente."
         confirmText="Eliminar"

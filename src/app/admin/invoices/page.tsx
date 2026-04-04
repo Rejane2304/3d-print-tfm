@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 
-interface Factura {
+interface Invoice {
   id: string;
   invoiceNumber: string;
   emitidaEn: string;
@@ -41,26 +41,26 @@ interface Factura {
 export default function AdminFacturasPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [facturas, setFacturas] = useState<Factura[]>([]);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [busqueda, setBusqueda] = useState('');
-  const [filtroEstado, setFiltroEstado] = useState('');
-  const [mostrarGenerarModal, setMostrarGenerarModal] = useState(false);
-  const [pedidoIdInput, setPedidoIdInput] = useState('');
-  const [modalAnularOpen, setModalAnularOpen] = useState(false);
-  const [facturaAAnular, setFacturaAAnular] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [showGenerateModal, setShowGenerateModal] = useState(false);
+  const [orderIdInput, setOrderIdInput] = useState('');
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [invoiceToCancel, setInvoiceToCancel] = useState<string | null>(null);
 
-  const cargarFacturas = useCallback(async () => {
+  const loadInvoices = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
       const params = new URLSearchParams();
-      if (busqueda) params.append('busqueda', busqueda);
-      if (filtroEstado) {
-        if (filtroEstado === 'activas') params.append('anulada', 'false');
-        if (filtroEstado === 'anuladas') params.append('anulada', 'true');
+      if (search) params.append('busqueda', search);
+      if (statusFilter) {
+        if (statusFilter === 'activas') params.append('anulada', 'false');
+        if (statusFilter === 'anuladas') params.append('anulada', 'true');
       }
 
       const response = await fetch(`/api/admin/invoices?${params.toString()}`);
@@ -70,13 +70,13 @@ export default function AdminFacturasPage() {
         throw new Error(data.error || 'Error al cargar facturas');
       }
 
-      setFacturas(data.facturas || []);
+      setInvoices(data.facturas || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error unknown');
     } finally {
       setLoading(false);
     }
-  }, [busqueda, filtroEstado]);
+  }, [search, statusFilter]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -90,12 +90,12 @@ export default function AdminFacturasPage() {
         router.push('/');
         return;
       }
-      cargarFacturas();
+      loadInvoices();
     }
-  }, [status, session, router, cargarFacturas]);
+  }, [status, session, router, loadInvoices]);
 
-  const generarFactura = async () => {
-    if (!pedidoIdInput.trim()) {
+  const generateInvoice = async () => {
+    if (!orderIdInput.trim()) {
       setError('Introduce el ID del pedido');
       return;
     }
@@ -105,7 +105,7 @@ export default function AdminFacturasPage() {
       const response = await fetch('/api/admin/invoices', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: pedidoIdInput }),
+        body: JSON.stringify({ orderId: orderIdInput }),
       });
 
       const data = await response.json();
@@ -114,38 +114,38 @@ export default function AdminFacturasPage() {
         throw new Error(data.error || 'Error al generar factura');
       }
 
-      setMostrarGenerarModal(false);
-      setPedidoIdInput('');
-      await cargarFacturas();
+      setShowGenerateModal(false);
+      setOrderIdInput('');
+      await loadInvoices();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error unknown');
     }
   };
 
-  const anularFactura = async (id: string) => {
-    setFacturaAAnular(id);
-    setModalAnularOpen(true);
+  const cancelInvoice = async (id: string) => {
+    setInvoiceToCancel(id);
+    setCancelModalOpen(true);
   };
 
-  const confirmarAnulacion = async () => {
-    if (!facturaAAnular) return;
+  const confirmCancel = async () => {
+    if (!invoiceToCancel) return;
 
     try {
-      const response = await fetch(`/api/admin/invoices/${facturaAAnular}`, {
+      const response = await fetch(`/api/admin/invoices/${invoiceToCancel}`, {
         method: 'DELETE',
       });
 
       if (response.ok) {
-        setModalAnularOpen(false);
-        setFacturaAAnular(null);
-        await cargarFacturas();
+        setCancelModalOpen(false);
+        setInvoiceToCancel(null);
+        await loadInvoices();
       }
     } catch {
       setError('Error al anular factura');
     }
   };
 
-  const descargarPDF = (id: string) => {
+  const downloadPDF = (id: string) => {
     window.open(`/api/admin/invoices/${id}/pdf`, '_blank');
   };
 
@@ -178,7 +178,7 @@ export default function AdminFacturasPage() {
                 ← Volver al Dashboard
               </Link>
               <button
-                onClick={() => setMostrarGenerarModal(true)}
+                onClick={() => setShowGenerateModal(true)}
                 className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
               >
                 <Plus className="h-5 w-5" />
@@ -206,16 +206,16 @@ export default function AdminFacturasPage() {
               <input
                 type="text"
                 placeholder="Buscar por número de factura..."
-                value={busqueda}
-                onChange={(e) => setBusqueda(e.target.value)}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               />
             </div>
             <div className="flex items-center gap-2">
               <Filter className="h-5 w-5 text-gray-500" />
               <select
-                value={filtroEstado}
-                onChange={(e) => setFiltroEstado(e.target.value)}
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
                 className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               >
                 <option value="">Todas las facturas</option>
@@ -224,7 +224,7 @@ export default function AdminFacturasPage() {
               </select>
             </div>
             <button
-              onClick={cargarFacturas}
+              onClick={loadInvoices}
               className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors"
             >
               Buscar
@@ -261,41 +261,41 @@ export default function AdminFacturasPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {facturas.length === 0 ? (
+              {invoices.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
                     No se encontraron facturas
                   </td>
                 </tr>
               ) : (
-                facturas.map((factura) => (
-                  <tr key={factura.id} className={`hover:bg-gray-50 ${factura.anulada ? 'opacity-50' : ''}`}>
+                invoices.map((invoice) => (
+                  <tr key={invoice.id} className={`hover:bg-gray-50 ${invoice.anulada ? 'opacity-50' : ''}`}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-indigo-600">
-                        {factura.invoiceNumber}
+                        {invoice.invoiceNumber}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
-                        {factura.pedido.usuario.nombre}
+                        {invoice.pedido.usuario.nombre}
                       </div>
                       <div className="text-sm text-gray-500">
-                        {factura.pedido.usuario.nif || 'Sin NIF'}
+                        {invoice.pedido.usuario.nif || 'Sin NIF'}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        {factura.pedido.orderNumber}
+                        {invoice.pedido.orderNumber}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(factura.emitidaEn).toLocaleDateString('es-ES')}
+                      {new Date(invoice.emitidaEn).toLocaleDateString('es-ES')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
-                      {Number(factura.total).toFixed(2)} €
+                      {Number(invoice.total).toFixed(2)} €
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {factura.anulada ? (
+                      {invoice.anulada ? (
                         <span className="px-2 inline-flex items-center gap-1 text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
                           <XCircle className="h-3 w-3" />
                           Anulada
@@ -310,22 +310,22 @@ export default function AdminFacturasPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end gap-2">
                         <Link
-                          href={`/admin/invoices/${factura.id}`}
+                          href={`/admin/invoices/${invoice.id}`}
                           className="text-indigo-600 hover:text-indigo-900 p-2"
                           title="Ver detalle"
                         >
                           <FileText className="h-4 w-4" />
                         </Link>
                         <button
-                          onClick={() => descargarPDF(factura.id)}
+                          onClick={() => downloadPDF(invoice.id)}
                           className="text-blue-600 hover:text-blue-900 p-2"
                           title="Descargar PDF"
                         >
                           <Download className="h-4 w-4" />
                         </button>
-                        {!factura.anulada && (
+                        {!invoice.anulada && (
                           <button
-                            onClick={() => anularFactura(factura.id)}
+                            onClick={() => cancelInvoice(invoice.id)}
                             className="text-red-600 hover:text-red-900 p-2"
                             title="Anular factura"
                           >
@@ -343,12 +343,12 @@ export default function AdminFacturasPage() {
 
         {/* Resumen */}
         <div className="mt-4 text-sm text-gray-600">
-          Mostrando {facturas.length} facturas
+          Mostrando {invoices.length} facturas
         </div>
       </div>
 
       {/* Modal Generar Factura */}
-      {mostrarGenerarModal && (
+      {showGenerateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Generar Nueva Factura</h2>
@@ -361,23 +361,23 @@ export default function AdminFacturasPage() {
               </label>
               <input
                 type="text"
-                value={pedidoIdInput}
-                onChange={(e) => setPedidoIdInput(e.target.value)}
+                value={orderIdInput}
+                onChange={(e) => setOrderIdInput(e.target.value)}
                 placeholder="Ej: 123e4567-e89b-12d3-a456-426614174000"
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               />
             </div>
             <div className="flex gap-3">
               <button
-                onClick={generarFactura}
+                onClick={generateInvoice}
                 className="flex-1 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
               >
                 Generar
               </button>
               <button
                 onClick={() => {
-                  setMostrarGenerarModal(false);
-                  setPedidoIdInput('');
+                  setShowGenerateModal(false);
+                  setOrderIdInput('');
                   setError(null);
                 }}
                 className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-300 transition-colors"
@@ -391,12 +391,12 @@ export default function AdminFacturasPage() {
 
       {/* Modal Confirmación Anular */}
       <ConfirmModal
-        isOpen={modalAnularOpen}
+        isOpen={cancelModalOpen}
         onClose={() => {
-          setModalAnularOpen(false);
-          setFacturaAAnular(null);
+          setCancelModalOpen(false);
+          setInvoiceToCancel(null);
         }}
-        onConfirm={confirmarAnulacion}
+        onConfirm={confirmCancel}
         title="¿Anular factura?"
         description="Esta acción no se puede deshacer. La factura se marcará como anulada pero permanecerá en el sistema para fines contables."
         confirmText="Anular"

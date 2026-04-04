@@ -22,7 +22,7 @@ import {
   Box
 } from 'lucide-react';
 
-interface Pedido {
+interface Order {
   id: string;
   orderNumber: string;
   estado: string;
@@ -35,7 +35,7 @@ interface Pedido {
   items: Array<{ id: string }>;
 }
 
-const estadosPedido: Record<string, { color: string; icon: React.ElementType; label: string }> = {
+const orderStatuses: Record<string, { color: string; icon: React.ElementType; label: string }> = {
   PENDIENTE: { color: 'bg-yellow-100 text-yellow-800', icon: Clock, label: 'Pendiente' },
   PAGADO: { color: 'bg-blue-100 text-blue-800', icon: CheckCircle2, label: 'Pagado' },
   EN_PREPARACION: { color: 'bg-indigo-100 text-indigo-800', icon: Box, label: 'En preparación' },
@@ -47,18 +47,18 @@ const estadosPedido: Record<string, { color: string; icon: React.ElementType; la
 export default function AdminPedidosPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [pedidos, setPedidos] = useState<Pedido[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [busqueda, setBusqueda] = useState('');
-  const [filtroEstado, setFiltroEstado] = useState('');
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
 
-  const cargarPedidos = useCallback(async () => {
+  const loadOrders = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const url = `/api/admin/orders${filtroEstado ? `?estado=${filtroEstado}` : ''}`;
+      const url = `/api/admin/orders${statusFilter ? `?estado=${statusFilter}` : ''}`;
       const response = await fetch(url);
       const data = await response.json();
 
@@ -66,13 +66,13 @@ export default function AdminPedidosPage() {
         throw new Error(data.error || 'Error al cargar pedidos');
       }
 
-      setPedidos(data.pedidos || []);
+      setOrders(data.pedidos || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error unknown');
     } finally {
       setLoading(false);
     }
-  }, [filtroEstado]);
+  }, [statusFilter]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -86,11 +86,11 @@ export default function AdminPedidosPage() {
         router.push('/');
         return;
       }
-      cargarPedidos();
+      loadOrders();
     }
-  }, [status, session, router, cargarPedidos]);
+  }, [status, session, router, loadOrders]);
 
-  const actualizarEstado = async (id: string, nuevoEstado: string) => {
+  const updateStatus = async (id: string, nuevoEstado: string) => {
     try {
       const response = await fetch('/api/admin/orders', {
         method: 'PATCH',
@@ -99,18 +99,18 @@ export default function AdminPedidosPage() {
       });
 
       if (response.ok) {
-        await cargarPedidos();
+        await loadOrders();
       }
     } catch {
       setError('Error al actualizar estado');
     }
   };
 
-  const pedidosFiltrados = pedidos.filter(pedido => {
+  const filteredOrders = orders.filter(order => {
     const matchesSearch = 
-      pedido.orderNumber.toLowerCase().includes(busqueda.toLowerCase()) ||
-      pedido.usuario.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-      pedido.usuario.email.toLowerCase().includes(busqueda.toLowerCase());
+      order.orderNumber.toLowerCase().includes(search.toLowerCase()) ||
+      order.usuario.nombre.toLowerCase().includes(search.toLowerCase()) ||
+      order.usuario.email.toLowerCase().includes(search.toLowerCase());
     return matchesSearch;
   });
 
@@ -162,16 +162,16 @@ export default function AdminPedidosPage() {
               <input
                 type="text"
                 placeholder="Buscar por número de pedido o cliente..."
-                value={busqueda}
-                onChange={(e) => setBusqueda(e.target.value)}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               />
             </div>
             <div className="flex items-center gap-2">
               <Filter className="h-5 w-5 text-gray-500" />
               <select
-                value={filtroEstado}
-                onChange={(e) => setFiltroEstado(e.target.value)}
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
                 className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               >
                 <option value="">Todos los estados</option>
@@ -212,68 +212,68 @@ export default function AdminPedidosPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {pedidosFiltrados.length === 0 ? (
+              {filteredOrders.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
                     No se encontraron pedidos
                   </td>
                 </tr>
               ) : (
-                pedidosFiltrados.map((pedido) => {
-                  const estadoConfig = estadosPedido[pedido.estado] || { color: 'bg-gray-100 text-gray-800', icon: Package, label: pedido.estado };
-                  const EstadoIcon = estadoConfig.icon;
+                filteredOrders.map((order) => {
+                  const statusConfig = orderStatuses[order.estado] || { color: 'bg-gray-100 text-gray-800', icon: Package, label: order.estado };
+                  const StatusIcon = statusConfig.icon;
                   
                   return (
-                    <tr key={pedido.id} className="hover:bg-gray-50">
+                    <tr key={order.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-indigo-600">
-                          {pedido.orderNumber}
+                          {order.orderNumber}
                         </div>
                         <div className="text-sm text-gray-500">
-                          {pedido.items.length} productos
+                          {order.items.length} productos
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">
-                          {pedido.usuario.nombre}
+                          {order.usuario.nombre}
                         </div>
                         <div className="text-sm text-gray-500">
-                          {pedido.usuario.email}
+                          {order.usuario.email}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 inline-flex items-center gap-1 text-xs leading-5 font-semibold rounded-full ${estadoConfig.color}`}>
-                          <EstadoIcon className="h-3 w-3" />
-                          {estadoConfig.label}
+                        <span className={`px-2 inline-flex items-center gap-1 text-xs leading-5 font-semibold rounded-full ${statusConfig.color}`}>
+                          <StatusIcon className="h-3 w-3" />
+                          {statusConfig.label}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {Number(pedido.total).toFixed(2)} €
+                        {Number(order.total).toFixed(2)} €
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(pedido.createdAt).toLocaleDateString('es-ES')}
+                        {new Date(order.createdAt).toLocaleDateString('es-ES')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex items-center justify-end gap-2">
                           <Link
-                            href={`/admin/orders/${pedido.id}`}
+                            href={`/admin/orders/${order.id}`}
                             className="text-indigo-600 hover:text-indigo-900 p-2"
                             title="Ver detalle"
                           >
                             <Eye className="h-4 w-4" />
                           </Link>
-                          {pedido.estado === 'PAGADO' && (
+                          {order.estado === 'PAGADO' && (
                             <button
-                              onClick={() => actualizarEstado(pedido.id, 'EN_PREPARACION')}
+                              onClick={() => updateStatus(order.id, 'EN_PREPARACION')}
                               className="text-blue-600 hover:text-blue-900 p-2"
                               title="Marcar en preparación"
                             >
                               <Box className="h-4 w-4" />
                             </button>
                           )}
-                          {pedido.estado === 'EN_PREPARACION' && (
+                          {order.estado === 'EN_PREPARACION' && (
                             <button
-                              onClick={() => actualizarEstado(pedido.id, 'ENVIADO')}
+                              onClick={() => updateStatus(order.id, 'ENVIADO')}
                               className="text-purple-600 hover:text-purple-900 p-2"
                               title="Marcar como enviado"
                             >
@@ -292,7 +292,7 @@ export default function AdminPedidosPage() {
 
         {/* Resumen */}
         <div className="mt-4 text-sm text-gray-600">
-          Mostrando {pedidosFiltrados.length} de {pedidos.length} pedidos
+          Mostrando {filteredOrders.length} de {orders.length} pedidos
         </div>
       </div>
     </div>

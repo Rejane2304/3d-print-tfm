@@ -34,7 +34,7 @@ export default function AuthPage() {
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();
   const callbackUrl = searchParams.get('callbackUrl') || '/';
-  const registroExitoso = searchParams.get('registro') === 'exitoso';
+  const registrationSuccessful = searchParams.get('registro') === 'exitoso';
   
   // Redirect authenticated users away from auth page
   useEffect(() => {
@@ -253,7 +253,7 @@ export default function AuthPage() {
           {/* Content Area */}
           <div className="p-8">
             {/* Success Message from Register */}
-            {registroExitoso && (
+            {registrationSuccessful && (
               <div className="mb-6 bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
                 <div className="flex">
                   <CheckCircle2 className="h-5 w-5 text-green-400" />

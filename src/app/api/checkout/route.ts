@@ -24,7 +24,7 @@ type CartItemWithProduct = Prisma.CartItemGetPayload<{
   };
 }>;
 
-// Inicializar Stripe (modo test)
+// Initialize Stripe (test mode)
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2023-10-16' as Stripe.LatestApiVersion,
 });
@@ -41,7 +41,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     );
   }
 
-  // Obtener datos del body
+  // Get data from request body
   const body = await req.json();
   const { shippingAddressId } = body;
 
@@ -52,7 +52,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     );
   }
 
-  // Buscar usuario con carrito
+  // Find user with cart
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
     include: {
@@ -79,7 +79,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     );
   }
 
-  // Verificar que tiene carrito con items
+  // Verify user has cart with items
   if (!user.cart || user.cart.items.length === 0) {
     return NextResponse.json(
       { success: false, error: 'El carrito está vacío' },
@@ -103,7 +103,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const total = subtotal + shippingCost;
 
   try {
-    // Crear line items para Stripe
+    // Create line items for Stripe
     const lineItems = (user.cart.items as CartItemWithProduct[]).map((item) => ({
       price_data: {
         currency: 'eur',
@@ -116,7 +116,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       quantity: item.quantity,
     }));
 
-    // Añadir envío si aplica
+    // Add shipping if applicable
     if (shippingCost > 0) {
       lineItems.push({
         price_data: {
@@ -145,7 +145,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       },
     });
 
-    // Obtener dirección de envío
+    // Get shipping address
     const address = await prisma.address.findUnique({
       where: { id: shippingAddressId },
     });
@@ -157,7 +157,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       );
     }
 
-    // Generar número de pedido
+    // Generate order number
     const year = new Date().getFullYear();
     const count = await prisma.order.count();
     const orderNumber = `P-${year}${String(count + 1).padStart(6, '0')}`;

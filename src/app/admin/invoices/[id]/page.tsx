@@ -1,6 +1,6 @@
 /**
- * Página de Detalle de Factura - Admin
- * Vista completa de factura con opciones de gestión
+ * Invoice Detail Page - Admin
+ * Complete invoice view with management options
  */
 'use client';
 
@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 
-interface FacturaDetalle {
+interface InvoiceDetail {
   id: string;
   invoiceNumber: string;
   emitidaEn: string;
@@ -43,7 +43,7 @@ interface FacturaDetalle {
   clienteProvincia: string;
   clienteCodigoPostal: string;
   clientePais: string;
-  pedido: {
+  order: {
     orderNumber: string;
     paymentMethod: string;
     items: Array<{
@@ -60,16 +60,16 @@ interface FacturaDetalle {
   };
 }
 
-export default function AdminFacturaDetallePage() {
+export default function AdminInvoiceDetailPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const params = useParams();
-  const [factura, setFactura] = useState<FacturaDetalle | null>(null);
+  const [invoice, setInvoice] = useState<InvoiceDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [modalAnularOpen, setModalAnularOpen] = useState(false);
+  const [modalCancelOpen, setModalCancelOpen] = useState(false);
 
-  const cargarFactura = useCallback(async () => {
+  const loadInvoice = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -81,7 +81,7 @@ export default function AdminFacturaDetallePage() {
         throw new Error(data.error || 'Error al cargar factura');
       }
 
-      setFactura(data.factura);
+      setInvoice(data.factura);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error unknown');
     } finally {
@@ -101,23 +101,23 @@ export default function AdminFacturaDetallePage() {
         router.push('/');
         return;
       }
-      cargarFactura();
+      loadInvoice();
     }
-  }, [status, session, router, cargarFactura]);
+  }, [status, session, router, loadInvoice]);
 
-  const anularFactura = async () => {
-    setModalAnularOpen(true);
+  const cancelInvoice = async () => {
+    setModalCancelOpen(true);
   };
 
-  const confirmarAnulacion = async () => {
+  const confirmCancellation = async () => {
     try {
       const response = await fetch(`/api/admin/invoices/${params.id}`, {
         method: 'DELETE',
       });
 
       if (response.ok) {
-        setModalAnularOpen(false);
-        await cargarFactura();
+        setModalCancelOpen(false);
+        await loadInvoice();
       } else {
         const data = await response.json();
         setError(data.error || 'Error al anular');
@@ -127,11 +127,11 @@ export default function AdminFacturaDetallePage() {
     }
   };
 
-  const descargarPDF = () => {
+  const downloadPDF = () => {
     window.open(`/api/admin/invoices/${params.id}/pdf`, '_blank');
   };
 
-  const imprimir = () => {
+  const print = () => {
     window.print();
   };
 
@@ -146,7 +146,7 @@ export default function AdminFacturaDetallePage() {
     );
   }
 
-  if (!factura) {
+  if (!invoice) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -171,16 +171,16 @@ export default function AdminFacturaDetallePage() {
                 <ArrowLeft className="h-6 w-6" />
               </Link>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Factura {factura.invoiceNumber}</h1>
+                <h1 className="text-2xl font-bold text-gray-900">Factura {invoice.invoiceNumber}</h1>
                 <p className="text-sm text-gray-500">
-                  Emitida el {new Date(factura.emitidaEn).toLocaleDateString('es-ES')}
+                  Emitida el {new Date(invoice.emitidaEn).toLocaleDateString('es-ES')}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {!factura.anulada && (
+              {!invoice.anulada && (
                 <button
-                  onClick={anularFactura}
+                  onClick={cancelInvoice}
                   className="inline-flex items-center gap-2 bg-red-100 text-red-700 px-4 py-2 rounded-lg font-medium hover:bg-red-200 transition-colors"
                 >
                   <XCircle className="h-4 w-4" />
@@ -188,14 +188,14 @@ export default function AdminFacturaDetallePage() {
                 </button>
               )}
               <button
-                onClick={descargarPDF}
+                onClick={downloadPDF}
                 className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-medium hover:bg-blue-200 transition-colors"
               >
                 <Download className="h-4 w-4" />
                 Descargar
               </button>
               <button
-                onClick={imprimir}
+                onClick={print}
                 className="inline-flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors"
               >
                 <Printer className="h-4 w-4" />
@@ -207,13 +207,13 @@ export default function AdminFacturaDetallePage() {
       </header>
 
       {/* Estado Anulada */}
-      {factura.anulada && (
+      {invoice.anulada && (
         <div className="bg-red-50 border-l-4 border-red-400 p-4 print:hidden">
           <div className="flex max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <XCircle className="h-5 w-5 text-red-400" />
             <div className="ml-3">
               <p className="text-sm text-red-700">
-                <strong>FACTURA ANULADA</strong> - Esta factura fue anulada el {factura.anuladaEn && new Date(factura.anuladaEn).toLocaleDateString('es-ES')}
+                <strong>FACTURA ANULADA</strong> - Esta factura fue anulada el {invoice.anuladaEn && new Date(invoice.anuladaEn).toLocaleDateString('es-ES')}
               </p>
             </div>
           </div>
@@ -229,21 +229,21 @@ export default function AdminFacturaDetallePage() {
           </div>
         )}
 
-        {/* Factura Document */}
+        {/* Invoice Document */}
         <div className="bg-white shadow-lg rounded-lg overflow-hidden print:shadow-none print:rounded-none">
-          {/* Encabezado */}
+          {/* Header */}
           <div className="bg-gray-900 text-white p-8 print:bg-white print:text-black print:border-b-2 print:border-gray-900">
             <div className="flex justify-between items-start">
               <div>
                 <h2 className="text-3xl font-bold">FACTURA</h2>
-                <p className="text-xl mt-2">{factura.invoiceNumber}</p>
+                <p className="text-xl mt-2">{invoice.invoiceNumber}</p>
                 <p className="text-gray-300 mt-1 print:text-gray-600">
-                  Fecha: {new Date(factura.emitidaEn).toLocaleDateString('es-ES')}
+                  Fecha: {new Date(invoice.emitidaEn).toLocaleDateString('es-ES')}
                 </p>
               </div>
               <div className="text-right">
-                <h3 className="text-xl font-bold">{factura.empresaNombre}</h3>
-                <p className="text-gray-300 print:text-gray-600">NIF: {factura.empresaNif}</p>
+                <h3 className="text-xl font-bold">{invoice.empresaNombre}</h3>
+                <p className="text-gray-300 print:text-gray-600">NIF: {invoice.empresaNif}</p>
               </div>
             </div>
           </div>
@@ -257,13 +257,13 @@ export default function AdminFacturaDetallePage() {
                   <Building2 className="h-4 w-4" />
                   Vendedor
                 </h4>
-                <p className="font-medium">{factura.empresaNombre}</p>
-                <p className="text-gray-600">NIF: {factura.empresaNif}</p>
-                <p className="text-gray-600">{factura.empresaDireccion}</p>
+                <p className="font-medium">{invoice.empresaNombre}</p>
+                <p className="text-gray-600">NIF: {invoice.empresaNif}</p>
+                <p className="text-gray-600">{invoice.empresaDireccion}</p>
                 <p className="text-gray-600">
-                  {factura.empresaCodigoPostal} {factura.empresaCiudad}
+                  {invoice.empresaCodigoPostal} {invoice.empresaCiudad}
                 </p>
-                <p className="text-gray-600">{factura.empresaProvincia}</p>
+                <p className="text-gray-600">{invoice.empresaProvincia}</p>
               </div>
 
               {/* Receptor */}
@@ -272,14 +272,14 @@ export default function AdminFacturaDetallePage() {
                   <User className="h-4 w-4" />
                   Cliente
                 </h4>
-                <p className="font-medium">{factura.clienteNombre}</p>
-                <p className="text-gray-600">NIF: {factura.clienteNif || 'No especificado'}</p>
-                <p className="text-gray-600">{factura.clienteDireccion}</p>
+                <p className="font-medium">{invoice.clienteNombre}</p>
+                <p className="text-gray-600">NIF: {invoice.clienteNif || 'No especificado'}</p>
+                <p className="text-gray-600">{invoice.clienteDireccion}</p>
                 <p className="text-gray-600">
-                  {factura.clienteCodigoPostal} {factura.clienteCiudad}
+                  {invoice.clienteCodigoPostal} {invoice.clienteCiudad}
                 </p>
                 <p className="text-gray-600">
-                  {factura.clienteProvincia}, {factura.clientePais}
+                  {invoice.clienteProvincia}, {invoice.clientePais}
                 </p>
               </div>
             </div>
@@ -297,7 +297,7 @@ export default function AdminFacturaDetallePage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {factura.pedido.items.map((item) => (
+                  {invoice.order.items.map((item) => (
                     <tr key={item.id} className="border-b border-gray-100">
                       <td className="py-3">{item.nombre}</td>
                       <td className="text-center py-3">{item.quantity}</td>
@@ -315,15 +315,15 @@ export default function AdminFacturaDetallePage() {
                 <div className="w-64 space-y-2">
                   <div className="flex justify-between text-gray-600">
                     <span>Base Imponible:</span>
-                    <span>{Number(factura.baseImponible).toFixed(2)} €</span>
+                    <span>{Number(invoice.baseImponible).toFixed(2)} €</span>
                   </div>
                   <div className="flex justify-between text-gray-600">
-                    <span>IVA ({factura.tipoIva}%):</span>
-                    <span>{Number(factura.cuotaIva).toFixed(2)} €</span>
+                    <span>IVA ({invoice.tipoIva}%):</span>
+                    <span>{Number(invoice.cuotaIva).toFixed(2)} €</span>
                   </div>
                   <div className="flex justify-between text-xl font-bold text-gray-900 pt-2 border-t border-gray-200">
                     <span>TOTAL:</span>
-                    <span>{Number(factura.total).toFixed(2)} €</span>
+                    <span>{Number(invoice.total).toFixed(2)} €</span>
                   </div>
                 </div>
               </div>
@@ -333,11 +333,11 @@ export default function AdminFacturaDetallePage() {
             <div className="mt-8 pt-6 border-t border-gray-200">
               <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
                 <div>
-                  <p><strong>Pedido:</strong> {factura.pedido.orderNumber}</p>
-                  <p><strong>Método de pago:</strong> {factura.pedido.paymentMethod === 'TARJETA' ? 'Tarjeta de crédito' : 'Transferencia bancaria'}</p>
+                  <p><strong>Pedido:</strong> {invoice.order.orderNumber}</p>
+                  <p><strong>Método de pago:</strong> {invoice.order.paymentMethod === 'TARJETA' ? 'Tarjeta de crédito' : 'Transferencia bancaria'}</p>
                 </div>
                 <div>
-                  <p><strong>Email:</strong> {factura.pedido.usuario.email}</p>
+                  <p><strong>Email:</strong> {invoice.order.usuario.email}</p>
                 </div>
               </div>
             </div>
@@ -353,9 +353,9 @@ export default function AdminFacturaDetallePage() {
 
       {/* Modal Confirmación Anular */}
       <ConfirmModal
-        isOpen={modalAnularOpen}
-        onClose={() => setModalAnularOpen(false)}
-        onConfirm={confirmarAnulacion}
+        isOpen={modalCancelOpen}
+        onClose={() => setModalCancelOpen(false)}
+        onConfirm={confirmCancellation}
         title="¿Anular factura?"
         description="Esta acción no se puede deshacer. La factura se marcará como anulada pero permanecerá en el sistema para fines contables."
         confirmText="Anular"

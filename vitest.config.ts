@@ -64,7 +64,7 @@ export default defineConfig({
     exclude: [],
     loader: 'tsx',
   },
-  // Configuración para React Testing Library y componentes
+  // Configuration for React Testing Library and components
   define: {
     'process.env': {},
   },
