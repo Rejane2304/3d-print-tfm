@@ -99,6 +99,18 @@ export default function Header() {
               <span className="text-sm font-medium">Catálogo</span>
             </Link>
 
+            {/* My Account - for authenticated CLIENTE */}
+            {!isLoading && isAuthenticated && isCliente && (
+              <Link
+                href="/account"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
+                title="Mi Cuenta"
+              >
+                <User className="h-5 w-5" />
+                <span className="text-sm font-medium">Mi Cuenta</span>
+              </Link>
+            )}
+
             {/* Admin Dashboard - ONLY for ADMIN */}
             {!isLoading && isAuthenticated && isAdmin && (
               <Link
