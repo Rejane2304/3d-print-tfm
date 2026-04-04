@@ -79,6 +79,12 @@ export async function POST(req: NextRequest) {
     }
 
     const captureData = await captureResponse.json();
+    
+    // Get order to retrieve total
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      select: { total: true }
+    });
 
     // Update order status
     await prisma.order.update({
@@ -86,25 +92,22 @@ export async function POST(req: NextRequest) {
       data: {
         status: 'CONFIRMED',
         confirmedAt: new Date(),
-        paypalCaptureId: captureData.purchase_units[0]?.payments?.captures[0]?.id,
-        paymentMethod: 'PAYPAL',
       },
     });
 
     // Create payment record
+    const userRecord = await prisma.user.findUnique({ 
+      where: { email: session.user.email },
+      select: { id: true }
+    });
+    
     await prisma.payment.create({
       data: {
         orderId: orderId,
-        userId: (await prisma.user.findUnique({ 
-          where: { email: session.user.email },
-          select: { id: true }
-        }))?.id || '',
-        amount: captureData.purchase_units[0]?.amount?.value,
+        userId: userRecord?.id || '',
+        amount: captureData.purchase_units[0]?.amount?.value || order?.total || 0,
         status: 'COMPLETED',
         method: 'PAYPAL',
-        provider: 'paypal',
-        paypalOrderId: paypalOrderId,
-        paypalCaptureId: captureData.purchase_units[0]?.payments?.captures[0]?.id,
         processedAt: new Date(),
       },
     });

@@ -109,13 +109,13 @@ export async function POST(req: NextRequest) {
 
     const paypalOrder = await response.json();
 
-    // Update order with PayPal order ID
-    await prisma.order.update({
-      where: { id: orderId },
-      data: {
-        paypalOrderId: paypalOrder.id,
-      },
-    });
+    // TODO: Store PayPal order ID after running migration
+    // await prisma.order.update({
+    //   where: { id: orderId },
+    //   data: {
+    //     paypalOrderId: paypalOrder.id,
+    //   },
+    // });
 
     return NextResponse.json({ paypalOrderId: paypalOrder.id });
   } catch (error) {

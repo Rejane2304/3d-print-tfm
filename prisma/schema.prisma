@@ -254,9 +254,11 @@ model Payment {
   method                PaymentMethod @default(CARD)
   status                PaymentStatus @default(PENDING)
   stripeSessionId       String?       @unique @db.VarChar(255)
-  stripePaymentIntentId String?       @unique @db.VarChar(255)
+  stripePaymentIntentId String?     @unique @db.VarChar(255)
   stripeClientSecret    String?       @db.VarChar(255)
   stripeChargeId        String?       @db.VarChar(255)
+  paypalOrderId         String?       @unique @db.VarChar(255)
+  paypalCaptureId       String?       @unique @db.VarChar(255)
   errorMessage          String?
   processedAt           DateTime?
   refundedAt            DateTime?
