@@ -10,12 +10,12 @@ import { Loader2 } from 'lucide-react';
 
 interface PayPalButtonProps {
   total: number;
-  orderId: string;
+  orderId?: string;
   onSuccess: (details: unknown) => void;
   onError: (error: Error) => void;
 }
 
-export default function PayPalButton({ total, orderId, onSuccess, onError }: PayPalButtonProps) {
+export default function PayPalButton({ total, orderId = 'temp', onSuccess, onError }: PayPalButtonProps) {
   const [{ isPending }] = usePayPalScriptReducer();
   const [isProcessing, setIsProcessing] = useState(false);
 

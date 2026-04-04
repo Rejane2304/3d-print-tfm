@@ -7,6 +7,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { SessionProvider } from "@/components/providers/SessionProvider";
+import PayPalProvider from "@/components/providers/PayPalProvider";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 
@@ -42,14 +43,16 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
         <SessionProvider>
-          <Header />
-          
-          {/* Main Content Area */}
-          <main className="flex-grow">
-            {children}
-          </main>
-          
-          <Footer />
+          <PayPalProvider>
+            <Header />
+            
+            {/* Main Content Area */}
+            <main className="flex-grow">
+              {children}
+            </main>
+            
+            <Footer />
+          </PayPalProvider>
         </SessionProvider>
       </body>
     </html>
