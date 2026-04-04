@@ -193,6 +193,8 @@ model Order {
   paymentMethod         PaymentMethod       @default(CARD)
   stripeSessionId       String?             @unique @db.VarChar(255)
   stripePaymentIntentId String?             @db.VarChar(255)
+  paypalOrderId         String?             @unique @db.VarChar(255)
+  paypalCaptureId       String?             @db.VarChar(255)
   customerNotes         String?
   internalNotes         String?
   shippedAt             DateTime?

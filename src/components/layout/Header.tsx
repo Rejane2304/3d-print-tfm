@@ -39,6 +39,10 @@ export default function Header() {
   const isCliente = session?.user?.rol === 'CLIENTE';
 
   const handleLogout = async () => {
+    // Limpiar carrito del localStorage antes de cerrar sesión
+    localStorage.removeItem('cart');
+    // Dispatch event para actualizar el contador del carrito
+    window.dispatchEvent(new Event('cartUpdated'));
     await signOut({ callbackUrl: '/' });
   };
 
