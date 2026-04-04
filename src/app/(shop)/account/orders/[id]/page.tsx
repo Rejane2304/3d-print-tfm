@@ -4,10 +4,11 @@
  */
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Package,
   Clock,
@@ -17,12 +18,8 @@ import {
   Loader2,
   AlertCircle,
   ArrowLeft,
-  FileText,
   MapPin,
   CreditCard,
-  Calendar,
-  Euro,
-  User,
   Phone,
   MessageSquare,
   Printer,
@@ -127,25 +124,14 @@ const metodosPago: Record<string, string> = {
 };
 
 export default function PedidoDetallePage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const params = useParams();
   const [pedido, setPedido] = useState<PedidoDetalle | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth?callbackUrl=/account/orders');
-      return;
-    }
-
-    if (status === 'authenticated' && params.id) {
-      cargarPedido();
-    }
-  }, [status, router, params.id]);
-
-  const cargarPedido = async () => {
+  const cargarPedido = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -163,7 +149,18 @@ export default function PedidoDetallePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [params.id]);
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth?callbackUrl=/account/orders');
+      return;
+    }
+
+    if (status === 'authenticated' && params.id) {
+      cargarPedido();
+    }
+  }, [status, router, params.id, cargarPedido]);
 
   const descargarFactura = () => {
     if (pedido?.factura && !pedido.factura.anulada) {
@@ -343,12 +340,14 @@ export default function PedidoDetallePage() {
                 {pedido.items.map((item) => (
                   <div key={item.id} className="p-6 flex gap-4">
                     {/* Imagen */}
-                    <div className="w-24 h-24 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden">
+                    <div className="w-24 h-24 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden relative">
                       {item.producto.images[0]?.url ? (
-                        <img
+                        <Image
                           src={item.producto.images[0].url}
                           alt={item.producto.nombre}
-                          className="w-full h-full object-cover"
+                          fill
+                          className="object-cover"
+                          unoptimized
                         />
                       ) : (
                         <Package className="w-full h-full p-6 text-gray-400" />

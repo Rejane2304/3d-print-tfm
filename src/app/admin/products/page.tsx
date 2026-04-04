@@ -8,11 +8,11 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { 
   Plus, 
   Search, 
   Filter, 
-  MoreHorizontal, 
   Edit, 
   Trash2, 
   Package,
@@ -96,7 +96,7 @@ export default function AdminProductosPage() {
       if (response.ok) {
         setProductos(productos.filter(p => p.id !== productoAEliminar));
       }
-    } catch (err) {
+    } catch {
       setError('Error al eliminar producto');
     } finally {
       setModalOpen(false);
@@ -221,10 +221,13 @@ export default function AdminProductosPage() {
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
                           {producto.imagenes?.[0] ? (
-                            <img
+                            <Image
                               className="h-10 w-10 rounded-full object-cover"
                               src={producto.imagenes[0].url}
                               alt={producto.nombre}
+                              width={40}
+                              height={40}
+                              unoptimized
                             />
                           ) : (
                             <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">

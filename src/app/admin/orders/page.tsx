@@ -4,7 +4,7 @@
  */
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -53,23 +53,7 @@ export default function AdminPedidosPage() {
   const [busqueda, setBusqueda] = useState('');
   const [filtroEstado, setFiltroEstado] = useState('');
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login?callbackUrl=/admin/orders');
-      return;
-    }
-
-    if (status === 'authenticated') {
-      const user = session?.user as { rol?: string } | undefined;
-      if (user?.rol !== 'ADMIN') {
-        router.push('/');
-        return;
-      }
-      cargarPedidos();
-    }
-  }, [status, session, router, filtroEstado]);
-
-  const cargarPedidos = async () => {
+  const cargarPedidos = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -88,7 +72,23 @@ export default function AdminPedidosPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filtroEstado]);
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login?callbackUrl=/admin/orders');
+      return;
+    }
+
+    if (status === 'authenticated') {
+      const user = session?.user as { rol?: string } | undefined;
+      if (user?.rol !== 'ADMIN') {
+        router.push('/');
+        return;
+      }
+      cargarPedidos();
+    }
+  }, [status, session, router, cargarPedidos]);
 
   const actualizarEstado = async (id: string, nuevoEstado: string) => {
     try {
@@ -101,7 +101,7 @@ export default function AdminPedidosPage() {
       if (response.ok) {
         await cargarPedidos();
       }
-    } catch (err) {
+    } catch {
       setError('Error al actualizar estado');
     }
   };

@@ -9,6 +9,7 @@ import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
+import { Prisma, OrderStatus } from '@prisma/client';
 
 // Schema de validación para actualización
 const actualizarPedidoSchema = z.object({
@@ -47,9 +48,9 @@ export async function GET(req: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const skip = (page - 1) * limit;
 
-    const where: any = {};
+    const where: Prisma.OrderWhereInput = {};
     if (status) {
-      where.status = status;
+      where.status = status as OrderStatus;
     }
 
     const [pedidos, total] = await Promise.all([
@@ -127,7 +128,7 @@ export async function PATCH(req: NextRequest) {
     const validatedData = actualizarPedidoSchema.parse(data);
 
     // Actualizar timestamps según el estado
-    const updateData: any = { ...validatedData };
+    const updateData: Prisma.OrderUpdateInput = { ...validatedData };
     if (validatedData.status === 'SHIPPED' && validatedData.shippedAt) {
       updateData.sentAt = new Date(validatedData.shippedAt);
     } else if (validatedData.status === 'DELIVERED') {

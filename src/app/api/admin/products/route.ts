@@ -29,7 +29,7 @@ const productSchema = z.object({
 });
 
 // GET - Listar productos
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {

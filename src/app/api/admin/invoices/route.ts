@@ -9,6 +9,7 @@ import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 
 // Datos de la empresa (fijos para el TFM)
 const DATOS_EMPRESA = {
@@ -55,7 +56,7 @@ export async function GET(req: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const skip = (page - 1) * limit;
 
-    const where: any = {};
+    const where: Prisma.InvoiceWhereInput = {};
     
     if (busqueda) {
       where.invoiceNumber = { contains: busqueda, mode: 'insensitive' };

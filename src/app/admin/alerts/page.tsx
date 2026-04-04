@@ -4,7 +4,7 @@
  */
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -19,8 +19,7 @@ import {
   Package,
   Clock,
   Trash2,
-  Eye,
-  MessageSquare
+  Eye
 } from 'lucide-react';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
@@ -60,13 +59,6 @@ const severityColors: Record<string, string> = {
   CRITICA: 'bg-red-100 text-red-800 border-red-200',
 };
 
-const estadoIconos: Record<string, React.ElementType> = {
-  PENDIENTE: Bell,
-  EN_PROCESO: Clock,
-  RESUELTA: CheckCircle2,
-  IGNORADA: Eye,
-};
-
 export default function AdminAlertasPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -83,23 +75,7 @@ export default function AdminAlertasPage() {
   const [modalEliminarOpen, setModalEliminarOpen] = useState(false);
   const [alertaAEliminar, setAlertaAEliminar] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login?callbackUrl=/admin/alerts');
-      return;
-    }
-
-    if (status === 'authenticated') {
-      const user = session?.user as { rol?: string } | undefined;
-      if (user?.rol !== 'ADMIN') {
-        router.push('/');
-        return;
-      }
-      cargarAlertas();
-    }
-  }, [status, session, router]);
-
-  const cargarAlertas = async () => {
+  const cargarAlertas = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -123,7 +99,23 @@ export default function AdminAlertasPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filtroTipo, filtroSeveridad, filtroEstado]);
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login?callbackUrl=/admin/alerts');
+      return;
+    }
+
+    if (status === 'authenticated') {
+      const user = session?.user as { rol?: string } | undefined;
+      if (user?.rol !== 'ADMIN') {
+        router.push('/');
+        return;
+      }
+      cargarAlertas();
+    }
+  }, [status, session, router, cargarAlertas]);
 
   const actualizarEstado = async (id: string, nuevoEstado: string) => {
     try {
@@ -146,7 +138,7 @@ export default function AdminAlertasPage() {
         const data = await response.json();
         setError(data.error || 'Error al actualizar');
       }
-    } catch (err) {
+    } catch {
       setError('Error al actualizar alerta');
     }
   };
@@ -170,7 +162,7 @@ export default function AdminAlertasPage() {
         const data = await response.json();
         setError(data.error || 'Error al eliminar');
       }
-    } catch (err) {
+    } catch {
       setError('Error al eliminar alerta');
     } finally {
       setModalEliminarOpen(false);
@@ -299,7 +291,6 @@ export default function AdminAlertasPage() {
           ) : (
             alertas.map((alerta) => {
               const TipoIcon = tipoIconos[alerta.tipo] || Bell;
-              const EstadoIcon = estadoIconos[alerta.estado] || Bell;
               
               return (
                 <div 

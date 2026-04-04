@@ -4,7 +4,7 @@
  */
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -17,7 +17,6 @@ import {
   Loader2,
   AlertCircle,
   Plus,
-  Calendar,
   CheckCircle2,
   AlertTriangle
 } from 'lucide-react';
@@ -52,23 +51,7 @@ export default function AdminFacturasPage() {
   const [modalAnularOpen, setModalAnularOpen] = useState(false);
   const [facturaAAnular, setFacturaAAnular] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login?callbackUrl=/admin/invoices');
-      return;
-    }
-
-    if (status === 'authenticated') {
-      const user = session?.user as { rol?: string } | undefined;
-      if (user?.rol !== 'ADMIN') {
-        router.push('/');
-        return;
-      }
-      cargarFacturas();
-    }
-  }, [status, session, router]);
-
-  const cargarFacturas = async () => {
+  const cargarFacturas = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -93,7 +76,23 @@ export default function AdminFacturasPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [busqueda, filtroEstado]);
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login?callbackUrl=/admin/invoices');
+      return;
+    }
+
+    if (status === 'authenticated') {
+      const user = session?.user as { rol?: string } | undefined;
+      if (user?.rol !== 'ADMIN') {
+        router.push('/');
+        return;
+      }
+      cargarFacturas();
+    }
+  }, [status, session, router, cargarFacturas]);
 
   const generarFactura = async () => {
     if (!pedidoIdInput.trim()) {
@@ -141,12 +140,12 @@ export default function AdminFacturasPage() {
         setFacturaAAnular(null);
         await cargarFacturas();
       }
-    } catch (err) {
+    } catch {
       setError('Error al anular factura');
     }
   };
 
-  const descargarPDF = (id: string, invoiceNumber: string) => {
+  const descargarPDF = (id: string) => {
     window.open(`/api/admin/invoices/${id}/pdf`, '_blank');
   };
 
@@ -318,7 +317,7 @@ export default function AdminFacturasPage() {
                           <FileText className="h-4 w-4" />
                         </Link>
                         <button
-                          onClick={() => descargarPDF(factura.id, factura.invoiceNumber)}
+                          onClick={() => descargarPDF(factura.id)}
                           className="text-blue-600 hover:text-blue-900 p-2"
                           title="Descargar PDF"
                         >

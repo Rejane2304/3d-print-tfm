@@ -18,11 +18,8 @@ import {
   AlertCircle,
   CheckCircle2,
   X,
-  Home,
-  Building,
   Phone,
-  User,
-  Navigation
+  User
 } from 'lucide-react';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 

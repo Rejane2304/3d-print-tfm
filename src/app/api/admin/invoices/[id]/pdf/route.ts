@@ -8,6 +8,22 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
+import { Prisma } from '@prisma/client';
+
+// Type for invoice with order, items and product
+type InvoiceWithOrder = Prisma.InvoiceGetPayload<{
+  include: {
+    order: {
+      include: {
+        items: {
+          include: {
+            product: true;
+          };
+        };
+      };
+    };
+  };
+}>;
 
 export async function GET(
   req: NextRequest,
@@ -74,7 +90,7 @@ export async function GET(
   }
 }
 
-function generarHTMLFactura(factura: any): string {
+function generarHTMLFactura(factura: InvoiceWithOrder): string {
   const items = factura.order?.items || [];
   
   return `
@@ -136,9 +152,9 @@ function generarHTMLFactura(factura: any): string {
             </tr>
         </thead>
         <tbody>
-            ${items.map((item: any) => `
+            ${items.map((item) => `
             <tr>
-                <td>${item.nombre}</td>
+                <td>${item.name}</td>
                 <td>${item.quantity}</td>
                 <td>${Number(item.price).toFixed(2)} €</td>
                 <td>${Number(item.subtotal).toFixed(2)} €</td>

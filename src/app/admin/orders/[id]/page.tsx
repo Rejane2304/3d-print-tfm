@@ -4,10 +4,11 @@
  */
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { 
   ArrowLeft,
   Truck,
@@ -21,7 +22,6 @@ import {
   User,
   MapPin,
   CreditCard,
-  MessageSquare,
   Edit
 } from 'lucide-react';
 
@@ -82,23 +82,7 @@ export default function AdminPedidoDetallePage() {
   const [transportista, setTransportista] = useState('');
   const [mostrarFormEstado, setMostrarFormEstado] = useState(false);
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login?callbackUrl=/admin/orders');
-      return;
-    }
-
-    if (status === 'authenticated') {
-      const user = session?.user as { rol?: string } | undefined;
-      if (user?.rol !== 'ADMIN') {
-        router.push('/');
-        return;
-      }
-      cargarPedido();
-    }
-  }, [status, session, router]);
-
-  const cargarPedido = async () => {
+  const cargarPedido = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -120,7 +104,23 @@ export default function AdminPedidoDetallePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [params.id]);
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login?callbackUrl=/admin/orders');
+      return;
+    }
+
+    if (status === 'authenticated') {
+      const user = session?.user as { rol?: string } | undefined;
+      if (user?.rol !== 'ADMIN') {
+        router.push('/');
+        return;
+      }
+      cargarPedido();
+    }
+  }, [status, session, router, cargarPedido]);
 
   const actualizarEstado = async () => {
     try {
@@ -143,7 +143,7 @@ export default function AdminPedidoDetallePage() {
         const data = await response.json();
         setError(data.error || 'Error al actualizar');
       }
-    } catch (err) {
+    } catch {
       setError('Error al actualizar estado');
     }
   };
@@ -225,10 +225,13 @@ export default function AdminPedidoDetallePage() {
                 {pedido.items.map((item) => (
                   <div key={item.id} className="p-6 flex items-center gap-4">
                     {item.imagenUrl ? (
-                      <img
+                      <Image
                         src={item.imagenUrl}
                         alt={item.nombre}
+                        width={64}
+                        height={64}
                         className="h-16 w-16 rounded-lg object-cover"
+                        unoptimized
                       />
                     ) : (
                       <div className="h-16 w-16 rounded-lg bg-gray-100 flex items-center justify-center">

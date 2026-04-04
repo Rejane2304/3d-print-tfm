@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Package,
   Clock,
@@ -20,8 +21,7 @@ import {
   FileText,
   Eye,
   Filter,
-  Calendar,
-  Euro
+  Calendar
 } from 'lucide-react';
 
 interface Pedido {
@@ -61,7 +61,7 @@ const estadosConfig: Record<string, { color: string; icon: React.ElementType; la
 };
 
 export default function MisPedidosPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [loading, setLoading] = useState(true);
@@ -227,12 +227,14 @@ export default function MisPedidosPage() {
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                       <div className="flex items-start gap-4">
                         {/* Imagen del primer producto */}
-                        <div className="w-20 h-20 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden">
+                        <div className="w-20 h-20 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden relative">
                           {primeraImagen ? (
-                            <img
+                            <Image
                               src={primeraImagen}
                               alt={pedido.items[0]?.producto.nombre}
-                              className="w-full h-full object-cover"
+                              fill
+                              className="object-cover"
+                              unoptimized
                             />
                           ) : (
                             <Package className="w-full h-full p-4 text-gray-400" />

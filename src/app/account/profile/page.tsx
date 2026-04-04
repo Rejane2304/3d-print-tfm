@@ -9,7 +9,6 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { 
   User, 
-  Mail, 
   Phone, 
   CreditCard,
   Lock,
@@ -28,8 +27,16 @@ interface PerfilData {
   nif: string;
 }
 
+interface UpdateProfileBody {
+  nombre: string;
+  telefono?: string;
+  nif?: string;
+  passwordActual?: string;
+  passwordNuevo?: string;
+}
+
 export default function PerfilPage() {
-  const { data: session, status, update } = useSession();
+  const { status, update } = useSession();
   const router = useRouter();
   const [perfil, setPerfil] = useState<PerfilData>({
     nombre: '',
@@ -103,7 +110,7 @@ export default function PerfilPage() {
         }
       }
 
-      const body: any = {
+      const body: UpdateProfileBody = {
         nombre: perfil.nombre,
         telefono: perfil.telefono || undefined,
         nif: perfil.nif || undefined

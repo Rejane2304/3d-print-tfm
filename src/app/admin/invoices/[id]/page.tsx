@@ -4,24 +4,19 @@
  */
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { 
   ArrowLeft,
-  FileText,
   Download,
   Printer,
   XCircle,
   Loader2,
   AlertCircle,
-  CheckCircle2,
   Building2,
-  User,
-  MapPin,
-  Calendar,
-  Euro
+  User
 } from 'lucide-react';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 
@@ -74,23 +69,7 @@ export default function AdminFacturaDetallePage() {
   const [error, setError] = useState<string | null>(null);
   const [modalAnularOpen, setModalAnularOpen] = useState(false);
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login?callbackUrl=/admin/invoices');
-      return;
-    }
-
-    if (status === 'authenticated') {
-      const user = session?.user as { rol?: string } | undefined;
-      if (user?.rol !== 'ADMIN') {
-        router.push('/');
-        return;
-      }
-      cargarFactura();
-    }
-  }, [status, session, router]);
-
-  const cargarFactura = async () => {
+  const cargarFactura = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -108,7 +87,23 @@ export default function AdminFacturaDetallePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [params.id]);
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login?callbackUrl=/admin/invoices');
+      return;
+    }
+
+    if (status === 'authenticated') {
+      const user = session?.user as { rol?: string } | undefined;
+      if (user?.rol !== 'ADMIN') {
+        router.push('/');
+        return;
+      }
+      cargarFactura();
+    }
+  }, [status, session, router, cargarFactura]);
 
   const anularFactura = async () => {
     setModalAnularOpen(true);
@@ -127,7 +122,7 @@ export default function AdminFacturaDetallePage() {
         const data = await response.json();
         setError(data.error || 'Error al anular');
       }
-    } catch (err) {
+    } catch {
       setError('Error al anular factura');
     }
   };

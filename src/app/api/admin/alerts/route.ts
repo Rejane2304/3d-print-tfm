@@ -9,6 +9,7 @@ import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
+import { Prisma, AlertType, AlertSeverity, AlertStatus } from '@prisma/client';
 
 // Schema de validación
 const actualizarAlertaSchema = z.object({
@@ -47,18 +48,18 @@ export async function GET(req: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const skip = (page - 1) * limit;
 
-    const where: any = {};
-    
+    const where: Prisma.AlertWhereInput = {};
+
     if (type) {
-      where.type = type;
+      where.type = type as AlertType;
     }
-    
+
     if (severity) {
-      where.severity = severity;
+      where.severity = severity as AlertSeverity;
     }
-    
+
     if (status) {
-      where.status = status;
+      where.status = status as AlertStatus;
     }
 
     const [alertas, total, pendientes] = await Promise.all([
@@ -134,7 +135,7 @@ export async function PATCH(req: NextRequest) {
     const body = await req.json();
     const validatedData = actualizarAlertaSchema.parse(body);
 
-    const updateData: any = {
+    const updateData: Prisma.AlertUncheckedUpdateInput = {
       status: validatedData.status,
     };
 

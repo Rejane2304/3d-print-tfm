@@ -11,10 +11,22 @@ import { withErrorHandler } from '@/lib/errors/api-wrapper';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import Stripe from 'stripe';
+import { Prisma } from '@prisma/client';
+
+// Type for cart items with product included
+type CartItemWithProduct = Prisma.CartItemGetPayload<{
+  include: {
+    product: {
+      include: {
+        category: true;
+      };
+    };
+  };
+}>;
 
 // Inicializar Stripe (modo test)
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2023-10-16' as any,
+  apiVersion: '2023-10-16' as Stripe.LatestApiVersion,
 });
 
 // POST /api/checkout - Create checkout session
@@ -76,7 +88,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
 
   // Verificar stock disponible
-  for (const item of user.cart.items) {
+  for (const item of user.cart.items as CartItemWithProduct[]) {
     if (item.product.stock < item.quantity) {
       return NextResponse.json(
         { success: false, error: `Insufficient stock para ${item.product.name}` },
@@ -92,7 +104,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   try {
     // Crear line items para Stripe
-    const lineItems = user.cart.items.map((item) => ({
+    const lineItems = (user.cart.items as CartItemWithProduct[]).map((item) => ({
       price_data: {
         currency: 'eur',
         product_data: {
@@ -170,7 +182,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         shippingCountry: address.country,
         stripeSessionId: stripeSession.id,
         items: {
-          create: user.cart.items.map((item) => ({
+          create: (user.cart.items as CartItemWithProduct[]).map((item) => ({
             productId: item.productId,
             quantity: item.quantity,
             price: item.unitPrice,
