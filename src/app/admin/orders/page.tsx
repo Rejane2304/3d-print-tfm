@@ -107,11 +107,11 @@ export default function AdminPedidosPage() {
   };
 
   const pedidosFiltrados = pedidos.filter(pedido => {
-    const coincideBusqueda = 
+    const matchesSearch = 
       pedido.orderNumber.toLowerCase().includes(busqueda.toLowerCase()) ||
       pedido.usuario.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
       pedido.usuario.email.toLowerCase().includes(busqueda.toLowerCase());
-    return coincideBusqueda;
+    return matchesSearch;
   });
 
   if (status === 'loading' || loading) {

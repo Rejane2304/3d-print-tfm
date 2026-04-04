@@ -40,7 +40,7 @@ export default function AdminProductosPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busqueda, setBusqueda] = useState('');
-  const [filtroCategoria, setFiltroCategoria] = useState('');
+  const [filterCategory, setFilterCategory] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [productoAEliminar, setProductoAEliminar] = useState<string | null>(null);
 
@@ -105,9 +105,9 @@ export default function AdminProductosPage() {
   };
 
   const productosFiltrados = productos.filter(producto => {
-    const coincideBusqueda = producto.nombre.toLowerCase().includes(busqueda.toLowerCase());
-    const coincideCategoria = !filtroCategoria || producto.categoria === filtroCategoria;
-    return coincideBusqueda && coincideCategoria;
+    const matchesSearch = producto.nombre.toLowerCase().includes(busqueda.toLowerCase());
+    const matchesCategory = !filterCategory || producto.categoria === filterCategory;
+    return matchesSearch && matchesCategory;
   });
 
   if (status === 'loading' || loading) {
@@ -167,8 +167,8 @@ export default function AdminProductosPage() {
             <div className="flex items-center gap-2">
               <Filter className="h-5 w-5 text-gray-500" />
               <select
-                value={filtroCategoria}
-                onChange={(e) => setFiltroCategoria(e.target.value)}
+                value={filterCategory}
+                onChange={(e) => setFilterCategory(e.target.value)}
                 className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               >
                 <option value="">Todas las categorías</option>
