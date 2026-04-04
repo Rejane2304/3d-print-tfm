@@ -1,7 +1,7 @@
 /**
- * Tests Helpers - Consolidado
+ * Tests Helpers - Consolidated
  * 
- * Funciones utilitarias simplificadas para tests
+ * Simplified utility functions for tests
  */
 
 import { PrismaClient } from '@prisma/client';
