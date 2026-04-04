@@ -106,8 +106,8 @@ export default function Header() {
             )}
           </nav>
 
-          {/* Right Side: Cart + Auth */}
-          <div className="hidden md:flex items-center space-x-2">
+          {/* Right Side: Cart + Auth - Always visible */}
+          <div className="flex items-center space-x-2">
             {/* Cart - Always visible except for Admin */}
             {!isLoading && !isAdmin && (
               <div className="flex items-center">
@@ -117,7 +117,7 @@ export default function Header() {
 
             {/* Divider - only show if cart is visible or user is authenticated */}
             {(!isLoading && !isAdmin) || (!isLoading && isAuthenticated) ? (
-              <div className="h-6 w-px bg-gray-200 mx-2" />
+              <div className="h-6 w-px bg-gray-200 mx-2 hidden md:block" />
             ) : null}
 
             {/* Auth Buttons */}
