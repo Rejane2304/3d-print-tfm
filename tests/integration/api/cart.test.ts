@@ -37,13 +37,13 @@ describe('Cart API', () => {
     });
     await prisma.product.deleteMany({
       where: { slug: { startsWith: 'cart-test-' } } },
-    });
+    );
     await prisma.category.deleteMany({
       where: { slug: { startsWith: 'cart-test-' } } },
-    });
+    );
     await prisma.user.deleteMany({
       where: { email: { startsWith: 'cart-test-' } } },
-    });
+    );
 
     // Create test user
     const hashedPassword = await bcrypt.hash('TestPass123!', 10);
@@ -93,13 +93,13 @@ describe('Cart API', () => {
     });
     await prisma.product.deleteMany({
       where: { slug: { startsWith: 'cart-test-' } } },
-    });
+    );
     await prisma.category.deleteMany({
       where: { slug: { startsWith: 'cart-test-' } } },
-    });
+    );
     await prisma.user.deleteMany({
       where: { email: { startsWith: 'cart-test-' } } },
-    });
+    );
   });
 
   describe('GET /api/cart', () => {
