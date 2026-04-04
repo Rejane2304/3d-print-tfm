@@ -1,409 +1,409 @@
-# Procesos de Negocio - 3D Print TFM
+# Business Processes - 3D Print TFM
 
-## 🔄 Diagramas de Flujo
+## 🔄 Flow Diagrams
 
-### 1. PROCESO DE COMPRA (Customer Journey)
+### 1. PURCHASE PROCESS (Customer Journey)
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  FASE 1: DESCUBRIMIENTO                                      │
+│  PHASE 1: DISCOVERY                                           │
 └─────────────────────────────────────────────────────────────┘
     │
     ▼
 ┌──────────────┐
-│   Entrada    │  Usuario llega a la web
+│   Entry      │  User arrives at the website
 └──────────────┘
     │
     ▼
 ┌──────────────────────────────────┐
-│  Browse Catálogo                  │
-│  • Ver productos destacados       │
-│  • Filtrar por categoría          │
-│  • Buscar por nombre              │
+│  Browse Catalog                   │
+│  • View featured products         │
+│  • Filter by category             │
+│  • Search by name                 │
 └──────────────────────────────────┘
     │
     ▼
 ┌──────────────────────────────────┐
-│  Selección de Producto            │
-│  • Ver detalle                    │
-│  • Ver imágenes                   │
-│  • Ver especificaciones           │
+│  Product Selection                │
+│  • View details                   │
+│  • View images                    │
+│  • View specifications            │
 └──────────────────────────────────┘
     │
     ▼
 ┌──────────────────────────────────┐
-│  Añadir al Carrito                │
-│  • Elegir cantidad                │
-│  • Validar stock                  │
-│  • Confirmar adición            │
+│  Add to Cart                      │
+│  • Choose quantity                │
+│  • Validate stock                 │
+│  • Confirm addition               │
 └──────────────────────────────────┘
     │
     ▼
 ┌──────────────────────────────────┐
-│  CONTINUAR COMPRANDO?             │
-│  ├─ SI → Volver a catálogo        │
-│  └─ NO → Ir al checkout           │
+│  CONTINUE SHOPPING?               │
+│  ├─ YES → Return to catalog       │
+│  └─ NO → Go to checkout           │
 └──────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────┐
-│  FASE 2: CHECKOUT                                              │
+│  PHASE 2: CHECKOUT                                            │
 └─────────────────────────────────────────────────────────────┘
     │
     ▼
 ┌──────────────────────────────────┐
-│  Revisar Carrito                  │
-│  • Ver items                      │
-│  • Modificar cantidades           │
-│  • Eliminar items                 │
-│  • Ver totales                    │
+│  Review Cart                      │
+│  • View items                     │
+│  • Modify quantities              │
+│  • Remove items                   │
+│  • View totals                    │
 └──────────────────────────────────┘
     │
     ▼
 ┌──────────────────────────────────┐
-│  ¿Usuario Logueado?               │
-│  ├─ SI → Continuar                │
-│  └─ NO → Login/Registro           │
+│  User Logged In?                  │
+│  ├─ YES → Continue                │
+│  └─ NO → Login/Register           │
 └──────────────────────────────────┘
     │
     ▼
 ┌──────────────────────────────────┐
-│  Seleccionar Dirección            │
-│  • Elegir dirección guardada      │
-│  • O crear nueva dirección        │
+│  Select Address                   │
+│  • Choose saved address           │
+│  • Or create new address          │
 └──────────────────────────────────┘
     │
     ▼
 ┌──────────────────────────────────┐
-│  Confirmar Pedido                 │
-│  • Revisar resumen                │
-│  • Aceptar términos               │
-│  • Proceder al pago               │
+│  Confirm Order                    │
+│  • Review summary                 │
+│  • Accept terms                   │
+│  • Proceed to payment             │
 └──────────────────────────────────┘
     │
     ▼
 ┌──────────────────────────────────┐
-│  PAGO CON STRIPE                  │
-│  • Redirección a Stripe Checkout  │
-│  • Introducir datos tarjeta       │
-│  • Confirmar pago                 │
+│  PAYMENT WITH STRIPE              │
+│  • Redirect to Stripe Checkout    │
+│  • Enter card details             │
+│  • Confirm payment                │
 └──────────────────────────────────┘
     │
     ▼
 ┌──────────────────────────────────┐
-│  Webhook Stripe                   │
-│  • Confirmación de pago           │
-│  • Actualizar pedido              │
-│  • Enviar email                   │
+│  Stripe Webhook                   │
+│  • Payment confirmation           │
+│  • Update order                   │
+│  • Send email                     │
 └──────────────────────────────────┘
     │
     ▼
 ┌──────────────────────────────────┐
-│  ✅ PEDIDO CONFIRMADO             │
-│  • Mostrar página de éxito        │
-│  • Número de pedido               │
-│  • Instrucciones siguientes       │
+│  ✅ ORDER CONFIRMED               │
+│  • Display success page           │
+│  • Order number                   │
+│  • Next steps instructions        │
 └──────────────────────────────────┘
 ```
 
 ---
 
-### 2. PROCESO DE PRODUCCIÓN (Admin)
+### 2. PRODUCTION PROCESS (Admin)
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  RECEPCIÓN DE PEDIDO PAGADO                                    │
+│  RECEIPT OF PAID ORDER                                        │
 └─────────────────────────────────────────────────────────────┘
     │
     ▼
 ┌──────────────────────────────────┐
-│  Dashboard Admin                  │
-│  • Ver notificación               │
-│  • Ver detalle del pedido         │
-│  • Items a fabricar               │
+│  Admin Dashboard                  │
+│  • View notification              │
+│  • View order detail              │
+│  • Items to manufacture           │
 └──────────────────────────────────┘
     │
     ▼
 ┌──────────────────────────────────┐
-│  VALIDAR STOCK                    │
-│  ├─ Stock suficiente              │
-│  └─ Stock insuficiente → Alerta   │
+│  VALIDATE STOCK                   │
+│  ├─ Sufficient stock              │
+│  └─ Insufficient stock → Alert    │
 └──────────────────────────────────┘
     │
     ▼
 ┌──────────────────────────────────┐
-│  MARCAR: EN PREPARACIÓN           │
-│  • Cliente recibe notificación    │
-│  • Tiempo estimado: 1-3 días      │
+│  MARK: PREPARING                  │
+│  • Customer receives notification │
+│  • Estimated time: 1-3 days       │
 └──────────────────────────────────┘
     │
     ▼
 ┌──────────────────────────────────┐
-│  FABRICACIÓN                      │
-│  • Preparar archivos G-code       │
-│  • Configurar impresora           │
-│  • Imprimir productos             │
-│  • Post-procesado (limpieza)      │
-│  • Control de calidad             │
+│  MANUFACTURING                    │
+│  • Prepare G-code files           │
+│  • Configure printer              │
+│  • Print products                 │
+│  • Post-processing (cleaning)     │
+│  • Quality control                │
 └──────────────────────────────────┘
     │
     ▼
 ┌──────────────────────────────────┐
-│  EMPAQUETADO                      │
-│  • Embalaje protector             │
-│  • Añadir branding                │
-│  • Incluir instrucciones          │
+│  PACKAGING                        │
+│  • Protective packaging           │
+│  • Add branding                   │
+│  • Include instructions           │
 └──────────────────────────────────┘
     │
     ▼
 ┌──────────────────────────────────┐
-│  MARCAR: ENVIADO                  │
-│  • Añadir tracking                │
-│  • Generar etiqueta               │
-│  • Entregar a mensajería          │
+│  MARK: SHIPPED                    │
+│  • Add tracking                   │
+│  • Generate label                 │
+│  • Deliver to courier             │
 └──────────────────────────────────┘
     │
     ▼
 ┌──────────────────────────────────┐
-│  Seguimiento                      │
-│  • Cliente ve tracking            │
-│  • Notificaciones de estado       │
+│  Tracking                         │
+│  • Customer sees tracking         │
+│  • Status notifications           │
 └──────────────────────────────────┘
     │
     ▼
 ┌──────────────────────────────────┐
-│  MARCAR: ENTREGADO                │
-│  • Confirmación recepción         │
-│  • Habilitar reseñas              │
-│  • Cerrar pedido                  │
+│  MARK: DELIVERED                  │
+│  • Reception confirmation         │
+│  • Enable reviews                 │
+│  • Close order                    │
 └──────────────────────────────────┘
 ```
 
 ---
 
-### 3. PROCESO DE GESTIÓN DE PRODUCTOS
+### 3. PRODUCT MANAGEMENT PROCESS
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  CREAR NUEVO PRODUCTO                                          │
+│  CREATE NEW PRODUCT                                           │
 └─────────────────────────────────────────────────────────────┘
     │
     ▼
 ┌──────────────────────────────────┐
-│  Formulario Admin                 │
-│  • Nombre y descripción           │
-│  • Seleccionar categoría          │
-│  • Definir precio                 │
-│  • Seleccionar material           │
-│  • Subir imágenes                 │
-│  • Configurar stock               │
-│  • Establecer dimensiones         │
+│  Admin Form                       │
+│  • Name and description           │
+│  • Select category                │
+│  • Set price                      │
+│  • Select material                │
+│  • Upload images                  │
+│  • Configure stock                │
+│  • Set dimensions                 │
 └──────────────────────────────────┘
     │
     ▼
 ┌──────────────────────────────────┐
-│  VALIDACIÓN                       │
-│  ├─ Datos completos              │
-│  │   ├─ Precio > 0                │
-│  │   ├─ Stock ≥ 0                 │
-│  │   └─ Imagen principal          │
-│  └─ Error → Corregir              │
+│  VALIDATION                       │
+│  ├─ Complete data                 │
+│  │   ├─ Price > 0                  │
+│  │   ├─ Stock ≥ 0                  │
+│  │   └─ Main image                   │
+│  └─ Error → Fix                   │
 └──────────────────────────────────┘
     │
     ▼
 ┌──────────────────────────────────┐
-│  GENERAR SLUG                     │
-│  • URL amigable única             │
-│  • Ej: "soporte-movil-moderno"    │
+│  GENERATE SLUG                    │
+│  • Unique friendly URL            │
+│  • Ex: "modern-phone-stand"       │
 └──────────────────────────────────┘
     │
     ▼
 ┌──────────────────────────────────┐
-│  CALCULAR COSTES                  │
-│  • Gramos de filamento            │
-│  • Tiempo de impresión            │
-│  • Coste eléctrico                │
-│  • Margen de beneficio            │
+│  CALCULATE COSTS                  │
+│  • Filament grams                 │
+│  • Printing time                  │
+│  • Electricity cost               │
+│  • Profit margin                  │
 └──────────────────────────────────┘
     │
     ▼
 ┌──────────────────────────────────┐
-│  PUBLICAR                         │
-│  • Producto activo                │
-│  • Visible en catálogo            │
-│  • Indexado para SEO              │
+│  PUBLISH                          │
+│  • Active product                 │
+│  • Visible in catalog             │
+│  • Indexed for SEO                │
 └──────────────────────────────────┘
 ```
 
 ---
 
-## 🎭 Procesos de Usuario vs Admin
+## 🎭 User vs Admin Processes
 
-### Usuario (Cliente)
+### User (Customer)
 
-| Proceso | Interacción | Tiempo |
+| Process | Interaction | Time |
 |---------|-------------|--------|
-| **Registro** | Formulario → Email confirmación | 2 min |
-| **Navegación** | Browse → Filtros → Detalle | 1-5 min |
-| **Añadir al carrito** | Click → Cantidad → Confirmar | 30 seg |
-| **Checkout** | Carrito → Login → Dirección → Pago | 3-5 min |
-| **Seguimiento pedido** | Login → Mis pedidos → Tracking | 1 min |
-| **Contactar soporte** | Pedido → Chat → Mensaje | 2 min |
+| **Registration** | Form → Confirmation email | 2 min |
+| **Browsing** | Browse → Filters → Detail | 1-5 min |
+| **Add to cart** | Click → Quantity → Confirm | 30 sec |
+| **Checkout** | Cart → Login → Address → Payment | 3-5 min |
+| **Order tracking** | Login → My orders → Tracking | 1 min |
+| **Contact support** | Order → Chat → Message | 2 min |
 
 ### Admin
 
-| Proceso | Interacción | Tiempo |
+| Process | Interaction | Time |
 |---------|-------------|--------|
-| **Gestionar pedido** | Dashboard → Pedido → Actualizar estado | 1-2 min |
-| **Crear producto** | Formulario → Subir imágenes → Publicar | 10-15 min |
-| **Gestionar stock** | Producto → Ajustar cantidad → Guardar | 1 min |
-| **Ver alertas** | Alertas → Ver detalle → Resolver | 2 min |
-| **Generar factura** | Pedido → Crear factura → Descargar PDF | 1 min |
-| **Responder mensaje** | Chat → Escribir → Enviar | 2 min |
+| **Manage order** | Dashboard → Order → Update status | 1-2 min |
+| **Create product** | Form → Upload images → Publish | 10-15 min |
+| **Manage stock** | Product → Adjust quantity → Save | 1 min |
+| **View alerts** | Alerts → View detail → Resolve | 2 min |
+| **Generate invoice** | Order → Create invoice → Download PDF | 1 min |
+| **Reply to message** | Chat → Write → Send | 2 min |
 
 ---
 
-## 📊 Métricas de Procesos
+## 📊 Process Metrics
 
-### Conversión
+### Conversion
 
-| Paso | Tasa Estimada |
-|------|---------------|
-| Visita → Vista producto | 40% |
-| Vista producto → Añadir carrito | 15% |
-| Carrito → Checkout | 60% |
-| Checkout → Pago completado | 70% |
-| **Conversión total** | **2.5%** |
+| Step | Estimated Rate |
+|------|----------------|
+| Visit → Product view | 40% |
+| Product view → Add to cart | 15% |
+| Cart → Checkout | 60% |
+| Checkout → Payment completed | 70% |
+| **Total conversion** | **2.5%** |
 
-### Tiempos de Respuesta
+### Response Times
 
-| Proceso | Objetivo | Máximo |
-|---------|----------|--------|
-| Carga de página | <2s | 3s |
-| Filtrar productos | <500ms | 1s |
-| Añadir al carrito | <200ms | 500ms |
-| Checkout Stripe | <3s | 5s |
-| Generar factura PDF | <2s | 5s |
+| Process | Target | Maximum |
+|---------|--------|---------|
+| Page load | <2s | 3s |
+| Filter products | <500ms | 1s |
+| Add to cart | <200ms | 500ms |
+| Stripe checkout | <3s | 5s |
+| Generate PDF invoice | <2s | 5s |
 
 ---
 
-## 🔄 Estados y Transiciones
+## 🔄 States and Transitions
 
-### Pedido
+### Order
 
 ```
-[PENDIENTE] ────────→ [CONFIRMADO] ───────→ [PREPARANDO]
+[PENDING] ────────→ [CONFIRMED] ───────→ [PREPARING]
       │                      │                      │
       │                      │                      │
       ▼                      ▼                      ▼
-[CANCELADO]            [CANCELADO]            [CANCELADO]
-                              │                      │
-                              ▼                      ▼
-                        [ENVIADO] ────────────→ [ENTREGADO]
+[CANCELLED]            [CANCELLED]            [CANCELLED]
+                               │                      │
+                               ▼                      ▼
+                         [SHIPPED] ────────────→ [DELIVERED]
 ```
 
-**Reglas**:
-- PENDIENTE: Esperando pago Stripe
-- CONFIRMADO: Pago recibido, esperando producción
-- PREPARANDO: En fabricación
-- ENVIADO: Entregado a mensajería
-- ENTREGADO: Confirmado por cliente
-- CANCELADO: Puede cancelarse hasta PREPARANDO
+**Rules**:
+- PENDING: Waiting for Stripe payment
+- CONFIRMED: Payment received, awaiting production
+- PREPARING: In manufacturing
+- SHIPPED: Delivered to courier
+- DELIVERED: Confirmed by customer
+- CANCELLED: Can be cancelled until PREPARING
 
-### Pago
+### Payment
 
 ```
-[PENDIENTE] → [COMPLETADO]
+[PENDING] → [COMPLETED]
       │
-      └──────→ [FALLIDO]
+      └──────→ [FAILED]
                 │
-                └──────→ [REINTENTO] → [COMPLETADO]
+                └──────→ [RETRY] → [COMPLETED]
                               │
-                              └──────→ [FALLIDO] (definitivo)
+                              └──────→ [FAILED] (final)
 ```
 
-### Factura
+### Invoice
 
 ```
-[PENDIENTE] → [EMITIDA]
+[PENDING] → [ISSUED]
                    │
-                   └──────→ [ANULADA] (con nota de crédito)
+                   └──────→ [CANCELLED] (with credit note)
 ```
 
-**Nota**: Las facturas emitidas no se pueden eliminar, solo anular.
+**Note**: Issued invoices cannot be deleted, only cancelled.
 
 ---
 
-## 🚨 Procesos de Excepción
+## 🚨 Exception Processes
 
-### Error de Pago
-
-```
-1. Stripe devuelve error
-2. Mostrar mensaje al usuario
-3. Ofrecer reintentar
-4. Log en sistema de alertas
-5. Si persiste → Contactar soporte
-```
-
-### Stock Insuficiente
+### Payment Error
 
 ```
-1. Verificar stock en checkout
-2. Si insuficiente:
-   - Mostrar error
-   - Sugerir cantidad máxima
-   - Notificar admin (alerta automática)
-3. Opción: Pre-order si disponible
+1. Stripe returns error
+2. Show message to user
+3. Offer to retry
+4. Log in alert system
+5. If persists → Contact support
 ```
 
-### Devolución
+### Insufficient Stock
 
 ```
-1. Cliente solicita devolución (48h)
-2. Admin evalúa:
-   - Producto defectuoso → Aceptar
-   - Cambio de opinión → Política
-3. Generar nota de crédito
-4. Procesar reembolso Stripe
-5. Actualizar inventario
+1. Verify stock at checkout
+2. If insufficient:
+   - Show error
+   - Suggest maximum quantity
+   - Notify admin (automatic alert)
+3. Option: Pre-order if available
+```
+
+### Return
+
+```
+1. Customer requests return (48h)
+2. Admin evaluates:
+   - Defective product → Accept
+   - Change of mind → Policy
+3. Generate credit note
+4. Process Stripe refund
+5. Update inventory
 ```
 
 ---
 
-## 📱 Flujos Multi-Dispositivo
+## 📱 Multi-Device Flows
 
-### Escritorio vs Móvil
+### Desktop vs Mobile
 
-| Proceso | Desktop | Mobile |
+| Process | Desktop | Mobile |
 |---------|---------|--------|
-| Navegación | Sidebar + Grid | Drawer + Scroll |
-| Filtros | Sidebar fija | Bottom sheet |
-| Checkout | 3 columnas | Paso a paso |
-| Admin | Full dashboard | Cards simplificadas |
+| Navigation | Sidebar + Grid | Drawer + Scroll |
+| Filters | Fixed sidebar | Bottom sheet |
+| Checkout | 3 columns | Step by step |
+| Admin | Full dashboard | Simplified cards |
 
 ---
 
-## ✅ Checklist de Procesos
+## ✅ Process Checklist
 
-### Antes del Lanzamiento
+### Before Launch
 
-- [ ] Proceso de compra completo probado
-- [ ] Checkout Stripe en test mode
-- [ ] Webhook de confirmación funcionando
-- [ ] Gestión de pedidos admin operativa
-- [ ] Sistema de alertas configurado
-- [ ] Emails de confirmación enviándose
-- [ ] Tracking de envíos integrado
-- [ ] Proceso de devolución documentado
+- [ ] Complete purchase process tested
+- [ ] Stripe checkout in test mode
+- [ ] Confirmation webhook working
+- [ ] Admin order management operational
+- [ ] Alert system configured
+- [ ] Confirmation emails sending
+- [ ] Shipping tracking integrated
+- [ ] Return process documented
 
-### Post-Lanzamiento
+### Post-Launch
 
-- [ ] Monitoreo de conversiones
-- [ ] Optimización de tiempos de carga
-- [ ] Mejora de UX basada en feedback
-- [ ] Automatización de procesos repetitivos
-- [ ] Documentación de casos edge
+- [ ] Conversion monitoring
+- [ ] Load time optimization
+- [ ] UX improvement based on feedback
+- [ ] Automation of repetitive processes
+- [ ] Edge case documentation
 
 ---
 
-**Estado**: ✅ Procesos documentados y probados
+**Status**: ✅ Processes documented and tested

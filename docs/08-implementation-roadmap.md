@@ -1,431 +1,431 @@
-# Roadmap de Implementación - 3D Print TFM
+# Implementation Roadmap - 3D Print TFM
 
-## 🗓️ Cronograma del Proyecto
+## 🗓️ Project Timeline
 
-**Período**: Abril 2026 - Junio 2026 (3 meses)
-**Metodología**: Agile + TDD
-**Sprints**: 2 semanas cada uno
+**Period**: April 2026 - June 2026 (3 months)
+**Methodology**: Agile + TDD
+**Sprints**: 2 weeks each
 
 ---
 
-## 📅 Fases del Proyecto
+## 📅 Project Phases
 
-### FASE 1: Fundamentos (Semanas 1-2)
-**Fecha**: Abril 2026
+### PHASE 1: Foundations (Weeks 1-2)
+**Date**: April 2026
 
-#### Objetivos
-- ✅ Configuración del proyecto
-- ✅ Modelo de datos Prisma
-- ✅ Autenticación básica
-- ✅ Tests unitarios base
+#### Objectives
+- ✅ Project setup
+- ✅ Prisma data model
+- ✅ Basic authentication
+- ✅ Base unit tests
 
-#### Tareas
-| Tarea | Responsable | Estado |
+#### Tasks
+| Task | Responsible | Status |
 |-------|-------------|--------|
 | Setup Next.js 14 + TypeScript | Dev | ✅ |
-| Configurar Prisma + PostgreSQL | Dev | ✅ |
-| Modelar entidades principales | Dev | ✅ |
-| Implementar NextAuth.js | Dev | ✅ |
-| Tests unitarios (Zod) | QA | ✅ |
-| Seed database con CSV | Dev | ✅ |
+| Configure Prisma + PostgreSQL | Dev | ✅ |
+| Model main entities | Dev | ✅ |
+| Implement NextAuth.js | Dev | ✅ |
+| Unit tests (Zod) | QA | ✅ |
+| Seed database with CSV | Dev | ✅ |
 
-#### Entregables
-- [x] Proyecto base funcionando
-- [x] Schema Prisma completo
-- [x] Sistema de auth operativo
-- [x] 37 tests unitarios pasando
+#### Deliverables
+- [x] Base project working
+- [x] Complete Prisma schema
+- [x] Auth system operational
+- [x] 37 unit tests passing
 
 **Tests**: 37 tests ✅
 
 ---
 
-### FASE 2: Autenticación y Navegación (Semanas 3-4)
-**Fecha**: Abril 2026
+### PHASE 2: Authentication and Navigation (Weeks 3-4)
+**Date**: April 2026
 
-#### Objetivos
-- ✅ Sistema de login/registro completo
-- ✅ Middleware de autorización
-- ✅ Header y Footer responsive
-- ✅ Tests E2E básicos
+#### Objectives
+- ✅ Complete login/register system
+- ✅ Authorization middleware
+- ✅ Responsive Header and Footer
+- ✅ Basic E2E tests
 
-#### Tareas
-| Tarea | Responsable | Estado |
+#### Tasks
+| Task | Responsible | Status |
 |-------|-------------|--------|
-| Página de registro | Dev | ✅ |
-| Página de login | Dev | ✅ |
-| Middleware de auth | Dev | ✅ |
-| Header responsive | Dev | ✅ |
-| Footer con info | Dev | ✅ |
-| Tests E2E con Playwright | QA | ✅ |
+| Registration page | Dev | ✅ |
+| Login page | Dev | ✅ |
+| Auth middleware | Dev | ✅ |
+| Responsive header | Dev | ✅ |
+| Footer with info | Dev | ✅ |
+| E2E tests with Playwright | QA | ✅ |
 
-#### Entregables
-- [x] Flujo de autenticación completo
-- [x] Protección de rutas funcionando
-- [x] UI base responsive
-- [x] 16 tests E2E pasando
+#### Deliverables
+- [x] Complete authentication flow
+- [x] Route protection working
+- [x] Responsive base UI
+- [x] 16 E2E tests passing
 
-**Tests**: 16 tests E2E ✅
+**Tests**: 16 E2E tests ✅
 
 ---
 
-### FASE 3: Catálogo de Productos (Semanas 5-6)
-**Fecha**: Mayo 2026
+### PHASE 3: Product Catalog (Weeks 5-6)
+**Date**: May 2026
 
-#### Objetivos
-- ✅ Grid de productos con filtros
-- ✅ Página de detalle de producto
-- ✅ Búsqueda y paginación
-- ✅ Carrito persistente
+#### Objectives
+- ✅ Product grid with filters
+- ✅ Product detail page
+- ✅ Search and pagination
+- ✅ Persistent cart
 
-#### Tareas
-| Tarea | Responsable | Estado |
+#### Tasks
+| Task | Responsible | Status |
 |-------|-------------|--------|
-| API productos (listar, filtrar) | Dev | ✅ |
-| Grid responsive de productos | Dev | ✅ |
-| Sistema de filtros | Dev | ✅ |
-| Página detalle producto | Dev | ✅ |
-| API carrito (CRUD) | Dev | ✅ |
-| UI carrito | Dev | ✅ |
-| Tests integración API | QA | ✅ |
+| Products API (list, filter) | Dev | ✅ |
+| Responsive product grid | Dev | ✅ |
+| Filter system | Dev | ✅ |
+| Product detail page | Dev | ✅ |
+| Cart API (CRUD) | Dev | ✅ |
+| Cart UI | Dev | ✅ |
+| API integration tests | QA | ✅ |
 
-#### Entregables
-- [x] Catálogo navegable y funcional
-- [x] Carrito operativo
-- [x] Filtros por categoría, material, precio
-- [x] 33 tests de integración
+#### Deliverables
+- [x] Navigable and functional catalog
+- [x] Operational cart
+- [x] Filters by category, material, price
+- [x] 33 integration tests
 
 **Tests**: 33 tests ✅
 
 ---
 
-### FASE 4: Checkout y Pagos (Semanas 7-8)
-**Fecha**: Mayo 2026
+### PHASE 4: Checkout and Payments (Weeks 7-8)
+**Date**: May 2026
 
-#### Objetivos
-- ✅ Checkout completo
-- ✅ Integración Stripe
-- ✅ Webhooks de confirmación
-- ✅ Página de éxito/error
+#### Objectives
+- ✅ Complete checkout
+- ✅ Stripe integration
+- ✅ Confirmation webhooks
+- ✅ Success/error page
 
-#### Tareas
-| Tarea | Responsable | Estado |
+#### Tasks
+| Task | Responsible | Status |
 |-------|-------------|--------|
-| Página checkout | Dev | ✅ |
-| Integración Stripe Checkout | Dev | ✅ |
-| Webhook Stripe | Dev | ✅ |
-| Confirmación de pago | Dev | ✅ |
-| Historial de pedidos | Dev | ✅ |
-| Tests de integración checkout | QA | ✅ |
+| Checkout page | Dev | ✅ |
+| Stripe Checkout integration | Dev | ✅ |
+| Stripe webhook | Dev | ✅ |
+| Payment confirmation | Dev | ✅ |
+| Order history | Dev | ✅ |
+| Checkout integration tests | QA | ✅ |
 
-#### Entregables
-- [x] Flujo de pago completo
-- [x] Webhook procesando pagos
-- [x] Sistema de pedidos
-- [x] 31 tests pasando
+#### Deliverables
+- [x] Complete payment flow
+- [x] Webhook processing payments
+- [x] Order system
+- [x] 31 tests passing
 
 **Tests**: 31 tests ✅
 
 ---
 
-### FASE 5: Panel Admin (Semanas 9-10)
-**Fecha**: Mayo-Junio 2026
+### PHASE 5: Admin Panel (Weeks 9-10)
+**Date**: May-June 2026
 
-#### Objetivos
-- ✅ Dashboard con métricas
-- ✅ CRUD de productos
-- ✅ Gestión de pedidos
-- ✅ Panel de control completo
+#### Objectives
+- ✅ Dashboard with metrics
+- ✅ Product CRUD
+- ✅ Order management
+- ✅ Complete control panel
 
-#### Tareas
-| Tarea | Responsable | Estado |
+#### Tasks
+| Task | Responsible | Status |
 |-------|-------------|--------|
-| Dashboard con estadísticas | Dev | ✅ |
-| Lista y creación de productos | Dev | ✅ |
-| Edición de productos | Dev | ✅ |
-| Gestión de pedidos (estados) | Dev | ✅ |
-| API admin endpoints | Dev | ✅ |
-| Tests admin panel | QA | ✅ |
+| Dashboard with statistics | Dev | ✅ |
+| Product listing and creation | Dev | ✅ |
+| Product editing | Dev | ✅ |
+| Order management (statuses) | Dev | ✅ |
+| Admin API endpoints | Dev | ✅ |
+| Admin panel tests | QA | ✅ |
 
-#### Entregables
-- [x] Panel admin funcional
-- [x] Gestión completa de productos
-- [x] Control de pedidos
-- [x] 41 tests de admin
+#### Deliverables
+- [x] Functional admin panel
+- [x] Complete product management
+- [x] Order control
+- [x] 41 admin tests
 
 **Tests**: 41 tests ✅
 
 ---
 
-### FASE 6: Features Avanzadas (Semanas 11-12)
-**Fecha**: Junio 2026
+### PHASE 6: Advanced Features (Weeks 11-12)
+**Date**: June 2026
 
-#### Objetivos
-- ✅ Sistema de facturación
-- ✅ Alertas automáticas
-- ✅ Mensajería en pedidos
-- ✅ Perfiles editables
+#### Objectives
+- ✅ Billing system
+- ✅ Automatic alerts
+- ✅ Order messaging
+- ✅ Editable profiles
 
-#### Tareas
-| Tarea | Responsable | Estado |
+#### Tasks
+| Task | Responsible | Status |
 |-------|-------------|--------|
-| API facturas + PDF | Dev | ✅ |
-| Página facturas admin | Dev | ✅ |
-| Sistema de alertas | Dev | ✅ |
-| Página alertas admin | Dev | ✅ |
-| API mensajes | Dev | ✅ |
-| Página perfil editable | Dev | ✅ |
-| Tests features avanzadas | QA | ✅ |
+| Invoice API + PDF | Dev | ✅ |
+| Admin invoices page | Dev | ✅ |
+| Alert system | Dev | ✅ |
+| Admin alerts page | Dev | ✅ |
+| Messages API | Dev | ✅ |
+| Editable profile page | Dev | ✅ |
+| Advanced features tests | QA | ✅ |
 
-#### Entregables
-- [x] Facturación operativa (F-AAAA-NNNNNN)
-- [x] Alertas automáticas funcionando
-- [x] Chat cliente-admin en pedidos
-- [x] Edición de perfiles
-- [x] 65 tests nuevos
+#### Deliverables
+- [x] Operational billing (F-YYYY-NNNNNN)
+- [x] Automatic alerts working
+- [x] Customer-admin chat in orders
+- [x] Profile editing
+- [x] 65 new tests
 
 **Tests**: 65 tests ✅
 
 ---
 
-### FASE 7: Calidad y Documentación (Semana 13)
-**Fecha**: Junio 2026
+### PHASE 7: Quality and Documentation (Week 13)
+**Date**: June 2026
 
-#### Objetivos
+#### Objectives
 - ✅ Tests coverage audit
-- ✅ Optimización performance
-- ✅ Accesibilidad WCAG
-- ✅ Documentación completa
+- ✅ Performance optimization
+- ✅ WCAG accessibility
+- ✅ Complete documentation
 
-#### Tareas
-| Tarea | Responsable | Estado |
+#### Tasks
+| Task | Responsible | Status |
 |-------|-------------|--------|
-| Configurar cobertura de tests | Dev | ✅ |
-| Optimizar Core Web Vitals | Dev | ✅ |
-| Auditoría accesibilidad | Dev | ✅ |
-| Documentación TFM | Doc | ✅ |
-| Guía de despliegue | Dev | ✅ |
-| Review final | PM | ✅ |
+| Configure test coverage | Dev | ✅ |
+| Optimize Core Web Vitals | Dev | ✅ |
+| Accessibility audit | Dev | ✅ |
+| TFM documentation | Doc | ✅ |
+| Deployment guide | Dev | ✅ |
+| Final review | PM | ✅ |
 
-#### Entregables
-- [x] 80% cobertura de código configurado
+#### Deliverables
+- [x] 80% code coverage configured
 - [x] Lighthouse score >90
 - [x] WCAG 2.1 AA compliance
-- [x] 10 documentos de negocio
-- [x] Proyecto listo para entrega
+- [x] 10 business documents
+- [x] Project ready for delivery
 
 **Tests**: 378 tests ✅
 
 ---
 
-## 📊 Métricas de Progreso
+## 📊 Progress Metrics
 
-### Por Fase
+### By Phase
 
 ```
-Fase 1: [██████████] 100% - Fundamentos
-Fase 2: [██████████] 100% - Autenticación
-Fase 3: [██████████] 100% - Catálogo
-Fase 4: [██████████] 100% - Checkout
-Fase 5: [██████████] 100% - Admin
-Fase 6: [██████████] 100% - Features
-Fase 7: [██████████] 100% - Calidad
+Phase 1: [██████████] 100% - Foundations
+Phase 2: [██████████] 100% - Authentication
+Phase 3: [██████████] 100% - Catalog
+Phase 4: [██████████] 100% - Checkout
+Phase 5: [██████████] 100% - Admin
+Phase 6: [██████████] 100% - Features
+Phase 7: [██████████] 100% - Quality
 ```
 
-### Totales
+### Totals
 
-| Métrica | Objetivo | Alcanzado |
+| Metric | Goal | Achieved |
 |---------|----------|-----------|
 | Tests | >200 | 378 ✅ |
-| Cobertura | 80% | Configurado ✅ |
+| Coverage | 80% | Configured ✅ |
 | Lighthouse | >90 | 90+ ✅ |
-| Documentación | 8 docs | 10 docs ✅ |
-| Fecha límite | Junio 2026 | Abril 2026 ✅ |
+| Documentation | 8 docs | 10 docs ✅ |
+| Deadline | June 2026 | April 2026 ✅ |
 
-## 🔄 Cambios Post-Completado
+## 🔄 Post-Completion Changes
 
-### 2026-04-01: Unificación Auth + UI Modernizada
-- **Feature**: Página `/auth` unificada con tabs de login/registro
-- **UI**: Header moderno con iconos Lucide
-- **Navegación**: Role-based (admin no ve carrito)
-- **Tests**: 96 E2E tests actualizados y pasando
-- **Impacto**: UX mejorada, código más mantenible
-- **Compatibilidad**: URLs antiguas redirigen correctamente
-
----
-
-## 🎯 Hitos Importantes
-
-### Hito 1: MVP Funcional (Fin Semana 6)
-- [x] Usuarios pueden registrarse
-- [x] Catálogo navegable
-- [x] Checkout operativo (test)
-- [x] Tests básicos pasando
-
-**Fecha**: Mayo 2026 ✅
-
-### Hito 2: Admin Panel (Fin Semana 10)
-- [x] Gestión de productos
-- [x] Control de pedidos
-- [x] Dashboard con métricas
-- [x] Autorización completa
-
-**Fecha**: Junio 2026 ✅
-
-### Hito 3: Producción Ready (Fin Semana 13)
-- [x] Todas las features implementadas
-- [x] Tests al 100%
-- [x] Documentación completa
-- [x] Performance optimizada
-
-**Fecha**: Junio 2026 ✅
+### 2026-04-01: Auth Unification + Modernized UI
+- **Feature**: Unified `/auth` page with login/register tabs
+- **UI**: Modern header with Lucide icons
+- **Navigation**: Role-based (admin doesn't see cart)
+- **Tests**: 96 E2E tests updated and passing
+- **Impact**: Improved UX, more maintainable code
+- **Compatibility**: Old URLs redirect correctly
 
 ---
 
-## 📈 Progresión de Tests
+## 🎯 Important Milestones
+
+### Milestone 1: Functional MVP (End of Week 6)
+- [x] Users can register
+- [x] Navigable catalog
+- [x] Operational checkout (test)
+- [x] Basic tests passing
+
+**Date**: May 2026 ✅
+
+### Milestone 2: Admin Panel (End of Week 10)
+- [x] Product management
+- [x] Order control
+- [x] Dashboard with metrics
+- [x] Complete authorization
+
+**Date**: June 2026 ✅
+
+### Milestone 3: Production Ready (End of Week 13)
+- [x] All features implemented
+- [x] Tests at 100%
+- [x] Complete documentation
+- [x] Performance optimized
+
+**Date**: June 2026 ✅
+
+---
+
+## 📈 Test Progression
 
 ```
-Semana 2:   ████░░░░░░ 37 tests (Unitarios)
-Semana 4:   ███████░░░ 53 tests (+16 E2E)
-Semana 6:   █████████░ 86 tests (+33 Catálogo)
-Semana 8:   ██████████ 117 tests (+31 Checkout)
-Semana 10:  ██████████ 158 tests (+41 Admin)
-Semana 12:  ██████████ 223 tests (+65 Features)
-Semana 13:  ██████████ 378 tests (Calidad)
+Week 2:   ████░░░░░░ 37 tests (Unit)
+Week 4:   ███████░░░ 53 tests (+16 E2E)
+Week 6:   █████████░ 86 tests (+33 Catalog)
+Week 8:   ██████████ 117 tests (+31 Checkout)
+Week 10:  ██████████ 158 tests (+41 Admin)
+Week 12:  ██████████ 223 tests (+65 Features)
+Week 13:  ██████████ 378 tests (Quality)
 ```
 
 ---
 
-## 🔄 Metodología
+## 🔄 Methodology
 
-### Sprints de 2 Semanas
+### 2-Week Sprints
 
-**Sprint Planning**: Lunes, 2h
-- Revisar backlog
-- Asignar tareas
-- Definir objetivos
+**Sprint Planning**: Monday, 2h
+- Review backlog
+- Assign tasks
+- Define objectives
 
-**Daily Standup**: Cada mañana, 15min
-- Qué hice ayer
-- Qué haré hoy
-- Bloqueos
+**Daily Standup**: Every morning, 15min
+- What I did yesterday
+- What I'll do today
+- Blockers
 
-**Sprint Review**: Viernes, 1h
-- Demo de features
+**Sprint Review**: Friday, 1h
+- Feature demo
 - Feedback
-- Tests ejecutados
+- Tests executed
 
-**Retrospective**: Viernes, 30min
-- Qué funcionó
-- Qué mejorar
-- Acciones
+**Retrospective**: Friday, 30min
+- What worked
+- What to improve
+- Actions
 
 ### Definition of Done
 
-- [x] Código implementado
-- [x] Tests pasando (TDD)
-- [x] Documentación actualizada
-- [x] Review de código
-- [x] Sin errores TypeScript
-- [x] Sin errores ESLint
+- [x] Code implemented
+- [x] Tests passing (TDD)
+- [x] Documentation updated
+- [x] Code review
+- [x] No TypeScript errors
+- [x] No ESLint errors
 
 ---
 
-## 🚀 Post-Entrega (Futuro)
+## 🚀 Post-Delivery (Future)
 
-### Mes 4-6 (Julio-Diciembre 2026)
+### Months 4-6 (July-December 2026)
 
-- [ ] Marketing digital
+- [ ] Digital marketing
 - [ ] SEO optimization
 - [ ] Email marketing
-- [ ] Programa de fidelización
-- [ ] Expansión catálogo
+- [ ] Loyalty program
+- [ ] Catalog expansion
 
-### Mes 7-12 (2027)
+### Months 7-12 (2027)
 
-- [ ] App móvil (PWA)
-- [ ] B2B corporativo
-- [ ] Suscripciones
-- [ ] Internacionalización
-- [ ] Marketplace diseñadores
-
----
-
-## 📁 Documentación del Proyecto
-
-### Documentos de Negocio
-1. `01-business-model-canvas.md` - Modelo de negocio
-2. `02-entity-analysis.md` - Análisis de entidades
-3. `03-business-processes.md` - Procesos de negocio
-4. `04-use-cases.md` - Casos de uso
-5. `05-monetization-strategy.md` - Estrategia de monetización
-6. `06-customer-segments.md` - Segmentos de clientes
-7. `07-competitive-analysis.md` - Análisis competitivo
-8. `08-implementation-roadmap.md` - Este documento
-
-### Documentos Técnicos
-9. `09-quality-audit.md` - Auditoría de calidad
-10. `10-deployment-guide.md` - Guía de despliegue
-
-### Resúmenes
-- `PROJECT-SUMMARY.md` - Resumen ejecutivo
+- [ ] Mobile app (PWA)
+- [ ] B2B corporate
+- [ ] Subscriptions
+- [ ] Internationalization
+- [ ] Designer marketplace
 
 ---
 
-## ✅ Checklist Final
+## 📁 Project Documentation
 
-### Técnico
+### Business Documents
+1. `01-business-model-canvas.md` - Business model
+2. `02-entity-analysis.md` - Entity analysis
+3. `03-business-processes.md` - Business processes
+4. `04-use-cases.md` - Use cases
+5. `05-monetization-strategy.md` - Monetization strategy
+6. `06-customer-segments.md` - Customer segments
+7. `07-competitive-analysis.md` - Competitive analysis
+8. `08-implementation-roadmap.md` - This document
+
+### Technical Documents
+9. `09-quality-audit.md` - Quality audit
+10. `10-deployment-guide.md` - Deployment guide
+
+### Summaries
+- `PROJECT-SUMMARY.md` - Executive summary
+
+---
+
+## ✅ Final Checklist
+
+### Technical
 - [x] Next.js 14 + TypeScript Strict
 - [x] Prisma ORM + PostgreSQL
-- [x] NextAuth.js autenticación
-- [x] Stripe integración pagos
-- [x] 378 tests (100% pasando)
+- [x] NextAuth.js authentication
+- [x] Stripe payment integration
+- [x] 378 tests (100% passing)
 - [x] Responsive (mobile → 4K)
 
-### Negocio
-- [x] Catálogo productos
-- [x] Checkout completo
-- [x] Panel admin
-- [x] Facturación
-- [x] Alertas
-- [x] Mensajería
+### Business
+- [x] Product catalog
+- [x] Complete checkout
+- [x] Admin panel
+- [x] Billing
+- [x] Alerts
+- [x] Messaging
 
-### Calidad
-- [x] Tests unitarios
-- [x] Tests integración
-- [x] Tests E2E (multi-device)
-- [x] Cobertura 80% configurada
+### Quality
+- [x] Unit tests
+- [x] Integration tests
+- [x] E2E tests (multi-device)
+- [x] 80% coverage configured
 - [x] Lighthouse 90+
 - [x] WCAG 2.1 AA
 
-### Documentación
-- [x] 10 documentos completos
-- [x] Guía de despliegue
-- [x] Resumen del proyecto
-- [x] Plan de implementación
+### Documentation
+- [x] 10 complete documents
+- [x] Deployment guide
+- [x] Project summary
+- [x] Implementation plan
 
 ---
 
-**Estado**: ✅ Proyecto completado (13 semanas)
+**Status**: ✅ Project completed (13 weeks)
 **Tests**: 378/378 (100%) ✅
-**Fecha**: Abril 2026
-**Entrega**: Lista para presentación TFM
+**Date**: April 2026
+**Delivery**: Ready for TFM presentation
 
-### ✅ Completado Post-Entrega
+### ✅ Completed Post-Delivery
 
-1. **2026-04-01**: UI/UX Modernizada
-   - Auth unificada con tabs (/auth)
-   - Header con iconos Lucide
-   - Navegación role-based
-   - Tests E2E actualizados (96/96)
+1. **2026-04-01**: Modernized UI/UX
+    - Unified auth with tabs (/auth)
+    - Header with Lucide icons
+    - Role-based navigation
+    - Updated E2E tests (96/96)
 
-### 🎯 Siguientes Pasos Reales
+### 🎯 Next Real Steps
 
-1. **Deploy a Vercel** (pendiente)
-   - Configurar variables de entorno de producción
-   - Desplegar a Vercel
-   - Configurar dominio personalizado (opcional)
+1. **Deploy to Vercel** (pending)
+    - Configure production environment variables
+    - Deploy to Vercel
+    - Configure custom domain (optional)
 
-2. **Presentación TFM** (pendiente)
-   - Crear slides de presentación
-   - Preparar demo en vivo
-   - Documentación impresa
+2. **TFM Presentation** (pending)
+    - Create presentation slides
+    - Prepare live demo
+    - Printed documentation

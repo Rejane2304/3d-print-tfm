@@ -1,59 +1,59 @@
-# Migración a Estándares de Industria (Inglés)
+# Migration to Industry Standards (English)
 
-**Fecha inicio:** 2 Abril 2026  
+**Start date:** April 2, 2026  
 **Branch:** `refactor/english-migration`  
-**Status:** ✅ COMPLETADA - FASE 1
+**Status:** ✅ COMPLETED - PHASE 1
 
 ---
 
-## FASES
+## PHASES
 
-### FASE 1: Base de Datos y Prisma ✅ COMPLETADA
-- [x] Reescribir schema.prisma (17 models, 11 enums, 60+ fields) - 100% INGLÉS
-- [x] Todos los nombres de modelos en inglés: User, Product, Order, etc.
-- [x] Todos los nombres de campos en inglés: name, price, quantity, etc.
-- [x] Todos los valores de enums en inglés: CUSTOMER, PENDING, SHIPPED, etc.
-- [x] Usar @map() para mantener compatibilidad con nombres de columnas en BD
-- [x] Reescribir seed.ts con nombres en inglés
-- [x] Forzar push a BD: `npx prisma db push --force-reset`
-- [x] Ejecutar seed: ✅ 38 registros creados (10 users, 10 products, 10 orders, 8 alerts)
-- [x] Limpiar archivos temporales
+### PHASE 1: Database and Prisma ✅ COMPLETED
+- [x] Rewrite schema.prisma (17 models, 11 enums, 60+ fields) - 100% ENGLISH
+- [x] All model names in English: User, Product, Order, etc.
+- [x] All field names in English: name, price, quantity, etc.
+- [x] All enum values in English: CUSTOMER, PENDING, SHIPPED, etc.
+- [x] Use @map() to maintain compatibility with DB column names
+- [x] Rewrite seed.ts with names in English
+- [x] Force push to DB: `npx prisma db push --force-reset`
+- [x] Execute seed: ✅ 38 records created (10 users, 10 products, 10 orders, 8 alerts)
+- [x] Clean temporary files
 - [x] Commit: `28b5e12` - feat: migrate Prisma schema to English with @map()
 
-### FASE 2: Código Core 🔴 PENDIENTE
+### PHASE 2: Core Code 🔴 PENDING
 - [ ] /src/lib/validators/index.ts
 - [ ] /src/lib/auth/auth-options.ts
 - [ ] /src/types/next-auth.d.ts
-- [ ] API Routes (26 archivos)
-- [ ] Components (14 archivos)
-- [ ] Hooks (2 archivos)
+- [ ] API Routes (26 files)
+- [ ] Components (14 files)
+- [ ] Hooks (2 files)
 
-### FASE 3: Tests 🔴 PENDIENTE
+### PHASE 3: Tests 🔴 PENDING
 - [ ] tests/helpers.ts
-- [ ] Integration tests (6 archivos)
-- [ ] E2E tests (6 archivos)
+- [ ] Integration tests (6 files)
+- [ ] E2E tests (6 files)
 - [ ] Unit tests
 
-### FASE 4: Verificación Final 🔴 PENDIENTE
-- [ ] Build sin errores
-- [ ] Tests pasando
-- [ ] Documentación actualizada
-- [ ] Commit final
+### PHASE 4: Final Verification 🔴 PENDING
+- [ ] Build without errors
+- [ ] Tests passing
+- [ ] Documentation updated
+- [ ] Final commit
 
 ---
 
-## 📝 REGISTRO DE CAMBIOS
+## 📝 CHANGE LOG
 
-### 2026-04-02 21:XX - FASE 1 COMPLETADA
-- ✅ Schema.prisma 100% en inglés (nombres de modelos, campos Y valores de enums)
-- ✅ BD sincronizada con `prisma db push --force-reset`
-- ✅ Seed ejecutado exitosamente (38 registros)
-- ✅ Archivos temporales eliminados
-- ✅ Commit realizado: `28b5e12`
+### 2026-04-02 21:XX - PHASE 1 COMPLETED
+- ✅ Schema.prisma 100% in English (model names, fields AND enum values)
+- ✅ DB synchronized with `prisma db push --force-reset`
+- ✅ Seed executed successfully (38 records)
+- ✅ Temporary files deleted
+- ✅ Commit made: `28b5e12`
 
 ---
 
-## 🗂️ MAPEO DE CAMBIOS PRISMA - 100% EN INGLÉS
+## 🗂️ PRISMA CHANGES MAPPING - 100% IN ENGLISH
 
 ### Models (17):
 ```
@@ -72,11 +72,11 @@ Factura → Invoice
 MensajePedido → OrderMessage
 ConfiguracionEnvio → ShippingConfig
 Configuracion → SiteConfig
-Session → Session (sin cambio)
+Session → Session (no change)
 LogAuditoria → AuditLog
 ```
 
-### Enums (11) - Nombres Y valores en inglés:
+### Enums (11) - Names AND values in English:
 ```
 Rol → Role (CLIENTE → CUSTOMER, ADMIN → ADMIN)
 Categoria → Category (DECORACION → DECORATION, ACCESORIOS → ACCESSORIES, etc.)
@@ -87,10 +87,10 @@ TipoMovimiento → MovementType (ENTRADA → IN, SALIDA → OUT, etc.)
 TipoAlerta → AlertType (STOCK_BAJO → LOW_STOCK, SIN_STOCK → OUT_OF_STOCK, etc.)
 SeveridadAlerta → AlertSeverity (BAJA → LOW, MEDIA → MEDIUM, etc.)
 EstadoAlerta → AlertStatus (PENDIENTE → PENDING, EN_PROGRESO → IN_PROGRESS, etc.)
-Material → Material (sin cambios - ya estaban en inglés)
+Material → Material (no changes - already in English)
 ```
 
-### Campos principales con @map():
+### Main fields with @map():
 ```
 name → @map("nombre")
 description → @map("descripcion")
@@ -101,7 +101,7 @@ phone → @map("telefono")
 postalCode → @map("codigoPostal")
 city → @map("ciudad")
 province → @map("provincia")
-country → @map("pais") - default("Spain") en lugar de "España"
+country → @map("pais") - default("Spain") instead of "España"
 status → @map("estado")
 paymentMethod → @map("metodoPago")
 isActive → @map("activo")
@@ -114,32 +114,32 @@ orderId → @map("pedidoId")
 
 ---
 
-## ✅ RESULTADO FASE 1
+## ✅ PHASE 1 RESULT
 
-**Base de datos:**
-- ✅ Schema 100% en inglés
-- ✅ BD sincronizada
-- ✅ 38 registros de seed creados exitosamente
-- ✅ Prisma Client regenerado sin errores
+**Database:**
+- ✅ Schema 100% in English
+- ✅ DB synchronized
+- ✅ 38 seed records created successfully
+- ✅ Prisma Client regenerated without errors
 
-**Archivos modificados:**
-- ✅ `prisma/schema.prisma` - 100% inglés
-- ✅ `prisma/seed.ts` - Actualizado con enums en inglés
+**Modified files:**
+- ✅ `prisma/schema.prisma` - 100% English
+- ✅ `prisma/seed.ts` - Updated with English enums
 
 **Commits:**
 - ✅ `28b5e12` - feat: migrate Prisma schema to English with @map()
 
 ---
 
-## 📋 PRÓXIMOS PASOS - FASE 2
+## 📋 NEXT STEPS - PHASE 2
 
-Actualizar archivos de código fuente para usar los nuevos nombres de Prisma:
+Update source code files to use the new Prisma names:
 
-1. **src/lib/validators/index.ts** - Actualizar referencias a enums (Category, OrderStatus, etc.)
-2. **src/lib/auth/auth-options.ts** - Actualizar referencias a User, Role
-3. **src/types/next-auth.d.ts** - Actualizar tipos de sesión
-4. **API Routes** - Actualizar todas las referencias de modelos (producto → product, etc.)
-5. **Components** - Actualizar props e interfaces
-6. **Hooks** - Actualizar useCart y otros
+1. **src/lib/validators/index.ts** - Update enum references (Category, OrderStatus, etc.)
+2. **src/lib/auth/auth-options.ts** - Update references to User, Role
+3. **src/types/next-auth.d.ts** - Update session types
+4. **API Routes** - Update all model references (producto → product, etc.)
+5. **Components** - Update props and interfaces
+6. **Hooks** - Update useCart and others
 
-**Nota:** El código ahora usa nombres 100% en inglés, pero los valores de la UI siguen en español.
+**Note:** The code now uses 100% English names, but UI values remain in Spanish.

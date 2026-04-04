@@ -1,88 +1,88 @@
-# GUÍA DE DESPLIEGUE - 3D PRINT TFM
+# DEPLOYMENT GUIDE - 3D PRINT TFM
 
-## 🚀 Preparación para Producción
+## 🚀 Production Preparation
 
-### Requisitos Previos
+### Prerequisites
 
-- [ ] Cuenta en Vercel (recomendado) o similar
-- [ ] Cuenta en Supabase (PostgreSQL)
-- [ ] Cuenta en Stripe (modo producción)
-- [ ] Dominio configurado (opcional)
+- [ ] Vercel account (recommended) or similar
+- [ ] Supabase account (PostgreSQL)
+- [ ] Stripe account (production mode)
+- [ ] Domain configured (optional)
 
-## 📋 Checklist Pre-Despliegue
+## 📋 Pre-Deployment Checklist
 
-### 1. Variables de Entorno
+### 1. Environment Variables
 
-Crear archivo `.env.production`:
+Create `.env.production` file:
 
 ```bash
-# Base de datos (Supabase Production)
+# Database (Supabase Production)
 DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT_REF].supabase.co:5432/postgres?pgbouncer=true&connection_limit=1"
 
 # NextAuth
-NEXTAUTH_SECRET="tu-secreto-muy-seguro-32-caracteres"
-NEXTAUTH_URL="https://tu-dominio.vercel.app"
+NEXTAUTH_SECRET="your-very-secure-secret-32-characters"
+NEXTAUTH_URL="https://your-domain.vercel.app"
 
-# Stripe (Producción)
+# Stripe (Production)
 STRIPE_SECRET_KEY="sk_live_..."
 STRIPE_PUBLISHABLE_KEY="pk_live_..."
 STRIPE_WEBHOOK_SECRET="whsec_..."
 
-# Configuración
+# Configuration
 NODE_ENV="production"
 ```
 
-### 4. Notas sobre Auth Unificada
+### 4. Notes on Unified Auth
 
-**Cambio reciente (2026-04-01)**: El sistema ahora usa una página `/auth` unificada con tabs para login y registro.
+**Recent change (2026-04-01)**: The system now uses a unified `/auth` page with tabs for login and register.
 
-- **URLs nuevas**:
-  - `/auth` - Página unificada (tab login por defecto)
-  - `/auth?tab=register` - Tab de registro
+- **New URLs**:
+  - `/auth` - Unified page (login tab by default)
+  - `/auth?tab=register` - Register tab
 
-- **URLs antiguas** (redirigen automáticamente):
+- **Old URLs** (redirect automatically):
   - `/login` → `/auth`
   - `/registro` → `/auth?tab=register`
 
-- **No requiere cambios en despliegue**: Las redirecciones son automáticas en la aplicación.
+- **No deployment changes required**: Redirects are automatic in the application.
 
-### 2. Base de Datos
+### 2. Database
 
 ```bash
-# 1. Crear proyecto en Supabase
-# 2. Copiar DATABASE_URL del panel de Supabase
-# 3. Ejecutar migraciones
+# 1. Create project in Supabase
+# 2. Copy DATABASE_URL from Supabase panel
+# 3. Run migrations
 npx prisma migrate deploy
 
-# 4. Cargar datos iniciales (opcional)
+# 4. Load initial data (optional)
 npm run db:seed
 ```
 
 ### 3. Stripe Configuration
 
-1. Cambiar a modo producción en Stripe Dashboard
-2. Actualizar webhook URL: `https://tu-dominio.com/api/webhooks/stripe`
-3. Verificar eventos suscritos:
+1. Switch to production mode in Stripe Dashboard
+2. Update webhook URL: `https://your-domain.com/api/webhooks/stripe`
+3. Verify subscribed events:
    - `checkout.session.completed`
    - `payment_intent.succeeded`
    - `payment_intent.payment_failed`
 
-## 🔧 Configuración Vercel
+## 🔧 Vercel Configuration
 
-### 1. Importar Proyecto
+### 1. Import Project
 
 ```bash
-# Opción A: CLI
+# Option A: CLI
 npm i -g vercel
 vercel --prod
 
-# Opción B: Git Integration
-# Conectar repositorio en dashboard.vercel.com
+# Option B: Git Integration
+# Connect repository at dashboard.vercel.com
 ```
 
-### 2. Environment Variables en Vercel
+### 2. Environment Variables in Vercel
 
-Agregar en Project Settings → Environment Variables:
+Add in Project Settings → Environment Variables:
 
 ```
 DATABASE_URL=...
@@ -104,33 +104,33 @@ STRIPE_WEBHOOK_SECRET=...
 }
 ```
 
-## 📊 Configuración de Dominio Personalizado
+## 📊 Custom Domain Configuration
 
-### Opción A: Vercel (Recomendado)
+### Option A: Vercel (Recommended)
 
-1. Comprar dominio en Vercel o transferir
-2. Configurar DNS:
+1. Buy domain in Vercel or transfer
+2. Configure DNS:
    ```
    A Record: @ → 76.76.21.21
    CNAME: www → cname.vercel-dns.com
    ```
 
-### Opción B: Dominio Externo
+### Option B: External Domain
 
-1. Agregar dominio en Vercel Dashboard
-2. Copiar registros DNS proporcionados
-3. Configurar en proveedor DNS
-4. Esperar propagación (24-48h)
+1. Add domain in Vercel Dashboard
+2. Copy provided DNS records
+3. Configure at DNS provider
+4. Wait for propagation (24-48h)
 
-## 🔒 Configuración de Seguridad
+## 🔒 Security Configuration
 
 ### HTTPS/SSL
-- ✅ Automático en Vercel
-- ✅ Certificados SSL gratuitos (Let's Encrypt)
+- ✅ Automatic in Vercel
+- ✅ Free SSL certificates (Let's Encrypt)
 
-### Headers de Seguridad
+### Security Headers
 
-Agregar a `next.config.js`:
+Add to `next.config.js`:
 
 ```javascript
 async headers() {
@@ -162,16 +162,16 @@ async headers() {
 
 ### Rate Limiting
 
-Configurado en middleware para:
-- Login: 5 intentos / minuto
-- API general: 100 requests / minuto
+Configured in middleware for:
+- Login: 5 attempts / minute
+- General API: 100 requests / minute
 
-## 📈 Monitoreo
+## 📈 Monitoring
 
 ### Vercel Analytics
 
-1. Habilitar en Dashboard: Analytics → Web Vitals
-2. Ver métricas en tiempo real:
+1. Enable in Dashboard: Analytics → Web Vitals
+2. View real-time metrics:
    - LCP
    - FID
    - CLS
@@ -179,14 +179,14 @@ Configurado en middleware para:
 
 ### Logs
 
-Acceder en Vercel Dashboard:
+Access in Vercel Dashboard:
 - Functions Logs
 - Build Logs
 - Edge Network Logs
 
 ## 🔄 CI/CD Pipeline
 
-### GitHub Actions (Opcional)
+### GitHub Actions (Optional)
 
 ```yaml
 # .github/workflows/deploy.yml
@@ -221,82 +221,82 @@ jobs:
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
 ```
 
-## 📦 Verificación Post-Despliegue
+## 📦 Post-Deployment Verification
 
-### 1. Funcionalidad Básica
+### 1. Basic Functionality
 
-- [ ] Página principal carga
-- [ ] Navegación funciona
-- [ ] Catálogo de productos carga
-- [ ] Filtros funcionan
-- [ ] Responsive en mobile
+- [ ] Home page loads
+- [ ] Navigation works
+- [ ] Product catalog loads
+- [ ] Filters work
+- [ ] Responsive on mobile
 
-### 2. Autenticación
+### 2. Authentication
 
-- [ ] Registro de usuarios
-- [ ] Login funciona
-- [ ] Logout funciona
-- [ ] Redirecciones correctas
-- [ ] Admin puede acceder a /admin
+- [ ] User registration
+- [ ] Login works
+- [ ] Logout works
+- [ ] Correct redirects
+- [ ] Admin can access /admin
 
-### 3. Carrito y Checkout
+### 3. Cart and Checkout
 
-- [ ] Agregar al carrito
-- [ ] Modificar cantidades
-- [ ] Checkout con Stripe
-- [ ] Webhook procesa pagos
-- [ ] Email de confirmación (si configurado)
+- [ ] Add to cart
+- [ ] Modify quantities
+- [ ] Checkout with Stripe
+- [ ] Webhook processes payments
+- [ ] Confirmation email (if configured)
 
-### 4. Panel Admin
+### 4. Admin Panel
 
-- [ ] Dashboard carga
-- [ ] CRUD de productos
-- [ ] Gestión de pedidos
-- [ ] Facturación funciona
-- [ ] Alertas funcionan
+- [ ] Dashboard loads
+- [ ] Product CRUD
+- [ ] Order management
+- [ ] Billing works
+- [ ] Alerts work
 
 ## 🆘 Troubleshooting
 
 ### Error: "relation does not exist"
 
-**Solución**: Ejecutar migraciones
+**Solution**: Run migrations
 ```bash
 npx prisma migrate deploy
 ```
 
-### Error: Stripe webhook no funciona
+### Error: Stripe webhook not working
 
-**Verificar**:
-1. URL webhook correcta
-2. Secreto configurado
-3. Eventos suscritos
+**Verify**:
+1. Correct webhook URL
+2. Secret configured
+3. Subscribed events
 
-### Error: Build falla
+### Error: Build fails
 
-**Verificar**:
-1. Variables de entorno configuradas
-2. `next.config.js` válido
-3. Dependencias instaladas
+**Verify**:
+1. Environment variables configured
+2. Valid `next.config.js`
+3. Dependencies installed
 
-### Error: 404 en rutas dinámicas
+### Error: 404 on dynamic routes
 
-**Verificar**:
-1. Configuración de rewrites en `next.config.js`
-2. ISR configurado correctamente
+**Verify**:
+1. Rewrites configuration in `next.config.js`
+2. ISR configured correctly
 
-## 📞 Soporte
+## 📞 Support
 
-### Recursos
+### Resources
 
-- **Documentación Next.js**: https://nextjs.org/docs
-- **Documentación Prisma**: https://www.prisma.io/docs
-- **Documentación Stripe**: https://stripe.com/docs
-- **Documentación Supabase**: https://supabase.com/docs
+- **Next.js Documentation**: https://nextjs.org/docs
+- **Prisma Documentation**: https://www.prisma.io/docs
+- **Stripe Documentation**: https://stripe.com/docs
+- **Supabase Documentation**: https://supabase.com/docs
 
-### Comandos Útiles
+### Useful Commands
 
 ```bash
-# Ver logs en tiempo real
+# View real-time logs
 vercel logs --follow
 
 # Rollback
@@ -305,30 +305,30 @@ vercel rollback
 # Redeploy
 vercel --force
 
-# Test local en modo producción
+# Test locally in production mode
 npm run build && npm start
 ```
 
-## ✅ Checklist Final
+## ✅ Final Checklist
 
-Antes del lanzamiento:
+Before launch:
 
-- [ ] Tests pasando (378)
+- [ ] Tests passing (378)
 - [ ] Lighthouse score > 90
-- [ ] SSL funcionando
-- [ ] Webhook Stripe configurado
-- [ ] Base de datos en producción
-- [ ] Variables de entorno configuradas
-- [ ] Dominio configurado
-- [ ] Analytics habilitado
-- [ ] Backup configurado (si aplica)
+- [ ] SSL working
+- [ ] Stripe webhook configured
+- [ ] Production database
+- [ ] Environment variables configured
+- [ ] Domain configured
+- [ ] Analytics enabled
+- [ ] Backup configured (if applicable)
 
 ---
 
-**Nota**: Este es un proyecto académico. Para producción real, considerar:
-- Plan de hosting adecuado
-- Monitoring avanzado (Sentry, LogRocket)
-- Tests de carga
+**Note**: This is an academic project. For real production, consider:
+- Appropriate hosting plan
+- Advanced monitoring (Sentry, LogRocket)
+- Load tests
 - Disaster recovery plan
 
-**Última actualización**: 2026-04-01
+**Last updated**: 2026-04-01

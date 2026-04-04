@@ -1,206 +1,3 @@
-# Análisis de Entidades - 3D Print TFM
-
-## 📊 Modelo de Datos
-
-### Resumen de Entidades
-
-El sistema cuenta con **18 modelos** principales organizados en 4 categorías funcionales:
-
-```
-┌─────────────────────────────────────────┐
-│           USUARIOS Y AUTH              │
-├─────────────────────────────────────────┤
-│ • Usuario                              │
-│ • Cuenta (NextAuth)                    │
-│ • Session                              │
-│ • VerificationToken                    │
-└─────────────────────────────────────────┘
-
-┌─────────────────────────────────────────┐
-│           CATÁLOGO Y SHOP              │
-├─────────────────────────────────────────┤
-│ • Producto                             │
-│ • Categoría                            │
-│ • Material                             │
-│ • Stock/Movimientos                    │
-└─────────────────────────────────────────┘
-
-┌─────────────────────────────────────────┐
-│           COMPRAS Y PAGOS              │
-├─────────────────────────────────────────┤
-│ • Carrito                              │
-│ • ItemCarrito                          │
-│ • Pedido                               │
-│ • DetallePedido                        │
-│ • Pago                                 │
-│ • Factura                              │
-└─────────────────────────────────────────┘
-
-┌─────────────────────────────────────────┐
-│           ADMIN Y LOGS                 │
-├─────────────────────────────────────────┤
-│ • Direccion                            │
-│ • Alerta                               │
-│ • MensajePedido                        │
-│ • LogAuditoria                         │
-│ • MovimientoInventario                 │
-└─────────────────────────────────────────┘
-```
-
----
-
-## 👤 ENTIDADES DE USUARIO
-
-### Usuario
-**Propósito**: Gestión de usuarios del sistema
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| id | UUID | Identificador único |
-| email | String | Email único para login |
-| password | String | Hash bcrypt de contraseña |
-| nombre | String | Nombre completo |
-| rol | Enum | CLIENTE / ADMIN |
-| nif | String | NIF español (facturación) |
-| telefono | String | Contacto telefónico |
-| activo | Boolean | Estado de la cuenta |
-| emailVerificado | DateTime | Verificación de email |
-| creadoEn | DateTime | Fecha de registro |
-
-**Relaciones**:
-- Uno a muchos: Pedidos, Facturas, Direcciones, Alertas
-- Uno a uno: Cuenta (NextAuth)
-
-**Reglas de Negocio**:
-- Email debe ser único
-- Rol por defecto: CLIENTE
-- NIF validado formato español (8 dígitos + letra)
-
----
-
-## 🛍️ ENTIDADES DE CATÁLOGO
-
-### Producto
-**Propósito**: Catálogo de productos impresos en 3D
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| id | UUID | Identificador único |
-| nombre | String | Nombre del producto |
-| slug | String | URL amigable única |
-| descripcion | String | Descripción larga |
-| descripcionCorta | String | Resumen (140 chars) |
-| precio | Decimal | Precio en EUR |
-| stock | Int | Unidades disponibles |
-| stockMinimo | Int | Umbral alerta stock bajo |
-| sku | String | Código único de producto |
-| categoria | Enum | DECORACION / TECNICO / JOYERIA / ARTE / HOGAR |
-| material | Enum | PLA / PETG / ABS / FLEX / RESINA |
-| color | String | Color disponible |
-| tiempoImpresion | Int | Minutos estimados |
-| peso | Decimal | Gramos de filamento |
-| dimensiones | Json | {largo, ancho, alto} |
-| imagenes | Json | Array de URLs |
-| activo | Boolean | Visible en tienda |
-| destacado | Boolean | Aparece en home |
-
-**Relaciones**:
-- Uno a muchos: ItemsCarrito, DetallePedido, MovimientosInventario, Alertas
-- Muchos a uno: Categoria (implícito), Material (implícito)
-
-**Reglas de Negocio**:
-- Slug único y SEO-friendly
-- Stock no puede ser negativo
-- Precio > 0
-- Imagen principal obligatoria
-
----
-
-### Material
-**Propósito**: Tipos de filamentos disponibles
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| tipo | Enum | PLA / PETG / ABS / FLEX / RESINA |
-| nombre | String | Nombre comercial |
-| descripcion | String | Características |
-| precioKg | Decimal | Coste por kg |
-| biodegradable | Boolean | Eco-friendly |
-| temperatura | Int | Temp impresión (°C) |
-
-**Materiales Soportados**:
-- **PLA**: Biodegradable, fácil impresión, colores variados
-- **PETG**: Resistente, transparente, alimenticio
-- **ABS**: Resistente a impactos, alta temperatura
-- **FLEX**: Flexible, TPU
-- **RESINA**: Alta calidad, detalle fino
-
----
-
-## 🛒 ENTIDADES DE COMPRA
-
-### Carrito
-**Propósito**: Carrito temporal de compras
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| id | UUID | Identificador |
-| usuarioId | UUID | Dueño del carrito |
-| sessionId | String | Para usuarios anónimos |
-| items | Relación | Productos en carrito |
-| creadoEn | DateTime | Fecha creación |
-| actualizadoEn | DateTime | Última modificación |
-
-**Reglas de Negocio**:
-- Un carrito por usuario
-- Items expiran después de 30 días
-- Stock verificado en checkout
-
----
-
-### Pedido
-**Propósito**: Registro de compras completadas
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| id | UUID | Identificador único |
-| numeroPedido | String | P-20260001 (secuencial) |
-| usuarioId | UUID | Cliente |
-| estado | Enum | PENDIENTE / CONFIRMADO / PREPARANDO / ENVIADO / ENTREGADO / CANCELADO |
-| subtotal | Decimal | Suma de items |
-| envio | Decimal | Coste envío |
-| total | Decimal | Total a pagar |
-| nombreEnvio | String | Destinatario |
-| direccionEnvio | String | Dirección completa |
-| telefonoEnvio | String | Teléfono contacto |
-| metodoPago | Enum | TARJETA / TRANSFERENCIA |
-| notas | String | Instrucciones especiales |
-| creadoEn | DateTime | Fecha del pedido |
-
-**Relaciones**:
-- Muchos a uno: Usuario
-- Uno a muchos: DetallePedido, Pago, Factura, Mensajes
-
-**Ciclo de Vida**:
-```
-PENDIENTE → CONFIRMADO → PREPARANDO → ENVIADO → ENTREGADO
-     ↓
-CANCELADO (en cualquier punto)
-```
-
----
-
-### Pago
-**Propósito**: Registro de transacciones de pago
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| id | UUID | Identificador |
-| pedidoId | UUID | Pedido asociado |
-| stripeSessionId | String | Referencia Stripe |
-| stripePaymentIntentId | String | ID de pago Stripe |
-| monto | Decimal | Cantidad pagada |
-| estado | Enum | PENDIENTE / COMPLETADO / FALLIDO / REEMBOLSADO |
 # Entity Analysis - 3D Print TFM
 
 ## 📊 Data Model
@@ -210,44 +7,44 @@ CANCELADO (en cualquier punto)
 The system has **18 main models** organized into 4 functional categories:
 
 ```
-┌──────────────────────────────┐
+┌─────────────────────────────────────────┐
 │           USERS & AUTH                │
-├──────────────────────────────┤
-│ • User                                 │
-│ • Account (NextAuth)                   │
-│ • Session                              │
-│ • VerificationToken                    │
-└──────────────────────────────┘
+├─────────────────────────────────────────┤
+│ • User                                  │
+│ • Account (NextAuth)                    │
+│ • Session                               │
+│ • VerificationToken                     │
+└─────────────────────────────────────────┘
 
-┌──────────────────────────────┐
-│           CATALOG & SHOP               │
-├──────────────────────────────┤
-│ • Product                              │
-│ • Category                             │
-│ • Material                             │
-│ • Stock/Movements                      │
-└──────────────────────────────┘
+┌─────────────────────────────────────────┐
+│           CATALOG & SHOP                │
+├─────────────────────────────────────────┤
+│ • Product                               │
+│ • Category                              │
+│ • Material                              │
+│ • Stock/Movements                       │
+└─────────────────────────────────────────┘
 
-┌──────────────────────────────┐
-│           PURCHASES & PAYMENTS         │
-├──────────────────────────────┤
-│ • Cart                                 │
-│ • CartItem                             │
-│ • Order                                │
-│ • OrderDetail                          │
-│ • Payment                              │
-│ • Invoice                              │
-└──────────────────────────────┘
+┌─────────────────────────────────────────┐
+│           PURCHASES & PAYMENTS          │
+├─────────────────────────────────────────┤
+│ • Cart                                  │
+│ • CartItem                              │
+│ • Order                                 │
+│ • OrderDetail                           │
+│ • Payment                               │
+│ • Invoice                               │
+└─────────────────────────────────────────┘
 
-┌──────────────────────────────┐
-│           ADMIN & LOGS                 │
-├──────────────────────────────┤
-│ • Address                              │
-│ • Alert                                │
-│ • OrderMessage                         │
-│ • AuditLog                             │
-│ • InventoryMovement                    │
-└──────────────────────────────┘
+┌─────────────────────────────────────────┐
+│           ADMIN & LOGS                  │
+├─────────────────────────────────────────┤
+│ • Address                               │
+│ • Alert                                 │
+│ • OrderMessage                          │
+│ • AuditLog                              │
+│ • InventoryMovement                     │
+└─────────────────────────────────────────┘
 ```
 
 ---
