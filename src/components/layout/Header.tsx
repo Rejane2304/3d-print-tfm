@@ -191,7 +191,17 @@ export default function Header() {
                   </div>
                 )}
               </div>
-            ) : null}
+            ) : (
+              /* Login Button for Unauthenticated Users */
+              <Link
+                href="/auth"
+                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                title="Iniciar sesión"
+              >
+                <User className="h-5 w-5" />
+                <span className="text-sm font-medium hidden sm:block">Iniciar sesión</span>
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
