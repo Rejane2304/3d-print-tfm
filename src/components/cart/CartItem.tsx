@@ -122,6 +122,7 @@ export default function CartItem({
               min={1}
               max={item.product.stock}
               disabled={isUpdating}
+              data-testid="cart-item-quantity"
               className="w-16 text-center border border-gray-300 rounded-md py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             />
 
@@ -131,6 +132,7 @@ export default function CartItem({
               onClick={() => handleQuantityChange(quantity + 1)}
               disabled={quantity >= item.product.stock || isUpdating}
               aria-label="Incrementar cantidad"
+              data-testid="quantity-increase"
               className="p-2 rounded-md border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <Plus className="h-4 w-4" />
@@ -163,6 +165,7 @@ export default function CartItem({
               onClick={handleRemoveClick}
               disabled={isUpdating}
               aria-label="Eliminar del carrito"
+              data-testid="remove-item-button"
               className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors disabled:opacity-50"
             >
               {isUpdating ? (

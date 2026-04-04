@@ -60,7 +60,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   const mainImage = product.images[0];
   
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div data-testid="product-detail" className="min-h-screen bg-gray-50">
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 3xl:px-20 py-8 lg:py-12">
         {/* Breadcrumb */}
         <nav className="mb-6 text-sm text-gray-600">

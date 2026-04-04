@@ -145,7 +145,7 @@ export default function CarritoPage() {
                 ))}
               </div>
             ) : (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+              <div data-testid="empty-cart" className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
                 <div className="text-gray-400 mb-4">
                   <svg
                     className="h-24 w-24 mx-auto"

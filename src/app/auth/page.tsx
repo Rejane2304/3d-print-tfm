@@ -228,6 +228,7 @@ export default function AuthPage() {
           <div className="flex border-b border-gray-200">
             <button
               onClick={() => handleTabSwitch('login')}
+              data-testid="login-tab"
               className={`flex-1 flex items-center justify-center gap-2 py-4 text-sm font-medium transition-all duration-300 ${
                 activeTab === 'login'
                   ? 'text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50/50'
@@ -239,6 +240,7 @@ export default function AuthPage() {
             </button>
             <button
               onClick={() => handleTabSwitch('register')}
+              data-testid="register-tab"
               className={`flex-1 flex items-center justify-center gap-2 py-4 text-sm font-medium transition-all duration-300 ${
                 activeTab === 'register'
                   ? 'text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50/50'
@@ -276,7 +278,7 @@ export default function AuthPage() {
             >
               <form onSubmit={handleLogin} className="space-y-5">
                 {loginError && (
-                  <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg">
+                  <div data-testid="login-error" className="bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg">
                     <p className="text-sm text-red-700">{loginError}</p>
                   </div>
                 )}
@@ -292,7 +294,7 @@ export default function AuthPage() {
                     </div>
                     <input
                       id="login-email"
-                      data-testid="login-email-input"
+                      data-testid="login-email"
                       type="email"
                       required
                       className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
@@ -314,7 +316,7 @@ export default function AuthPage() {
                     </div>
                     <input
                       id="login-password"
-                      data-testid="login-password-input"
+                      data-testid="login-password"
                       type={showLoginPassword ? 'text' : 'password'}
                       required
                       className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
@@ -335,6 +337,7 @@ export default function AuthPage() {
                 {/* Submit Button */}
                 <button
                   type="submit"
+                  data-testid="login-submit"
                   disabled={loginLoading}
                   className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
@@ -403,6 +406,7 @@ export default function AuthPage() {
                         </div>
                         <input
                           id="register-nombre"
+                          data-testid="register-name"
                           name="nombre"
                           type="text"
                           required
@@ -425,6 +429,7 @@ export default function AuthPage() {
                         </div>
                         <input
                           id="register-email"
+                          data-testid="register-email"
                           name="email"
                           type="email"
                           required
@@ -471,6 +476,7 @@ export default function AuthPage() {
                         </div>
                         <input
                           id="register-password"
+                          data-testid="register-password"
                           name="password"
                           type={showRegisterPassword ? 'text' : 'password'}
                           required
@@ -500,6 +506,7 @@ export default function AuthPage() {
                         </div>
                         <input
                           id="register-confirm"
+                          data-testid="register-confirm-password"
                           name="confirmarPassword"
                           type={showConfirmPassword ? 'text' : 'password'}
                           required
@@ -634,6 +641,7 @@ export default function AuthPage() {
                   {/* Submit Button */}
                   <button
                     type="submit"
+                    data-testid="register-submit"
                     disabled={registerLoading}
                     className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
                   >

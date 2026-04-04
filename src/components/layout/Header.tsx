@@ -112,7 +112,7 @@ export default function Header() {
             {isLoading ? (
               <div className="h-8 w-8 bg-gray-200 animate-pulse rounded-full"></div>
             ) : isAuthenticated ? (
-              <div className="flex items-center space-x-3">
+              <div data-testid="user-menu" className="flex items-center space-x-3">
                 {/* User greeting - hidden on small screens */}
                 <span className="text-sm text-gray-600 hidden xl:block max-w-[150px] truncate">
                   {session?.user?.name}
@@ -121,6 +121,7 @@ export default function Header() {
                 {/* Logout button with icon */}
                 <button
                   onClick={handleLogout}
+                  data-testid="logout-button"
                   className="flex items-center gap-2 px-3 py-2 rounded-lg text-red-600 hover:bg-red-50 transition-all duration-200"
                   title="Cerrar sesión"
                 >

@@ -50,6 +50,7 @@ export default function AdminFacturasPage() {
   const [orderIdInput, setOrderIdInput] = useState('');
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [invoiceToCancel, setInvoiceToCancel] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const loadInvoices = useCallback(async () => {
     try {
@@ -116,6 +117,8 @@ export default function AdminFacturasPage() {
 
       setShowGenerateModal(false);
       setOrderIdInput('');
+      setSuccessMessage('Factura generada correctamente');
+      setTimeout(() => setSuccessMessage(null), 3000);
       await loadInvoices();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error unknown');
@@ -180,6 +183,7 @@ export default function AdminFacturasPage() {
               <button
                 onClick={() => setShowGenerateModal(true)}
                 className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+                data-testid="generate-invoice-button"
               >
                 <Plus className="h-5 w-5" />
                 Generar Factura
@@ -195,6 +199,14 @@ export default function AdminFacturasPage() {
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
             <AlertCircle className="h-5 w-5 text-red-600" />
             <p className="text-red-700">{error}</p>
+          </div>
+        )}
+
+        {/* Success */}
+        {successMessage && (
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3" data-testid="invoice-generated-message">
+            <CheckCircle2 className="h-5 w-5 text-green-600" />
+            <p className="text-green-700">{successMessage}</p>
           </div>
         )}
 
@@ -320,6 +332,7 @@ export default function AdminFacturasPage() {
                           onClick={() => downloadPDF(invoice.id)}
                           className="text-blue-600 hover:text-blue-900 p-2"
                           title="Descargar PDF"
+                          data-testid="download-invoice-button"
                         >
                           <Download className="h-4 w-4" />
                         </button>

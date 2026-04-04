@@ -134,6 +134,7 @@ export default function AdminProductsPage() {
             <Link
               href="/admin/products/nuevo"
               className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+              data-testid="new-product-button"
             >
               <Plus className="h-5 w-5" />
               Nuevo Producto

@@ -98,6 +98,7 @@ export default function CartSummary({
               type="button"
               onClick={onCheckout}
               disabled={isProcessing || !hasItems}
+              data-testid="checkout-button"
               className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
             >
               {isProcessing ? (

@@ -13,6 +13,7 @@ export default function NuevoProductoPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     nombre: '',
     description: '',
@@ -53,7 +54,10 @@ export default function NuevoProductoPage() {
         throw new Error(data.error || 'Error al crear producto');
       }
 
-      router.push('/admin/products');
+      setSuccessMessage('Producto guardado correctamente');
+      setTimeout(() => {
+        router.push('/admin/products');
+      }, 1500);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error unknown');
     } finally {
@@ -86,6 +90,12 @@ export default function NuevoProductoPage() {
           </div>
         )}
 
+        {successMessage && (
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2" data-testid="product-saved-message">
+            <span className="text-green-700">{successMessage}</span>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-6">
           {/* Información básica */}
           <div className="space-y-4">
@@ -101,6 +111,7 @@ export default function NuevoProductoPage() {
                 value={formData.nombre}
                 onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                data-testid="product-name"
               />
             </div>
 
@@ -113,6 +124,7 @@ export default function NuevoProductoPage() {
                 value={formData.descriptionCorta}
                 onChange={(e) => setFormData({ ...formData, descriptionCorta: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                data-testid="product-slug"
               />
             </div>
 
@@ -125,6 +137,7 @@ export default function NuevoProductoPage() {
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                data-testid="product-description"
               />
             </div>
           </div>
@@ -143,6 +156,7 @@ export default function NuevoProductoPage() {
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                data-testid="product-price"
               />
             </div>
 
@@ -157,6 +171,7 @@ export default function NuevoProductoPage() {
                 value={formData.stock}
                 onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                data-testid="product-stock"
               />
             </div>
           </div>
@@ -258,6 +273,7 @@ export default function NuevoProductoPage() {
               type="submit"
               disabled={loading}
               className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+              data-testid="save-product-button"
             >
               {loading ? (
                 <Loader2 className="h-5 w-5 animate-spin" />

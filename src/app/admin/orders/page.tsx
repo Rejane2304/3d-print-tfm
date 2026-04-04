@@ -222,9 +222,9 @@ export default function AdminPedidosPage() {
                 filteredOrders.map((order) => {
                   const statusConfig = orderStatuses[order.estado] || { color: 'bg-gray-100 text-gray-800', icon: Package, label: order.estado };
                   const StatusIcon = statusConfig.icon;
-                  
+
                   return (
-                    <tr key={order.id} className="hover:bg-gray-50">
+                    <tr key={order.id} className="hover:bg-gray-50" data-testid="order-row">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-indigo-600">
                           {order.orderNumber}
@@ -242,7 +242,7 @@ export default function AdminPedidosPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 inline-flex items-center gap-1 text-xs leading-5 font-semibold rounded-full ${statusConfig.color}`}>
+                        <span className={`px-2 inline-flex items-center gap-1 text-xs leading-5 font-semibold rounded-full ${statusConfig.color}`} data-testid="order-status">
                           <StatusIcon className="h-3 w-3" />
                           {statusConfig.label}
                         </span>

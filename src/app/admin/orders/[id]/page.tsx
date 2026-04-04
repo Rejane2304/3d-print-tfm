@@ -81,6 +81,7 @@ export default function AdminPedidoDetallePage() {
   const [numeroSeguimiento, setNumeroSeguimiento] = useState('');
   const [transportista, setTransportista] = useState('');
   const [showStatusForm, setShowStatusForm] = useState(false);
+  const [statusSuccessMessage, setStatusSuccessMessage] = useState<string | null>(null);
 
   const loadOrder = useCallback(async () => {
     try {
@@ -139,6 +140,8 @@ export default function AdminPedidoDetallePage() {
       if (response.ok) {
         await loadOrder();
         setShowStatusForm(false);
+        setStatusSuccessMessage('Estado actualizado correctamente');
+        setTimeout(() => setStatusSuccessMessage(null), 3000);
       } else {
         const data = await response.json();
         setError(data.error || 'Error al actualizar');
@@ -193,7 +196,7 @@ export default function AdminPedidoDetallePage() {
                 </p>
               </div>
             </div>
-            <span className={`px-4 py-2 inline-flex items-center gap-2 text-sm font-semibold rounded-full border-2 ${statusConfig.color}`}>
+            <span className={`px-4 py-2 inline-flex items-center gap-2 text-sm font-semibold rounded-full border-2 ${statusConfig.color}`} data-testid="order-status">
               <StatusIcon className="h-5 w-5" />
               {statusConfig.label}
             </span>
@@ -207,6 +210,14 @@ export default function AdminPedidoDetallePage() {
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
             <AlertCircle className="h-5 w-5 text-red-600" />
             <p className="text-red-700">{error}</p>
+          </div>
+        )}
+
+        {/* Success */}
+        {statusSuccessMessage && (
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3" data-testid="status-updated-message">
+            <CheckCircle2 className="h-5 w-5 text-green-600" />
+            <p className="text-green-700">{statusSuccessMessage}</p>
           </div>
         )}
 
@@ -347,6 +358,7 @@ export default function AdminPedidoDetallePage() {
                         value={newStatus}
                         onChange={(e) => setNewStatus(e.target.value)}
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        data-testid="status-dropdown"
                       >
                         <option value="PENDIENTE">Pendiente</option>
                         <option value="PAGADO">Pagado</option>
@@ -403,6 +415,7 @@ export default function AdminPedidoDetallePage() {
                       <button
                         onClick={updateStatus}
                         className="flex-1 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+                        data-testid="update-status-button"
                       >
                         Guardar
                       </button>
