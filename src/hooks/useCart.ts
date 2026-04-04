@@ -4,7 +4,7 @@
  * and unauthenticated users (localStorage)
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 
 export interface CartItem {
@@ -36,13 +36,21 @@ export function useCart() {
   const [cart, setCart] = useState<CartData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isMigrating, setIsMigrating] = useState(false);
+  const skipAutoLoadRef = useRef(false);
 
   const isAuthenticated = status === 'authenticated';
   const isLoadingSession = status === 'loading';
 
   // Load cart
-  const loadCart = useCallback(async () => {
+  const loadCart = useCallback(async (force = false) => {
     if (isLoadingSession) return;
+    
+    // Skip auto-load if we're in the middle of migration
+    if (!force && skipAutoLoadRef.current) {
+      console.log('Cart load skipped: migration in progress');
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -255,33 +263,46 @@ export function useCart() {
 
   // Migrate cart from localStorage to API (useful when logging in)
   const migrateCart = useCallback(async () => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated) return { success: false, error: 'Not authenticated' };
     
-    const cartData = localStorage.getItem(CART_STORAGE_KEY);
-    if (cartData) {
-      const items: CartItem[] = JSON.parse(cartData);
-      
-      // Add each item to API
-      for (const item of items) {
-        try {
-          await fetch('/api/cart', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              productId: item.productId, 
-              quantity: item.quantity 
-            }),
-          });
-        } catch (err) {
-          console.error('Error migrating item:', err);
+    // Set flag to prevent auto-load during migration
+    skipAutoLoadRef.current = true;
+    setIsMigrating(true);
+    
+    try {
+      const cartData = localStorage.getItem(CART_STORAGE_KEY);
+      if (cartData) {
+        const items: CartItem[] = JSON.parse(cartData);
+        
+        // Add each item to API
+        for (const item of items) {
+          try {
+            await fetch('/api/cart', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ 
+                productId: item.productId, 
+                quantity: item.quantity 
+              }),
+            });
+          } catch (err) {
+            console.error('Error migrating item:', err);
+          }
         }
+        
+        // Clear localStorage AFTER successful migration
+        localStorage.removeItem(CART_STORAGE_KEY);
       }
       
-      // Clear localStorage
-      localStorage.removeItem(CART_STORAGE_KEY);
-      
-      // Reload cart from API
-      await loadCart();
+      // Reload cart from API with force=true
+      await loadCart(true);
+      return { success: true };
+    } catch (err) {
+      console.error('Migration error:', err);
+      return { success: false, error: err instanceof Error ? err.message : 'Migration failed' };
+    } finally {
+      skipAutoLoadRef.current = false;
+      setIsMigrating(false);
     }
   }, [isAuthenticated, loadCart]);
 

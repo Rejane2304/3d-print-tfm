@@ -97,10 +97,20 @@ export async function middleware(request: NextRequest) {
   // ============================================
   // RULE 4: Login/Register Redirects
   // Authenticated users should not see these pages
+  // Unless they have a callbackUrl (e.g., after adding to cart)
   // ============================================
   const isAuthRoute = AUTH_ROUTES.some(route => pathname.startsWith(route));
-  
+
   if (isAuthRoute && isAuthenticated) {
+    // Check if there's a callbackUrl
+    const callbackUrl = request.nextUrl.searchParams.get('callbackUrl');
+
+    if (callbackUrl) {
+      // If there's a callbackUrl, redirect there instead
+      console.log(`✅ Authenticated user on ${pathname} - Redirecting to callback: ${callbackUrl}`);
+      return NextResponse.redirect(new URL(callbackUrl, request.url));
+    }
+
     if (userRole === 'ADMIN') {
       // Admin authenticated on login → redirect to admin
       console.log(`✅ Admin authenticated on ${pathname} - Redirecting to /admin/dashboard`);

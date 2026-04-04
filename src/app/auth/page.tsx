@@ -39,16 +39,25 @@ export default function AuthPage() {
   const registrationSuccessful = searchParams.get('registro') === 'exitoso';
   
   // Redirect authenticated users away from auth page
+  // Skip redirect if we just logged in (handled by handleLogin)
   useEffect(() => {
     if (status === 'authenticated' && session) {
+      // Check if we just came from login/register
+      const justRegistered = searchParams.get('registro') === 'exitoso';
+      const migratingCart = sessionStorage.getItem('migratingCart');
+
+      // If we're migrating cart, don't redirect yet
+      if (migratingCart) return;
+
       const userRole = (session.user as { rol?: string })?.rol;
       if (userRole === 'ADMIN') {
         router.push('/admin/dashboard');
-      } else {
+      } else if (!justRegistered) {
+        // Only redirect if not just registered (registration auto-redirects)
         router.push(callbackUrl);
       }
     }
-  }, [status, session, router, callbackUrl]);
+  }, [status, session, router, callbackUrl, searchParams]);
   
   // Tab state: 'login' | 'register'
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
@@ -120,8 +129,13 @@ export default function AuthPage() {
       if (result?.error) {
         setLoginError('Email o contraseña incorrectos');
       } else {
+        // Mark that we're migrating cart to prevent conflicts
+        sessionStorage.setItem('migratingCart', 'true');
         // Migrate cart from localStorage to API after login
         await migrateCart();
+        // Remove flag after migration
+        sessionStorage.removeItem('migratingCart');
+        // Redirect to callback URL
         router.push(callbackUrl);
         router.refresh();
       }
