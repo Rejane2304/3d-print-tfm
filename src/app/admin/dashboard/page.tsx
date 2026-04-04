@@ -1,153 +1,368 @@
 /**
- * Dashboard de Administración
- * Solo accesible para usuarios ADMIN
- * Layout responsive
+ * Admin Dashboard Page
+ * Show analytics and statistics for the store
  */
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Loader2 } from 'lucide-react';
+import { Loader2, DollarSign, ShoppingBag, Users, TrendingUp, Package, Calendar, ChevronDown } from 'lucide-react';
+
+interface AnalyticsData {
+  salesSummary: {
+    today: number;
+    thisWeek: number;
+    thisMonth: number;
+    lastMonth: number;
+    total: number;
+  };
+  orderStats: {
+    total: number;
+    today: number;
+    thisWeek: number;
+    thisMonth: number;
+    byStatus: Record<string, number>;
+  };
+  customerStats: {
+    total: number;
+    newThisMonth: number;
+    active: number;
+  };
+  topProducts: Array<{
+    id: string;
+    name: string;
+    sold: number;
+    revenue: number;
+    stock: number;
+  }>;
+  topCustomers: Array<{
+    id: string;
+    name: string;
+    orders: number;
+    spent: number;
+  }>;
+  recentOrders: Array<{
+    id: string;
+    orderNumber: string;
+    customerName: string;
+    total: number;
+    status: string;
+    createdAt: string;
+  }>;
+}
+
+type DateRange = 'today' | 'week' | 'month' | 'lastMonth' | 'year';
 
 export default function AdminDashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [dateRange, setDateRange] = useState<DateRange>('month');
 
   useEffect(() => {
-    if (status === 'loading') return;
-
     if (status === 'unauthenticated') {
       router.push('/login?callbackUrl=/admin/dashboard');
       return;
     }
 
-    // Verificar si es admin
     const user = session?.user as { rol?: string } | undefined;
-    if (user?.rol !== 'ADMIN') {
+    if (status === 'authenticated' && user?.rol !== 'ADMIN') {
       router.push('/');
       return;
     }
 
-    setIsAuthorized(true);
-  }, [status, session, router]);
+    if (status === 'authenticated') {
+      fetchAnalytics();
+    }
+  }, [status, session, router, dateRange]);
 
-  if (status === 'loading' || !isAuthorized) {
+  const fetchAnalytics = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/admin/analytics?range=${dateRange}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setAnalytics(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching analytics:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatCurrency = (amount: number) => {
+    return `${amount.toFixed(2)} €`;
+  };
+
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString('es-ES');
+  };
+
+  const getStatusBadge = (status: string) => {
+    const statusMap: Record<string, string> = {
+      PENDING: 'bg-yellow-100 text-yellow-800',
+      CONFIRMED: 'bg-blue-100 text-blue-800',
+      PREPARING: 'bg-purple-100 text-purple-800',
+      SHIPPED: 'bg-indigo-100 text-indigo-800',
+      DELIVERED: 'bg-green-100 text-green-800',
+      CANCELLED: 'bg-red-100 text-red-800',
+    };
+    return statusMap[status] || 'bg-gray-100 text-gray-800';
+  };
+
+  if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-indigo-600 mx-auto mb-4" />
-          <p className="text-gray-600">Verificando acceso...</p>
+          <p className="text-gray-600">Cargando dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!analytics) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Error al cargar datos</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100" data-testid="admin-dashboard">
-      {/* Header Admin */}
-      <header className="bg-gray-900 text-white shadow">
-        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold">Panel de Administración</h1>
-            
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-300">{session?.user?.name}</span>
-              <Link
-                href="/"
-                className="text-sm text-gray-300 hover:text-white transition-colors"
+    <div className="min-h-screen bg-gray-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+            <p className="text-gray-600 mt-2">Resumen de la tienda y estadísticas</p>
+          </div>
+          <div className="relative">
+            <select
+              value={dateRange}
+              onChange={(e) => setDateRange(e.target.value as DateRange)}
+              className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-10 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            >
+              <option value="today">Hoy</option>
+              <option value="week">Últimos 7 días</option>
+              <option value="month">Este mes</option>
+              <option value="lastMonth">Mes anterior</option>
+              <option value="year">Este año</option>
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+          </div>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* Revenue Card */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Ingresos</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {formatCurrency(analytics.salesSummary.thisMonth)}
+                </p>
+                {dateRange === 'month' && analytics.salesSummary.lastMonth > 0 && (
+                  <p className={`text-sm mt-1 ${
+                    analytics.salesSummary.thisMonth >= analytics.salesSummary.lastMonth 
+                      ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    vs {formatCurrency(analytics.salesSummary.lastMonth)} mes ant.
+                  </p>
+                )}
+              </div>
+              <div className="p-3 bg-green-100 rounded-lg">
+                <DollarSign className="h-6 w-6 text-green-600" />
+              </div>
+            </div>
+          </div>
+
+          {/* Orders Card */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Pedidos</p>
+                <p className="text-2xl font-bold text-gray-900">{analytics.orderStats.thisMonth}</p>
+                <p className="text-sm text-gray-500 mt-1">
+                  {analytics.orderStats.today} hoy
+                </p>
+              </div>
+              <div className="p-3 bg-blue-100 rounded-lg">
+                <ShoppingBag className="h-6 w-6 text-blue-600" />
+              </div>
+            </div>
+          </div>
+
+          {/* Customers Card */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Clientes</p>
+                <p className="text-2xl font-bold text-gray-900">{analytics.customerStats.total}</p>
+                <p className="text-sm text-green-600 mt-1">
+                  +{analytics.customerStats.newThisMonth} nuevos
+                </p>
+              </div>
+              <div className="p-3 bg-purple-100 rounded-lg">
+                <Users className="h-6 w-6 text-purple-600" />
+              </div>
+            </div>
+          </div>
+
+          {/* Average Order Card */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Ticket Medio</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {formatCurrency(
+                    analytics.orderStats.thisMonth > 0 
+                      ? analytics.salesSummary.thisMonth / analytics.orderStats.thisMonth 
+                      : 0
+                  )}
+                </p>
+                <p className="text-sm text-gray-500 mt-1">
+                  por pedido
+                </p>
+              </div>
+              <div className="p-3 bg-yellow-100 rounded-lg">
+                <TrendingUp className="h-6 w-6 text-yellow-600" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Two Column Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Top Products */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                <Package className="h-5 w-5 mr-2 text-indigo-500" />
+                Productos Más Vendidos
+              </h3>
+            </div>
+            <div className="p-6">
+              {analytics.topProducts.length === 0 ? (
+                <p className="text-gray-500 text-center py-4">No hay datos de ventas</p>
+              ) : (
+                <div className="space-y-4">
+                  {analytics.topProducts.map((product, index) => (
+                    <div key={product.id} className="flex items-center">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-sm font-bold text-indigo-600">
+                        {index + 1}
+                      </div>
+                      <div className="ml-4 flex-1">
+                        <p className="text-sm font-medium text-gray-900">{product.name}</p>
+                        <div className="flex items-center text-xs text-gray-500 mt-1">
+                          <span className="mr-3">{product.sold} vendidos</span>
+                          <span>{formatCurrency(product.revenue)}</span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className={`inline-flex px-2 py-1 text-xs rounded-full ${
+                          product.stock > 5 ? 'bg-green-100 text-green-800' : 
+                          product.stock > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {product.stock} en stock
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Recent Orders */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                <Calendar className="h-5 w-5 mr-2 text-indigo-500" />
+                Últimos Pedidos
+              </h3>
+            </div>
+            <div className="divide-y divide-gray-200">
+              {analytics.recentOrders.length === 0 ? (
+                <p className="text-gray-500 text-center py-8">No hay pedidos recientes</p>
+              ) : (
+                analytics.recentOrders.map((order) => (
+                  <div key={order.id} className="px-6 py-4 hover:bg-gray-50">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">
+                          #{order.orderNumber}
+                        </p>
+                        <p className="text-xs text-gray-500">{order.customerName}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium text-gray-900">
+                          {formatCurrency(order.total)}
+                        </p>
+                        <span className={`inline-flex px-2 py-0.5 text-xs rounded-full ${getStatusBadge(order.status)}`}>
+                          {order.status}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-400 mt-1">{formatDate(order.createdAt)}</p>
+                  </div>
+                ))
+              )}
+            </div>
+            <div className="px-6 py-4 border-t border-gray-200">
+              <Link 
+                href="/admin/orders" 
+                className="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
               >
-                Ver tienda
+                Ver todos los pedidos →
               </Link>
             </div>
           </div>
         </div>
-      </header>
 
-      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Tarjetas de resumen */}
-          <Link href="/admin/products"
-            className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow"
+        {/* Quick Links */}
+        <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Link 
+            href="/admin/products"
+            className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow"
           >
-            <div className="flex items-center">
-              <div className="flex-shrink-0 bg-indigo-500 rounded-md p-3">
-                <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                </svg>
-              </div>
-              <div className="ml-4">
-                <h3 className="text-lg font-medium text-gray-900">Productos</h3>
-                <p className="text-sm text-gray-500">Gestionar catálogo</p>
-              </div>
-            </div>
+            <Package className="h-6 w-6 text-indigo-600 mb-2" />
+            <p className="font-medium text-gray-900">Productos</p>
+            <p className="text-sm text-gray-500">Gestionar catálogo</p>
           </Link>
-
-          <Link href="/admin/orders"
-            className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow"
+          <Link 
+            href="/admin/orders"
+            className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow"
           >
-            <div className="flex items-center">
-              <div className="flex-shrink-0 bg-green-500 rounded-md p-3">
-                <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-              </div>
-              <div className="ml-4">
-                <h3 className="text-lg font-medium text-gray-900">Pedidos</h3>
-                <p className="text-sm text-gray-500">Gestionar pedidos</p>
-              </div>
-            </div>
+            <ShoppingBag className="h-6 w-6 text-blue-600 mb-2" />
+            <p className="font-medium text-gray-900">Pedidos</p>
+            <p className="text-sm text-gray-500">Ver y gestionar</p>
           </Link>
-
-          <Link href="/admin/clientes"
-            className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow"
+          <Link 
+            href="/admin/clients"
+            className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow"
           >
-            <div className="flex items-center">
-              <div className="flex-shrink-0 bg-blue-500 rounded-md p-3">
-                <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-              </div>
-              <div className="ml-4">
-                <h3 className="text-lg font-medium text-gray-900">Clientes</h3>
-                <p className="text-sm text-gray-500">Gestionar usuarios</p>
-              </div>
-            </div>
+            <Users className="h-6 w-6 text-purple-600 mb-2" />
+            <p className="font-medium text-gray-900">Clientes</p>
+            <p className="text-sm text-gray-500">Ver clientes</p>
           </Link>
-
-          <Link href="/admin/inventario"
-            className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow"
+          <Link 
+            href="/admin/inventory"
+            className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow"
           >
-            <div className="flex items-center">
-              <div className="flex-shrink-0 bg-yellow-500 rounded-md p-3">
-                <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                </svg>
-              </div>
-              <div className="ml-4">
-                <h3 className="text-lg font-medium text-gray-900">Inventario</h3>
-                <p className="text-sm text-gray-500">Control de stock</p>
-              </div>
-            </div>
+            <TrendingUp className="h-6 w-6 text-green-600 mb-2" />
+            <p className="font-medium text-gray-900">Inventario</p>
+            <p className="text-sm text-gray-500">Control de stock</p>
           </Link>
-        </div>
-
-        {/* Sección de bienvenida */}
-        <div className="mt-8 bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Bienvenido al Panel de Administración</h2>
-          
-          <p className="text-gray-600 mb-4">
-            Desde aquí puedes gestionar todos los aspectos de tu tienda de impresión 3D:
-          </p>
-          
-          <ul className="list-disc list-inside text-gray-600 space-y-2">
-            <li>Gestionar el catálogo de productos</li>
-            <li>Ver y actualizar el estado de los pedidos</li>
-            <li>Controlar el inventario y stock</li>
-            <li>Gestionar clientes y usuarios</li>
-          </ul>
         </div>
       </div>
     </div>

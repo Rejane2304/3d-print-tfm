@@ -1,0 +1,128 @@
+/**
+ * API Route - Client Detail (Admin)
+ * GET /api/admin/clients/[id]
+ */
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
+import { prisma } from '@/lib/db/prisma';
+
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { success: false, error: 'No autenticado' },
+        { status: 401 }
+      );
+    }
+
+    // Verify admin role
+    const adminUser = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true, role: true },
+    });
+
+    if (!adminUser || adminUser.role !== 'ADMIN') {
+      return NextResponse.json(
+        { success: false, error: 'Acceso denegado' },
+        { status: 403 }
+      );
+    }
+
+    const { id } = params;
+
+    // Get client with all related data
+    const client = await prisma.user.findUnique({
+      where: { id, role: 'CUSTOMER' },
+      include: {
+        addresses: {
+          orderBy: { isDefault: 'desc' },
+        },
+        orders: {
+          orderBy: { createdAt: 'desc' },
+          take: 10,
+          include: {
+            items: {
+              select: {
+                id: true,
+                name: true,
+                quantity: true,
+                price: true,
+                subtotal: true,
+              },
+            },
+            payment: {
+              select: {
+                status: true,
+                method: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!client) {
+      return NextResponse.json(
+        { success: false, error: 'Cliente no encontrado' },
+        { status: 404 }
+      );
+    }
+
+    // Calculate statistics
+    const totalOrders = client.orders.length;
+    const totalSpent = client.orders
+      .filter((o) => o.status !== 'CANCELLED')
+      .reduce((sum, o) => sum + Number(o.total), 0);
+
+    const completedOrders = client.orders.filter(
+      (o) => o.status === 'DELIVERED'
+    ).length;
+
+    const pendingOrders = client.orders.filter(
+      (o) => ['PENDING', 'CONFIRMED', 'PREPARING'].includes(o.status)
+    ).length;
+
+    return NextResponse.json({
+      success: true,
+      client: {
+        id: client.id,
+        name: client.name,
+        email: client.email,
+        phone: client.phone,
+        isActive: client.isActive,
+        createdAt: client.createdAt,
+        lastAccess: client.lastAccess,
+        addresses: client.addresses,
+        orders: client.orders.map((order) => ({
+          id: order.id,
+          orderNumber: order.orderNumber,
+          status: order.status,
+          total: order.total,
+          createdAt: order.createdAt,
+          itemCount: order.items.length,
+          paymentStatus: order.payment?.status || 'PENDING',
+          paymentMethod: order.payment?.method || 'CARD',
+        })),
+        stats: {
+          totalOrders,
+          totalSpent: totalSpent.toFixed(2),
+          completedOrders,
+          pendingOrders,
+          averageOrderValue: totalOrders > 0 ? (totalSpent / totalOrders).toFixed(2) : '0.00',
+        },
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching client detail:', error);
+    return NextResponse.json(
+      { success: false, error: 'Error al obtener detalle del cliente' },
+      { status: 500 }
+    );
+  }
+}

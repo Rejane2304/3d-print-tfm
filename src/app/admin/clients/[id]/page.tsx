@@ -1,0 +1,350 @@
+/**
+ * Admin Client Detail Page
+ * Show detailed information about a specific client
+ */
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter, useParams } from 'next/navigation';
+import Link from 'next/link';
+import { Loader2, ArrowLeft, User, Mail, Phone, Calendar, ShoppingBag, MapPin, Package, DollarSign } from 'lucide-react';
+
+interface ClientDetail {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  isActive: boolean;
+  createdAt: string;
+  lastAccess: string | null;
+  addresses: Address[];
+  orders: Order[];
+  stats: {
+    totalOrders: number;
+    totalSpent: string;
+    completedOrders: number;
+    pendingOrders: number;
+    averageOrderValue: string;
+  };
+}
+
+interface Address {
+  id: string;
+  name: string;
+  recipient: string;
+  phone: string;
+  address: string;
+  postalCode: string;
+  city: string;
+  province: string;
+  isDefault: boolean;
+}
+
+interface Order {
+  id: string;
+  orderNumber: string;
+  status: string;
+  total: number;
+  createdAt: string;
+  itemCount: number;
+  paymentStatus: string;
+  paymentMethod: string;
+}
+
+export default function AdminClientDetailPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const params = useParams();
+  const [client, setClient] = useState<ClientDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login?callbackUrl=/admin/clients');
+      return;
+    }
+
+    const user = session?.user as { rol?: string } | undefined;
+    if (status === 'authenticated' && user?.rol !== 'ADMIN') {
+      router.push('/');
+      return;
+    }
+
+    if (status === 'authenticated' && params.id) {
+      fetchClientDetail();
+    }
+  }, [status, session, router, params.id]);
+
+  const fetchClientDetail = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/admin/clients/${params.id}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setClient(data.client);
+      } else {
+        router.push('/admin/clients');
+      }
+    } catch (error) {
+      console.error('Error fetching client:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatDate = (date: string | null) => {
+    if (!date) return 'N/A';
+    return new Date(date).toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
+  const formatCurrency = (amount: number | string) => {
+    return `${parseFloat(amount.toString()).toFixed(2)} €`;
+  };
+
+  const getStatusBadge = (status: string) => {
+    const statusMap: Record<string, string> = {
+      PENDING: 'bg-yellow-100 text-yellow-800',
+      CONFIRMED: 'bg-blue-100 text-blue-800',
+      PREPARING: 'bg-purple-100 text-purple-800',
+      SHIPPED: 'bg-indigo-100 text-indigo-800',
+      DELIVERED: 'bg-green-100 text-green-800',
+      CANCELLED: 'bg-red-100 text-red-800',
+    };
+    return statusMap[status] || 'bg-gray-100 text-gray-800';
+  };
+
+  if (status === 'loading' || loading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-indigo-600 mx-auto mb-4" />
+          <p className="text-gray-600">Cargando información del cliente...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!client) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Cliente no encontrado</p>
+          <Link href="/admin/clients" className="text-indigo-600 hover:text-indigo-900 mt-4 inline-block">
+            Volver al listado
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Back Button */}
+        <Link
+          href="/admin/clients"
+          className="inline-flex items-center text-indigo-600 hover:text-indigo-900 mb-6"
+        >
+          <ArrowLeft className="h-4 w-4 mr-1" />
+          Volver a clientes
+        </Link>
+
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">{client.name}</h1>
+          <p className="text-gray-600 mt-2">Detalle del cliente</p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Client Info Card */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center mb-6">
+              <div className="h-16 w-16 rounded-full bg-indigo-100 flex items-center justify-center">
+                <User className="h-8 w-8 text-indigo-600" />
+              </div>
+              <div className="ml-4">
+                <h2 className="text-xl font-semibold text-gray-900">{client.name}</h2>
+                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                  client.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                }`}>
+                  {client.isActive ? 'Activo' : 'Inactivo'}
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center text-gray-600">
+                <Mail className="h-5 w-5 mr-3 text-gray-400" />
+                <span>{client.email}</span>
+              </div>
+              <div className="flex items-center text-gray-600">
+                <Phone className="h-5 w-5 mr-3 text-gray-400" />
+                <span>{client.phone || 'N/A'}</span>
+              </div>
+              <div className="flex items-center text-gray-600">
+                <Calendar className="h-5 w-5 mr-3 text-gray-400" />
+                <span>Registrado: {formatDate(client.createdAt)}</span>
+              </div>
+              <div className="flex items-center text-gray-600">
+                <Calendar className="h-5 w-5 mr-3 text-gray-400" />
+                <span>Último acceso: {formatDate(client.lastAccess)}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Statistics Cards */}
+          <div className="lg:col-span-2 grid grid-cols-2 gap-4">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center">
+                <ShoppingBag className="h-8 w-8 text-indigo-500" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Total Pedidos</p>
+                  <p className="text-2xl font-bold text-gray-900">{client.stats.totalOrders}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center">
+                <DollarSign className="h-8 w-8 text-green-500" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Total Gastado</p>
+                  <p className="text-2xl font-bold text-gray-900">{formatCurrency(client.stats.totalSpent)}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center">
+                <Package className="h-8 w-8 text-blue-500" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Completados</p>
+                  <p className="text-2xl font-bold text-gray-900">{client.stats.completedOrders}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center">
+                <DollarSign className="h-8 w-8 text-purple-500" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Ticket Medio</p>
+                  <p className="text-2xl font-bold text-gray-900">{formatCurrency(client.stats.averageOrderValue)}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Addresses Section */}
+        <div className="mt-8 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <MapPin className="h-5 w-5 mr-2 text-indigo-500" />
+            Direcciones ({client.addresses.length})
+          </h3>
+          
+          {client.addresses.length === 0 ? (
+            <p className="text-gray-500">No hay direcciones registradas</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {client.addresses.map((address) => (
+                <div key={address.id} className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="font-medium text-gray-900">{address.name}</span>
+                    {address.isDefault && (
+                      <span className="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">
+                        Principal
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-gray-600">{address.recipient}</p>
+                  <p className="text-gray-600">{address.address}</p>
+                  <p className="text-gray-600">
+                    {address.postalCode} {address.city}, {address.province}
+                  </p>
+                  <p className="text-gray-600">Tel: {address.phone}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Orders Section */}
+        <div className="mt-8 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <h3 className="text-lg font-semibold text-gray-900 p-6 pb-4 flex items-center">
+            <ShoppingBag className="h-5 w-5 mr-2 text-indigo-500" />
+            Últimos Pedidos ({client.orders.length})
+          </h3>
+          
+          {client.orders.length === 0 ? (
+            <div className="p-6 text-center text-gray-500">
+              No hay pedidos registrados
+            </div>
+          ) : (
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Pedido
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Fecha
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Items
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Total
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Estado
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Acciones
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {client.orders.map((order) => (
+                  <tr key={order.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      #{order.orderNumber}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {formatDate(order.createdAt)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {order.itemCount} items
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {formatCurrency(order.total)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadge(order.status)}`}>
+                        {order.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <Link
+                        href={`/admin/orders/${order.id}`}
+                        className="text-indigo-600 hover:text-indigo-900"
+                      >
+                        Ver pedido
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
