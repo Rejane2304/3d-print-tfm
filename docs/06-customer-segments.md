@@ -1,330 +1,330 @@
-# Segmentos de Clientes - 3D Print TFM
+# Customer Segments - 3D Print TFM
 
-## 👥 Perfiles de Usuario
+## 👥 User Profiles
 
-### Segmento 1: Tech Enthusiasts (Early Adopters)
+### Segment 1: Tech Enthusiasts (Early Adopters)
 
-**Demográfico**:
-- Edad: 25-40 años
-- Género: Predominantemente masculino (70%)
-- Ubicación: Urbano, grandes ciudades
-- Ingresos: Medios-altos (30-60k€/año)
+**Demographics**:
+- Age: 25-40 years
+- Gender: Predominantly male (70%)
+- Location: Urban, major cities
+- Income: Middle-high (30-60k€/year)
 
-**Psicográfico**:
-- Interesados en tecnología y gadgets
-- Primeros en adoptar nuevas tendencias
-- Valoran la innovación y exclusividad
-- Activos en redes sociales (Reddit, Twitter/X)
+**Psychographics**:
+- Interested in technology and gadgets
+- First to adopt new trends
+- Value innovation and exclusivity
+- Active on social media (Reddit, Twitter/X)
 
-**Comportamiento de Compra**:
-- Frecuencia: 2-3 compras/mes
-- Ticket medio: 35-50€
-- Productos favoritos: Gadgets técnicos, accesorios maker
-- Dispositivo: 60% desktop, 40% mobile
+**Purchase Behavior**:
+- Frequency: 2-3 purchases/month
+- Average ticket: 35-50€
+- Favorite products: Technical gadgets, maker accessories
+- Device: 60% desktop, 40% mobile
 
-**Motivaciones**:
-- ✅ Tener lo último en tecnología
-- ✅ Soporte a proyectos innovadores
-- ✅ Productos únicos que no hay en tiendas
-- ✅ Calidad de impresión superior
+**Motivations**:
+- ✅ Having the latest technology
+- ✅ Supporting innovative projects
+- ✅ Unique products not available in stores
+- ✅ Superior print quality
 
 **Pain Points**:
-- ❌ Falta de personalización en productos mainstream
-- ❌ Precios elevados en tiendas especializadas
-- ❌ Tiempo de espera en envíos internacionales
+- ❌ Lack of customization in mainstream products
+- ❌ High prices in specialized stores
+- ❌ Waiting time for international shipping
 
-**Estrategia de Marketing**:
-- Twitter/X y Reddit como canales principales
-- Influencers tech y maker
-- Early access a nuevos productos
-- Contenido técnico detallado
+**Marketing Strategy**:
+- Twitter/X and Reddit as main channels
+- Tech and maker influencers
+- Early access to new products
+- Detailed technical content
 
 ---
 
-### Segmento 2: Decoradores de Interiores
+### Segment 2: Interior Decorators
 
-**Demográfico**:
-- Edad: 30-55 años
-- Género: Mixto (ligera mayoría femenina)
-- Ubicación: Urbano y suburbano
-- Ingresos: Medios-altos (40-80k€/año)
+**Demographics**:
+- Age: 30-55 years
+- Gender: Mixed (slight female majority)
+- Location: Urban and suburban
+- Income: Middle-high (40-80k€/year)
 
-**Psicográfico**:
-- Interesados en diseño y estética
-- Valoran piezas únicas y artísticas
-- Influenciados por tendencias (Pinterest, Instagram)
-- Preocupados por sostenibilidad
+**Psychographics**:
+- Interested in design and aesthetics
+- Value unique and artistic pieces
+- Influenced by trends (Pinterest, Instagram)
+- Concerned about sustainability
 
-**Comportamiento de Compra**:
-- Frecuencia: 1-2 compras/mes (estacional)
-- Ticket medio: 40-80€
-- Productos favoritos: Decoración, arte, jarrones, lámparas
-- Dispositivo: 50% mobile, 50% desktop
+**Purchase Behavior**:
+- Frequency: 1-2 purchases/month (seasonal)
+- Average ticket: 40-80€
+- Favorite products: Decoration, art, vases, lamps
+- Device: 50% mobile, 50% desktop
 
-**Motivaciones**:
-- ✅ Diferenciación del hogar
-- ✅ Apoyo a diseñadores locales/independientes
-- ✅ Materiales eco-friendly (PLA biodegradable)
-- ✅ Conversación starter con visitas
+**Motivations**:
+- ✅ Home differentiation
+- ✅ Support for local/independent designers
+- ✅ Eco-friendly materials (biodegradable PLA)
+- ✅ Conversation starter with visitors
 
 **Pain Points**:
-- ❌ Difícil encontrar piezas únicas
-- ❌ Decoración masificada (IKEA effect)
-- ❌ Falta de opciones personalizables
+- ❌ Difficult to find unique pieces
+- ❌ Mass-produced decoration (IKEA effect)
+- ❌ Lack of customizable options
 
-**Estrategia de Marketing**:
-- Instagram y Pinterest prioritarios
-- Colaboraciones con interioristas
-- Fotos de ambiente/salón
+**Marketing Strategy**:
+- Instagram and Pinterest priority
+- Collaborations with interior designers
+- Ambience/living room photos
 - Hashtags: #decoracion #homedecor
 
 ---
 
-### Segmento 3: Compradores de Regalos
+### Segment 3: Gift Buyers
 
-**Demográfico**:
-- Edad: 25-45 años
-- Género: Mixto
-- Ubicación: Todo tipo
-- Ingresos: Medios (25-50k€/año)
+**Demographics**:
+- Age: 25-45 years
+- Gender: Mixed
+- Location: All types
+- Income: Middle (25-50k€/year)
 
-**Psicográfico**:
-- Buscando regalos originales
-- Valoran la personalización
-- Compra por eventos (cumpleaños, Navidad)
-- Poco conocimiento técnico 3D
+**Psychographics**:
+- Looking for original gifts
+- Value personalization
+- Purchase for events (birthdays, Christmas)
+- Little 3D technical knowledge
 
-**Comportamiento de Compra**:
-- Frecuencia: Estacional (picos: Dic, Jun)
-- Ticket medio: 20-40€
-- Productos favoritos: Personalizados, joyería, figuras
-- Dispositivo: 70% mobile
+**Purchase Behavior**:
+- Frequency: Seasonal (peaks: Dec, Jun)
+- Average ticket: 20-40€
+- Favorite products: Personalized, jewelry, figures
+- Device: 70% mobile
 
-**Motivaciones**:
-- ✅ Regalo único y memorable
-- ✅ Posibilidad de personalizar (nombre, fecha)
-- ✅ Precio accesible
-- ✅ Entrega rápida
+**Motivations**:
+- ✅ Unique and memorable gift
+- ✅ Possibility to personalize (name, date)
+- ✅ Affordable price
+- ✅ Fast delivery
 
 **Pain Points**:
-- ❌ No saber qué regalar
-- ❌ Preocupación por calidad
-- ❌ Tiempo de entrega
+- ❌ Not knowing what to gift
+- ❌ Concern about quality
+- ❌ Delivery time
 
-**Estrategia de Marketing**:
-- "Gift guides" por ocasión
-- Empaque de regalo premium
-- Tarjetas personalizadas
-- Remarketing: "¿Buscas regalo?"
+**Marketing Strategy**:
+- "Gift guides" by occasion
+- Premium gift wrapping
+- Personalized cards
+- Remarketing: "Looking for a gift?"
 
 ---
 
-### Segmento 4: Maker Community
+### Segment 4: Maker Community
 
-**Demográfico**:
-- Edad: 20-50 años
-- Género: Predominantemente masculino
-- Ubicación: Global, comunidades maker
-- Ingresos: Variables
+**Demographics**:
+- Age: 20-50 years
+- Gender: Predominantly male
+- Location: Global, maker communities
+- Income: Variable
 
-**Psicográfico**:
-- Interesados en fabricación digital
-- Conocimiento técnico medio-alto
-- Participan en makerspaces/foros
-- Valoran código abierto y sharing
+**Psychographics**:
+- Interested in digital manufacturing
+- Medium-high technical knowledge
+- Participate in makerspaces/forums
+- Value open source and sharing
 
-**Comportamiento de Compra**:
-- Frecuencia: Regular (herramientas, piezas)
-- Ticket medio: 15-30€
-- Productos favoritos: Partes técnicas, soportes, organizadores
-- Dispositivo: Desktop preferido
+**Purchase Behavior**:
+- Frequency: Regular (tools, parts)
+- Average ticket: 15-30€
+- Favorite products: Technical parts, supports, organizers
+- Device: Desktop preferred
 
-**Motivaciones**:
-- ✅ Componentes que no fabrican ellos
-- ✅ Calidad profesional
-- ✅ Precio competitivo vs fabricación propia
-- ✅ Colaboración con diseñadores
+**Motivations**:
+- ✅ Components they don't manufacture themselves
+- ✅ Professional quality
+- ✅ Competitive price vs self-manufacturing
+- ✅ Collaboration with designers
 
 **Pain Points**:
-- ❌ Prefieren DIY si es viable
-- ❌ Comparan coste vs hacerlo ellos
-- ❌ Curiosidad sobre archivos STL
+- ❌ Prefer DIY if viable
+- ❌ Compare cost vs making it themselves
+- ❌ Curiosity about STL files
 
-**Estrategia de Marketing**:
+**Marketing Strategy**:
 - Thingiverse/MyMiniFactory presence
-- Tutoriales y documentación
-- Comunidad y foros
-- Open source parcial
+- Tutorials and documentation
+- Community and forums
+- Partial open source
 
 ---
 
-### Segmento 5: B2B Corporativo
+### Segment 5: B2B Corporate
 
-**Demográfico**:
-- Tipo: Empresas, startups, agencias
-- Tamaño: 10-500 empleados
-- Sector: Tech, marketing, diseño, consultoría
+**Demographics**:
+- Type: Companies, startups, agencies
+- Size: 10-500 employees
+- Sector: Tech, marketing, design, consulting
 
-**Psicográfico**:
-- Buscando regalos corporativos únicos
-- Valoran branding e imagen
-- Presupuestos definidos
-- Proceso de compra más largo
+**Psychographics**:
+- Looking for unique corporate gifts
+- Value branding and image
+- Defined budgets
+- Longer purchase process
 
-**Comportamiento de Compra**:
-- Frecuencia: Trimestral/anual
-- Ticket medio: 500-5000€ (pedidos volumen)
-- Productos: Personalizados con logo, eventos
-- Contacto: Email, reuniones
+**Purchase Behavior**:
+- Frequency: Quarterly/annual
+- Average ticket: 500-5000€ (volume orders)
+- Products: Personalized with logo, events
+- Contact: Email, meetings
 
-**Motivaciones**:
-- ✅ Diferenciación de regalos típicos
-- ✅ Branding personalizado
-- ✅ Soporte local/PYME
-- ✅ Facturación y formalidad
+**Motivations**:
+- ✅ Differentiation from typical gifts
+- ✅ Customized branding
+- ✅ Local/SME support
+- ✅ Invoicing and formality
 
 **Pain Points**:
-- ❌ Necesitan factura formal
-- ❌ Plazos estrictos
-- ❌ Requieren muestras previas
+- ❌ Need formal invoice
+- ❌ Strict deadlines
+- ❌ Require prior samples
 
-**Estrategia de Marketing**:
-- LinkedIn como canal principal
-- Portfolio B2B específico
-- Descuentos por volumen claros
-- Atención personalizada
+**Marketing Strategy**:
+- LinkedIn as main channel
+- Specific B2B portfolio
+- Clear volume discounts
+- Personalized attention
 
 ---
 
-## 📊 Comparativa de Segmentos
+## 📊 Segment Comparison
 
-| Segmento | % Total | Ticket Medio | Frecuencia | LTV Estimado |
+| Segment | % Total | Average Ticket | Frequency | Estimated LTV |
 |----------|---------|--------------|------------|--------------|
-| Tech Enthusiasts | 30% | 40€ | Alta | 480€/año |
-| Decoradores | 25% | 55€ | Media | 330€/año |
-| Regalos | 20% | 30€ | Media-Baja | 150€/año |
-| Maker Community | 15% | 25€ | Alta | 300€/año |
-| B2B Corporativo | 10% | 800€ | Baja | 2,400€/año |
+| Tech Enthusiasts | 30% | 40€ | High | 480€/year |
+| Decorators | 25% | 55€ | Medium | 330€/year |
+| Gifts | 20% | 30€ | Medium-Low | 150€/year |
+| Maker Community | 15% | 25€ | High | 300€/year |
+| B2B Corporate | 10% | 800€ | Low | 2,400€/year |
 
 ---
 
-## 🎯 Buyer Personas Detalladas
+## 🎯 Detailed Buyer Personas
 
-### Persona 1: "Carlos el Techie"
+### Persona 1: "Carlos the Techie"
 
-**Ficha**:
-- 🧑‍💻 32 años, ingeniero software
+**Profile**:
+- 🧑‍💻 32 years, software engineer
 - 📍 Madrid
-- 💻 Gasta 100€/mes en gadgets
-- 📱 Sigue a @mkbhd, @linustech
+- 💻 Spends 100€/month on gadgets
+- 📱 Follows @mkbhd, @linustech
 
-**Frase típica**: "Necesito el último gadget para mi setup"
+**Typical phrase**: "I need the latest gadget for my setup"
 
-**Jornada de Compra**:
-1. Ve review en YouTube/Twitter
-2. Investiga especificaciones
-3. Compara con alternativas
-4. Compra si tiene buena pinta
-5. Comparte en redes su compra
+**Purchase Journey**:
+1. Sees review on YouTube/Twitter
+2. Researches specifications
+3. Compares with alternatives
+4. Buys if it looks good
+5. Shares purchase on social media
 
-**Qué le convence**:
-- Calidad de impresión (capas, detalle)
-- Funcionalidad real
+**What convinces him**:
+- Print quality (layers, detail)
+- Real functionality
 - Unboxing experience
-- Comunidad activa
+- Active community
 
 ---
 
-### Persona 2: "María la Decoradora"
+### Persona 2: "María the Decorator"
 
-**Ficha**:
-- 👩‍🎨 38 años, interiorista
+**Profile**:
+- 👩‍🎨 38 years, interior designer
 - 📍 Barcelona
-- 🏠 Renovando casa nueva
+- 🏠 Renovating new home
 - 📱 Pinterest power user
 
-**Frase típica**: "Quiero algo único que nadie más tenga"
+**Typical phrase**: "I want something unique that no one else has"
 
-**Jornada de Compra**:
-1. Busca inspiración en Pinterest
-2. Guarda pins de impresión 3D
-3. Encuentra nuestra tienda
-4. Valora diseño y reseñas
-5. Compra 2-3 piezas coordinadas
+**Purchase Journey**:
+1. Searches for inspiration on Pinterest
+2. Saves 3D printing pins
+3. Finds our store
+4. Values design and reviews
+5. Buys 2-3 coordinated pieces
 
-**Qué le convence**:
-- Fotos de ambiente/estilismo
-- Testimonios con fotos reales
-- Opciones de color/material
-- Packaging cuidado
+**What convinces her**:
+- Ambience/styling photos
+- Testimonials with real photos
+- Color/material options
+- Careful packaging
 
 ---
 
-## 🗺️ Mapa de Empatía
+## 🗺️ Empathy Map
 
-### Para Tech Enthusiasts
+### For Tech Enthusiasts
 
-| Dice | Piensa | Hace | Siente |
+| Says | Thinks | Does | Feels |
 |------|--------|------|--------|
-| "¿De qué material está hecho?" | "¿Vale la pena vs comprar en Amazon?" | Lee reviews técnicas | Curiosidad, escepticismo inicial |
-| "¿Puedo personalizar el color?" | "Quiero algo único" | Mira opciones de custom | Creatividad |
-| "Envíenme fotos antes" | "Espero que la calidad sea buena" | Pide más información | Cautela |
+| "What material is it made of?" | "Is it worth it vs buying on Amazon?" | Reads technical reviews | Curiosity, initial skepticism |
+| "Can I customize the color?" | "I want something unique" | Looks at customization options | Creativity |
+| "Send me photos before" | "I hope the quality is good" | Asks for more information | Caution |
 
 ---
 
-## 📈 Priorización de Segmentos
+## 📈 Segment Prioritization
 
-### Matriz de Atractivo
+### Attractiveness Matrix
 
 ```
-                    Atractivo del Segmento
-                    Bajo    Medio    Alto
+                    Segment Attractiveness
+                    Low    Medium    High
                  ┌────────┬────────┬────────┐
-            Alto │   B2B  │ Makers │ Techie │
-     Capacidad   ├────────┼────────┼────────┤
- de Atención    Medio │   -    │Regalos │Decor  │
+            High │   B2B  │ Makers │ Techie │
+     Capacity    ├────────┼────────┼────────┤
+ to Serve     Medium │   -    │Gifts  │Decor  │
                  ├────────┼────────┼────────┤
-           Bajo  │   -    │   -    │   -    │
+           Low  │   -    │   -    │   -    │
                  └────────┴────────┴────────┘
 ```
 
-**Prioridad 1**: Tech Enthusiasts (volumen + evangelismo)
-**Prioridad 2**: Decoradores (margen + estética)
-**Prioridad 3**: B2B (volumen + recurrente)
+**Priority 1**: Tech Enthusiasts (volume + evangelism)
+**Priority 2**: Decorators (margin + aesthetics)
+**Priority 3**: B2B (volume + recurring)
 
 ---
 
-## 💬 Mensajes por Segmento
+## 💬 Messages by Segment
 
 ### Tech Enthusiasts
-> "Calidad de impresión profesional. Tecnología de última generación para tu setup."
+> "Professional print quality. Latest generation technology for your setup."
 
-### Decoradores
-> "Piezas únicas que transforman tu espacio. Diseño exclusivo que nadie más tendrá."
+### Decorators
+> "Unique pieces that transform your space. Exclusive design that no one else will have."
 
-### Regalos
-> "El regalo perfecto existe y lo puedes personalizar. Sorprende con algo único."
+### Gifts
+> "The perfect gift exists and you can personalize it. Surprise with something unique."
 
 ### Makers
-> "Fabricación profesional para tus proyectos. Colabora con diseñadores 3D."
+> "Professional manufacturing for your projects. Collaborate with 3D designers."
 
 ### B2B
-> "Regalos corporativos diferenciadores. Personalización completa con tu branding."
+> "Differentiating corporate gifts. Complete customization with your branding."
 
 ---
 
-## ✅ Checklist de Segmentación
+## ✅ Segmentation Checklist
 
-- [x] 5 segmentos principales identificados
-- [x] Demografía y psicografía definida
-- [x] Buyer personas creadas (Carlos y María)
-- [x] Mapa de empatía desarrollado
-- [x] Mensajes específicos por segmento
-- [x] Canales de marketing asignados
-- [ ] Seguimiento de métricas por cohorte (M2)
-- [ ] A/B testing de mensajes (M3)
+- [x] 5 main segments identified
+- [x] Demographics and psychographics defined
+- [x] Buyer personas created (Carlos and María)
+- [x] Empathy map developed
+- [x] Specific messages by segment
+- [x] Marketing channels assigned
+- [ ] Cohort metrics tracking (M2)
+- [ ] Message A/B testing (M3)
 
 ---
 
-**Estado**: ✅ Segmentación completada  
-**Revisión**: Trimestral según datos de analytics
+**Status**: ✅ Segmentation completed  
+**Review**: Quarterly according to analytics data
