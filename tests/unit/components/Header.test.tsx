@@ -85,6 +85,8 @@ describe('Header Component', () => {
       const loginLink = screen.getByTitle('Iniciar sesión');
       expect(loginLink).toBeInTheDocument();
       expect(loginLink).toHaveAttribute('href', '/auth');
+      // Verificar que NO hay texto "Entrar" (solo icono)
+      expect(screen.queryByText('Entrar')).not.toBeInTheDocument();
     });
 
     it('debe mostrar navegación con icono + texto (Inicio)', () => {

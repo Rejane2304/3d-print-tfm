@@ -159,7 +159,10 @@ export default function CheckoutPage() {
   }
 
   const shippingCost = (cart?.subtotal || 0) >= 50 ? 0 : 5.99;
-  const total = (cart?.subtotal || 0) + shippingCost;
+  const subtotal = cart?.subtotal || 0;
+  const taxRate = 0.21; // 21% IVA en España
+  const taxAmount = subtotal * taxRate;
+  const total = subtotal + shippingCost + taxAmount;
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -273,7 +276,7 @@ export default function CheckoutPage() {
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between text-gray-600">
                   <span>Subtotal</span>
-                  <span>{cart?.subtotal.toFixed(2) || '0.00'} €</span>
+                  <span>{subtotal.toFixed(2)} €</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Envío</span>
@@ -281,9 +284,13 @@ export default function CheckoutPage() {
                     {shippingCost === 0 ? 'Gratis' : `${shippingCost.toFixed(2)} €`}
                   </span>
                 </div>
+                <div className="flex justify-between text-gray-600">
+                  <span>IVA (21%)</span>
+                  <span>{taxAmount.toFixed(2)} €</span>
+                </div>
                 {shippingCost > 0 && (
                   <p className="text-sm text-blue-600">
-                    Te faltan {(50 - (cart?.subtotal || 0)).toFixed(2)} € para envío gratis
+                    Te faltan {(50 - subtotal).toFixed(2)} € para envío gratis
                   </p>
                 )}
                 <div className="flex justify-between text-xl font-bold border-t pt-3">
