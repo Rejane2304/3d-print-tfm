@@ -107,8 +107,9 @@ export function useCart() {
           throw new Error(data.error || 'Error adding to cart');
         }
         
-        // Reload cart
+        // Reload cart and dispatch event for cross-component updates
         await loadCart();
+        window.dispatchEvent(new Event('cartUpdated'));
         return { success: true };
       } else {
         // Use localStorage
@@ -170,6 +171,7 @@ export function useCart() {
         }
         
         await loadCart();
+        window.dispatchEvent(new Event('cartUpdated'));
       } else {
         // Use localStorage
         const cartData = localStorage.getItem(CART_STORAGE_KEY);

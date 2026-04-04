@@ -51,11 +51,9 @@ export default function AddToCartButton({ productId, stock, product }: AddToCart
       }
 
       // Mostrar éxito temporalmente
+      // El evento cartUpdated ya se disparó en addItem, que actualizará el contador
       setSuccess(true);
       setTimeout(() => setSuccess(false), 2000);
-
-      // Refrescar la página para actualizar el carrito en el header
-      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error unknown');
     } finally {

@@ -12,14 +12,14 @@ import { Loader2, MapPin, CreditCard, ChevronRight } from 'lucide-react';
 
 interface Address {
   id: string;
-  nombre: string;
-  destinatario: string;
-  telefono: string;
-  direccion: string;
-  complemento?: string;
+  name: string;
+  recipient: string;
+  phone: string;
+  street: string;
+  complement?: string;
   postalCode: string;
-  ciudad: string;
-  provincia: string;
+  city: string;
+  province: string;
   isPrimary: boolean;
 }
 
@@ -29,9 +29,9 @@ interface CartItem {
   unitPrice: number;
   product: {
     id: string;
-    nombre: string;
+    name: string;
     slug: string;
-    imagen: string | null;
+    image: string | null;
   };
 }
 
@@ -48,32 +48,39 @@ export default function CheckoutPage() {
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
+      setError(null);
 
       // Load addresses
-      const resDirecciones = await fetch('/api/direcciones');
-      if (resDirecciones.ok) {
-        const data = await resDirecciones.json();
-        setAddresses(data.direcciones || []);
+      const resAddresses = await fetch('/api/account/addresses');
+      if (resAddresses.ok) {
+        const data = await resAddresses.json();
+        setAddresses(data.addresses || []);
         // Select primary address by default
-        const principal = data.direcciones?.find((d: Address) => d.isPrimary);
-        if (principal) {
-          setSelectedAddress(principal.id);
+        const primary = data.addresses?.find((d: Address) => d.isPrimary);
+        if (primary) {
+          setSelectedAddress(primary.id);
         }
+      } else if (resAddresses.status === 401) {
+        // Not authenticated, redirect to login
+        router.push('/auth?callbackUrl=/checkout');
+        return;
       }
 
       // Load cart
-      const resCarrito = await fetch('/api/cart');
-      if (resCarrito.ok) {
-        const data = await resCarrito.json();
-        setCart(data.carrito);
+      const resCart = await fetch('/api/cart');
+      if (resCart.ok) {
+        const data = await resCart.json();
+        setCart(data.cart);
 
         // Si el carrito está vacío, redirigir
-        if (!data.carrito?.items?.length) {
+        if (!data.cart?.items?.length) {
           router.push('/cart');
+          return;
         }
       }
-    } catch {
-      setError('Error al cargar datos');
+    } catch (err) {
+      setError('Error al cargar datos del checkout');
+      console.error('Error loading checkout data:', err);
     } finally {
       setLoading(false);
     }
@@ -81,7 +88,7 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/login?callbackUrl=/checkout');
+      router.push('/auth?callbackUrl=/checkout');
       return;
     }
 
@@ -175,7 +182,7 @@ export default function CheckoutPage() {
                     No tienes direcciones guardadas
                   </p>
                   <a
-                    href="/account/direcciones"
+                    href="/account/addresses"
                     className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-800"
                   >
                     Agregar dirección <ChevronRight className="h-4 w-4" />
@@ -202,7 +209,7 @@ export default function CheckoutPage() {
                       />
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="font-medium">{address.nombre}</span>
+                          <span className="font-medium">{address.name}</span>
                           {address.isPrimary && (
                             <span className="text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded">
                               Principal
@@ -210,18 +217,18 @@ export default function CheckoutPage() {
                           )}
                         </div>
                         <p className="text-sm text-gray-600">
-                          {address.destinatario}
+                          {address.recipient}
                         </p>
                         <p className="text-sm text-gray-600">
-                          {address.direccion}
-                          {address.complemento && `, ${address.complemento}`}
+                          {address.street}
+                          {address.complement && `, ${address.complement}`}
                         </p>
                         <p className="text-sm text-gray-600">
-                          {address.postalCode} {address.ciudad},{' '}
-                          {address.provincia}
+                          {address.postalCode} {address.city},{' '}
+                          {address.province}
                         </p>
                         <p className="text-sm text-gray-600">
-                          Tel: {address.telefono}
+                          Tel: {address.phone}
                         </p>
                       </div>
                     </label>
@@ -239,7 +246,7 @@ export default function CheckoutPage() {
                    className="flex items-center gap-4 py-3 border-b border-gray-100"
                  >
                    <div className="flex-1">
-                     <p className="font-medium">{item.product.nombre}</p>
+                     <p className="font-medium">{item.product.name}</p>
                      <p className="text-sm text-gray-600">
                        {item.quantity} x {(item.unitPrice || 0).toFixed(2)} €
                      </p>
