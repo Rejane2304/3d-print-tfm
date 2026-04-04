@@ -474,14 +474,14 @@ export async function seedTestData(): Promise<void> {
     skipDuplicates: true,
   });
 
-  // Create images
+  // Create images using local project images
   await prisma.productImage.createMany({
     data: [
       {
         id: 'test-img-1',
         productId: 'test-product-1',
-        url: 'https://example.com/img1.jpg',
-        filename: 'img1.jpg',
+        url: '/images/products/p1/p1-1.jpg',
+        filename: 'p1-1.jpg',
         altText: 'Product 1',
         isMain: true,
         displayOrder: 0,
@@ -489,8 +489,8 @@ export async function seedTestData(): Promise<void> {
       {
         id: 'test-img-2',
         productId: 'test-product-2',
-        url: 'https://example.com/img2.jpg',
-        filename: 'img2.jpg',
+        url: '/images/products/p2/p2-1.jpg',
+        filename: 'p2-1.jpg',
         altText: 'Product 2',
         isMain: true,
         displayOrder: 0,
