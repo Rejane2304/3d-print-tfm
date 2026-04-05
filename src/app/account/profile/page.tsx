@@ -81,11 +81,12 @@ export default function PerfilPage() {
         throw new Error(data.error || 'Error al cargar perfil');
       }
 
+      console.log('[Profile] Datos recibidos de API:', data.usuario);
       setPerfil({
-        nombre: data.usuario.nombre || '',
+        nombre: data.usuario.name || '',
         email: data.usuario.email || '',
-        telefono: data.usuario.telefono || '',
-        nif: data.usuario.nif || ''
+        telefono: data.usuario.phone || '',
+        nif: data.usuario.taxId || ''
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error unknown');
@@ -112,15 +113,17 @@ export default function PerfilPage() {
         }
       }
 
-      const body: UpdateProfileBody = {
-        nombre: perfil.nombre,
-        telefono: perfil.telefono || undefined,
-        nif: perfil.nif || undefined
+      const body = {
+        name: perfil.nombre,
+        phone: perfil.telefono || undefined,
+        taxId: perfil.nif || undefined
       };
 
       if (cambiarPassword) {
-        body.passwordActual = passwordActual;
-        body.passwordNuevo = passwordNuevo;
+        Object.assign(body, {
+          passwordActual: passwordActual,
+          passwordNuevo: passwordNuevo
+        });
       }
 
       const response = await fetch('/api/account/profile', {
@@ -136,6 +139,9 @@ export default function PerfilPage() {
       }
 
       setSuccess('Perfil actualizado correctamente');
+      
+      // Recargar perfil para actualizar datos
+      await cargarPerfil();
       
       // Limpiar campos de contraseña
       if (cambiarPassword) {
