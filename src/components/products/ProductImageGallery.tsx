@@ -131,7 +131,7 @@ export default function ProductImageGallery({ images, productName }: ProductImag
           <button
             onClick={closeModal}
             className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors p-2 z-10"
-            aria-label="Cerrar galería"
+            aria-label="Cerrar galeria"
           >
             <X className="w-8 h-8" />
           </button>

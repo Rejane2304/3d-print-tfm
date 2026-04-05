@@ -22,9 +22,15 @@ export default function CheckoutSuccessPage() {
         const data = await response.json();
         setPedido(data.order || data.pedido);
         
-        // Dispatch event to clear cart counter in header
+        // Force clear cart on successful payment
         if (data.success) {
+          // Clear localStorage in case there's any residual data
+          localStorage.removeItem('cart');
+          // Dispatch event multiple times to ensure header updates
           window.dispatchEvent(new Event('cartUpdated'));
+          setTimeout(() => {
+            window.dispatchEvent(new Event('cartUpdated'));
+          }, 100);
         }
       }
     } catch (error) {

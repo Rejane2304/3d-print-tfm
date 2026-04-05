@@ -334,6 +334,8 @@ export function useCart() {
     }
   }, [status, loadCart]);
 
+
+
   return {
     cart,
     loading,

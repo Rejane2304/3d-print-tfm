@@ -188,10 +188,12 @@ export default function AuthPage() {
         // Clear migration flag and redirect
         sessionStorage.removeItem('migratingCart');
         
+        // Trigger cart update to refresh header counter
+        window.dispatchEvent(new Event('cartUpdated'));
+        
         // Redirect to callback URL
         console.log('Redirecting to:', callbackUrl);
         router.push(callbackUrl);
-        router.refresh();
       }
     } catch {
       sessionStorage.removeItem('migratingCart');
