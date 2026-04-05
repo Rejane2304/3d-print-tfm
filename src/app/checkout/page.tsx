@@ -68,12 +68,50 @@ export default function CheckoutPage() {
     // Datos de dirección
     addressName: '',
     street: '',
+    streetNumber: '',
     complement: '',
     postalCode: '',
     city: '',
     province: '',
     isDefault: false
   });
+
+  // Función para traducir nombres de dirección comunes
+  const translateAddressName = (name: string): string => {
+    const translations: { [key: string]: string } = {
+      'home': 'Casa',
+      'house': 'Casa',
+      'work': 'Trabajo',
+      'office': 'Oficina',
+      'apartment': 'Apartamento',
+      'flat': 'Piso',
+      'parents': 'Casa de padres',
+      'family': 'Casa familiar',
+    };
+    const lowerName = name?.toLowerCase().trim();
+    return translations[lowerName] || name;
+  };
+
+  // Función para parsear la dirección y separar calle y número
+  const parseStreetAddress = (street: string): { streetName: string; streetNumber: string } => {
+    // Patrón común: "Calle Nombre 123" o "Calle Nombre, 123" o "Calle Nombre Nº123"
+    const match = street.match(/^(.+?)\s+(?:(?:nº|n°|n|#)?\s*(\d+.*)|s\/n|sin\s+número)?$/i);
+    if (match) {
+      return {
+        streetName: match[1].trim(),
+        streetNumber: match[2] || ''
+      };
+    }
+    return { streetName: street, streetNumber: '' };
+  };
+
+  // Función para combinar calle y número
+  const combineStreetAddress = (streetName: string, streetNumber: string): string => {
+    if (streetNumber.trim()) {
+      return `${streetName.trim()} ${streetNumber.trim()}`;
+    }
+    return streetName.trim();
+  };
 
   // Cargar datos iniciales
   const loadData = useCallback(async () => {
@@ -105,11 +143,14 @@ export default function CheckoutPage() {
         const primary = data.addresses?.find((d: Address) => d.isDefault);
         if (primary) {
           setSelectedAddressId(primary.id);
+          // Parse street to separate street name and number
+          const { streetName, streetNumber } = parseStreetAddress(primary.street || '');
           // Cargar datos de dirección en el formulario
           setFormData(prev => ({
             ...prev,
-            addressName: primary.name || '',
-            street: primary.street || '',
+            addressName: translateAddressName(primary.name || ''),
+            street: streetName,
+            streetNumber: streetNumber,
             complement: primary.complement || '',
             postalCode: primary.postalCode || '',
             city: primary.city || '',
@@ -173,7 +214,7 @@ export default function CheckoutPage() {
             id: selectedAddressId,
             name: formData.addressName,
             recipient: formData.name,
-            address: formData.street,
+            address: combineStreetAddress(formData.street, formData.streetNumber),
             complement: formData.complement,
             postalCode: formData.postalCode,
             city: formData.city,
@@ -206,10 +247,12 @@ export default function CheckoutPage() {
     }
     const selected = addresses.find(a => a.id === selectedAddressId);
     if (selected) {
+      const { streetName, streetNumber } = parseStreetAddress(selected.street || '');
       setFormData(prev => ({
         ...prev,
-        addressName: selected.name || '',
-        street: selected.street || '',
+        addressName: translateAddressName(selected.name || ''),
+        street: streetName,
+        streetNumber: streetNumber,
         complement: selected.complement || '',
         postalCode: selected.postalCode || '',
         city: selected.city || '',
@@ -418,18 +461,33 @@ export default function CheckoutPage() {
                           required
                         />
                       </div>
-                      <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">
-                          Calle y número *
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.street}
-                          onChange={(e) => setFormData({ ...formData, street: e.target.value })}
-                          placeholder="Calle Principal 123"
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                          required
-                        />
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            Calle *
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.street}
+                            onChange={(e) => setFormData({ ...formData, street: e.target.value })}
+                            placeholder="Calle Principal"
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            Número *
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.streetNumber}
+                            onChange={(e) => setFormData({ ...formData, streetNumber: e.target.value })}
+                            placeholder="123"
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            required
+                          />
+                        </div>
                       </div>
                       <div>
                         <label className="block text-xs font-medium text-gray-600 mb-1">
@@ -543,7 +601,7 @@ export default function CheckoutPage() {
                       </h3>
                       <div className="text-sm space-y-1">
                         <p className="font-medium text-gray-900">{selectedAddress?.name || formData.addressName}</p>
-                        <p className="text-gray-600">{selectedAddress?.street || formData.street}</p>
+                        <p className="text-gray-600">{combineStreetAddress(formData.street, formData.streetNumber)}</p>
                         {(selectedAddress?.complement || formData.complement) && (
                           <p className="text-gray-600">{selectedAddress?.complement || formData.complement}</p>
                         )}
