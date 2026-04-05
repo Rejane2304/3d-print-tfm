@@ -8,7 +8,6 @@
 
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import { useCart } from '@/hooks/useCart';
 import { ShoppingCart, Check, Loader2 } from 'lucide-react';
 
@@ -30,7 +29,6 @@ interface AddToCartButtonProps {
 export default function AddToCartButton({ productId, stock, product }: AddToCartButtonProps) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { status } = useSession();
-  const router = useRouter();
   const { addItem } = useCart();
   
   const [quantity, setQuantity] = useState(1);

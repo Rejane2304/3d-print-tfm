@@ -31,7 +31,6 @@ export default function Header() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
-  const isLoading = status === 'loading';
   const isAuthenticated = status === 'authenticated';
   const isAdmin = session?.user?.rol === 'ADMIN';
   const isCliente = session?.user?.rol === 'CLIENTE';

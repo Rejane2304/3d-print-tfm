@@ -6,7 +6,7 @@
 
 import { useState } from 'react';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
-import { Loader2, CheckCircle2, XCircle } from 'lucide-react';
+import { CheckCircle2, XCircle } from 'lucide-react';
 
 export default function PayPalTestPage() {
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');

@@ -5,7 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { withErrorHandler } from '@/lib/errors/api-wrapper';
-import { translateFAQ, translateErrorMessage } from '@/lib/i18n';
+import { translateFAQ } from '@/lib/i18n';
 
 // GET /api/faqs - Listar FAQs
 export const GET = withErrorHandler(async (req: NextRequest) => {

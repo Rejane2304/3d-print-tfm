@@ -1,14 +1,16 @@
 /**
  * Página de Catálogo de Productos
- * Muestra lista de productos con filtros y paginación
+ * Muestra lista de productos traducidos con filtros y paginación
  * Responsive: mobile → 4K
  */
 import { prisma } from '@/lib/db/prisma';
+import { translateProductName, translateProductDescription } from '@/lib/i18n';
 import ProductCard from '@/components/products/ProductCard';
 import FilterSidebar from '@/components/products/FilterSidebar';
 import Pagination from '@/components/products/Pagination';
 import SearchBar from '@/components/products/SearchBar';
 import SortSelector from '@/components/products/SortSelector';
+import { Prisma } from '@prisma/client';
 
 interface ProductsPageProps {
   searchParams: {
@@ -24,21 +26,24 @@ interface ProductsPageProps {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function getProducts(searchParams: ProductsPageProps['searchParams']) {
   const page = parseInt(searchParams.page || '1', 10);
   const pageSize = 12;
   const skip = (page - 1) * pageSize;
   
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const where: any = { isActive: true };
+  const where: Prisma.ProductWhereInput = { isActive: true };
 
   if (searchParams.category) {
-    where.category = searchParams.category;
+    const category = await prisma.category.findUnique({
+      where: { slug: searchParams.category },
+    });
+    if (category) {
+      where.categoryId = category.id;
+    }
   }
 
   if (searchParams.material) {
-    where.material = searchParams.material;
+    where.material = searchParams.material as Prisma.EnumMaterialFilter;
   }
 
   if (searchParams.minPrice || searchParams.maxPrice) {
@@ -57,19 +62,18 @@ async function getProducts(searchParams: ProductsPageProps['searchParams']) {
 
   if (searchParams.search) {
     where.OR = [
-      { name: { contains: searchParams.search, mode: 'insensitive' } },
-      { description: { contains: searchParams.search, mode: 'insensitive' } },
+      { name: { contains: searchParams.search, mode: 'insensitive' as Prisma.QueryMode } },
+      { description: { contains: searchParams.search, mode: 'insensitive' as Prisma.QueryMode } },
     ];
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const orderBy: any = {};
+  const orderBy: Prisma.ProductOrderByWithRelationInput = {};
   if (searchParams.sortBy === 'price') {
-    orderBy.price = searchParams.sortOrder || 'asc';
+    orderBy.price = searchParams.sortOrder as Prisma.SortOrder || 'asc';
   } else if (searchParams.sortBy === 'stock') {
-    orderBy.stock = searchParams.sortOrder || 'desc';
+    orderBy.stock = searchParams.sortOrder as Prisma.SortOrder || 'desc';
   } else {
-    orderBy.name = searchParams.sortOrder || 'asc';
+    orderBy.name = searchParams.sortOrder as Prisma.SortOrder || 'asc';
   }
 
   const [products, total] = await Promise.all([
@@ -88,8 +92,15 @@ async function getProducts(searchParams: ProductsPageProps['searchParams']) {
     prisma.product.count({ where }),
   ]);
   
+  // Traducir productos al español
+  const translatedProducts = products.map((product) => ({
+    ...product,
+    name: translateProductName(product.slug),
+    description: translateProductDescription(product.slug),
+  }));
+  
   return {
-    products,
+    products: translatedProducts,
     total,
     totalPages: Math.ceil(total / pageSize),
     page,

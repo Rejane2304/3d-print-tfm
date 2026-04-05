@@ -61,6 +61,7 @@ export default function AdminInventoryPage() {
     if (status === 'authenticated') {
       fetchInventory();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, session, router, pagination.page, search, stockLevel]);
 
   const fetchInventory = async () => {

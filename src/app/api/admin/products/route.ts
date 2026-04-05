@@ -10,6 +10,11 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
 import { Material } from '@prisma/client';
+import {
+  translateProductName,
+  translateProductDescription,
+  translateProductShortDescription,
+} from '@/lib/i18n';
 
 // Schema de validación
 const productSchema = z.object({
@@ -67,7 +72,15 @@ export async function GET() {
       orderBy: { createdAt: 'desc' },
     });
 
-    return NextResponse.json({ success: true, products });
+    // Translate products to Spanish
+    const translatedProducts = products.map((product) => ({
+      ...product,
+      name: translateProductName(product.slug),
+      description: translateProductDescription(product.slug),
+      shortDescription: translateProductShortDescription(product.slug),
+    }));
+
+    return NextResponse.json({ success: true, products: translatedProducts });
   } catch (error) {
     console.error('Error listando productos:', error);
     return NextResponse.json(

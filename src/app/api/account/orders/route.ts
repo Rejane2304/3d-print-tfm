@@ -7,7 +7,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
-import { translateOrderStatus, translatePaymentStatus, translatePaymentMethod } from '@/lib/i18n';
+import { translateOrderStatus, translatePaymentStatus, translatePaymentMethod, translateProductName } from '@/lib/i18n';
 
 export async function GET() {
   try {
@@ -82,7 +82,7 @@ export async function GET() {
         quantity: item.quantity,
         unitPrice: item.price,
         producto: {
-          nombre: item.product?.name || 'Producto',
+          nombre: item.product?.slug ? translateProductName(item.product.slug) : 'Producto',
           slug: item.product?.slug || '',
           images: item.product?.images || []
         }

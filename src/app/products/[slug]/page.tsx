@@ -1,16 +1,21 @@
 /**
  * Página de Detalle de Producto
- * Muestra información completa de un producto
+ * Muestra información completa de un producto traducida al español
  * Responsive: mobile → 4K
  */
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/db/prisma';
-import Image from 'next/image';
+
 import Link from 'next/link';
 import AddToCartButton from '@/components/products/AddToCartButton';
 import ProductImageGallery from '@/components/products/ProductImageGallery';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
+import {
+  translateProductName,
+  translateProductDescription,
+  translateCategoryName,
+} from '@/lib/i18n';
 
 interface ProductDetailPageProps {
   params: {
@@ -28,11 +33,24 @@ async function getProduct(slug: string) {
       category: true,
     },
   });
-  
+
   if (!product || !product.isActive) {
     return null;
   }
-  
+
+  // Traducir datos del producto
+  const translatedProduct = {
+    ...product,
+    name: translateProductName(product.slug),
+    description: translateProductDescription(product.slug),
+    category: product.category
+      ? {
+          ...product.category,
+          name: translateCategoryName(product.category.slug),
+        }
+      : product.category,
+  };
+
   // Obtener productos relacionados
   const related = await prisma.product.findMany({
     where: {
@@ -48,8 +66,14 @@ async function getProduct(slug: string) {
     },
     take: 4,
   });
-  
-  return { product, related };
+
+  // Traducir productos relacionados
+  const translatedRelated = related.map((p) => ({
+    ...p,
+    name: translateProductName(p.slug),
+  }));
+
+  return { product: translatedProduct, related: translatedRelated };
 }
 
 export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
@@ -63,8 +87,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
     notFound();
   }
 
-  const { product, related } = data;
-  const mainImage = product.images[0];
+  const { product } = data;
   
   return (
     <div data-testid="product-detail" className="min-h-screen bg-gray-50">
@@ -133,15 +156,15 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             </div>
             
             {/* Detalles */}
-            {(product.widthCm || product.heightCm || product.depthCm || product.weight || (isAdmin && product.printTime)) && (
+            {((product as any).widthCm || (product as any).heightCm || (product as any).depthCm || product.weight || (isAdmin && (product as any).printTime)) && (
               <div className="border-t pt-6">
                 <h3 className="text-lg font-semibold mb-4">Especificaciones</h3>
                 <dl className="grid grid-cols-2 gap-4">
-                  {(product.widthCm || product.heightCm || product.depthCm) && (
+                  {((product as any).widthCm || (product as any).heightCm || (product as any).depthCm) && (
                     <>
                       <dt className="text-gray-600">Dimensiones:</dt>
                       <dd className="font-medium">
-                        {[product.widthCm, product.heightCm, product.depthCm]
+                        {[(product as any).widthCm, (product as any).heightCm, (product as any).depthCm]
                           .filter(Boolean)
                           .join(' x ')} cm
                       </dd>

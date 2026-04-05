@@ -7,9 +7,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
+import { Prisma } from '@prisma/client';
 import {
   translateMovementType,
   translateErrorMessage,
+  translateProductName,
 } from '@/lib/i18n';
 
 export async function GET(req: NextRequest) {
@@ -47,7 +49,7 @@ export async function GET(req: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Build where clause
-    const where: any = {};
+    const where: Prisma.ProductWhereInput = {};
 
     if (search) {
       where.OR = [
@@ -57,7 +59,9 @@ export async function GET(req: NextRequest) {
     }
 
     if (stockLevel === 'low') {
-      where.stock = { gt: 0, lte: { minStock: { gt: 0 } } };
+      // Products with stock > 0 and stock <= minStock
+      where.stock = { gt: 0 };
+      where.minStock = { gt: 0 };
     } else if (stockLevel === 'critical') {
       where.stock = { lte: 0 };
     } else if (stockLevel === 'out') {
@@ -103,7 +107,7 @@ export async function GET(req: NextRequest) {
       take: limit,
     });
 
-    // Determine stock status
+    // Determine stock status with translations
     const productsWithStatus = products.map((product) => {
       const stockStatus = 
         product.stock <= 0 ? 'critical' :
@@ -113,7 +117,7 @@ export async function GET(req: NextRequest) {
 
       return {
         id: product.id,
-        name: product.name,
+        name: translateProductName(product.slug),
         slug: product.slug,
         stock: product.stock,
         minStock: product.minStock,

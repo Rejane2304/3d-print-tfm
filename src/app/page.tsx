@@ -1,6 +1,6 @@
 /**
  * Página de Inicio
- * Muestra productos destacados y bienvenida
+ * Muestra productos destacados traducidos y bienvenida
  * Responsive: mobile → 4K
  */
 
@@ -11,11 +11,13 @@ export const revalidate = 0;
 import Link from 'next/link';
 import Image from 'next/image';
 import { prisma } from '@/lib/db/prisma';
+import {
+  translateProductName,
+  translateProductDescription,
+  translateProductShortDescription,
+} from '@/lib/i18n';
 
 async function getFeaturedProducts() {
-  // Debug: Log the actual query
-  console.log('Fetching featured products from database...');
-  
   const products = await prisma.product.findMany({
     where: {
       isActive: true,
@@ -27,9 +29,6 @@ async function getFeaturedProducts() {
       },
     },
   });
-
-  // Debug: Log what we got from DB
-  console.log(`Found ${products.length} products from database:`, products.map(p => ({ id: p.id, name: p.name, slug: p.slug })));
 
   const deliveredOrders = await prisma.order.findMany({
     where: {
@@ -57,10 +56,15 @@ async function getFeaturedProducts() {
     .sort((a, b) => b.sales - a.sales)
     .slice(0, 3);
 
-  // Debug: Log final result
-  console.log('Returning products with sales:', productsWithSales.map(p => p.name));
+  // Traducir productos destacados al español
+  const translatedProducts = productsWithSales.map((product) => ({
+    ...product,
+    name: translateProductName(product.slug),
+    description: translateProductDescription(product.slug),
+    shortDescription: translateProductShortDescription(product.slug),
+  }));
 
-  return productsWithSales;
+  return translatedProducts;
 }
 
 export default async function HomePage() {

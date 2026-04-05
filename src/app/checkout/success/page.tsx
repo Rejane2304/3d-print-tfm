@@ -1,51 +1,139 @@
 /**
  * Página de Éxito de Checkout
- * Muestra confirmación después del pago exitoso
+ * Muestra confirmación después del pago exitoso (Stripe o PayPal)
  */
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { CheckCircle, Package, ArrowRight } from 'lucide-react';
+import { CheckCircle, Package, ArrowRight, Loader2 } from 'lucide-react';
+
+interface OrderData {
+  orderNumber?: string;
+  total?: number;
+  estado?: string;
+  paymentMethod?: string;
+}
 
 export default function CheckoutSuccessPage() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
-  const [pedido, setPedido] = useState<{orderNumber?: string; total?: number; estado?: string} | null>(null);
-  const [, setLoading] = useState(true);
+  const token = searchParams.get('token'); // PayPal token
+  const payerId = searchParams.get('PayerID'); // PayPal payer ID
+  const [pedido, setPedido] = useState<OrderData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const verificarPago = useCallback(async () => {
+  const verificarPagoStripe = useCallback(async (sid: string) => {
     try {
-      const response = await fetch(`/api/checkout/verify?session_id=${sessionId}`);
+      const response = await fetch(`/api/checkout/verify?session_id=${sid}`);
       if (response.ok) {
         const data = await response.json();
-        setPedido(data.order || data.pedido);
-        
-        // Force clear cart on successful payment
-        if (data.success) {
-          // Clear localStorage in case there's any residual data
-          localStorage.removeItem('cart');
-          // Dispatch event multiple times to ensure header updates
-          window.dispatchEvent(new Event('cartUpdated'));
-          setTimeout(() => {
-            window.dispatchEvent(new Event('cartUpdated'));
-          }, 100);
-        }
+        return data.order || data.pedido;
       }
-    } catch (error) {
-      console.error('Error verificando pago:', error);
-    } finally {
-      setLoading(false);
+      throw new Error('Error verificando pago de Stripe');
+    } catch (err) {
+      console.error('Error verificando pago Stripe:', err);
+      throw err;
     }
-  }, [sessionId]);
+  }, []);
+
+  const verificarPagoPayPal = useCallback(async (paypalToken: string, paypalPayerId: string) => {
+    try {
+      const response = await fetch(`/api/paypal/verify?token=${paypalToken}&PayerID=${paypalPayerId}`);
+      if (response.ok) {
+        const data = await response.json();
+        return data.order || data.pedido;
+      }
+      throw new Error('Error verificando pago de PayPal');
+    } catch (err) {
+      console.error('Error verificando pago PayPal:', err);
+      throw err;
+    }
+  }, []);
+
+  const clearCart = useCallback(() => {
+    localStorage.removeItem('cart');
+    window.dispatchEvent(new Event('cartUpdated'));
+    setTimeout(() => {
+      window.dispatchEvent(new Event('cartUpdated'));
+    }, 100);
+  }, []);
 
   useEffect(() => {
-    if (sessionId) {
-      // Verificar estado del pago
-      verificarPago();
-    }
-  }, [sessionId, verificarPago]);
+    const verifyPayment = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        let orderData: OrderData | null = null;
+
+        if (sessionId) {
+          // Stripe payment
+          orderData = await verificarPagoStripe(sessionId);
+        } else if (token && payerId) {
+          // PayPal payment
+          orderData = await verificarPagoPayPal(token, payerId);
+        } else {
+          setError('No se encontró información del pago');
+          setLoading(false);
+          return;
+        }
+
+        if (orderData) {
+          setPedido(orderData);
+          clearCart();
+        }
+      } catch (err) {
+        setError('Error al verificar el pago. Por favor, contacta con soporte.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    verifyPayment();
+  }, [sessionId, token, payerId, verificarPagoStripe, verificarPagoPayPal, clearCart]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
+            <Loader2 className="h-12 w-12 animate-spin text-indigo-600 mx-auto mb-4" />
+            <p className="text-gray-600">Verificando tu pago...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
+            <div className="mb-6">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-red-100 rounded-full">
+                <span className="text-4xl text-red-600">⚠️</span>
+              </div>
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">
+              Error en la verificación
+            </h1>
+            <p className="text-lg text-gray-600 mb-8">{error}</p>
+            <Link
+              href="/account/orders"
+              className="inline-flex items-center justify-center gap-2 bg-indigo-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+            >
+              Ver mis pedidos
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">

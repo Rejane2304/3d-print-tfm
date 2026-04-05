@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
+import { translateProductName } from '@/lib/i18n';
 
 export async function GET(req: NextRequest) {
   try {
@@ -168,11 +169,11 @@ export async function GET(req: NextRequest) {
       topProducts.map(async (item) => {
         const product = await prisma.product.findUnique({
           where: { id: item.productId || '' },
-          select: { name: true, stock: true },
+          select: { name: true, stock: true, slug: true },
         });
         return {
           id: item.productId,
-          name: product?.name || 'Producto eliminado',
+          name: product?.slug ? translateProductName(product.slug) : 'Producto eliminado',
           sold: item._sum.quantity || 0,
           revenue: Number(item._sum.subtotal || 0),
           stock: product?.stock || 0,

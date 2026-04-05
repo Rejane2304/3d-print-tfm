@@ -11,7 +11,10 @@ import { prisma } from '@/lib/db/prisma';
 import { withErrorHandler } from '@/lib/errors/api-wrapper';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
-import { translateErrorMessage } from '@/lib/i18n';
+import {
+  translateProductName,
+  translateErrorMessage,
+} from '@/lib/i18n';
 
 // GET /api/cart - Get user's cart
 export const GET = withErrorHandler(async () => {
@@ -87,7 +90,7 @@ export const GET = withErrorHandler(async () => {
         unitPrice: Number(item.unitPrice),
         product: {
           id: item.product.id,
-          name: item.product.name,
+          name: translateProductName(item.product.slug),
           slug: item.product.slug,
           price: Number(item.product.price),
           stock: item.product.stock,

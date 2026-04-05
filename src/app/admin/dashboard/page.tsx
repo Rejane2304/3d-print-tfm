@@ -77,6 +77,7 @@ export default function AdminDashboardPage() {
     if (status === 'authenticated') {
       fetchAnalytics();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, session, router, dateRange]);
 
   const fetchAnalytics = async () => {

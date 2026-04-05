@@ -195,7 +195,7 @@ export default function CheckoutPage() {
   const guardarDatos = async () => {
     try {
       // Guardar perfil
-      const profileResponse = await fetch('/api/account/profile', {
+      await fetch('/api/account/profile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

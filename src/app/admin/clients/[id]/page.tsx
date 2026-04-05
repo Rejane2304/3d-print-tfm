@@ -74,6 +74,7 @@ export default function AdminClientDetailPage() {
     if (status === 'authenticated' && params.id) {
       fetchClientDetail();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, session, router, params.id]);
 
   const fetchClientDetail = async () => {

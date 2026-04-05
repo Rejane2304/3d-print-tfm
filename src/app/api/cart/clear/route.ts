@@ -3,7 +3,7 @@
  * DELETE /api/cart/clear
  * Vacía completamente el carrito del usuario autenticado
  */
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';

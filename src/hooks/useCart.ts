@@ -48,7 +48,6 @@ export function useCart() {
     
     // Skip auto-load if we're in the middle of migration
     if (!force && skipAutoLoadRef.current) {
-      console.log('Cart load skipped: migration in progress');
       return;
     }
 

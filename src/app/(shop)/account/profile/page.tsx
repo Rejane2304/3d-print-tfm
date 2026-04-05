@@ -27,14 +27,6 @@ interface PerfilData {
   nif: string;
 }
 
-interface UpdateProfileBody {
-  nombre: string;
-  telefono?: string;
-  nif?: string;
-  passwordActual?: string;
-  passwordNuevo?: string;
-}
-
 export default function PerfilPage() {
   const { status, update } = useSession();
   const router = useRouter();

@@ -1,0 +1,144 @@
+{
+  "version": "1.0",
+  "description": "Reglas de delegación automática a subagentes especializados",
+  "agents": [
+    {
+      "id": "explore",
+      "name": "Explorador",
+      "description": "Especializado en búsqueda y exploración de código",
+      "when_to_use": [
+        "Buscar archivos por patrón",
+        "Explorar estructura del proyecto",
+        "Encontrar definiciones de funciones/clases",
+        "Buscar patrones de código"
+      ],
+      "patterns": [
+        "buscar.*archivo",
+        "encontrar.*donde",
+        "explorar.*código",
+        "locate.*file",
+        "find.*where",
+        "search.*for"
+      ],
+      "thoroughness": "medium",
+      "timeout": 120000,
+      "max_parallel": 3
+    },
+    {
+      "id": "general",
+      "name": "Generalista",
+      "description": "Propósito general para tareas complejas",
+      "when_to_use": [
+        "Tareas de investigación complejas",
+        "Ejecutar múltiples pasos",
+        "Análisis de código",
+        "Generación de documentación"
+      ],
+      "patterns": [
+        "analizar.*código",
+        "refactorizar",
+        "generar.*documentación",
+        "investigar.*problema",
+        "fix.*issue",
+        "implement.*feature"
+      ],
+      "thoroughness": "high",
+      "timeout": 300000,
+      "max_parallel": 2
+    },
+    {
+      "id": "code-reviewer",
+      "name": "Revisor de Código",
+      "description": "Revisa calidad y encuentra problemas",
+      "when_to_use": [
+        "Después de escribir código significativo",
+        "Buscar bugs potenciales",
+        "Verificar seguridad",
+        "Revisar estilo de código"
+      ],
+      "patterns": [
+        "revisar.*código",
+        "review.*code",
+        "check.*quality",
+        "encontrar.*bug",
+        "verificar.*seguridad"
+      ],
+      "thoroughness": "very_thorough",
+      "timeout": 180000,
+      "max_parallel": 1
+    },
+    {
+      "id": "test-runner",
+      "name": "Ejecutor de Tests",
+      "description": "Especializado en ejecutar y analizar tests",
+      "when_to_use": [
+        "Ejecutar tests unitarios",
+        "Correr tests de integración",
+        "Verificar cobertura",
+        "Debug de tests fallidos"
+      ],
+      "patterns": [
+        "ejecutar.*test",
+        "run.*test",
+        "correr.*prueba",
+        "debug.*test",
+        "verificar.*cobertura"
+      ],
+      "thoroughness": "medium",
+      "timeout": 180000,
+      "max_parallel": 2
+    },
+    {
+      "id": "translator",
+      "name": "Traductor",
+      "description": "Especializado en traducción de código y contenido",
+      "when_to_use": [
+        "Traducir mensajes de error",
+        "Localizar aplicación",
+        "Actualizar traducciones",
+        "Convertir textos"
+      ],
+      "patterns": [
+        "traducir.*texto",
+        "translate.*message",
+        "localizar.*aplicación",
+        "actualizar.*traducción",
+        "convertir.*idioma"
+      ],
+      "thoroughness": "high",
+      "timeout": 120000,
+      "max_parallel": 3
+    }
+  ],
+  "delegation_rules": {
+    "auto_delegate": true,
+    "min_complexity_for_delegation": 2,
+    "max_subagents_per_task": 3,
+    "parallel_when_possible": true,
+    "coordinate_results": true
+  },
+  "task_patterns": {
+    "find_and_replace": {
+      "description": "Encontrar y reemplazar en múltiples archivos",
+      "delegate_to": ["explore", "general"],
+      "parallel": true
+    },
+    "refactor_module": {
+      "description": "Refactorizar un módulo completo",
+      "delegate_to": ["explore", "general", "code-reviewer"],
+      "parallel": false,
+      "sequence": ["explore", "general", "code-reviewer"]
+    },
+    "translate_content": {
+      "description": "Traducir contenido de la aplicación",
+      "delegate_to": ["translator", "explore"],
+      "parallel": true
+    },
+    "fix_test_failures": {
+      "description": "Arreglar tests que fallan",
+      "delegate_to": ["test-runner", "general"],
+      "parallel": false,
+      "sequence": ["test-runner", "general"]
+    }
+  }
+}
