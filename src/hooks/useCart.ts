@@ -36,7 +36,6 @@ export function useCart() {
   const [cart, setCart] = useState<CartData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isMigrating, setIsMigrating] = useState(false);
   const skipAutoLoadRef = useRef(false);
 
   const isAuthenticated = status === 'authenticated';
@@ -266,7 +265,6 @@ export function useCart() {
     
     // Set flag to prevent auto-load during migration
     skipAutoLoadRef.current = true;
-    setIsMigrating(true);
     
     try {
       const cartData = localStorage.getItem(CART_STORAGE_KEY);
@@ -301,7 +299,6 @@ export function useCart() {
       return { success: false, error: err instanceof Error ? err.message : 'Migration failed' };
     } finally {
       skipAutoLoadRef.current = false;
-      setIsMigrating(false);
     }
   }, [isAuthenticated, loadCart]);
 

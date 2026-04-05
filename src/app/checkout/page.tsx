@@ -1,6 +1,7 @@
 /**
  * Checkout Page - Formulario Unificado de Datos de Envío
  * Combina datos personales y dirección de envío en un solo formulario
+ * Soporta Stripe (redirección) y PayPal (modal)
  */
 'use client';
 
@@ -9,6 +10,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Loader2, MapPin, CreditCard, Wallet, Package } from 'lucide-react';
 import Image from 'next/image';
+import PayPalButton from '@/components/payment/PayPalButton';
 
 interface UserProfile {
   id: string;
@@ -56,6 +58,7 @@ export default function CheckoutPage() {
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('stripe');
+  const [currentOrderId, setCurrentOrderId] = useState<string | null>(null);
   
   // Estado unificado para el formulario
   const [isEditing, setIsEditing] = useState(false);
@@ -263,7 +266,7 @@ export default function CheckoutPage() {
     setIsEditing(false);
   };
 
-  const processPayment = async () => {
+  const processStripePayment = async () => {
     if (!selectedAddressId) {
       setError('Selecciona una dirección de envío');
       return;
@@ -278,7 +281,7 @@ export default function CheckoutPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           shippingAddressId: selectedAddressId,
-          paymentMethod: paymentMethod.toUpperCase(),
+          paymentMethod: 'CARD',
         }),
       });
 
@@ -288,28 +291,46 @@ export default function CheckoutPage() {
         throw new Error(data.error || 'Error al procesar el pedido');
       }
 
-      // Confirm payment
-      const confirmResponse = await fetch('/api/checkout/confirm-payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          orderId: data.orderId,
-          paymentMethod: paymentMethod.toUpperCase(),
-        }),
-      });
-
-      if (!confirmResponse.ok) {
-        console.error('Payment confirmation error');
+      // Stripe redirige a su propia página de checkout
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        // Fallback: marcar como confirmado (modo demo)
+        await fetch('/api/checkout/confirm-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            orderId: data.orderId,
+            paymentMethod: 'CARD',
+          }),
+        });
+        setCart({ items: [], subtotal: 0 });
+        window.dispatchEvent(new Event('cartUpdated'));
+        router.push('/checkout/success?orderId=' + data.orderId);
       }
-
-      // Clear cart
-      setCart({ items: [], subtotal: 0 });
-      window.dispatchEvent(new Event('cartUpdated'));
-      router.push('/checkout/success');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
       setProcessing(false);
     }
+  };
+
+  const handlePayPalSuccess = async (details: unknown, orderId: string) => {
+    try {
+      // PayPal ya capturó el pago en el componente PayPalButton
+      // Solo necesitamos limpiar y redirigir
+      setCart({ items: [], subtotal: 0 });
+      window.dispatchEvent(new Event('cartUpdated'));
+      router.push('/checkout/success?orderId=' + orderId);
+    } catch (err) {
+      console.error('Error after PayPal success:', err);
+      setError('Error finalizando el pedido. Por favor, contacta soporte.');
+    }
+  };
+
+  const handlePayPalError = (error: Error) => {
+    console.error('PayPal error:', error);
+    setError('Error con PayPal: ' + error.message);
+    setProcessing(false);
   };
 
   if (status === 'loading' || loading) {
@@ -732,28 +753,86 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* Botón de pago */}
-              <button
-                onClick={processPayment}
-                disabled={processing || !selectedAddressId || addresses.length === 0}
-                className="w-full bg-indigo-600 text-white py-4 px-6 rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
-              >
-                {processing ? (
-                  <>
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    Procesando...
-                  </>
-                ) : (
-                  <>
-                    {paymentMethod === 'stripe' ? (
+              {/* Botón de pago - Condicional según método */}
+              {paymentMethod === 'stripe' ? (
+                <button
+                  onClick={processStripePayment}
+                  disabled={processing || !selectedAddressId || addresses.length === 0}
+                  className="w-full bg-indigo-600 text-white py-4 px-6 rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
+                >
+                  {processing ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      Procesando...
+                    </>
+                  ) : (
+                    <>
                       <CreditCard className="h-5 w-5" />
-                    ) : (
-                      <Wallet className="h-5 w-5" />
-                    )}
-                    Confirmar pedido - {total.toFixed(2)} €
-                  </>
-                )}
-              </button>
+                      Pagar con Tarjeta - {total.toFixed(2)} €
+                    </>
+                  )}
+                </button>
+              ) : (
+                <div className="space-y-4">
+                  {/* PayPal requiere crear la orden primero */}
+                  {!currentOrderId ? (
+                    <button
+                      onClick={async () => {
+                        if (!selectedAddressId) {
+                          setError('Selecciona una dirección de envío');
+                          return;
+                        }
+                        try {
+                          setProcessing(true);
+                          setError(null);
+                          
+                          const response = await fetch('/api/checkout', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              shippingAddressId: selectedAddressId,
+                              paymentMethod: 'PAYPAL',
+                            }),
+                          });
+
+                          const data = await response.json();
+                          
+                          if (!response.ok) {
+                            throw new Error(data.error || 'Error al crear el pedido');
+                          }
+
+                          setCurrentOrderId(data.orderId);
+                          setProcessing(false);
+                        } catch (err) {
+                          setError(err instanceof Error ? err.message : 'Error desconocido');
+                          setProcessing(false);
+                        }
+                      }}
+                      disabled={processing || !selectedAddressId || addresses.length === 0}
+                      className="w-full bg-blue-600 text-white py-4 px-6 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
+                    >
+                      {processing ? (
+                        <>
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                          Creando pedido...
+                        </>
+                      ) : (
+                        <>
+                          <Wallet className="h-5 w-5" />
+                          Continuar con PayPal - {total.toFixed(2)} €
+                        </>
+                      )}
+                    </button>
+                  ) : (
+                    <PayPalButton
+                      total={total}
+                      orderId={currentOrderId}
+                      onSuccess={(details) => handlePayPalSuccess(details, currentOrderId)}
+                      onError={handlePayPalError}
+                    />
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

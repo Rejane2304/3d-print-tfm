@@ -19,8 +19,7 @@ interface OrderData {
 export default function CheckoutSuccessPage() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
-  const token = searchParams.get('token'); // PayPal token
-  const payerId = searchParams.get('PayerID'); // PayPal payer ID
+  const orderId = searchParams.get('orderId'); // Para verificación directa por ID
   const [pedido, setPedido] = useState<OrderData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,16 +38,16 @@ export default function CheckoutSuccessPage() {
     }
   }, []);
 
-  const verificarPagoPayPal = useCallback(async (paypalToken: string, paypalPayerId: string) => {
+  const verificarPedidoPorId = useCallback(async (oid: string) => {
     try {
-      const response = await fetch(`/api/paypal/verify?token=${paypalToken}&PayerID=${paypalPayerId}`);
+      const response = await fetch(`/api/account/orders/${oid}`);
       if (response.ok) {
         const data = await response.json();
-        return data.order || data.pedido;
+        return data.pedido;
       }
-      throw new Error('Error verificando pago de PayPal');
+      throw new Error('Error verificando pedido');
     } catch (err) {
-      console.error('Error verificando pago PayPal:', err);
+      console.error('Error verificando pedido por ID:', err);
       throw err;
     }
   }, []);
@@ -72,9 +71,9 @@ export default function CheckoutSuccessPage() {
         if (sessionId) {
           // Stripe payment
           orderData = await verificarPagoStripe(sessionId);
-        } else if (token && payerId) {
-          // PayPal payment
-          orderData = await verificarPagoPayPal(token, payerId);
+        } else if (orderId) {
+          // Verificación por ID de pedido (PayPal o redirección directa)
+          orderData = await verificarPedidoPorId(orderId);
         } else {
           setError('No se encontró información del pago');
           setLoading(false);
@@ -85,7 +84,7 @@ export default function CheckoutSuccessPage() {
           setPedido(orderData);
           clearCart();
         }
-      } catch (err) {
+      } catch {
         setError('Error al verificar el pago. Por favor, contacta con soporte.');
       } finally {
         setLoading(false);
@@ -93,7 +92,7 @@ export default function CheckoutSuccessPage() {
     };
 
     verifyPayment();
-  }, [sessionId, token, payerId, verificarPagoStripe, verificarPagoPayPal, clearCart]);
+  }, [sessionId, orderId, verificarPagoStripe, verificarPedidoPorId, clearCart]);
 
   if (loading) {
     return (
