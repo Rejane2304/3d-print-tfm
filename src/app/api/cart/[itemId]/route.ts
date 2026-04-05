@@ -11,6 +11,7 @@ import { prisma } from '@/lib/db/prisma';
 import { withErrorHandler } from '@/lib/errors/api-wrapper';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
+import { translateErrorMessage } from '@/lib/i18n';
 
 // PATCH /api/cart/[itemId] - Update quantity
 export const PATCH = withErrorHandler(async (
@@ -58,7 +59,7 @@ export const PATCH = withErrorHandler(async (
 
   if (!item) {
     return NextResponse.json(
-      { success: false, error: 'Item not found' },
+      { success: false, error: translateErrorMessage('Item not found') },
       { status: 404 }
     );
   }
@@ -94,7 +95,7 @@ export const PATCH = withErrorHandler(async (
   // Verificar stock
   if (item.product.stock < quantity) {
     return NextResponse.json(
-      { success: false, error: 'Insufficient stock' },
+      { success: false, error: translateErrorMessage('Insufficient stock') },
       { status: 400 }
     );
   }
@@ -161,7 +162,7 @@ export const DELETE = withErrorHandler(async (
 
   if (!item) {
     return NextResponse.json(
-      { success: false, error: 'Item not found' },
+      { success: false, error: translateErrorMessage('Item not found') },
       { status: 404 }
     );
   }

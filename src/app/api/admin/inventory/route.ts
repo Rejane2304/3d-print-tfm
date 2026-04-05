@@ -7,6 +7,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
+import {
+  translateMovementType,
+  translateErrorMessage,
+} from '@/lib/i18n';
 
 export async function GET(req: NextRequest) {
   try {
@@ -119,7 +123,7 @@ export async function GET(req: NextRequest) {
         stockStatus,
         movementCount: product._count.movements,
         lastMovementAt: lastMovement?.createdAt || null,
-        lastMovementType: lastMovement?.type || null,
+        lastMovementType: lastMovement?.type ? translateMovementType(lastMovement.type) : null,
       };
     });
 
@@ -136,7 +140,7 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error('Error fetching inventory:', error);
     return NextResponse.json(
-      { success: false, error: 'Error al obtener inventario' },
+      { success: false, error: translateErrorMessage('Error al obtener inventario') },
       { status: 500 }
     );
   }

@@ -51,7 +51,7 @@ export function validateInput<T>(
   } catch (error: unknown) {
     // Extract error message from Zod
     const zodError = error as { errors?: [{ message?: string }] };
-    const message = zodError.errors?.[0]?.message || `Validation error in ${context}`;
+    const message = zodError.errors?.[0]?.message || `Error de validación en ${context}`;
     throw new ApiError(ErrorCode.VALIDATION_INVALID_INPUT, message, 400);
   }
 }
@@ -74,26 +74,26 @@ export async function withDbOperation<T>(
       const field = prismaError.meta?.target?.[0] || 'field';
       throw new ApiError(
         ErrorCode.DB_DUPLICATE_ENTRY,
-        `Already exists a record with that ${field}`,
+        `Ya existe un registro con ese ${field}`,
         409,
         field
       );
     }
-    
+
     if (prismaError.code === 'P2025') {
       // Record not found
       throw new ApiError(
         ErrorCode.DB_NOT_FOUND,
-        `${context} not found`,
+        `${context} no encontrado`,
         404
       );
     }
-    
+
     if (prismaError.code === 'P2003') {
       // Foreign key constraint
       throw new ApiError(
         ErrorCode.VALIDATION_INVALID_INPUT,
-        `Invalid reference in ${context}`,
+        `Referencia inválida en ${context}`,
         400
       );
     }

@@ -10,6 +10,12 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
 import { Prisma, AlertType, AlertSeverity, AlertStatus } from '@prisma/client';
+import {
+  translateAlertType,
+  translateAlertSeverity,
+  translateAlertStatus,
+  translateErrorMessage,
+} from '@/lib/i18n';
 
 // Schema de validación
 const actualizarAlertaSchema = z.object({
@@ -92,9 +98,17 @@ export async function GET(req: NextRequest) {
       prisma.alert.count({ where: { status: 'PENDING' } }),
     ]);
 
-    return NextResponse.json({ 
-      success: true, 
-      alertas,
+    // Translate alert fields
+    const translatedAlertas = alertas.map((alerta) => ({
+      ...alerta,
+      type: translateAlertType(alerta.type),
+      severity: translateAlertSeverity(alerta.severity),
+      status: translateAlertStatus(alerta.status),
+    }));
+
+    return NextResponse.json({
+      success: true,
+      alertas: translatedAlertas,
       total,
       pendientes,
       pages: Math.ceil(total / limit),
@@ -104,7 +118,7 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error('Error listando alertas:', error);
     return NextResponse.json(
-      { success: false, error: 'Internal error' },
+      { success: false, error: translateErrorMessage('Internal error') },
       { status: 500 }
     );
   }
@@ -168,17 +182,24 @@ export async function PATCH(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({ success: true, alerta });
+    const translatedAlerta = {
+      ...alerta,
+      type: translateAlertType(alerta.type),
+      severity: translateAlertSeverity(alerta.severity),
+      status: translateAlertStatus(alerta.status),
+    };
+
+    return NextResponse.json({ success: true, alerta: translatedAlerta });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { success: false, error: error.errors[0].message },
+        { success: false, error: translateErrorMessage(error.errors[0].message) },
         { status: 400 }
       );
     }
     console.error('Error actualizando alerta:', error);
     return NextResponse.json(
-      { success: false, error: 'Internal error' },
+      { success: false, error: translateErrorMessage('Internal error') },
       { status: 500 }
     );
   }

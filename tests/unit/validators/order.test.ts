@@ -28,7 +28,7 @@ describe('Order Validators', () => {
       });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.errors[0].message).toBe('Invalid product ID');
+        expect(result.error.errors[0].message).toBe('ID de producto inválido');
       }
     });
 
@@ -39,7 +39,7 @@ describe('Order Validators', () => {
       });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.errors[0].message).toBe('Quantity must be at least 1');
+        expect(result.error.errors[0].message).toBe('La cantidad debe ser al menos 1');
       }
     });
 
@@ -50,7 +50,7 @@ describe('Order Validators', () => {
       });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.errors[0].message).toBe('Quantity must be at least 1');
+        expect(result.error.errors[0].message).toBe('La cantidad debe ser al menos 1');
       }
     });
 
@@ -61,7 +61,7 @@ describe('Order Validators', () => {
       });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.errors[0].message).toBe('Maximum quantity per product is 100');
+        expect(result.error.errors[0].message).toBe('La cantidad máxima por producto es 100');
       }
     });
 
@@ -88,7 +88,7 @@ describe('Order Validators', () => {
       });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.errors[0].message).toBe('Quantity must be an integer');
+        expect(result.error.errors[0].message).toBe('La cantidad debe ser un número entero');
       }
     });
 
@@ -129,7 +129,7 @@ describe('Order Validators', () => {
       });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.errors[0].message).toBe('Order must contain at least one product');
+        expect(result.error.errors[0].message).toBe('El pedido debe contener al menos un producto');
       }
     });
 
@@ -188,7 +188,7 @@ describe('Order Validators', () => {
       });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.errors[0].message).toBe('Invalid shipping address');
+        expect(result.error.errors[0].message).toBe('Dirección de envío inválida');
       }
     });
 
@@ -219,7 +219,7 @@ describe('Order Validators', () => {
       });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.errors[0].message).toBe('Notes cannot exceed 1000 characters');
+        expect(result.error.errors[0].message).toBe('Las notas no pueden exceder 1000 caracteres');
       }
     });
 
@@ -323,7 +323,7 @@ describe('Order Validators', () => {
       });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.errors[0].message).toBe('Notes cannot exceed 1000 characters');
+        expect(result.error.errors[0].message).toBe('Las notas no pueden exceder 1000 caracteres');
       }
     });
 
@@ -349,7 +349,7 @@ describe('Order Validators', () => {
       });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.errors[0].message).toBe('Cancellation reason is required');
+        expect(result.error.errors[0].message).toBe('El motivo de cancelación es obligatorio');
       }
     });
 
@@ -364,7 +364,7 @@ describe('Order Validators', () => {
       });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.errors[0].message).toBe('Reason cannot exceed 500 characters');
+        expect(result.error.errors[0].message).toBe('El motivo no puede exceder 500 caracteres');
       }
     });
 

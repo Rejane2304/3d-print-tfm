@@ -36,7 +36,7 @@ describe('Address Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Address name is required');
+          expect(result.error.errors[0].message).toBe('El nombre de la dirección es obligatorio');
         }
       });
 
@@ -47,7 +47,7 @@ describe('Address Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Name cannot exceed 100 characters');
+          expect(result.error.errors[0].message).toBe('El nombre no puede exceder 100 caracteres');
         }
       });
 
@@ -76,7 +76,7 @@ describe('Address Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Recipient name is required');
+          expect(result.error.errors[0].message).toBe('El nombre del destinatario es obligatorio');
         }
       });
 
@@ -87,7 +87,7 @@ describe('Address Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Recipient cannot exceed 100 characters');
+          expect(result.error.errors[0].message).toBe('El destinatario no puede exceder 100 caracteres');
         }
       });
 
@@ -149,7 +149,7 @@ describe('Address Validators', () => {
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.error.errors[0].message).toBe(
-            'Phone must be in Spanish format: +34 600 123 456'
+            'El teléfono debe estar en formato español: +34 600 123 456'
           );
         }
       });
@@ -226,7 +226,7 @@ describe('Address Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Address is required');
+          expect(result.error.errors[0].message).toBe('La dirección es obligatoria');
         }
       });
 
@@ -237,7 +237,7 @@ describe('Address Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Address cannot exceed 255 characters');
+          expect(result.error.errors[0].message).toBe('La dirección no puede exceder 255 caracteres');
         }
       });
 
@@ -280,7 +280,7 @@ describe('Address Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Complement cannot exceed 100 characters');
+          expect(result.error.errors[0].message).toBe('El complemento no puede exceder 100 caracteres');
         }
       });
 
@@ -333,7 +333,7 @@ describe('Address Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Postal code must have 5 digits');
+          expect(result.error.errors[0].message).toBe('El código postal debe tener 5 dígitos');
         }
       });
 
@@ -386,7 +386,7 @@ describe('Address Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('City is required');
+          expect(result.error.errors[0].message).toBe('La ciudad es obligatoria');
         }
       });
 
@@ -397,7 +397,7 @@ describe('Address Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('City cannot exceed 100 characters');
+          expect(result.error.errors[0].message).toBe('La ciudad no puede exceder 100 caracteres');
         }
       });
 
@@ -434,7 +434,7 @@ describe('Address Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Province is required');
+          expect(result.error.errors[0].message).toBe('La provincia es obligatoria');
         }
       });
 
@@ -445,7 +445,7 @@ describe('Address Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Province cannot exceed 100 characters');
+          expect(result.error.errors[0].message).toBe('La provincia no puede exceder 100 caracteres');
         }
       });
 
@@ -474,7 +474,7 @@ describe('Address Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Country is required');
+          expect(result.error.errors[0].message).toBe('El país es obligatorio');
         }
       });
 
@@ -485,7 +485,7 @@ describe('Address Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Country cannot exceed 50 characters');
+          expect(result.error.errors[0].message).toBe('El país no puede exceder 50 caracteres');
         }
       });
 

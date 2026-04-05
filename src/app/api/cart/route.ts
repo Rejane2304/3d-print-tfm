@@ -11,6 +11,7 @@ import { prisma } from '@/lib/db/prisma';
 import { withErrorHandler } from '@/lib/errors/api-wrapper';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
+import { translateErrorMessage } from '@/lib/i18n';
 
 // GET /api/cart - Get user's cart
 export const GET = withErrorHandler(async () => {
@@ -49,7 +50,7 @@ export const GET = withErrorHandler(async () => {
 
   if (!user) {
     return NextResponse.json(
-      { success: false, error: 'Usuario not found' },
+      { success: false, error: translateErrorMessage('Usuario not found') },
       { status: 404 }
     );
   }
@@ -150,7 +151,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   if (!product) {
     return NextResponse.json(
-      { success: false, error: 'Producto not found' },
+      { success: false, error: translateErrorMessage('Producto not found') },
       { status: 404 }
     );
   }
@@ -164,7 +165,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   if (product.stock < quantity) {
     return NextResponse.json(
-      { success: false, error: 'Insufficient stock' },
+      { success: false, error: translateErrorMessage('Insufficient stock') },
       { status: 400 }
     );
   }
@@ -192,7 +193,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     
     if (product.stock < newQuantity) {
       return NextResponse.json(
-        { success: false, error: 'Insufficient stock para la cantidad total' },
+        { success: false, error: translateErrorMessage('Insufficient stock para la cantidad total') },
         { status: 400 }
       );
     }

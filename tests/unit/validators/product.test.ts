@@ -43,7 +43,7 @@ describe('Product Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Product name is required');
+          expect(result.error.errors[0].message).toBe('El nombre del producto es obligatorio');
         }
       });
 
@@ -54,7 +54,7 @@ describe('Product Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Name cannot exceed 200 characters');
+          expect(result.error.errors[0].message).toBe('El nombre no puede exceder 200 caracteres');
         }
       });
 
@@ -83,7 +83,7 @@ describe('Product Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Description is required');
+          expect(result.error.errors[0].message).toBe('La descripción es obligatoria');
         }
       });
 
@@ -94,7 +94,7 @@ describe('Product Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Description cannot exceed 5000 characters');
+          expect(result.error.errors[0].message).toBe('La descripción no puede exceder 5000 caracteres');
         }
       });
 
@@ -121,7 +121,7 @@ describe('Product Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Short description cannot exceed 255 characters');
+          expect(result.error.errors[0].message).toBe('La descripción corta no puede exceder 255 caracteres');
         }
       });
 
@@ -142,7 +142,7 @@ describe('Product Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Price must be greater than 0');
+          expect(result.error.errors[0].message).toBe('El precio debe ser mayor que 0');
         }
       });
 
@@ -153,7 +153,7 @@ describe('Product Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Price must be greater than 0');
+          expect(result.error.errors[0].message).toBe('El precio debe ser mayor que 0');
         }
       });
 
@@ -172,7 +172,7 @@ describe('Product Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Maximum price allowed is 99999.99');
+          expect(result.error.errors[0].message).toBe('El precio máximo permitido es 99999.99');
         }
       });
 
@@ -223,7 +223,7 @@ describe('Product Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Previous price cannot be negative');
+          expect(result.error.errors[0].message).toBe('El precio anterior no puede ser negativo');
         }
       });
 
@@ -242,7 +242,7 @@ describe('Product Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Maximum previous price is 99999.99');
+          expect(result.error.errors[0].message).toBe('El precio anterior máximo es 99999.99');
         }
       });
 
@@ -264,7 +264,7 @@ describe('Product Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Stock cannot be negative');
+          expect(result.error.errors[0].message).toBe('El stock no puede ser negativo');
         }
       });
 
@@ -291,7 +291,7 @@ describe('Product Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Stock must be an integer');
+          expect(result.error.errors[0].message).toBe('El stock debe ser un número entero');
         }
       });
 
@@ -321,7 +321,7 @@ describe('Product Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Minimum stock must be at least 1');
+          expect(result.error.errors[0].message).toBe('El stock mínimo debe ser al menos 1');
         }
       });
 
@@ -332,7 +332,7 @@ describe('Product Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Minimum stock must be an integer');
+          expect(result.error.errors[0].message).toBe('El stock mínimo debe ser un número entero');
         }
       });
 
@@ -361,7 +361,7 @@ describe('Product Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Invalid category ID');
+          expect(result.error.errors[0].message).toBe('ID de categoría inválido');
         }
       });
 
@@ -420,7 +420,7 @@ describe('Product Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Dimensions cannot exceed 50 characters');
+          expect(result.error.errors[0].message).toBe('Las dimensiones no pueden exceder 50 caracteres');
         }
       });
 
@@ -447,7 +447,7 @@ describe('Product Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Weight cannot be negative');
+          expect(result.error.errors[0].message).toBe('El peso no puede ser negativo');
         }
       });
 
@@ -482,7 +482,7 @@ describe('Product Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Time must be at least 1 minute');
+          expect(result.error.errors[0].message).toBe('El tiempo debe ser de al menos 1 minuto');
         }
       });
 
@@ -501,7 +501,7 @@ describe('Product Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Time must be an integer');
+          expect(result.error.errors[0].message).toBe('El tiempo debe ser un número entero');
         }
       });
 
@@ -528,7 +528,7 @@ describe('Product Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Meta title cannot exceed 200 characters');
+          expect(result.error.errors[0].message).toBe('El meta título no puede exceder 200 caracteres');
         }
       });
 
@@ -555,7 +555,7 @@ describe('Product Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Meta description cannot exceed 300 characters');
+          expect(result.error.errors[0].message).toBe('La meta descripción no puede exceder 300 caracteres');
         }
       });
 

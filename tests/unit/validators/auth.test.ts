@@ -26,7 +26,7 @@ describe('Authentication Validators', () => {
       });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.errors[0].message).toBe('Email is required');
+        expect(result.error.errors[0].message).toBe('El email es obligatorio');
       }
     });
 
@@ -37,7 +37,7 @@ describe('Authentication Validators', () => {
       });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.errors[0].message).toBe('Invalid email format');
+        expect(result.error.errors[0].message).toBe('Formato de email inválido');
       }
     });
 
@@ -48,7 +48,7 @@ describe('Authentication Validators', () => {
       });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.errors[0].message).toBe('Invalid email format');
+        expect(result.error.errors[0].message).toBe('Formato de email inválido');
       }
     });
 
@@ -59,7 +59,7 @@ describe('Authentication Validators', () => {
       });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.errors[0].message).toBe('Password is required');
+        expect(result.error.errors[0].message).toBe('La contraseña es obligatoria');
       }
     });
 
@@ -70,7 +70,7 @@ describe('Authentication Validators', () => {
       });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.errors[0].message).toBe('Password must be at least 8 characters');
+        expect(result.error.errors[0].message).toBe('La contraseña debe tener al menos 8 caracteres');
       }
     });
 
@@ -81,7 +81,7 @@ describe('Authentication Validators', () => {
       });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.errors[0].message).toBe('Password must be at least 8 characters');
+        expect(result.error.errors[0].message).toBe('La contraseña debe tener al menos 8 caracteres');
       }
     });
 
@@ -130,7 +130,7 @@ describe('Authentication Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Name is required');
+          expect(result.error.errors[0].message).toBe('El nombre es obligatorio');
         }
       });
 
@@ -141,7 +141,7 @@ describe('Authentication Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Name must be at least 3 characters');
+          expect(result.error.errors[0].message).toBe('El nombre debe tener al menos 3 caracteres');
         }
       });
 
@@ -160,7 +160,7 @@ describe('Authentication Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Name cannot exceed 100 characters');
+          expect(result.error.errors[0].message).toBe('El nombre no puede exceder 100 caracteres');
         }
       });
 
@@ -181,7 +181,7 @@ describe('Authentication Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Email is required');
+          expect(result.error.errors[0].message).toBe('El email es obligatorio');
         }
       });
 
@@ -192,7 +192,7 @@ describe('Authentication Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Invalid email format');
+          expect(result.error.errors[0].message).toBe('Formato de email inválido');
         }
       });
 
@@ -214,7 +214,7 @@ describe('Authentication Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Password is required');
+          expect(result.error.errors[0].message).toBe('La contraseña es obligatoria');
         }
       });
 
@@ -226,7 +226,7 @@ describe('Authentication Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('Password must be at least 8 characters');
+          expect(result.error.errors[0].message).toBe('La contraseña debe tener al menos 8 caracteres');
         }
       });
 
@@ -239,7 +239,7 @@ describe('Authentication Validators', () => {
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.error.errors[0].message).toBe(
-            'Password must contain at least one uppercase, one lowercase and one number'
+            'La contraseña debe contener al menos una mayúscula, una minúscula y un número'
           );
         }
       });
@@ -253,7 +253,7 @@ describe('Authentication Validators', () => {
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.error.errors[0].message).toBe(
-            'Password must contain at least one uppercase, one lowercase and one number'
+            'La contraseña debe contener al menos una mayúscula, una minúscula y un número'
           );
         }
       });
@@ -267,7 +267,7 @@ describe('Authentication Validators', () => {
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.error.errors[0].message).toBe(
-            'Password must contain at least one uppercase, one lowercase and one number'
+            'La contraseña debe contener al menos una mayúscula, una minúscula y un número'
           );
         }
       });
@@ -292,7 +292,7 @@ describe('Authentication Validators', () => {
           const confirmError = result.error.errors.find(
             (e) => e.path[0] === 'confirmPassword'
           );
-          expect(confirmError?.message).toBe('Passwords do not match');
+          expect(confirmError?.message).toBe('Las contraseñas no coinciden');
         }
       });
 
@@ -306,7 +306,7 @@ describe('Authentication Validators', () => {
           const confirmError = result.error.errors.find(
             (e) => e.path[0] === 'confirmPassword'
           );
-          expect(confirmError?.message).toBe('Passwords do not match');
+          expect(confirmError?.message).toBe('Las contraseñas no coinciden');
         }
       });
     });
@@ -344,7 +344,7 @@ describe('Authentication Validators', () => {
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.error.errors[0].message).toBe(
-            'Phone must be in Spanish format: +34 600 123 456'
+            'El teléfono debe estar en formato español: +34 600 123 456'
           );
         }
       });
@@ -400,7 +400,7 @@ describe('Authentication Validators', () => {
       });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.errors[0].message).toBe('Current password is required');
+        expect(result.error.errors[0].message).toBe('La contraseña actual es obligatoria');
       }
     });
 
@@ -423,7 +423,7 @@ describe('Authentication Validators', () => {
         const confirmError = result.error.errors.find(
           (e) => e.path[0] === 'confirmPassword'
         );
-        expect(confirmError?.message).toBe('Passwords do not match');
+        expect(confirmError?.message).toBe('Las contraseñas no coinciden');
       }
     });
 
@@ -435,7 +435,7 @@ describe('Authentication Validators', () => {
       });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.errors[0].message).toBe('New password must be at least 8 characters');
+        expect(result.error.errors[0].message).toBe('La nueva contraseña debe tener al menos 8 caracteres');
       }
     });
   });

@@ -9,6 +9,7 @@ import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import Stripe from 'stripe';
+import { translateOrderStatus, translatePaymentStatus } from '@/lib/i18n';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2023-10-16' as Stripe.LatestApiVersion,
@@ -104,7 +105,8 @@ export async function GET(req: NextRequest) {
             id: order.id,
             orderNumber: order.orderNumber,
             total: order.total,
-            status: 'CONFIRMED',
+            status: translateOrderStatus('CONFIRMED'),
+            paymentStatus: translatePaymentStatus('COMPLETED'),
             items: order.items
           }
         });
@@ -113,7 +115,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       success: false,
-      status: stripeSession.payment_status
+      status: translatePaymentStatus(stripeSession.payment_status)
     });
 
   } catch (error) {

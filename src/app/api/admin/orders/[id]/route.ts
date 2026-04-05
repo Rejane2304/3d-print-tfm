@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
+import { translateOrderStatus, translatePaymentStatus, translatePaymentMethod, translateErrorMessage } from '@/lib/i18n';
 
 export async function GET(
   req: NextRequest,
@@ -55,16 +56,27 @@ export async function GET(
 
     if (!order) {
       return NextResponse.json(
-        { success: false, error: 'Pedido not found' },
+        { success: false, error: translateErrorMessage('Pedido not found') },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ success: true, order });
+    // Translate order data before sending to frontend
+    const translatedOrder = {
+      ...order,
+      status: translateOrderStatus(order.status),
+      payment: order.payment ? {
+        ...order.payment,
+        status: translatePaymentStatus(order.payment.status),
+        method: translatePaymentMethod(order.payment.method),
+      } : null,
+    };
+
+    return NextResponse.json({ success: true, order: translatedOrder });
   } catch (error) {
     console.error('Error obteniendo pedido:', error);
     return NextResponse.json(
-      { success: false, error: 'Internal error' },
+      { success: false, error: translateErrorMessage('Internal error') },
       { status: 500 }
     );
   }

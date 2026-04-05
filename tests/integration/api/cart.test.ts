@@ -220,7 +220,7 @@ describe('Cart API', () => {
       const body = await res.json();
 
       expect(res.status).toBe(400);
-      expect(body.error).toContain('stock');
+      expect(body.error).toContain('Stock');
     });
 
     it('should reject quantity less than 1', async () => {

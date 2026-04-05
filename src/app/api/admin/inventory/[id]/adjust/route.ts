@@ -8,6 +8,10 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
 import { MovementType } from '@prisma/client';
+import {
+  translateMovementType,
+  translateErrorMessage,
+} from '@/lib/i18n';
 
 export async function POST(
   req: NextRequest,
@@ -134,7 +138,7 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
-      message: 'Stock actualizado correctamente',
+      message: translateErrorMessage('Stock actualizado correctamente'),
       data: {
         product: {
           id: result.product.id,
@@ -143,7 +147,7 @@ export async function POST(
         },
         movement: {
           id: result.movement.id,
-          type: result.movement.type,
+          type: translateMovementType(result.movement.type),
           previousStock: result.movement.previousStock,
           newStock: result.movement.newStock,
           quantity: result.movement.quantity,
@@ -155,7 +159,7 @@ export async function POST(
   } catch (error) {
     console.error('Error adjusting inventory:', error);
     return NextResponse.json(
-      { success: false, error: 'Error al ajustar inventario' },
+      { success: false, error: translateErrorMessage('Error al ajustar inventario') },
       { status: 500 }
     );
   }

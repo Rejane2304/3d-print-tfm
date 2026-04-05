@@ -10,6 +10,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
 import { Prisma, OrderStatus } from '@prisma/client';
+import { translateOrderStatus, translatePaymentStatus, translatePaymentMethod, translateErrorMessage } from '@/lib/i18n';
 
 // Schema de validación para actualización
 const actualizarPedidoSchema = z.object({
@@ -76,9 +77,20 @@ export async function GET(req: NextRequest) {
       prisma.order.count({ where }),
     ]);
 
+    // Translate order data before sending to frontend
+    const pedidosTraducidos = pedidos.map(pedido => ({
+      ...pedido,
+      status: translateOrderStatus(pedido.status),
+      payment: pedido.payment ? {
+        ...pedido.payment,
+        status: translatePaymentStatus(pedido.payment.status),
+        method: translatePaymentMethod(pedido.payment.method),
+      } : null,
+    }));
+
     return NextResponse.json({ 
       success: true, 
-      pedidos,
+      pedidos: pedidosTraducidos,
       total,
       pages: Math.ceil(total / limit),
       page,
@@ -87,7 +99,7 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error('Error listando pedidos:', error);
     return NextResponse.json(
-      { success: false, error: 'Internal error' },
+      { success: false, error: translateErrorMessage('Internal error') },
       { status: 500 }
     );
   }
@@ -154,7 +166,7 @@ export async function PATCH(req: NextRequest) {
     }
     console.error('Error actualizando pedido:', error);
     return NextResponse.json(
-      { success: false, error: 'Internal error' },
+      { success: false, error: translateErrorMessage('Internal error') },
       { status: 500 }
     );
   }

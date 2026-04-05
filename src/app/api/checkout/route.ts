@@ -12,6 +12,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import Stripe from 'stripe';
 import { Prisma } from '@prisma/client';
+import { translatePaymentMethod, translateErrorMessage } from '@/lib/i18n';
 
 // Type for cart items with product included
 type CartItemWithProduct = Prisma.CartItemGetPayload<{
@@ -82,7 +83,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   if (!user) {
     return NextResponse.json(
-      { success: false, error: 'Usuario not found' },
+      { success: false, error: translateErrorMessage('Usuario not found') },
       { status: 404 }
     );
   }
@@ -162,7 +163,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
     if (!address) {
       return NextResponse.json(
-        { success: false, error: 'Dirección de envío no encontrada' },
+        { success: false, error: translateErrorMessage('Dirección de envío no encontrada') },
         { status: 404 }
       );
     }
@@ -205,11 +206,12 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         },
       });
 
-      return NextResponse.json({
-        success: true,
-        orderId: order.id,
-        orderNumber: order.orderNumber,
-      });
+    return NextResponse.json({
+      success: true,
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      paymentMethod: translatePaymentMethod(paymentMethod),
+    });
     }
 
     // Stripe flow - create Stripe session and order
@@ -254,11 +256,12 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       sessionId: stripeSession.id,
       url: stripeSession.url,
       orderId: order.id,
+      paymentMethod: translatePaymentMethod(paymentMethod),
     });
   } catch (error) {
     console.error('Error creando sesión de Stripe:', error);
     return NextResponse.json(
-      { success: false, error: 'Error al crear sesión de pago' },
+      { success: false, error: translateErrorMessage('Error al crear sesión de pago') },
       { status: 500 }
     );
   }

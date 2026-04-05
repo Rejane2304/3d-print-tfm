@@ -8,50 +8,50 @@ import { Material, Role, PaymentMethod, OrderStatus } from '@/types/prisma-enums
 export const loginSchema = z.object({
   email: z
     .string()
-    .min(1, 'Email is required')
-    .email('Invalid email format'),
+    .min(1, 'El email es obligatorio')
+    .email('Formato de email inválido'),
   password: z
     .string()
-    .min(1, 'Password is required')
-    .min(8, 'Password must be at least 8 characters'),
+    .min(1, 'La contraseña es obligatoria')
+    .min(8, 'La contraseña debe tener al menos 8 caracteres'),
 });
 
 export const registerSchema = z.object({
   name: z
     .string()
-    .min(1, 'Name is required')
-    .min(3, 'Name must be at least 3 characters')
-    .max(100, 'Name cannot exceed 100 characters'),
+    .min(1, 'El nombre es obligatorio')
+    .min(3, 'El nombre debe tener al menos 3 caracteres')
+    .max(100, 'El nombre no puede exceder 100 caracteres'),
   email: z
     .string()
-    .min(1, 'Email is required')
-    .email('Invalid email format'),
+    .min(1, 'El email es obligatorio')
+    .email('Formato de email inválido'),
   password: z
     .string()
-    .min(1, 'Password is required')
-    .min(8, 'Password must be at least 8 characters')
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Password must contain at least one uppercase, one lowercase and one number'),
+    .min(1, 'La contraseña es obligatoria')
+    .min(8, 'La contraseña debe tener al menos 8 caracteres')
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'La contraseña debe contener al menos una mayúscula, una minúscula y un número'),
   confirmPassword: z.string(),
   phone: z
     .string()
     .optional()
     .refine((val) => !val || /^\+34\s?\d{3}\s?\d{3}\s?\d{3}$/.test(val), {
-      message: 'Phone must be in Spanish format: +34 600 123 456',
+      message: 'El teléfono debe estar en formato español: +34 600 123 456',
     }),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: 'Passwords do not match',
+  message: 'Las contraseñas no coinciden',
   path: ['confirmPassword'],
 });
 
 export const changePasswordSchema = z.object({
-  currentPassword: z.string().min(1, 'Current password is required'),
+  currentPassword: z.string().min(1, 'La contraseña actual es obligatoria'),
   newPassword: z
     .string()
-    .min(8, 'New password must be at least 8 characters')
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Password must contain at least one uppercase, one lowercase and one number'),
+    .min(8, 'La nueva contraseña debe tener al menos 8 caracteres')
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'La contraseña debe contener al menos una mayúscula, una minúscula y un número'),
   confirmPassword: z.string(),
 }).refine((data) => data.newPassword === data.confirmPassword, {
-  message: 'Passwords do not match',
+  message: 'Las contraseñas no coinciden',
   path: ['confirmPassword'],
 });
 
@@ -62,27 +62,27 @@ export const changePasswordSchema = z.object({
 export const userSchema = z.object({
   name: z
     .string()
-    .min(1, 'Name is required')
-    .min(3, 'Name must be at least 3 characters')
-    .max(100, 'Name cannot exceed 100 characters'),
+    .min(1, 'El nombre es obligatorio')
+    .min(3, 'El nombre debe tener al menos 3 caracteres')
+    .max(100, 'El nombre no puede exceder 100 caracteres'),
   email: z
     .string()
-    .email('Invalid email format'),
+    .email('Formato de email inválido'),
   phone: z
     .string()
     .optional()
     .refine((val) => !val || /^\+34\s?\d{3}\s?\d{3}\s?\d{3}$/.test(val), {
-      message: 'Phone must be in Spanish format: +34 600 123 456',
+      message: 'El teléfono debe estar en formato español: +34 600 123 456',
     }),
   taxId: z
     .string()
     .optional()
     .refine((val) => !val || /^\d{8}[A-Z]$/.test(val), {
-      message: 'Tax ID must have 8 numbers and one uppercase letter',
+      message: 'El NIF debe tener 8 números y una letra mayúscula',
     }),
   fiscalName: z
     .string()
-    .max(200, 'Fiscal name cannot exceed 200 characters')
+    .max(200, 'El nombre fiscal no puede exceder 200 caracteres')
     .optional(),
   role: z.nativeEnum(Role).optional(),
   isActive: z.boolean().default(true),
@@ -97,38 +97,38 @@ export const userUpdateSchema = userSchema.partial();
 export const addressSchema = z.object({
   name: z
     .string()
-    .min(1, 'Address name is required')
-    .max(100, 'Name cannot exceed 100 characters'),
+    .min(1, 'El nombre de la dirección es obligatorio')
+    .max(100, 'El nombre no puede exceder 100 caracteres'),
   recipient: z
     .string()
-    .min(1, 'Recipient name is required')
-    .max(100, 'Recipient cannot exceed 100 characters'),
+    .min(1, 'El nombre del destinatario es obligatorio')
+    .max(100, 'El destinatario no puede exceder 100 caracteres'),
   phone: z
     .string()
-    .regex(/^\+34\s?\d{3}\s?\d{3}\s?\d{3}$/, 'Phone must be in Spanish format: +34 600 123 456'),
+    .regex(/^\+34\s?\d{3}\s?\d{3}\s?\d{3}$/, 'El teléfono debe estar en formato español: +34 600 123 456'),
   address: z
     .string()
-    .min(1, 'Address is required')
-    .max(255, 'Address cannot exceed 255 characters'),
+    .min(1, 'La dirección es obligatoria')
+    .max(255, 'La dirección no puede exceder 255 caracteres'),
   complement: z
     .string()
-    .max(100, 'Complement cannot exceed 100 characters')
+    .max(100, 'El complemento no puede exceder 100 caracteres')
     .optional(),
   postalCode: z
     .string()
-    .regex(/^\d{5}$/, 'Postal code must have 5 digits'),
+    .regex(/^\d{5}$/, 'El código postal debe tener 5 dígitos'),
   city: z
     .string()
-    .min(1, 'City is required')
-    .max(100, 'City cannot exceed 100 characters'),
+    .min(1, 'La ciudad es obligatoria')
+    .max(100, 'La ciudad no puede exceder 100 caracteres'),
   province: z
     .string()
-    .min(1, 'Province is required')
-    .max(100, 'Province cannot exceed 100 characters'),
+    .min(1, 'La provincia es obligatoria')
+    .max(100, 'La provincia no puede exceder 100 caracteres'),
   country: z
     .string()
-    .min(1, 'Country is required')
-    .max(50, 'Country cannot exceed 50 characters')
+    .min(1, 'El país es obligatorio')
+    .max(50, 'El país no puede exceder 50 caracteres')
     .default('Spain'),
   isDefault: z.boolean().default(false),
 });
@@ -142,59 +142,59 @@ export const addressUpdateSchema = addressSchema.partial();
 export const productSchema = z.object({
   name: z
     .string()
-    .min(1, 'Product name is required')
-    .max(200, 'Name cannot exceed 200 characters'),
+    .min(1, 'El nombre del producto es obligatorio')
+    .max(200, 'El nombre no puede exceder 200 caracteres'),
   description: z
     .string()
-    .min(1, 'Description is required')
-    .max(5000, 'Description cannot exceed 5000 characters'),
+    .min(1, 'La descripción es obligatoria')
+    .max(5000, 'La descripción no puede exceder 5000 caracteres'),
   shortDescription: z
     .string()
-    .max(255, 'Short description cannot exceed 255 characters')
+    .max(255, 'La descripción corta no puede exceder 255 caracteres')
     .optional(),
   price: z
     .number()
-    .min(0.01, 'Price must be greater than 0')
-    .max(99999.99, 'Maximum price allowed is 99999.99'),
+    .min(0.01, 'El precio debe ser mayor que 0')
+    .max(99999.99, 'El precio máximo permitido es 99999.99'),
   previousPrice: z
     .number()
-    .min(0, 'Previous price cannot be negative')
-    .max(99999.99, 'Maximum previous price is 99999.99')
+    .min(0, 'El precio anterior no puede ser negativo')
+    .max(99999.99, 'El precio anterior máximo es 99999.99')
     .optional()
     .nullable(),
   stock: z
     .number()
-    .int('Stock must be an integer')
-    .min(0, 'Stock cannot be negative'),
+    .int('El stock debe ser un número entero')
+    .min(0, 'El stock no puede ser negativo'),
   minStock: z
     .number()
-    .int('Minimum stock must be an integer')
-    .min(1, 'Minimum stock must be at least 1')
+    .int('El stock mínimo debe ser un número entero')
+    .min(1, 'El stock mínimo debe ser al menos 1')
     .default(5),
-  categoryId: z.string().uuid('Invalid category ID').optional(),
+  categoryId: z.string().uuid('ID de categoría inválido').optional(),
   material: z.nativeEnum(Material).optional(),
   dimensions: z
     .string()
-    .max(50, 'Dimensions cannot exceed 50 characters')
+    .max(50, 'Las dimensiones no pueden exceder 50 caracteres')
     .optional(),
   weight: z
     .number()
-    .min(0, 'Weight cannot be negative')
+    .min(0, 'El peso no puede ser negativo')
     .optional()
     .nullable(),
   printTime: z
     .number()
-    .int('Time must be an integer')
-    .min(1, 'Time must be at least 1 minute')
+    .int('El tiempo debe ser un número entero')
+    .min(1, 'El tiempo debe ser de al menos 1 minuto')
     .optional()
     .nullable(),
   metaTitle: z
     .string()
-    .max(200, 'Meta title cannot exceed 200 characters')
+    .max(200, 'El meta título no puede exceder 200 caracteres')
     .optional(),
   metaDescription: z
     .string()
-    .max(300, 'Meta description cannot exceed 300 characters')
+    .max(300, 'La meta descripción no puede exceder 300 caracteres')
     .optional(),
   isActive: z.boolean().default(true),
   isFeatured: z.boolean().default(false),
@@ -207,22 +207,22 @@ export const productUpdateSchema = productSchema.partial();
 // ============================================
 
 export const orderItemSchema = z.object({
-  productId: z.string().uuid('Invalid product ID'),
+  productId: z.string().uuid('ID de producto inválido'),
   quantity: z
     .number()
-    .int('Quantity must be an integer')
-    .min(1, 'Quantity must be at least 1')
-    .max(100, 'Maximum quantity per product is 100'),
+    .int('La cantidad debe ser un número entero')
+    .min(1, 'La cantidad debe ser al menos 1')
+    .max(100, 'La cantidad máxima por producto es 100'),
 });
 
 export const createOrderSchema = z.object({
   items: z
     .array(orderItemSchema)
-    .min(1, 'Order must contain at least one product'),
-  shippingAddressId: z.string().uuid('Invalid shipping address'),
+    .min(1, 'El pedido debe contener al menos un producto'),
+  shippingAddressId: z.string().uuid('Dirección de envío inválida'),
   customerNotes: z
     .string()
-    .max(1000, 'Notes cannot exceed 1000 characters')
+    .max(1000, 'Las notas no pueden exceder 1000 caracteres')
     .optional(),
 });
 
@@ -230,15 +230,15 @@ export const updateOrderStatusSchema = z.object({
   status: z.nativeEnum(OrderStatus).optional(),
   adminNotes: z
     .string()
-    .max(1000, 'Notes cannot exceed 1000 characters')
+    .max(1000, 'Las notas no pueden exceder 1000 caracteres')
     .optional(),
 });
 
 export const cancelOrderSchema = z.object({
   reason: z
     .string()
-    .min(1, 'Cancellation reason is required')
-    .max(500, 'Reason cannot exceed 500 characters'),
+    .min(1, 'El motivo de cancelación es obligatorio')
+    .max(500, 'El motivo no puede exceder 500 caracteres'),
 });
 
 // ============================================
@@ -246,7 +246,7 @@ export const cancelOrderSchema = z.object({
 // ============================================
 
 export const createPaymentSchema = z.object({
-  orderId: z.string().uuid('Invalid order ID'),
+  orderId: z.string().uuid('ID de pedido inválido'),
   method: z.nativeEnum(PaymentMethod).optional(),
 });
 
@@ -255,15 +255,15 @@ export const createPaymentSchema = z.object({
 // ============================================
 
 export const inventoryMovementSchema = z.object({
-  productId: z.string().uuid('Invalid product ID'),
+  productId: z.string().uuid('ID de producto inválido'),
   quantity: z
     .number()
-    .int('Quantity must be an integer')
-    .refine((val) => val !== 0, 'Quantity cannot be 0'),
+    .int('La cantidad debe ser un número entero')
+    .refine((val) => val !== 0, 'La cantidad no puede ser 0'),
   reason: z
     .string()
-    .min(1, 'Reason is required')
-    .max(255, 'Reason cannot exceed 255 characters'),
+    .min(1, 'El motivo es obligatorio')
+    .max(255, 'El motivo no puede exceder 255 caracteres'),
 });
 
 // ============================================
@@ -271,13 +271,13 @@ export const inventoryMovementSchema = z.object({
 // ============================================
 
 export const productImageSchema = z.object({
-  url: z.string().url('Invalid image URL'),
-  filename: z.string().min(1, 'Filename is required'),
+  url: z.string().url('URL de imagen inválida'),
+  filename: z.string().min(1, 'El nombre de archivo es obligatorio'),
   altText: z
     .string()
-    .max(255, 'Alt text cannot exceed 255 characters'),
+    .max(255, 'El texto alternativo no puede exceder 255 caracteres'),
   isMain: z.boolean().default(false),
-  displayOrder: z.number().int().min(0).max(4, 'Maximum 5 images per product'),
+  displayOrder: z.number().int().min(0).max(4, 'Máximo 5 imágenes por producto'),
 });
 
 // ============================================
@@ -285,9 +285,9 @@ export const productImageSchema = z.object({
 // ============================================
 
 export const shippingConfigSchema = z.object({
-  name: z.string().min(1, 'Name is required').max(100),
+  name: z.string().min(1, 'El nombre es obligatorio').max(100),
   description: z.string().max(500).optional(),
-  price: z.number().min(0, 'Price cannot be negative'),
+  price: z.number().min(0, 'El precio no puede ser negativo'),
   freeShippingFrom: z.number().min(0).optional().nullable(),
   minDays: z.number().int().min(1).default(1),
   maxDays: z.number().int().min(1).default(5),
