@@ -60,6 +60,22 @@ interface OrderDetail {
   notasInternas?: string;
 }
 
+// Traducir nombres de dirección comunes
+const translateAddressName = (name: string): string => {
+  const translations: { [key: string]: string } = {
+    'home': 'Casa',
+    'house': 'Casa',
+    'work': 'Trabajo',
+    'office': 'Oficina',
+    'apartment': 'Apartamento',
+    'flat': 'Piso',
+    'parents': 'Casa de padres',
+    'family': 'Casa familiar',
+  };
+  const lowerName = name?.toLowerCase().trim();
+  return translations[lowerName] || name;
+};
+
 const orderStatuses: Record<string, { color: string; icon: React.ElementType; label: string }> = {
   PENDIENTE: { color: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: Clock, label: 'Pendiente' },
   PAGADO: { color: 'bg-blue-100 text-blue-800 border-blue-200', icon: CheckCircle2, label: 'Pagado' },
@@ -287,7 +303,7 @@ export default function AdminPedidoDetallePage() {
                 </h2>
               </div>
               <div className="p-6">
-                <p className="font-medium text-gray-900">{order.nombreEnvio}</p>
+                <p className="font-medium text-gray-900">{translateAddressName(order.nombreEnvio)}</p>
                 <p className="text-gray-600">{order.shippingAddress}</p>
                 {order.complementoEnvio && (
                   <p className="text-gray-600">{order.complementoEnvio}</p>
@@ -327,7 +343,7 @@ export default function AdminPedidoDetallePage() {
               </div>
               <div className="p-6">
                 <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                  {order.paymentMethod === 'TARJETA' ? 'Tarjeta' : 'Transferencia'}
+                  {order.paymentMethod === 'CARD' ? 'Tarjeta' : 'PayPal'}
                 </span>
               </div>
             </div>

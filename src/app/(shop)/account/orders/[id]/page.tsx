@@ -117,16 +117,24 @@ const estadosConfig: Record<string, { color: string; icon: React.ElementType; la
 };
 
 const metodosPago: Record<string, string> = {
-  TARJETA: 'Tarjeta de crédito/débito',
-  TRANSFERENCIA: 'Transferencia bancaria',
-  CONTRA_REEMBOLSO: 'Contra reembolso',
+  CARD: 'Tarjeta',
   PAYPAL: 'PayPal',
-  CARD: 'Tarjeta de crédito/débito',
-  STRIPE: 'Tarjeta de crédito/débito',
-  CREDIT_CARD: 'Tarjeta de crédito',
-  DEBIT_CARD: 'Tarjeta de débito',
-  BANK_TRANSFER: 'Transferencia bancaria',
-  CASH: 'Efectivo',
+};
+
+// Traducir nombres de dirección comunes
+const translateAddressName = (name: string): string => {
+  const translations: { [key: string]: string } = {
+    'home': 'Casa',
+    'house': 'Casa',
+    'work': 'Trabajo',
+    'office': 'Oficina',
+    'apartment': 'Apartamento',
+    'flat': 'Piso',
+    'parents': 'Casa de padres',
+    'family': 'Casa familiar',
+  };
+  const lowerName = name?.toLowerCase().trim();
+  return translations[lowerName] || name;
 };
 
 export default function OrderDetailPage() {
@@ -474,7 +482,7 @@ export default function OrderDetailPage() {
                 Dirección de envío
               </h3>
               <div className="space-y-2 text-sm">
-                <p className="font-medium text-gray-900">{order.nombreEnvio}</p>
+                <p className="font-medium text-gray-900">{translateAddressName(order.nombreEnvio)}</p>
                 <p className="text-gray-600">{order.shippingAddress}</p>
                 {order.complementoEnvio && (
                   <p className="text-gray-600">{order.complementoEnvio}</p>
