@@ -1,13 +1,13 @@
 /**
- * Checkout Page - Simplified for Academic Demo
- * One-click checkout: select address + method → click pay → success
+ * Checkout Page - Formulario Unificado de Datos de Envío
+ * Combina datos personales y dirección de envío en un solo formulario
  */
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Loader2, MapPin, CreditCard, ChevronRight, Wallet, Package, User } from 'lucide-react';
+import { Loader2, MapPin, CreditCard, Wallet, Package } from 'lucide-react';
 import Image from 'next/image';
 
 interface UserProfile {
@@ -46,65 +46,36 @@ interface CartItem {
 type PaymentMethod = 'stripe' | 'paypal';
 
 export default function CheckoutPage() {
-  const { status, data: session } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [addresses, setAddresses] = useState<Address[]>([]);
-  const [selectedAddress, setSelectedAddress] = useState<string>('');
+  const [selectedAddressId, setSelectedAddressId] = useState<string>('');
   const [cart, setCart] = useState<{ items: CartItem[]; subtotal: number } | null>(null);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('stripe');
   
-  // Estados para edición de datos personales
-  const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [editedProfile, setEditedProfile] = useState<Partial<UserProfile>>({});
-  
-  // Estados para edición de dirección
-  const [isEditingAddress, setIsEditingAddress] = useState(false);
-  const [editedAddress, setEditedAddress] = useState<Address | null>(null);
+  // Estado unificado para el formulario
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    // Datos personales
+    name: '',
+    email: '',
+    phone: '',
+    taxId: '',
+    // Datos de dirección
+    addressName: '',
+    street: '',
+    complement: '',
+    postalCode: '',
+    city: '',
+    province: '',
+    isDefault: false
+  });
 
-  // Función para guardar dirección editada
-  const guardarDireccion = async () => {
-    if (!editedAddress) return;
-    
-    try {
-      const response = await fetch('/api/account/addresses', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: editedAddress.id,
-          name: editedAddress.name,
-          recipient: editedAddress.recipient,
-          phone: editedAddress.phone,
-          address: editedAddress.street,
-          complement: editedAddress.complement,
-          postalCode: editedAddress.postalCode,
-          city: editedAddress.city,
-          province: editedAddress.province,
-          isDefault: editedAddress.isDefault
-        })
-      });
-      
-      if (response.ok) {
-        // Recargar direcciones
-        const resAddresses = await fetch('/api/account/addresses');
-        if (resAddresses.ok) {
-          const data = await resAddresses.json();
-          setAddresses(data.addresses || []);
-        }
-        setIsEditingAddress(false);
-      } else {
-        const errorData = await response.json();
-        setError(errorData.error || 'Error al guardar dirección');
-      }
-    } catch (err) {
-      console.error('Error saving address:', err);
-      setError('Error al guardar la dirección');
-    }
-  };
-
+  // Cargar datos iniciales
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
@@ -116,11 +87,13 @@ export default function CheckoutPage() {
         const data = await resProfile.json();
         if (data.success) {
           setUserProfile(data.usuario);
-          setEditedProfile({
-            name: data.usuario.name,
+          setFormData(prev => ({
+            ...prev,
+            name: data.usuario.name || '',
+            email: data.usuario.email || '',
             phone: data.usuario.phone || '',
             taxId: data.usuario.taxId || ''
-          });
+          }));
         }
       }
 
@@ -131,7 +104,18 @@ export default function CheckoutPage() {
         setAddresses(data.addresses || []);
         const primary = data.addresses?.find((d: Address) => d.isDefault);
         if (primary) {
-          setSelectedAddress(primary.id);
+          setSelectedAddressId(primary.id);
+          // Cargar datos de dirección en el formulario
+          setFormData(prev => ({
+            ...prev,
+            addressName: primary.name || '',
+            street: primary.street || '',
+            complement: primary.complement || '',
+            postalCode: primary.postalCode || '',
+            city: primary.city || '',
+            province: primary.province || '',
+            isDefault: primary.isDefault || false
+          }));
         }
       } else if (resAddresses.status === 401) {
         router.push('/auth?callbackUrl=/checkout');
@@ -143,7 +127,6 @@ export default function CheckoutPage() {
       if (resCart.ok) {
         const data = await resCart.json();
         setCart(data.cart);
-
         if (!data.cart?.items?.length) {
           router.push('/cart');
           return;
@@ -162,14 +145,83 @@ export default function CheckoutPage() {
       router.push('/auth?callbackUrl=/checkout');
       return;
     }
-
     if (status === 'authenticated') {
       loadData();
     }
   }, [status, router, loadData]);
 
+  // Guardar datos unificados
+  const guardarDatos = async () => {
+    try {
+      // Guardar perfil
+      const profileResponse = await fetch('/api/account/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          phone: formData.phone,
+          taxId: formData.taxId
+        })
+      });
+
+      // Guardar dirección
+      if (selectedAddressId) {
+        await fetch('/api/account/addresses', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: selectedAddressId,
+            name: formData.addressName,
+            recipient: formData.name,
+            address: formData.street,
+            complement: formData.complement,
+            postalCode: formData.postalCode,
+            city: formData.city,
+            province: formData.province,
+            phone: formData.phone,
+            isDefault: formData.isDefault
+          })
+        });
+      }
+
+      // Recargar datos
+      await loadData();
+      setIsEditing(false);
+    } catch (err) {
+      console.error('Error saving data:', err);
+      setError('Error al guardar los datos');
+    }
+  };
+
+  const cancelarEdicion = () => {
+    // Restaurar valores originales
+    if (userProfile) {
+      setFormData(prev => ({
+        ...prev,
+        name: userProfile.name || '',
+        email: userProfile.email || '',
+        phone: userProfile.phone || '',
+        taxId: userProfile.taxId || ''
+      }));
+    }
+    const selected = addresses.find(a => a.id === selectedAddressId);
+    if (selected) {
+      setFormData(prev => ({
+        ...prev,
+        addressName: selected.name || '',
+        street: selected.street || '',
+        complement: selected.complement || '',
+        postalCode: selected.postalCode || '',
+        city: selected.city || '',
+        province: selected.province || '',
+        isDefault: selected.isDefault || false
+      }));
+    }
+    setIsEditing(false);
+  };
+
   const processPayment = async () => {
-    if (!selectedAddress) {
+    if (!selectedAddressId) {
       setError('Selecciona una dirección de envío');
       return;
     }
@@ -178,12 +230,11 @@ export default function CheckoutPage() {
       setProcessing(true);
       setError(null);
 
-      // Create order and process payment in one step
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          shippingAddressId: selectedAddress,
+          shippingAddressId: selectedAddressId,
           paymentMethod: paymentMethod.toUpperCase(),
         }),
       });
@@ -194,7 +245,7 @@ export default function CheckoutPage() {
         throw new Error(data.error || 'Error al procesar el pedido');
       }
 
-      // For demo: immediately confirm payment and redirect to success
+      // Confirm payment
       const confirmResponse = await fetch('/api/checkout/confirm-payment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -205,16 +256,12 @@ export default function CheckoutPage() {
       });
 
       if (!confirmResponse.ok) {
-        const confirmData = await confirmResponse.json();
-        console.error('Payment confirmation error:', confirmData);
-        // Continue anyway since order was created
+        console.error('Payment confirmation error');
       }
 
-      // Clear cart from state and trigger update
+      // Clear cart
       setCart({ items: [], subtotal: 0 });
       window.dispatchEvent(new Event('cartUpdated'));
-
-      // Redirect to success page
       router.push('/checkout/success');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
@@ -239,6 +286,8 @@ export default function CheckoutPage() {
   const taxAmount = subtotal * taxRate;
   const total = subtotal + shippingCost + taxAmount;
 
+  const selectedAddress = addresses.find(a => a.id === selectedAddressId);
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
@@ -247,9 +296,7 @@ export default function CheckoutPage() {
           <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
             Finalizar Compra
           </h1>
-          <p className="text-gray-600">
-            Revisa tu pedido y confirma el pago
-          </p>
+          <p className="text-gray-600">Revisa tu pedido y confirma el pago</p>
         </div>
 
         {/* Error */}
@@ -260,37 +307,33 @@ export default function CheckoutPage() {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Selección de dirección */}
+          {/* Columna izquierda: Datos de envío unificados */}
           <div className="space-y-6">
+            {/* Formulario Unificado */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
                   <MapPin className="h-5 w-5 text-indigo-600" />
-                  <h2 className="text-xl font-semibold">Dirección de envío</h2>
+                  <h2 className="text-xl font-semibold">Datos de envío</h2>
                 </div>
-                {!isEditingAddress ? (
+                {!isEditing ? (
                   <button
-                    onClick={() => setIsEditingAddress(true)}
-                    className="text-sm text-indigo-600 hover:text-indigo-800"
+                    onClick={() => setIsEditing(true)}
+                    className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
                   >
                     Editar
                   </button>
                 ) : (
                   <div className="flex gap-2">
                     <button
-                      onClick={guardarDireccion}
-                      className="text-sm text-green-600 hover:text-green-800"
+                      onClick={guardarDatos}
+                      className="text-sm text-green-600 hover:text-green-800 font-medium"
                     >
                       Guardar
                     </button>
                     <button
-                      onClick={() => {
-                        setIsEditingAddress(false);
-                        // Resetear al valor original
-                        const original = addresses.find(a => a.id === selectedAddress);
-                        if (original) setEditedAddress(original);
-                      }}
-                      className="text-sm text-gray-600 hover:text-gray-800"
+                      onClick={cancelarEdicion}
+                      className="text-sm text-gray-600 hover:text-gray-800 font-medium"
                     >
                       Cancelar
                     </button>
@@ -298,312 +341,231 @@ export default function CheckoutPage() {
                 )}
               </div>
 
-              {addresses.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-gray-600 mb-4">
-                    No tienes direcciones guardadas
-                  </p>
-                  <a
-                    href="/account/addresses"
-                    className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-800"
-                  >
-                    Agregar dirección <ChevronRight className="h-4 w-4" />
-                  </a>
-                </div>
-              ) : isEditingAddress ? (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Nombre de la dirección
-                    </label>
-                    <input
-                      type="text"
-                      value={editedAddress?.name || ''}
-                      onChange={(e) => setEditedAddress({ ...editedAddress!, name: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Destinatario
-                    </label>
-                    <input
-                      type="text"
-                      value={editedAddress?.recipient || ''}
-                      onChange={(e) => setEditedAddress({ ...editedAddress!, recipient: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Dirección
-                    </label>
-                    <input
-                      type="text"
-                      value={editedAddress?.street || ''}
-                      onChange={(e) => setEditedAddress({ ...editedAddress!, street: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Complemento (opcional)
-                    </label>
-                    <input
-                      type="text"
-                      value={editedAddress?.complement || ''}
-                      onChange={(e) => setEditedAddress({ ...editedAddress!, complement: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Código postal
-                      </label>
-                      <input
-                        type="text"
-                        value={editedAddress?.postalCode || ''}
-                        onChange={(e) => setEditedAddress({ ...editedAddress!, postalCode: e.target.value })}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Ciudad
-                      </label>
-                      <input
-                        type="text"
-                        value={editedAddress?.city || ''}
-                        onChange={(e) => setEditedAddress({ ...editedAddress!, city: e.target.value })}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500"
-                      />
+              {isEditing ? (
+                // Formulario Editable
+                <div className="space-y-6">
+                  {/* Datos Personales */}
+                  <div className="border-b border-gray-200 pb-6">
+                    <h3 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wide">
+                      Datos personales
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">
+                          Nombre completo *
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.name}
+                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">
+                          Email *
+                        </label>
+                        <input
+                          type="email"
+                          value={formData.email}
+                          disabled
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-gray-100 text-gray-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">
+                          Teléfono *
+                        </label>
+                        <input
+                          type="tel"
+                          value={formData.phone}
+                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">
+                          NIF / DNI
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.taxId}
+                          onChange={(e) => setFormData({ ...formData, taxId: e.target.value })}
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        />
+                      </div>
                     </div>
                   </div>
+
+                  {/* Dirección */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Provincia
-                    </label>
-                    <input
-                      type="text"
-                      value={editedAddress?.province || ''}
-                      onChange={(e) => setEditedAddress({ ...editedAddress!, province: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Teléfono
-                    </label>
-                    <input
-                      type="tel"
-                      value={editedAddress?.phone || ''}
-                      onChange={(e) => setEditedAddress({ ...editedAddress!, phone: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500"
-                    />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      id="isDefault"
-                      checked={editedAddress?.isDefault || false}
-                      onChange={(e) => setEditedAddress({ ...editedAddress!, isDefault: e.target.checked })}
-                      className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                    />
-                    <label htmlFor="isDefault" className="text-sm text-gray-700">
-                      Dirección principal
-                    </label>
+                    <h3 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wide">
+                      Dirección de envío
+                    </h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">
+                          Nombre de la dirección *
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.addressName}
+                          onChange={(e) => setFormData({ ...formData, addressName: e.target.value })}
+                          placeholder="Ej: Casa, Oficina"
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">
+                          Calle y número *
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.street}
+                          onChange={(e) => setFormData({ ...formData, street: e.target.value })}
+                          placeholder="Calle Principal 123"
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">
+                          Complemento (piso, puerta, etc.)
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.complement}
+                          onChange={(e) => setFormData({ ...formData, complement: e.target.value })}
+                          placeholder="Piso 2, Puerta B"
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        />
+                      </div>
+                      <div className="grid grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            Código postal *
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.postalCode}
+                            onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            Ciudad *
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.city}
+                            onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            Provincia *
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.province}
+                            onChange={(e) => setFormData({ ...formData, province: e.target.value })}
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            required
+                          />
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 pt-2">
+                        <input
+                          type="checkbox"
+                          id="isDefault"
+                          checked={formData.isDefault}
+                          onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })}
+                          className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                        />
+                        <label htmlFor="isDefault" className="text-sm text-gray-700">
+                          Guardar como dirección principal
+                        </label>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ) : (
-                <div className="space-y-2">
-                  {(() => {
-                    const selected = addresses.find(a => a.id === selectedAddress);
-                    if (!selected) return <p className="text-gray-600">Selecciona una dirección</p>;
-                    return (
-                      <>
-                        <p className="text-sm">
-                          <span className="text-gray-600">Nombre:</span>{' '}
-                          <span className="font-medium">{selected.name}</span>
-                          {selected.isDefault && (
-                            <span className="ml-2 text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded">
-                              Principal
-                            </span>
-                          )}
-                        </p>
-                        <p className="text-sm">
-                          <span className="text-gray-600">Destinatario:</span>{' '}
-                          <span className="font-medium">{selected.recipient}</span>
-                        </p>
-                        <p className="text-sm">
-                          <span className="text-gray-600">Dirección:</span>{' '}
-                          <span className="font-medium">{selected.street}</span>
-                        </p>
-                        {selected.complement && (
-                          <p className="text-sm">
-                            <span className="text-gray-600">Complemento:</span>{' '}
-                            <span className="font-medium">{selected.complement}</span>
-                          </p>
+                // Vista Resumida (No editable)
+                addresses.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-gray-600 mb-4">No tienes direcciones guardadas</p>
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      className="text-indigo-600 hover:text-indigo-800 font-medium"
+                    >
+                      Añadir dirección de envío →
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {/* Info Personal */}
+                    <div className="border-b border-gray-100 pb-4">
+                      <h3 className="text-sm font-semibold text-gray-900 mb-3">Datos personales</h3>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                        <div>
+                          <span className="text-gray-500">Nombre:</span>
+                          <p className="font-medium">{userProfile?.name || formData.name}</p>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Email:</span>
+                          <p className="font-medium">{userProfile?.email || formData.email}</p>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Teléfono:</span>
+                          <p className="font-medium">{userProfile?.phone || formData.phone || '-'}</p>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">NIF/DNI:</span>
+                          <p className="font-medium">{userProfile?.taxId || formData.taxId || '-'}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Info Dirección */}
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                        Dirección de envío
+                        {selectedAddress?.isDefault && (
+                          <span className="ml-2 text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded">Principal</span>
                         )}
-                        <p className="text-sm">
-                          <span className="text-gray-600">Código postal:</span>{' '}
-                          <span className="font-medium">{selected.postalCode}</span>
+                      </h3>
+                      <div className="text-sm space-y-1">
+                        <p className="font-medium text-gray-900">{selectedAddress?.name || formData.addressName}</p>
+                        <p className="text-gray-600">{selectedAddress?.street || formData.street}</p>
+                        {(selectedAddress?.complement || formData.complement) && (
+                          <p className="text-gray-600">{selectedAddress?.complement || formData.complement}</p>
+                        )}
+                        <p className="text-gray-600">
+                          {(selectedAddress?.postalCode || formData.postalCode)} {''}
+                          {(selectedAddress?.city || formData.city)}, {''}
+                          {(selectedAddress?.province || formData.province)}
                         </p>
-                        <p className="text-sm">
-                          <span className="text-gray-600">Ciudad:</span>{' '}
-                          <span className="font-medium">{selected.city}</span>
-                        </p>
-                        <p className="text-sm">
-                          <span className="text-gray-600">Provincia:</span>{' '}
-                          <span className="font-medium">{selected.province}</span>
-                        </p>
-                        <p className="text-sm">
-                          <span className="text-gray-600">Teléfono:</span>{' '}
-                          <span className="font-medium">{selected.phone}</span>
-                        </p>
-                      </>
-                    );
-                  })()}
-                </div>
+                        <p className="text-gray-600">Tel: {selectedAddress?.phone || userProfile?.phone || formData.phone}</p>
+                      </div>
+                    </div>
+                  </div>
+                )
               )}
             </div>
 
-            {/* Datos personales */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <User className="h-5 w-5 text-indigo-600" />
-                  <h2 className="text-xl font-semibold">Datos personales</h2>
-                </div>
-                {!isEditingProfile ? (
-                  <button
-                    onClick={() => setIsEditingProfile(true)}
-                    className="text-sm text-indigo-600 hover:text-indigo-800"
-                  >
-                    Editar
-                  </button>
-                ) : (
-                  <div className="flex gap-2">
-                    <button
-                      onClick={async () => {
-                        try {
-                          const response = await fetch('/api/account/profile', {
-                            method: 'PATCH',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                              name: editedProfile.name,
-                              phone: editedProfile.phone,
-                              taxId: editedProfile.taxId
-                            })
-                          });
-                          if (response.ok) {
-                            const data = await response.json();
-                            setUserProfile(data.usuario);
-                            setIsEditingProfile(false);
-                          }
-                        } catch (err) {
-                          console.error('Error updating profile:', err);
-                        }
-                      }}
-                      className="text-sm text-green-600 hover:text-green-800"
-                    >
-                      Guardar
-                    </button>
-                    <button
-                      onClick={() => {
-                        setEditedProfile({
-                          name: userProfile?.name,
-                          phone: userProfile?.phone || '',
-                          taxId: userProfile?.taxId || ''
-                        });
-                        setIsEditingProfile(false);
-                      }}
-                      className="text-sm text-gray-600 hover:text-gray-800"
-                    >
-                      Cancelar
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {isEditingProfile ? (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Nombre completo
-                    </label>
-                    <input
-                      type="text"
-                      value={editedProfile.name || ''}
-                      onChange={(e) => setEditedProfile({ ...editedProfile, name: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      value={userProfile?.email || ''}
-                      disabled
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-100 text-gray-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Teléfono
-                    </label>
-                    <input
-                      type="tel"
-                      value={editedProfile.phone || ''}
-                      onChange={(e) => setEditedProfile({ ...editedProfile, phone: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      NIF / DNI
-                    </label>
-                    <input
-                      type="text"
-                      value={editedProfile.taxId || ''}
-                      onChange={(e) => setEditedProfile({ ...editedProfile, taxId: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500"
-                    />
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <p className="text-sm">
-                    <span className="text-gray-600">Nombre:</span>{' '}
-                    <span className="font-medium">{userProfile?.name}</span>
-                  </p>
-                  <p className="text-sm">
-                    <span className="text-gray-600">Email:</span>{' '}
-                    <span className="font-medium">{userProfile?.email}</span>
-                  </p>
-                  <p className="text-sm">
-                    <span className="text-gray-600">Teléfono:</span>{' '}
-                    <span className="font-medium">{userProfile?.phone || 'No especificado'}</span>
-                  </p>
-                  <p className="text-sm">
-                    <span className="text-gray-600">NIF / DNI:</span>{' '}
-                    <span className="font-medium">{userProfile?.taxId || 'No especificado'}</span>
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Resumen de items */}
+            {/* Resumen del pedido */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h2 className="text-xl font-semibold mb-4">Resumen del pedido</h2>
+              
               {cart?.items.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center gap-4 py-3 border-b border-gray-100"
-                >
-                  {/* Product Image */}
+                <div key={item.id} className="flex items-center gap-4 py-3 border-b border-gray-100">
                   <div className="w-20 h-20 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden relative">
                     {item.product.image ? (
                       <Image
@@ -631,7 +593,7 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* Totales y pago */}
+          {/* Columna derecha: Totales y pago */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-24">
               <h2 className="text-xl font-semibold mb-6">Total del pedido</h2>
@@ -651,18 +613,13 @@ export default function CheckoutPage() {
                   <span>IVA (21%)</span>
                   <span>{taxAmount.toFixed(2)} €</span>
                 </div>
-                {shippingCost > 0 && (
-                  <p className="text-sm text-blue-600">
-                    Te faltan {(50 - subtotal).toFixed(2)} € para envío gratis
-                  </p>
-                )}
                 <div className="flex justify-between text-xl font-bold border-t pt-3">
                   <span>Total</span>
                   <span className="text-indigo-600">{total.toFixed(2)} €</span>
                 </div>
               </div>
 
-              {/* Payment Method Selection */}
+              {/* Método de pago */}
               <div className="mb-6">
                 <h3 className="text-sm font-medium text-gray-700 mb-3">Método de pago</h3>
                 <div className="space-y-2">
@@ -684,7 +641,6 @@ export default function CheckoutPage() {
                     <CreditCard className="h-5 w-5 text-indigo-600" />
                     <div className="flex-1">
                       <span className="font-medium">Tarjeta de crédito/débito</span>
-                      <p className="text-xs text-gray-500">Stripe</p>
                     </div>
                   </label>
 
@@ -706,17 +662,16 @@ export default function CheckoutPage() {
                     <Wallet className="h-5 w-5 text-blue-600" />
                     <div className="flex-1">
                       <span className="font-medium">PayPal</span>
-                      <p className="text-xs text-gray-500">Pago seguro con PayPal</p>
                     </div>
                   </label>
                 </div>
               </div>
 
-              {/* Single Payment Button */}
+              {/* Botón de pago */}
               <button
                 onClick={processPayment}
-                disabled={processing || !selectedAddress || addresses.length === 0}
-                className="w-full bg-indigo-600 text-white py-4 px-6 rounded-lg font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
+                disabled={processing || !selectedAddressId || addresses.length === 0}
+                className="w-full bg-indigo-600 text-white py-4 px-6 rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
               >
                 {processing ? (
                   <>
@@ -734,8 +689,6 @@ export default function CheckoutPage() {
                   </>
                 )}
               </button>
-
-
             </div>
           </div>
         </div>
