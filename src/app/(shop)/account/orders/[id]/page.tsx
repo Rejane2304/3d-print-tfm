@@ -121,6 +121,12 @@ const metodosPago: Record<string, string> = {
   TRANSFERENCIA: 'Transferencia bancaria',
   CONTRA_REEMBOLSO: 'Contra reembolso',
   PAYPAL: 'PayPal',
+  CARD: 'Tarjeta de crédito/débito',
+  STRIPE: 'Tarjeta de crédito/débito',
+  CREDIT_CARD: 'Tarjeta de crédito',
+  DEBIT_CARD: 'Tarjeta de débito',
+  BANK_TRANSFER: 'Transferencia bancaria',
+  CASH: 'Efectivo',
 };
 
 export default function OrderDetailPage() {
