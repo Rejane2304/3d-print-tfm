@@ -28,7 +28,7 @@ interface Address {
   postalCode: string;
   city: string;
   province: string;
-  isPrimary: boolean;
+  isDefault: boolean;
 }
 
 interface CartItem {
@@ -60,6 +60,50 @@ export default function CheckoutPage() {
   // Estados para edición de datos personales
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editedProfile, setEditedProfile] = useState<Partial<UserProfile>>({});
+  
+  // Estados para edición de dirección
+  const [isEditingAddress, setIsEditingAddress] = useState(false);
+  const [editedAddress, setEditedAddress] = useState<Address | null>(null);
+
+  // Función para guardar dirección editada
+  const guardarDireccion = async () => {
+    if (!editedAddress) return;
+    
+    try {
+      const response = await fetch('/api/account/addresses', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: editedAddress.id,
+          name: editedAddress.name,
+          recipient: editedAddress.recipient,
+          phone: editedAddress.phone,
+          address: editedAddress.street,
+          complement: editedAddress.complement,
+          postalCode: editedAddress.postalCode,
+          city: editedAddress.city,
+          province: editedAddress.province,
+          isDefault: editedAddress.isDefault
+        })
+      });
+      
+      if (response.ok) {
+        // Recargar direcciones
+        const resAddresses = await fetch('/api/account/addresses');
+        if (resAddresses.ok) {
+          const data = await resAddresses.json();
+          setAddresses(data.addresses || []);
+        }
+        setIsEditingAddress(false);
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || 'Error al guardar dirección');
+      }
+    } catch (err) {
+      console.error('Error saving address:', err);
+      setError('Error al guardar la dirección');
+    }
+  };
 
   const loadData = useCallback(async () => {
     try {
@@ -85,7 +129,7 @@ export default function CheckoutPage() {
       if (resAddresses.ok) {
         const data = await resAddresses.json();
         setAddresses(data.addresses || []);
-        const primary = data.addresses?.find((d: Address) => d.isPrimary);
+        const primary = data.addresses?.find((d: Address) => d.isDefault);
         if (primary) {
           setSelectedAddress(primary.id);
         }
@@ -219,9 +263,39 @@ export default function CheckoutPage() {
           {/* Selección de dirección */}
           <div className="space-y-6">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <MapPin className="h-5 w-5 text-indigo-600" />
-                <h2 className="text-xl font-semibold">Dirección de envío</h2>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-indigo-600" />
+                  <h2 className="text-xl font-semibold">Dirección de envío</h2>
+                </div>
+                {!isEditingAddress ? (
+                  <button
+                    onClick={() => setIsEditingAddress(true)}
+                    className="text-sm text-indigo-600 hover:text-indigo-800"
+                  >
+                    Editar
+                  </button>
+                ) : (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={guardarDireccion}
+                      className="text-sm text-green-600 hover:text-green-800"
+                    >
+                      Guardar
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsEditingAddress(false);
+                        // Resetear al valor original
+                        const original = addresses.find(a => a.id === selectedAddress);
+                        if (original) setEditedAddress(original);
+                      }}
+                      className="text-sm text-gray-600 hover:text-gray-800"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                )}
               </div>
 
               {addresses.length === 0 ? (
@@ -236,43 +310,160 @@ export default function CheckoutPage() {
                     Agregar dirección <ChevronRight className="h-4 w-4" />
                   </a>
                 </div>
-              ) : (
+              ) : isEditingAddress ? (
                 <div className="space-y-4">
-                  {addresses.map((address) => (
-                    <label
-                      key={address.id}
-                      className={`flex items-start gap-4 p-4 rounded-lg border-2 cursor-pointer transition-colors ${
-                        selectedAddress === address.id
-                          ? 'border-indigo-600 bg-indigo-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Nombre de la dirección
+                    </label>
+                    <input
+                      type="text"
+                      value={editedAddress?.name || ''}
+                      onChange={(e) => setEditedAddress({ ...editedAddress!, name: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Destinatario
+                    </label>
+                    <input
+                      type="text"
+                      value={editedAddress?.recipient || ''}
+                      onChange={(e) => setEditedAddress({ ...editedAddress!, recipient: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Dirección
+                    </label>
+                    <input
+                      type="text"
+                      value={editedAddress?.street || ''}
+                      onChange={(e) => setEditedAddress({ ...editedAddress!, street: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Complemento (opcional)
+                    </label>
+                    <input
+                      type="text"
+                      value={editedAddress?.complement || ''}
+                      onChange={(e) => setEditedAddress({ ...editedAddress!, complement: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Código postal
+                      </label>
                       <input
-                        type="radio"
-                        name="direccion"
-                        value={address.id}
-                        checked={selectedAddress === address.id}
-                        onChange={(e) => setSelectedAddress(e.target.value)}
-                        className="mt-1"
+                        type="text"
+                        value={editedAddress?.postalCode || ''}
+                        onChange={(e) => setEditedAddress({ ...editedAddress!, postalCode: e.target.value })}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500"
                       />
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-medium">{address.name}</span>
-                          {address.isPrimary && (
-                            <span className="text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded">
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Ciudad
+                      </label>
+                      <input
+                        type="text"
+                        value={editedAddress?.city || ''}
+                        onChange={(e) => setEditedAddress({ ...editedAddress!, city: e.target.value })}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Provincia
+                    </label>
+                    <input
+                      type="text"
+                      value={editedAddress?.province || ''}
+                      onChange={(e) => setEditedAddress({ ...editedAddress!, province: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Teléfono
+                    </label>
+                    <input
+                      type="tel"
+                      value={editedAddress?.phone || ''}
+                      onChange={(e) => setEditedAddress({ ...editedAddress!, phone: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="isDefault"
+                      checked={editedAddress?.isDefault || false}
+                      onChange={(e) => setEditedAddress({ ...editedAddress!, isDefault: e.target.checked })}
+                      className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <label htmlFor="isDefault" className="text-sm text-gray-700">
+                      Dirección principal
+                    </label>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {(() => {
+                    const selected = addresses.find(a => a.id === selectedAddress);
+                    if (!selected) return <p className="text-gray-600">Selecciona una dirección</p>;
+                    return (
+                      <>
+                        <p className="text-sm">
+                          <span className="text-gray-600">Nombre:</span>{' '}
+                          <span className="font-medium">{selected.name}</span>
+                          {selected.isDefault && (
+                            <span className="ml-2 text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded">
                               Principal
                             </span>
                           )}
-                        </div>
-                        <p className="text-sm text-gray-600">{address.recipient}</p>
-                        <p className="text-sm text-gray-600">{address.street}</p>
-                        <p className="text-sm text-gray-600">
-                          {address.postalCode} {address.city}, {address.province}
                         </p>
-                        <p className="text-sm text-gray-600">Tel: {address.phone}</p>
-                      </div>
-                    </label>
-                  ))}
+                        <p className="text-sm">
+                          <span className="text-gray-600">Destinatario:</span>{' '}
+                          <span className="font-medium">{selected.recipient}</span>
+                        </p>
+                        <p className="text-sm">
+                          <span className="text-gray-600">Dirección:</span>{' '}
+                          <span className="font-medium">{selected.street}</span>
+                        </p>
+                        {selected.complement && (
+                          <p className="text-sm">
+                            <span className="text-gray-600">Complemento:</span>{' '}
+                            <span className="font-medium">{selected.complement}</span>
+                          </p>
+                        )}
+                        <p className="text-sm">
+                          <span className="text-gray-600">Código postal:</span>{' '}
+                          <span className="font-medium">{selected.postalCode}</span>
+                        </p>
+                        <p className="text-sm">
+                          <span className="text-gray-600">Ciudad:</span>{' '}
+                          <span className="font-medium">{selected.city}</span>
+                        </p>
+                        <p className="text-sm">
+                          <span className="text-gray-600">Provincia:</span>{' '}
+                          <span className="font-medium">{selected.province}</span>
+                        </p>
+                        <p className="text-sm">
+                          <span className="text-gray-600">Teléfono:</span>{' '}
+                          <span className="font-medium">{selected.phone}</span>
+                        </p>
+                      </>
+                    );
+                  })()}
                 </div>
               )}
             </div>
