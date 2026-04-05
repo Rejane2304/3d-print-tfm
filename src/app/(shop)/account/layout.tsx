@@ -16,8 +16,8 @@ interface CuentaLayoutProps {
 
 const menuItems = [
   { href: '/account/orders', label: 'Mis Pedidos', icon: Package },
-  { href: '/account/direcciones', label: 'Mis Direcciones', icon: MapPin },
-  { href: '/account/perfil', label: 'Mi Perfil', icon: User },
+  { href: '/account/addresses', label: 'Mis Direcciones', icon: MapPin },
+  { href: '/account/profile', label: 'Mi Perfil', icon: User },
 ];
 
 export default function CuentaLayout({ children }: CuentaLayoutProps) {
