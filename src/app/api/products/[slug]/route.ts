@@ -6,6 +6,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { withErrorHandler } from '@/lib/errors/api-wrapper';
 import { ApiError, ErrorCode } from '@/lib/errors';
+import {
+  translateProductName,
+  translateProductDescription,
+  translateProductShortDescription,
+  translateCategoryName,
+  translateCategoryDescription,
+} from '@/lib/i18n';
 
 export const GET = withErrorHandler(async (
   req: NextRequest,
@@ -23,17 +30,33 @@ export const GET = withErrorHandler(async (
       images: {
         orderBy: { displayOrder: 'asc' },
       },
+      category: true,
     },
   });
-  
+
   if (!product) {
     throw new ApiError(ErrorCode.DB_NOT_FOUND, 'Producto not found', 404);
   }
-  
+
   if (!product.isActive) {
     throw new ApiError(ErrorCode.DB_NOT_FOUND, 'Producto no disponible', 404);
   }
-  
+
+  // Translate product fields to Spanish
+  const translatedProduct = {
+    ...product,
+    name: translateProductName(product.slug),
+    description: translateProductDescription(product.slug),
+    shortDescription: translateProductShortDescription(product.slug),
+    category: product.category
+      ? {
+          ...product.category,
+          name: translateCategoryName(product.category.slug),
+          description: translateCategoryDescription(product.category.slug),
+        }
+      : product.category,
+  };
+
   // Obtener productos relacionados (misma categoría, excluyendo el actual)
   const related = await prisma.product.findMany({
     where: {
@@ -49,12 +72,20 @@ export const GET = withErrorHandler(async (
     },
     take: 4,
   });
-  
+
+  // Translate related products
+  const translatedRelated = related.map((p) => ({
+    ...p,
+    name: translateProductName(p.slug),
+    description: translateProductDescription(p.slug),
+    shortDescription: translateProductShortDescription(p.slug),
+  }));
+
   return NextResponse.json({
     success: true,
     data: {
-      product,
-      related,
+      product: translatedProduct,
+      related: translatedRelated,
     },
   });
 });

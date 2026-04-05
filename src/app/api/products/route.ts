@@ -6,6 +6,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { withErrorHandler } from '@/lib/errors/api-wrapper';
 import { Material, Prisma } from '@prisma/client';
+import {
+  translateProductName,
+  translateProductDescription,
+  translateProductShortDescription,
+  translateCategoryName,
+} from '@/lib/i18n';
 
 export const GET = withErrorHandler(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
@@ -95,9 +101,23 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
 
   const totalPages = Math.ceil(total / pageSize);
 
+  // Translate products to Spanish
+  const translatedProducts = products.map((product) => ({
+    ...product,
+    name: translateProductName(product.slug),
+    description: translateProductDescription(product.slug),
+    shortDescription: translateProductShortDescription(product.slug),
+    category: product.category
+      ? {
+          ...product.category,
+          name: translateCategoryName(product.category.slug),
+        }
+      : product.category,
+  }));
+
   return NextResponse.json({
     success: true,
-    data: products,
+    data: translatedProducts,
     pagination: {
       page,
       pageSize,

@@ -235,7 +235,8 @@ describe('Products API', () => {
       expect(res.status).toBe(200);
       expect(body.success).toBe(true);
       expect(body.data.product.slug).toBe(activeProduct.slug);
-      expect(body.data.product.name).toBe(activeProduct.name);
+      // For products without translation, name falls back to slug
+      expect(body.data.product.name).toBe(activeProduct.slug);
     });
 
     it('should return 404 for non-existent product', async () => {
