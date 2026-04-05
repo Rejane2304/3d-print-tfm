@@ -8,6 +8,7 @@ import { prisma } from '@/lib/db/prisma';
 import Image from 'next/image';
 import Link from 'next/link';
 import AddToCartButton from '@/components/products/AddToCartButton';
+import ProductImageGallery from '@/components/products/ProductImageGallery';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 
@@ -78,45 +79,8 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
         </nav>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-          {/* Imágenes del Producto */}
-          <div className="space-y-4">
-            <div className="relative aspect-square bg-gray-200 rounded-lg overflow-hidden">
-              {mainImage ? (
-                <Image
-                  src={mainImage.url}
-                  alt={product.name}
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 50vw"
-                  className="object-cover"
-                  priority
-                />
-              ) : (
-                <div className="flex items-center justify-center h-full text-gray-400">
-                  Sin imagen
-                </div>
-              )}
-            </div>
-            
-            {/* Miniaturas */}
-            {product.images.length > 1 && (
-              <div className="grid grid-cols-4 gap-2">
-                {product.images.map((image) => (
-                  <button
-                    key={image.id}
-                    className="relative aspect-square bg-gray-200 rounded-md overflow-hidden hover:ring-2 hover:ring-indigo-500"
-                  >
-                    <Image
-                      src={image.url}
-                      alt={image.altText || product.name}
-                      fill
-                      sizes="(max-width: 768px) 25vw, (max-width: 1200px) 12vw, 12vw"
-                      className="object-cover"
-                    />
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          {/* Imágenes del Producto - Galería Interactiva */}
+          <ProductImageGallery images={product.images} productName={product.name} />
           
           {/* Información del Producto */}
           <div className="space-y-6">
