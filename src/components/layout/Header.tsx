@@ -41,9 +41,19 @@ export default function Header() {
   const firstLetter = userName.charAt(0).toUpperCase();
 
   const handleLogout = async () => {
-    localStorage.removeItem('cart');
-    window.dispatchEvent(new Event('cartUpdated'));
-    await signOut({ callbackUrl: '/' });
+    try {
+      // Clear cart from database for authenticated users
+      if (isAuthenticated) {
+        await fetch('/api/cart/clear', { method: 'DELETE' });
+      }
+    } catch (err) {
+      console.error('Error clearing cart on logout:', err);
+    } finally {
+      // Always clear localStorage and sign out
+      localStorage.removeItem('cart');
+      window.dispatchEvent(new Event('cartUpdated'));
+      await signOut({ callbackUrl: '/' });
+    }
   };
 
   // Close dropdown when clicking outside

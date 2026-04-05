@@ -72,7 +72,7 @@ export default function PerfilPage() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('/api/account/perfil');
+      const response = await fetch('/api/account/profile');
       const data = await response.json();
 
       if (!response.ok) {
@@ -121,7 +121,7 @@ export default function PerfilPage() {
         body.passwordNuevo = passwordNuevo;
       }
 
-      const response = await fetch('/api/account/perfil', {
+      const response = await fetch('/api/account/profile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)

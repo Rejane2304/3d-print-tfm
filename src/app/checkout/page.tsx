@@ -7,8 +7,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Loader2, MapPin, CreditCard, ChevronRight, Wallet, Package } from 'lucide-react';
+import { Loader2, MapPin, CreditCard, ChevronRight, Wallet, Package, User } from 'lucide-react';
 import Image from 'next/image';
+
+interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  taxId: string | null;
+}
 
 interface Address {
   id: string;
@@ -38,20 +46,39 @@ interface CartItem {
 type PaymentMethod = 'stripe' | 'paypal';
 
 export default function CheckoutPage() {
-  const { status } = useSession();
+  const { status, data: session } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<string>('');
   const [cart, setCart] = useState<{ items: CartItem[]; subtotal: number } | null>(null);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('stripe');
+  
+  // Estados para edición de datos personales
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editedProfile, setEditedProfile] = useState<Partial<UserProfile>>({});
 
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
+
+      // Load user profile
+      const resProfile = await fetch('/api/account/profile');
+      if (resProfile.ok) {
+        const data = await resProfile.json();
+        if (data.success) {
+          setUserProfile(data.usuario);
+          setEditedProfile({
+            name: data.usuario.name,
+            phone: data.usuario.phone || '',
+            taxId: data.usuario.taxId || ''
+          });
+        }
+      }
 
       // Load addresses
       const resAddresses = await fetch('/api/account/addresses');
@@ -246,6 +273,133 @@ export default function CheckoutPage() {
                       </div>
                     </label>
                   ))}
+                </div>
+              )}
+            </div>
+
+            {/* Datos personales */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <User className="h-5 w-5 text-indigo-600" />
+                  <h2 className="text-xl font-semibold">Datos personales</h2>
+                </div>
+                {!isEditingProfile ? (
+                  <button
+                    onClick={() => setIsEditingProfile(true)}
+                    className="text-sm text-indigo-600 hover:text-indigo-800"
+                  >
+                    Editar
+                  </button>
+                ) : (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={async () => {
+                        try {
+                          const response = await fetch('/api/account/profile', {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              name: editedProfile.name,
+                              phone: editedProfile.phone,
+                              taxId: editedProfile.taxId
+                            })
+                          });
+                          if (response.ok) {
+                            const data = await response.json();
+                            setUserProfile(data.usuario);
+                            setIsEditingProfile(false);
+                          }
+                        } catch (err) {
+                          console.error('Error updating profile:', err);
+                        }
+                      }}
+                      className="text-sm text-green-600 hover:text-green-800"
+                    >
+                      Guardar
+                    </button>
+                    <button
+                      onClick={() => {
+                        setEditedProfile({
+                          name: userProfile?.name,
+                          phone: userProfile?.phone || '',
+                          taxId: userProfile?.taxId || ''
+                        });
+                        setIsEditingProfile(false);
+                      }}
+                      className="text-sm text-gray-600 hover:text-gray-800"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {isEditingProfile ? (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Nombre completo
+                    </label>
+                    <input
+                      type="text"
+                      value={editedProfile.name || ''}
+                      onChange={(e) => setEditedProfile({ ...editedProfile, name: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      value={userProfile?.email || ''}
+                      disabled
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-100 text-gray-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Teléfono
+                    </label>
+                    <input
+                      type="tel"
+                      value={editedProfile.phone || ''}
+                      onChange={(e) => setEditedProfile({ ...editedProfile, phone: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      NIF / DNI
+                    </label>
+                    <input
+                      type="text"
+                      value={editedProfile.taxId || ''}
+                      onChange={(e) => setEditedProfile({ ...editedProfile, taxId: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-sm">
+                    <span className="text-gray-600">Nombre:</span>{' '}
+                    <span className="font-medium">{userProfile?.name}</span>
+                  </p>
+                  <p className="text-sm">
+                    <span className="text-gray-600">Email:</span>{' '}
+                    <span className="font-medium">{userProfile?.email}</span>
+                  </p>
+                  <p className="text-sm">
+                    <span className="text-gray-600">Teléfono:</span>{' '}
+                    <span className="font-medium">{userProfile?.phone || 'No especificado'}</span>
+                  </p>
+                  <p className="text-sm">
+                    <span className="text-gray-600">NIF / DNI:</span>{' '}
+                    <span className="font-medium">{userProfile?.taxId || 'No especificado'}</span>
+                  </p>
                 </div>
               )}
             </div>
