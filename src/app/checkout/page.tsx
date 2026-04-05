@@ -23,7 +23,7 @@ interface Address {
   name: string;
   recipient: string;
   phone: string;
-  street: string;
+  address: string;
   complement?: string;
   postalCode: string;
   city: string;
@@ -144,7 +144,7 @@ export default function CheckoutPage() {
         if (primary) {
           setSelectedAddressId(primary.id);
           // Parse street to separate street name and number
-          const { streetName, streetNumber } = parseStreetAddress(primary.street || '');
+          const { streetName, streetNumber } = parseStreetAddress(primary.address || '');
           // Cargar datos de dirección en el formulario
           setFormData(prev => ({
             ...prev,
@@ -247,7 +247,7 @@ export default function CheckoutPage() {
     }
     const selected = addresses.find(a => a.id === selectedAddressId);
     if (selected) {
-      const { streetName, streetNumber } = parseStreetAddress(selected.street || '');
+      const { streetName, streetNumber } = parseStreetAddress(selected.address || '');
       setFormData(prev => ({
         ...prev,
         addressName: translateAddressName(selected.name || ''),
@@ -604,15 +604,9 @@ export default function CheckoutPage() {
                         <p className="font-medium text-gray-900">
                           {translateAddressName(selectedAddress?.name || formData.addressName)}
                         </p>
-                        {/* Calle y número - mostrar de selectedAddress o formData */}
+                        {/* Calle y número - mostrar directamente de la BD */}
                         <p className="text-gray-600">
-                          {(() => {
-                            if (selectedAddress?.street) {
-                              const { streetName, streetNumber } = parseStreetAddress(selectedAddress.street);
-                              return `${streetName} ${streetNumber}`;
-                            }
-                            return `${formData.street} ${formData.streetNumber}`;
-                          })()}
+                          {selectedAddress?.address || `${formData.street} ${formData.streetNumber}`}
                         </p>
                         {/* Complemento */}
                         {(selectedAddress?.complement || formData.complement) && (
