@@ -9,11 +9,11 @@ import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
 import bcrypt from 'bcrypt';
 
-// Schema de validación para actualizar perfil
+// Schema de validación para actualizar perfil - más permisivo
 const profileSchema = z.object({
-  name: z.string().min(2).max(100).optional(),
-  phone: z.string().regex(/^\+?[0-9]{9,15}$/).optional(),
-  taxId: z.string().regex(/^\d{8}[A-Z]$/).optional(),
+  name: z.string().min(1).max(100).optional(),
+  phone: z.string().max(20).optional().or(z.literal('')),
+  taxId: z.string().max(20).optional().or(z.literal('')),
 });
 
 // Schema para cambiar contraseña
