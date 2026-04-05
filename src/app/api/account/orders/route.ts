@@ -7,6 +7,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
+import { translateOrderStatus, translatePaymentStatus, translatePaymentMethod } from '@/lib/i18n';
 
 export async function GET() {
   try {
@@ -69,10 +70,11 @@ export async function GET() {
     });
 
     // Transformar a formato español esperado por el frontend
+    // Traducir enums de inglés (BD) a español (UI)
     const pedidos = pedidosRaw.map(pedido => ({
       id: pedido.id,
       orderNumber: pedido.orderNumber,
-      estado: pedido.status,
+      estado: translateOrderStatus(pedido.status),
       total: pedido.total,
       createdAt: pedido.createdAt,
       items: pedido.items.map(item => ({
@@ -91,8 +93,8 @@ export async function GET() {
         anulada: pedido.invoice.isCancelled
       } : undefined,
       pago: pedido.payment ? {
-        estado: pedido.payment.status,
-        metodo: pedido.payment.method
+        estado: translatePaymentStatus(pedido.payment.status),
+        metodo: translatePaymentMethod(pedido.payment.method)
       } : undefined
     }));
 

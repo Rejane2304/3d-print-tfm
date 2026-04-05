@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
+import { translateOrderStatus, translatePaymentStatus, translatePaymentMethod, translateErrorMessage } from '@/lib/i18n';
 
 export async function GET(
   request: NextRequest,
@@ -86,16 +87,17 @@ export async function GET(
 
     if (!pedido) {
       return NextResponse.json(
-        { error: 'Pedido not found' },
+        { error: translateErrorMessage('Pedido not found') },
         { status: 404 }
       );
     }
 
     // Transform to Spanish response format matching frontend expectations
+    // Translate enums from English (DB) to Spanish (UI)
     const pedidoTransformado = {
       id: pedido.id,
       orderNumber: pedido.orderNumber,
-      estado: pedido.status,
+      estado: translateOrderStatus(pedido.status),
       subtotal: Number(pedido.subtotal),
       envio: Number(pedido.shipping),
       total: Number(pedido.total),
@@ -109,7 +111,7 @@ export async function GET(
       ciudadEnvio: pedido.shippingCity,
       provinciaEnvio: pedido.shippingProvince,
       paisEnvio: pedido.shippingCountry,
-      paymentMethod: pedido.paymentMethod,
+      paymentMethod: pedido.paymentMethod ? translatePaymentMethod(pedido.paymentMethod) : null,
       numeroSeguimiento: pedido.trackingNumber,
       transportista: pedido.carrier,
       notasCliente: pedido.customerNotes,
@@ -131,8 +133,8 @@ export async function GET(
         emitidaEn: pedido.invoice.issuedAt,
       } : undefined,
       pago: pedido.payment ? {
-        estado: pedido.payment.status,
-        metodo: pedido.payment.method,
+        estado: translatePaymentStatus(pedido.payment.status),
+        metodo: translatePaymentMethod(pedido.payment.method),
         createdAt: pedido.payment.createdAt,
       } : undefined,
       messages: pedido.messages.map((msg) => ({
