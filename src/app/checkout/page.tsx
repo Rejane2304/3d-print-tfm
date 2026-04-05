@@ -591,7 +591,7 @@ export default function CheckoutPage() {
                       </div>
                     </div>
 
-                    {/* Info Dirección */}
+                     {/* Info Dirección */}
                     <div>
                       <h3 className="text-sm font-semibold text-gray-900 mb-3">
                         Dirección de envío
@@ -600,11 +600,25 @@ export default function CheckoutPage() {
                         )}
                       </h3>
                       <div className="text-sm space-y-1">
-                        <p className="font-medium text-gray-900">{selectedAddress?.name || formData.addressName}</p>
-                        <p className="text-gray-600">{combineStreetAddress(formData.street, formData.streetNumber)}</p>
+                        {/* Nombre de dirección traducido */}
+                        <p className="font-medium text-gray-900">
+                          {translateAddressName(selectedAddress?.name || formData.addressName)}
+                        </p>
+                        {/* Calle y número - mostrar de selectedAddress o formData */}
+                        <p className="text-gray-600">
+                          {(() => {
+                            if (selectedAddress?.street) {
+                              const { streetName, streetNumber } = parseStreetAddress(selectedAddress.street);
+                              return `${streetName} ${streetNumber}`;
+                            }
+                            return `${formData.street} ${formData.streetNumber}`;
+                          })()}
+                        </p>
+                        {/* Complemento */}
                         {(selectedAddress?.complement || formData.complement) && (
                           <p className="text-gray-600">{selectedAddress?.complement || formData.complement}</p>
                         )}
+                        {/* CP, Ciudad, Provincia */}
                         <p className="text-gray-600">
                           {(selectedAddress?.postalCode || formData.postalCode)} {''}
                           {(selectedAddress?.city || formData.city)}, {''}
