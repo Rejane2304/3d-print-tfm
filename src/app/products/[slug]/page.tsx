@@ -8,6 +8,8 @@ import { prisma } from '@/lib/db/prisma';
 import Image from 'next/image';
 import Link from 'next/link';
 import AddToCartButton from '@/components/products/AddToCartButton';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
 
 interface ProductDetailPageProps {
   params: {
@@ -50,12 +52,16 @@ async function getProduct(slug: string) {
 }
 
 export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
+  // Get session to check if user is admin
+  const session = await getServerSession(authOptions);
+  const isAdmin = session?.user?.rol === 'ADMIN';
+
   const data = await getProduct(params.slug);
-  
+
   if (!data) {
     notFound();
   }
-  
+
   const { product, related } = data;
   const mainImage = product.images[0];
   
@@ -163,7 +169,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             </div>
             
             {/* Detalles */}
-            {(product.widthCm || product.heightCm || product.depthCm || product.weight || product.printTime) && (
+            {(product.widthCm || product.heightCm || product.depthCm || product.weight || (isAdmin && product.printTime)) && (
               <div className="border-t pt-6">
                 <h3 className="text-lg font-semibold mb-4">Especificaciones</h3>
                 <dl className="grid grid-cols-2 gap-4">
@@ -183,7 +189,8 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                       <dd className="font-medium">{Number(product.weight)} g</dd>
                     </>
                   )}
-                  {product.printTime && (
+                  {/* Tiempo de impresión solo visible para admins */}
+                  {isAdmin && product.printTime && (
                     <>
                       <dt className="text-gray-600">Tiempo de impresión:</dt>
                       <dd className="font-medium">{product.printTime} min</dd>
