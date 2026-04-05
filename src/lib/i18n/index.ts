@@ -109,16 +109,6 @@ export const addressNameTranslations: TranslationMap = {
 };
 
 // ============================================================================
-// SHIPPING CONFIG TRANSLATIONS
-// ============================================================================
-
-export const shippingTranslations: TranslationMap = {
-  'Standard Shipping': 'Envío Estándar',
-  'Express Shipping': 'Envío Express',
-  'Free Shipping': 'Envío Gratuito',
-};
-
-// ============================================================================
 // ERROR MESSAGE TRANSLATIONS
 // ============================================================================
 
@@ -253,6 +243,207 @@ export const errorMessages: TranslationMap = {
 };
 
 // ============================================================================
+// FAQ TRANSLATIONS
+// ============================================================================
+
+export const faqTranslations: Record<string, { question: string; answer: string; category: string }> = {
+  'FAQ-0001': {
+    question: '¿Qué materiales usan para imprimir?',
+    answer: 'Usamos principalmente PLA (plástico biodegradable a base de plantas) y PETG (más resistente y tolerante al calor). Ambos son seguros y ecológicos.',
+    category: 'Materiales'
+  },
+  'FAQ-0002': {
+    question: '¿Cuánto tarda el envío?',
+    answer: 'El envío estándar tarda 3-5 días hábiles. El envío express se entrega en 1-2 días hábiles. Los pedidos superiores a 50€ califican para envío gratuito.',
+    category: 'Envío'
+  },
+  'FAQ-0003': {
+    question: '¿Puedo devolver o cambiar un producto?',
+    answer: '¡Sí! Tienes 14 días desde la entrega para devolver cualquier producto en su estado original. Contáctanos en info@3dprint.com para iniciar una devolución.',
+    category: 'Devoluciones'
+  },
+  'FAQ-0004': {
+    question: '¿Aceptan pedidos personalizados?',
+    answer: 'Actualmente solo ofrecemos productos de nuestro catálogo fijo. Los pedidos personalizados podrían estar disponibles en el futuro.',
+    category: 'Pedidos'
+  },
+  'FAQ-0005': {
+    question: '¿Cómo debo cuidar mis objetos impresos en 3D?',
+    answer: 'Mantén alejados de la luz solar directa y fuentes de calor (especialmente los objetos de PLA). Limpia con un paño húmedo. Evita sumergir en agua.',
+    category: 'Cuidado'
+  },
+  'FAQ-0006': {
+    question: '¿Qué métodos de pago aceptan?',
+    answer: 'Aceptamos tarjetas de crédito/débito (Visa, Mastercard) y PayPal. Todos los pagos se procesan de forma segura a través de Stripe.',
+    category: 'Pagos'
+  },
+  'FAQ-0007': {
+    question: '¿Son seguros sus productos para niños?',
+    answer: 'La mayoría de nuestros productos son aptos para niños mayores de 3 años. Consulta las descripciones individuales de productos para recomendaciones específicas de edad.',
+    category: 'Seguridad'
+  },
+  'FAQ-0008': {
+    question: '¿Hacen envíos internacionales?',
+    answer: 'Actualmente solo enviamos dentro de España. El envío internacional estará disponible pronto.',
+    category: 'Envío'
+  }
+};
+
+// ============================================================================
+// SHIPPING CONFIG TRANSLATIONS
+// ============================================================================
+
+export const shippingTranslations: Record<string, { name: string; description: string }> = {
+  'SHIP-0001': {
+    name: 'Envío Estándar',
+    description: 'Entrega estándar en 3-5 días hábiles'
+  },
+  'SHIP-0002': {
+    name: 'Envío Express',
+    description: 'Entrega express en 1-2 días hábiles'
+  },
+  'SHIP-0003': {
+    name: 'Envío Gratuito',
+    description: 'Envío gratis para pedidos superiores a 50€'
+  }
+};
+
+// ============================================================================
+// ALERT TRANSLATIONS
+// ============================================================================
+
+export const alertTranslations: Record<string, { title: string; message: string }> = {
+  'ALRT-0001': {
+    title: 'Stock bajo',
+    message: 'Lámpara Lunar 3D tiene stock bajo (2 unidades)'
+  },
+  'ALRT-0002': {
+    title: 'Stock bajo',
+    message: 'Figura Articulada de Dinosaurio Rex tiene stock bajo (4 unidades)'
+  }
+};
+
+// ============================================================================
+// FAQ TRANSLATION HELPERS
+// ============================================================================
+
+export function translateFAQ(ref: string, field: 'question' | 'answer' | 'category'): string {
+  return faqTranslations[ref]?.[field] || '';
+}
+
+export function translateShipping(ref: string, field: 'name' | 'description'): string {
+  return shippingTranslations[ref]?.[field] || '';
+}
+
+export function translateAlert(ref: string, field: 'title' | 'message'): string {
+  return alertTranslations[ref]?.[field] || '';
+}
+
+// ============================================================================
+// PRODUCT & CATEGORY TRANSLATIONS
+// ============================================================================
+
+export const productTranslations: Record<string, { name: string; description: string; shortDescription: string }> = {
+  'floral-decorative-vase': {
+    name: 'Jarrón Decorativo Floral',
+    description: 'Jarrón con diseño floral para decoración del hogar. Perfecto para flores artificiales o como pieza decorativa. Impreso en alta resolución para un acabado suave.',
+    shortDescription: 'Elegante jarrón floral para decoración del hogar'
+  },
+  'hexagonal-desk-organizer': {
+    name: 'Organizador de Escritorio Hexagonal',
+    description: 'Organizador hexagonal modular para suministros de oficina. Cada módulo se puede combinar para crear configuraciones personalizadas. Incluye 3 piezas interconectadas.',
+    shortDescription: 'Organizador modular de 3 piezas para escritorio'
+  },
+  'minimalist-geometric-planter': {
+    name: 'Macetero Geométrico Minimalista',
+    description: 'Macetero de diseño geométrico para plantas pequeñas. Cuenta con agujero de drenaje y estética angular moderna. Ideal para suculentas y cactus.',
+    shortDescription: 'Macetero geométrico moderno con drenaje'
+  },
+  'adjustable-phone-stand': {
+    name: 'Soporte Ajustable para Teléfono',
+    description: 'Soporte para teléfono inteligente con ángulo ajustable. Compatible con todos los teléfonos de hasta 7 pulgadas. Cuenta con ranura para gestión de cables.',
+    shortDescription: 'Soporte universal ajustable para teléfono'
+  },
+  'articulated-dinosaur-rex-figure': {
+    name: 'Figura Articulada de Dinosaurio Rex',
+    description: 'Figura de dinosaurio articulada para colección. 15 articulaciones móviles para poses realistas. Impreso en una pieza sin necesidad de ensamblaje.',
+    shortDescription: 'T-Rex articulado con 15 puntos de movimiento'
+  },
+  'house-miniature': {
+    name: 'Miniatura de Casa',
+    description: 'Casa miniatura detallada para decoración. Estilo victoriano con techo extraíble. Perfecta para dioramas o estantes de exhibición.',
+    shortDescription: 'Casa miniatura victoriana con techo extraíble'
+  },
+  'dragon-pencil-brush-holder': {
+    name: 'Portalápices en Forma de Dragón',
+    description: 'Portalápices/Lapiceros en forma de dragón estilizado. Escamas texturizadas y alas detalladas. Cabe lápices y pinceles estándar.',
+    shortDescription: 'Organizador de escritorio en forma de dragón'
+  },
+  'articulated-classic-car': {
+    name: 'Coche Clásico Articulado',
+    description: 'Coche clásico articulado con ruedas móviles. Diseño vintage de los años 50 con puertas que se abren. Interior detallado y acabados cromados.',
+    shortDescription: 'Coche vintage articulado con piezas móviles'
+  },
+  '3d-moon-lamp': {
+    name: 'Lámpara Lunar 3D',
+    description: 'Lámpara de noche LED con forma realista de luna. Incluye base recargable USB con atenuador táctil. Superficie lunar texturizada.',
+    shortDescription: 'Lámpara lunar LED con base táctil'
+  },
+  'medieval-secret-box': {
+    name: 'Caja Secreta Medieval',
+    description: 'Caja secreta con mecanismo de acertijo estilo medieval. Compartimento oculto para pequeños objetos de valor. Ideal como regalo o para guardar secretos.',
+    shortDescription: 'Caja con cerradura de acertijo medieval'
+  }
+};
+
+export const categoryTranslations: Record<string, { name: string; description: string }> = {
+  'decoration': {
+    name: 'Decoración',
+    description: 'Piezas decorativas para embellecer tu hogar u oficina'
+  },
+  'accessories': {
+    name: 'Accesorios',
+    description: 'Accesorios funcionales para el día a día'
+  },
+  'functional': {
+    name: 'Funcional',
+    description: 'Objetos prácticos y útiles para el hogar'
+  },
+  'articulated': {
+    name: 'Articulados',
+    description: 'Figuras y modelos con piezas móviles'
+  },
+  'toys': {
+    name: 'Juguetes',
+    description: 'Juguetes y figuras para coleccionistas'
+  }
+};
+
+// ============================================================================
+// PRODUCT TRANSLATION HELPERS
+// ============================================================================
+
+export function translateProductName(slug: string): string {
+  return productTranslations[slug]?.name || slug;
+}
+
+export function translateProductDescription(slug: string): string {
+  return productTranslations[slug]?.description || '';
+}
+
+export function translateProductShortDescription(slug: string): string {
+  return productTranslations[slug]?.shortDescription || '';
+}
+
+export function translateCategoryName(slug: string): string {
+  return categoryTranslations[slug]?.name || slug;
+}
+
+export function translateCategoryDescription(slug: string): string {
+  return categoryTranslations[slug]?.description || '';
+}
+
+// ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
 
@@ -296,8 +487,8 @@ export function translateAddressName(name: string): string {
   return addressNameTranslations[name.toLowerCase()] || name;
 }
 
-export function translateShippingName(name: string): string {
-  return shippingTranslations[name] || name;
+export function translateShippingName(ref: string, field: 'name' | 'description'): string {
+  return shippingTranslations[ref]?.[field] || '';
 }
 
 export function translateErrorMessage(message: string): string {
