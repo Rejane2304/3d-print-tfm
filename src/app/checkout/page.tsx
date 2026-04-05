@@ -7,7 +7,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Loader2, MapPin, CreditCard, ChevronRight, Wallet } from 'lucide-react';
+import { Loader2, MapPin, CreditCard, ChevronRight, Wallet, Package } from 'lucide-react';
+import Image from 'next/image';
 
 interface Address {
   id: string;
@@ -123,7 +124,7 @@ export default function CheckoutPage() {
       }
 
       // For demo: immediately confirm payment and redirect to success
-      await fetch('/api/checkout/confirm-payment', {
+      const confirmResponse = await fetch('/api/checkout/confirm-payment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -131,6 +132,16 @@ export default function CheckoutPage() {
           paymentMethod: paymentMethod.toUpperCase(),
         }),
       });
+
+      if (!confirmResponse.ok) {
+        const confirmData = await confirmResponse.json();
+        console.error('Payment confirmation error:', confirmData);
+        // Continue anyway since order was created
+      }
+
+      // Clear cart from state and trigger update
+      setCart({ items: [], subtotal: 0 });
+      window.dispatchEvent(new Event('cartUpdated'));
 
       // Redirect to success page
       router.push('/checkout/success');
@@ -163,7 +174,7 @@ export default function CheckoutPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-            Checkout
+            Finalizar Compra
           </h1>
           <p className="text-gray-600">
             Revisa tu pedido y confirma el pago
@@ -247,6 +258,20 @@ export default function CheckoutPage() {
                   key={item.id}
                   className="flex items-center gap-4 py-3 border-b border-gray-100"
                 >
+                  {/* Product Image */}
+                  <div className="w-20 h-20 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden relative">
+                    {item.product.image ? (
+                      <Image
+                        src={item.product.image}
+                        alt={item.product.name}
+                        fill
+                        className="object-cover"
+                        unoptimized
+                      />
+                    ) : (
+                      <Package className="w-full h-full p-4 text-gray-400" />
+                    )}
+                  </div>
                   <div className="flex-1">
                     <p className="font-medium">{item.product.name}</p>
                     <p className="text-sm text-gray-600">
@@ -365,16 +390,7 @@ export default function CheckoutPage() {
                 )}
               </button>
 
-              {/* Demo Info */}
-              <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p className="text-xs text-yellow-800 text-center">
-                  <strong>🧪 Demo Académica</strong><br />
-                  {paymentMethod === 'stripe' 
-                    ? 'Tarjeta de prueba: 4242 4242 4242 4242 - 12/30 - 123'
-                    : 'PayPal: usar cuenta sandbox de prueba'
-                  }
-                </p>
-              </div>
+
             </div>
           </div>
         </div>

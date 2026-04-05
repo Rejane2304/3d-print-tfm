@@ -11,7 +11,6 @@ import { useState, useEffect } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { useCart } from '@/hooks/useCart';
 import { 
   User, 
   Mail, 
@@ -34,8 +33,8 @@ export default function AuthPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();
-  const { migrateCart } = useCart();
   const callbackUrl = searchParams.get('callbackUrl') || '/';
+  const cartStorageKey = 'cart';
   const registrationSuccessful = searchParams.get('registro') === 'exitoso';
   
   // Redirect authenticated users away from auth page
@@ -47,7 +46,10 @@ export default function AuthPage() {
       const migratingCart = sessionStorage.getItem('migratingCart');
 
       // If we're migrating cart, don't redirect yet
-      if (migratingCart) return;
+      if (migratingCart) {
+        console.log('Migration in progress, skipping redirect');
+        return;
+      }
 
       const userRole = (session.user as { rol?: string })?.rol;
       if (userRole === 'ADMIN') {
@@ -118,6 +120,14 @@ export default function AuthPage() {
     setLoginLoading(true);
     setLoginError('');
 
+    // Set migration flag BEFORE login to prevent useEffect redirect
+    const localCart = localStorage.getItem(cartStorageKey);
+    const hasItemsToMigrate = localCart && JSON.parse(localCart).length > 0;
+    
+    if (hasItemsToMigrate) {
+      sessionStorage.setItem('migratingCart', 'true');
+    }
+
     try {
       const result = await signIn('credentials', {
         email: sharedEmail,
@@ -127,19 +137,64 @@ export default function AuthPage() {
       });
 
       if (result?.error) {
+        // Clear migration flag on error
+        sessionStorage.removeItem('migratingCart');
         setLoginError('Email o contraseña incorrectos');
       } else {
-        // Mark that we're migrating cart to prevent conflicts
-        sessionStorage.setItem('migratingCart', 'true');
-        // Migrate cart from localStorage to API after login
-        await migrateCart();
-        // Remove flag after migration
+        // Login successful - migrate cart before redirecting
+        
+        if (localCart) {
+          try {
+            const items = JSON.parse(localCart);
+            console.log(`Migrating ${items.length} items to API cart`);
+            
+            // Migrate each item to API with credentials
+            const migrationResults = await Promise.allSettled(
+              items.map(async (item: { productId: string; quantity: number }) => {
+                const response = await fetch('/api/cart', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  credentials: 'include',
+                  body: JSON.stringify({
+                    productId: item.productId,
+                    quantity: item.quantity,
+                  }),
+                });
+                if (!response.ok) {
+                  const errorData = await response.json().catch(() => ({}));
+                  console.error('Failed to migrate item:', item.productId, errorData);
+                  return { success: false, productId: item.productId, error: errorData };
+                }
+                return { success: true, productId: item.productId };
+              })
+            );
+            
+            const successful = migrationResults.filter(r => r.status === 'fulfilled' && (r.value as {success: boolean}).success).length;
+            const failed = migrationResults.length - successful;
+            console.log(`Migration complete: ${successful} successful, ${failed} failed`);
+            
+            // Clear localStorage after migration attempt
+            localStorage.removeItem(cartStorageKey);
+            
+            // Small delay to ensure API consistency
+            await new Promise(resolve => setTimeout(resolve, 500));
+          } catch (err) {
+            console.error('Error migrating cart:', err);
+            // Still clear localStorage to prevent duplicate migration attempts
+            localStorage.removeItem(cartStorageKey);
+          }
+        }
+        
+        // Clear migration flag and redirect
         sessionStorage.removeItem('migratingCart');
+        
         // Redirect to callback URL
+        console.log('Redirecting to:', callbackUrl);
         router.push(callbackUrl);
         router.refresh();
       }
     } catch {
+      sessionStorage.removeItem('migratingCart');
       setLoginError('Error al iniciar sesión. Inténtalo de nuevo.');
     } finally {
       setLoginLoading(false);

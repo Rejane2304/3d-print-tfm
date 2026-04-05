@@ -91,7 +91,59 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({ pedido });
+    // Transform to Spanish response format matching frontend expectations
+    const pedidoTransformado = {
+      id: pedido.id,
+      orderNumber: pedido.orderNumber,
+      estado: pedido.status,
+      subtotal: Number(pedido.subtotal),
+      envio: Number(pedido.shipping),
+      total: Number(pedido.total),
+      createdAt: pedido.createdAt,
+      updatedAt: pedido.updatedAt,
+      nombreEnvio: pedido.shippingName,
+      telefonoEnvio: pedido.shippingPhone,
+      shippingAddress: pedido.shippingAddress,
+      complementoEnvio: pedido.shippingComplement,
+      postalCodeEnvio: pedido.shippingPostalCode,
+      ciudadEnvio: pedido.shippingCity,
+      provinciaEnvio: pedido.shippingProvince,
+      paisEnvio: pedido.shippingCountry,
+      paymentMethod: pedido.paymentMethod,
+      numeroSeguimiento: pedido.trackingNumber,
+      transportista: pedido.carrier,
+      notasCliente: pedido.customerNotes,
+      items: pedido.items.map((item) => ({
+        id: item.id,
+        quantity: item.quantity,
+        unitPrice: Number(item.price),
+        subtotal: Number(item.subtotal),
+        producto: {
+          nombre: item.product?.name || '',
+          slug: item.product?.slug || '',
+          images: item.product?.images || [],
+        },
+      })),
+      factura: pedido.invoice ? {
+        id: pedido.invoice.id,
+        invoiceNumber: pedido.invoice.invoiceNumber,
+        anulada: pedido.invoice.isCancelled,
+        emitidaEn: pedido.invoice.issuedAt,
+      } : undefined,
+      pago: pedido.payment ? {
+        estado: pedido.payment.status,
+        metodo: pedido.payment.method,
+        createdAt: pedido.payment.createdAt,
+      } : undefined,
+      messages: pedido.messages.map((msg) => ({
+        id: msg.id,
+        mensaje: msg.message,
+        tipoRemitente: msg.isFromCustomer ? 'CLIENTE' : 'ADMIN',
+        createdAt: msg.createdAt,
+      })),
+    };
+
+    return NextResponse.json({ pedido: pedidoTransformado });
   } catch (error) {
     console.error('Error al obtener pedido:', error);
     return NextResponse.json(

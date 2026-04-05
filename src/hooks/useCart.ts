@@ -321,6 +321,19 @@ export function useCart() {
     return () => window.removeEventListener('cartUpdated', handleCartUpdate);
   }, [loadCart]);
 
+  // Listen for auth changes to reload cart
+  useEffect(() => {
+    // When session status changes from loading/unauthenticated to authenticated
+    // Force reload cart from API
+    if (status === 'authenticated') {
+      // Small delay to allow any migration to complete
+      const timeout = setTimeout(() => {
+        loadCart(true);
+      }, 100);
+      return () => clearTimeout(timeout);
+    }
+  }, [status, loadCart]);
+
   return {
     cart,
     loading,

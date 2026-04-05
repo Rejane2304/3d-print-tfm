@@ -105,10 +105,12 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     }
   }
 
-  // Calcular totales
+  // Calcular totales (siempre incluir IVA del 21%)
   const subtotal = Number(user.cart.subtotal);
   const shippingCost = subtotal >= 50 ? 0 : 5.99;
-  const total = subtotal + shippingCost;
+  const taxRate = 0.21;
+  const taxAmount = subtotal * taxRate;
+  const total = subtotal + shippingCost + taxAmount;
 
   try {
     // Create line items for Stripe
