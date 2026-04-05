@@ -163,14 +163,18 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             </div>
             
             {/* Detalles */}
-            {(product.dimensions || product.weight || product.printTime) && (
+            {(product.widthCm || product.heightCm || product.depthCm || product.weight || product.printTime) && (
               <div className="border-t pt-6">
                 <h3 className="text-lg font-semibold mb-4">Especificaciones</h3>
                 <dl className="grid grid-cols-2 gap-4">
-                  {product.dimensions && (
+                  {(product.widthCm || product.heightCm || product.depthCm) && (
                     <>
                       <dt className="text-gray-600">Dimensiones:</dt>
-                      <dd className="font-medium">{product.dimensions}</dd>
+                      <dd className="font-medium">
+                        {[product.widthCm, product.heightCm, product.depthCm]
+                          .filter(Boolean)
+                          .join(' x ')} cm
+                      </dd>
                     </>
                   )}
                   {product.weight && (

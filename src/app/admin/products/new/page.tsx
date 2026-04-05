@@ -22,7 +22,9 @@ export default function NuevoProductoPage() {
     stock: '',
     category: 'DECORACION',
     material: 'PLA',
-    dimensiones: '',
+    widthCm: '',
+    heightCm: '',
+    depthCm: '',
     peso: '',
     tiempoImpresion: '',
     isActive: true,
@@ -43,6 +45,9 @@ export default function NuevoProductoPage() {
           ...formData,
           price: parseFloat(formData.price),
           stock: parseInt(formData.stock),
+          widthCm: formData.widthCm ? parseFloat(formData.widthCm) : undefined,
+          heightCm: formData.heightCm ? parseFloat(formData.heightCm) : undefined,
+          depthCm: formData.depthCm ? parseFloat(formData.depthCm) : undefined,
           peso: formData.peso ? parseFloat(formData.peso) : undefined,
           tiempoImpresion: formData.tiempoImpresion ? parseInt(formData.tiempoImpresion) : undefined,
         }),
@@ -211,45 +216,85 @@ export default function NuevoProductoPage() {
           </div>
 
           {/* Dimensiones y Características */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Dimensiones
-              </label>
-              <input
-                type="text"
-                placeholder="Ej: 20x15x10 cm"
-                value={formData.dimensiones}
-                onChange={(e) => setFormData({ ...formData, dimensiones: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              />
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold text-gray-900">Dimensiones y Características</h2>
+            
+            {/* Dimensiones (Ancho x Alto x Profundidad) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Ancho (cm)
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  placeholder="Ej: 20"
+                  value={formData.widthCm}
+                  onChange={(e) => setFormData({ ...formData, widthCm: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Alto (cm)
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  placeholder="Ej: 15"
+                  value={formData.heightCm}
+                  onChange={(e) => setFormData({ ...formData, heightCm: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Profundidad (cm)
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  placeholder="Ej: 10"
+                  value={formData.depthCm}
+                  onChange={(e) => setFormData({ ...formData, depthCm: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Peso (g)
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={formData.peso}
-                onChange={(e) => setFormData({ ...formData, peso: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              />
-            </div>
+            {/* Peso y Tiempo */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Peso (g)
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={formData.peso}
+                  onChange={(e) => setFormData({ ...formData, peso: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tiempo de Impresión (min)
-              </label>
-              <input
-                type="number"
-                min="0"
-                value={formData.tiempoImpresion}
-                onChange={(e) => setFormData({ ...formData, tiempoImpresion: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Tiempo de Impresión (min)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={formData.tiempoImpresion}
+                  onChange={(e) => setFormData({ ...formData, tiempoImpresion: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
             </div>
           </div>
 

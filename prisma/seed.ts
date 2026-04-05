@@ -64,7 +64,9 @@ interface ProductCSV {
   material: string;
   description: string;
   shortDescription: string;
-  dimensions: string;
+  widthCm: string;
+  heightCm: string;
+  depthCm: string;
   weight: string;
   printTime: string;
   isActive: string;
@@ -468,7 +470,9 @@ async function seedProducts(): Promise<number> {
         stock: toInt(product.stock),
         categoryId: categoryId,
         material: product.material as Material,
-        dimensions: toNullableString(product.dimensions),
+        widthCm: product.widthCm ? parseFloat(product.widthCm) : null,
+        heightCm: product.heightCm ? parseFloat(product.heightCm) : null,
+        depthCm: product.depthCm ? parseFloat(product.depthCm) : null,
         weight: product.weight ? toDecimal(product.weight) : null,
         printTime: product.printTime ? toInt(product.printTime) : null,
         isActive: toBoolean(product.isActive),

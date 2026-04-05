@@ -95,7 +95,9 @@ model Product {
   minStock         Int                 @default(5)
   categoryId       String
   material         Material
-  dimensions       String?             @db.VarChar(50)
+  widthCm          Float?
+  heightCm         Float?
+  depthCm          Float?
   weight           Decimal?            @db.Decimal(8, 2)
   printTime        Int?
   metaTitle        String?             @db.VarChar(200)
