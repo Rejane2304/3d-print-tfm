@@ -178,7 +178,7 @@ export default function OrderDetailPage() {
 
   const downloadInvoice = () => {
     if (order?.factura && !order.factura.anulada) {
-      window.open(`/api/admin/invoices/${order.factura.id}/pdf`, '_blank');
+      window.open(`/api/account/invoices/${order.factura.id}/pdf`, '_blank');
     }
   };
 
