@@ -552,7 +552,6 @@ export default function CheckoutPage() {
                           {(selectedAddress?.city || formData.city)}, {''}
                           {(selectedAddress?.province || formData.province)}
                         </p>
-                        <p className="text-gray-600">Tel: {selectedAddress?.phone || userProfile?.phone || formData.phone}</p>
                       </div>
                     </div>
                   </div>
