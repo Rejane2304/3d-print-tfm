@@ -8,6 +8,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { SessionProvider } from "@/components/providers/SessionProvider";
 import PayPalProvider from "@/components/providers/PayPalProvider";
+import { CartPersistenceProvider } from "@/components/providers/CartPersistenceProvider";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 
@@ -44,14 +45,16 @@ export default function RootLayout({
       >
         <SessionProvider>
           <PayPalProvider>
-            <Header />
-            
-            {/* Main Content Area */}
-            <main className="flex-grow">
-              {children}
-            </main>
-            
-            <Footer />
+            <CartPersistenceProvider>
+              <Header />
+              
+              {/* Main Content Area */}
+              <main className="flex-grow">
+                {children}
+              </main>
+              
+              <Footer />
+            </CartPersistenceProvider>
           </PayPalProvider>
         </SessionProvider>
       </body>
