@@ -32,7 +32,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       href={`/products/${product.slug}`} data-testid="product-card"
       className="group bg-white shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300"
     >
-      <div className="relative aspect-square bg-gray-200">
+      <div className="relative w-full aspect-square bg-gray-200">
         {mainImage ? (
           <Image
             src={mainImage.url}
@@ -40,6 +40,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             className="object-cover group-hover:scale-105 transition-transform duration-300"
+            style={{ width: '100%', height: '100%' }}
           />
         ) : (
           <div className="flex items-center justify-center h-full text-gray-400">

@@ -348,7 +348,8 @@ export default function AdminInvoiceDetailPage() {
                   <p><strong>Método de pago:</strong> {invoice.order.paymentMethod === 'TARJETA' ? 'Tarjeta de crédito' : 'Transferencia bancaria'}</p>
                 </div>
                 <div>
-                  <p><strong>Email:</strong> {invoice.order.usuario.email}</p>
+                  <p><strong>Cliente:</strong> {invoice.order.usuario?.nombre || 'Cliente no disponible'}</p>
+                  <p><strong>Email:</strong> {invoice.order.usuario?.email || 'N/A'}</p>
                 </div>
               </div>
             </div>

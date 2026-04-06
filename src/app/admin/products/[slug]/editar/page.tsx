@@ -1,12 +1,12 @@
 /**
- * Página de Nuevo Producto - Admin
- * Formulario completo para crear producto según schema Prisma
+ * Edit Product Page - Admin
+ * Formulario para editar producto existente
  */
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -15,7 +15,6 @@ import {
   Loader2,
   Upload,
   X,
-  Plus,
   AlertCircle,
   CheckCircle2,
   Save
@@ -38,17 +37,21 @@ const MATERIALES = [
   'ASA'
 ];
 
-export default function NuevoProductoPage() {
+export default function EditarProductoPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
+  const params = useParams();
+  const slug = params?.slug as string;
+  
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [images, setImages] = useState<{ url: string; isMain: boolean }[]>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
 
-  // Form state - todos los campos del schema Product
+  // Form state
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -71,7 +74,7 @@ export default function NuevoProductoPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/auth?callbackUrl=/admin/products/new');
+      router.push('/auth?callbackUrl=/admin/products');
       return;
     }
 
@@ -81,10 +84,11 @@ export default function NuevoProductoPage() {
       return;
     }
 
-    if (status === 'authenticated') {
+    if (status === 'authenticated' && slug) {
       loadCategories();
+      loadProduct();
     }
-  }, [status, session, router]);
+  }, [status, session, router, slug]);
 
   const loadCategories = async () => {
     try {
@@ -98,27 +102,51 @@ export default function NuevoProductoPage() {
     }
   };
 
+  const loadProduct = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/admin/products/${slug}`);
+      if (!response.ok) {
+        throw new Error('Error al cargar producto');
+      }
+      const data = await response.json();
+      
+      if (data.success && data.producto) {
+        const p = data.producto;
+        setFormData({
+          name: p.nombre || '',
+          slug: p.slug || '',
+          description: p.descripcion || '',
+          shortDescription: p.descripcionCorta || '',
+          price: p.precio?.toString() || '',
+          previousPrice: p.precioAnterior?.toString() || '',
+          stock: p.stock?.toString() || '',
+          minStock: p.stockMinimo?.toString() || '5',
+          categoryId: p.categoriaId || '',
+          material: p.material || 'PLA',
+          widthCm: p.anchoCm?.toString() || '',
+          heightCm: p.altoCm?.toString() || '',
+          depthCm: p.profundidadCm?.toString() || '',
+          weight: p.peso?.toString() || '',
+          printTime: p.tiempoImpresion?.toString() || '',
+          isActive: p.activo !== false,
+          isFeatured: p.destacado === true,
+        });
+        setImages(p.imagenes || []);
+      }
+    } catch (err) {
+      console.error('Error loading product:', err);
+      setError('Error al cargar el producto');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
-    }));
-  };
-
-  const generateSlug = (name: string) => {
-    return name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
-  };
-
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const name = e.target.value;
-    setFormData(prev => ({
-      ...prev,
-      name,
-      slug: generateSlug(name),
     }));
   };
 
@@ -128,12 +156,8 @@ export default function NuevoProductoPage() {
 
     setUploadingImage(true);
     try {
-      // Crear URL temporal para preview
       const tempUrl = URL.createObjectURL(file);
       setImages(prev => [...prev, { url: tempUrl, isMain: prev.length === 0 }]);
-      
-      // Aquí se subiría al servidor en producción
-      // Por ahora usamos la URL temporal
     } catch (err) {
       console.error('Error uploading image:', err);
       alert('Error al subir imagen. Intente nuevamente.');
@@ -182,12 +206,12 @@ export default function NuevoProductoPage() {
       return;
     }
 
-    setLoading(true);
+    setSaving(true);
     setError(null);
 
     try {
-      const response = await fetch('/api/admin/products', {
-        method: 'POST',
+      const response = await fetch(`/api/admin/products/${slug}`, {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
@@ -207,7 +231,7 @@ export default function NuevoProductoPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error al crear producto');
+        throw new Error(data.error || 'Error al actualizar producto');
       }
 
       setSuccess(true);
@@ -215,13 +239,13 @@ export default function NuevoProductoPage() {
         router.push('/admin/products');
       }, 1500);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al crear producto');
+      setError(err instanceof Error ? err.message : 'Error al actualizar producto');
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
-  if (status === 'loading') {
+  if (loading || status === 'loading') {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -245,8 +269,8 @@ export default function NuevoProductoPage() {
               <ArrowLeft className="h-6 w-6" />
             </Link>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Nuevo Producto</h1>
-              <p className="text-gray-600 mt-1">Crear un nuevo producto en el catálogo</p>
+              <h1 className="text-3xl font-bold text-gray-900">Editar Producto</h1>
+              <p className="text-gray-600 mt-1">Modificar producto existente</p>
             </div>
           </div>
         </div>
@@ -263,7 +287,7 @@ export default function NuevoProductoPage() {
         {success && (
           <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
             <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
-            <p className="text-green-700">Producto creado exitosamente. Redirigiendo...</p>
+            <p className="text-green-700">Producto actualizado exitosamente. Redirigiendo...</p>
           </div>
         )}
 
@@ -287,7 +311,7 @@ export default function NuevoProductoPage() {
                       type="text"
                       name="name"
                       value={formData.name}
-                      onChange={handleNameChange}
+                      onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       placeholder="Ej: Jarrón Decorativo Floral"
                       required
@@ -654,12 +678,12 @@ export default function NuevoProductoPage() {
                 </Link>
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={saving}
                   className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+                  {saving && <Loader2 className="h-4 w-4 animate-spin" />}
                   <Save className="h-4 w-4" />
-                  Crear
+                  Guardar
                 </button>
               </div>
             </div>

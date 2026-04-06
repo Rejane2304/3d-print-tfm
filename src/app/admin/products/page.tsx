@@ -229,6 +229,7 @@ export default function AdminProductsPage() {
                               width={40}
                               height={40}
                               unoptimized
+                              style={{ width: 'auto', height: 'auto' }}
                             />
                           ) : (
                             <div className="h-10 w-10 bg-gray-200 flex items-center justify-center">

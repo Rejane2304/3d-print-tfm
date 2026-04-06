@@ -71,7 +71,7 @@ export async function GET(req: NextRequest) {
     // Get total count
     const total = await prisma.product.count({ where });
 
-    // Get products with stock info
+    // Get products with stock info and images
     const products = await prisma.product.findMany({
       where,
       select: {
@@ -85,6 +85,13 @@ export async function GET(req: NextRequest) {
         category: {
           select: {
             name: true,
+          },
+        },
+        images: {
+          where: { isMain: true },
+          take: 1,
+          select: {
+            url: true,
           },
         },
         _count: {
@@ -128,6 +135,7 @@ export async function GET(req: NextRequest) {
         movementCount: product._count.movements,
         lastMovementAt: lastMovement?.createdAt || null,
         lastMovementType: lastMovement?.type ? translateMovementType(lastMovement.type) : null,
+        imagenes: product.images,
       };
     });
 

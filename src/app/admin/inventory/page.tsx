@@ -9,6 +9,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Loader2, Search, Package, AlertTriangle, CheckCircle, Plus, Minus, RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react';
+import Image from 'next/image';
 
 interface Product {
   id: string;
@@ -23,6 +24,7 @@ interface Product {
   movementCount: number;
   lastMovementAt: string | null;
   lastMovementType: string | null;
+  imagenes?: Array<{ url: string }>;
 }
 
 interface Pagination {
@@ -241,9 +243,21 @@ export default function AdminInventoryPage() {
                 <tr key={product.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
                     <div className="flex items-center">
-                      <div className="flex-shrink-0 h-10 w-10 rounded bg-gray-100 flex items-center justify-center">
-                        <Package className="h-5 w-5 text-gray-500" />
-                      </div>
+                      {product.imagenes && product.imagenes[0] ? (
+                        <div className="flex-shrink-0 h-10 w-10 bg-gray-100 flex items-center justify-center overflow-hidden">
+                          <Image
+                            src={product.imagenes[0].url}
+                            alt={product.name}
+                            width={40}
+                            height={40}
+                            className="object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="flex-shrink-0 h-10 w-10 bg-gray-100 flex items-center justify-center">
+                          <Package className="h-5 w-5 text-gray-500" />
+                        </div>
+                      )}
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">{product.name}</div>
                         <div className="text-xs text-gray-500">{product.movementCount} movimientos</div>

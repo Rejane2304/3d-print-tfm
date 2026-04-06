@@ -274,6 +274,7 @@ export default function AdminPedidoDetallePage() {
                         height={64}
                         className="h-16 w-16 object-cover"
                         unoptimized
+                        style={{ width: 'auto', height: 'auto' }}
                       />
                     ) : (
                       <div className="h-16 w-16 bg-gray-100 flex items-center justify-center">
