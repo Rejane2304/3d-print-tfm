@@ -9,15 +9,20 @@ import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { Prisma } from '@prisma/client';
+import { generateInvoiceHTML } from '@/lib/invoices/invoice-template';
 
-// Type for invoice with order, items and product
+// Type for invoice with order, items and product with images
 type InvoiceWithOrder = Prisma.InvoiceGetPayload<{
   include: {
     order: {
       include: {
         items: {
           include: {
-            product: true;
+            product: {
+              include: {
+                images: true;
+              };
+            };
           };
         };
       };
@@ -56,7 +61,11 @@ export async function GET(
           include: {
             items: {
               include: {
-                product: true,
+                product: {
+                  include: {
+                    images: true,
+                  },
+                },
               },
             },
           },
@@ -71,8 +80,44 @@ export async function GET(
       );
     }
 
-    // Generar HTML de la factura (simulación de PDF)
-    const html = generarHTMLFactura(factura);
+    // Mapear datos al formato del template
+    const invoiceData = {
+      invoiceNumber: factura.invoiceNumber,
+      issuedAt: factura.issuedAt,
+      isCancelled: factura.isCancelled,
+      cancelledAt: factura.cancelledAt,
+      companyName: factura.companyName,
+      companyTaxId: factura.companyTaxId,
+      companyAddress: factura.companyAddress,
+      companyCity: factura.companyCity,
+      companyProvince: factura.companyProvince,
+      companyPostalCode: factura.companyPostalCode,
+      clientName: factura.clientName,
+      clientTaxId: factura.clientTaxId,
+      clientAddress: factura.clientAddress,
+      clientCity: factura.clientCity,
+      clientProvince: factura.clientProvince,
+      clientPostalCode: factura.clientPostalCode,
+      clientCountry: factura.clientCountry,
+      items: factura.order?.items.map((item) => ({
+        name: item.name,
+        quantity: item.quantity,
+        price: Number(item.price),
+        subtotal: Number(item.subtotal),
+        image: item.product?.images?.[0]?.url || undefined,
+      })) || [],
+      subtotal: Number(factura.subtotal),
+      shipping: Number(factura.shipping),
+      taxableAmount: Number(factura.taxableAmount),
+      vatRate: Number(factura.vatRate),
+      vatAmount: Number(factura.vatAmount),
+      total: Number(factura.total),
+      paymentMethod: factura.order?.paymentMethod,
+      orderNumber: factura.order?.orderNumber,
+    };
+
+    // Generar HTML de la factura usando el template
+    const html = generateInvoiceHTML(invoiceData);
 
     // Retornar como HTML con headers para descarga
     return new NextResponse(html, {
@@ -88,92 +133,4 @@ export async function GET(
       { status: 500 }
     );
   }
-}
-
-function generarHTMLFactura(factura: InvoiceWithOrder): string {
-  const items = factura.order?.items || [];
-  
-  return `
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Factura ${factura.invoiceNumber}</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        .header { border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
-        .company-info { float: left; width: 50%; }
-        .invoice-info { float: right; width: 50%; text-align: right; }
-        .client-info { margin: 30px 0; }
-        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-        th { background-color: #f5f5f5; }
-        .totals { margin-top: 30px; text-align: right; }
-        .total { font-size: 1.2em; font-weight: bold; }
-        .anulada { color: red; font-size: 1.5em; font-weight: bold; }
-        .clear { clear: both; }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <div class="company-info">
-            <h1>${factura.companyName}</h1>
-            <p>NIF: ${factura.companyTaxId}</p>
-            <p>${factura.companyAddress}</p>
-            <p>${factura.companyPostalCode} ${factura.companyCity}</p>
-            <p>${factura.companyProvince}</p>
-        </div>
-        <div class="invoice-info">
-            <h2>FACTURA</h2>
-            <p><strong>Nº:</strong> ${factura.invoiceNumber}</p>
-            <p><strong>Fecha:</strong> ${new Date(factura.issuedAt).toLocaleDateString('es-ES')}</p>
-            ${factura.isCancelled ? '<p class="anulada">FACTURA ANULADA</p>' : ''}
-        </div>
-        <div class="clear"></div>
-    </div>
-
-    <div class="client-info">
-        <h3>Cliente</h3>
-        <p><strong>${factura.clientName}</strong></p>
-        <p>NIF: ${factura.clientTaxId}</p>
-        <p>${factura.clientAddress}</p>
-        <p>${factura.clientPostalCode} ${factura.clientCity}</p>
-        <p>${factura.clientProvince}, ${factura.clientCountry}</p>
-    </div>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Descripción</th>
-                <th>Cantidad</th>
-                <th>Precio Unit.</th>
-                <th>Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            ${items.map((item) => `
-            <tr>
-                <td>${item.name}</td>
-                <td>${item.quantity}</td>
-                <td>${Number(item.price).toFixed(2)} €</td>
-                <td>${Number(item.subtotal).toFixed(2)} €</td>
-            </tr>
-            `).join('')}
-        </tbody>
-    </table>
-
-    <div class="totals">
-        <p>Base Imponible: ${Number(factura.taxableAmount).toFixed(2)} €</p>
-        <p>IVA (${factura.vatRate}%): ${Number(factura.vatAmount).toFixed(2)} €</p>
-        <p class="total">TOTAL: ${Number(factura.total).toFixed(2)} €</p>
-    </div>
-
-    <div style="margin-top: 50px; border-top: 1px solid #ccc; padding-top: 20px;">
-        <p><strong>Notas:</strong></p>
-        <p>Forma de pago: ${factura.order?.paymentMethod === 'CARD' ? 'Tarjeta de crédito' : 'Transferencia bancaria'}</p>
-    </div>
-</body>
-</html>
-  `;
 }

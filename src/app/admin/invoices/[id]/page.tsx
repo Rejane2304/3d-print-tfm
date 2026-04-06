@@ -127,12 +127,19 @@ export default function AdminInvoiceDetailPage() {
     }
   };
 
-  const downloadPDF = () => {
+  const openPDF = () => {
     window.open(`/api/admin/invoices/${params.id}/pdf`, '_blank');
   };
 
-  const print = () => {
-    window.print();
+  const downloadPDF = () => {
+    // Create a temporary link to force download
+    const link = document.createElement('a');
+    link.href = `/api/admin/invoices/${params.id}/pdf`;
+    link.download = `factura-${invoice?.invoiceNumber || params.id}.pdf`;
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   if (status === 'loading' || loading) {
@@ -177,7 +184,25 @@ export default function AdminInvoiceDetailPage() {
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap justify-end">
+              <button
+                onClick={openPDF}
+                disabled={invoice.anulada}
+                className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400"
+                title={invoice.anulada ? "Factura anulada - no disponible" : "Ver factura PDF"}
+              >
+                <Printer className="h-4 w-4" />
+                Ver factura
+              </button>
+              <button
+                onClick={downloadPDF}
+                disabled={invoice.anulada}
+                className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400"
+                title={invoice.anulada ? "Factura anulada - no disponible" : "Descargar factura PDF"}
+              >
+                <Download className="h-4 w-4" />
+                Descargar
+              </button>
               {!invoice.anulada && (
                 <button
                   onClick={cancelInvoice}
@@ -187,20 +212,6 @@ export default function AdminInvoiceDetailPage() {
                   Anular
                 </button>
               )}
-              <button
-                onClick={downloadPDF}
-                className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-medium hover:bg-blue-200 transition-colors"
-              >
-                <Download className="h-4 w-4" />
-                Descargar
-              </button>
-              <button
-                onClick={print}
-                className="inline-flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors"
-              >
-                <Printer className="h-4 w-4" />
-                Imprimir
-              </button>
             </div>
           </div>
         </div>

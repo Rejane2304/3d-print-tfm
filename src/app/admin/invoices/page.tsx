@@ -18,7 +18,9 @@ import {
   AlertCircle,
   Plus,
   CheckCircle2,
-  AlertTriangle
+  AlertTriangle,
+  Printer,
+  Eye
 } from 'lucide-react';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 
@@ -148,7 +150,7 @@ export default function AdminFacturasPage() {
     }
   };
 
-  const downloadPDF = (id: string) => {
+  const openPDF = (id: string) => {
     window.open(`/api/admin/invoices/${id}/pdf`, '_blank');
   };
 
@@ -323,18 +325,21 @@ export default function AdminFacturasPage() {
                       <div className="flex items-center justify-end gap-2">
                         <Link
                           href={`/admin/invoices/${invoice.id}`}
-                          className="text-indigo-600 hover:text-indigo-900 p-2"
+                          className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-900 px-3 py-1.5 rounded-md hover:bg-indigo-50 transition-colors"
                           title="Ver detalle"
                         >
-                          <FileText className="h-4 w-4" />
+                          <Eye className="h-4 w-4" />
+                          <span className="hidden sm:inline">Ver</span>
                         </Link>
                         <button
-                          onClick={() => downloadPDF(invoice.id)}
-                          className="text-blue-600 hover:text-blue-900 p-2"
-                          title="Descargar PDF"
-                          data-testid="download-invoice-button"
+                          onClick={() => openPDF(invoice.id)}
+                          disabled={invoice.anulada}
+                          className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-900 px-3 py-1.5 rounded-md hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          title={invoice.anulada ? "Factura anulada - no disponible" : "Ver factura"}
+                          data-testid="view-invoice-button"
                         >
-                          <Download className="h-4 w-4" />
+                          <Printer className="h-4 w-4" />
+                          <span className="hidden sm:inline">Ver factura</span>
                         </button>
                         {!invoice.anulada && (
                           <button
