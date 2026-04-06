@@ -4,6 +4,7 @@
  */
 import Link from 'next/link';
 import Image from 'next/image';
+import { Decimal } from '@prisma/client/runtime/library';
 
 interface Product {
   id: string;
@@ -89,8 +90,3 @@ export default function ProductCard({ product }: ProductCardProps) {
     </Link>
   );
 }
-
-// Type helper para Decimal de Prisma
-type Decimal = {
-  toNumber(): number;
-};

@@ -132,7 +132,7 @@ export default function AdminProductsPage() {
               <h1 className="text-2xl font-bold text-gray-900">Gestión de Productos</h1>
             </div>
             <Link
-              href="/admin/products/nuevo"
+              href="/admin/products/new"
               className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
               data-testid="new-product-button"
             >

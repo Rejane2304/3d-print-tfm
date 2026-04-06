@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 /**
  * API - Listado de Pedidos del Usuario Autenticado
  * GET /api/account/orders

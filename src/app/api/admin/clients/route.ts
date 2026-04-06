@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 /**
  * API Route - List Clients (Admin)
  * GET /api/admin/clients

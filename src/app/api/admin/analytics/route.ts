@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 /**
  * API Route - Admin Analytics Dashboard
  * GET /api/admin/analytics

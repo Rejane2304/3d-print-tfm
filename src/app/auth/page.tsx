@@ -1,11 +1,6 @@
-/**
- * Página de Authentication Unificada
- * Login y Registro en la misma página con tabs
- * Incluye campos de dirección en el registro
- * Estado compartido del email entre formularios
- * Diseño moderno con animaciones suaves
- */
 'use client';
+
+export const dynamic = 'force-dynamic';
 
 import { useState, useEffect } from 'react';
 import { signIn, useSession } from 'next-auth/react';

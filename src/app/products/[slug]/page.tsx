@@ -23,7 +23,26 @@ interface ProductDetailPageProps {
   };
 }
 
-async function getProduct(slug: string) {
+// Extended product type with optional dimension fields
+interface ProductWithDimensions {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  price: number | { toNumber(): number };
+  previousPrice: number | { toNumber(): number } | null;
+  stock: number;
+  weight: number | { toNumber(): number } | null;
+  material: string;
+  widthCm: number | null;
+  heightCm: number | null;
+  depthCm: number | null;
+  printTime: number | null;
+  images: Array<{ id: string; url: string; altText?: string | null }>;
+  category: { name: string } | null;
+}
+
+async function getProduct(slug: string): Promise<{ product: ProductWithDimensions; related: unknown[] } | null> {
   const product = await prisma.product.findUnique({
     where: { slug },
     include: {
@@ -39,16 +58,30 @@ async function getProduct(slug: string) {
   }
 
   // Traducir datos del producto
-  const translatedProduct = {
-    ...product,
+  const translatedProduct: ProductWithDimensions = {
+    id: product.id,
+    slug: product.slug,
     name: translateProductName(product.slug),
     description: translateProductDescription(product.slug),
+    price: product.price,
+    previousPrice: product.previousPrice,
+    stock: product.stock,
+    weight: product.weight,
+    material: product.material,
+    widthCm: product.widthCm,
+    heightCm: product.heightCm,
+    depthCm: product.depthCm,
+    printTime: product.printTime,
+    images: product.images.map(img => ({
+      id: img.id,
+      url: img.url,
+      altText: img.altText,
+    })),
     category: product.category
       ? {
-          ...product.category,
           name: translateCategoryName(product.category.slug),
         }
-      : product.category,
+      : null,
   };
 
   // Obtener productos relacionados
@@ -156,15 +189,15 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             </div>
             
             {/* Detalles */}
-            {((product as any).widthCm || (product as any).heightCm || (product as any).depthCm || product.weight || (isAdmin && (product as any).printTime)) && (
+            {(product.widthCm || product.heightCm || product.depthCm || product.weight || (isAdmin && product.printTime)) && (
               <div className="border-t pt-6">
                 <h3 className="text-lg font-semibold mb-4">Especificaciones</h3>
                 <dl className="grid grid-cols-2 gap-4">
-                  {((product as any).widthCm || (product as any).heightCm || (product as any).depthCm) && (
+                  {(product.widthCm || product.heightCm || product.depthCm) && (
                     <>
                       <dt className="text-gray-600">Dimensiones:</dt>
                       <dd className="font-medium">
-                        {[(product as any).widthCm, (product as any).heightCm, (product as any).depthCm]
+                        {[product.widthCm, product.heightCm, product.depthCm]
                           .filter(Boolean)
                           .join(' x ')} cm
                       </dd>

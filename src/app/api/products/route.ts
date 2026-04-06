@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 /**
  * API Route para catálogo de productos
  * GET /api/products - Listado con filtros y paginación

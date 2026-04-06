@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 /**
  * API Route - Inventory Management (Admin)
  * GET /api/admin/inventory

@@ -1,8 +1,11 @@
+'use client';
+
+export const dynamic = 'force-dynamic';
+
 /**
  * Página de Éxito de Checkout
  * Muestra confirmación después del pago exitoso (Stripe o PayPal)
  */
-'use client';
 
 import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';

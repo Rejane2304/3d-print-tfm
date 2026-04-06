@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 /**
  * API Route para FAQs (Preguntas Frecuentes)
  * GET /api/faqs - Listado de preguntas frecuentes en español

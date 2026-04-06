@@ -37,7 +37,6 @@ export default function Header() {
 
   const isAuthenticated = status === 'authenticated';
   const isAdmin = session?.user?.rol === 'ADMIN';
-  const isCliente = session?.user?.rol === 'CLIENTE';
 
   // Get first letter of user's name
   const userName = session?.user?.name || '';
@@ -331,7 +330,7 @@ export default function Header() {
                 <span>Carrito</span>
               </Link>
             )}
-            {isCliente && (
+            {!isAdmin && isAuthenticated && (
               <>
                 <hr className="my-2 border-gray-200" />
                 <Link
