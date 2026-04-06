@@ -10,9 +10,10 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
 import { Prisma, OrderStatus } from '@prisma/client';
-import { translateOrderStatus, translatePaymentStatus, translatePaymentMethod, translateErrorMessage } from '@/lib/i18n';
+import { translateOrderStatus, translateErrorMessage } from '@/lib/i18n';
 
 // Schema de validación para actualización
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const actualizarPedidoSchema = z.object({
   status: z.enum(['PENDING', 'CONFIRMED', 'PREPARING', 'SHIPPED', 'DELIVERED', 'CANCELLED']),
   internalNotes: z.string().optional(),
@@ -45,8 +46,8 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url);
     const status = searchParams.get('status');
-    const limit = parseInt(searchParams.get('limit') || '50');
-    const page = parseInt(searchParams.get('page') || '1');
+    const limit = Number.parseInt(searchParams.get('limit') || '50', 10);
+    const page = Number.parseInt(searchParams.get('page') || '1', 10);
     const skip = (page - 1) * limit;
 
     const where: Prisma.OrderWhereInput = {};
@@ -142,7 +143,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { id, estado, notasInternas, numeroSeguimiento, transportista, ...data } = body;
+    const { id, estado, notasInternas, numeroSeguimiento, transportista } = body;
     
     if (!id) {
       return NextResponse.json(

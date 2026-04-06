@@ -89,7 +89,7 @@ export default function CheckoutPage() {
   const { status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [, setUserProfile] = useState<UserProfile | null>(null);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string>('');
   const [cart, setCart] = useState<{ items: CartItem[]; subtotal: number } | null>(null);
@@ -273,7 +273,8 @@ export default function CheckoutPage() {
   const taxAmount = subtotal * taxRate;
   const total = subtotal + shippingCost + taxAmount;
 
-  const selectedAddress = addresses.find(a => a.id === selectedAddressId);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _selectedAddress = addresses.find(a => a.id === selectedAddressId);
   const selectedPaymentMethod = paymentMethods.find(m => m.id === paymentMethod);
 
   return (
@@ -327,6 +328,7 @@ export default function CheckoutPage() {
                   {addresses.map((address) => (
                     <label
                       key={address.id}
+                      htmlFor={`address-${address.id}`}
                       className={`flex items-start gap-4 p-4 rounded-lg border-2 cursor-pointer transition-colors ${
                         selectedAddressId === address.id
                           ? 'border-indigo-600 bg-indigo-50'
@@ -335,6 +337,7 @@ export default function CheckoutPage() {
                     >
                       <input
                         type="radio"
+                        id={`address-${address.id}`}
                         name="address"
                         value={address.id}
                         checked={selectedAddressId === address.id}
@@ -412,6 +415,7 @@ export default function CheckoutPage() {
                   return (
                     <label
                       key={method.id}
+                      htmlFor={`payment-${method.id}`}
                       className={`flex items-center gap-4 p-4 rounded-lg border-2 cursor-pointer transition-all ${
                         paymentMethod === method.id
                           ? `${method.borderColor} ${method.bgColor}`
@@ -420,6 +424,7 @@ export default function CheckoutPage() {
                     >
                       <input
                         type="radio"
+                        id={`payment-${method.id}`}
                         name="paymentMethod"
                         value={method.id}
                         checked={paymentMethod === method.id}

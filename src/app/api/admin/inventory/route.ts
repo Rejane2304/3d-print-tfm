@@ -42,8 +42,8 @@ export async function GET(req: NextRequest) {
 
     // Get query parameters
     const { searchParams } = new URL(req.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
+    const page = Number.parseInt(searchParams.get('page') || '1', 10);
+    const limit = Number.parseInt(searchParams.get('limit') || '10', 10);
     const search = searchParams.get('search') || '';
     const stockLevel = searchParams.get('stockLevel') || 'all';
 
@@ -131,12 +131,12 @@ export async function GET(req: NextRequest) {
         stock: product.stock,
         minStock: product.minStock,
         price: product.price,
-        category: product.category?.name || 'Sin categoría',
+        categoria: product.category?.name || 'Sin categoría',
         isActive: product.isActive,
         stockStatus,
         movementCount: product._count.movements,
         lastMovementAt: lastMovement?.createdAt || null,
-        lastMovementType: lastMovement?.type ? translateMovementType(lastMovement.type) : null,
+        ultimoMovimientoTipo: lastMovement?.type ? translateMovementType(lastMovement.type) : null,
         imagenes: product.images,
       };
     });

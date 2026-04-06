@@ -12,7 +12,6 @@ import {
   Search, 
   Filter, 
   FileText, 
-  Download, 
   XCircle,
   Loader2,
   AlertCircle,
@@ -374,11 +373,12 @@ export default function AdminFacturasPage() {
               Introduce el ID del pedido entregado para generar una factura.
             </p>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="orderIdInput" className="block text-sm font-medium text-gray-700 mb-1">
                 ID del Pedido
               </label>
               <input
                 type="text"
+                id="orderIdInput"
                 value={orderIdInput}
                 onChange={(e) => setOrderIdInput(e.target.value)}
                 placeholder="Ej: 123e4567-e89b-12d3-a456-426614174000"

@@ -77,9 +77,9 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
       
       {/* Categoría */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <span className="block text-sm font-medium text-gray-700 mb-2">
           Categoría
-        </label>
+        </span>
         <select
           value={searchParams.category || ''}
           onChange={(e) => updateFilter('category', e.target.value)}
@@ -95,9 +95,9 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
       
       {/* Material */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <span className="block text-sm font-medium text-gray-700 mb-2">
           Material
-        </label>
+        </span>
         <select
           value={searchParams.material || ''}
           onChange={(e) => updateFilter('material', e.target.value)}
@@ -113,9 +113,9 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
       
       {/* Rango de price */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <span className="block text-sm font-medium text-gray-700 mb-2">
           Precio
-        </label>
+        </span>
         <div className="flex gap-2">
           <input
             type="number"
@@ -138,15 +138,16 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
       
       {/* En stock */}
       <div className="mb-6">
-        <label className="flex items-center gap-2 cursor-pointer">
+        <div className="flex items-center gap-2 cursor-pointer">
           <input
             type="checkbox"
+            id="inStockFilter"
             checked={searchParams.inStock === 'true'}
             onChange={(e) => updateFilter('inStock', e.target.checked ? 'true' : '')}
             className="rounded text-indigo-600 focus:ring-indigo-500"
           />
-          <span className="text-sm text-gray-700">Solo en stock</span>
-        </label>
+          <label htmlFor="inStockFilter" className="text-sm text-gray-700 cursor-pointer">Solo en stock</label>
+        </div>
       </div>
     </div>
   );

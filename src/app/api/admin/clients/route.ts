@@ -37,8 +37,8 @@ export async function GET(req: NextRequest) {
 
     // Get query parameters
     const { searchParams } = new URL(req.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
+    const page = Number.parseInt(searchParams.get('page') || '1', 10);
+    const limit = Number.parseInt(searchParams.get('limit') || '10', 10);
     const search = searchParams.get('search') || '';
     const status = searchParams.get('status') || 'all';
 
@@ -107,15 +107,15 @@ export async function GET(req: NextRequest) {
 
       return {
         id: client.id,
-        name: client.name,
+        nombre: client.name,
         email: client.email,
-        phone: client.phone,
-        isActive: client.isActive,
-        createdAt: client.createdAt,
-        lastAccess: client.lastAccess,
-        totalOrders: client._count.orders,
-        totalSpent: totalSpent.toFixed(2),
-        lastOrderDate: lastOrder ? new Date(lastOrder.createdAt).toISOString() : null,
+        telefono: client.phone,
+        activo: client.isActive,
+        creadoEn: client.createdAt,
+        ultimoAcceso: client.lastAccess,
+        totalPedidos: client._count.orders,
+        totalGastado: totalSpent.toFixed(2),
+        fechaUltimoPedido: lastOrder ? new Date(lastOrder.createdAt).toISOString() : null,
       };
     });
 

@@ -402,10 +402,11 @@ export default function AdminAlertasPage() {
               {selectedAlert.titulo}
             </p>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="resolutionNotes" className="block text-sm font-medium text-gray-700 mb-1">
                 Notas de resolución (opcional)
               </label>
               <textarea
+                id="resolutionNotes"
                 value={resolutionNotes}
                 onChange={(e) => setResolutionNotes(e.target.value)}
                 placeholder="Describe cómo se resolvió la alerta..."

@@ -43,8 +43,8 @@ export async function GET(
 
     // Get query parameters for pagination
     const { searchParams } = new URL(req.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '20');
+    const page = Number.parseInt(searchParams.get('page') || '1', 10);
+    const limit = Number.parseInt(searchParams.get('limit') || '20', 10);
     const skip = (page - 1) * limit;
 
     // Get product details

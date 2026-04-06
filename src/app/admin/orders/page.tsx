@@ -44,6 +44,9 @@ const orderStatuses: Record<string, { color: string; icon: React.ElementType; la
   Cancelado: { color: 'bg-red-100 text-red-800', icon: XCircle, label: 'Cancelado' },
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _estadosConfig = orderStatuses;
+
 export default function AdminPedidosPage() {
   const { data: session, status } = useSession();
   const router = useRouter();

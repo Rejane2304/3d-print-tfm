@@ -155,6 +155,7 @@ export default function OrderProgressBar({
             const Icon = step.icon;
             const isCompleted = index < currentStepIndex;
             const isCurrent = index === currentStepIndex;
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const isPending = index > currentStepIndex;
 
             // Lógica especial para el paso de pago

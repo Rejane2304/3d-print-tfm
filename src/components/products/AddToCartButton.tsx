@@ -89,7 +89,7 @@ export default function AddToCartButton({ productId, stock, product }: AddToCart
             data-testid="quantity-input"
             value={quantity}
             onChange={(e) => {
-              const value = parseInt(e.target.value, 10);
+              const value = Number.parseInt(e.target.value, 10);
               if (!isNaN(value)) {
                 setQuantity(Math.max(1, Math.min(value, stock)));
               }

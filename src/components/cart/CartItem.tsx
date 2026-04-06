@@ -82,7 +82,7 @@ export default function CartItem({
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value, 10);
+    const value = Number.parseInt(e.target.value, 10);
     if (isNaN(value)) return;
     
     // Limitar entre 1 y stock disponible

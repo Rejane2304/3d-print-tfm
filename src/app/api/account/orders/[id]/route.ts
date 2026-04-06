@@ -105,7 +105,7 @@ export async function GET(
       updatedAt: pedido.updatedAt,
       nombreEnvio: pedido.shippingName,
       telefonoEnvio: pedido.shippingPhone,
-      shippingAddress: pedido.shippingAddress,
+      direccionEnvio: pedido.shippingAddress,
       complementoEnvio: pedido.shippingComplement,
       postalCodeEnvio: pedido.shippingPostalCode,
       ciudadEnvio: pedido.shippingCity,

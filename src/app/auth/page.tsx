@@ -1,8 +1,6 @@
 'use client';
 
-export const dynamic = 'force-dynamic';
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -20,11 +18,13 @@ import {
   Home,
   Building,
   Map,
-  Phone
+  Phone,
+  Loader2
 } from 'lucide-react';
-// PhoneInput component removed as it's not used
 
-export default function AuthPage() {
+export const dynamic = 'force-dynamic';
+
+function AuthContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();
@@ -762,5 +762,20 @@ export default function AuthPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-indigo-50">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-indigo-600 mx-auto mb-4" />
+          <p className="text-gray-600">Cargando...</p>
+        </div>
+      </div>
+    }>
+      <AuthContent />
+    </Suspense>
   );
 }

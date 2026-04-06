@@ -27,7 +27,7 @@ interface ProductsPageProps {
 }
 
 async function getProducts(searchParams: ProductsPageProps['searchParams']) {
-  const page = parseInt(searchParams.page || '1', 10);
+  const page = Number.parseInt(searchParams.page || '1', 10);
   const pageSize = 12;
   const skip = (page - 1) * pageSize;
   

@@ -175,9 +175,9 @@ export async function GET(req: NextRequest) {
         });
         return {
           id: item.productId,
-          name: product?.slug ? translateProductName(product.slug) : 'Producto eliminado',
-          sold: item._sum.quantity || 0,
-          revenue: Number(item._sum.subtotal || 0),
+          nombre: product?.slug ? translateProductName(product.slug) : 'Producto eliminado',
+          vendido: item._sum.quantity || 0,
+          ingresos: Number(item._sum.subtotal || 0),
           stock: product?.stock || 0,
         };
       })
@@ -207,9 +207,9 @@ export async function GET(req: NextRequest) {
         });
         return {
           id: customer.userId,
-          name: user?.name || 'Cliente eliminado',
-          orders: customer._count.id,
-          spent: Number(customer._sum.total || 0),
+          nombre: user?.name || 'Cliente eliminado',
+          pedidos: customer._count.id,
+          gastado: Number(customer._sum.total || 0),
         };
       })
     );
@@ -262,11 +262,11 @@ export async function GET(req: NextRequest) {
         topCustomers: topCustomersWithDetails,
         recentOrders: recentOrders.map((o) => ({
           id: o.id,
-          orderNumber: o.orderNumber,
-          customerName: o.user?.name || 'N/A',
+          numeroPedido: o.orderNumber,
+          clienteNombre: o.user?.name || 'N/A',
           total: Number(o.total),
-          status: o.status,
-          createdAt: o.createdAt,
+          estado: o.status,
+          creadoEn: o.createdAt,
         })),
       },
     });

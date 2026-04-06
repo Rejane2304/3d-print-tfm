@@ -31,7 +31,7 @@ export default function SortSelector({ initialSortBy = 'nombre', initialSortOrde
 
   return (
     <div className="flex items-center gap-2">
-      <label className="text-sm text-gray-600">Ordenar por:</label>
+      <span className="text-sm text-gray-600">Ordenar por:</span>
       <select
         defaultValue={initialSortBy}
         onChange={handleSortByChange}

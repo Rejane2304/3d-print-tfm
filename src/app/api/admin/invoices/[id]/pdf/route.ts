@@ -12,6 +12,7 @@ import { Prisma } from '@prisma/client';
 import { generateInvoiceHTML } from '@/lib/invoices/invoice-template';
 
 // Type for invoice with order, items and product with images
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type InvoiceWithOrder = Prisma.InvoiceGetPayload<{
   include: {
     order: {

@@ -15,7 +15,6 @@ import {
   Loader2,
   Upload,
   X,
-  Plus,
   AlertCircle,
   CheckCircle2,
   Save
@@ -193,13 +192,9 @@ export default function NuevoProductoPage() {
           ...formData,
           price: parseFloat(formData.price),
           previousPrice: formData.previousPrice ? parseFloat(formData.previousPrice) : null,
-          stock: parseInt(formData.stock) || 0,
-          minStock: parseInt(formData.minStock) || 5,
-          widthCm: formData.widthCm ? parseFloat(formData.widthCm) : null,
-          heightCm: formData.heightCm ? parseFloat(formData.heightCm) : null,
-          depthCm: formData.depthCm ? parseFloat(formData.depthCm) : null,
-          weight: formData.weight ? parseFloat(formData.weight) : null,
-          printTime: formData.printTime ? parseInt(formData.printTime) : null,
+          stock: Number.parseInt(formData.stock) || 0,
+          minStock: Number.parseInt(formData.minStock) || 5,
+          printTime: formData.printTime ? Number.parseInt(formData.printTime) : null,
           images,
         }),
       });
@@ -288,11 +283,12 @@ export default function NuevoProductoPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
                       Nombre del producto *
                     </label>
                     <input
                       type="text"
+                      id="name"
                       name="name"
                       value={formData.name}
                       onChange={handleNameChange}
@@ -303,11 +299,12 @@ export default function NuevoProductoPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-1">
                       Slug *
                     </label>
                     <input
                       type="text"
+                      id="slug"
                       name="slug"
                       value={formData.slug}
                       onChange={handleInputChange}
@@ -318,10 +315,11 @@ export default function NuevoProductoPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 mb-1">
                       Categoría *
                     </label>
                     <select
+                      id="categoryId"
                       name="categoryId"
                       value={formData.categoryId}
                       onChange={handleInputChange}
@@ -336,11 +334,12 @@ export default function NuevoProductoPage() {
                   </div>
 
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="shortDescription" className="block text-sm font-medium text-gray-700 mb-1">
                       Descripción corta
                     </label>
                     <input
                       type="text"
+                      id="shortDescription"
                       name="shortDescription"
                       value={formData.shortDescription}
                       onChange={handleInputChange}
@@ -351,10 +350,11 @@ export default function NuevoProductoPage() {
                   </div>
 
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
                       Descripción completa *
                     </label>
                     <textarea
+                      id="description"
                       name="description"
                       value={formData.description}
                       onChange={handleInputChange}
@@ -373,11 +373,12 @@ export default function NuevoProductoPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
                       Precio actual (€) *
                     </label>
                     <input
                       type="number"
+                      id="price"
                       name="price"
                       value={formData.price}
                       onChange={handleInputChange}
@@ -390,11 +391,12 @@ export default function NuevoProductoPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="previousPrice" className="block text-sm font-medium text-gray-700 mb-1">
                       Precio anterior (€)
                     </label>
                     <input
                       type="number"
+                      id="previousPrice"
                       name="previousPrice"
                       value={formData.previousPrice}
                       onChange={handleInputChange}
@@ -406,10 +408,11 @@ export default function NuevoProductoPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="material" className="block text-sm font-medium text-gray-700 mb-1">
                       Material
                     </label>
                     <select
+                      id="material"
                       name="material"
                       value={formData.material}
                       onChange={handleInputChange}
@@ -422,11 +425,12 @@ export default function NuevoProductoPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="stock" className="block text-sm font-medium text-gray-700 mb-1">
                       Stock actual *
                     </label>
                     <input
                       type="number"
+                      id="stock"
                       name="stock"
                       value={formData.stock}
                       onChange={handleInputChange}
@@ -438,11 +442,12 @@ export default function NuevoProductoPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="minStock" className="block text-sm font-medium text-gray-700 mb-1">
                       Stock mínimo
                     </label>
                     <input
                       type="number"
+                      id="minStock"
                       name="minStock"
                       value={formData.minStock}
                       onChange={handleInputChange}
@@ -460,11 +465,12 @@ export default function NuevoProductoPage() {
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="widthCm" className="block text-sm font-medium text-gray-700 mb-1">
                       Ancho (cm)
                     </label>
                     <input
                       type="number"
+                      id="widthCm"
                       name="widthCm"
                       value={formData.widthCm}
                       onChange={handleInputChange}
@@ -476,11 +482,12 @@ export default function NuevoProductoPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="heightCm" className="block text-sm font-medium text-gray-700 mb-1">
                       Alto (cm)
                     </label>
                     <input
                       type="number"
+                      id="heightCm"
                       name="heightCm"
                       value={formData.heightCm}
                       onChange={handleInputChange}
@@ -492,11 +499,12 @@ export default function NuevoProductoPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="depthCm" className="block text-sm font-medium text-gray-700 mb-1">
                       Profundidad (cm)
                     </label>
                     <input
                       type="number"
+                      id="depthCm"
                       name="depthCm"
                       value={formData.depthCm}
                       onChange={handleInputChange}
@@ -508,11 +516,12 @@ export default function NuevoProductoPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="weight" className="block text-sm font-medium text-gray-700 mb-1">
                       Peso (g)
                     </label>
                     <input
                       type="number"
+                      id="weight"
                       name="weight"
                       value={formData.weight}
                       onChange={handleInputChange}
@@ -525,11 +534,12 @@ export default function NuevoProductoPage() {
                 </div>
 
                 <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="printTime" className="block text-sm font-medium text-gray-700 mb-1">
                     Tiempo de impresión (min)
                   </label>
                   <input
                     type="number"
+                    id="printTime"
                     name="printTime"
                     value={formData.printTime}
                     onChange={handleInputChange}
@@ -549,9 +559,10 @@ export default function NuevoProductoPage() {
 
                 <div className="space-y-4">
                   <div className="flex gap-2">
-                    <label className="flex-1 cursor-pointer">
+                    <label htmlFor="imageUpload" className="flex-1 cursor-pointer">
                       <input
                         type="file"
+                        id="imageUpload"
                         accept="image/*"
                         onChange={handleImageUpload}
                         className="hidden"
@@ -628,27 +639,33 @@ export default function NuevoProductoPage() {
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Configuración</h2>
 
                 <div className="space-y-4">
-                  <label className="flex items-center gap-3">
+                  <div className="flex items-center gap-3">
                     <input
                       type="checkbox"
+                      id="isActive"
                       name="isActive"
                       checked={formData.isActive}
                       onChange={handleInputChange}
                       className="h-4 w-4 text-indigo-600 rounded focus:ring-indigo-500"
                     />
-                    <span className="text-sm text-gray-700">Producto activo</span>
-                  </label>
+                    <label htmlFor="isActive" className="text-sm text-gray-700 cursor-pointer">
+                      Producto activo
+                    </label>
+                  </div>
 
-                  <label className="flex items-center gap-3">
+                  <div className="flex items-center gap-3">
                     <input
                       type="checkbox"
+                      id="isFeatured"
                       name="isFeatured"
                       checked={formData.isFeatured}
                       onChange={handleInputChange}
                       className="h-4 w-4 text-indigo-600 rounded focus:ring-indigo-500"
                     />
-                    <span className="text-sm text-gray-700">Producto destacado</span>
-                  </label>
+                    <label htmlFor="isFeatured" className="text-sm text-gray-700 cursor-pointer">
+                      Producto destacado
+                    </label>
+                  </div>
                 </div>
               </div>
 

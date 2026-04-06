@@ -78,7 +78,8 @@ interface OrderDetail {
   }>;
 }
 
-const estadosConfig: Record<string, { color: string; icon: React.ElementType; label: string; description: string }> = {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _estadosConfig: Record<string, { color: string; icon: React.ElementType; label: string; description: string }> = {
   Pendiente: {
     color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
     icon: Clock,

@@ -19,8 +19,8 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
   
   // Parámetros de paginación
-  const page = parseInt(searchParams.get('page') || '1', 10);
-  const pageSize = parseInt(searchParams.get('pageSize') || '12', 10);
+  const page = Number.parseInt(searchParams.get('page') || '1', 10);
+  const pageSize = Number.parseInt(searchParams.get('pageSize') || '12', 10);
   const skip = (page - 1) * pageSize;
   
   // Parámetros de filtrado

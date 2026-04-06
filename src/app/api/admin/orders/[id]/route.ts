@@ -93,7 +93,7 @@ export async function GET(
       })),
       nombreEnvio: order.shippingName,
       telefonoEnvio: order.shippingPhone,
-      shippingAddress: order.shippingAddress,
+      direccionEnvio: order.shippingAddress,
       complementoEnvio: order.shippingComplement,
       postalCodeEnvio: order.shippingPostalCode,
       ciudadEnvio: order.shippingCity,

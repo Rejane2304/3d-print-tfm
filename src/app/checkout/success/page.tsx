@@ -1,16 +1,11 @@
 'use client';
 
-export const dynamic = 'force-dynamic';
-
-/**
- * Página de Éxito de Checkout
- * Muestra confirmación después del pago exitoso (Stripe o PayPal)
- */
-
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle, Package, ArrowRight, Loader2 } from 'lucide-react';
+
+export const dynamic = 'force-dynamic';
 
 interface OrderData {
   orderNumber?: string;
@@ -19,7 +14,7 @@ interface OrderData {
   paymentMethod?: string;
 }
 
-export default function CheckoutSuccessPage() {
+function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
   const orderId = searchParams.get('orderId'); // Para verificación directa por ID
@@ -199,5 +194,26 @@ export default function CheckoutSuccessPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * Página de Éxito de Checkout
+ * Muestra confirmación después del pago exitoso (Stripe o PayPal)
+ */
+export default function CheckoutSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 py-12">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
+            <Loader2 className="h-12 w-12 animate-spin text-indigo-600 mx-auto mb-4" />
+            <p className="text-gray-600">Cargando...</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <CheckoutSuccessContent />
+    </Suspense>
   );
 }

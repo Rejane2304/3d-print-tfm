@@ -91,31 +91,31 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      client: {
+      cliente: {
         id: client.id,
-        name: client.name,
+        nombre: client.name,
         email: client.email,
-        phone: client.phone,
-        isActive: client.isActive,
-        createdAt: client.createdAt,
-        lastAccess: client.lastAccess,
-        addresses: client.addresses,
-        orders: client.orders.map((order) => ({
+        telefono: client.phone,
+        activo: client.isActive,
+        creadoEn: client.createdAt,
+        ultimoAcceso: client.lastAccess,
+        direcciones: client.addresses,
+        pedidos: client.orders.map((order) => ({
           id: order.id,
-          orderNumber: order.orderNumber,
+          numeroPedido: order.orderNumber,
           estado: translateOrderStatus(order.status),
           total: order.total,
-          createdAt: order.createdAt,
-          itemCount: order.items.length,
+          creadoEn: order.createdAt,
+          cantidadItems: order.items.length,
           pagoEstado: translatePaymentStatus(order.payment?.status || 'PENDING'),
           pagoMetodo: translatePaymentMethod(order.payment?.method || 'CARD'),
         })),
-        stats: {
-          totalOrders,
-          totalSpent: totalSpent.toFixed(2),
-          completedOrders,
-          pendingOrders,
-          averageOrderValue: totalOrders > 0 ? (totalSpent / totalOrders).toFixed(2) : '0.00',
+        estadisticas: {
+          totalPedidos: totalOrders,
+          totalGastado: totalSpent.toFixed(2),
+          pedidosCompletados: completedOrders,
+          pedidosPendientes: pendingOrders,
+          valorPromedioPedido: totalOrders > 0 ? (totalSpent / totalOrders).toFixed(2) : '0.00',
         },
       },
     });

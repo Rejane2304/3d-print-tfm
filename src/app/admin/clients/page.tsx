@@ -12,15 +12,15 @@ import { Loader2, Search, ChevronLeft, ChevronRight, User, Phone, ShoppingBag, D
 
 interface Client {
   id: string;
-  name: string;
+  nombre: string;
   email: string;
-  phone: string | null;
-  isActive: boolean;
-  createdAt: string;
-  lastAccess: string | null;
-  totalOrders: number;
-  totalSpent: string;
-  lastOrderDate: string | null;
+  telefono: string | null;
+  activo: boolean;
+  creadoEn: string;
+  ultimoAcceso: string | null;
+  totalPedidos: number;
+  totalGastado: string;
+  fechaUltimoPedido: string | null;
 }
 
 interface Pagination {
@@ -193,7 +193,7 @@ export default function AdminClientsPage() {
                         <User className="h-5 w-5 text-indigo-600" />
                       </div>
                       <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{client.name}</div>
+                        <div className="text-sm font-medium text-gray-900">{client.nombre}</div>
                         <div className="text-sm text-gray-500">{client.email}</div>
                       </div>
                     </div>
@@ -201,39 +201,39 @@ export default function AdminClientsPage() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center text-sm text-gray-500">
                       <Phone className="h-4 w-4 mr-1" />
-                      {client.phone || 'N/A'}
+                      {client.telefono || 'N/A'}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center text-sm text-gray-900">
                       <ShoppingBag className="h-4 w-4 mr-1 text-indigo-500" />
-                      {client.totalOrders}
+                      {client.totalPedidos}
                     </div>
-                    {client.lastOrderDate && (
+                    {client.fechaUltimoPedido && (
                       <div className="text-xs text-gray-500">
-                        Último: {formatDate(client.lastOrderDate)}
+                        Último: {formatDate(client.fechaUltimoPedido)}
                       </div>
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center text-sm font-medium text-gray-900">
                       <DollarSign className="h-4 w-4 mr-1 text-green-500" />
-                      {formatCurrency(client.totalSpent)}
+                      {formatCurrency(client.totalGastado)}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <div className="flex items-center">
                       <Calendar className="h-4 w-4 mr-1" />
-                      {formatDate(client.createdAt)}
+                      {formatDate(client.creadoEn)}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      client.isActive 
+                      client.activo 
                         ? 'bg-green-100 text-green-800' 
                         : 'bg-red-100 text-red-800'
                     }`}>
-                      {client.isActive ? 'Activo' : 'Inactivo'}
+                      {client.activo ? 'Activo' : 'Inactivo'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

@@ -50,8 +50,8 @@ export async function GET(req: NextRequest) {
     const type = searchParams.get('type');
     const severity = searchParams.get('severity');
     const status = searchParams.get('status');
-    const limit = parseInt(searchParams.get('limit') || '50');
-    const page = parseInt(searchParams.get('page') || '1');
+    const limit = Number.parseInt(searchParams.get('limit') || '50', 10);
+    const page = Number.parseInt(searchParams.get('page') || '1', 10);
     const skip = (page - 1) * limit;
 
     const where: Prisma.AlertWhereInput = {};
