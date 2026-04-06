@@ -269,11 +269,14 @@ export default function AdminInventoryPage() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {(() => {
-                      const stockColorClass = product.stockStatus === 'critical' 
-                        ? 'text-red-600' 
-                        : product.stockStatus === 'low' 
-                          ? 'text-yellow-600' 
-                          : 'text-green-600';
+                      let stockColorClass: string;
+                      if (product.stockStatus === 'critical') {
+                        stockColorClass = 'text-red-600';
+                      } else if (product.stockStatus === 'low') {
+                        stockColorClass = 'text-yellow-600';
+                      } else {
+                        stockColorClass = 'text-green-600';
+                      }
                       return (
                         <span className={`text-lg font-bold ${stockColorClass}`}>
                           {product.stock}
@@ -377,7 +380,7 @@ export default function AdminInventoryPage() {
             
             <form onSubmit={handleAdjustment}>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Producto</label>
+                <div className="block text-sm font-medium text-gray-700 mb-1">Producto</div>
                 <div className="text-gray-900 font-medium">{adjustingProduct.name}</div>
                 <div className="text-sm text-gray-500">Stock actual: {adjustingProduct.stock}</div>
               </div>
