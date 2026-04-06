@@ -1,7 +1,7 @@
 /**
  * Invoice Detail Page - Admin
- * Complete invoice view with management options
- * Uses InvoiceViewer component for unified display
+ * Solo visualización de la factura
+ * Las acciones (Ver PDF, Descargar, Anular) están en el listado
  */
 'use client';
 
@@ -9,15 +9,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import {
-  ArrowLeft,
-  Download,
-  Printer,
-  XCircle,
-  Loader2,
-  AlertCircle,
-} from 'lucide-react';
-import ConfirmModal from '@/components/ui/ConfirmModal';
+import { ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
 import { InvoiceViewer, useInvoiceData } from '@/components/invoices/InvoiceViewer';
 
 interface InvoiceDetail {
@@ -76,7 +68,6 @@ export default function AdminInvoiceDetailPage() {
   const [invoice, setInvoice] = useState<InvoiceDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [modalCancelOpen, setModalCancelOpen] = useState(false);
 
   const loadInvoice = useCallback(async () => {
     try {
@@ -114,42 +105,6 @@ export default function AdminInvoiceDetailPage() {
     }
   }, [status, session, router, loadInvoice]);
 
-  const cancelInvoice = async () => {
-    setModalCancelOpen(true);
-  };
-
-  const confirmCancellation = async () => {
-    try {
-      const response = await fetch(`/api/admin/invoices/${params.id}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        setModalCancelOpen(false);
-        await loadInvoice();
-      } else {
-        const data = await response.json();
-        setError(data.error || 'Error al anular');
-      }
-    } catch {
-      setError('Error al anular factura');
-    }
-  };
-
-  const openPDF = () => {
-    window.open(`/api/admin/invoices/${params.id}/pdf`, '_blank');
-  };
-
-  const downloadPDF = () => {
-    const link = document.createElement('a');
-    link.href = `/api/admin/invoices/${params.id}/pdf`;
-    link.download = `factura-${invoice?.invoiceNumber || params.id}.pdf`;
-    link.target = '_blank';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -178,15 +133,14 @@ export default function AdminInvoiceDetailPage() {
     );
   }
 
-  // Transformar datos al formato esperado por InvoiceViewer
   const invoiceData = useInvoiceData(invoice);
 
   return (
     <div className="min-h-screen bg-gray-100 print:bg-white">
-      {/* Header */}
+      {/* Header simplificado - solo navegación */}
       <header className="bg-white shadow-sm print:hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Link
                 href="/admin/invoices"
@@ -205,68 +159,15 @@ export default function AdminInvoiceDetailPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 flex-wrap">
-              <Link
-                href="/admin/dashboard"
-                className="text-indigo-600 hover:text-indigo-800 font-medium mr-4"
-              >
-                ← Volver al Dashboard
-              </Link>
-              <button
-                onClick={openPDF}
-                disabled={invoice.isCancelled}
-                className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                title={
-                  invoice.isCancelled
-                    ? 'Factura anulada - no disponible'
-                    : 'Ver factura PDF'
-                }
-              >
-                <Printer className="h-4 w-4" />
-                Ver factura
-              </button>
-              <button
-                onClick={downloadPDF}
-                disabled={invoice.isCancelled}
-                className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                title={
-                  invoice.isCancelled
-                    ? 'Factura anulada - no disponible'
-                    : 'Descargar factura PDF'
-                }
-              >
-                <Download className="h-4 w-4" />
-                Descargar
-              </button>
-              {!invoice.isCancelled && (
-                <button
-                  onClick={cancelInvoice}
-                  className="inline-flex items-center gap-2 bg-red-100 text-red-700 px-4 py-2 rounded-lg font-medium hover:bg-red-200 transition-colors"
-                >
-                  <XCircle className="h-4 w-4" />
-                  Anular
-                </button>
-              )}
-            </div>
+            <Link
+              href="/admin/dashboard"
+              className="text-indigo-600 hover:text-indigo-800 font-medium"
+            >
+              ← Volver al Dashboard
+            </Link>
           </div>
         </div>
       </header>
-
-      {/* Estado Anulada */}
-      {invoice.isCancelled && (
-        <div className="bg-red-50 border-l-4 border-red-400 p-4 print:hidden">
-          <div className="flex max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <XCircle className="h-5 w-5 text-red-400" />
-            <div className="ml-3">
-              <p className="text-sm text-red-700">
-                <strong>FACTURA ANULADA</strong> - Esta factura fue anulada el{' '}
-                {invoice.cancelledAt &&
-                  new Date(invoice.cancelledAt).toLocaleDateString('es-ES')}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Error */}
       {error && (
@@ -278,21 +179,10 @@ export default function AdminInvoiceDetailPage() {
         </div>
       )}
 
-      {/* Invoice Viewer */}
+      {/* Invoice Viewer - sin botones de acción */}
       <div className="py-8 px-4 print:p-0">
         <InvoiceViewer data={invoiceData} />
       </div>
-
-      {/* Modal Confirmación Anular */}
-      <ConfirmModal
-        isOpen={modalCancelOpen}
-        onClose={() => setModalCancelOpen(false)}
-        onConfirm={confirmCancellation}
-        title="¿Anular factura?"
-        description="Esta acción no se puede deshacer. La factura se marcará como anulada pero permanecerá en el sistema para fines contables."
-        confirmText="Anular"
-        type="warning"
-      />
     </div>
   );
 }
