@@ -1,7 +1,7 @@
 /**
- * Invoice Detail Page - Admin
- * Complete invoice view with management options
- * Uses InvoiceViewer component for unified display
+ * Invoice Detail Page - User Account
+ * Vista de factura para usuarios autenticados
+ * Usa InvoiceViewer component para visualización unificada
  */
 'use client';
 
@@ -13,11 +13,11 @@ import {
   ArrowLeft,
   Download,
   Printer,
-  XCircle,
   Loader2,
   AlertCircle,
+  XCircle,
+  FileText
 } from 'lucide-react';
-import ConfirmModal from '@/components/ui/ConfirmModal';
 import { InvoiceViewer, useInvoiceData } from '@/components/invoices/InvoiceViewer';
 
 interface InvoiceDetail {
@@ -69,21 +69,20 @@ interface InvoiceDetail {
   };
 }
 
-export default function AdminInvoiceDetailPage() {
-  const { data: session, status } = useSession();
+export default function UserInvoiceDetailPage() {
+  const { status } = useSession();
   const router = useRouter();
   const params = useParams();
   const [invoice, setInvoice] = useState<InvoiceDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [modalCancelOpen, setModalCancelOpen] = useState(false);
 
   const loadInvoice = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`/api/admin/invoices/${params.id}`);
+      const response = await fetch(`/api/account/invoices/${params.id}`);
       const data = await response.json();
 
       if (!response.ok) {
@@ -92,7 +91,7 @@ export default function AdminInvoiceDetailPage() {
 
       setInvoice(data.factura);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error unknown');
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
     }
@@ -100,59 +99,37 @@ export default function AdminInvoiceDetailPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/login?callbackUrl=/admin/invoices');
+      router.push('/auth?callbackUrl=/account/invoices');
       return;
     }
 
-    if (status === 'authenticated') {
-      const user = session?.user as { rol?: string } | undefined;
-      if (user?.rol !== 'ADMIN') {
-        router.push('/');
-        return;
-      }
+    if (status === 'authenticated' && params.id) {
       loadInvoice();
     }
-  }, [status, session, router, loadInvoice]);
+  }, [status, router, params.id, loadInvoice]);
 
-  const cancelInvoice = async () => {
-    setModalCancelOpen(true);
-  };
-
-  const confirmCancellation = async () => {
-    try {
-      const response = await fetch(`/api/admin/invoices/${params.id}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        setModalCancelOpen(false);
-        await loadInvoice();
-      } else {
-        const data = await response.json();
-        setError(data.error || 'Error al anular');
-      }
-    } catch {
-      setError('Error al anular factura');
-    }
-  };
-
-  const openPDF = () => {
-    window.open(`/api/admin/invoices/${params.id}/pdf`, '_blank');
+  const printInvoice = () => {
+    window.print();
   };
 
   const downloadPDF = () => {
-    const link = document.createElement('a');
-    link.href = `/api/admin/invoices/${params.id}/pdf`;
-    link.download = `factura-${invoice?.invoiceNumber || params.id}.pdf`;
-    link.target = '_blank';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    if (invoice) {
+      const link = document.createElement('a');
+      link.href = `/api/account/invoices/${params.id}/pdf`;
+      link.download = `factura-${invoice.invoiceNumber || params.id}.pdf`;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   };
+
+  // Transformar datos al formato esperado por InvoiceViewer
+  const invoiceData = invoice ? useInvoiceData(invoice) : null;
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-indigo-600 mx-auto mb-4" />
           <p className="text-gray-600">Cargando factura...</p>
@@ -163,67 +140,61 @@ export default function AdminInvoiceDetailPage() {
 
   if (!invoice) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="h-12 w-12 text-red-600 mx-auto mb-4" />
           <p className="text-gray-900 font-medium">Factura no encontrada</p>
           <Link
-            href="/admin/invoices"
+            href="/account/orders"
             className="text-indigo-600 hover:text-indigo-800 mt-2 inline-block"
           >
-            ← Volver a facturas
+            ← Volver a mis pedidos
           </Link>
         </div>
       </div>
     );
   }
 
-  // Transformar datos al formato esperado por InvoiceViewer
-  const invoiceData = useInvoiceData(invoice);
-
   return (
-    <div className="min-h-screen bg-gray-100 print:bg-white">
+    <div className="min-h-screen bg-gray-50 print:bg-white">
       {/* Header */}
-      <header className="bg-white shadow-sm print:hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div className="flex items-center gap-3">
+      <div className="bg-white shadow-sm border-b print:hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-4">
               <Link
-                href="/admin/invoices"
-                className="text-gray-500 hover:text-gray-700"
+                href="/account/orders"
+                className="text-gray-500 hover:text-gray-700 transition-colors"
               >
                 <ArrowLeft className="h-6 w-6" />
               </Link>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  Factura {invoice.invoiceNumber}
-                </h1>
-                <p className="text-sm text-gray-500">
+                <div className="flex items-center gap-3">
+                  <FileText className="h-6 w-6 text-indigo-600" />
+                  <h1 className="text-2xl font-bold text-gray-900">
+                    Factura {invoice.invoiceNumber}
+                  </h1>
+                </div>
+                <p className="text-sm text-gray-500 mt-1">
                   Emitida el{' '}
-                  {new Date(invoice.issuedAt).toLocaleDateString('es-ES')}
+                  {new Date(invoice.issuedAt).toLocaleDateString('es-ES', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 flex-wrap">
-              <Link
-                href="/admin/dashboard"
-                className="text-indigo-600 hover:text-indigo-800 font-medium mr-4"
-              >
-                ← Volver al Dashboard
-              </Link>
+            <div className="flex items-center gap-2">
               <button
-                onClick={openPDF}
-                disabled={invoice.isCancelled}
-                className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                title={
-                  invoice.isCancelled
-                    ? 'Factura anulada - no disponible'
-                    : 'Ver factura PDF'
-                }
+                onClick={printInvoice}
+                className="inline-flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+                title="Imprimir factura"
               >
                 <Printer className="h-4 w-4" />
-                Ver factura
+                Imprimir
               </button>
               <button
                 onClick={downloadPDF}
@@ -236,21 +207,12 @@ export default function AdminInvoiceDetailPage() {
                 }
               >
                 <Download className="h-4 w-4" />
-                Descargar
+                Descargar PDF
               </button>
-              {!invoice.isCancelled && (
-                <button
-                  onClick={cancelInvoice}
-                  className="inline-flex items-center gap-2 bg-red-100 text-red-700 px-4 py-2 rounded-lg font-medium hover:bg-red-200 transition-colors"
-                >
-                  <XCircle className="h-4 w-4" />
-                  Anular
-                </button>
-              )}
             </div>
           </div>
         </div>
-      </header>
+      </div>
 
       {/* Estado Anulada */}
       {invoice.isCancelled && (
@@ -280,19 +242,8 @@ export default function AdminInvoiceDetailPage() {
 
       {/* Invoice Viewer */}
       <div className="py-8 px-4 print:p-0">
-        <InvoiceViewer data={invoiceData} mode="screen" />
+        {invoiceData && <InvoiceViewer data={invoiceData} mode="screen" />}
       </div>
-
-      {/* Modal Confirmación Anular */}
-      <ConfirmModal
-        isOpen={modalCancelOpen}
-        onClose={() => setModalCancelOpen(false)}
-        onConfirm={confirmCancellation}
-        title="¿Anular factura?"
-        description="Esta acción no se puede deshacer. La factura se marcará como anulada pero permanecerá en el sistema para fines contables."
-        confirmText="Anular"
-        type="warning"
-      />
     </div>
   );
 }

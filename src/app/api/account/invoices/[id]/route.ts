@@ -1,40 +1,48 @@
 /**
- * API de Factura Individual Admin
- * Obtener detalle y anular factura
- * 
- * Requiere: Rol ADMIN
+ * API - Detalle de Factura del Usuario Autenticado
+ * GET /api/account/invoices/[id]
+ * Devuelve el detalle completo de una factura específica del usuario
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
+import { prisma } from '@/lib/db/prisma';
 
 export async function GET(
-  req: NextRequest,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
+
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: 'No autenticado' },
+        { error: 'No autenticado' },
         { status: 401 }
       );
     }
 
+    // Obtener usuario
     const usuario = await prisma.user.findUnique({
       where: { email: session.user.email },
+      select: { id: true }
     });
 
-    if (!usuario || usuario.role !== 'ADMIN') {
+    if (!usuario) {
       return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 403 }
+        { error: 'Usuario no encontrado' },
+        { status: 404 }
       );
     }
 
-    const factura = await prisma.invoice.findUnique({
-      where: { id: params.id },
+    // Obtener factura específica del usuario
+    const factura = await prisma.invoice.findFirst({
+      where: {
+        id: params.id,
+        order: {
+          userId: usuario.id
+        }
+      },
       include: {
         order: {
           include: {
@@ -51,30 +59,33 @@ export async function GET(
               include: {
                 product: {
                   include: {
-                    images: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
+                    images: {
+                      take: 1,
+                      select: { url: true }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     });
 
     if (!factura) {
       return NextResponse.json(
-        { success: false, error: 'Factura no encontrada' },
+        { error: 'Factura no encontrada' },
         { status: 404 }
       );
     }
 
-    // Transformar datos al formato esperado por el componente
+    // Transformar datos al formato esperado por el componente InvoiceViewer
     const facturaFormateada = {
       id: factura.id,
       invoiceNumber: factura.invoiceNumber,
-      emitidaEn: factura.issuedAt,
-      anulada: factura.isCancelled,
-      anuladaEn: factura.cancelledAt,
+      issuedAt: factura.issuedAt,
+      isCancelled: factura.isCancelled,
+      cancelledAt: factura.cancelledAt,
       baseImponible: Number(factura.taxableAmount),
       cuotaIva: Number(factura.vatAmount),
       tipoIva: Number(factura.vatRate),
@@ -121,54 +132,11 @@ export async function GET(
       },
     };
 
-    return NextResponse.json({ success: true, factura: facturaFormateada });
+    return NextResponse.json({ factura: facturaFormateada });
   } catch (error) {
-    console.error('Error obteniendo factura:', error);
+    console.error('Error al obtener factura:', error);
     return NextResponse.json(
-      { success: false, error: 'Internal error' },
-      { status: 500 }
-    );
-  }
-}
-
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 }
-      );
-    }
-
-    const usuario = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
-
-    if (!usuario || usuario.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 403 }
-      );
-    }
-
-    // Anular la factura (no eliminar)
-    const factura = await prisma.invoice.update({
-      where: { id: params.id },
-      data: {
-        isCancelled: true,
-        cancelledAt: new Date(),
-      },
-    });
-
-    return NextResponse.json({ success: true, factura });
-  } catch (error) {
-    console.error('Error anulando factura:', error);
-    return NextResponse.json(
-      { success: false, error: 'Internal error' },
+      { error: 'Error al obtener factura' },
       { status: 500 }
     );
   }
