@@ -14,6 +14,7 @@ import {
   translateProductName,
   translateProductDescription,
   translateProductShortDescription,
+  translateCategoryName,
 } from '@/lib/i18n';
 
 // Schema de validación
@@ -68,19 +69,36 @@ export async function GET() {
           where: { isMain: true },
           take: 1,
         },
+        category: true,
       },
       orderBy: { createdAt: 'desc' },
     });
 
-    // Translate products to Spanish
-    const translatedProducts = products.map((product) => ({
-      ...product,
-      name: translateProductName(product.slug),
-      description: translateProductDescription(product.slug),
-      shortDescription: translateProductShortDescription(product.slug),
+    // Translate products to Spanish for admin panel
+    const productosTraducidos = products.map((product) => ({
+      id: product.id,
+      slug: product.slug,
+      nombre: translateProductName(product.slug),
+      descripcion: translateProductDescription(product.slug),
+      descripcionCorta: translateProductShortDescription(product.slug),
+      precio: Number(product.price),
+      precioAnterior: product.previousPrice ? Number(product.previousPrice) : null,
+      stock: product.stock,
+      categoria: product.category ? translateCategoryName(product.category.slug) : 'Sin categoría',
+      material: product.material,
+      anchoCm: product.widthCm,
+      altoCm: product.heightCm,
+      profundidadCm: product.depthCm,
+      peso: product.weight,
+      tiempoImpresion: product.printTime,
+      activo: product.isActive,
+      destacado: product.isFeatured,
+      imagenes: product.images,
+      creadoEn: product.createdAt,
+      actualizadoEn: product.updatedAt,
     }));
 
-    return NextResponse.json({ success: true, products: translatedProducts });
+    return NextResponse.json({ success: true, productos: productosTraducidos });
   } catch (error) {
     console.error('Error listando productos:', error);
     return NextResponse.json(
