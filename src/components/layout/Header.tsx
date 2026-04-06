@@ -21,7 +21,8 @@ import {
   ClipboardList,
   Settings,
   MapPin,
-  ShoppingCart
+  ShoppingCart,
+  FileText
 } from 'lucide-react';
 import CartIcon from '@/components/cart/CartIcon';
 
@@ -150,38 +151,88 @@ export default function Header() {
 
                     {/* Menu Links */}
                     <div className="py-2">
-                      <Link
-                        href="/account"
-                        onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
-                      >
-                        <Settings className="h-4 w-4" />
-                        <span className="text-sm">Mi Perfil</span>
-                      </Link>
-                      <Link
-                        href="/account/orders"
-                        onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
-                      >
-                        <ClipboardList className="h-4 w-4" />
-                        <span className="text-sm">Mis Pedidos</span>
-                      </Link>
-                      <Link
-                        href="/account/addresses"
-                        onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
-                      >
-                        <MapPin className="h-4 w-4" />
-                        <span className="text-sm">Mis Direcciones</span>
-                      </Link>
-                      <Link
-                        href="/cart"
-                        onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors md:hidden"
-                      >
-                        <ShoppingCart className="h-4 w-4" />
-                        <span className="text-sm">Mi Carrito</span>
-                      </Link>
+                      {isAdmin ? (
+                        // Admin Menu
+                        <>
+                          <Link
+                            href="/admin/dashboard"
+                            onClick={() => setUserMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                          >
+                            <LayoutDashboard className="h-4 w-4" />
+                            <span className="text-sm">Panel Admin</span>
+                          </Link>
+                          <Link
+                            href="/admin/orders"
+                            onClick={() => setUserMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                          >
+                            <ClipboardList className="h-4 w-4" />
+                            <span className="text-sm">Pedidos</span>
+                          </Link>
+                          <Link
+                            href="/admin/products"
+                            onClick={() => setUserMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                          >
+                            <Package className="h-4 w-4" />
+                            <span className="text-sm">Productos</span>
+                          </Link>
+                          <Link
+                            href="/admin/invoices"
+                            onClick={() => setUserMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                          >
+                            <FileText className="h-4 w-4" />
+                            <span className="text-sm">Facturas</span>
+                          </Link>
+                          <div className="border-t border-gray-100 my-2" />
+                          <Link
+                            href="/account"
+                            onClick={() => setUserMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                          >
+                            <Settings className="h-4 w-4" />
+                            <span className="text-sm">Mi Perfil</span>
+                          </Link>
+                        </>
+                      ) : (
+                        // Client Menu
+                        <>
+                          <Link
+                            href="/account"
+                            onClick={() => setUserMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                          >
+                            <Settings className="h-4 w-4" />
+                            <span className="text-sm">Mi Perfil</span>
+                          </Link>
+                          <Link
+                            href="/account/orders"
+                            onClick={() => setUserMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                          >
+                            <ClipboardList className="h-4 w-4" />
+                            <span className="text-sm">Mis Pedidos</span>
+                          </Link>
+                          <Link
+                            href="/account/addresses"
+                            onClick={() => setUserMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                          >
+                            <MapPin className="h-4 w-4" />
+                            <span className="text-sm">Mis Direcciones</span>
+                          </Link>
+                          <Link
+                            href="/cart"
+                            onClick={() => setUserMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors md:hidden"
+                          >
+                            <ShoppingCart className="h-4 w-4" />
+                            <span className="text-sm">Mi Carrito</span>
+                          </Link>
+                        </>
+                      )}
                     </div>
 
                     {/* Logout */}
