@@ -130,8 +130,8 @@ export default function Header() {
                   className="flex items-center gap-2 focus:outline-none"
                 >
                   {/* Avatar Circle */}
-                  <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-lg hover:bg-indigo-700 transition-colors">
-                    {firstLetter || <User className="h-5 w-5" />}
+                  <div className="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-sm hover:bg-indigo-700 transition-colors">
+                    {firstLetter || <User className="h-3.5 w-3.5" />}
                   </div>
                   {/* Dropdown Arrow */}
                   <ChevronDown 

@@ -178,9 +178,9 @@ export default async function HomePage() {
                              {Number(product.price).toFixed(2)} €
                           </span>
                            
-                           <span className="text-sm text-gray-500">
-                            {product.stock > 0 ? 'En stock' : 'Agotado'}
-                           </span>
+                            <span className={`text-sm ${product.stock > 0 ? 'text-green-600 font-medium' : 'text-gray-500'}`}>
+                             {product.stock > 0 ? '✅ En stock' : 'Agotado'}
+                            </span>
                          </div>
                        </div>
                      </div>

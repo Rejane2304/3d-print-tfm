@@ -26,7 +26,7 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const mainImage = product.images?.find(img => img.isMain) || product.images?.[0];
   const price = Number(product.price);
-  
+
   return (
     <Link
       href={`/products/${product.slug}`} data-testid="product-card"
@@ -46,42 +46,42 @@ export default function ProductCard({ product }: ProductCardProps) {
             No image
           </div>
         )}
-        
+
         {/* Low stock badge */}
         {product.stock > 0 && product.stock < 5 && (
           <span className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
-            Last units!
+            ¡Últimas unidades!
           </span>
         )}
-        
+
         {/* Out of stock badge */}
         {product.stock === 0 && (
           <span className="absolute top-2 right-2 bg-gray-500 text-white text-xs px-2 py-1 rounded">
-            Out of stock
+            Agotado
           </span>
         )}
       </div>
-      
+
       <div className="p-4">
         <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-indigo-600 transition-colors line-clamp-2" data-testid="product-name">
           {product.name}
         </h3>
-        
+
         {product.shortDescription && (
           <p className="text-sm text-gray-500 mb-2 line-clamp-2" data-testid="product-description">
             {product.shortDescription}
           </p>
         )}
-        
+
         <div className="flex items-center justify-between">
           <span className="text-xl font-bold text-indigo-600" data-testid="product-price">
             {price.toFixed(2)} €
           </span>
-          
+
           <span className={`text-sm ${
             product.stock > 0 ? 'text-green-600' : 'text-red-600'
           }`} data-testid="product-stock">
-            {product.stock > 0 ? 'In stock' : 'Out of stock'}
+            {product.stock > 0 ? '✅ En stock' : 'Agotado'}
           </span>
         </div>
       </div>
