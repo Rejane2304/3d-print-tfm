@@ -1,2 +1,2 @@
 _ref,companyName,companyTaxId,companyAddress,companyCity,companyProvince,companyPostalCode,companyPhone,companyEmail,defaultVatRate,lowStockThreshold
-CONFIG-0001,3D Print Shop S.L.,B12345678,Calle Innovación 42,Madrid,Madrid,28001,+34 910 000 001,info@3dprint.com,21.00,5
+CONFIG-0001,3D Print,B12345678,Calle Admin 123,Barcelona,Barcelona,08001,+34 930 000 001,info@3dprint.com,21.00,5

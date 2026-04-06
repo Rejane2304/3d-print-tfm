@@ -387,7 +387,7 @@ describe('Invoices API', () => {
       const res = await generateInvoicePDF(req, { params: { id: invoiceId } });
 
       expect(res.status).toBe(200);
-      expect(res.headers.get('Content-Type')).toContain('text/html');
+      expect(res.headers.get('Content-Type')).toContain('application/pdf');
       expect(res.headers.get('Content-Disposition')).toContain('attachment');
     });
 

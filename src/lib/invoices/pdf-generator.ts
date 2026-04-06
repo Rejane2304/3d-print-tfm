@@ -51,13 +51,13 @@ export async function generatePDF({ html, filename }: PDFOptions): Promise<Buffe
  * En producción, estos deberían venir de la BD o variables de entorno
  */
 export const COMPANY_CONFIG = {
-  name: '3D Print Shop S.L.',
+  name: '3D Print',
   taxId: 'B12345678',
-  address: 'Calle Innovación 42',
-  city: 'Madrid',
-  province: 'Madrid',
-  postalCode: '28001',
-  phone: '+34 910 000 001',
+  address: 'Calle Admin 123',
+  city: 'Barcelona',
+  province: 'Barcelona',
+  postalCode: '08001',
+  phone: '+34 930 000 001',
   email: 'info@3dprint.com',
   vatRate: 21,
 } as const;
