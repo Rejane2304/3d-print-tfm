@@ -1,11 +1,12 @@
 /**
  * InvoiceViewer Component
  * Componente compartido para visualizar facturas
- * Se usa en: Admin UI, User UI, y como base para PDF
- * Diseño optimizado para una sola página A4 con paginación si es necesario
+ * Usa exactamente el mismo HTML/CSS que el PDF para consistencia perfecta
  */
 
-import Image from 'next/image';
+'use client';
+
+import { useEffect, useState } from 'react';
 
 interface InvoiceItem {
   id?: string;
@@ -22,7 +23,6 @@ interface InvoiceData {
   issuedAt: Date | string;
   isCancelled?: boolean;
   cancelledAt?: Date | string | null;
-  // Datos de la empresa
   companyName: string;
   companyTaxId: string;
   companyAddress: string;
@@ -31,7 +31,6 @@ interface InvoiceData {
   companyPostalCode: string;
   companyPhone?: string;
   companyEmail?: string;
-  // Datos del cliente
   clientName: string;
   clientTaxId: string;
   clientAddress: string;
@@ -41,7 +40,6 @@ interface InvoiceData {
   clientCountry?: string;
   clientEmail?: string;
   clientPhone?: string;
-  // Items y totales
   items: InvoiceItem[];
   subtotal: number;
   shipping: number;
@@ -55,25 +53,463 @@ interface InvoiceData {
 
 interface InvoiceViewerProps {
   data: InvoiceData;
-  mode?: 'screen' | 'pdf';
 }
 
-export function InvoiceViewer({ data, mode = 'screen' }: InvoiceViewerProps) {
-  const isPDF = mode === 'pdf';
+// CSS exacto del template PDF
+const invoiceStyles = `
+  .invoice-wrapper {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: #1a202c;
+    line-height: 1.6;
+  }
+  
+  .invoice-container {
+    max-width: 210mm;
+    margin: 0 auto;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+  
+  /* Header */
+  .invoice-header {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: white;
+    padding: 32px 40px;
+    position: relative;
+  }
+  
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  
+  .company-section { flex: 1; }
+  
+  .logo-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  
+  .logo-icon {
+    width: 48px;
+    height: 48px;
+    background: white;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 800;
+    color: #4f46e5;
+  }
+  
+  .company-name {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  
+  .company-details {
+    font-size: 13px;
+    opacity: 0.9;
+    line-height: 1.7;
+  }
+  
+  .invoice-meta {
+    text-align: right;
+    background: rgba(255,255,255,0.1);
+    padding: 20px 28px;
+    border-radius: 12px;
+  }
+  
+  .invoice-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    opacity: 0.8;
+    margin-bottom: 4px;
+  }
+  
+  .invoice-number {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -1px;
+  }
+  
+  .invoice-date {
+    font-size: 13px;
+    opacity: 0.9;
+    margin-top: 4px;
+  }
+  
+  .cancelled-badge {
+    display: inline-block;
+    background: #ef4444;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-top: 12px;
+  }
+  
+  /* Body */
+  .invoice-body {
+    padding: 32px 40px;
+  }
+  
+  .client-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+  
+  .client-card {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #64748b;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .section-label::before {
+    content: '';
+    width: 3px;
+    height: 12px;
+    background: #4f46e5;
+    border-radius: 2px;
+  }
+  
+  .client-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+  }
+  
+  .client-details {
+    font-size: 13px;
+    color: #475569;
+    line-height: 1.6;
+  }
+  
+  .client-details strong {
+    color: #1e293b;
+    font-weight: 600;
+  }
+  
+  .client-contact {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #e2e8f0;
+    font-size: 12px;
+    color: #64748b;
+  }
+  
+  /* Items */
+  .items-section {
+    margin-bottom: 24px;
+  }
+  
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+  
+  .section-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e293b;
+  }
+  
+  .items-count {
+    font-size: 12px;
+    color: #64748b;
+  }
+  
+  .items-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .items-table thead th {
+    background: #f1f5f9;
+    padding: 12px;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #64748b;
+    border-bottom: 2px solid #e2e8f0;
+  }
+  
+  .items-table thead th:first-child {
+    border-top-left-radius: 8px;
+  }
+  
+  .items-table thead th:last-child {
+    border-top-right-radius: 8px;
+    text-align: right;
+  }
+  
+  .items-table tbody td {
+    padding: 12px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  
+  .product-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .product-image-container {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    flex-shrink: 0;
+  }
+  
+  .product-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .product-image-placeholder {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    flex-shrink: 0;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .product-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  
+  .product-name {
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 13px;
+  }
+  
+  .product-description {
+    font-size: 11px;
+    color: #64748b;
+  }
+  
+  .quantity-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    background: #f1f5f9;
+    border-radius: 6px;
+    font-weight: 600;
+    color: #475569;
+    font-size: 12px;
+  }
+  
+  .unit-price {
+    color: #64748b;
+    font-size: 13px;
+  }
+  
+  .subtotal {
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 13px;
+  }
+  
+  .text-center { text-align: center; }
+  .text-right { text-align: right; }
+  
+  /* Totals */
+  .totals-wrapper {
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .totals-section {
+    background: #1e293b;
+    border-radius: 12px;
+    padding: 24px;
+    color: white;
+    min-width: 280px;
+  }
+  
+  .totals-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: #94a3b8;
+  }
+  
+  .totals-row.total-row {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 2px solid rgba(255,255,255,0.1);
+    font-size: 20px;
+    font-weight: 700;
+    color: white;
+  }
+  
+  /* Footer */
+  .invoice-footer {
+    background: #f8fafc;
+    padding: 24px 40px;
+    border-top: 1px solid #e2e8f0;
+    text-align: center;
+  }
+  
+  .footer-grid {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  
+  .footer-block {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .footer-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .footer-icon svg {
+    width: 16px;
+    height: 16px;
+    color: white;
+  }
+  
+  .footer-content {
+    text-align: left;
+  }
+  
+  .footer-content h4 {
+    font-size: 10px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  
+  .footer-content p {
+    font-size: 13px;
+    color: #1e293b;
+    font-weight: 600;
+  }
+  
+  .footer-note {
+    font-size: 12px;
+    color: #94a3b8;
+    line-height: 1.6;
+  }
+  
+  .footer-note strong {
+    color: #64748b;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .client-section {
+      grid-template-columns: 1fr;
+    }
+    
+    .header-content {
+      flex-direction: column;
+      gap: 24px;
+    }
+    
+    .invoice-meta {
+      text-align: left;
+      width: 100%;
+    }
+    
+    .footer-grid {
+      flex-direction: column;
+    }
+    
+    .totals-section {
+      min-width: 100%;
+    }
+  }
+  
+  /* Print styles */
+  @media print {
+    .invoice-container {
+      box-shadow: none;
+      border-radius: 0;
+    }
+    
+    .invoice-wrapper {
+      background: white;
+    }
+  }
+`;
+
+export function InvoiceViewer({ data }: InvoiceViewerProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const fechaEmision = new Date(data.issuedAt).toLocaleDateString('es-ES', {
     day: '2-digit',
     month: 'long',
     year: 'numeric',
   });
-
-  const fechaAnulacion = data.cancelledAt
-    ? new Date(data.cancelledAt).toLocaleDateString('es-ES', {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric',
-      })
-    : null;
 
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat('es-ES', {
@@ -92,750 +528,198 @@ export function InvoiceViewer({ data, mode = 'screen' }: InvoiceViewerProps) {
     return methods[method || ''] || 'Tarjeta de crédito/débito';
   };
 
-  return (
-    <div
-      className={`invoice-container ${isPDF ? 'pdf-mode' : ''}`}
-      style={{
-        maxWidth: '210mm',
-        margin: '0 auto',
-        background: 'white',
-        borderRadius: isPDF ? '0' : '16px',
-        boxShadow: isPDF ? 'none' : '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-        overflow: 'hidden',
-        fontFamily:
-          'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-      }}
-    >
-      {/* Header con gradiente */}
-      <div
-        style={{
-          background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
-          color: 'white',
-          padding: '32px 40px',
-          position: 'relative',
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-start',
-          }}
-        >
-          {/* Logo y datos empresa */}
-          <div style={{ flex: 1 }}>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                marginBottom: '16px',
-              }}
-            >
-              {/* Logo 3D */}
-              <div
-                style={{
-                  width: '48px',
-                  height: '48px',
-                  background: 'white',
-                  borderRadius: '12px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '20px',
-                  fontWeight: 800,
-                  color: '#4f46e5',
-                }}
-              >
-                3D
-              </div>
-              <div>
-                <div
-                  style={{
-                    fontSize: '24px',
-                    fontWeight: 700,
-                    letterSpacing: '-0.5px',
-                  }}
-                >
-                  {data.companyName}
-                </div>
-              </div>
+  // Generar HTML de items
+  const itemsHTML = data.items.map(
+    (item) => `
+    <tr>
+      <td>
+        <div class="product-cell">
+          ${item.image ? `
+            <div class="product-image-container">
+              <img src="${item.image}" alt="${item.name}">
             </div>
-            <div
-              style={{
-                fontSize: '13px',
-                opacity: 0.9,
-                lineHeight: 1.7,
-              }}
-            >
-              <div>
-                <strong>NIF:</strong> {data.companyTaxId}
-              </div>
-              <div>{data.companyAddress}</div>
-              <div>
-                {data.companyPostalCode} {data.companyCity}, {data.companyProvince}
-              </div>
-              {data.companyPhone && <div>📞 {data.companyPhone}</div>}
-              {data.companyEmail && <div>✉ {data.companyEmail}</div>}
-            </div>
-          </div>
-
-          {/* Datos factura */}
-          <div
-            style={{
-              textAlign: 'right',
-              background: 'rgba(255,255,255,0.1)',
-              padding: '20px 28px',
-              borderRadius: '12px',
-              backdropFilter: 'blur(10px)',
-            }}
-          >
-            <div
-              style={{
-                fontSize: '11px',
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                letterSpacing: '2px',
-                opacity: 0.8,
-                marginBottom: '4px',
-              }}
-            >
-              Factura
-            </div>
-            <div
-              style={{
-                fontSize: '28px',
-                fontWeight: 700,
-                letterSpacing: '-1px',
-              }}
-            >
-              {data.invoiceNumber}
-            </div>
-            <div style={{ fontSize: '13px', opacity: 0.9, marginTop: '4px' }}>
-              {fechaEmision}
-            </div>
-            {data.isCancelled && (
-              <div
-                style={{
-                  background: '#ef4444',
-                  padding: '6px 12px',
-                  borderRadius: '20px',
-                  fontSize: '10px',
-                  fontWeight: 600,
-                  textTransform: 'uppercase',
-                  marginTop: '12px',
-                }}
-              >
-                Factura Anulada
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Body */}
-      <div style={{ padding: '32px 40px' }}>
-        {/* Datos cliente y pedido */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '20px',
-            marginBottom: '28px',
-          }}
-        >
-          {/* Cliente */}
-          <div
-            style={{
-              background: '#f8fafc',
-              borderRadius: '12px',
-              padding: '20px',
-              border: '1px solid #e2e8f0',
-            }}
-          >
-            <div
-              style={{
-                fontSize: '10px',
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '1px',
-                color: '#64748b',
-                marginBottom: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-              }}
-            >
-              <span
-                style={{
-                  width: '3px',
-                  height: '12px',
-                  background: '#4f46e5',
-                  borderRadius: '2px',
-                }}
-              />
-              Facturar a
-            </div>
-            <div
-              style={{
-                fontSize: '18px',
-                fontWeight: 700,
-                color: '#1e293b',
-                marginBottom: '8px',
-              }}
-            >
-              {data.clientName}
-            </div>
-            <div
-              style={{ fontSize: '13px', color: '#475569', lineHeight: 1.6 }}
-            >
-              <div>
-                <strong style={{ color: '#1e293b' }}>NIF:</strong>{' '}
-                {data.clientTaxId || 'No especificado'}
-              </div>
-              <div>{data.clientAddress}</div>
-              <div>
-                {data.clientPostalCode} {data.clientCity},{' '}
-                {data.clientProvince}
-              </div>
-              <div>{data.clientCountry || 'España'}</div>
-            </div>
-            {(data.clientEmail || data.clientPhone) && (
-              <div
-                style={{
-                  marginTop: '12px',
-                  paddingTop: '12px',
-                  borderTop: '1px solid #e2e8f0',
-                  fontSize: '12px',
-                  color: '#64748b',
-                }}
-              >
-                {data.clientEmail && <div>✉ {data.clientEmail}</div>}
-                {data.clientPhone && <div>📞 {data.clientPhone}</div>}
-              </div>
-            )}
-          </div>
-
-          {/* Pedido */}
-          <div
-            style={{
-              background: '#f8fafc',
-              borderRadius: '12px',
-              padding: '20px',
-              border: '1px solid #e2e8f0',
-            }}
-          >
-            <div
-              style={{
-                fontSize: '10px',
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '1px',
-                color: '#64748b',
-                marginBottom: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-              }}
-            >
-              <span
-                style={{
-                  width: '3px',
-                  height: '12px',
-                  background: '#4f46e5',
-                  borderRadius: '2px',
-                }}
-              />
-              Información del pedido
-            </div>
-            <div
-              style={{ fontSize: '13px', color: '#475569', lineHeight: 1.8 }}
-            >
-              <div>
-                <strong style={{ color: '#1e293b' }}>Pedido:</strong>{' '}
-                {data.orderNumber || 'N/A'}
-              </div>
-              <div>
-                <strong style={{ color: '#1e293b' }}>Método de pago:</strong>{' '}
-                {getPaymentMethodName(data.paymentMethod)}
-              </div>
-              <div>
-                <strong style={{ color: '#1e293b' }}>Fecha de emisión:</strong>{' '}
-                {fechaEmision}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Items */}
-        <div style={{ marginBottom: '24px' }}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: '12px',
-              paddingBottom: '12px',
-              borderBottom: '2px solid #e2e8f0',
-            }}
-          >
-            <div
-              style={{
-                fontSize: '14px',
-                fontWeight: 700,
-                color: '#1e293b',
-              }}
-            >
-              Conceptos
-            </div>
-            <div style={{ fontSize: '12px', color: '#64748b' }}>
-              {data.items.length} producto{data.items.length !== 1 ? 's' : ''}
-            </div>
-          </div>
-
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr>
-                <th
-                  style={{
-                    background: '#f1f5f9',
-                    padding: '12px',
-                    textAlign: 'left',
-                    fontSize: '10px',
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px',
-                    color: '#64748b',
-                    borderBottom: '2px solid #e2e8f0',
-                    borderTopLeftRadius: '8px',
-                  }}
-                >
-                  Producto
-                </th>
-                <th
-                  style={{
-                    background: '#f1f5f9',
-                    padding: '12px',
-                    textAlign: 'center',
-                    fontSize: '10px',
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px',
-                    color: '#64748b',
-                    borderBottom: '2px solid #e2e8f0',
-                    width: '80px',
-                  }}
-                >
-                  Cant.
-                </th>
-                <th
-                  style={{
-                    background: '#f1f5f9',
-                    padding: '12px',
-                    textAlign: 'right',
-                    fontSize: '10px',
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px',
-                    color: '#64748b',
-                    borderBottom: '2px solid #e2e8f0',
-                    width: '100px',
-                  }}
-                >
-                  Precio
-                </th>
-                <th
-                  style={{
-                    background: '#f1f5f9',
-                    padding: '12px',
-                    textAlign: 'right',
-                    fontSize: '10px',
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px',
-                    color: '#64748b',
-                    borderBottom: '2px solid #e2e8f0',
-                    borderTopRightRadius: '8px',
-                    width: '100px',
-                  }}
-                >
-                  Importe
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.items.map((item, index) => (
-                <tr
-                  key={item.id || index}
-                  style={{
-                    borderBottom:
-                      index === data.items.length - 1
-                        ? 'none'
-                        : '1px solid #e2e8f0',
-                  }}
-                >
-                  <td style={{ padding: '12px' }}>
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                      }}
-                    >
-                      {item.image ? (
-                        <div
-                          style={{
-                            width: '48px',
-                            height: '48px',
-                            borderRadius: '8px',
-                            overflow: 'hidden',
-                            background: '#f1f5f9',
-                            border: '1px solid #e2e8f0',
-                            flexShrink: 0,
-                          }}
-                        >
-                          <Image
-                            src={item.image}
-                            alt={item.name}
-                            width={48}
-                            height={48}
-                            style={{ objectFit: 'cover' }}
-                            unoptimized
-                          />
-                        </div>
-                      ) : (
-                        <div
-                          style={{
-                            width: '48px',
-                            height: '48px',
-                            borderRadius: '8px',
-                            background: '#f1f5f9',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: '#94a3b8',
-                            flexShrink: 0,
-                            border: '1px solid #e2e8f0',
-                          }}
-                        >
-                          <svg
-                            width="24"
-                            height="24"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={1.5}
-                              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                            />
-                          </svg>
-                        </div>
-                      )}
-                      <div>
-                        <div
-                          style={{
-                            fontWeight: 600,
-                            color: '#1e293b',
-                            fontSize: '13px',
-                          }}
-                        >
-                          {item.name}
-                        </div>
-                        {item.description && (
-                          <div
-                            style={{
-                              fontSize: '11px',
-                              color: '#64748b',
-                              marginTop: '2px',
-                            }}
-                          >
-                            {item.description}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </td>
-                  <td style={{ padding: '12px', textAlign: 'center' }}>
-                    <span
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        minWidth: '28px',
-                        height: '28px',
-                        background: '#f1f5f9',
-                        borderRadius: '6px',
-                        fontWeight: 600,
-                        color: '#475569',
-                        fontSize: '12px',
-                      }}
-                    >
-                      {item.quantity}
-                    </span>
-                  </td>
-                  <td
-                    style={{
-                      padding: '12px',
-                      textAlign: 'right',
-                      color: '#64748b',
-                      fontSize: '13px',
-                    }}
-                  >
-                    {formatCurrency(item.price)}
-                  </td>
-                  <td
-                    style={{
-                      padding: '12px',
-                      textAlign: 'right',
-                      fontWeight: 600,
-                      color: '#1e293b',
-                      fontSize: '13px',
-                    }}
-                  >
-                    {formatCurrency(item.subtotal)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Totales */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <div
-            style={{
-              background: '#1e293b',
-              borderRadius: '12px',
-              padding: '24px',
-              color: 'white',
-              minWidth: '280px',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                marginBottom: '8px',
-                fontSize: '13px',
-                color: '#94a3b8',
-              }}
-            >
-              <span>Subtotal productos</span>
-              <span>{formatCurrency(data.subtotal)}</span>
-            </div>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                marginBottom: '8px',
-                fontSize: '13px',
-                color: '#94a3b8',
-              }}
-            >
-              <span>Envío</span>
-              <span>{formatCurrency(data.shipping)}</span>
-            </div>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                marginBottom: '8px',
-                fontSize: '13px',
-                color: '#94a3b8',
-              }}
-            >
-              <span>Base imponible</span>
-              <span>{formatCurrency(data.taxableAmount)}</span>
-            </div>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                marginBottom: '8px',
-                fontSize: '13px',
-                color: '#94a3b8',
-              }}
-            >
-              <span>IVA ({data.vatRate}%)</span>
-              <span>{formatCurrency(data.vatAmount)}</span>
-            </div>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                marginTop: '12px',
-                paddingTop: '12px',
-                borderTop: '2px solid rgba(255,255,255,0.1)',
-                fontSize: '20px',
-                fontWeight: 700,
-              }}
-            >
-              <span>TOTAL</span>
-              <span>{formatCurrency(data.total)}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Footer */}
-      <div
-        style={{
-          background: '#f8fafc',
-          padding: '24px 40px',
-          borderTop: '1px solid #e2e8f0',
-          textAlign: 'center',
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '16px',
-            marginBottom: '16px',
-          }}
-        >
-          {/* Método de pago */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '12px 16px',
-              background: 'white',
-              borderRadius: '8px',
-              border: '1px solid #e2e8f0',
-            }}
-          >
-            <div
-              style={{
-                width: '32px',
-                height: '32px',
-                background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
-                borderRadius: '6px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <svg
-                width="16"
-                height="16"
-                fill="none"
-                stroke="white"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
-                />
+          ` : `
+            <div class="product-image-placeholder">
+              <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
               </svg>
             </div>
-            <div style={{ textAlign: 'left' }}>
-              <div
-                style={{
-                  fontSize: '10px',
-                  fontWeight: 600,
-                  color: '#64748b',
-                  textTransform: 'uppercase',
-                }}
-              >
-                Método de pago
+          `}
+          <div class="product-info">
+            <span class="product-name">${item.name}</span>
+            ${item.description ? `<span class="product-description">${item.description}</span>` : ''}
+          </div>
+        </div>
+      </td>
+      <td class="text-center">
+        <span class="quantity-badge">${item.quantity}</span>
+      </td>
+      <td class="text-right unit-price">${formatCurrency(item.price)}</td>
+      <td class="text-right subtotal">${formatCurrency(item.subtotal)}</td>
+    </tr>
+  `
+  ).join('');
+
+  const htmlContent = `
+    <div class="invoice-wrapper">
+      <div class="invoice-container">
+        <!-- Header -->
+        <div class="invoice-header">
+          <div class="header-content">
+            <div class="company-section">
+              <div class="logo-container">
+                <div class="logo-icon">3D</div>
+                <div class="company-name">${data.companyName}</div>
               </div>
-              <div
-                style={{ fontSize: '13px', color: '#1e293b', fontWeight: 600 }}
-              >
-                {getPaymentMethodName(data.paymentMethod)}
+              <div class="company-details">
+                <strong>NIF:</strong> ${data.companyTaxId}<br>
+                ${data.companyAddress}<br>
+                ${data.companyPostalCode} ${data.companyCity}, ${data.companyProvince}
+                ${data.companyPhone ? `<br>📞 ${data.companyPhone}` : ''}
+                ${data.companyEmail ? `<br>✉ ${data.companyEmail}` : ''}
               </div>
+            </div>
+            <div class="invoice-meta">
+              <div class="invoice-label">Factura</div>
+              <div class="invoice-number">${data.invoiceNumber}</div>
+              <div class="invoice-date">${fechaEmision}</div>
+              ${data.isCancelled ? `<div class="cancelled-badge">Factura Anulada</div>` : ''}
             </div>
           </div>
-
-          {/* Pedido */}
-          {data.orderNumber && (
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '12px 16px',
-                background: 'white',
-                borderRadius: '8px',
-                border: '1px solid #e2e8f0',
-              }}
-            >
-              <div
-                style={{
-                  width: '32px',
-                  height: '32px',
-                  background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
-                  borderRadius: '6px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  fill="none"
-                  stroke="white"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-                  />
-                </svg>
-              </div>
-              <div style={{ textAlign: 'left' }}>
-                <div
-                  style={{
-                    fontSize: '10px',
-                    fontWeight: 600,
-                    color: '#64748b',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  Pedido
-                </div>
-                <div
-                  style={{
-                    fontSize: '13px',
-                    color: '#1e293b',
-                    fontWeight: 600,
-                  }}
-                >
-                  {data.orderNumber}
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
-        <div style={{ fontSize: '12px', color: '#94a3b8', lineHeight: 1.6 }}>
-          <div style={{ fontWeight: 600, color: '#64748b' }}>
-            {data.companyName} - {data.companyCity}, {data.companyProvince}
+        <!-- Body -->
+        <div class="invoice-body">
+          <!-- Client Info -->
+          <div class="client-section">
+            <div class="client-card">
+              <div class="section-label">Facturar a</div>
+              <div class="client-name">${data.clientName}</div>
+              <div class="client-details">
+                <strong>NIF:</strong> ${data.clientTaxId || 'No especificado'}<br>
+                ${data.clientAddress}<br>
+                ${data.clientPostalCode} ${data.clientCity}, ${data.clientProvince}<br>
+                ${data.clientCountry || 'España'}
+              </div>
+              ${data.clientEmail || data.clientPhone ? `
+              <div class="client-contact">
+                ${data.clientEmail ? `✉ ${data.clientEmail}` : ''}
+                ${data.clientEmail && data.clientPhone ? ' · ' : ''}
+                ${data.clientPhone ? `📞 ${data.clientPhone}` : ''}
+              </div>
+              ` : ''}
+            </div>
+
+            <div class="client-card">
+              <div class="section-label">Información del pedido</div>
+              <div class="client-details">
+                <strong>Pedido:</strong> ${data.orderNumber || 'N/A'}<br>
+                <strong>Método de pago:</strong> ${getPaymentMethodName(data.paymentMethod)}<br>
+                <strong>Fecha de emisión:</strong> ${fechaEmision}
+              </div>
+            </div>
           </div>
-          <div>
-            Factura generada electrónicamente · Este documento es válido sin
-            firma según la normativa vigente
+
+          <!-- Items -->
+          <div class="items-section">
+            <div class="section-header">
+              <h3 class="section-title">Conceptos</h3>
+              <span class="items-count">${data.items.length} producto${data.items.length !== 1 ? 's' : ''}</span>
+            </div>
+            <table class="items-table">
+              <thead>
+                <tr>
+                  <th style="width: 50%">Producto</th>
+                  <th style="width: 15%" class="text-center">Cant.</th>
+                  <th style="width: 20%" class="text-right">Precio</th>
+                  <th style="width: 15%" class="text-right">Importe</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${itemsHTML}
+              </tbody>
+            </table>
           </div>
-          {data.companyEmail && (
-            <div style={{ marginTop: '4px' }}>Contacto: {data.companyEmail}</div>
-          )}
+
+          <!-- Totals -->
+          <div class="totals-wrapper">
+            <div class="totals-section">
+              <div class="totals-row">
+                <span>Subtotal productos</span>
+                <span>${formatCurrency(data.subtotal)}</span>
+              </div>
+              <div class="totals-row">
+                <span>Envío</span>
+                <span>${formatCurrency(data.shipping)}</span>
+              </div>
+              <div class="totals-row">
+                <span>Base imponible</span>
+                <span>${formatCurrency(data.taxableAmount)}</span>
+              </div>
+              <div class="totals-row">
+                <span>IVA (${data.vatRate}%)</span>
+                <span>${formatCurrency(data.vatAmount)}</span>
+              </div>
+              <div class="totals-row total-row">
+                <span>TOTAL</span>
+                <span>${formatCurrency(data.total)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="invoice-footer">
+          <div class="footer-grid">
+            <div class="footer-block">
+              <div class="footer-icon">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                </svg>
+              </div>
+              <div class="footer-content">
+                <h4>Método de pago</h4>
+                <p>${getPaymentMethodName(data.paymentMethod)}</p>
+              </div>
+            </div>
+            ${data.orderNumber ? `
+            <div class="footer-block">
+              <div class="footer-icon">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                </svg>
+              </div>
+              <div class="footer-content">
+                <h4>Pedido</h4>
+                <p>${data.orderNumber}</p>
+              </div>
+            </div>
+            ` : ''}
+          </div>
+
+          <div class="footer-note">
+            <strong>${data.companyName}</strong> · ${data.companyCity}, ${data.companyProvince}<br>
+            Factura generada electrónicamente · Este documento es válido sin firma según la normativa vigente<br>
+            ${data.companyEmail ? `Contacto: ${data.companyEmail}` : ''}
+          </div>
         </div>
       </div>
     </div>
+  `;
+
+  if (!mounted) {
+    return <div style={{ minHeight: '600px' }} />;
+  }
+
+  return (
+    <>
+      <style>{invoiceStyles}</style>
+      <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
+    </>
   );
 }
 
-// Hook para obtener datos de factura desde la API
+// Hook para transformar datos de la API al formato del componente
 export function useInvoiceData(invoiceData: {
   invoiceNumber: string;
   issuedAt: string;
@@ -847,8 +731,8 @@ export function useInvoiceData(invoiceData: {
   empresaCiudad: string;
   empresaProvincia: string;
   empresaCodigoPostal: string;
-  empresaTelefono?: string;
   empresaEmail?: string;
+  empresaTelefono?: string;
   clienteNombre: string;
   clienteNif: string;
   clienteDireccion: string;
@@ -863,14 +747,19 @@ export function useInvoiceData(invoiceData: {
     paymentMethod: string;
     items: Array<{
       id?: string;
-      nombre?: string;
       name?: string;
+      nombre?: string;
       quantity: number;
       price: number;
       subtotal: number;
       image?: string;
       description?: string;
     }>;
+    usuario?: {
+      nombre?: string;
+      email?: string;
+      telefono?: string;
+    };
   };
   baseImponible: number;
   cuotaIva: number;
@@ -890,8 +779,8 @@ export function useInvoiceData(invoiceData: {
     companyCity: invoiceData.empresaCiudad,
     companyProvince: invoiceData.empresaProvincia,
     companyPostalCode: invoiceData.empresaCodigoPostal,
-    companyPhone: invoiceData.empresaTelefono,
     companyEmail: invoiceData.empresaEmail,
+    companyPhone: invoiceData.empresaTelefono,
     clientName: invoiceData.clienteNombre,
     clientTaxId: invoiceData.clienteNif,
     clientAddress: invoiceData.clienteDireccion,

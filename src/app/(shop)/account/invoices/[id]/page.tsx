@@ -242,7 +242,7 @@ export default function UserInvoiceDetailPage() {
 
       {/* Invoice Viewer */}
       <div className="py-8 px-4 print:p-0">
-        {invoiceData && <InvoiceViewer data={invoiceData} mode="screen" />}
+        {invoiceData && <InvoiceViewer data={invoiceData} />}
       </div>
     </div>
   );

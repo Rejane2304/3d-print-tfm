@@ -280,7 +280,7 @@ export default function AdminInvoiceDetailPage() {
 
       {/* Invoice Viewer */}
       <div className="py-8 px-4 print:p-0">
-        <InvoiceViewer data={invoiceData} mode="screen" />
+        <InvoiceViewer data={invoiceData} />
       </div>
 
       {/* Modal Confirmación Anular */}
