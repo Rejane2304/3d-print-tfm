@@ -32,24 +32,24 @@ interface AnalyticsData {
   };
   topProducts: Array<{
     id: string;
-    name: string;
-    sold: number;
-    revenue: number;
+    nombre: string;
+    vendido: number;
+    ingresos: number;
     stock: number;
   }>;
   topCustomers: Array<{
     id: string;
-    name: string;
-    orders: number;
-    spent: number;
+    nombre: string;
+    pedidos: number;
+    gastado: number;
   }>;
   recentOrders: Array<{
     id: string;
-    orderNumber: string;
-    customerName: string;
+    numeroPedido: string;
+    clienteNombre: string;
     total: number;
-    status: string;
-    createdAt: string;
+    estado: string;
+    creadoEn: string;
   }>;
 }
 
@@ -96,8 +96,9 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const formatCurrency = (amount: number) => {
-    return `${amount.toFixed(2)} €`;
+  const formatCurrency = (amount: number | undefined | null) => {
+    if (amount === undefined || amount === null) return '0.00 €';
+    return `${Number(amount).toFixed(2)} €`;
   };
 
   const formatDate = (date: string) => {
@@ -263,10 +264,10 @@ export default function AdminDashboardPage() {
                         {index + 1}
                       </div>
                       <div className="ml-4 flex-1">
-                        <p className="text-sm font-medium text-gray-900">{product.name}</p>
+                        <p className="text-sm font-medium text-gray-900">{product.nombre}</p>
                         <div className="flex items-center text-xs text-gray-500 mt-1">
-                          <span className="mr-3">{product.sold} vendidos</span>
-                          <span>{formatCurrency(product.revenue)}</span>
+                          <span className="mr-3">{product.vendido} vendidos</span>
+                          <span>{formatCurrency(product.ingresos)}</span>
                         </div>
                       </div>
                       <div className="text-right">
@@ -301,20 +302,20 @@ export default function AdminDashboardPage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-gray-900">
-                          #{order.orderNumber}
+                          #{order.numeroPedido}
                         </p>
-                        <p className="text-xs text-gray-500">{order.customerName}</p>
+                        <p className="text-xs text-gray-500">{order.clienteNombre}</p>
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-medium text-gray-900">
                           {formatCurrency(order.total)}
                         </p>
-                        <span className={`inline-flex px-2 py-0.5 text-xs rounded-full ${getStatusBadge(order.status)}`}>
-                          {order.status}
+                        <span className={`inline-flex px-2 py-0.5 text-xs rounded-full ${getStatusBadge(order.estado)}`}>
+                          {order.estado}
                         </span>
                       </div>
                     </div>
-                    <p className="text-xs text-gray-400 mt-1">{formatDate(order.createdAt)}</p>
+                    <p className="text-xs text-gray-400 mt-1">{formatDate(order.creadoEn)}</p>
                   </div>
                 ))
               )}
