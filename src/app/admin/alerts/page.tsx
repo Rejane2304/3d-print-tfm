@@ -49,11 +49,34 @@ interface Alert {
     slug: string;
     stock: number;
     minStock: number;
+    image?: string;
   };
   resolvedByUser?: {
     name: string;
   };
 }
+
+const typeLabels: Record<string, string> = {
+  LOW_STOCK: 'Stock Bajo',
+  OUT_OF_STOCK: 'Sin Stock',
+  PAYMENT_FAILED: 'Pago Fallido',
+  ORDER_DELAYED: 'Pedido Retrasado',
+  SYSTEM_ERROR: 'Error del Sistema',
+};
+
+const severityLabels: Record<string, string> = {
+  LOW: 'Baja',
+  MEDIUM: 'Media',
+  HIGH: 'Alta',
+  CRITICAL: 'Crítica',
+};
+
+const statusLabels: Record<string, string> = {
+  PENDING: 'Pendiente',
+  IN_PROGRESS: 'En Proceso',
+  RESOLVED: 'Resuelta',
+  IGNORED: 'Ignorada',
+};
 
 const typeIcons: Record<string, React.ElementType> = {
   LOW_STOCK: Package,
@@ -491,23 +514,37 @@ export default function AdminAlertasPage() {
                                 {alert.title}
                               </h3>
                               <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[alert.status] || 'bg-gray-100'}`}>
-                                {alert.statusTranslated}
+                                {statusLabels[alert.status] || alert.status}
                               </span>
                             </div>
                             <p className="text-gray-600">{alert.message}</p>
                             
                             {alert.product && (
-                              <div className="mt-2 flex items-center gap-2 text-sm">
-                                <Package className="h-4 w-4 text-gray-400" />
-                                <Link 
-                                  href={`/admin/products/${alert.product.slug}/editar`}
-                                  className="text-indigo-600 hover:text-indigo-800 font-medium"
-                                >
-                                  {alert.product.name}
-                                </Link>
-                                <span className="text-gray-500">
-                                  (Stock: {alert.product.stock} / Mín: {alert.product.minStock})
-                                </span>
+                              <div className="mt-3 flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                {alert.product.image ? (
+                                  <div className="w-12 h-12 rounded-lg overflow-hidden bg-white border border-gray-200 flex-shrink-0">
+                                    <img 
+                                      src={alert.product.image} 
+                                      alt={alert.product.name}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  </div>
+                                ) : (
+                                  <div className="w-12 h-12 rounded-lg bg-gray-200 flex items-center justify-center flex-shrink-0">
+                                    <Package className="h-6 w-6 text-gray-400" />
+                                  </div>
+                                )}
+                                <div className="flex-1 min-w-0">
+                                  <Link 
+                                    href={`/admin/products/${alert.product.slug}/editar`}
+                                    className="text-indigo-600 hover:text-indigo-800 font-medium block truncate"
+                                  >
+                                    {alert.product.name}
+                                  </Link>
+                                  <span className="text-gray-500 text-sm">
+                                    Stock: {alert.product.stock} / Mín: {alert.product.minStock}
+                                  </span>
+                                </div>
                               </div>
                             )}
                             

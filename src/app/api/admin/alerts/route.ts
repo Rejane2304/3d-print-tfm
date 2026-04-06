@@ -88,6 +88,11 @@ export async function GET(req: NextRequest) {
               slug: true,
               stock: true,
               minStock: true,
+              images: {
+                where: { isMain: true },
+                select: { url: true },
+                take: 1,
+              },
             },
           },
           resolvedByUser: {
@@ -124,7 +129,14 @@ export async function GET(req: NextRequest) {
       createdAt: alerta.createdAt,
       resolvedAt: alerta.resolvedAt,
       resolutionNotes: alerta.resolutionNotes,
-      product: alerta.product,
+      product: alerta.product ? {
+        id: alerta.product.id,
+        name: alerta.product.name,
+        slug: alerta.product.slug,
+        stock: alerta.product.stock,
+        minStock: alerta.product.minStock,
+        image: alerta.product.images[0]?.url || null,
+      } : null,
       resolvedByUser: alerta.resolvedByUser,
     }));
 
