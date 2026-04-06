@@ -92,9 +92,24 @@ export async function GET(req: NextRequest) {
       prisma.invoice.count({ where }),
     ]);
 
+    const facturasTraducidas = facturas.map(factura => ({
+      id: factura.id,
+      invoiceNumber: factura.invoiceNumber,
+      anulada: factura.isCancelled,
+      emitidaEn: factura.issuedAt,
+      total: factura.total,
+      pedido: {
+        orderNumber: factura.order?.orderNumber,
+        usuario: {
+          nombre: factura.order?.user?.name,
+          nif: factura.order?.user?.taxId,
+        }
+      }
+    }));
+
     return NextResponse.json({ 
       success: true, 
-      facturas,
+      facturas: facturasTraducidas,
       total,
       pages: Math.ceil(total / limit),
       page,
