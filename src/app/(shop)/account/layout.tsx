@@ -1,26 +1,40 @@
 /**
  * Layout para sección de Cuenta
- * Incluye navegación lateral para Mis Pedidos, Mis Direcciones y Mi Perfil
+ * Navegación lateral adaptada según el rol del usuario
  */
 import Link from 'next/link';
-import { 
-  Package, 
-  MapPin, 
-  User, 
-  ChevronRight 
+import { redirect } from 'next/navigation';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
+import {
+  Package,
+  MapPin,
+  User,
+  ChevronRight
 } from 'lucide-react';
 
 interface CuentaLayoutProps {
   children: React.ReactNode;
 }
 
-const menuItems = [
-  { href: '/account/orders', label: 'Mis Pedidos', icon: Package },
-  { href: '/account/addresses', label: 'Mis Direcciones', icon: MapPin },
-  { href: '/account/profile', label: 'Mi Perfil', icon: User },
-];
+export default async function CuentaLayout({ children }: CuentaLayoutProps) {
+  const session = await getServerSession(authOptions);
 
-export default function CuentaLayout({ children }: CuentaLayoutProps) {
+  if (!session?.user) {
+    redirect('/login');
+  }
+
+  const isAdmin = session.user.rol === 'ADMIN';
+
+  // Menu items según el rol
+  const menuItems = isAdmin
+    ? [{ href: '/account/profile', label: 'Mi Perfil', icon: User }]
+    : [
+        { href: '/account/orders', label: 'Mis Pedidos', icon: Package },
+        { href: '/account/addresses', label: 'Mis Direcciones', icon: MapPin },
+        { href: '/account/profile', label: 'Mi Perfil', icon: User },
+      ];
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
