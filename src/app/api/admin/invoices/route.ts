@@ -1,7 +1,7 @@
 /**
  * API de Facturación Admin
  * Gestión de facturas para administradores
- * 
+ *
  * Requiere: Rol ADMIN
  */
 import { NextRequest, NextResponse } from 'next/server';
@@ -10,16 +10,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
 import { Prisma } from '@prisma/client';
-
-// Datos de la empresa (fijos para el TFM)
-const DATOS_EMPRESA = {
-  nombre: '3D Print',
-  nif: 'B12345678',
-  direccion: 'Calle Impresión 3D, 123',
-  ciudad: 'Barcelona',
-  provincia: 'Barcelona',
-  postalCode: '08001',
-};
+import { COMPANY_CONFIG } from '@/lib/invoices/pdf-generator';
 
 // Schema de validación
 const crearFacturaSchema = z.object({
@@ -216,12 +207,12 @@ export async function POST(req: NextRequest) {
         number: numero,
         orderId,
         // Datos empresa
-        companyName: DATOS_EMPRESA.nombre,
-        companyTaxId: DATOS_EMPRESA.nif,
-        companyAddress: DATOS_EMPRESA.direccion,
-        companyCity: DATOS_EMPRESA.ciudad,
-        companyProvince: DATOS_EMPRESA.provincia,
-        companyPostalCode: DATOS_EMPRESA.postalCode,
+        companyName: COMPANY_CONFIG.name,
+        companyTaxId: COMPANY_CONFIG.taxId,
+        companyAddress: COMPANY_CONFIG.address,
+        companyCity: COMPANY_CONFIG.city,
+        companyProvince: COMPANY_CONFIG.province,
+        companyPostalCode: COMPANY_CONFIG.postalCode,
         // Datos cliente
         clientName: pedido.shippingName,
         clientTaxId: pedido.user.taxId || '',

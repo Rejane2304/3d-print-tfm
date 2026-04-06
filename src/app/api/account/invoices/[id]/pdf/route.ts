@@ -1,6 +1,6 @@
 /**
  * API de Descarga de Factura para Usuarios
- * Permite a los usuarios descargar sus propias facturas
+ * Permite a los usuarios descargar sus propias facturas en PDF
  * 
  * GET /api/account/invoices/[id]/pdf
  */
@@ -10,6 +10,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { Prisma } from '@prisma/client';
 import { generateInvoiceHTML } from '@/lib/invoices/invoice-template';
+import { generatePDF, COMPANY_CONFIG } from '@/lib/invoices/pdf-generator';
 
 // Type for invoice with order
  // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -101,18 +102,22 @@ export async function GET(
     const orderTotal = Number(factura.order?.total || 0);
     const shipping = orderTotal - subtotal;
 
-    // Mapear datos de la factura al formato del template
+    // Mapear datos de la factura al formato del template usando datos CORRECTOS de empresa
     const invoiceData = {
       invoiceNumber: factura.invoiceNumber,
       issuedAt: factura.issuedAt,
       isCancelled: factura.isCancelled,
       cancelledAt: factura.cancelledAt,
-      companyName: factura.companyName,
-      companyTaxId: factura.companyTaxId,
-      companyAddress: factura.companyAddress,
-      companyCity: factura.companyCity,
-      companyProvince: factura.companyProvince,
-      companyPostalCode: factura.companyPostalCode,
+      // Datos de la empresa - USAR CONFIGURACIÓN CORRECTA
+      companyName: COMPANY_CONFIG.name,
+      companyTaxId: COMPANY_CONFIG.taxId,
+      companyAddress: COMPANY_CONFIG.address,
+      companyCity: COMPANY_CONFIG.city,
+      companyProvince: COMPANY_CONFIG.province,
+      companyPostalCode: COMPANY_CONFIG.postalCode,
+      companyEmail: COMPANY_CONFIG.email,
+      companyPhone: COMPANY_CONFIG.phone,
+      // Datos del cliente
       clientName: factura.clientName,
       clientTaxId: factura.clientTaxId,
       clientAddress: factura.clientAddress,
@@ -120,6 +125,8 @@ export async function GET(
       clientProvince: factura.clientProvince,
       clientPostalCode: factura.clientPostalCode,
       clientCountry: factura.clientCountry || undefined,
+      clientEmail: usuario.email,
+      clientPhone: usuario.phone || undefined,
       items: items,
       subtotal: subtotal,
       shipping: shipping > 0 ? shipping : 0,
@@ -134,17 +141,23 @@ export async function GET(
     // Generar HTML de la factura usando el template
     const html = generateInvoiceHTML(invoiceData);
 
-    // Retornar como HTML con headers para descarga
-    return new NextResponse(html, {
+    // Generar PDF usando Puppeteer
+    const pdfBuffer = await generatePDF({
+      html,
+      filename: `factura-${factura.invoiceNumber}.pdf`,
+    });
+
+    // Retornar el PDF como descarga
+    return new NextResponse(new Uint8Array(pdfBuffer), {
       headers: {
-        'Content-Type': 'text/html; charset=utf-8',
-        'Content-Disposition': `attachment; filename="factura-${factura.invoiceNumber}.html"`,
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="factura-${factura.invoiceNumber}.pdf"`,
       },
     });
   } catch (error) {
     console.error('Error generando PDF:', error);
     return NextResponse.json(
-      { success: false, error: 'Internal error' },
+      { success: false, error: 'Error al generar el PDF' },
       { status: 500 }
     );
   }
