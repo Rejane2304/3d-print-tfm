@@ -346,7 +346,7 @@ export default function AdminInvoiceDetailPage() {
           {/* Pie de página */}
           <div className="bg-gray-50 p-6 text-center text-sm text-gray-500 print:bg-white">
             <p>Esta factura ha sido generada electrónicamente y es válida sin firma.</p>
-            <p className="mt-1">3D Print TFM - E-commerce de productos impresos en 3D</p>
+            <p className="mt-1">3D Print - E-commerce de productos impresos en 3D</p>
           </div>
         </div>
       </div>

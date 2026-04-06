@@ -13,12 +13,12 @@ import { Prisma } from '@prisma/client';
 
 // Datos de la empresa (fijos para el TFM)
 const DATOS_EMPRESA = {
-  nombre: '3D Print TFM S.L.',
+  nombre: '3D Print',
   nif: 'B12345678',
   direccion: 'Calle Impresión 3D, 123',
-  ciudad: 'Madrid',
-  provincia: 'Madrid',
-  postalCode: '28001',
+  ciudad: 'Barcelona',
+  provincia: 'Barcelona',
+  postalCode: '08001',
 };
 
 // Schema de validación

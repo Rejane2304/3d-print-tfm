@@ -185,8 +185,21 @@ export default function OrderDetailPage() {
     }
   };
 
-  const printOrder = () => {
-    window.print();
+  const printOrder = async () => {
+    // Si hay factura, descargar el PDF
+    if (order?.factura && !order.factura.anulada) {
+      try {
+        // Abrir el PDF en una nueva pestaña (el navegador manejará la descarga/visualización)
+        window.open(`/api/account/invoices/${order.factura.id}/pdf`, '_blank');
+      } catch (error) {
+        console.error('Error al abrir factura:', error);
+        alert('Error al abrir la factura. Inténtalo de nuevo.');
+      }
+    } else if (order?.factura?.anulada) {
+      alert('La factura de este pedido ha sido anulada');
+    } else {
+      alert('No hay factura disponible para este pedido');
+    }
   };
 
   if (status === 'loading' || loading) {
@@ -245,7 +258,7 @@ export default function OrderDetailPage() {
                 className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 font-medium"
               >
                 <Printer className="h-5 w-5" />
-                Imprimir
+                Imprimir factura
               </button>
             </div>
           </div>

@@ -306,7 +306,7 @@ describe('Invoices API', () => {
       const res = await createInvoice(req);
       const body = await res.json();
 
-      expect(body.factura.companyName).toBe('3D Print TFM S.L.');
+      expect(body.factura.companyName).toBe('3D Print');
       expect(body.factura.companyTaxId).toBe('B12345678');
       expect(body.factura.clientTaxId).toBe('12345678A');
     });

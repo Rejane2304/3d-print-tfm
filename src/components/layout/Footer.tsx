@@ -30,7 +30,7 @@ export default function Footer() {
             <div className="mb-6">
               <Image
                 src="/images/logo.svg"
-                alt="3D Print TFM"
+                alt="3D Print"
                 width={180}
                 height={60}
                 className="h-12 w-auto brightness-0 invert"
@@ -39,8 +39,7 @@ export default function Footer() {
             </div>
             
             <p className="text-gray-300 text-sm lg:text-base leading-relaxed mb-6 max-w-md">
-              E-commerce especializado en productos impresos en 3D de alta calidad. 
-              Proyecto de fin de máster en impresión aditiva y manufactura digital.
+              E-commerce especializado en productos impresos en 3D de alta calidad.
             </p>
 
             {/* Social Links */}
@@ -190,7 +189,7 @@ export default function Footer() {
         <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 3xl:px-20 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-gray-400 text-sm text-center md:text-left flex items-center gap-1">
-              © {currentYear} 3D Print TFM. Hecho con 
+              © {currentYear} 3D Print. Hecho con 
               <Heart className="h-4 w-4 text-red-500 fill-red-500" /> 
               en Barcelona
             </p>

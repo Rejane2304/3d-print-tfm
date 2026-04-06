@@ -73,15 +73,15 @@ export default function Header() {
         <div className="flex justify-between items-center h-16 lg:h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <Image
-              src="/images/logo.svg"
-              alt="3D Print TFM"
-              width={120}
-              height={40}
-              className="h-8 lg:h-10 w-auto"
-              style={{ height: 'auto', width: 'auto' }}
-              priority
-            />
+              <Image
+                src="/images/logo.svg"
+                alt="3D Print"
+                width={120}
+                height={40}
+                className="h-8 lg:h-10 w-auto"
+                style={{ height: 'auto', width: 'auto' }}
+                priority
+              />
           </Link>
 
           {/* Desktop Navigation */}

@@ -24,8 +24,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "3D Print TFM - Impresión 3D",
-  description: "E-commerce de productos impresos en 3D. Proyecto de fin de máster.",
+  title: "3D Print - Impresión 3D",
+  description: "E-commerce de productos impresos en 3D de alta calidad.",
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",

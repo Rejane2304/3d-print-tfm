@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
           },
         }],
         application_context: {
-          brand_name: '3D Print TFM',
+          brand_name: '3D Print',
           shipping_preference: 'NO_SHIPPING',
           user_action: 'PAY_NOW',
           return_url: `${process.env.NEXTAUTH_URL}/checkout/success`,
