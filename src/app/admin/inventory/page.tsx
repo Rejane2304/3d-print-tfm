@@ -120,7 +120,7 @@ export default function AdminInventoryPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           type: adjustmentType,
-          quantity: parseInt(adjustmentQuantity),
+          quantity: Number.parseInt(adjustmentQuantity),
           reason: adjustmentReason,
         }),
       });
@@ -243,7 +243,7 @@ export default function AdminInventoryPage() {
                 <tr key={product.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
                     <div className="flex items-center">
-                      {product.imagenes && product.imagenes[0] ? (
+                      {product.imagenes?.[0] ? (
                         <div className="flex-shrink-0 h-10 w-10 bg-gray-100 flex items-center justify-center overflow-hidden">
                           <Image
                             src={product.imagenes[0].url}
@@ -268,13 +268,18 @@ export default function AdminInventoryPage() {
                     {product.category}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`text-lg font-bold ${
-                      product.stockStatus === 'critical' ? 'text-red-600' :
-                      product.stockStatus === 'low' ? 'text-yellow-600' :
-                      'text-green-600'
-                    }`}>
-                      {product.stock}
-                    </span>
+                    {(() => {
+                      const stockColorClass = product.stockStatus === 'critical' 
+                        ? 'text-red-600' 
+                        : product.stockStatus === 'low' 
+                          ? 'text-yellow-600' 
+                          : 'text-green-600';
+                      return (
+                        <span className={`text-lg font-bold ${stockColorClass}`}>
+                          {product.stock}
+                        </span>
+                      );
+                    })()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {product.minStock}
@@ -378,10 +383,11 @@ export default function AdminInventoryPage() {
               </div>
               
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="adjustmentQuantity" className="block text-sm font-medium text-gray-700 mb-1">
                   {adjustmentType === 'ADJUST' ? 'Nuevo Stock' : 'Cantidad'}
                 </label>
                 <input
+                  id="adjustmentQuantity"
                   type="number"
                   min="0"
                   value={adjustmentQuantity}
@@ -392,8 +398,9 @@ export default function AdminInventoryPage() {
               </div>
               
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Motivo</label>
+                <label htmlFor="adjustmentReason" className="block text-sm font-medium text-gray-700 mb-1">Motivo</label>
                 <textarea
+                  id="adjustmentReason"
                   value={adjustmentReason}
                   onChange={(e) => setAdjustmentReason(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
