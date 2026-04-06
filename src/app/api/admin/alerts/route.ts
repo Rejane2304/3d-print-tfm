@@ -50,6 +50,7 @@ export async function GET(req: NextRequest) {
     const type = searchParams.get('type');
     const severity = searchParams.get('severity');
     const status = searchParams.get('status');
+    const search = searchParams.get('search');
     const limit = Number.parseInt(searchParams.get('limit') || '50', 10);
     const page = Number.parseInt(searchParams.get('page') || '1', 10);
     const skip = (page - 1) * limit;
@@ -68,7 +69,15 @@ export async function GET(req: NextRequest) {
       where.status = status as AlertStatus;
     }
 
-    const [alertas, total, pendientes] = await Promise.all([
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: 'insensitive' } },
+        { message: { contains: search, mode: 'insensitive' } },
+        { product: { name: { contains: search, mode: 'insensitive' } } },
+      ];
+    }
+
+    const [alertas, total, pendientes, critica, alta] = await Promise.all([
       prisma.alert.findMany({
         where,
         include: {
@@ -78,6 +87,7 @@ export async function GET(req: NextRequest) {
               name: true,
               slug: true,
               stock: true,
+              minStock: true,
             },
           },
           resolvedByUser: {
@@ -96,14 +106,26 @@ export async function GET(req: NextRequest) {
       }),
       prisma.alert.count({ where }),
       prisma.alert.count({ where: { status: 'PENDING' } }),
+      prisma.alert.count({ where: { status: 'PENDING', severity: 'CRITICAL' } }),
+      prisma.alert.count({ where: { status: 'PENDING', severity: 'HIGH' } }),
     ]);
 
-    // Translate alert fields
+    // Traducir solo para UI, mantener valores originales
     const translatedAlertas = alertas.map((alerta) => ({
-      ...alerta,
-      type: translateAlertType(alerta.type),
-      severity: translateAlertSeverity(alerta.severity),
-      status: translateAlertStatus(alerta.status),
+      id: alerta.id,
+      type: alerta.type,
+      typeTranslated: translateAlertType(alerta.type),
+      severity: alerta.severity,
+      severityTranslated: translateAlertSeverity(alerta.severity),
+      status: alerta.status,
+      statusTranslated: translateAlertStatus(alerta.status),
+      title: alerta.title,
+      message: alerta.message,
+      createdAt: alerta.createdAt,
+      resolvedAt: alerta.resolvedAt,
+      resolutionNotes: alerta.resolutionNotes,
+      product: alerta.product,
+      resolvedByUser: alerta.resolvedByUser,
     }));
 
     return NextResponse.json({
@@ -111,6 +133,8 @@ export async function GET(req: NextRequest) {
       alertas: translatedAlertas,
       total,
       pendientes,
+      critica,
+      alta,
       pages: Math.ceil(total / limit),
       page,
       limit,
