@@ -25,21 +25,30 @@ export async function middleware(request: NextRequest) {
   const userRole = token?.rol as string;
   
   // ============================================
-  // RULE 1: Admin cannot shop
-  // If ADMIN and trying to access shop routes
+  // RULE 1: Admin cannot shop (but can access their profile)
   // ============================================
   if (userRole === 'ADMIN') {
-    // Check if trying to access protected client routes
-    const isProtectedRoute = PROTECTED_CLIENT_ROUTES.some((route: string) =>
-      pathname.startsWith(route)
-    );
+    // First check if admin is accessing their profile/account pages
+    const isProfileRoute = pathname === '/account' ||
+                          pathname.startsWith('/account/profile') ||
+                          pathname.startsWith('/account/perfil') ||
+                          pathname.startsWith('/account/direcciones') ||
+                          pathname.startsWith('/account/addresses') ||
+                          pathname.startsWith('/account/orders') ||
+                          pathname.startsWith('/account/pedidos');
 
-    // Check /cart, /checkout, /account
-    const isShopRoute = pathname === '/cart' ||
-                       pathname.startsWith('/checkout') ||
-                       pathname.startsWith('/account');
-    
-    if (isProtectedRoute || isShopRoute) {
+    // Allow profile routes
+    if (isProfileRoute) {
+      console.log(`✅ ADMIN accessing profile at ${pathname} - Allowing`);
+      return NextResponse.next();
+    }
+
+    // Check shop-only routes (cart, checkout)
+    const isShopOnlyRoute = pathname === '/cart' ||
+                           pathname.startsWith('/checkout');
+
+    // Redirect admin away from shop-only routes
+    if (isShopOnlyRoute) {
       console.log(`🚫 ADMIN tried to access ${pathname} - Redirecting to /admin/dashboard`);
       return NextResponse.redirect(new URL('/admin/dashboard', request.url));
     }
