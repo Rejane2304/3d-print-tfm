@@ -26,6 +26,18 @@ export async function generatePDF({ html, filename }: PDFOptions): Promise<Buffe
 
     // Wait for fonts to load
     await page.evaluateHandle('document.fonts.ready');
+    
+    // Wait for all images to load
+    await page.evaluate(() => {
+      return Promise.all(
+        Array.from(document.images)
+          .filter(img => !img.complete)
+          .map(img => new Promise((resolve, reject) => {
+            img.addEventListener('load', resolve);
+            img.addEventListener('error', resolve); // Resolve on error to not block
+          }))
+      );
+    });
 
     // Generate PDF
     const pdf = await page.pdf({
