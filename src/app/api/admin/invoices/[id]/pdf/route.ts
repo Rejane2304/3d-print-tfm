@@ -60,6 +60,12 @@ export async function GET(
       include: {
         order: {
           include: {
+            user: {
+              select: {
+                email: true,
+                phone: true,
+              },
+            },
             items: {
               include: {
                 product: {
@@ -87,12 +93,16 @@ export async function GET(
       issuedAt: factura.issuedAt,
       isCancelled: factura.isCancelled,
       cancelledAt: factura.cancelledAt,
+      // Datos empresa
       companyName: factura.companyName,
       companyTaxId: factura.companyTaxId,
       companyAddress: factura.companyAddress,
       companyCity: factura.companyCity,
       companyProvince: factura.companyProvince,
       companyPostalCode: factura.companyPostalCode,
+      companyEmail: 'info@3dprint-tfm.com',
+      companyPhone: '+34 900 123 456',
+      // Datos cliente
       clientName: factura.clientName,
       clientTaxId: factura.clientTaxId,
       clientAddress: factura.clientAddress,
@@ -100,6 +110,9 @@ export async function GET(
       clientProvince: factura.clientProvince,
       clientPostalCode: factura.clientPostalCode,
       clientCountry: factura.clientCountry,
+      clientEmail: factura.order?.user?.email || undefined,
+      clientPhone: factura.order?.user?.phone || undefined,
+      // Items y totales
       items: factura.order?.items.map((item) => ({
         name: item.name,
         quantity: item.quantity,

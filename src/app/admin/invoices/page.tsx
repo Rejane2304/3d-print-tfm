@@ -98,16 +98,34 @@ export default function AdminFacturasPage() {
 
   const generateInvoice = async () => {
     if (!orderIdInput.trim()) {
-      setError('Introduce el ID del pedido');
+      setError('Introduce el número de pedido');
       return;
     }
 
     try {
       setError(null);
+
+      // Primero buscar el pedido por orderNumber para obtener el ID
+      const searchResponse = await fetch(`/api/admin/orders?search=${encodeURIComponent(orderIdInput.trim())}`);
+      const searchData = await searchResponse.json();
+
+      if (!searchResponse.ok) {
+        throw new Error('Error al buscar pedido');
+      }
+
+      const pedido = searchData.pedidos?.find((p: { orderNumber: string }) =>
+        p.orderNumber.toLowerCase() === orderIdInput.trim().toLowerCase()
+      );
+
+      if (!pedido) {
+        throw new Error('No se encontró el pedido con ese número');
+      }
+
+      // Ahora generar la factura con el ID del pedido
       const response = await fetch('/api/admin/invoices', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: orderIdInput }),
+        body: JSON.stringify({ orderId: pedido.id }),
       });
 
       const data = await response.json();
@@ -374,14 +392,14 @@ export default function AdminFacturasPage() {
             </p>
             <div className="mb-4">
               <label htmlFor="orderIdInput" className="block text-sm font-medium text-gray-700 mb-1">
-                ID del Pedido
+                Número de Pedido
               </label>
               <input
                 type="text"
                 id="orderIdInput"
                 value={orderIdInput}
                 onChange={(e) => setOrderIdInput(e.target.value)}
-                placeholder="Ej: 123e4567-e89b-12d3-a456-426614174000"
+                placeholder="Ej: ORD-2024-0001"
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               />
             </div>
