@@ -61,18 +61,48 @@ export async function GET(
       );
     }
 
-    // Translate order data before sending to frontend
-    const translatedOrder = {
-      ...order,
-      status: translateOrderStatus(order.status),
-      payment: order.payment ? {
-        ...order.payment,
-        status: translatePaymentStatus(order.payment.status),
-        method: translatePaymentMethod(order.payment.method),
-      } : null,
+    // Transform to Spanish response format matching frontend expectations
+    // Translate enums from English (DB) to Spanish (UI)
+    const pedidoTransformado = {
+      id: order.id,
+      orderNumber: order.orderNumber,
+      estado: translateOrderStatus(order.status),
+      total: order.total,
+      subtotal: Number(order.subtotal),
+      envio: Number(order.shipping),
+      createdAt: order.createdAt,
+      updatedAt: order.updatedAt,
+      usuario: {
+        nombre: order.user.name,
+        email: order.user.email,
+      },
+      items: order.items.map(item => ({
+        id: item.id,
+        nombre: item.product?.name || 'Producto',
+        quantity: item.quantity,
+        price: Number(item.price),
+        subtotal: Number(item.subtotal),
+      })),
+      nombreEnvio: order.shippingName,
+      telefonoEnvio: order.shippingPhone,
+      shippingAddress: order.shippingAddress,
+      complementoEnvio: order.shippingComplement,
+      postalCodeEnvio: order.shippingPostalCode,
+      ciudadEnvio: order.shippingCity,
+      provinciaEnvio: order.shippingProvince,
+      paisEnvio: order.shippingCountry,
+      paymentMethod: order.paymentMethod ? translatePaymentMethod(order.paymentMethod) : null,
+      numeroSeguimiento: order.trackingNumber,
+      transportista: order.carrier,
+      notasInternas: order.internalNotes,
+      pago: order.payment ? {
+        estado: translatePaymentStatus(order.payment.status),
+        metodo: translatePaymentMethod(order.payment.method),
+        createdAt: order.payment.createdAt,
+      } : undefined,
     };
 
-    return NextResponse.json({ success: true, order: translatedOrder });
+    return NextResponse.json({ success: true, pedido: pedidoTransformado });
   } catch (error) {
     console.error('Error obteniendo pedido:', error);
     return NextResponse.json(

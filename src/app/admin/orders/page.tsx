@@ -36,12 +36,12 @@ interface Order {
 }
 
 const orderStatuses: Record<string, { color: string; icon: React.ElementType; label: string }> = {
-  PENDIENTE: { color: 'bg-yellow-100 text-yellow-800', icon: Clock, label: 'Pendiente' },
-  PAGADO: { color: 'bg-blue-100 text-blue-800', icon: CheckCircle2, label: 'Pagado' },
-  EN_PREPARACION: { color: 'bg-indigo-100 text-indigo-800', icon: Box, label: 'En preparación' },
-  ENVIADO: { color: 'bg-purple-100 text-purple-800', icon: Truck, label: 'Enviado' },
-  ENTREGADO: { color: 'bg-green-100 text-green-800', icon: CheckCircle2, label: 'Entregado' },
-  CANCELADO: { color: 'bg-red-100 text-red-800', icon: XCircle, label: 'Cancelado' },
+  Pendiente: { color: 'bg-yellow-100 text-yellow-800', icon: Clock, label: 'Pendiente' },
+  Confirmado: { color: 'bg-blue-100 text-blue-800', icon: CheckCircle2, label: 'Confirmado' },
+  'En preparación': { color: 'bg-indigo-100 text-indigo-800', icon: Box, label: 'En preparación' },
+  Enviado: { color: 'bg-purple-100 text-purple-800', icon: Truck, label: 'Enviado' },
+  Entregado: { color: 'bg-green-100 text-green-800', icon: CheckCircle2, label: 'Entregado' },
+  Cancelado: { color: 'bg-red-100 text-red-800', icon: XCircle, label: 'Cancelado' },
 };
 
 export default function AdminPedidosPage() {
@@ -175,12 +175,12 @@ export default function AdminPedidosPage() {
                 className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               >
                 <option value="">Todos los estados</option>
-                <option value="PENDIENTE">Pendiente</option>
-                <option value="PAGADO">Pagado</option>
-                <option value="EN_PREPARACION">En preparación</option>
-                <option value="ENVIADO">Enviado</option>
-                <option value="ENTREGADO">Entregado</option>
-                <option value="CANCELADO">Cancelado</option>
+                <option value="Pendiente">Pendiente</option>
+                <option value="Confirmado">Confirmado</option>
+                <option value="En preparación">En preparación</option>
+                <option value="Enviado">Enviado</option>
+                <option value="Entregado">Entregado</option>
+                <option value="Cancelado">Cancelado</option>
               </select>
             </div>
           </div>
@@ -262,18 +262,18 @@ export default function AdminPedidosPage() {
                           >
                             <Eye className="h-4 w-4" />
                           </Link>
-                          {order.estado === 'PAGADO' && (
+                          {order.estado === 'Confirmado' && (
                             <button
-                              onClick={() => updateStatus(order.id, 'EN_PREPARACION')}
+                              onClick={() => updateStatus(order.id, 'En preparación')}
                               className="text-blue-600 hover:text-blue-900 p-2"
                               title="Marcar en preparación"
                             >
                               <Box className="h-4 w-4" />
                             </button>
                           )}
-                          {order.estado === 'EN_PREPARACION' && (
+                          {order.estado === 'En preparación' && (
                             <button
-                              onClick={() => updateStatus(order.id, 'ENVIADO')}
+                              onClick={() => updateStatus(order.id, 'Enviado')}
                               className="text-purple-600 hover:text-purple-900 p-2"
                               title="Marcar como enviado"
                             >

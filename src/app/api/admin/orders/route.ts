@@ -78,14 +78,18 @@ export async function GET(req: NextRequest) {
     ]);
 
     // Translate order data before sending to frontend
+    // Transform to Spanish response format matching frontend expectations
     const pedidosTraducidos = pedidos.map(pedido => ({
-      ...pedido,
-      status: translateOrderStatus(pedido.status),
-      payment: pedido.payment ? {
-        ...pedido.payment,
-        status: translatePaymentStatus(pedido.payment.status),
-        method: translatePaymentMethod(pedido.payment.method),
-      } : null,
+      id: pedido.id,
+      orderNumber: pedido.orderNumber,
+      estado: translateOrderStatus(pedido.status),
+      total: pedido.total,
+      createdAt: pedido.createdAt,
+      usuario: {
+        nombre: pedido.user.name,
+        email: pedido.user.email,
+      },
+      items: pedido.items.map(item => ({ id: item.id })),
     }));
 
     return NextResponse.json({ 
@@ -104,6 +108,16 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+// Mapeo de estados de español a inglés
+const estadoToEnglish: Record<string, string> = {
+  'Pendiente': 'PENDING',
+  'Confirmado': 'CONFIRMED',
+  'En preparación': 'PREPARING',
+  'Enviado': 'SHIPPED',
+  'Entregado': 'DELIVERED',
+  'Cancelado': 'CANCELLED',
+};
 
 // PATCH - Actualizar estado del pedido
 export async function PATCH(req: NextRequest) {
@@ -128,7 +142,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { id, ...data } = body;
+    const { id, estado, notasInternas, numeroSeguimiento, transportista, ...data } = body;
     
     if (!id) {
       return NextResponse.json(
@@ -137,18 +151,24 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    const validatedData = actualizarPedidoSchema.parse(data);
+    // Convertir estado de español a inglés
+    const englishStatus = estadoToEnglish[estado];
+    if (!englishStatus) {
+      return NextResponse.json(
+        { success: false, error: 'Estado inválido' },
+        { status: 400 }
+      );
+    }
 
     // Actualizar timestamps según el estado
-    const updateData: Prisma.OrderUpdateInput = { ...validatedData };
-    if (validatedData.status === 'SHIPPED' && validatedData.shippedAt) {
-      updateData.sentAt = new Date(validatedData.shippedAt);
-    } else if (validatedData.status === 'DELIVERED') {
-      updateData.deliveredAt = new Date();
-    } else if (validatedData.status === 'PREPARING') {
-      updateData.preparingAt = new Date();
-    } else if (validatedData.status === 'CANCELLED') {
-      updateData.cancelledAt = new Date();
+    const updateData: Prisma.OrderUpdateInput = {
+      status: englishStatus as OrderStatus,
+      internalNotes: notasInternas,
+    };
+
+    if (englishStatus === 'SHIPPED') {
+      if (numeroSeguimiento) updateData.trackingNumber = numeroSeguimiento;
+      if (transportista) updateData.carrier = transportista;
     }
 
     const pedido = await prisma.order.update({

@@ -1,16 +1,16 @@
 /**
- * API Route for Checkout with Stripe
+ * API Route for Simplified Checkout
  * 
- * POST /api/checkout - Create checkout session
+ * POST /api/checkout - Create order and payment in one step
  * 
- * Requires authentication and cart with items
+ * Flujo simplificado: Usuario elige método → Confirma → Pedido creado como CONFIRMED
+ * No redirecciones externas, no formularios complejos
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { withErrorHandler } from '@/lib/errors/api-wrapper';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
-import Stripe from 'stripe';
 import { Prisma } from '@prisma/client';
 import { translatePaymentMethod, translateErrorMessage } from '@/lib/i18n';
 
@@ -25,12 +25,7 @@ type CartItemWithProduct = Prisma.CartItemGetPayload<{
   };
 }>;
 
-// Initialize Stripe (test mode)
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2023-10-16' as Stripe.LatestApiVersion,
-});
-
-// POST /api/checkout - Create checkout session
+// POST /api/checkout - Create order and process payment
 export const POST = withErrorHandler(async (req: NextRequest) => {
   // Verify authentication
   const session = await getServerSession(authOptions);
@@ -44,7 +39,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   // Get data from request body
   const body = await req.json();
-  const { shippingAddressId, paymentMethod = 'STRIPE' } = body;
+  const { shippingAddressId, paymentMethod = 'CARD' } = body;
 
   if (!shippingAddressId) {
     return NextResponse.json(
@@ -54,7 +49,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
 
   // Validate payment method
-  if (!['STRIPE', 'PAYPAL'].includes(paymentMethod)) {
+  const validPaymentMethods = ['CARD', 'PAYPAL', 'BIZUM', 'TRANSFER'];
+  if (!validPaymentMethods.includes(paymentMethod)) {
     return NextResponse.json(
       { success: false, error: 'Método de pago no válido' },
       { status: 400 }
@@ -114,48 +110,6 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const total = subtotal + shippingCost + taxAmount;
 
   try {
-    // Create line items for Stripe
-    const lineItems = (user.cart.items as CartItemWithProduct[]).map((item) => ({
-      price_data: {
-        currency: 'eur',
-        product_data: {
-          name: item.product.name,
-          description: `Producto ID: ${item.product.id}`,
-        },
-        unit_amount: Math.round(Number(item.unitPrice) * 100), // Stripe usa céntimos
-      },
-      quantity: item.quantity,
-    }));
-
-    // Add shipping if applicable
-    if (shippingCost > 0) {
-      lineItems.push({
-        price_data: {
-          currency: 'eur',
-          product_data: {
-            name: 'Envío',
-            description: 'Gastos de envío',
-          },
-          unit_amount: Math.round(shippingCost * 100),
-        },
-        quantity: 1,
-      });
-    }
-
-    // Crear sesión de Stripe
-    const stripeSession = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: lineItems,
-      mode: 'payment',
-      success_url: `${process.env.NEXTAUTH_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXTAUTH_URL}/cart`,
-      metadata: {
-        userId: user.id,
-        cartId: user.cart.id,
-        shippingAddressId,
-      },
-    });
-
     // Get shipping address
     const address = await prisma.address.findUnique({
       where: { id: shippingAddressId },
@@ -173,13 +127,18 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     const count = await prisma.order.count();
     const orderNumber = `P-${year}${String(count + 1).padStart(6, '0')}`;
 
-    // If PayPal, just create order without Stripe session
-    if (paymentMethod === 'PAYPAL') {
-      const order = await prisma.order.create({
+    // Guardar referencia al carrito
+    const cart = user.cart;
+    const cartItems = cart.items as CartItemWithProduct[];
+
+    // Crear pedido y pago en una transacción
+    const result = await prisma.$transaction(async (tx) => {
+      // 1. Crear el pedido como CONFIRMED (no PENDING)
+      const order = await tx.order.create({
         data: {
           orderNumber,
           userId: user.id,
-          status: 'PENDING',
+          status: 'CONFIRMED', // Directamente confirmado
           subtotal,
           shipping: shippingCost,
           total,
@@ -192,8 +151,9 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
           shippingCity: address.city,
           shippingProvince: address.province,
           shippingCountry: address.country,
+          paymentMethod: paymentMethod as 'CARD' | 'PAYPAL' | 'BIZUM' | 'TRANSFER',
           items: {
-            create: (user.cart.items as CartItemWithProduct[]).map((item) => ({
+            create: cartItems.map((item) => ({
               productId: item.productId,
               quantity: item.quantity,
               price: item.unitPrice,
@@ -206,62 +166,49 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         },
       });
 
-    return NextResponse.json({
-      success: true,
-      orderId: order.id,
-      orderNumber: order.orderNumber,
-      paymentMethod: translatePaymentMethod(paymentMethod),
-    });
-    }
-
-    // Stripe flow - create Stripe session and order
-    // Crear pedido en estado PENDIENTE
-    const order = await prisma.order.create({
-      data: {
-        orderNumber,
-        userId: user.id,
-        status: 'PENDING',
-        subtotal,
-        shipping: shippingCost,
-        total,
-        shippingAddressId,
-        shippingName: address.name,
-        shippingPhone: address.phone,
-        shippingAddress: address.address,
-        shippingComplement: address.complement,
-        shippingPostalCode: address.postalCode,
-        shippingCity: address.city,
-        shippingProvince: address.province,
-        shippingCountry: address.country,
-        stripeSessionId: stripeSession.id,
-        items: {
-          create: (user.cart.items as CartItemWithProduct[]).map((item) => ({
-            productId: item.productId,
-            quantity: item.quantity,
-            price: item.unitPrice,
-            subtotal: Number(item.unitPrice) * item.quantity,
-            name: item.product.name,
-            category: item.product.category?.name || 'Sin categoría',
-            material: item.product.material,
-          })),
+      // 2. Crear el pago como COMPLETED
+      await tx.payment.create({
+        data: {
+          orderId: order.id,
+          userId: user.id,
+          amount: total,
+          method: paymentMethod as 'CARD' | 'PAYPAL' | 'BIZUM' | 'TRANSFER',
+          status: 'COMPLETED',
+          processedAt: new Date(),
         },
-      },
-    });
+      });
 
-    // Vaciar carrito (opcional - lo vaciamos después del pago exitoso)
-    // Por ahora dejamos el carrito intacto hasta confirmar el pago
+      // 3. Descontar stock de productos
+      for (const item of cartItems) {
+        await tx.product.update({
+          where: { id: item.productId },
+          data: {
+            stock: {
+              decrement: item.quantity,
+            },
+          },
+        });
+      }
+
+      // 4. Vaciar el carrito
+      await tx.cartItem.deleteMany({
+        where: { cartId: cart.id },
+      });
+
+      return order;
+    });
 
     return NextResponse.json({
       success: true,
-      sessionId: stripeSession.id,
-      url: stripeSession.url,
-      orderId: order.id,
+      orderId: result.id,
+      orderNumber: result.orderNumber,
       paymentMethod: translatePaymentMethod(paymentMethod),
+      message: 'Pago completado exitosamente',
     });
   } catch (error) {
-    console.error('Error creando sesión de Stripe:', error);
+    console.error('Error en checkout:', error);
     return NextResponse.json(
-      { success: false, error: translateErrorMessage('Error al crear sesión de pago') },
+      { success: false, error: translateErrorMessage('Error al procesar el pedido') },
       { status: 500 }
     );
   }

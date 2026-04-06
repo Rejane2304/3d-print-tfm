@@ -25,6 +25,7 @@ import {
   Printer,
   Download
 } from 'lucide-react';
+import OrderProgressBar from '@/components/orders/OrderProgressBar';
 
 interface OrderDetail {
   id: string;
@@ -78,37 +79,37 @@ interface OrderDetail {
 }
 
 const estadosConfig: Record<string, { color: string; icon: React.ElementType; label: string; description: string }> = {
-  PENDIENTE: {
+  Pendiente: {
     color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
     icon: Clock,
     label: 'Pendiente',
     description: 'Tu pedido está pendiente de pago'
   },
-  PAGADO: {
+  Confirmado: {
     color: 'bg-blue-100 text-blue-800 border-blue-200',
     icon: CheckCircle2,
-    label: 'Pagado',
+    label: 'Confirmado',
     description: 'Pago confirmado, preparando tu pedido'
   },
-  EN_PREPARACION: {
+  'En preparación': {
     color: 'bg-indigo-100 text-indigo-800 border-indigo-200',
     icon: Package,
     label: 'En preparación',
     description: 'Estamos preparando tu pedido'
   },
-  ENVIADO: {
+  Enviado: {
     color: 'bg-purple-100 text-purple-800 border-purple-200',
     icon: Truck,
     label: 'Enviado',
     description: 'Tu pedido está en camino'
   },
-  ENTREGADO: {
+  Entregado: {
     color: 'bg-green-100 text-green-800 border-green-200',
     icon: CheckCircle2,
     label: 'Entregado',
     description: 'Pedido entregado exitosamente'
   },
-  CANCELADO: {
+  Cancelado: {
     color: 'bg-red-100 text-red-800 border-red-200',
     icon: XCircle,
     label: 'Cancelado',
@@ -117,8 +118,10 @@ const estadosConfig: Record<string, { color: string; icon: React.ElementType; la
 };
 
 const metodosPago: Record<string, string> = {
-  CARD: 'Tarjeta',
-  PAYPAL: 'PayPal',
+  Tarjeta: 'Tarjeta',
+  PayPal: 'PayPal',
+  Bizum: 'Bizum',
+  Transferencia: 'Transferencia',
 };
 
 // Traducir nombres de dirección comunes
@@ -211,13 +214,6 @@ export default function OrderDetailPage() {
     );
   }
 
-  const statusConfig = estadosConfig[order.estado] || estadosConfig.PENDIENTE;
-  const StatusIcon = statusConfig.icon;
-
-  // Timeline de estados
-  const statusOrder = ['PENDIENTE', 'PAGADO', 'EN_PREPARACION', 'ENVIADO', 'ENTREGADO'];
-  const currentStatusIndex = statusOrder.indexOf(order.estado);
-
   return (
     <div className="min-h-screen bg-gray-50 print:bg-white">
       {/* Header */}
@@ -268,79 +264,14 @@ export default function OrderDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Columna principal */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Estado del pedido */}
-            <div className={`bg-white rounded-lg shadow-sm border p-6 ${order.estado === 'CANCELADO' ? 'border-red-200' : ''}`}>
-              <div className="flex items-start gap-4">
-                <div className={`p-3 rounded-full ${statusConfig.color.split(' ')[0]}`}>
-                  <StatusIcon className={`h-8 w-8 ${statusConfig.color.split(' ')[1]}`} />
-                </div>
-                <div className="flex-1">
-                  <h2 className="text-lg font-semibold text-gray-900">
-                    {statusConfig.label}
-                  </h2>
-                  <p className="text-gray-600 mt-1">{statusConfig.description}</p>
-
-                  {order.numeroSeguimiento && (
-                    <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                      <p className="text-sm font-medium text-blue-900 mb-1">Número de seguimiento</p>
-                      <p className="text-lg font-mono text-blue-700">{order.numeroSeguimiento}</p>
-                      {order.transportista && (
-                        <p className="text-sm text-blue-600 mt-1">
-                          Transportista: {order.transportista}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Timeline */}
-              {order.estado !== 'CANCELADO' && (
-                <div className="mt-8">
-                  <div className="flex items-center justify-between">
-                    {statusOrder.map((estado, index) => {
-                      const config = estadosConfig[estado];
-                      const Icon = config.icon;
-                      const completed = index <= currentStatusIndex;
-                      const isCurrent = index === currentStatusIndex;
-
-                      return (
-                        <div key={estado} className="flex flex-col items-center flex-1">
-                          <div
-                            className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-                              completed
-                                ? isCurrent
-                                  ? 'bg-indigo-600 text-white'
-                                  : 'bg-green-500 text-white'
-                                : 'bg-gray-200 text-gray-400'
-                            }`}
-                          >
-                            <Icon className="h-5 w-5" />
-                          </div>
-                          <span
-                            className={`text-xs mt-2 font-medium text-center ${
-                              completed ? 'text-gray-900' : 'text-gray-400'
-                            }`}
-                          >
-                            {config.label}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <div className="flex items-center justify-between mt-2 px-5">
-                    {statusOrder.slice(0, -1).map((_, index) => (
-                      <div
-                        key={index}
-                        className={`h-1 flex-1 mx-2 ${
-                          index < currentStatusIndex ? 'bg-green-500' : 'bg-gray-200'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+            {/* Componente de Barra de Progreso */}
+            <OrderProgressBar
+              estado={order.estado}
+              estadoPago={order.pago?.estado}
+              metodoPago={order.pago?.metodo}
+              numeroSeguimiento={order.numeroSeguimiento}
+              transportista={order.transportista}
+            />
 
             {/* Productos */}
             <div className="bg-white rounded-lg shadow-sm border overflow-hidden">

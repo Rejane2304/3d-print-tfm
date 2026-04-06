@@ -24,6 +24,7 @@ import {
   CreditCard,
   Edit
 } from 'lucide-react';
+import OrderProgressBar from '@/components/orders/OrderProgressBar';
 
 interface OrderDetail {
   id: string;
@@ -58,6 +59,11 @@ interface OrderDetail {
   numeroSeguimiento?: string;
   transportista?: string;
   notasInternas?: string;
+  pago?: {
+    estado: string;
+    metodo: string;
+    createdAt: string;
+  };
 }
 
 // Traducir nombres de dirección comunes
@@ -77,12 +83,12 @@ const translateAddressName = (name: string): string => {
 };
 
 const orderStatuses: Record<string, { color: string; icon: React.ElementType; label: string }> = {
-  PENDIENTE: { color: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: Clock, label: 'Pendiente' },
-  PAGADO: { color: 'bg-blue-100 text-blue-800 border-blue-200', icon: CheckCircle2, label: 'Pagado' },
-  EN_PREPARACION: { color: 'bg-indigo-100 text-indigo-800 border-indigo-200', icon: Box, label: 'En preparación' },
-  ENVIADO: { color: 'bg-purple-100 text-purple-800 border-purple-200', icon: Truck, label: 'Enviado' },
-  ENTREGADO: { color: 'bg-green-100 text-green-800 border-green-200', icon: CheckCircle2, label: 'Entregado' },
-  CANCELADO: { color: 'bg-red-100 text-red-800 border-red-200', icon: XCircle, label: 'Cancelado' },
+  Pendiente: { color: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: Clock, label: 'Pendiente' },
+  Confirmado: { color: 'bg-blue-100 text-blue-800 border-blue-200', icon: CheckCircle2, label: 'Confirmado' },
+  'En preparación': { color: 'bg-indigo-100 text-indigo-800 border-indigo-200', icon: Box, label: 'En preparación' },
+  Enviado: { color: 'bg-purple-100 text-purple-800 border-purple-200', icon: Truck, label: 'Enviado' },
+  Entregado: { color: 'bg-green-100 text-green-800 border-green-200', icon: CheckCircle2, label: 'Entregado' },
+  Cancelado: { color: 'bg-red-100 text-red-800 border-red-200', icon: XCircle, label: 'Cancelado' },
 };
 
 export default function AdminPedidoDetallePage() {
@@ -240,6 +246,15 @@ export default function AdminPedidoDetallePage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Columna izquierda - Info principal */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Componente de Barra de Progreso - Admin ve el mismo progreso que el usuario */}
+            <OrderProgressBar
+              estado={order.estado}
+              estadoPago={order.pago?.estado}
+              metodoPago={order.pago?.metodo}
+              numeroSeguimiento={order.numeroSeguimiento}
+              transportista={order.transportista}
+            />
+
             {/* Productos */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200">
               <div className="px-6 py-4 border-b border-gray-200">
@@ -376,16 +391,16 @@ export default function AdminPedidoDetallePage() {
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         data-testid="status-dropdown"
                       >
-                        <option value="PENDIENTE">Pendiente</option>
-                        <option value="PAGADO">Pagado</option>
-                        <option value="EN_PREPARACION">En preparación</option>
-                        <option value="ENVIADO">Enviado</option>
-                        <option value="ENTREGADO">Entregado</option>
-                        <option value="CANCELADO">Cancelado</option>
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="Confirmado">Confirmado</option>
+                        <option value="En preparación">En preparación</option>
+                        <option value="Enviado">Enviado</option>
+                        <option value="Entregado">Entregado</option>
+                        <option value="Cancelado">Cancelado</option>
                       </select>
                     </div>
 
-                    {newStatus === 'ENVIADO' && (
+                    {newStatus === 'Enviado' && (
                       <>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">

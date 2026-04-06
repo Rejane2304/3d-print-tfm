@@ -44,12 +44,12 @@ interface Address {
 interface Order {
   id: string;
   orderNumber: string;
-  status: string;
+  estado: string;
   total: number;
   createdAt: string;
   itemCount: number;
-  paymentStatus: string;
-  paymentMethod: string;
+  pagoEstado: string;
+  pagoMetodo: string;
 }
 
 export default function AdminClientDetailPage() {
@@ -108,16 +108,16 @@ export default function AdminClientDetailPage() {
     return `${parseFloat(amount.toString()).toFixed(2)} €`;
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (estado: string) => {
     const statusMap: Record<string, string> = {
-      PENDING: 'bg-yellow-100 text-yellow-800',
-      CONFIRMED: 'bg-blue-100 text-blue-800',
-      PREPARING: 'bg-purple-100 text-purple-800',
-      SHIPPED: 'bg-indigo-100 text-indigo-800',
-      DELIVERED: 'bg-green-100 text-green-800',
-      CANCELLED: 'bg-red-100 text-red-800',
+      'Pendiente': 'bg-yellow-100 text-yellow-800',
+      'Confirmado': 'bg-blue-100 text-blue-800',
+      'En preparación': 'bg-purple-100 text-purple-800',
+      'Enviado': 'bg-indigo-100 text-indigo-800',
+      'Entregado': 'bg-green-100 text-green-800',
+      'Cancelado': 'bg-red-100 text-red-800',
     };
-    return statusMap[status] || 'bg-gray-100 text-gray-800';
+    return statusMap[estado] || 'bg-gray-100 text-gray-800';
   };
 
   if (status === 'loading' || loading) {
@@ -327,8 +327,8 @@ export default function AdminClientDetailPage() {
                       {formatCurrency(order.total)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadge(order.status)}`}>
-                        {order.status}
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadge(order.estado)}`}>
+                        {order.estado}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

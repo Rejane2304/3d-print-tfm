@@ -1,16 +1,15 @@
 /**
- * Checkout Page - Formulario Unificado de Datos de Envío
- * Combina datos personales y dirección de envío en un solo formulario
- * Soporta Stripe (redirección) y PayPal (modal)
+ * Checkout Page - Formulario Simplificado de Pago
+ * Flujo: Usuario elige método → Confirma → Pedido creado → Redirección a success
+ * Sin redirecciones externas ni formularios complejos
  */
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Loader2, MapPin, CreditCard, Wallet, Package } from 'lucide-react';
+import { Loader2, MapPin, CreditCard, Wallet, Banknote, ArrowRightLeft, Package, CheckCircle2 } from 'lucide-react';
 import Image from 'next/image';
-import PayPalButton from '@/components/payment/PayPalButton';
 
 interface UserProfile {
   id: string;
@@ -45,7 +44,46 @@ interface CartItem {
   };
 }
 
-type PaymentMethod = 'stripe' | 'paypal';
+type PaymentMethod = 'CARD' | 'PAYPAL' | 'BIZUM' | 'TRANSFER';
+
+const paymentMethods = [
+  {
+    id: 'CARD' as PaymentMethod,
+    name: 'Tarjeta de crédito/débito',
+    description: 'Pago seguro con tarjeta',
+    icon: CreditCard,
+    color: 'text-indigo-600',
+    bgColor: 'bg-indigo-50',
+    borderColor: 'border-indigo-200',
+  },
+  {
+    id: 'PAYPAL' as PaymentMethod,
+    name: 'PayPal',
+    description: 'Pago rápido con PayPal',
+    icon: Wallet,
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-50',
+    borderColor: 'border-blue-200',
+  },
+  {
+    id: 'BIZUM' as PaymentMethod,
+    name: 'Bizum',
+    description: 'Pago instantáneo desde tu móvil',
+    icon: Banknote,
+    color: 'text-green-600',
+    bgColor: 'bg-green-50',
+    borderColor: 'border-green-200',
+  },
+  {
+    id: 'TRANSFER' as PaymentMethod,
+    name: 'Transferencia bancaria',
+    description: 'Transferencia a nuestra cuenta',
+    icon: ArrowRightLeft,
+    color: 'text-purple-600',
+    bgColor: 'bg-purple-50',
+    borderColor: 'border-purple-200',
+  },
+];
 
 export default function CheckoutPage() {
   const { status } = useSession();
@@ -57,64 +95,10 @@ export default function CheckoutPage() {
   const [cart, setCart] = useState<{ items: CartItem[]; subtotal: number } | null>(null);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('stripe');
-  const [currentOrderId, setCurrentOrderId] = useState<string | null>(null);
-  
-  // Estado unificado para el formulario
-  const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    // Datos personales
-    name: '',
-    email: '',
-    phone: '',
-    taxId: '',
-    // Datos de dirección
-    addressName: '',
-    street: '',
-    streetNumber: '',
-    complement: '',
-    postalCode: '',
-    city: '',
-    province: '',
-    isDefault: false
-  });
-
-  // Función para traducir nombres de dirección comunes
-  const translateAddressName = (name: string): string => {
-    const translations: { [key: string]: string } = {
-      'home': 'Casa',
-      'house': 'Casa',
-      'work': 'Trabajo',
-      'office': 'Oficina',
-      'apartment': 'Apartamento',
-      'flat': 'Piso',
-      'parents': 'Casa de padres',
-      'family': 'Casa familiar',
-    };
-    const lowerName = name?.toLowerCase().trim();
-    return translations[lowerName] || name;
-  };
-
-  // Función para parsear la dirección y separar calle y número
-  const parseStreetAddress = (street: string): { streetName: string; streetNumber: string } => {
-    // Patrón común: "Calle Nombre 123" o "Calle Nombre, 123" o "Calle Nombre Nº123"
-    const match = street.match(/^(.+?)\s+(?:(?:nº|n°|n|#)?\s*(\d+.*)|s\/n|sin\s+número)?$/i);
-    if (match) {
-      return {
-        streetName: match[1].trim(),
-        streetNumber: match[2] || ''
-      };
-    }
-    return { streetName: street, streetNumber: '' };
-  };
-
-  // Función para combinar calle y número
-  const combineStreetAddress = (streetName: string, streetNumber: string): string => {
-    if (streetNumber.trim()) {
-      return `${streetName.trim()} ${streetNumber.trim()}`;
-    }
-    return streetName.trim();
-  };
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('CARD');
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [orderComplete, setOrderComplete] = useState(false);
+  const [orderData, setOrderData] = useState<{ orderId: string; orderNumber: string } | null>(null);
 
   // Cargar datos iniciales
   const loadData = useCallback(async () => {
@@ -128,13 +112,6 @@ export default function CheckoutPage() {
         const data = await resProfile.json();
         if (data.success) {
           setUserProfile(data.usuario);
-          setFormData(prev => ({
-            ...prev,
-            name: data.usuario.name || '',
-            email: data.usuario.email || '',
-            phone: data.usuario.phone || '',
-            taxId: data.usuario.taxId || ''
-          }));
         }
       }
 
@@ -146,20 +123,6 @@ export default function CheckoutPage() {
         const primary = data.addresses?.find((d: Address) => d.isDefault);
         if (primary) {
           setSelectedAddressId(primary.id);
-          // Parse street to separate street name and number
-          const { streetName, streetNumber } = parseStreetAddress(primary.address || '');
-          // Cargar datos de dirección en el formulario
-          setFormData(prev => ({
-            ...prev,
-            addressName: translateAddressName(primary.name || ''),
-            street: streetName,
-            streetNumber: streetNumber,
-            complement: primary.complement || '',
-            postalCode: primary.postalCode || '',
-            city: primary.city || '',
-            province: primary.province || '',
-            isDefault: primary.isDefault || false
-          }));
         }
       } else if (resAddresses.status === 401) {
         router.push('/auth?callbackUrl=/checkout');
@@ -194,79 +157,7 @@ export default function CheckoutPage() {
     }
   }, [status, router, loadData]);
 
-  // Guardar datos unificados
-  const guardarDatos = async () => {
-    try {
-      // Guardar perfil
-      await fetch('/api/account/profile', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: formData.name,
-          phone: formData.phone,
-          taxId: formData.taxId
-        })
-      });
-
-      // Guardar dirección
-      if (selectedAddressId) {
-        await fetch('/api/account/addresses', {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            id: selectedAddressId,
-            name: formData.addressName,
-            recipient: formData.name,
-            address: combineStreetAddress(formData.street, formData.streetNumber),
-            complement: formData.complement,
-            postalCode: formData.postalCode,
-            city: formData.city,
-            province: formData.province,
-            phone: formData.phone,
-            isDefault: formData.isDefault
-          })
-        });
-      }
-
-      // Recargar datos
-      await loadData();
-      setIsEditing(false);
-    } catch (err) {
-      console.error('Error saving data:', err);
-      setError('Error al guardar los datos');
-    }
-  };
-
-  const cancelarEdicion = () => {
-    // Restaurar valores originales
-    if (userProfile) {
-      setFormData(prev => ({
-        ...prev,
-        name: userProfile.name || '',
-        email: userProfile.email || '',
-        phone: userProfile.phone || '',
-        taxId: userProfile.taxId || ''
-      }));
-    }
-    const selected = addresses.find(a => a.id === selectedAddressId);
-    if (selected) {
-      const { streetName, streetNumber } = parseStreetAddress(selected.address || '');
-      setFormData(prev => ({
-        ...prev,
-        addressName: translateAddressName(selected.name || ''),
-        street: streetName,
-        streetNumber: streetNumber,
-        complement: selected.complement || '',
-        postalCode: selected.postalCode || '',
-        city: selected.city || '',
-        province: selected.province || '',
-        isDefault: selected.isDefault || false
-      }));
-    }
-    setIsEditing(false);
-  };
-
-  const processStripePayment = async () => {
+  const processPayment = async () => {
     if (!selectedAddressId) {
       setError('Selecciona una dirección de envío');
       return;
@@ -281,7 +172,7 @@ export default function CheckoutPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           shippingAddressId: selectedAddressId,
-          paymentMethod: 'CARD',
+          paymentMethod: paymentMethod,
         }),
       });
 
@@ -291,46 +182,41 @@ export default function CheckoutPage() {
         throw new Error(data.error || 'Error al procesar el pedido');
       }
 
-      // Stripe redirige a su propia página de checkout
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        // Fallback: marcar como confirmado (modo demo)
-        await fetch('/api/checkout/confirm-payment', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            orderId: data.orderId,
-            paymentMethod: 'CARD',
-          }),
-        });
-        setCart({ items: [], subtotal: 0 });
-        window.dispatchEvent(new Event('cartUpdated'));
-        router.push('/checkout/success?orderId=' + data.orderId);
-      }
+      // Pedido completado exitosamente
+      setOrderComplete(true);
+      setOrderData({
+        orderId: data.orderId,
+        orderNumber: data.orderNumber,
+      });
+
+      // Vaciar carrito local
+      setCart({ items: [], subtotal: 0 });
+      window.dispatchEvent(new Event('cartUpdated'));
+
+      // Redirigir a la página de éxito después de 2 segundos
+      setTimeout(() => {
+        router.push(`/checkout/success?orderId=${data.orderId}`);
+      }, 2000);
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
       setProcessing(false);
     }
   };
 
-  const handlePayPalSuccess = async (details: unknown, orderId: string) => {
-    try {
-      // PayPal ya capturó el pago en el componente PayPalButton
-      // Solo necesitamos limpiar y redirigir
-      setCart({ items: [], subtotal: 0 });
-      window.dispatchEvent(new Event('cartUpdated'));
-      router.push('/checkout/success?orderId=' + orderId);
-    } catch (err) {
-      console.error('Error after PayPal success:', err);
-      setError('Error finalizando el pedido. Por favor, contacta soporte.');
-    }
-  };
-
-  const handlePayPalError = (error: Error) => {
-    console.error('PayPal error:', error);
-    setError('Error con PayPal: ' + error.message);
-    setProcessing(false);
+  const translateAddressName = (name: string): string => {
+    const translations: { [key: string]: string } = {
+      'home': 'Casa',
+      'house': 'Casa',
+      'work': 'Trabajo',
+      'office': 'Oficina',
+      'apartment': 'Apartamento',
+      'flat': 'Piso',
+      'parents': 'Casa de padres',
+      'family': 'Casa familiar',
+    };
+    const lowerName = name?.toLowerCase().trim();
+    return translations[lowerName] || name;
   };
 
   if (status === 'loading' || loading) {
@@ -344,6 +230,43 @@ export default function CheckoutPage() {
     );
   }
 
+  // Si el pedido está completado, mostrar pantalla de éxito
+  if (orderComplete) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-2xl mx-auto px-4">
+          <div className="bg-white rounded-lg shadow-sm border p-8 text-center">
+            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircle2 className="h-10 w-10 text-green-600" />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">
+              ¡Pago completado!
+            </h1>
+            
+            <p className="text-gray-600 mb-4">
+              Tu pedido ha sido procesado exitosamente.
+            </p>
+            
+            {orderData && (
+              <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                <p className="text-sm text-gray-600 mb-1">Número de pedido:</p>
+                <p className="text-xl font-bold text-indigo-600">{orderData.orderNumber}</p>
+              </div>
+            )}
+            
+            <p className="text-sm text-gray-500 mb-6">
+              Redirigiendo a los detalles de tu pedido...
+            </p>
+            
+            <div className="animate-pulse">
+              <Loader2 className="h-6 w-6 animate-spin text-indigo-600 mx-auto" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const shippingCost = (cart?.subtotal || 0) >= 50 ? 0 : 5.99;
   const subtotal = cart?.subtotal || 0;
   const taxRate = 0.21;
@@ -351,6 +274,7 @@ export default function CheckoutPage() {
   const total = subtotal + shippingCost + taxAmount;
 
   const selectedAddress = addresses.find(a => a.id === selectedAddressId);
+  const selectedPaymentMethod = paymentMethods.find(m => m.id === paymentMethod);
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -360,7 +284,7 @@ export default function CheckoutPage() {
           <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
             Finalizar Compra
           </h1>
-          <p className="text-gray-600">Revisa tu pedido y confirma el pago</p>
+          <p className="text-gray-600">Revisa tu pedido, elige método de pago y confirma</p>
         </div>
 
         {/* Error */}
@@ -371,287 +295,84 @@ export default function CheckoutPage() {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Columna izquierda: Datos de envío unificados */}
+          {/* Columna izquierda: Datos de envío y productos */}
           <div className="space-y-6">
-            {/* Formulario Unificado */}
+            {/* Dirección de envío */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
                   <MapPin className="h-5 w-5 text-indigo-600" />
-                  <h2 className="text-xl font-semibold">Datos de envío</h2>
+                  <h2 className="text-xl font-semibold">Dirección de envío</h2>
                 </div>
-                {!isEditing ? (
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
-                  >
-                    Editar
-                  </button>
-                ) : (
-                  <div className="flex gap-2">
-                    <button
-                      onClick={guardarDatos}
-                      className="text-sm text-green-600 hover:text-green-800 font-medium"
-                    >
-                      Guardar
-                    </button>
-                    <button
-                      onClick={cancelarEdicion}
-                      className="text-sm text-gray-600 hover:text-gray-800 font-medium"
-                    >
-                      Cancelar
-                    </button>
-                  </div>
-                )}
+                <a
+                  href="/account/addresses"
+                  className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
+                >
+                  Gestionar direcciones →
+                </a>
               </div>
 
-              {isEditing ? (
-                // Formulario Editable
-                <div className="space-y-6">
-                  {/* Datos Personales */}
-                  <div className="border-b border-gray-200 pb-6">
-                    <h3 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wide">
-                      Datos personales
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">
-                          Nombre completo *
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.name}
-                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">
-                          Email *
-                        </label>
-                        <input
-                          type="email"
-                          value={formData.email}
-                          disabled
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-gray-100 text-gray-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">
-                          Teléfono *
-                        </label>
-                        <input
-                          type="tel"
-                          value={formData.phone}
-                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">
-                          NIF / DNI
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.taxId}
-                          onChange={(e) => setFormData({ ...formData, taxId: e.target.value })}
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Dirección */}
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wide">
-                      Dirección de envío
-                    </h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">
-                          Nombre de la dirección *
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.addressName}
-                          onChange={(e) => setFormData({ ...formData, addressName: e.target.value })}
-                          placeholder="Ej: Casa, Oficina"
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                          required
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs font-medium text-gray-600 mb-1">
-                            Calle *
-                          </label>
-                          <input
-                            type="text"
-                            value={formData.street}
-                            onChange={(e) => setFormData({ ...formData, street: e.target.value })}
-                            placeholder="Calle Principal"
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-medium text-gray-600 mb-1">
-                            Número *
-                          </label>
-                          <input
-                            type="text"
-                            value={formData.streetNumber}
-                            onChange={(e) => setFormData({ ...formData, streetNumber: e.target.value })}
-                            placeholder="123"
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                            required
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">
-                          Complemento (piso, puerta, etc.)
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.complement}
-                          onChange={(e) => setFormData({ ...formData, complement: e.target.value })}
-                          placeholder="Piso 2, Puerta B"
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        />
-                      </div>
-                      <div className="grid grid-cols-3 gap-4">
-                        <div>
-                          <label className="block text-xs font-medium text-gray-600 mb-1">
-                            Código postal *
-                          </label>
-                          <input
-                            type="text"
-                            value={formData.postalCode}
-                            onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-medium text-gray-600 mb-1">
-                            Ciudad *
-                          </label>
-                          <input
-                            type="text"
-                            value={formData.city}
-                            onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-medium text-gray-600 mb-1">
-                            Provincia *
-                          </label>
-                          <input
-                            type="text"
-                            value={formData.province}
-                            onChange={(e) => setFormData({ ...formData, province: e.target.value })}
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                            required
-                          />
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 pt-2">
-                        <input
-                          type="checkbox"
-                          id="isDefault"
-                          checked={formData.isDefault}
-                          onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })}
-                          className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                        />
-                        <label htmlFor="isDefault" className="text-sm text-gray-700">
-                          Guardar como dirección principal
-                        </label>
-                      </div>
-                    </div>
-                  </div>
+              {addresses.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-600 mb-4">No tienes direcciones guardadas</p>
+                  <a
+                    href="/account/addresses"
+                    className="inline-flex items-center bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+                  >
+                    Añadir dirección
+                  </a>
                 </div>
               ) : (
-                // Vista Resumida (No editable)
-                addresses.length === 0 ? (
-                  <div className="text-center py-8">
-                    <p className="text-gray-600 mb-4">No tienes direcciones guardadas</p>
-                    <button
-                      onClick={() => setIsEditing(true)}
-                      className="text-indigo-600 hover:text-indigo-800 font-medium"
+                <div className="space-y-3">
+                  {addresses.map((address) => (
+                    <label
+                      key={address.id}
+                      className={`flex items-start gap-4 p-4 rounded-lg border-2 cursor-pointer transition-colors ${
+                        selectedAddressId === address.id
+                          ? 'border-indigo-600 bg-indigo-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
                     >
-                      Añadir dirección de envío →
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    {/* Info Personal */}
-                    <div className="border-b border-gray-100 pb-4">
-                      <h3 className="text-sm font-semibold text-gray-900 mb-3">Datos personales</h3>
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                        <div>
-                          <span className="text-gray-500">Nombre:</span>
-                          <p className="font-medium">{userProfile?.name || formData.name}</p>
+                      <input
+                        type="radio"
+                        name="address"
+                        value={address.id}
+                        checked={selectedAddressId === address.id}
+                        onChange={() => setSelectedAddressId(address.id)}
+                        className="mt-1"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-gray-900">
+                            {translateAddressName(address.name)}
+                          </span>
+                          {address.isDefault && (
+                            <span className="text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded">
+                              Principal
+                            </span>
+                          )}
                         </div>
-                        <div>
-                          <span className="text-gray-500">Email:</span>
-                          <p className="font-medium">{userProfile?.email || formData.email}</p>
-                        </div>
-                        <div>
-                          <span className="text-gray-500">Teléfono:</span>
-                          <p className="font-medium">{userProfile?.phone || formData.phone || '-'}</p>
-                        </div>
-                        <div>
-                          <span className="text-gray-500">NIF/DNI:</span>
-                          <p className="font-medium">{userProfile?.taxId || formData.taxId || '-'}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                     {/* Info Dirección */}
-                    <div>
-                      <h3 className="text-sm font-semibold text-gray-900 mb-3">
-                        Dirección de envío
-                        {selectedAddress?.isDefault && (
-                          <span className="ml-2 text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded">Principal</span>
+                        <p className="text-sm text-gray-600 mt-1">{address.address}</p>
+                        {address.complement && (
+                          <p className="text-sm text-gray-600">{address.complement}</p>
                         )}
-                      </h3>
-                      <div className="text-sm space-y-1">
-                        {/* Nombre de dirección traducido */}
-                        <p className="font-medium text-gray-900">
-                          {translateAddressName(selectedAddress?.name || formData.addressName)}
+                        <p className="text-sm text-gray-600">
+                          {address.postalCode} {address.city}, {address.province}
                         </p>
-                        {/* Calle y número - mostrar directamente de la BD */}
-                        <p className="text-gray-600">
-                          {selectedAddress?.address || `${formData.street} ${formData.streetNumber}`}
-                        </p>
-                        {/* Complemento */}
-                        {(selectedAddress?.complement || formData.complement) && (
-                          <p className="text-gray-600">{selectedAddress?.complement || formData.complement}</p>
-                        )}
-                        {/* CP, Ciudad, Provincia */}
-                        <p className="text-gray-600">
-                          {(selectedAddress?.postalCode || formData.postalCode)} {''}
-                          {(selectedAddress?.city || formData.city)}, {''}
-                          {(selectedAddress?.province || formData.province)}
-                        </p>
+                        <p className="text-sm text-gray-600">Tel: {address.phone}</p>
                       </div>
-                    </div>
-                  </div>
-                )
+                    </label>
+                  ))}
+                </div>
               )}
             </div>
 
-            {/* Resumen del pedido */}
+            {/* Productos */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h2 className="text-xl font-semibold mb-4">Resumen del pedido</h2>
               
               {cart?.items.map((item) => (
-                <div key={item.id} className="flex items-center gap-4 py-3 border-b border-gray-100">
+                <div key={item.id} className="flex items-center gap-4 py-3 border-b border-gray-100 last:border-0">
                   <div className="w-20 h-20 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden relative">
                     {item.product.image ? (
                       <Image
@@ -679,158 +400,122 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* Columna derecha: Totales y pago */}
+          {/* Columna derecha: Método de pago y confirmación */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-24">
-              <h2 className="text-xl font-semibold mb-6">Total del pedido</h2>
+              <h2 className="text-xl font-semibold mb-6">Método de pago</h2>
 
+              {/* Selector de métodos de pago */}
               <div className="space-y-3 mb-6">
-                <div className="flex justify-between text-gray-600">
-                  <span>Subtotal</span>
-                  <span>{subtotal.toFixed(2)} €</span>
-                </div>
-                <div className="flex justify-between text-gray-600">
-                  <span>Envío</span>
-                  <span className={shippingCost === 0 ? 'text-green-600' : ''}>
-                    {shippingCost === 0 ? 'Gratis' : `${shippingCost.toFixed(2)} €`}
-                  </span>
-                </div>
-                <div className="flex justify-between text-gray-600">
-                  <span>IVA (21%)</span>
-                  <span>{taxAmount.toFixed(2)} €</span>
-                </div>
-                <div className="flex justify-between text-xl font-bold border-t pt-3">
-                  <span>Total</span>
-                  <span className="text-indigo-600">{total.toFixed(2)} €</span>
+                {paymentMethods.map((method) => {
+                  const Icon = method.icon;
+                  return (
+                    <label
+                      key={method.id}
+                      className={`flex items-center gap-4 p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                        paymentMethod === method.id
+                          ? `${method.borderColor} ${method.bgColor}`
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value={method.id}
+                        checked={paymentMethod === method.id}
+                        onChange={() => {
+                          setPaymentMethod(method.id);
+                          setShowConfirmation(false);
+                        }}
+                        className="sr-only"
+                      />
+                      <div className={`p-2 rounded-lg ${method.bgColor}`}>
+                        <Icon className={`h-6 w-6 ${method.color}`} />
+                      </div>
+                      <div className="flex-1">
+                        <span className="font-medium text-gray-900">{method.name}</span>
+                        <p className="text-sm text-gray-500">{method.description}</p>
+                      </div>
+                    </label>
+                  );
+                })}
+              </div>
+
+              {/* Resumen de totales */}
+              <div className="border-t pt-6 mb-6">
+                <h3 className="text-lg font-semibold mb-4">Total del pedido</h3>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between text-gray-600">
+                    <span>Subtotal</span>
+                    <span>{subtotal.toFixed(2)} €</span>
+                  </div>
+                  <div className="flex justify-between text-gray-600">
+                    <span>Envío</span>
+                    <span className={shippingCost === 0 ? 'text-green-600' : ''}>
+                      {shippingCost === 0 ? 'Gratis' : `${shippingCost.toFixed(2)} €`}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-gray-600">
+                    <span>IVA (21%)</span>
+                    <span>{taxAmount.toFixed(2)} €</span>
+                  </div>
+                  <div className="flex justify-between text-xl font-bold border-t pt-3">
+                    <span>Total</span>
+                    <span className="text-indigo-600">{total.toFixed(2)} €</span>
+                  </div>
                 </div>
               </div>
 
-              {/* Método de pago */}
-              <div className="mb-6">
-                <h3 className="text-sm font-medium text-gray-700 mb-3">Método de pago</h3>
-                <div className="space-y-2">
-                  <label
-                    className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
-                      paymentMethod === 'stripe'
-                        ? 'border-indigo-600 bg-indigo-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="stripe"
-                      checked={paymentMethod === 'stripe'}
-                      onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
-                      className="sr-only"
-                    />
-                    <CreditCard className="h-5 w-5 text-indigo-600" />
-                    <div className="flex-1">
-                      <span className="font-medium">Tarjeta de crédito/débito</span>
-                    </div>
-                  </label>
-
-                  <label
-                    className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
-                      paymentMethod === 'paypal'
-                        ? 'border-indigo-600 bg-indigo-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="paypal"
-                      checked={paymentMethod === 'paypal'}
-                      onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
-                      className="sr-only"
-                    />
-                    <Wallet className="h-5 w-5 text-blue-600" />
-                    <div className="flex-1">
-                      <span className="font-medium">PayPal</span>
-                    </div>
-                  </label>
-                </div>
-              </div>
-
-              {/* Botón de pago - Condicional según método */}
-              {paymentMethod === 'stripe' ? (
+              {/* Botón de confirmación */}
+              {!showConfirmation ? (
                 <button
-                  onClick={processStripePayment}
-                  disabled={processing || !selectedAddressId || addresses.length === 0}
-                  className="w-full bg-indigo-600 text-white py-4 px-6 rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
+                  onClick={() => setShowConfirmation(true)}
+                  disabled={!selectedAddressId || addresses.length === 0}
+                  className="w-full bg-indigo-600 text-white py-4 px-6 rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  {processing ? (
-                    <>
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                      Procesando...
-                    </>
-                  ) : (
-                    <>
-                      <CreditCard className="h-5 w-5" />
-                      Pagar con Tarjeta - {total.toFixed(2)} €
-                    </>
-                  )}
+                  Confirmar pedido
                 </button>
               ) : (
                 <div className="space-y-4">
-                  {/* PayPal requiere crear la orden primero */}
-                  {!currentOrderId ? (
+                  {/* Confirmación final */}
+                  <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-4">
+                    <p className="text-sm text-indigo-900 font-medium mb-2">
+                      ¿Confirmar compra?
+                    </p>
+                    <p className="text-sm text-indigo-700">
+                      Vas a pagar <span className="font-bold">{total.toFixed(2)} €</span> con{' '}
+                      <span className="font-medium">{selectedPaymentMethod?.name}</span>
+                    </p>
+                  </div>
+
+                  <div className="flex gap-3">
                     <button
-                      onClick={async () => {
-                        if (!selectedAddressId) {
-                          setError('Selecciona una dirección de envío');
-                          return;
-                        }
-                        try {
-                          setProcessing(true);
-                          setError(null);
-                          
-                          const response = await fetch('/api/checkout', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                              shippingAddressId: selectedAddressId,
-                              paymentMethod: 'PAYPAL',
-                            }),
-                          });
-
-                          const data = await response.json();
-                          
-                          if (!response.ok) {
-                            throw new Error(data.error || 'Error al crear el pedido');
-                          }
-
-                          setCurrentOrderId(data.orderId);
-                          setProcessing(false);
-                        } catch (err) {
-                          setError(err instanceof Error ? err.message : 'Error desconocido');
-                          setProcessing(false);
-                        }
-                      }}
-                      disabled={processing || !selectedAddressId || addresses.length === 0}
-                      className="w-full bg-blue-600 text-white py-4 px-6 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
+                      onClick={processPayment}
+                      disabled={processing}
+                      className="flex-1 bg-indigo-600 text-white py-4 px-6 rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
                     >
                       {processing ? (
                         <>
                           <Loader2 className="h-5 w-5 animate-spin" />
-                          Creando pedido...
+                          Procesando...
                         </>
                       ) : (
                         <>
-                          <Wallet className="h-5 w-5" />
-                          Continuar con PayPal - {total.toFixed(2)} €
+                          <CheckCircle2 className="h-5 w-5" />
+                          Sí, pagar {total.toFixed(2)} €
                         </>
                       )}
                     </button>
-                  ) : (
-                    <PayPalButton
-                      total={total}
-                      orderId={currentOrderId}
-                      onSuccess={(details) => handlePayPalSuccess(details, currentOrderId)}
-                      onError={handlePayPalError}
-                    />
-                  )}
+
+                    <button
+                      onClick={() => setShowConfirmation(false)}
+                      disabled={processing}
+                      className="flex-1 bg-gray-200 text-gray-700 py-4 px-6 rounded-lg font-medium hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

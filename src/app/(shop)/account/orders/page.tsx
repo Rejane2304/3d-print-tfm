@@ -52,12 +52,12 @@ interface Order {
 }
 
 const estadosConfig: Record<string, { color: string; icon: React.ElementType; label: string }> = {
-  PENDING: { color: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: Clock, label: 'Pendiente' },
-  CONFIRMED: { color: 'bg-blue-100 text-blue-800 border-blue-200', icon: CheckCircle2, label: 'Confirmado' },
-  PREPARING: { color: 'bg-indigo-100 text-indigo-800 border-indigo-200', icon: Package, label: 'En preparación' },
-  SHIPPED: { color: 'bg-purple-100 text-purple-800 border-purple-200', icon: Truck, label: 'Enviado' },
-  DELIVERED: { color: 'bg-green-100 text-green-800 border-green-200', icon: CheckCircle2, label: 'Entregado' },
-  CANCELLED: { color: 'bg-red-100 text-red-800 border-red-200', icon: XCircle, label: 'Cancelado' },
+  Pendiente: { color: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: Clock, label: 'Pendiente' },
+  Confirmado: { color: 'bg-blue-100 text-blue-800 border-blue-200', icon: CheckCircle2, label: 'Confirmado' },
+  'En preparación': { color: 'bg-indigo-100 text-indigo-800 border-indigo-200', icon: Package, label: 'En preparación' },
+  Enviado: { color: 'bg-purple-100 text-purple-800 border-purple-200', icon: Truck, label: 'Enviado' },
+  Entregado: { color: 'bg-green-100 text-green-800 border-green-200', icon: CheckCircle2, label: 'Entregado' },
+  Cancelado: { color: 'bg-red-100 text-red-800 border-red-200', icon: XCircle, label: 'Cancelado' },
 };
 
 export default function MyOrdersPage() {

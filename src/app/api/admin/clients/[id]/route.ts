@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
+import { translateOrderStatus, translatePaymentStatus, translatePaymentMethod } from '@/lib/i18n';
 
 export async function GET(
   req: NextRequest,
@@ -102,12 +103,12 @@ export async function GET(
         orders: client.orders.map((order) => ({
           id: order.id,
           orderNumber: order.orderNumber,
-          status: order.status,
+          estado: translateOrderStatus(order.status),
           total: order.total,
           createdAt: order.createdAt,
           itemCount: order.items.length,
-          paymentStatus: order.payment?.status || 'PENDING',
-          paymentMethod: order.payment?.method || 'CARD',
+          pagoEstado: translatePaymentStatus(order.payment?.status || 'PENDING'),
+          pagoMetodo: translatePaymentMethod(order.payment?.method || 'CARD'),
         })),
         stats: {
           totalOrders,
