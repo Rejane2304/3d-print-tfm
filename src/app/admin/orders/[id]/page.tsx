@@ -273,17 +273,18 @@ export default function AdminPedidoDetallePage() {
                 {order.items.map((item) => (
                   <div key={item.id} className="p-6 flex items-center gap-4">
                     {item.imagenUrl ? (
-                      <Image
-                        src={item.imagenUrl}
-                        alt={item.nombre}
-                        width={64}
-                        height={64}
-                        className="h-16 w-16 object-cover"
-                        unoptimized
-                        style={{ width: 'auto', height: 'auto' }}
-                      />
+                      <div className="w-24 h-24 bg-gray-100 flex-shrink-0 overflow-hidden relative">
+                        <Image
+                          src={item.imagenUrl}
+                          alt={item.nombre}
+                          fill
+                          sizes="96px"
+                          className="object-cover"
+                          unoptimized
+                        />
+                      </div>
                     ) : (
-                      <div className="h-16 w-16 bg-gray-100 flex items-center justify-center">
+                      <div className="w-24 h-24 bg-gray-100 flex items-center justify-center flex-shrink-0">
                         <Package className="h-8 w-8 text-gray-400" />
                       </div>
                     )}

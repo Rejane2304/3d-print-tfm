@@ -597,6 +597,7 @@ export default function NuevoProductoPage() {
                             src={img.url}
                             alt={`Imagen ${index + 1}`}
                             fill
+                            sizes="(max-width: 768px) 50vw, 150px"
                             className="object-cover"
                           />
                           {img.isMain && (

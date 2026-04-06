@@ -109,7 +109,7 @@ describe('Product Validators', () => {
 
     describe('shortDescription validation', () => {
       it('should accept product without short description (optional)', () => {
-        const { _:shortDescription, ...dataWithoutShort } = validProduct;
+        const { shortDescription: _, ...dataWithoutShort } = validProduct;
         const result = productSchema.safeParse(dataWithoutShort);
         expect(result.success).toBe(true);
       });
@@ -203,7 +203,7 @@ describe('Product Validators', () => {
 
     describe('previousPrice validation', () => {
       it('should accept product without previous price', () => {
-        const { _:previousPrice, ...dataWithoutPrev } = validProduct;
+        const { previousPrice: _, ...dataWithoutPrev } = validProduct;
         const result = productSchema.safeParse(dataWithoutPrev);
         expect(result.success).toBe(true);
       });
@@ -306,7 +306,7 @@ describe('Product Validators', () => {
 
     describe('minStock validation', () => {
       it('should use default value when not provided', () => {
-        const { _:minStock, ...dataWithoutMinStock } = validProduct;
+        const { minStock: _, ...dataWithoutMinStock } = validProduct;
         const result = productSchema.safeParse(dataWithoutMinStock);
         expect(result.success).toBe(true);
         if (result.success) {
@@ -366,7 +366,7 @@ describe('Product Validators', () => {
       });
 
       it('should accept product without category (optional)', () => {
-        const { _:categoryId, ...dataWithoutCategory } = validProduct;
+        const { categoryId: _, ...dataWithoutCategory } = validProduct;
         const result = productSchema.safeParse(dataWithoutCategory);
         expect(result.success).toBe(true);
       });
@@ -406,7 +406,7 @@ describe('Product Validators', () => {
       });
 
       it('should accept product without material (optional)', () => {
-        const { _:material, ...dataWithoutMaterial } = validProduct;
+        const { material: _, ...dataWithoutMaterial } = validProduct;
         const result = productSchema.safeParse(dataWithoutMaterial);
         expect(result.success).toBe(true);
       });
@@ -433,7 +433,7 @@ describe('Product Validators', () => {
       });
 
       it('should accept product without dimensions (optional)', () => {
-        const { _:dimensions, ...dataWithoutDimensions } = validProduct;
+        const { dimensions: _, ...dataWithoutDimensions } = validProduct;
         const result = productSchema.safeParse(dataWithoutDimensions);
         expect(result.success).toBe(true);
       });
@@ -468,7 +468,7 @@ describe('Product Validators', () => {
       });
 
       it('should accept product without weight (optional)', () => {
-        const { _:weight, ...dataWithoutWeight } = validProduct;
+        const { weight: _, ...dataWithoutWeight } = validProduct;
         const result = productSchema.safeParse(dataWithoutWeight);
         expect(result.success).toBe(true);
       });
@@ -514,7 +514,7 @@ describe('Product Validators', () => {
       });
 
       it('should accept product without printTime (optional)', () => {
-        const { _:printTime, ...dataWithoutPrintTime } = validProduct;
+        const { printTime: _, ...dataWithoutPrintTime } = validProduct;
         const result = productSchema.safeParse(dataWithoutPrintTime);
         expect(result.success).toBe(true);
       });
@@ -541,7 +541,7 @@ describe('Product Validators', () => {
       });
 
       it('should accept product without metaTitle (optional)', () => {
-        const { _:metaTitle, ...dataWithoutMetaTitle } = validProduct;
+        const { metaTitle: _, ...dataWithoutMetaTitle } = validProduct;
         const result = productSchema.safeParse(dataWithoutMetaTitle);
         expect(result.success).toBe(true);
       });
@@ -568,7 +568,7 @@ describe('Product Validators', () => {
       });
 
       it('should accept product without metaDescription (optional)', () => {
-        const { _:metaDescription, ...dataWithoutMetaDesc } = validProduct;
+        const { metaDescription: _, ...dataWithoutMetaDesc } = validProduct;
         const result = productSchema.safeParse(dataWithoutMetaDesc);
         expect(result.success).toBe(true);
       });
@@ -576,7 +576,7 @@ describe('Product Validators', () => {
 
     describe('boolean fields validation', () => {
       it('should use default isActive value', () => {
-        const { _:isActive, ...dataWithoutIsActive } = validProduct;
+        const { isActive: _, ...dataWithoutIsActive } = validProduct;
         const result = productSchema.safeParse(dataWithoutIsActive);
         expect(result.success).toBe(true);
         if (result.success) {
@@ -585,7 +585,7 @@ describe('Product Validators', () => {
       });
 
       it('should use default isFeatured value', () => {
-        const { _:isFeatured, ...dataWithoutIsFeatured } = validProduct;
+        const { isFeatured: _, ...dataWithoutIsFeatured } = validProduct;
         const result = productSchema.safeParse(dataWithoutIsFeatured);
         expect(result.success).toBe(true);
         if (result.success) {

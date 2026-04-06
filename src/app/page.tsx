@@ -153,13 +153,14 @@ export default async function HomePage() {
                   <div className="bg-white shadow-md overflow-hidden hover:shadow-xl transition-shadow">
                     <div className="relative w-full aspect-square bg-gray-200">
                       {product.images[0] ? (
-                        <Image
-                          src={product.images[0].url}
-                          alt={product.name}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
-                          style={{ width: '100%', height: '100%' }}
-                        />
+                      <Image
+                        src={product.images[0].url}
+                        alt={product.name}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        style={{ width: '100%', height: '100%' }}
+                      />
                       ) : (
                         <div className="flex items-center justify-center h-full text-gray-400">Sin imagen</div>
                       )}

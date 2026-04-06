@@ -617,12 +617,13 @@ export default function EditarProductoPage() {
                             img.isMain ? 'border-indigo-500' : 'border-gray-200'
                           }`}
                         >
-                          <Image
-                            src={img.url}
-                            alt={`Imagen ${index + 1}`}
-                            fill
-                            className="object-cover"
-                          />
+                        <Image
+                          src={img.url}
+                          alt={`Imagen ${index + 1}`}
+                          fill
+                          sizes="(max-width: 768px) 50vw, 150px"
+                          className="object-cover"
+                        />
                           {img.isMain && (
                             <span className="absolute top-1 left-1 bg-indigo-600 text-white text-xs px-2 py-1">
                               Principal

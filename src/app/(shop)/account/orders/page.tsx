@@ -230,13 +230,14 @@ export default function MyOrdersPage() {
                         {/* Imagen del primer producto */}
                         <div className="w-20 h-20 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden relative">
                           {firstImage ? (
-                            <Image
-                              src={firstImage}
-                              alt={firstItem?.producto?.nombre || 'Producto'}
-                              fill
-                              className="object-cover"
-                              unoptimized
-                            />
+                        <Image
+                          src={firstImage}
+                          alt={firstItem?.producto?.nombre || 'Producto'}
+                          fill
+                          sizes="80px"
+                          className="object-cover"
+                          unoptimized
+                        />
                           ) : (
                             <Package className="w-full h-full p-4 text-gray-400" />
                           )}

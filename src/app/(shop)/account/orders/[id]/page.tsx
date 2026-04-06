@@ -305,6 +305,7 @@ export default function OrderDetailPage() {
                           src={item.producto.images[0].url}
                           alt={item.producto.nombre}
                           fill
+                          sizes="96px"
                           className="object-cover"
                           unoptimized
                         />

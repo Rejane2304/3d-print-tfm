@@ -91,31 +91,41 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      cliente: {
+      client: {
         id: client.id,
-        nombre: client.name,
+        name: client.name,
         email: client.email,
-        telefono: client.phone,
-        activo: client.isActive,
-        creadoEn: client.createdAt,
-        ultimoAcceso: client.lastAccess,
-        direcciones: client.addresses,
-        pedidos: client.orders.map((order) => ({
+        phone: client.phone,
+        isActive: client.isActive,
+        createdAt: client.createdAt,
+        lastAccess: client.lastAccess,
+        addresses: client.addresses.map((addr) => ({
+          id: addr.id,
+          name: addr.name,
+          recipient: addr.recipient,
+          phone: addr.phone,
+          address: addr.address,
+          postalCode: addr.postalCode,
+          city: addr.city,
+          province: addr.province,
+          isDefault: addr.isDefault,
+        })),
+        orders: client.orders.map((order) => ({
           id: order.id,
-          numeroPedido: order.orderNumber,
+          orderNumber: order.orderNumber,
           estado: translateOrderStatus(order.status),
           total: order.total,
-          creadoEn: order.createdAt,
-          cantidadItems: order.items.length,
+          createdAt: order.createdAt,
+          itemCount: order.items.length,
           pagoEstado: translatePaymentStatus(order.payment?.status || 'PENDING'),
           pagoMetodo: translatePaymentMethod(order.payment?.method || 'CARD'),
         })),
-        estadisticas: {
-          totalPedidos: totalOrders,
-          totalGastado: totalSpent.toFixed(2),
-          pedidosCompletados: completedOrders,
-          pedidosPendientes: pendingOrders,
-          valorPromedioPedido: totalOrders > 0 ? (totalSpent / totalOrders).toFixed(2) : '0.00',
+        stats: {
+          totalOrders: totalOrders,
+          totalSpent: totalSpent.toFixed(2),
+          completedOrders: completedOrders,
+          pendingOrders: pendingOrders,
+          averageOrderValue: totalOrders > 0 ? (totalSpent / totalOrders).toFixed(2) : '0.00',
         },
       },
     });
