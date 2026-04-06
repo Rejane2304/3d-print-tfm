@@ -373,7 +373,7 @@ export default function CheckoutPage() {
               
               {cart?.items.map((item) => (
                 <div key={item.id} className="flex items-center gap-4 py-3 border-b border-gray-100 last:border-0">
-                  <div className="w-20 h-20 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden relative">
+                  <div className="w-20 h-20 bg-gray-100 flex-shrink-0 overflow-hidden relative">
                     {item.product.image ? (
                       <Image
                         src={item.product.image}

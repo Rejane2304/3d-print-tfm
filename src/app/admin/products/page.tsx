@@ -223,7 +223,7 @@ export default function AdminProductsPage() {
                         <div className="flex-shrink-0 h-10 w-10">
                           {product.imagenes?.[0] ? (
                             <Image
-                              className="h-10 w-10 rounded-full object-cover"
+                              className="h-10 w-10 object-cover"
                               src={product.imagenes[0].url}
                               alt={product.nombre}
                               width={40}
@@ -231,7 +231,7 @@ export default function AdminProductsPage() {
                               unoptimized
                             />
                           ) : (
-                            <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                            <div className="h-10 w-10 bg-gray-200 flex items-center justify-center">
                               <Package className="h-5 w-5 text-gray-400" />
                             </div>
                           )}

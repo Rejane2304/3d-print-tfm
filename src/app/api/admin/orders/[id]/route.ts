@@ -46,7 +46,14 @@ export async function GET(
         },
         items: {
           include: {
-            product: true,
+            product: {
+              include: {
+                images: {
+                  where: { isMain: true },
+                  take: 1,
+                },
+              },
+            },
           },
         },
         payment: true,
@@ -82,6 +89,7 @@ export async function GET(
         quantity: item.quantity,
         price: Number(item.price),
         subtotal: Number(item.subtotal),
+        imagenUrl: item.product?.images?.[0]?.url || null,
       })),
       nombreEnvio: order.shippingName,
       telefonoEnvio: order.shippingPhone,

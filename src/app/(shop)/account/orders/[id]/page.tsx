@@ -298,7 +298,7 @@ export default function OrderDetailPage() {
                 {order.items.map((item) => (
                   <div key={item.id} className="p-6 flex gap-4">
                     {/* Imagen */}
-                    <div className="w-24 h-24 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden relative">
+                    <div className="w-24 h-24 bg-gray-100 flex-shrink-0 overflow-hidden relative">
                       {item.producto.images[0]?.url ? (
                         <Image
                           src={item.producto.images[0].url}

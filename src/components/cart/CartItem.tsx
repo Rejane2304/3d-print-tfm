@@ -105,7 +105,7 @@ export default function CartItem({
           src={product.image || '/images/placeholder.jpg'}
           alt={product.name}
           fill
-          className="object-cover rounded-md"
+          className="object-cover"
           sizes="(max-width: 640px) 100vw, 128px"
         />
       </Link>

@@ -65,7 +65,7 @@ export default function ProductImageGallery({ images, productName }: ProductImag
 
   if (images.length === 0) {
     return (
-      <div className="relative aspect-square bg-gray-200 rounded-lg overflow-hidden">
+      <div className="relative aspect-square bg-gray-200 overflow-hidden">
         <div className="flex items-center justify-center h-full text-gray-400">
           Sin imagen
         </div>
@@ -78,7 +78,7 @@ export default function ProductImageGallery({ images, productName }: ProductImag
       <div className="space-y-4">
         {/* Main Image - Clickable */}
         <div 
-          className="relative aspect-square bg-gray-200 rounded-lg overflow-hidden cursor-zoom-in group"
+          className="relative aspect-square bg-gray-200 overflow-hidden cursor-zoom-in group"
           onClick={openModal}
         >
           <Image
@@ -102,7 +102,7 @@ export default function ProductImageGallery({ images, productName }: ProductImag
               <button
                 key={image.id}
                 onClick={() => setSelectedIndex(index)}
-                className={`relative aspect-square bg-gray-200 rounded-md overflow-hidden transition-all ${
+                className={`relative aspect-square bg-gray-200 overflow-hidden transition-all ${
                   selectedIndex === index 
                     ? 'ring-2 ring-indigo-600 ring-offset-2' 
                     : 'hover:ring-2 hover:ring-indigo-400 hover:ring-offset-2'

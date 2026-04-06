@@ -272,11 +272,11 @@ export default function AdminPedidoDetallePage() {
                         alt={item.nombre}
                         width={64}
                         height={64}
-                        className="h-16 w-16 rounded-lg object-cover"
+                        className="h-16 w-16 object-cover"
                         unoptimized
                       />
                     ) : (
-                      <div className="h-16 w-16 rounded-lg bg-gray-100 flex items-center justify-center">
+                      <div className="h-16 w-16 bg-gray-100 flex items-center justify-center">
                         <Package className="h-8 w-8 text-gray-400" />
                       </div>
                     )}

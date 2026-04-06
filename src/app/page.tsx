@@ -150,7 +150,7 @@ export default async function HomePage() {
                   href={`/products/${product.slug}`}
                   className="group"
                 >
-                  <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
+                  <div className="bg-white shadow-md overflow-hidden hover:shadow-xl transition-shadow">
                     <div className="relative aspect-square bg-gray-200">
                       {product.images[0] ? (
                         <Image
