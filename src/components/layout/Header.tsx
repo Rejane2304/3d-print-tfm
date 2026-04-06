@@ -107,16 +107,7 @@ export default function Header() {
               <span className="text-sm font-medium">Catálogo</span>
             </Link>
 
-            {/* Admin Dashboard */}
-            {isAdmin && (
-              <Link
-                href="/admin/dashboard"
-                className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
-              >
-                <LayoutDashboard className="h-5 w-5" />
-                <span className="text-sm font-medium">Admin</span>
-              </Link>
-            )}
+
           </nav>
 
           {/* Right Side */}
