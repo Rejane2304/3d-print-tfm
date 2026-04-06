@@ -325,20 +325,20 @@ export default function AdminFacturasPage() {
                         <Link
                           href={`/admin/invoices/${invoice.id}`}
                           className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-900 px-3 py-1.5 rounded-md hover:bg-indigo-50 transition-colors"
-                          title="Ver detalle"
+                          title="Ver detalle de la factura"
                         >
                           <Eye className="h-4 w-4" />
-                          <span className="hidden sm:inline">Ver</span>
+                          <span className="hidden sm:inline">Detalle</span>
                         </Link>
                         <button
                           onClick={() => openPDF(invoice.id)}
                           disabled={invoice.anulada}
                           className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-900 px-3 py-1.5 rounded-md hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          title={invoice.anulada ? "Factura anulada - no disponible" : "Ver factura"}
+                          title={invoice.anulada ? "Factura anulada - no disponible" : "Descargar PDF"}
                           data-testid="view-invoice-button"
                         >
                           <Printer className="h-4 w-4" />
-                          <span className="hidden sm:inline">Ver factura</span>
+                          <span className="hidden sm:inline">PDF</span>
                         </button>
                         {!invoice.anulada && (
                           <button
