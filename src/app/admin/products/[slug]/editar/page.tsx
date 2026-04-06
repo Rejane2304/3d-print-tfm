@@ -261,17 +261,25 @@ export default function EditarProductoPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/admin/products"
-              className="text-gray-500 hover:text-gray-700 transition-colors"
-            >
-              <ArrowLeft className="h-6 w-6" />
-            </Link>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Editar Producto</h1>
-              <p className="text-gray-600 mt-1">Modificar producto existente</p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Link
+                href="/admin/products"
+                className="text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                <ArrowLeft className="h-6 w-6" />
+              </Link>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">Editar Producto</h1>
+                <p className="text-gray-600 mt-1">Modificar producto existente</p>
+              </div>
             </div>
+            <Link
+              href="/admin/dashboard"
+              className="text-indigo-600 hover:text-indigo-800 font-medium"
+            >
+              ← Volver al Dashboard
+            </Link>
           </div>
         </div>
 

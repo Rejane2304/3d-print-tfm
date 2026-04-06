@@ -217,11 +217,17 @@ export default function AdminPedidoDetallePage() {
                   {new Date(order.createdAt).toLocaleDateString('es-ES')} - {new Date(order.createdAt).toLocaleTimeString('es-ES')}
                 </p>
               </div>
+              <span className={`ml-4 px-4 py-2 inline-flex items-center gap-2 text-sm font-semibold rounded-full border-2 ${statusConfig.color}`} data-testid="order-status">
+                <StatusIcon className="h-5 w-5" />
+                {statusConfig.label}
+              </span>
             </div>
-            <span className={`px-4 py-2 inline-flex items-center gap-2 text-sm font-semibold rounded-full border-2 ${statusConfig.color}`} data-testid="order-status">
-              <StatusIcon className="h-5 w-5" />
-              {statusConfig.label}
-            </span>
+            <Link
+              href="/admin/dashboard"
+              className="text-indigo-600 hover:text-indigo-800 font-medium"
+            >
+              ← Volver al Dashboard
+            </Link>
           </div>
         </div>
       </header>

@@ -131,14 +131,22 @@ export default function AdminProductsPage() {
               <Package className="h-8 w-8 text-indigo-600" />
               <h1 className="text-2xl font-bold text-gray-900">Gestión de Productos</h1>
             </div>
-            <Link
-              href="/admin/products/new"
-              className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
-              data-testid="new-product-button"
-            >
-              <Plus className="h-5 w-5" />
-              Nuevo Producto
-            </Link>
+            <div className="flex items-center gap-4">
+              <Link
+                href="/admin/dashboard"
+                className="text-indigo-600 hover:text-indigo-800 font-medium"
+              >
+                ← Volver al Dashboard
+              </Link>
+              <Link
+                href="/admin/products/new"
+                className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+                data-testid="new-product-button"
+              >
+                <Plus className="h-5 w-5" />
+                Nuevo Producto
+              </Link>
+            </div>
           </div>
         </div>
       </header>

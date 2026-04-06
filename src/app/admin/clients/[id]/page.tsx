@@ -146,21 +146,30 @@ export default function AdminClientDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Back Button */}
-        <Link
-          href="/admin/clients"
-          className="inline-flex items-center text-indigo-600 hover:text-indigo-900 mb-6"
-        >
-          <ArrowLeft className="h-4 w-4 mr-1" />
-          Volver a clientes
-        </Link>
-
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">{client.name}</h1>
-          <p className="text-gray-600 mt-2">Detalle del cliente</p>
+      {/* Header */}
+      <header className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Link href="/admin/clients" className="text-gray-500 hover:text-gray-700">
+                <ArrowLeft className="h-6 w-6" />
+              </Link>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">{client.name}</h1>
+                <p className="text-sm text-gray-500">Detalle del cliente</p>
+              </div>
+            </div>
+            <Link
+              href="/admin/dashboard"
+              className="text-indigo-600 hover:text-indigo-800 font-medium"
+            >
+              ← Volver al Dashboard
+            </Link>
+          </div>
         </div>
+      </header>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Client Info Card */}

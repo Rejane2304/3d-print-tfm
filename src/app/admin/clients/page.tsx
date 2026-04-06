@@ -109,12 +109,25 @@ export default function AdminClientsPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Gestión de Clientes</h1>
-          <p className="text-gray-600 mt-2">Administra los clientes registrados en la tienda</p>
+      {/* Header */}
+      <header className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Gestión de Clientes</h1>
+              <p className="text-gray-600 mt-1 text-sm">Administra los clientes registrados en la tienda</p>
+            </div>
+            <Link
+              href="/admin/dashboard"
+              className="text-indigo-600 hover:text-indigo-800 font-medium"
+            >
+              ← Volver al Dashboard
+            </Link>
+          </div>
         </div>
+      </header>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         {/* Filters */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">

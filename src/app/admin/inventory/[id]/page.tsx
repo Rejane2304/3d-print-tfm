@@ -198,16 +198,30 @@ export default function InventoryHistoryPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Botón Volver */}
-        <Link
-          href="/admin/inventory"
-          className="inline-flex items-center text-indigo-600 hover:text-indigo-900 mb-6"
-        >
-          <ArrowLeft className="h-4 w-4 mr-1" />
-          Volver a inventario
-        </Link>
+      {/* Header */}
+      <header className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Link href="/admin/inventory" className="text-gray-500 hover:text-gray-700">
+                <ArrowLeft className="h-6 w-6" />
+              </Link>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Historial de Inventario</h1>
+                <p className="text-sm text-gray-500">{producto.nombre}</p>
+              </div>
+            </div>
+            <Link
+              href="/admin/dashboard"
+              className="text-indigo-600 hover:text-indigo-800 font-medium"
+            >
+              ← Volver al Dashboard
+            </Link>
+          </div>
+        </div>
+      </header>
 
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header con información del producto */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
           <div className="flex items-center gap-6">

@@ -184,6 +184,12 @@ export default function AdminInvoiceDetailPage() {
                 </p>
               </div>
             </div>
+            <Link
+              href="/admin/dashboard"
+              className="text-indigo-600 hover:text-indigo-800 font-medium mr-4"
+            >
+              ← Volver al Dashboard
+            </Link>
             <div className="flex items-center gap-2 flex-wrap justify-end">
               <button
                 onClick={openPDF}
