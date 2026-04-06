@@ -3,8 +3,11 @@
  * Responsive: mobile → 4K
  * Logo en color, diseño moderno, Barcelona como ubicación
  */
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
+import { useSession } from 'next-auth/react';
 import { 
   Mail, 
   Phone, 
@@ -33,6 +36,8 @@ const TikTokIcon = () => (
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.rol === 'ADMIN';
 
   return (
     <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
@@ -119,12 +124,14 @@ export default function Footer() {
                   Mi Cuenta
                 </Link>
               </li>
-              <li>
-                <Link href="/cart" className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-2 group">
-                  <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-indigo-400 transition-colors"></span>
-                  Carrito
-                </Link>
-              </li>
+              {!isAdmin && (
+                <li>
+                  <Link href="/cart" className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-2 group">
+                    <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-indigo-400 transition-colors"></span>
+                    Carrito
+                  </Link>
+                </li>
+              )}
             </ul>
           </div>
 
