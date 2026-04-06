@@ -22,7 +22,10 @@ import {
   Settings,
   MapPin,
   ShoppingCart,
-  FileText
+  FileText,
+  Users,
+  Bell,
+  Warehouse
 } from 'lucide-react';
 import CartIcon from '@/components/cart/CartIcon';
 
@@ -163,6 +166,14 @@ export default function Header() {
                             <span className="text-sm">Panel Admin</span>
                           </Link>
                           <Link
+                            href="/admin/clients"
+                            onClick={() => setUserMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                          >
+                            <Users className="h-4 w-4" />
+                            <span className="text-sm">Clientes</span>
+                          </Link>
+                          <Link
                             href="/admin/orders"
                             onClick={() => setUserMenuOpen(false)}
                             className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
@@ -179,12 +190,28 @@ export default function Header() {
                             <span className="text-sm">Productos</span>
                           </Link>
                           <Link
+                            href="/admin/inventory"
+                            onClick={() => setUserMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                          >
+                            <Warehouse className="h-4 w-4" />
+                            <span className="text-sm">Inventario</span>
+                          </Link>
+                          <Link
                             href="/admin/invoices"
                             onClick={() => setUserMenuOpen(false)}
                             className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
                           >
                             <FileText className="h-4 w-4" />
                             <span className="text-sm">Facturas</span>
+                          </Link>
+                          <Link
+                            href="/admin/alerts"
+                            onClick={() => setUserMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                          >
+                            <Bell className="h-4 w-4" />
+                            <span className="text-sm">Alertas</span>
                           </Link>
                           <div className="border-t border-gray-100 my-2" />
                           <Link
