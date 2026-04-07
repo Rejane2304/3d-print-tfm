@@ -188,11 +188,15 @@ export default function AdminProductsPage() {
             href={`/admin/products/${product.slug}/editar`}
             className="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-50 transition-colors"
             title="Editar"
+            onClick={(e) => e.stopPropagation()}
           >
             <Edit className="h-5 w-5" />
           </Link>
           <button
-            onClick={() => handleDelete(product.id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDelete(product.id);
+            }}
             className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors"
             title="Eliminar"
           >
