@@ -36,12 +36,12 @@ interface Order {
 }
 
 const orderStatuses: Record<string, { color: string; icon: React.ElementType; label: string }> = {
-  Pendiente: { color: 'bg-yellow-100 text-yellow-800', icon: Clock, label: 'Pending' },
-  Confirmado: { color: 'bg-blue-100 text-blue-800', icon: CheckCircle2, label: 'Confirmed' },
-  'En preparación': { color: 'bg-indigo-100 text-indigo-800', icon: Box, label: 'Preparing' },
-  Enviado: { color: 'bg-purple-100 text-purple-800', icon: Truck, label: 'Shipped' },
-  Entregado: { color: 'bg-green-100 text-green-800', icon: CheckCircle2, label: 'Delivered' },
-  Cancelado: { color: 'bg-red-100 text-red-800', icon: XCircle, label: 'Cancelled' },
+  Pendiente: { color: 'bg-yellow-100 text-yellow-800', icon: Clock, label: 'Pendiente' },
+  Confirmado: { color: 'bg-blue-100 text-blue-800', icon: CheckCircle2, label: 'Confirmado' },
+  'En preparación': { color: 'bg-indigo-100 text-indigo-800', icon: Box, label: 'En preparación' },
+  Enviado: { color: 'bg-purple-100 text-purple-800', icon: Truck, label: 'Enviado' },
+  Entregado: { color: 'bg-green-100 text-green-800', icon: CheckCircle2, label: 'Entregado' },
+  Cancelado: { color: 'bg-red-100 text-red-800', icon: XCircle, label: 'Cancelado' },
 };
 
 export default function AdminOrdersPage() {
@@ -171,7 +171,7 @@ export default function AdminOrdersPage() {
       header: 'Total',
       sortable: true,
       render: (value) => (
-        <span className="text-sm text-gray-900">${Number(value).toFixed(2)}</span>
+        <span className="text-sm text-gray-900">{Number(value).toFixed(2)} €</span>
       ),
     },
     {
@@ -180,7 +180,7 @@ export default function AdminOrdersPage() {
       sortable: true,
       render: (value) => (
         <span className="text-sm text-gray-500">
-          {new Date(value as string).toLocaleDateString('en-US')}
+          {new Date(value as string).toLocaleDateString('es-ES')}
         </span>
       ),
     },
