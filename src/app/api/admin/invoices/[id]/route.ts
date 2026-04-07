@@ -72,9 +72,9 @@ export async function GET(
     const facturaFormateada = {
       id: factura.id,
       invoiceNumber: factura.invoiceNumber,
-      emitidaEn: factura.issuedAt,
-      anulada: factura.isCancelled,
-      anuladaEn: factura.cancelledAt,
+      issuedAt: factura.issuedAt?.toISOString() || new Date().toISOString(),
+      isCancelled: factura.isCancelled,
+      cancelledAt: factura.cancelledAt?.toISOString() || null,
       baseImponible: Number(factura.taxableAmount),
       cuotaIva: Number(factura.vatAmount),
       tipoIva: Number(factura.vatRate),

@@ -320,7 +320,9 @@ export default function AdminFacturasPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(invoice.emitidaEn).toLocaleDateString('es-ES')}
+                      {invoice.emitidaEn
+                        ? new Date(invoice.emitidaEn).toLocaleDateString('es-ES')
+                        : 'Fecha no disponible'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
                       {Number(invoice.total).toFixed(2)} €

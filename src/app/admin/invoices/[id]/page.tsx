@@ -154,7 +154,9 @@ export default function AdminInvoiceDetailPage() {
                 </h1>
                 <p className="text-sm text-gray-500">
                   Emitida el{' '}
-                  {new Date(invoice.issuedAt).toLocaleDateString('es-ES')}
+                  {invoice.issuedAt
+                    ? new Date(invoice.issuedAt).toLocaleDateString('es-ES')
+                    : 'Fecha no disponible'}
                 </p>
               </div>
             </div>

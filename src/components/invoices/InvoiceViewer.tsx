@@ -505,11 +505,13 @@ export function InvoiceViewer({ data }: InvoiceViewerProps) {
     setMounted(true);
   }, []);
 
-  const fechaEmision = new Date(data.issuedAt).toLocaleDateString('es-ES', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric',
-  });
+  const fechaEmision = data.issuedAt
+    ? new Date(data.issuedAt).toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+      })
+    : 'Fecha no disponible';
 
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat('es-ES', {

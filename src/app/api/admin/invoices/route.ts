@@ -92,7 +92,7 @@ export async function GET(req: NextRequest) {
       id: factura.id,
       invoiceNumber: factura.invoiceNumber,
       anulada: factura.isCancelled,
-      emitidaEn: factura.issuedAt,
+      emitidaEn: factura.issuedAt?.toISOString(),
       total: factura.total,
       pedido: {
         orderNumber: factura.order?.orderNumber,
