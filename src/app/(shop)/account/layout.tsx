@@ -10,7 +10,8 @@ import {
   Package,
   MapPin,
   User,
-  ChevronRight
+  ChevronRight,
+  MessageSquare
 } from 'lucide-react';
 
 interface CuentaLayoutProps {
@@ -31,6 +32,7 @@ export default async function CuentaLayout({ children }: CuentaLayoutProps) {
     ? [{ href: '/account/profile', label: 'Mi Perfil', icon: User }]
     : [
         { href: '/account/orders', label: 'Mis Pedidos', icon: Package },
+        { href: '/account/reviews', label: 'Mis Reseñas', icon: MessageSquare },
         { href: '/account/addresses', label: 'Mis Direcciones', icon: MapPin },
         { href: '/account/profile', label: 'Mi Perfil', icon: User },
       ];
