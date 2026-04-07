@@ -402,6 +402,27 @@ model ShippingConfig {
   @@map("shipping_configs")
 }
 
+model ShippingZone {
+  id                   String   @id @default(uuid())
+  name                 String   @db.VarChar(100)
+  country              String   @db.VarChar(100)
+  regions              String[] @db.VarChar(100)
+  postalCodePrefixes   String[] @db.VarChar(10)
+  baseCost             Decimal  @db.Decimal(10, 2)
+  freeShippingThreshold Decimal? @db.Decimal(10, 2)
+  estimatedDaysMin     Int      @default(3)
+  estimatedDaysMax     Int      @default(5)
+  isActive             Boolean  @default(true)
+  displayOrder         Int      @default(0)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@index([isActive])
+  @@index([country])
+  @@index([displayOrder])
+  @@map("shipping_zones")
+}
+
 model SiteConfig {
   id                String   @id @default(cuid())
   companyName       String   @db.VarChar(200)

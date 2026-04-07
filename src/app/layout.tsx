@@ -9,6 +9,7 @@ import "./globals.css";
 import { SessionProvider } from "@/components/providers/SessionProvider";
 import PayPalProvider from "@/components/providers/PayPalProvider";
 import { CartPersistenceProvider } from "@/components/providers/CartPersistenceProvider";
+import { SiteConfigProvider } from "@/providers/SiteConfigProvider";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 
@@ -46,14 +47,16 @@ export default function RootLayout({
         <SessionProvider>
           <PayPalProvider>
             <CartPersistenceProvider>
-              <Header />
-              
-              {/* Main Content Area */}
-              <main className="flex-grow">
-                {children}
-              </main>
-              
-              <Footer />
+              <SiteConfigProvider>
+                <Header />
+                
+                {/* Main Content Area */}
+                <main className="flex-grow">
+                  {children}
+                </main>
+                
+                <Footer />
+              </SiteConfigProvider>
             </CartPersistenceProvider>
           </PayPalProvider>
         </SessionProvider>

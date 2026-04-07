@@ -295,6 +295,51 @@ export const shippingConfigSchema = z.object({
   isDefault: z.boolean().default(false),
 });
 
+export const siteConfigSchema = z.object({
+  companyName: z
+    .string()
+    .min(1, 'El nombre de la empresa es obligatorio')
+    .max(200, 'El nombre no puede exceder 200 caracteres'),
+  companyTaxId: z
+    .string()
+    .min(1, 'El CIF/NIF es obligatorio')
+    .max(20, 'El CIF/NIF no puede exceder 20 caracteres'),
+  companyAddress: z
+    .string()
+    .min(1, 'La dirección es obligatoria')
+    .max(255, 'La dirección no puede exceder 255 caracteres'),
+  companyCity: z
+    .string()
+    .min(1, 'La ciudad es obligatoria')
+    .max(100, 'La ciudad no puede exceder 100 caracteres'),
+  companyProvince: z
+    .string()
+    .min(1, 'La provincia es obligatoria')
+    .max(100, 'La provincia no puede exceder 100 caracteres'),
+  companyPostalCode: z
+    .string()
+    .regex(/^\d{5}$/, 'El código postal debe tener 5 dígitos'),
+  companyPhone: z
+    .string()
+    .regex(/^\+?\d{9,20}$/, 'El teléfono debe tener entre 9 y 20 dígitos'),
+  companyEmail: z
+    .string()
+    .min(1, 'El email es obligatorio')
+    .email('Formato de email inválido')
+    .max(255, 'El email no puede exceder 255 caracteres'),
+  defaultVatRate: z
+    .number()
+    .min(0, 'El IVA no puede ser negativo')
+    .max(100, 'El IVA no puede exceder 100%')
+    .default(21),
+  lowStockThreshold: z
+    .number()
+    .int('El umbral debe ser un número entero')
+    .min(1, 'El umbral debe ser al menos 1')
+    .max(1000, 'El umbral no puede exceder 1000')
+    .default(5),
+});
+
 // ============================================
 // CATEGORY VALIDATIONS
 // ============================================
@@ -348,5 +393,6 @@ export type ProductImageInput = z.infer<typeof productImageSchema>;
 export type ShippingConfigInput = z.infer<typeof shippingConfigSchema>;
 export type CategoryInput = z.infer<typeof categorySchema>;
 export type CategoryUpdateInput = z.infer<typeof categoryUpdateSchema>;
+export type SiteConfigInput = z.infer<typeof siteConfigSchema>;
 
 

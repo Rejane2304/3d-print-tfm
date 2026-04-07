@@ -12,6 +12,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { Prisma } from '@prisma/client';
 import { translatePaymentMethod, translateErrorMessage } from '@/lib/i18n';
+import { getDefaultVatRate } from '@/lib/site-config';
 
 // Type for cart items with product included
 type CartItemWithProduct = Prisma.CartItemGetPayload<{
@@ -138,9 +139,12 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     }
   }
 
+  // Get VAT rate from site config
+  const vatRatePercent = await getDefaultVatRate();
+  const taxRate = vatRatePercent / 100;
+
   const shippingCost = subtotal >= 50 || hasFreeShipping ? 0 : 5.99;
   const discountedSubtotal = Math.max(0, subtotal - couponDiscount);
-  const taxRate = 0.21;
   const taxAmount = discountedSubtotal * taxRate;
   const total = discountedSubtotal + shippingCost + taxAmount;
 

@@ -1,0 +1,101 @@
+/**
+ * SiteConfig Provider
+ * Loads and provides site configuration to the frontend
+ */
+
+'use client';
+
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+
+interface SiteConfig {
+  _ref: string;
+  nombreEmpresa: string;
+  cifNif: string;
+  direccionEmpresa: string;
+  ciudadEmpresa: string;
+  provinciaEmpresa: string;
+  codigoPostalEmpresa: string;
+  telefonoEmpresa: string;
+  emailEmpresa: string;
+  ivaPorDefecto: number;
+  umbralStockBajo: number;
+  actualizadoEn: string;
+}
+
+interface SiteConfigContextType {
+  config: SiteConfig | null;
+  loading: boolean;
+  error: string | null;
+  refetch: () => Promise<void>;
+}
+
+const SiteConfigContext = createContext<SiteConfigContextType | undefined>(undefined);
+
+export function SiteConfigProvider({ children }: { children: ReactNode }) {
+  const [config, setConfig] = useState<SiteConfig | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchConfig = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch('/api/site-config');
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Error loading site config');
+      }
+
+      setConfig(data.config);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
+      console.error('Error loading site config:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchConfig();
+  }, []);
+
+  return (
+    <SiteConfigContext.Provider value={{ config, loading, error, refetch: fetchConfig }}>
+      {children}
+    </SiteConfigContext.Provider>
+  );
+}
+
+export function useSiteConfig() {
+  const context = useContext(SiteConfigContext);
+  if (context === undefined) {
+    throw new Error('useSiteConfig must be used within a SiteConfigProvider');
+  }
+  return context;
+}
+
+// Hook to get config value with fallback
+export function useConfigValue<K extends keyof SiteConfig>(key: K, fallback: SiteConfig[K]): SiteConfig[K] {
+  const { config } = useSiteConfig();
+  return config?.[key] ?? fallback;
+}
+
+// Hook to check if stock is low
+export function useIsLowStock(stock: number): boolean {
+  const { config } = useSiteConfig();
+  const threshold = config?.umbralStockBajo ?? 5;
+  return stock <= threshold;
+}
+
+// Hook to calculate VAT
+export function useCalculateVat(amount: number): { vatAmount: number; totalWithVat: number } {
+  const { config } = useSiteConfig();
+  const vatRate = config?.ivaPorDefecto ?? 21;
+  const vatAmount = (amount * vatRate) / 100;
+  return {
+    vatAmount,
+    totalWithVat: amount + vatAmount,
+  };
+}

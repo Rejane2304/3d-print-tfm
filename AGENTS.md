@@ -57,6 +57,10 @@ Funciones helpers:
 ✅ `/api/account/orders/[id]` - Detalle con productos traducidos
 ✅ `/api/admin/products` - Productos traducidos
 ✅ `/api/admin/inventory` - Inventario con nombres traducidos
+✅ `/api/admin/shipping` - Zonas de envío (listar, crear)
+✅ `/api/admin/shipping/[id]` - Zona de envío individual (obtener, actualizar, eliminar)
+✅ `/api/shipping/zones` - Zonas de envío públicas
+✅ `/api/shipping/calculate` - Calcular costo de envío
 
 ## Convenciones de Código
 

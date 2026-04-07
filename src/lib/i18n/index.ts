@@ -309,6 +309,29 @@ export const shippingTranslations: Record<string, { name: string; description: s
 };
 
 // ============================================================================
+// SHIPPING ZONE TRANSLATIONS (for zones)
+// ============================================================================
+
+export const shippingZoneTranslations: Record<string, { name: string; country: string }> = {
+  'ZONA-PENINSULA': {
+    name: 'Península',
+    country: 'España'
+  },
+  'ZONA-BALEARES': {
+    name: 'Islas Baleares',
+    country: 'España'
+  },
+  'ZONA-CANARIAS': {
+    name: 'Islas Canarias',
+    country: 'España'
+  },
+  'ZONA-CEUTA-MELILLA': {
+    name: 'Ceuta y Melilla',
+    country: 'España'
+  }
+};
+
+// ============================================================================
 // ALERT TRANSLATIONS
 // ============================================================================
 

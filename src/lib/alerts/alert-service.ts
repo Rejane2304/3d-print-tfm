@@ -4,6 +4,7 @@
  */
 import { prisma } from '@/lib/db/prisma';
 import { AlertType, AlertSeverity, AlertStatus, OrderStatus, PaymentStatus } from '@prisma/client';
+import { getLowStockThreshold } from '@/lib/site-config';
 
 interface AlertConfig {
   lowStockThreshold: number;
@@ -14,6 +15,17 @@ const DEFAULT_CONFIG: AlertConfig = {
   lowStockThreshold: 5,
   criticalStockThreshold: 2,
 };
+
+/**
+ * Carga la configuración de alertas desde la BD
+ */
+export async function getAlertConfig(): Promise<AlertConfig> {
+  const lowStockThreshold = await getLowStockThreshold();
+  return {
+    lowStockThreshold,
+    criticalStockThreshold: Math.max(1, Math.floor(lowStockThreshold / 2)),
+  };
+}
 
 /**
  * Crea una alerta de stock bajo para un producto
@@ -86,18 +98,21 @@ export async function createStockAlert(productId: string, currentStock: number, 
 /**
  * Verifica y crea alertas para todos los productos con stock bajo
  */
-export async function checkAllStockAlerts(config: AlertConfig = DEFAULT_CONFIG) {
+export async function checkAllStockAlerts(config?: AlertConfig) {
+  // Load config from DB if not provided
+  const alertConfig = config || await getAlertConfig();
+  
   const products = await prisma.product.findMany({
     where: {
       isActive: true,
-      stock: { lte: config.lowStockThreshold },
+      stock: { lte: alertConfig.lowStockThreshold },
     },
     include: { category: true },
   });
 
   const alerts = [];
   for (const product of products) {
-    const alert = await createStockAlert(product.id, product.stock, config.lowStockThreshold);
+    const alert = await createStockAlert(product.id, product.stock, alertConfig.lowStockThreshold);
     if (alert) alerts.push(alert);
   }
 
@@ -235,7 +250,8 @@ export async function createDelayedOrderAlerts(daysThreshold: number = 3) {
  * Ejecuta todas las verificaciones de alertas
  */
 export async function runAllAlertChecks() {
-  const stockAlerts = await checkAllStockAlerts();
+  const config = await getAlertConfig();
+  const stockAlerts = await checkAllStockAlerts(config);
   const unpaidAlerts = await createUnpaidOrderAlerts();
   const delayedAlerts = await createDelayedOrderAlerts();
 

@@ -8,6 +8,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSession } from 'next-auth/react';
+import { useSiteConfig } from '@/providers/SiteConfigProvider';
 import { 
   Mail, 
   Phone, 
@@ -38,7 +39,14 @@ const TikTokIcon = () => (
 export default function Footer() {
   const currentYear = new Date().getFullYear();
   const { data: session } = useSession();
+  const { config } = useSiteConfig();
   const isAdmin = session?.user?.rol === 'ADMIN';
+
+  // Use config values with fallbacks
+  const companyEmail = config?.emailEmpresa || 'info@3dprint-tfm.com';
+  const companyPhone = config?.telefonoEmpresa || '+34 900 123 456';
+  const companyCity = config?.ciudadEmpresa || 'Barcelona';
+  const companyProvince = config?.provinciaEmpresa || 'Barcelona';
 
   return (
     <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
@@ -185,8 +193,8 @@ export default function Footer() {
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 mb-0.5">Email</p>
-                  <a href="mailto:info@3dprint-tfm.com" className="text-gray-300 hover:text-white text-sm transition-colors">
-                    info@3dprint-tfm.com
+                  <a href={`mailto:${companyEmail}`} className="text-gray-300 hover:text-white text-sm transition-colors">
+                    {companyEmail}
                   </a>
                 </div>
               </li>
@@ -196,8 +204,8 @@ export default function Footer() {
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 mb-0.5">Teléfono</p>
-                  <a href="tel:+34900123456" className="text-gray-300 hover:text-white text-sm transition-colors">
-                    +34 900 123 456
+                  <a href={`tel:${companyPhone.replace(/\s/g, '')}`} className="text-gray-300 hover:text-white text-sm transition-colors">
+                    {companyPhone}
                   </a>
                 </div>
               </li>
@@ -208,7 +216,7 @@ export default function Footer() {
                 <div>
                   <p className="text-xs text-gray-500 mb-0.5">Ubicación</p>
                   <p className="text-gray-300 text-sm">
-                    Barcelona, España
+                    {companyCity}, {companyProvince}
                   </p>
                 </div>
               </li>
