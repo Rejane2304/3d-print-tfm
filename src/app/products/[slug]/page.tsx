@@ -9,6 +9,9 @@ import { prisma } from '@/lib/db/prisma';
 import Link from 'next/link';
 import AddToCartButton from '@/components/products/AddToCartButton';
 import ProductImageGallery from '@/components/products/ProductImageGallery';
+import { ReviewsList } from '@/components/reviews/ReviewsList';
+import { StarRating } from '@/components/ui/StarRating';
+import { ReviewFormClient } from '@/components/reviews/ReviewFormClient';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import {
@@ -16,6 +19,7 @@ import {
   translateProductDescription,
   translateCategoryName,
 } from '@/lib/i18n';
+
 
 interface ProductDetailPageProps {
   params: {
@@ -42,7 +46,7 @@ interface ProductWithDimensions {
   category: { name: string } | null;
 }
 
-async function getProduct(slug: string): Promise<{ product: ProductWithDimensions; related: unknown[] } | null> {
+async function getProduct(slug: string): Promise<{ product: ProductWithDimensions; related: unknown[]; reviews: unknown[]; reviewStats: unknown } | null> {
   const product = await prisma.product.findUnique({
     where: { slug },
     include: {
@@ -106,13 +110,76 @@ async function getProduct(slug: string): Promise<{ product: ProductWithDimension
     name: translateProductName(p.slug),
   }));
 
-  return { product: translatedProduct, related: translatedRelated };
+  // Obtener reseñas aprobadas
+  const reviews = await prisma.review.findMany({
+    where: {
+      productId: product.id,
+      isApproved: true,
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+    take: 10,
+  });
+
+  // Formatear reseñas
+  const formattedReviews = reviews.map((review) => ({
+    id: review.id,
+    usuarioNombre: review.user.name,
+    puntuacion: review.rating,
+    titulo: review.title,
+    comentario: review.comment,
+    verificado: review.isVerified,
+    creadoEn: review.createdAt.toISOString(),
+  }));
+
+  // Calcular estadísticas
+  const allReviews = await prisma.review.findMany({
+    where: {
+      productId: product.id,
+      isApproved: true,
+    },
+    select: {
+      rating: true,
+    },
+  });
+
+  const ratingCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+  let totalRating = 0;
+  
+  allReviews.forEach((review) => {
+    ratingCounts[review.rating as 1 | 2 | 3 | 4 | 5]++;
+    totalRating += review.rating;
+  });
+
+  const totalCount = allReviews.length;
+  const averageRating = totalCount > 0 ? totalRating / totalCount : 0;
+
+  return { 
+    product: translatedProduct, 
+    related: translatedRelated,
+    reviews: formattedReviews,
+    reviewStats: {
+      promedio: Number(averageRating.toFixed(1)),
+      total: totalCount,
+      distribucion: ratingCounts,
+    }
+  };
 }
 
 export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
-  // Get session to check if user is admin
+  // Get session to check if user is admin or logged in
   const session = await getServerSession(authOptions);
   const isAdmin = session?.user?.rol === 'ADMIN';
+  const isLoggedIn = !!session?.user;
 
   const data = await getProduct(params.slug);
 
@@ -120,7 +187,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
     notFound();
   }
 
-  const { product } = data;
+  const { product, reviews, reviewStats } = data;
   
   return (
     <div data-testid="product-detail" className="min-h-screen bg-gray-50">
@@ -187,6 +254,34 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 {product.description}
               </p>
             </div>
+
+            {/* Rating Summary */}
+            {(reviewStats as { total: number }).total > 0 && (
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="flex items-center gap-4">
+                  <div>
+                    <p className="text-3xl font-bold text-gray-900">
+                      {(reviewStats as { promedio: number }).promedio}
+                    </p>
+                    <StarRating 
+                      rating={(reviewStats as { promedio: number }).promedio} 
+                      size="sm" 
+                    />
+                  </div>
+                  <div className="border-l pl-4">
+                    <p className="text-sm text-gray-600">
+                      {(reviewStats as { total: number }).total} reseñas
+                    </p>
+                    <Link 
+                      href="#reviews" 
+                      className="text-sm text-indigo-600 hover:text-indigo-800"
+                    >
+                      Ver todas las reseñas
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            )}
             
             {/* Detalles */}
             {(product.widthCm || product.heightCm || product.depthCm || product.weight || (isAdmin && product.printTime)) && (
@@ -244,8 +339,60 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             </div>
           </div>
         </div>
-        
+
+        {/* Sección de Reseñas */}
+        <div id="reviews" className="mt-16 pt-8 border-t">
+          <h2 className="text-2xl font-bold text-gray-900 mb-8">
+            Reseñas de Clientes
+          </h2>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Reviews List */}
+            <div className="lg:col-span-2">
+              <ReviewsList 
+                reviews={reviews as []}
+                estadisticas={reviewStats as { promedio: number; total: number; distribucion: Record<number, number> }}
+                paginacion={{ 
+                  pagina: 1, 
+                  porPagina: 10, 
+                  totalPaginas: Math.ceil(((reviewStats as { total: number })?.total || 0) / 10),
+                  total: (reviewStats as { total: number })?.total || 0
+                }}
+              />
+            </div>
+
+            {/* Review Form */}
+            {isLoggedIn ? (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 h-fit">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  Escribe una reseña
+                </h3>
+                <ReviewFormClient 
+                  productId={product.id} 
+                  productName={product.name}
+                />
+              </div>
+            ) : (
+              <div className="bg-gray-50 rounded-xl p-6 h-fit">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Escribe una reseña
+                </h3>
+                <p className="text-gray-600 text-sm mb-4">
+                  Inicia sesión para dejar una reseña sobre este producto.
+                </p>
+                <Link
+                  href={`/login?callbackUrl=/products/${product.slug}`}
+                  className="inline-flex items-center justify-center w-full px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+                >
+                  Iniciar sesión
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
 }
+
+

@@ -1,10 +1,11 @@
 /**
  * ProductCard Component
- * Product card for the catalog
+ * Product card for the catalog with rating display
  */
 import Link from 'next/link';
 import Image from 'next/image';
 import { Decimal } from '@prisma/client/runtime/library';
+import { StarRating } from '@/components/ui/StarRating';
 
 interface Product {
   id: string;
@@ -18,6 +19,8 @@ interface Product {
     url: string;
     isMain: boolean;
   }>;
+  _avgRating?: number;
+  _reviewCount?: number;
 }
 
 interface ProductCardProps {
@@ -27,6 +30,7 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const mainImage = product.images?.find(img => img.isMain) || product.images?.[0];
   const price = Number(product.price);
+  const hasRating = product._avgRating !== undefined && product._reviewCount !== undefined && product._reviewCount > 0;
 
   return (
     <Link
@@ -73,6 +77,14 @@ export default function ProductCard({ product }: ProductCardProps) {
           <p className="text-sm text-gray-500 mb-2 line-clamp-2" data-testid="product-description">
             {product.shortDescription}
           </p>
+        )}
+
+        {/* Rating stars */}
+        {hasRating && (
+          <div className="flex items-center gap-2 mb-2">
+            <StarRating rating={product._avgRating || 0} size="sm" />
+            <span className="text-xs text-gray-500">({product._reviewCount})</span>
+          </div>
         )}
 
         <div className="flex items-center justify-between">
