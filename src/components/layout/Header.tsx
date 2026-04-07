@@ -25,7 +25,12 @@ import {
   FileText,
   Users,
   Bell,
-  Warehouse
+  Warehouse,
+  Folder,
+  Ticket,
+  HelpCircle,
+  Star,
+  Truck
 } from 'lucide-react';
 import CartIcon from '@/components/cart/CartIcon';
 
@@ -204,12 +209,62 @@ export default function Header() {
                             <span className="text-sm">Alertas</span>
                           </Link>
                           <div className="border-t border-gray-100 my-2" />
+                          <p className="px-4 py-1 text-xs text-gray-400 font-medium">CONFIGURACIÓN</p>
+                          <Link
+                            href="/admin/categories"
+                            onClick={() => setUserMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                          >
+                            <Folder className="h-4 w-4" />
+                            <span className="text-sm">Categorías</span>
+                          </Link>
+                          <Link
+                            href="/admin/coupons"
+                            onClick={() => setUserMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                          >
+                            <Ticket className="h-4 w-4" />
+                            <span className="text-sm">Cupones</span>
+                          </Link>
+                          <Link
+                            href="/admin/faqs"
+                            onClick={() => setUserMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                          >
+                            <HelpCircle className="h-4 w-4" />
+                            <span className="text-sm">FAQs</span>
+                          </Link>
+                          <Link
+                            href="/admin/reviews"
+                            onClick={() => setUserMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                          >
+                            <Star className="h-4 w-4" />
+                            <span className="text-sm">Reseñas</span>
+                          </Link>
+                          <Link
+                            href="/admin/shipping"
+                            onClick={() => setUserMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                          >
+                            <Truck className="h-4 w-4" />
+                            <span className="text-sm">Envíos</span>
+                          </Link>
+                          <Link
+                            href="/admin/site-config"
+                            onClick={() => setUserMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                          >
+                            <Settings className="h-4 w-4" />
+                            <span className="text-sm">Configuración</span>
+                          </Link>
+                          <div className="border-t border-gray-100 my-2" />
                           <Link
                             href="/account"
                             onClick={() => setUserMenuOpen(false)}
                             className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
                           >
-                            <Settings className="h-4 w-4" />
+                            <User className="h-4 w-4" />
                             <span className="text-sm">Mi Perfil</span>
                           </Link>
                         </>
