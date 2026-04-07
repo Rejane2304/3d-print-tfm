@@ -8,7 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
-import { translateOrderStatus, translatePaymentStatus, translatePaymentMethod, translateErrorMessage, translateCountry } from '@/lib/i18n';
+import { translateOrderStatus, translatePaymentStatus, translatePaymentMethod, translateErrorMessage, translateCountry, translateProductName } from '@/lib/i18n';
 
 export async function GET(
   req: NextRequest,
@@ -85,7 +85,7 @@ export async function GET(
       },
       items: order.items.map(item => ({
         id: item.id,
-        nombre: item.product?.name || 'Producto',
+        nombre: item.product?.slug ? translateProductName(item.product.slug) : (item.product?.name || 'Producto'),
         quantity: item.quantity,
         price: Number(item.price),
         subtotal: Number(item.subtotal),
