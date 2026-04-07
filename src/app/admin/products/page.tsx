@@ -16,7 +16,6 @@ import {
   AlertCircle,
   Edit,
   Trash2,
-  FolderTree,
 } from 'lucide-react';
 import { DataTable, Column, BulkAction } from '@/components/ui/DataTable';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
@@ -219,13 +218,6 @@ export default function AdminProductsPage() {
                 className="text-indigo-600 hover:text-indigo-800 font-medium"
               >
                 ← Volver al Panel
-              </Link>
-              <Link
-                href="/admin/categories"
-                className="inline-flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-teal-700 transition-colors"
-              >
-                <FolderTree className="h-5 w-5" />
-                Categorías
               </Link>
               <Link
                 href="/admin/products/new"
