@@ -1,6 +1,6 @@
 /**
- * Página de Gestión de Productos - Admin
- * Listado y gestión del catálogo de productos
+ * Admin Products Page
+ * Product management with DataTable
  */
 'use client';
 
@@ -11,17 +11,16 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { 
   Plus, 
-  Search, 
-  Filter, 
-  Edit, 
-  Trash2, 
   Package,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  Edit,
+  Trash2,
 } from 'lucide-react';
+import { DataTable, Column, BulkAction } from '@/components/ui/DataTable';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
-interface Product {
+interface Product extends Record<string, unknown> {
   id: string;
   slug: string;
   nombre: string;
@@ -39,8 +38,6 @@ export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [search, setSearch] = useState('');
-  const [filterCategory, setFilterCategory] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
 
@@ -69,12 +66,12 @@ export default function AdminProductsPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error al cargar productos');
+        throw new Error(data.error || 'Error loading products');
       }
 
       setProducts(data.productos || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error unknown');
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
@@ -97,25 +94,109 @@ export default function AdminProductsPage() {
         setProducts(products.filter(p => p.id !== productToDelete));
       }
     } catch {
-      setError('Error al eliminar producto');
+      setError('Error deleting product');
     } finally {
       setModalOpen(false);
       setProductToDelete(null);
     }
   };
 
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = product.nombre.toLowerCase().includes(search.toLowerCase());
-    const matchesCategory = !filterCategory || product.categoria === filterCategory;
-    return matchesSearch && matchesCategory;
-  });
+  const handleBulkDelete = async (selectedIds: string[]) => {
+    try {
+      await Promise.all(
+        selectedIds.map(id => 
+          fetch(`/api/admin/products/${id}`, { method: 'DELETE' })
+        )
+      );
+      setProducts(products.filter(p => !selectedIds.includes(p.id)));
+    } catch {
+      setError('Error deleting products');
+    }
+  };
+
+  const columns: Column<Product>[] = [
+    {
+      key: 'nombre',
+      header: 'Product',
+      sortable: true,
+      render: (_, product) => (
+        <div className="flex items-center">
+          <div className="flex-shrink-0 h-10 w-10">
+            {product.imagenes?.[0] ? (
+              <Image
+                className="h-10 w-10 object-cover rounded-lg"
+                src={product.imagenes[0].url}
+                alt={product.nombre}
+                width={40}
+                height={40}
+                unoptimized
+              />
+            ) : (
+              <div className="h-10 w-10 bg-gray-200 rounded-lg flex items-center justify-center">
+                <Package className="h-5 w-5 text-gray-400" />
+              </div>
+            )}
+          </div>
+          <div className="ml-4">
+            <div className="text-sm font-medium text-gray-900">{product.nombre}</div>
+            <div className="text-sm text-gray-500 capitalize">{product.material.toLowerCase()}</div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: 'categoria',
+      header: 'Category',
+      sortable: true,
+    },
+    {
+      key: 'precio',
+      header: 'Price',
+      sortable: true,
+      render: (value) => `${Number(value).toFixed(2)} €`,
+    },
+    {
+      key: 'stock',
+      header: 'Stock',
+      sortable: true,
+      render: (value) => (
+        <span className={Number(value) <= 5 ? 'text-red-600 font-medium' : ''}>
+          {value}
+        </span>
+      ),
+    },
+    {
+      key: 'activo',
+      header: 'Status',
+      sortable: true,
+      render: (value) => (
+        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+          value 
+            ? 'bg-green-100 text-green-800' 
+            : 'bg-gray-100 text-gray-800'
+        }`}>
+          {value ? 'Active' : 'Inactive'}
+        </span>
+      ),
+    },
+  ];
+
+  const bulkActions: BulkAction[] = [
+    {
+      key: 'delete',
+      label: 'Delete Selected',
+      icon: <Trash2 className="h-4 w-4" />,
+      variant: 'danger',
+      onClick: handleBulkDelete,
+    },
+  ];
 
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-indigo-600 mx-auto mb-4" />
-          <p className="text-gray-600">Cargando productos...</p>
+          <p className="text-gray-600">Loading products...</p>
         </div>
       </div>
     );
@@ -129,22 +210,21 @@ export default function AdminProductsPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Package className="h-8 w-8 text-indigo-600" />
-              <h1 className="text-2xl font-bold text-gray-900">Gestión de Productos</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Product Management</h1>
             </div>
             <div className="flex items-center gap-4">
               <Link
                 href="/admin/dashboard"
                 className="text-indigo-600 hover:text-indigo-800 font-medium"
               >
-                ← Volver al Dashboard
+                ← Back to Dashboard
               </Link>
               <Link
                 href="/admin/products/new"
                 className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
-                data-testid="new-product-button"
               >
                 <Plus className="h-5 w-5" />
-                Nuevo Producto
+                New Product
               </Link>
             </div>
           </div>
@@ -160,152 +240,26 @@ export default function AdminProductsPage() {
           </div>
         )}
 
-        {/* Filtros */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Buscar productos..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <Filter className="h-5 w-5 text-gray-500" />
-              <select
-                value={filterCategory}
-                onChange={(e) => setFilterCategory(e.target.value)}
-                className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              >
-                <option value="">Todas las categorías</option>
-                <option value="DECORACION">Decoración</option>
-                <option value="ACCESORIOS">Accesorios</option>
-                <option value="FUNCIONAL">Funcional</option>
-                <option value="ARTICULADOS">Articulados</option>
-                <option value="JUGUETES">Juguetes</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Tabla de productos */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Producto
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Categoría
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Precio
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Stock
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Estado
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Acciones
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredProducts.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
-                    No se encontraron productos
-                  </td>
-                </tr>
-              ) : (
-                filteredProducts.map((product) => (
-                  <tr key={product.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
-                          {product.imagenes?.[0] ? (
-                            <Image
-                              className="h-10 w-10 object-cover"
-                              src={product.imagenes[0].url}
-                              alt={product.nombre}
-                              width={40}
-                              height={40}
-                              unoptimized
-                              style={{ width: 'auto', height: 'auto' }}
-                            />
-                          ) : (
-                            <div className="h-10 w-10 bg-gray-200 flex items-center justify-center">
-                              <Package className="h-5 w-5 text-gray-400" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {product.nombre}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {product.material}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                        {product.categoria}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {Number(product.precio).toFixed(2)} €
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`text-sm ${product.stock < 10 ? 'text-red-600 font-medium' : 'text-gray-900'}`}>
-                        {product.stock}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        product.activo
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {product.activo ? 'Activo' : 'Inactivo'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex items-center justify-end gap-2">
-                        <Link
-                          href={`/admin/products/${product.slug}/editar`}
-                          className="text-indigo-600 hover:text-indigo-900 p-2"
-                          title="Editar"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Link>
-                        <button
-                          onClick={() => handleDelete(product.id)}
-                          className="text-red-600 hover:text-red-900 p-2"
-                          title="Eliminar"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Resumen */}
-        <div className="mt-4 text-sm text-gray-600">
-          Mostrando {filteredProducts.length} de {products.length} productos
-        </div>
+        {/* DataTable */}
+        <DataTable
+          data={products}
+          columns={columns}
+          rowKey="id"
+          searchable={true}
+          searchKeys={['nombre', 'categoria', 'material']}
+          searchPlaceholder="Search products..."
+          pagination={true}
+          pageSizeOptions={[10, 25, 50, 100]}
+          defaultPageSize={25}
+          selectable={true}
+          bulkActions={bulkActions}
+          exportable={true}
+          exportFilename="products.csv"
+          loading={loading}
+          emptyMessage="No products found"
+          noResultsMessage="No products match your search"
+          onRowClick={(product) => router.push(`/admin/products/${product.slug}/editar`)}
+        />
       </div>
 
       <ConfirmModal
@@ -315,9 +269,9 @@ export default function AdminProductsPage() {
           setProductToDelete(null);
         }}
         onConfirm={confirmDelete}
-        title="¿Eliminar producto?"
-        description="Esta acción no se puede deshacer. El producto se eliminará permanentemente del catálogo."
-        confirmText="Eliminar"
+        title="Delete Product?"
+        description="This action cannot be undone. The product will be permanently deleted."
+        confirmText="Delete"
         type="danger"
       />
     </div>

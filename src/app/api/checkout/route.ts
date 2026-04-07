@@ -133,17 +133,17 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
     // Create order and payment in a transaction
     const result = await prisma.$transaction(async (tx) => {
-      // 1. Create the order as CONFIRMED (not PENDING)
+      // 1. Create the order as CONFIRMED (payment completed immediately)
       const order = await tx.order.create({
         data: {
-          orderNumber,
           userId: user.id,
-          status: 'CONFIRMED', // Directamente confirmado
+          status: 'CONFIRMED',
+          orderNumber,
           subtotal,
           shipping: shippingCost,
           total,
           shippingAddressId,
-          shippingName: address.name,
+          shippingName: address.recipient,
           shippingPhone: address.phone,
           shippingAddress: address.address,
           shippingComplement: address.complement,
@@ -152,17 +152,21 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
           shippingProvince: address.province,
           shippingCountry: address.country,
           paymentMethod: paymentMethod as 'CARD' | 'PAYPAL' | 'BIZUM' | 'TRANSFER',
+          // Create order items from cart items
           items: {
-            create: cartItems.map((item) => ({
-              productId: item.productId,
-              quantity: item.quantity,
-              price: item.unitPrice,
-              subtotal: Number(item.unitPrice) * item.quantity,
+            create: cartItems.map((item: CartItemWithProduct) => ({
+              productId: item.product.id,
               name: item.product.name,
-              category: item.product.category?.name || 'Sin categoría',
+              quantity: item.quantity,
+              price: item.product.price,
+              subtotal: new Prisma.Decimal(item.product.price).mul(item.quantity),
+              category: item.product.category?.name || 'Uncategorized',
               material: item.product.material,
             })),
           },
+        },
+        include: {
+          items: true,
         },
       });
 
