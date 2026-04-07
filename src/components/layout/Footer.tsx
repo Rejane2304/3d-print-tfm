@@ -12,7 +12,8 @@ import {
   Mail, 
   Phone, 
   MapPin, 
-  Heart
+  Heart,
+  HelpCircle
 } from 'lucide-react';
 
 // Iconos SVG para redes sociales
@@ -116,6 +117,12 @@ export default function Footer() {
                 <Link href="/products" className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-2 group">
                   <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-indigo-400 transition-colors"></span>
                   Catálogo
+                </Link>
+              </li>
+              <li>
+                <Link href="/faqs" className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-2 group">
+                  <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-indigo-400 transition-colors"></span>
+                  FAQs
                 </Link>
               </li>
               <li>

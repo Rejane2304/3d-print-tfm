@@ -43,7 +43,7 @@ export default function PayPalButton({ total, orderId, onSuccess, onError }: Pay
 
       return data.paypalOrderId;
     } catch (error) {
-      onError(error instanceof Error ? error : new Error('Error creating order'));
+      onError(error instanceof Error ? error : new Error('Error al crear orden'));
       throw error;
     } finally {
       setIsProcessing(false);

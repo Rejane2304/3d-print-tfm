@@ -187,7 +187,7 @@ export default function AdminAlertsPage() {
         setError(data.error || 'Error updating');
       }
     } catch {
-      setError('Error updating alert');
+      setError('Error al actualizar alerta');
     }
   };
 
@@ -208,7 +208,7 @@ export default function AdminAlertsPage() {
         await loadAlerts();
       } else {
         const data = await response.json();
-        setError(data.error || 'Error deleting');
+        setError(data.error || 'Error al eliminar');
       }
     } catch {
       setError('Error deleting alert');
@@ -237,7 +237,7 @@ export default function AdminAlertsPage() {
       );
       await loadAlerts();
     } catch (error) {
-      console.error('Error deleting alerts:', error);
+      console.error('Error al eliminar alertas:', error);
     }
   };
 
@@ -466,7 +466,7 @@ export default function AdminAlertsPage() {
                 href="/admin/dashboard"
                 className="text-indigo-600 hover:text-indigo-800 font-medium"
               >
-                &larr; Back to Dashboard
+                &larr; Volver al Panel
               </Link>
             </div>
           </div>

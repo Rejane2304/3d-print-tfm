@@ -1,5 +1,5 @@
 /**
- * Invoice Management Page - Admin
+ * Gestión de Facturas Page - Admin
  * Invoice listing and management with DataTable component
  */
 'use client';
@@ -71,7 +71,7 @@ export default function AdminInvoicesPage() {
 
       setInvoices(data.facturas || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
     }
@@ -106,7 +106,7 @@ export default function AdminInvoicesPage() {
       const searchData = await searchResponse.json();
 
       if (!searchResponse.ok) {
-        throw new Error('Error searching order');
+        throw new Error('Error al buscar pedido');
       }
 
       const pedido = searchData.pedidos?.find((p: { orderNumber: string }) =>
@@ -114,7 +114,7 @@ export default function AdminInvoicesPage() {
       );
 
       if (!pedido) {
-        throw new Error('Order not found with that number');
+        throw new Error('Pedido no encontrado con ese número');
       }
 
       const response = await fetch('/api/admin/invoices', {
@@ -126,7 +126,7 @@ export default function AdminInvoicesPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error generating invoice');
+        throw new Error(data.error || 'Error al generar factura');
       }
 
       setShowGenerateModal(false);
@@ -135,7 +135,7 @@ export default function AdminInvoicesPage() {
       setTimeout(() => setSuccessMessage(null), 3000);
       await loadInvoices();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     }
   };
 
@@ -158,7 +158,7 @@ export default function AdminInvoicesPage() {
         await loadInvoices();
       }
     } catch {
-      setError('Error cancelling invoice');
+      setError('Error al anular factura');
     }
   };
 
@@ -167,7 +167,7 @@ export default function AdminInvoicesPage() {
   };
 
   const handleDeleteInvoices = async (selectedIds: string[]) => {
-    if (!confirm(`Are you sure you want to delete ${selectedIds.length} invoice(s)?`)) {
+    if (!confirm(`¿Estás seguro de que deseas eliminar ${selectedIds.length} invoice(s)?`)) {
       return;
     }
     
@@ -186,7 +186,7 @@ export default function AdminInvoicesPage() {
   const columns: Column<Invoice>[] = [
     {
       key: 'invoiceNumber',
-      header: 'Invoice #',
+      header: 'Factura #',
       sortable: true,
       render: (value) => (
         <div className="text-sm font-medium text-indigo-600">{value as string}</div>
@@ -194,7 +194,7 @@ export default function AdminInvoicesPage() {
     },
     {
       key: 'pedido',
-      header: 'Customer',
+      header: 'Cliente',
       render: (value) => {
         const pedido = value as { usuario: { nombre: string; email: string; nif: string | null } };
         return (
@@ -207,7 +207,7 @@ export default function AdminInvoicesPage() {
     },
     {
       key: 'pedido',
-      header: 'Order',
+      header: 'Pedido',
       render: (value) => {
         const pedido = value as { orderNumber: string };
         return (
@@ -217,13 +217,13 @@ export default function AdminInvoicesPage() {
     },
     {
       key: 'emitidaEn',
-      header: 'Date',
+      header: 'Fecha',
       sortable: true,
       render: (value) => (
         <span className="text-sm text-gray-500">
           {value 
-            ? new Date(value as string).toLocaleDateString('en-US')
-            : 'Date not available'}
+            ? new Date(value as string).toLocaleDateString('es-ES')
+            : 'Fecha no disponible'}
         </span>
       ),
     },
@@ -239,34 +239,34 @@ export default function AdminInvoicesPage() {
     },
     {
       key: 'anulada',
-      header: 'Status',
+      header: 'Estado',
       sortable: true,
       render: (value) => (
         value ? (
           <span className="px-2 inline-flex items-center gap-1 text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
             <XCircle className="h-3 w-3" />
-            Cancelled
+            Anulada
           </span>
         ) : (
           <span className="px-2 inline-flex items-center gap-1 text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
             <CheckCircle2 className="h-3 w-3" />
-            Active
+            Activa
           </span>
         )
       ),
     },
     {
       key: 'actions',
-      header: 'Actions',
+      header: 'Acciones',
       render: (_, row) => (
         <div className="flex items-center justify-end gap-2">
           <Link
             href={`/admin/invoices/${row.id}`}
             className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-900 px-3 py-1.5 rounded-md hover:bg-indigo-50 transition-colors"
-            title="View Invoice Details"
+            title="Ver detalles de factura"
           >
             <Eye className="h-4 w-4" />
-            <span className="hidden sm:inline">Details</span>
+            <span className="hidden sm:inline">Detalles</span>
           </Link>
           <button
             onClick={(e) => {
@@ -275,7 +275,7 @@ export default function AdminInvoicesPage() {
             }}
             disabled={row.anulada}
             className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-900 px-3 py-1.5 rounded-md hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            title={row.anulada ? "Invoice cancelled - not available" : "Download PDF"}
+            title={row.anulada ? "Factura anulada - no disponible" : "Descargar PDF"}
           >
             <Printer className="h-4 w-4" />
             <span className="hidden sm:inline">PDF</span>
@@ -287,7 +287,7 @@ export default function AdminInvoicesPage() {
                 cancelInvoice(row.id);
               }}
               className="text-red-600 hover:text-red-900 p-2"
-              title="Cancel Invoice"
+              title="Anular factura"
             >
               <AlertTriangle className="h-4 w-4" />
             </button>
@@ -300,7 +300,7 @@ export default function AdminInvoicesPage() {
   const bulkActions: BulkAction[] = [
     {
       key: 'delete',
-      label: 'Delete Selected',
+      label: 'Eliminar seleccionados',
       icon: <Trash2 className="h-4 w-4" />,
       variant: 'danger',
       onClick: handleDeleteInvoices,
@@ -312,7 +312,7 @@ export default function AdminInvoicesPage() {
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-indigo-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading invoices...</p>
+          <p className="text-gray-600">Cargando facturas...</p>
         </div>
       </div>
     );
@@ -326,14 +326,14 @@ export default function AdminInvoicesPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <FileText className="h-8 w-8 text-indigo-600" />
-              <h1 className="text-2xl font-bold text-gray-900">Invoice Management</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Gestión de Facturas</h1>
             </div>
             <div className="flex items-center gap-4">
               <Link
                 href="/admin/dashboard"
                 className="text-indigo-600 hover:text-indigo-800 font-medium"
               >
-                &larr; Back to Dashboard
+                &larr; Volver al Panel
               </Link>
               <button
                 onClick={() => setShowGenerateModal(true)}
@@ -341,7 +341,7 @@ export default function AdminInvoicesPage() {
                 data-testid="generate-invoice-button"
               >
                 <Plus className="h-5 w-5" />
-                Generate Invoice
+                Generar Factura
               </button>
             </div>
           </div>
@@ -373,9 +373,9 @@ export default function AdminInvoicesPage() {
               onChange={(e) => setStatusFilter(e.target.value)}
               className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             >
-              <option value="">All Invoices</option>
-              <option value="active">Active</option>
-              <option value="cancelled">Cancelled</option>
+              <option value="">Todas las facturas</option>
+              <option value="active">Activas</option>
+              <option value="cancelled">Anuladas</option>
             </select>
           </div>
         </div>
@@ -387,14 +387,14 @@ export default function AdminInvoicesPage() {
           rowKey="id"
           searchable
           searchKeys={['invoiceNumber', 'pedido.usuario.nombre', 'pedido.orderNumber']}
-          searchPlaceholder="Search by invoice number..."
+          searchPlaceholder="Buscar por número de factura..."
           pagination
           selectable
           bulkActions={bulkActions}
           exportable
           exportFilename="invoices.csv"
-          emptyMessage="No invoices found"
-          noResultsMessage="No invoices match your search"
+          emptyMessage="No se encontraron facturas"
+          noResultsMessage="Ninguna factura coincide con tu búsqueda"
         />
       </div>
 
@@ -402,20 +402,20 @@ export default function AdminInvoicesPage() {
       {showGenerateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Generate New Invoice</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Generar Nueva Factura</h2>
             <p className="text-sm text-gray-600 mb-4">
-              Enter the delivered order ID to generate an invoice.
+              Introduce el ID del pedido entregado para generar una factura.
             </p>
             <div className="mb-4">
               <label htmlFor="orderIdInput" className="block text-sm font-medium text-gray-700 mb-1">
-                Order Number
+                Número de Pedido
               </label>
               <input
                 type="text"
                 id="orderIdInput"
                 value={orderIdInput}
                 onChange={(e) => setOrderIdInput(e.target.value)}
-                placeholder="Ex: ORD-2024-0001"
+                placeholder="Ej: ORD-2024-0001"
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               />
             </div>
@@ -424,7 +424,7 @@ export default function AdminInvoicesPage() {
                 onClick={generateInvoice}
                 className="flex-1 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
               >
-                Generate
+                Generar
               </button>
               <button
                 onClick={() => {
@@ -434,7 +434,7 @@ export default function AdminInvoicesPage() {
                 }}
                 className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-300 transition-colors"
               >
-                Cancel
+                Cancelar
               </button>
             </div>
           </div>
@@ -449,9 +449,9 @@ export default function AdminInvoicesPage() {
           setInvoiceToCancel(null);
         }}
         onConfirm={confirmCancel}
-        title="Cancel Invoice?"
-        description="This action cannot be undone. The invoice will be marked as cancelled but will remain in the system for accounting purposes."
-        confirmText="Cancel Invoice"
+        title="¿Anular factura?"
+        description="Esta acción no se puede deshacer. La factura será marcada como anulada pero permanecerá en el sistema para fines contables."
+        confirmText="Anular factura"
         type="warning"
       />
     </div>

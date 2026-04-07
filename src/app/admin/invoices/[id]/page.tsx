@@ -83,7 +83,7 @@ export default function AdminInvoiceDetailPage() {
 
       setInvoice(data.factura);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error unknown');
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
     }

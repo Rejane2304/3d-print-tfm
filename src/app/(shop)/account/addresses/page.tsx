@@ -102,7 +102,7 @@ export default function MyAddressesPage() {
 
       setAddresses(data.addresses || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error unknown');
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
     }
@@ -135,7 +135,7 @@ export default function MyAddressesPage() {
       await loadAddresses();
       closeModal();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error unknown');
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setSaving(false);
     }
@@ -158,7 +158,7 @@ export default function MyAddressesPage() {
       setDeleteModalOpen(false);
       setAddressToDelete(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error unknown');
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     }
   };
 
@@ -177,7 +177,7 @@ export default function MyAddressesPage() {
 
       await loadAddresses();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error unknown');
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     }
   };
 

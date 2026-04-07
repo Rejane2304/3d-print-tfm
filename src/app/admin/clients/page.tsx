@@ -70,7 +70,7 @@ export default function AdminClientsPage() {
   };
 
   const handleDeleteClients = async (selectedIds: string[]) => {
-    if (!confirm(`Are you sure you want to delete ${selectedIds.length} client(s)?`)) {
+    if (!confirm(`Are you sure you want to delete ${selectedIds.length} cliente(s)?`)) {
       return;
     }
     
@@ -82,13 +82,13 @@ export default function AdminClientsPage() {
       );
       await fetchClients();
     } catch (error) {
-      console.error('Error deleting clients:', error);
+      console.error('Error al eliminar clientes:', error);
     }
   };
 
   const formatDate = (date: string | null) => {
     if (!date) return 'N/A';
-    return new Date(date).toLocaleDateString('en-US');
+    return new Date(date).toLocaleDateString('es-ES');
   };
 
   const formatCurrency = (amount: string) => {
@@ -98,7 +98,7 @@ export default function AdminClientsPage() {
   const columns: Column<Client>[] = [
     {
       key: 'nombre',
-      header: 'Client',
+      header: 'Cliente',
       sortable: true,
       render: (_, row) => (
         <div className="flex items-center">
@@ -114,7 +114,7 @@ export default function AdminClientsPage() {
     },
     {
       key: 'telefono',
-      header: 'Contact',
+      header: 'Contacto',
       render: (value) => (
         <div className="flex items-center text-sm text-gray-500">
           <Phone className="h-4 w-4 mr-1" />
@@ -124,7 +124,7 @@ export default function AdminClientsPage() {
     },
     {
       key: 'totalPedidos',
-      header: 'Orders',
+      header: 'Pedidos',
       sortable: true,
       render: (value, row) => (
         <div>
@@ -134,7 +134,7 @@ export default function AdminClientsPage() {
           </div>
           {row.fechaUltimoPedido && (
             <div className="text-xs text-gray-500">
-              Last: {formatDate(row.fechaUltimoPedido)}
+              Último: {formatDate(row.fechaUltimoPedido)}
             </div>
           )}
         </div>
@@ -142,7 +142,7 @@ export default function AdminClientsPage() {
     },
     {
       key: 'totalGastado',
-      header: 'Total Spent',
+      header: 'Total Gastado',
       sortable: true,
       render: (value) => (
         <div className="flex items-center text-sm font-medium text-gray-900">
@@ -153,7 +153,7 @@ export default function AdminClientsPage() {
     },
     {
       key: 'creadoEn',
-      header: 'Registration',
+      header: 'Registro',
       sortable: true,
       render: (value) => (
         <div className="flex items-center text-sm text-gray-500">
@@ -164,7 +164,7 @@ export default function AdminClientsPage() {
     },
     {
       key: 'activo',
-      header: 'Status',
+      header: 'Estado',
       sortable: true,
       render: (value) => (
         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
@@ -172,19 +172,19 @@ export default function AdminClientsPage() {
             ? 'bg-green-100 text-green-800' 
             : 'bg-red-100 text-red-800'
         }`}>
-          {value ? 'Active' : 'Inactive'}
+          {value ? 'Activo' : 'Inactivo'}
         </span>
       ),
     },
     {
       key: 'actions',
-      header: 'Actions',
+      header: 'Acciones',
       render: (_, row) => (
         <Link
           href={`/admin/clients/${row.id}`}
           className="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
         >
-          View Details
+          Ver detalles
         </Link>
       ),
     },
@@ -193,7 +193,7 @@ export default function AdminClientsPage() {
   const bulkActions: BulkAction[] = [
     {
       key: 'delete',
-      label: 'Delete Selected',
+      label: 'Eliminar seleccionados',
       icon: <Trash2 className="h-4 w-4" />,
       variant: 'danger',
       onClick: handleDeleteClients,
@@ -205,7 +205,7 @@ export default function AdminClientsPage() {
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-indigo-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading clients...</p>
+          <p className="text-gray-600">Cargando clientes...</p>
         </div>
       </div>
     );
@@ -218,14 +218,14 @@ export default function AdminClientsPage() {
         <div className="max-w-[1920px] 3xl:max-w-[2200px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Client Management</h1>
-              <p className="text-gray-600 mt-1 text-sm">Manage registered store clients</p>
+              <h1 className="text-2xl font-bold text-gray-900">Gestión de Clientes</h1>
+              <p className="text-gray-600 mt-1 text-sm">Gestionar clientes registrados de la tienda</p>
             </div>
             <Link
               href="/admin/dashboard"
               className="text-indigo-600 hover:text-indigo-800 font-medium"
             >
-              &larr; Back to Dashboard
+              &larr; Volver al Panel
             </Link>
           </div>
         </div>
@@ -240,9 +240,9 @@ export default function AdminClientsPage() {
               onChange={(e) => setStatusFilter(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
             >
-              <option value="all">All Statuses</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
+              <option value="all">Todos los estados</option>
+              <option value="active">Activo</option>
+              <option value="inactive">Inactivo</option>
             </select>
           </div>
         </div>
@@ -254,14 +254,14 @@ export default function AdminClientsPage() {
           rowKey="id"
           searchable
           searchKeys={['nombre', 'email', 'telefono']}
-          searchPlaceholder="Search by name or email..."
+          searchPlaceholder="Buscar por nombre o email..."
           pagination
           selectable
           bulkActions={bulkActions}
           exportable
           exportFilename="clients.csv"
-          emptyMessage="No clients found"
-          noResultsMessage="No clients match your search"
+          emptyMessage="No se encontraron clientes"
+          noResultsMessage="Ningún cliente coincide con tu búsqueda"
         />
       </div>
     </div>

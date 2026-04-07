@@ -1,5 +1,5 @@
 /**
- * Admin Dashboard Page
+ * Admin Panel Page
  * Show analytics and statistics for the store
  */
 'use client';
@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Loader2, DollarSign, ShoppingBag, Users, TrendingUp, Package, Calendar, ChevronDown } from 'lucide-react';
+import { Loader2, DollarSign, ShoppingBag, Users, TrendingUp, Package, Calendar, ChevronDown, FolderTree, HelpCircle } from 'lucide-react';
 
 interface AnalyticsData {
   salesSummary: {
@@ -55,7 +55,7 @@ interface AnalyticsData {
 
 type DateRange = 'today' | 'week' | 'month' | 'lastMonth' | 'year';
 
-export default function AdminDashboardPage() {
+export default function AdminPanelPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
@@ -144,7 +144,7 @@ export default function AdminDashboardPage() {
         {/* Header */}
         <div className="mb-8 flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Panel</h1>
             <p className="text-gray-600 mt-2">Resumen de la tienda y estadísticas</p>
           </div>
           <div className="relative">
@@ -332,7 +332,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Quick Links */}
-        <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="mt-8 grid grid-cols-2 md:grid-cols-6 gap-4">
           <Link 
             href="/admin/products"
             className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow"
@@ -340,6 +340,14 @@ export default function AdminDashboardPage() {
             <Package className="h-6 w-6 text-indigo-600 mb-2" />
             <p className="font-medium text-gray-900">Productos</p>
             <p className="text-sm text-gray-500">Gestionar catálogo</p>
+          </Link>
+          <Link 
+            href="/admin/categories"
+            className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow"
+          >
+            <FolderTree className="h-6 w-6 text-teal-600 mb-2" />
+            <p className="font-medium text-gray-900">Categorías</p>
+            <p className="text-sm text-gray-500">Gestionar categorías</p>
           </Link>
           <Link 
             href="/admin/orders"
@@ -364,6 +372,14 @@ export default function AdminDashboardPage() {
             <TrendingUp className="h-6 w-6 text-green-600 mb-2" />
             <p className="font-medium text-gray-900">Inventario</p>
             <p className="text-sm text-gray-500">Control de stock</p>
+          </Link>
+          <Link 
+            href="/admin/faqs"
+            className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow"
+          >
+            <HelpCircle className="h-6 w-6 text-orange-600 mb-2" />
+            <p className="font-medium text-gray-900">FAQs</p>
+            <p className="text-sm text-gray-500">Preguntas frecuentes</p>
           </Link>
         </div>
       </div>

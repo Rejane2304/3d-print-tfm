@@ -9,6 +9,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Loader2, ArrowLeft, User, Mail, Phone, Calendar, ShoppingBag, MapPin, Package, DollarSign } from 'lucide-react';
+import { translateAddressName } from '@/lib/i18n';
 
 interface ClientDetail {
   id: string;
@@ -266,7 +267,7 @@ export default function AdminClientDetailPage() {
               {client.addresses.map((address) => (
                 <div key={address.id} className="border border-gray-200 rounded-lg p-4">
                   <div className="flex justify-between items-start mb-2">
-                    <span className="font-medium text-gray-900">{address.name}</span>
+                    <span className="font-medium text-gray-900">{translateAddressName(address.name)}</span>
                     {address.isDefault && (
                       <span className="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">
                         Principal

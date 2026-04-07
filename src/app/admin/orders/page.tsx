@@ -101,12 +101,12 @@ export default function AdminOrdersPage() {
         await loadOrders();
       }
     } catch {
-      setError('Error updating status');
+      setError('Error al actualizar estado');
     }
   };
 
   const handleDeleteOrders = async (selectedIds: string[]) => {
-    if (!confirm(`Are you sure you want to delete ${selectedIds.length} order(s)?`)) {
+    if (!confirm(`¿Estás seguro de que deseas eliminar ${selectedIds.length} order(s)?`)) {
       return;
     }
     
@@ -118,25 +118,25 @@ export default function AdminOrdersPage() {
       );
       await loadOrders();
     } catch (error) {
-      console.error('Error deleting orders:', error);
+      console.error('Error al eliminar pedidos:', error);
     }
   };
 
   const columns: Column<Order>[] = [
     {
       key: 'orderNumber',
-      header: 'Order',
+      header: 'Pedido',
       sortable: true,
       render: (value, row) => (
         <div>
           <div className="text-sm font-medium text-indigo-600">{value as string}</div>
-          <div className="text-sm text-gray-500">{row.items.length} products</div>
+          <div className="text-sm text-gray-500">{row.items.length} productos</div>
         </div>
       ),
     },
     {
       key: 'usuario',
-      header: 'Customer',
+      header: 'Cliente',
       render: (value) => {
         const user = value as { nombre: string; email: string };
         return (
@@ -149,7 +149,7 @@ export default function AdminOrdersPage() {
     },
     {
       key: 'estado',
-      header: 'Status',
+      header: 'Estado',
       sortable: true,
       render: (value) => {
         const statusConfig = orderStatuses[value as string] || { 
@@ -176,7 +176,7 @@ export default function AdminOrdersPage() {
     },
     {
       key: 'createdAt',
-      header: 'Date',
+      header: 'Fecha',
       sortable: true,
       render: (value) => (
         <span className="text-sm text-gray-500">
@@ -186,13 +186,13 @@ export default function AdminOrdersPage() {
     },
     {
       key: 'actions',
-      header: 'Actions',
+      header: 'Acciones',
       render: (_, row) => (
         <div className="flex items-center justify-end gap-2">
           <Link
             href={`/admin/orders/${row.id}`}
             className="text-indigo-600 hover:text-indigo-900 p-2"
-            title="View Details"
+            title="Ver detalles"
           >
             <Eye className="h-4 w-4" />
           </Link>
@@ -203,7 +203,7 @@ export default function AdminOrdersPage() {
                 updateStatus(row.id, 'En preparación');
               }}
               className="text-blue-600 hover:text-blue-900 p-2"
-              title="Mark as Preparing"
+              title="Marcar como En preparación"
             >
               <Box className="h-4 w-4" />
             </button>
@@ -215,7 +215,7 @@ export default function AdminOrdersPage() {
                 updateStatus(row.id, 'Enviado');
               }}
               className="text-purple-600 hover:text-purple-900 p-2"
-              title="Mark as Shipped"
+              title="Marcar como Enviado"
             >
               <Truck className="h-4 w-4" />
             </button>
@@ -228,7 +228,7 @@ export default function AdminOrdersPage() {
   const bulkActions: BulkAction[] = [
     {
       key: 'delete',
-      label: 'Delete Selected',
+      label: 'Eliminar seleccionados',
       icon: <Trash2 className="h-4 w-4" />,
       variant: 'danger',
       onClick: handleDeleteOrders,
@@ -240,7 +240,7 @@ export default function AdminOrdersPage() {
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-indigo-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading orders...</p>
+          <p className="text-gray-600">Cargando pedidos...</p>
         </div>
       </div>
     );
@@ -254,13 +254,13 @@ export default function AdminOrdersPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Package className="h-8 w-8 text-indigo-600" />
-              <h1 className="text-2xl font-bold text-gray-900">Order Management</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Gestión de Pedidos</h1>
             </div>
             <Link
               href="/admin/dashboard"
               className="text-indigo-600 hover:text-indigo-800 font-medium"
             >
-              &larr; Back to Dashboard
+              &larr; Volver al Panel
             </Link>
           </div>
         </div>
@@ -284,13 +284,13 @@ export default function AdminOrdersPage() {
                 onChange={(e) => setStatusFilter(e.target.value)}
                 className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               >
-                <option value="">All Statuses</option>
-                <option value="Pendiente">Pending</option>
-                <option value="Confirmado">Confirmed</option>
-                <option value="En preparación">Preparing</option>
-                <option value="Enviado">Shipped</option>
-                <option value="Entregado">Delivered</option>
-                <option value="Cancelado">Cancelled</option>
+                <option value="">Todos los estados</option>
+                <option value="Pendiente">Pendiente</option>
+                <option value="Confirmado">Confirmado</option>
+                <option value="En preparación">En preparación</option>
+                <option value="Enviado">Enviado</option>
+                <option value="Entregado">Entregado</option>
+                <option value="Cancelado">Cancelado</option>
               </select>
             </div>
           </div>
@@ -303,14 +303,14 @@ export default function AdminOrdersPage() {
           rowKey="id"
           searchable
           searchKeys={['orderNumber', 'usuario.nombre', 'usuario.email']}
-          searchPlaceholder="Search by order number or customer..."
+          searchPlaceholder="Buscar por número de pedido o cliente..."
           pagination
           selectable
           bulkActions={bulkActions}
           exportable
           exportFilename="orders.csv"
-          emptyMessage="No orders found"
-          noResultsMessage="No orders match your search"
+          emptyMessage="No se encontraron pedidos"
+          noResultsMessage="Ningún pedido coincide con tu búsqueda"
         />
       </div>
     </div>

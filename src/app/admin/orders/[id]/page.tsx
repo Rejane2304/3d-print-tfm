@@ -123,7 +123,7 @@ export default function AdminPedidoDetallePage() {
       setNumeroSeguimiento(data.pedido.numeroSeguimiento || '');
       setTransportista(data.pedido.transportista || '');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error unknown');
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
     }
@@ -189,7 +189,7 @@ export default function AdminPedidoDetallePage() {
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="h-12 w-12 text-red-600 mx-auto mb-4" />
-          <p className="text-gray-900 font-medium">Pedido not found</p>
+          <p className="text-gray-900 font-medium">Pedido no encontrado</p>
           <Link href="/admin/orders" className="text-indigo-600 hover:text-indigo-800 mt-2 inline-block">
             ← Volver a pedidos
           </Link>

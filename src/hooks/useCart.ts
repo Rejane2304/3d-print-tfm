@@ -91,7 +91,7 @@ export function useCart() {
         }
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error unknown');
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
     }
@@ -155,8 +155,8 @@ export function useCart() {
         return { success: true };
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error unknown');
-      return { success: false, error: err instanceof Error ? err.message : 'Error unknown' };
+      setError(err instanceof Error ? err.message : 'Error desconocido');
+      return { success: false, error: err instanceof Error ? err.message : 'Error desconocido' };
     }
   }, [isAuthenticated, loadCart]);
 
@@ -202,8 +202,8 @@ export function useCart() {
       
       return { success: true };
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error unknown');
-      return { success: false, error: err instanceof Error ? err.message : 'Error unknown' };
+      setError(err instanceof Error ? err.message : 'Error desconocido');
+      return { success: false, error: err instanceof Error ? err.message : 'Error desconocido' };
     }
   }, [isAuthenticated, loadCart]);
 
@@ -238,8 +238,8 @@ export function useCart() {
 
       return { success: true };
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error unknown');
-      return { success: false, error: err instanceof Error ? err.message : 'Error unknown' };
+      setError(err instanceof Error ? err.message : 'Error desconocido');
+      return { success: false, error: err instanceof Error ? err.message : 'Error desconocido' };
     }
   }, [isAuthenticated, loadCart]);
 
@@ -254,8 +254,8 @@ export function useCart() {
       await loadCart();
       return { success: true };
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error unknown');
-      return { success: false, error: err instanceof Error ? err.message : 'Error unknown' };
+      setError(err instanceof Error ? err.message : 'Error desconocido');
+      return { success: false, error: err instanceof Error ? err.message : 'Error desconocido' };
     }
   }, [isAuthenticated, loadCart]);
 
@@ -296,7 +296,7 @@ export function useCart() {
       return { success: true };
     } catch (err) {
       console.error('Migration error:', err);
-      return { success: false, error: err instanceof Error ? err.message : 'Migration failed' };
+      return { success: false, error: err instanceof Error ? err.message : 'Error en migración' };
     } finally {
       skipAutoLoadRef.current = false;
     }

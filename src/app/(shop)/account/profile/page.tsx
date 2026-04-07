@@ -81,7 +81,7 @@ export default function ProfilePage() {
         taxId: data.user.taxId || ''
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error unknown');
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
     }
@@ -146,7 +146,7 @@ export default function ProfilePage() {
       // Update session
       await update();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error unknown');
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setSaving(false);
     }

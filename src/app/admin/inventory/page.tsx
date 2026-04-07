@@ -150,9 +150,9 @@ export default function AdminInventoryPage() {
       case 'normal':
         return 'Normal';
       case 'low':
-        return 'Low';
+        return 'Bajo';
       case 'critical':
-        return 'Critical';
+        return 'Crítico';
       default:
         return status;
     }
@@ -161,7 +161,7 @@ export default function AdminInventoryPage() {
   const columns: Column<Product>[] = [
     {
       key: 'name',
-      header: 'Product',
+      header: 'Producto',
       sortable: true,
       render: (value, row) => (
         <div className="flex items-center">
@@ -182,19 +182,19 @@ export default function AdminInventoryPage() {
           )}
           <div className="ml-4">
             <div className="text-sm font-medium text-gray-900">{value as string}</div>
-            <div className="text-xs text-gray-500">{row.movementCount} movements</div>
+            <div className="text-xs text-gray-500">{row.movementCount} movimientos</div>
           </div>
         </div>
       ),
     },
     {
       key: 'category',
-      header: 'Category',
+      header: 'Categoría',
       sortable: true,
     },
     {
       key: 'stock',
-      header: 'Current Stock',
+      header: 'Stock Actual',
       sortable: true,
       render: (value, row) => {
         let stockColorClass: string;
@@ -214,12 +214,12 @@ export default function AdminInventoryPage() {
     },
     {
       key: 'minStock',
-      header: 'Minimum',
+      header: 'Mínimo',
       sortable: true,
     },
     {
       key: 'stockStatus',
-      header: 'Status',
+      header: 'Estado',
       sortable: true,
       render: (value) => (
         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(value as string)}`}>
@@ -231,7 +231,7 @@ export default function AdminInventoryPage() {
     },
     {
       key: 'actions',
-      header: 'Actions',
+      header: 'Acciones',
       render: (_, row) => (
         <div className="flex items-center justify-end gap-2">
           <button
@@ -240,7 +240,7 @@ export default function AdminInventoryPage() {
               openAdjustModal(row, 'IN');
             }}
             className="p-2 text-green-600 hover:bg-green-50 rounded-lg"
-            title="Add Stock"
+            title="Añadir stock"
           >
             <Plus className="h-4 w-4" />
           </button>
@@ -250,7 +250,7 @@ export default function AdminInventoryPage() {
               openAdjustModal(row, 'OUT');
             }}
             className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
-            title="Reduce Stock"
+            title="Reducir stock"
           >
             <Minus className="h-4 w-4" />
           </button>
@@ -260,7 +260,7 @@ export default function AdminInventoryPage() {
               openAdjustModal(row, 'ADJUST');
             }}
             className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
-            title="Adjust Stock"
+            title="Ajustar stock"
           >
             <RotateCcw className="h-4 w-4" />
           </button>
@@ -268,7 +268,7 @@ export default function AdminInventoryPage() {
             href={`/admin/inventory/${row.id}`}
             className="ml-2 text-indigo-600 hover:text-indigo-900 text-sm"
           >
-            History
+            Historial
           </Link>
         </div>
       ),
@@ -278,7 +278,7 @@ export default function AdminInventoryPage() {
   const bulkActions: BulkAction[] = [
     {
       key: 'export',
-      label: 'Export Selected',
+      label: 'Exportar seleccionados',
       variant: 'primary',
       onClick: async (selectedIds) => {
         console.log('Export selected:', selectedIds);
@@ -291,7 +291,7 @@ export default function AdminInventoryPage() {
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-indigo-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading inventory...</p>
+          <p className="text-gray-600">Cargando inventario...</p>
         </div>
       </div>
     );
@@ -304,14 +304,14 @@ export default function AdminInventoryPage() {
         <div className="max-w-[1920px] 3xl:max-w-[2200px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Inventory Management</h1>
-              <p className="text-gray-600 mt-1 text-sm">Manage product stock in real-time</p>
+              <h1 className="text-2xl font-bold text-gray-900">Gestión de Inventario</h1>
+              <p className="text-gray-600 mt-1 text-sm">Gestionar stock de productos en tiempo real</p>
             </div>
             <Link
               href="/admin/dashboard"
               className="text-indigo-600 hover:text-indigo-800 font-medium"
             >
-              &larr; Back to Dashboard
+              &larr; Volver al Panel
             </Link>
           </div>
         </div>
@@ -326,10 +326,10 @@ export default function AdminInventoryPage() {
               onChange={(e) => setStockLevel(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
             >
-              <option value="all">All Stock Levels</option>
-              <option value="normal">Normal Stock</option>
-              <option value="low">Low Stock</option>
-              <option value="critical">Critical Stock</option>
+              <option value="all">Todos los niveles</option>
+              <option value="normal">Stock Normal</option>
+              <option value="low">Stock Bajo</option>
+              <option value="critical">Stock Crítico</option>
             </select>
           </div>
         </div>
@@ -341,14 +341,14 @@ export default function AdminInventoryPage() {
           rowKey="id"
           searchable
           searchKeys={['name', 'category']}
-          searchPlaceholder="Search products..."
+          searchPlaceholder="Buscar productos..."
           pagination
           selectable
           bulkActions={bulkActions}
           exportable
           exportFilename="inventory.csv"
-          emptyMessage="No products found"
-          noResultsMessage="No products match your search"
+          emptyMessage="No se encontraron productos"
+          noResultsMessage="Ningún producto coincide con tu búsqueda"
         />
       </div>
 
@@ -357,21 +357,21 @@ export default function AdminInventoryPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              {adjustmentType === 'IN' && 'Add Stock'}
-              {adjustmentType === 'OUT' && 'Reduce Stock'}
-              {adjustmentType === 'ADJUST' && 'Adjust Stock'}
+              {adjustmentType === 'IN' && 'Añadir Stock'}
+              {adjustmentType === 'OUT' && 'Reducir Stock'}
+              {adjustmentType === 'ADJUST' && 'Ajustar Stock'}
             </h3>
             
             <form onSubmit={handleAdjustment}>
               <div className="mb-4">
-                <div className="block text-sm font-medium text-gray-700 mb-1">Product</div>
+                <div className="block text-sm font-medium text-gray-700 mb-1">Producto</div>
                 <div className="text-gray-900 font-medium">{adjustingProduct.name}</div>
-                <div className="text-sm text-gray-500">Current Stock: {adjustingProduct.stock}</div>
+                <div className="text-sm text-gray-500">Stock actual: {adjustingProduct.stock}</div>
               </div>
               
               <div className="mb-4">
                 <label htmlFor="adjustmentQuantity" className="block text-sm font-medium text-gray-700 mb-1">
-                  {adjustmentType === 'ADJUST' ? 'New Stock' : 'Quantity'}
+                  {adjustmentType === 'ADJUST' ? 'Nuevo Stock' : 'Cantidad'}
                 </label>
                 <input
                   id="adjustmentQuantity"
@@ -385,7 +385,7 @@ export default function AdminInventoryPage() {
               </div>
               
               <div className="mb-6">
-                <label htmlFor="adjustmentReason" className="block text-sm font-medium text-gray-700 mb-1">Reason</label>
+                <label htmlFor="adjustmentReason" className="block text-sm font-medium text-gray-700 mb-1">Motivo</label>
                 <textarea
                   id="adjustmentReason"
                   value={adjustmentReason}
@@ -402,7 +402,7 @@ export default function AdminInventoryPage() {
                   onClick={closeAdjustModal}
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
                 >
-                  Cancel
+                  Cancelar
                 </button>
                 <button
                   type="submit"
@@ -410,7 +410,7 @@ export default function AdminInventoryPage() {
                   className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center"
                 >
                   {processing && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                  Save
+                  Guardar
                 </button>
               </div>
             </form>

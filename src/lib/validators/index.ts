@@ -296,6 +296,40 @@ export const shippingConfigSchema = z.object({
 });
 
 // ============================================
+// CATEGORY VALIDATIONS
+// ============================================
+
+export const categorySchema = z.object({
+  name: z
+    .string()
+    .min(1, 'El nombre de la categoría es obligatorio')
+    .max(100, 'El nombre no puede exceder 100 caracteres'),
+  slug: z
+    .string()
+    .min(1, 'El slug es obligatorio')
+    .max(100, 'El slug no puede exceder 100 caracteres')
+    .regex(/^[a-z0-9-]+$/, 'El slug solo puede contener letras minúsculas, números y guiones'),
+  description: z
+    .string()
+    .max(500, 'La descripción no puede exceder 500 caracteres')
+    .optional()
+    .nullable(),
+  image: z
+    .string()
+    .max(500, 'La URL de imagen es muy larga')
+    .optional()
+    .nullable(),
+  displayOrder: z
+    .number()
+    .int('El orden debe ser un número entero')
+    .min(0, 'El orden no puede ser negativo')
+    .default(0),
+  isActive: z.boolean().default(true),
+});
+
+export const categoryUpdateSchema = categorySchema.partial();
+
+// ============================================
 // EXPORTED TYPES
 // ============================================
 
@@ -312,5 +346,7 @@ export type CancelOrderInput = z.infer<typeof cancelOrderSchema>;
 export type InventoryMovementInput = z.infer<typeof inventoryMovementSchema>;
 export type ProductImageInput = z.infer<typeof productImageSchema>;
 export type ShippingConfigInput = z.infer<typeof shippingConfigSchema>;
+export type CategoryInput = z.infer<typeof categorySchema>;
+export type CategoryUpdateInput = z.infer<typeof categoryUpdateSchema>;
 
 

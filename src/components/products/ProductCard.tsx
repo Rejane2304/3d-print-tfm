@@ -45,7 +45,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           />
         ) : (
           <div className="flex items-center justify-center h-full text-gray-400">
-            No image
+            Sin imagen
           </div>
         )}
 
@@ -59,7 +59,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         {/* Out of stock badge */}
         {product.stock === 0 && (
           <span className="absolute top-2 right-2 bg-gray-500 text-white text-xs px-2 py-1 rounded">
-            Agotado
+            Sin stock
           </span>
         )}
       </div>
@@ -83,7 +83,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           <span className={`text-sm ${
             product.stock > 0 ? 'text-green-600' : 'text-red-600'
           }`} data-testid="product-stock">
-            {product.stock > 0 ? '✅ En stock' : 'Agotado'}
+            {product.stock > 0 ? '✅ En stock' : 'Sin stock'}
           </span>
         </div>
       </div>

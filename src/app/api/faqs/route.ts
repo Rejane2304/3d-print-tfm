@@ -2,14 +2,13 @@ export const dynamic = 'force-dynamic';
 
 /**
  * API Route para FAQs (Preguntas Frecuentes)
- * GET /api/faqs - Listado de preguntas frecuentes en español
+ * GET /api/faqs - Listado de preguntas frecuentes agrupadas por categoría
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { withErrorHandler } from '@/lib/errors/api-wrapper';
-import { translateFAQ } from '@/lib/i18n';
 
-// GET /api/faqs - Listar FAQs
+// GET /api/faqs - Listar FAQs agrupadas por categoría
 export const GET = withErrorHandler(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
 
@@ -29,22 +28,36 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   // Buscar FAQs
   const faqs = await prisma.fAQ.findMany({
     where,
-    orderBy: {
-      displayOrder: 'asc',
-    },
+    orderBy: [
+      { category: 'asc' },
+      { displayOrder: 'asc' },
+    ],
   });
 
-  // Traducir campos a español
-  const translatedFAQs = faqs.map((faq) => ({
-    ...faq,
-    question: translateFAQ(faq.id, 'question') || faq.question,
-    answer: translateFAQ(faq.id, 'answer') || faq.answer,
-    category: translateFAQ(faq.id, 'category') || faq.category,
+  // Agrupar por categoría (ya en español desde la BD)
+  const groupedByCategory = faqs.reduce((acc, faq) => {
+    const cat = faq.category;
+    if (!acc[cat]) {
+      acc[cat] = [];
+    }
+    acc[cat].push({
+      id: faq.id,
+      pregunta: faq.question,
+      respuesta: faq.answer,
+      orden: faq.displayOrder,
+    });
+    return acc;
+  }, {} as Record<string, Array<{ id: string; pregunta: string; respuesta: string; orden: number }>>);
+
+  // Convertir a array de categorías con FAQs
+  const categorias = Object.entries(groupedByCategory).map(([nombre, faqsList]) => ({
+    nombre,
+    faqs: faqsList.sort((a, b) => a.orden - b.orden),
   }));
 
   return NextResponse.json({
     success: true,
-    data: translatedFAQs,
-    count: translatedFAQs.length,
+    categorias,
+    total: faqs.length,
   });
 });

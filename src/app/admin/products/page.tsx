@@ -16,6 +16,7 @@ import {
   AlertCircle,
   Edit,
   Trash2,
+  FolderTree,
 } from 'lucide-react';
 import { DataTable, Column, BulkAction } from '@/components/ui/DataTable';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
@@ -66,7 +67,7 @@ export default function AdminProductsPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error loading products');
+        throw new Error(data.error || 'Error al cargar productos');
       }
 
       setProducts(data.productos || []);
@@ -94,7 +95,7 @@ export default function AdminProductsPage() {
         setProducts(products.filter(p => p.id !== productToDelete));
       }
     } catch {
-      setError('Error deleting product');
+      setError('Error al eliminar producto');
     } finally {
       setModalOpen(false);
       setProductToDelete(null);
@@ -110,14 +111,14 @@ export default function AdminProductsPage() {
       );
       setProducts(products.filter(p => !selectedIds.includes(p.id)));
     } catch {
-      setError('Error deleting products');
+      setError('Error al eliminar productos');
     }
   };
 
   const columns: Column<Product>[] = [
     {
       key: 'nombre',
-      header: 'Product',
+      header: 'Producto',
       sortable: true,
       render: (_, product) => (
         <div className="flex items-center">
@@ -146,28 +147,28 @@ export default function AdminProductsPage() {
     },
     {
       key: 'categoria',
-      header: 'Category',
+      header: 'Categoría',
       sortable: true,
     },
     {
       key: 'precio',
-      header: 'Price',
+      header: 'Precio',
       sortable: true,
       render: (value) => `${Number(value).toFixed(2)} €`,
     },
     {
       key: 'stock',
-      header: 'Stock',
+      header: 'Existencias',
       sortable: true,
       render: (value) => (
         <span className={Number(value) <= 5 ? 'text-red-600 font-medium' : ''}>
-          {value}
+          {String(value)}
         </span>
       ),
     },
     {
       key: 'activo',
-      header: 'Status',
+      header: 'Estado',
       sortable: true,
       render: (value) => (
         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -175,7 +176,7 @@ export default function AdminProductsPage() {
             ? 'bg-green-100 text-green-800' 
             : 'bg-gray-100 text-gray-800'
         }`}>
-          {value ? 'Active' : 'Inactive'}
+          {value ? 'Activo' : 'Inactivo'}
         </span>
       ),
     },
@@ -184,7 +185,7 @@ export default function AdminProductsPage() {
   const bulkActions: BulkAction[] = [
     {
       key: 'delete',
-      label: 'Delete Selected',
+      label: 'Eliminar seleccionados',
       icon: <Trash2 className="h-4 w-4" />,
       variant: 'danger',
       onClick: handleBulkDelete,
@@ -196,7 +197,7 @@ export default function AdminProductsPage() {
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-indigo-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading products...</p>
+          <p className="text-gray-600">Cargando productos...</p>
         </div>
       </div>
     );
@@ -210,21 +211,28 @@ export default function AdminProductsPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Package className="h-8 w-8 text-indigo-600" />
-              <h1 className="text-2xl font-bold text-gray-900">Product Management</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Gestión de Productos</h1>
             </div>
             <div className="flex items-center gap-4">
               <Link
                 href="/admin/dashboard"
                 className="text-indigo-600 hover:text-indigo-800 font-medium"
               >
-                ← Back to Dashboard
+                ← Volver al Panel
+              </Link>
+              <Link
+                href="/admin/categories"
+                className="inline-flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-teal-700 transition-colors"
+              >
+                <FolderTree className="h-5 w-5" />
+                Categorías
               </Link>
               <Link
                 href="/admin/products/new"
                 className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
               >
                 <Plus className="h-5 w-5" />
-                New Product
+                Nuevo Producto
               </Link>
             </div>
           </div>
@@ -247,7 +255,7 @@ export default function AdminProductsPage() {
           rowKey="id"
           searchable={true}
           searchKeys={['nombre', 'categoria', 'material']}
-          searchPlaceholder="Search products..."
+          searchPlaceholder="Buscar productos..."
           pagination={true}
           pageSizeOptions={[10, 25, 50, 100]}
           defaultPageSize={25}
@@ -256,8 +264,8 @@ export default function AdminProductsPage() {
           exportable={true}
           exportFilename="products.csv"
           loading={loading}
-          emptyMessage="No products found"
-          noResultsMessage="No products match your search"
+          emptyMessage="No se encontraron productos"
+          noResultsMessage="Ningún producto coincide con tu búsqueda"
           onRowClick={(product) => router.push(`/admin/products/${product.slug}/editar`)}
         />
       </div>
@@ -269,9 +277,9 @@ export default function AdminProductsPage() {
           setProductToDelete(null);
         }}
         onConfirm={confirmDelete}
-        title="Delete Product?"
-        description="This action cannot be undone. The product will be permanently deleted."
-        confirmText="Delete"
+        title="¿Eliminar producto?"
+        description="Esta acción no se puede deshacer. El producto será eliminado permanentemente."
+        confirmText="Eliminar"
         type="danger"
       />
     </div>

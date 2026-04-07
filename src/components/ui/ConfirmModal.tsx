@@ -18,6 +18,7 @@ interface ConfirmModalProps {
   cancelText?: string;
   type?: 'danger' | 'warning' | 'info';
   isLoading?: boolean;
+  confirmDisabled?: boolean;
 }
 
 export function ConfirmModal({
@@ -30,6 +31,7 @@ export function ConfirmModal({
   cancelText = 'Cancelar',
   type = 'danger',
   isLoading = false,
+  confirmDisabled = false,
 }: ConfirmModalProps) {
   // Cerrar con ESC
   const handleKeyDown = useCallback(
@@ -140,7 +142,7 @@ export function ConfirmModal({
               <button
                 type="button"
                 onClick={onConfirm}
-                disabled={isLoading}
+                disabled={isLoading || confirmDisabled}
                 className={`inline-flex w-full justify-center items-center rounded-xl px-5 py-3 text-sm font-semibold text-white shadow-sm ${config.buttonBg} ${config.buttonFocus} focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 sm:w-auto sm:min-w-[120px]`}
               >
                 {isLoading ? (
