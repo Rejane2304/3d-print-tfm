@@ -75,13 +75,13 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
 
   // Build orderBy
   const orderBy: Prisma.ProductOrderByWithRelationInput = {};
+  // Only order in DB for price and stock. Name ordering is done after translation.
   if (sortBy === 'price' || sortBy === 'precio') {
     orderBy.price = sortOrder as Prisma.SortOrder;
-  } else if (sortBy === 'name' || sortBy === 'nombre') {
-    orderBy.name = sortOrder as Prisma.SortOrder;
   } else if (sortBy === 'stock') {
     orderBy.stock = sortOrder as Prisma.SortOrder;
   }
+  // Name ordering is handled after translation
 
   // Execute queries in parallel
   const [products, total] = await Promise.all([
@@ -117,9 +117,18 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       : product.category,
   }));
 
+  // Sort by name after translation if requested
+  const sortedProducts = [...translatedProducts].sort((a, b) => {
+    if (sortBy === 'name' || sortBy === 'nombre') {
+      const comparison = (a.name || '').localeCompare(b.name || '', 'es', { sensitivity: 'base' });
+      return sortOrder === 'desc' ? -comparison : comparison;
+    }
+    return 0;
+  });
+
   return NextResponse.json({
     success: true,
-    data: translatedProducts,
+    data: sortedProducts,
     pagination: {
       page,
       pageSize,

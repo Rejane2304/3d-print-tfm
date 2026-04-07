@@ -71,7 +71,7 @@ export async function GET() {
         },
         category: true,
       },
-      orderBy: { name: 'asc' },
+      // No ordering in DB - will sort after translation
     });
 
     // Translate products to Spanish for admin panel
@@ -97,6 +97,11 @@ export async function GET() {
       creadoEn: product.createdAt,
       actualizadoEn: product.updatedAt,
     }));
+
+    // Sort by translated name alphabetically
+    productosTraducidos.sort((a, b) => 
+      a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' })
+    );
 
     return NextResponse.json({ success: true, productos: productosTraducidos });
   } catch (error) {

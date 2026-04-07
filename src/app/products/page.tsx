@@ -68,13 +68,13 @@ async function getProducts(searchParams: ProductsPageProps['searchParams']) {
   }
 
   const orderBy: Prisma.ProductOrderByWithRelationInput = {};
+  // Solo ordenar en BD si no es por nombre (el nombre se ordena después de traducir)
   if (searchParams.sortBy === 'price') {
     orderBy.price = searchParams.sortOrder as Prisma.SortOrder || 'asc';
   } else if (searchParams.sortBy === 'stock') {
     orderBy.stock = searchParams.sortOrder as Prisma.SortOrder || 'desc';
-  } else {
-    orderBy.name = searchParams.sortOrder as Prisma.SortOrder || 'asc';
   }
+  // Si es por nombre, no ordenar en BD - se ordenará después de traducir
 
   const [products, total] = await Promise.all([
     prisma.product.findMany({
@@ -99,8 +99,27 @@ async function getProducts(searchParams: ProductsPageProps['searchParams']) {
     description: translateProductDescription(product.slug),
   }));
   
+  // Ordenar productos traducidos según los parámetros
+  const sortedProducts = [...translatedProducts].sort((a, b) => {
+    let comparison = 0;
+    
+    if (searchParams.sortBy === 'price') {
+      const priceA = Number(a.price);
+      const priceB = Number(b.price);
+      comparison = priceA - priceB;
+    } else if (searchParams.sortBy === 'stock') {
+      comparison = a.stock - b.stock;
+    } else {
+      // Por defecto: ordenar por nombre traducido
+      comparison = (a.name || '').localeCompare(b.name || '', 'es', { sensitivity: 'base' });
+    }
+    
+    // Aplicar dirección (ascendente/descendente)
+    return searchParams.sortOrder === 'desc' ? -comparison : comparison;
+  });
+  
   return {
-    products: translatedProducts,
+    products: sortedProducts,
     total,
     totalPages: Math.ceil(total / pageSize),
     page,
