@@ -2,10 +2,27 @@ import 'dotenv/config';
 /**
  * Seed Script for 3D Print TFM
  * Initial database population with CSV data
- * 
+ *
  * Usage: npx prisma db seed
- * 
+ *
  * Loads all 16 CSV files in correct order respecting foreign keys
+ *
+ * ============================================
+ * TEST USER CREDENTIALS (for development/testing)
+ * ============================================
+ *
+ * MEMORABLE PASSWORDS (format: [Name][Proyecto][Year][Symbol]):
+ * ┌──────────────────────┬──────────────────────┬────────────┐
+ * │ Email                │ Password             │ Role       │
+ * ├──────────────────────┼──────────────────────┼────────────┤
+ * │ admin@3dprint.com    │ AdminTFM2024!        │ ADMIN      │
+ * │ juan@example.com     │ JuanTFM2024!         │ CUSTOMER   │
+ * └──────────────────────┴──────────────────────┴────────────┘
+ *
+ * All passwords are hashed with bcrypt (12 salt rounds) before storage.
+ * Other users have cryptographically secure random passwords (12+ chars).
+ *
+ * ============================================
  */
 import { PrismaClient, Role, Material, OrderStatus, PaymentMethod, PaymentStatus, MovementType, AlertType, AlertSeverity, AlertStatus, CouponType } from '@prisma/client';
 import * as bcrypt from 'bcrypt';

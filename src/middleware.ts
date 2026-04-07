@@ -6,6 +6,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
+import { checkRateLimit } from '@/lib/rate-limit';
 
   // Role-protected routes
 // NOTE: /cart is NOT protected, works with localStorage for guests
@@ -14,6 +15,17 @@ const AUTH_ROUTES = ['/login', '/auth'];
 
 export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
+
+  // ============================================
+  // RATE LIMITING for Authentication Endpoints
+  // ============================================
+  // Apply rate limiting to API auth endpoints
+  if (pathname === '/api/auth/callback/credentials') {
+    const rateLimitResponse = checkRateLimit(request, 'login');
+    if (rateLimitResponse) {
+      return rateLimitResponse;
+    }
+  }
 
   // ============================================
   // REDIRECTS: Legacy URL redirects
@@ -160,7 +172,7 @@ export const config = {
      * - api routes (handled separately)
      */
     '/((?!_next/static|_next/image|favicon.ico|public|api).*)',
-    
+
     // Specific routes that need protection
     '/admin/:path*',
     // '/cart' is not protected - works with localStorage
@@ -169,5 +181,7 @@ export const config = {
     '/login',
     '/register',
     '/auth',
+    // Include auth callback for rate limiting
+    '/api/auth/callback/credentials',
   ],
 };

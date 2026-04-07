@@ -452,6 +452,16 @@ model Session {
   @@map("sessions")
 }
 
+model PasswordHistory {
+  id        String   @id @default(cuid())
+  userId    String
+  hash      String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("password_history")
+}
+
 model VerificationToken {
   identifier String
   token      String   @unique

@@ -14,7 +14,7 @@ describe('Authentication Validators', () => {
     it('should accept valid credentials', () => {
       const result = loginSchema.safeParse({
         email: 'user@example.com',
-        password: 'Password123',
+        password: 'SecureP@ss1!',
       });
       expect(result.success).toBe(true);
     });
@@ -63,32 +63,32 @@ describe('Authentication Validators', () => {
       }
     });
 
-    it('should reject password shorter than 8 characters', () => {
+    it('should reject password shorter than 10 characters', () => {
       const result = loginSchema.safeParse({
         email: 'user@example.com',
         password: 'Short1',
       });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.errors[0].message).toBe('La contraseña debe tener al menos 8 caracteres');
+        expect(result.error.errors[0].message).toBe('La contraseña debe tener al menos 10 caracteres');
       }
     });
 
-    it('should reject password with exactly 7 characters', () => {
+    it('should reject password with exactly 9 characters', () => {
       const result = loginSchema.safeParse({
         email: 'user@example.com',
-        password: 'Seven77',
+        password: 'NineChars',
       });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.errors[0].message).toBe('La contraseña debe tener al menos 8 caracteres');
+        expect(result.error.errors[0].message).toBe('La contraseña debe tener al menos 10 caracteres');
       }
     });
 
-    it('should accept password with exactly 8 characters', () => {
+    it('should accept password with exactly 10 characters', () => {
       const result = loginSchema.safeParse({
         email: 'user@example.com',
-        password: 'Password',
+        password: 'Passw0rd!@#',
       });
       expect(result.success).toBe(true);
     });
@@ -112,8 +112,8 @@ describe('Authentication Validators', () => {
     const validRegistration = {
       name: 'María García',
       email: 'maria.garcia@example.com',
-      password: 'SecurePass123',
-      confirmPassword: 'SecurePass123',
+      password: 'SecureP@ss123',
+      confirmPassword: 'SecureP@ss123',
       phone: '+34 600 123 456',
     };
 
@@ -218,7 +218,7 @@ describe('Authentication Validators', () => {
         }
       });
 
-      it('should reject password shorter than 8 characters', () => {
+      it('should reject password shorter than 10 characters', () => {
         const result = registerSchema.safeParse({
           ...validRegistration,
           password: 'Short1',
@@ -226,20 +226,20 @@ describe('Authentication Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('La contraseña debe tener al menos 8 caracteres');
+          expect(result.error.errors[0].message).toBe('La contraseña debe tener al menos 10 caracteres');
         }
       });
 
       it('should reject password without uppercase letter', () => {
         const result = registerSchema.safeParse({
           ...validRegistration,
-          password: 'password123',
-          confirmPassword: 'password123',
+          password: 'password@123',
+          confirmPassword: 'password@123',
         });
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.error.errors[0].message).toBe(
-            'La contraseña debe contener al menos una mayúscula, una minúscula y un número'
+            'La contraseña debe contener al menos una letra mayúscula'
           );
         }
       });
@@ -247,13 +247,13 @@ describe('Authentication Validators', () => {
       it('should reject password without lowercase letter', () => {
         const result = registerSchema.safeParse({
           ...validRegistration,
-          password: 'PASSWORD123',
-          confirmPassword: 'PASSWORD123',
+          password: 'PASSWORD@123',
+          confirmPassword: 'PASSWORD@123',
         });
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.error.errors[0].message).toBe(
-            'La contraseña debe contener al menos una mayúscula, una minúscula y un número'
+            'La contraseña debe contener al menos una letra minúscula'
           );
         }
       });
@@ -261,22 +261,50 @@ describe('Authentication Validators', () => {
       it('should reject password without number', () => {
         const result = registerSchema.safeParse({
           ...validRegistration,
-          password: 'PasswordABC',
-          confirmPassword: 'PasswordABC',
+          password: 'Password@ABC',
+          confirmPassword: 'Password@ABC',
         });
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.error.errors[0].message).toBe(
-            'La contraseña debe contener al menos una mayúscula, una minúscula y un número'
+            'La contraseña debe contener al menos un número'
           );
         }
       });
 
-      it('should accept password with uppercase, lowercase and number', () => {
+      it('should reject password without special character', () => {
         const result = registerSchema.safeParse({
           ...validRegistration,
-          password: 'MyP@ssw0rd',
-          confirmPassword: 'MyP@ssw0rd',
+          password: 'Password123',
+          confirmPassword: 'Password123',
+        });
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.error.errors[0].message).toBe(
+            'La contraseña debe contener al menos un carácter especial (!@#$%^&*)'
+          );
+        }
+      });
+
+      it('should reject common password', () => {
+        const result = registerSchema.safeParse({
+          ...validRegistration,
+          password: 'Password123!',
+          confirmPassword: 'Password123!',
+        });
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.error.errors[0].message).toBe(
+            'Esta contraseña es muy común. Por favor elige una más segura.'
+          );
+        }
+      });
+
+      it('should accept password with all required complexity', () => {
+        const result = registerSchema.safeParse({
+          ...validRegistration,
+          password: 'MyS3cur3P@ss!',
+          confirmPassword: 'MyS3cur3P@ss!',
         });
         expect(result.success).toBe(true);
       });
@@ -284,8 +312,8 @@ describe('Authentication Validators', () => {
       it('should reject non-matching passwords', () => {
         const result = registerSchema.safeParse({
           ...validRegistration,
-          password: 'SecurePass123',
-          confirmPassword: 'DifferentPass123',
+          password: 'SecureP@ss123',
+          confirmPassword: 'DifferentP@ss123',
         });
         expect(result.success).toBe(false);
         if (!result.success) {
@@ -383,9 +411,9 @@ describe('Authentication Validators', () => {
 
   describe('changePasswordSchema', () => {
     const validChangePassword = {
-      currentPassword: 'OldPass123',
-      newPassword: 'NewSecurePass123',
-      confirmPassword: 'NewSecurePass123',
+      currentPassword: 'OldPass123!',
+      newPassword: 'NewSecureP@ss123',
+      confirmPassword: 'NewSecureP@ss123',
     };
 
     it('should accept valid password change', () => {
@@ -427,7 +455,7 @@ describe('Authentication Validators', () => {
       }
     });
 
-    it('should reject new password shorter than 8 characters', () => {
+    it('should reject new password shorter than 10 characters', () => {
       const result = changePasswordSchema.safeParse({
         ...validChangePassword,
         newPassword: 'Short1',
@@ -435,7 +463,21 @@ describe('Authentication Validators', () => {
       });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.errors[0].message).toBe('La nueva contraseña debe tener al menos 8 caracteres');
+        expect(result.error.errors[0].message).toBe('La nueva contraseña debe tener al menos 10 caracteres');
+      }
+    });
+
+    it('should reject new common password', () => {
+      const result = changePasswordSchema.safeParse({
+        ...validChangePassword,
+        newPassword: 'Password123!',
+        confirmPassword: 'Password123!',
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.errors[0].message).toBe(
+          'Esta contraseña es muy común. Por favor elige una más segura.'
+        );
       }
     });
   });

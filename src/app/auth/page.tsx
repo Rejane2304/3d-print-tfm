@@ -21,6 +21,7 @@ import {
   Phone,
   Loader2
 } from 'lucide-react';
+import PasswordStrength, { isPasswordValid } from '@/components/auth/PasswordStrength';
 
 export const dynamic = 'force-dynamic';
 
@@ -206,8 +207,8 @@ function AuthContent() {
       return;
     }
 
-    if (registerData.password.length < 8) {
-      setRegisterError('La contraseña debe tener al menos 8 caracteres');
+    if (!isPasswordValid(registerData.password)) {
+      setRegisterError('La contraseña no cumple con todos los requisitos de seguridad');
       setRegisterLoading(false);
       return;
     }
@@ -546,7 +547,7 @@ function AuthContent() {
                           type={showRegisterPassword ? 'text' : 'password'}
                           required
                           className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
-                          placeholder="Mínimo 8 caracteres"
+                          placeholder="Mínimo 10 caracteres"
                           value={registerData.password}
                           onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
                         />
@@ -558,6 +559,7 @@ function AuthContent() {
                           {showRegisterPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                         </button>
                       </div>
+                      <PasswordStrength password={registerData.password} />
                     </div>
 
                     {/* Confirm Password */}

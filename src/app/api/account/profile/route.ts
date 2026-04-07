@@ -8,6 +8,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
 import bcrypt from 'bcrypt';
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
+import { changePasswordSchema } from '@/lib/validators';
 
 // Schema de validación para actualizar perfil - más permisivo
 const profileSchema = z.object({
@@ -16,11 +18,43 @@ const profileSchema = z.object({
   taxId: z.string().max(20).optional().or(z.literal('')),
 });
 
-// Schema para cambiar contraseña
-const passwordSchema = z.object({
-  passwordActual: z.string().min(1),
-  passwordNuevo: z.string().min(8),
-});
+/**
+ * Verifica si la nueva contraseña coincide con alguna de las últimas 5 contraseñas
+ */
+async function checkPasswordHistory(
+  userId: string,
+  newPassword: string
+): Promise<boolean> {
+  const passwordHistory = await prisma.passwordHistory.findMany({
+    where: { userId },
+    orderBy: { createdAt: 'desc' },
+    take: 5,
+  });
+
+  for (const entry of passwordHistory) {
+    const isMatch = await bcrypt.compare(newPassword, entry.hash);
+    if (isMatch) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Guarda el hash de la contraseña actual en el historial
+ */
+async function savePasswordToHistory(
+  userId: string,
+  passwordHash: string
+): Promise<void> {
+  await prisma.passwordHistory.create({
+    data: {
+      userId,
+      hash: passwordHash,
+    },
+  });
+}
 
 // GET - Obtener perfil del usuario
 export async function GET() {
@@ -74,26 +108,37 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    const usuario = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
-
-    if (!usuario) {
-      return NextResponse.json(
-        { success: false, error: 'Usuario not found' },
-        { status: 404 }
-      );
-    }
-
     const body = await req.json();
 
-    // Si hay datos de contraseña, procesar cambio de contraseña
+    // Si hay datos de contraseña, aplicar rate limiting y procesar cambio
     if (body.passwordActual && body.passwordNuevo) {
-      const passwordData = passwordSchema.parse(body);
+      // Check rate limiting for password change
+      const rateLimitResponse = checkRateLimit(req, 'passwordChange');
+      if (rateLimitResponse) {
+        return rateLimitResponse;
+      }
+
+      const usuario = await prisma.user.findUnique({
+        where: { email: session.user.email },
+      });
+
+      if (!usuario) {
+        return NextResponse.json(
+          { success: false, error: 'Usuario not found' },
+          { status: 404 }
+        );
+      }
+
+      // Transform Spanish field names to English for schema validation
+      const passwordData = changePasswordSchema.parse({
+        currentPassword: body.passwordActual,
+        newPassword: body.passwordNuevo,
+        confirmPassword: body.passwordNuevo,
+      });
 
       // Verificar contraseña actual
       const passwordValido = await bcrypt.compare(
-        passwordData.passwordActual,
+        passwordData.currentPassword,
         usuario.password
       );
 
@@ -104,8 +149,23 @@ export async function PATCH(req: NextRequest) {
         );
       }
 
+      // Verificar que la nueva contraseña no coincida con las últimas 5
+      const isReused = await checkPasswordHistory(
+        usuario.id,
+        passwordData.newPassword
+      );
+      if (isReused) {
+        return NextResponse.json(
+          { success: false, error: 'La nueva contraseña no puede coincidir con ninguna de tus últimas 5 contraseñas' },
+          { status: 400 }
+        );
+      }
+
+      // Guardar la contraseña actual en el historial antes de actualizar
+      await savePasswordToHistory(usuario.id, usuario.password);
+
       // Actualizar contraseña
-      const hashedPassword = await bcrypt.hash(passwordData.passwordNuevo, 12);
+      const hashedPassword = await bcrypt.hash(passwordData.newPassword, 12);
       await prisma.user.update({
         where: { id: usuario.id },
         data: { password: hashedPassword },
@@ -117,7 +177,18 @@ export async function PATCH(req: NextRequest) {
       });
     }
 
-    // Actualizar datos del perfil
+    // Actualizar datos del perfil (sin rate limiting para datos no sensibles)
+    const usuario = await prisma.user.findUnique({
+      where: { email: session.user.email },
+    });
+
+    if (!usuario) {
+      return NextResponse.json(
+        { success: false, error: 'Usuario not found' },
+        { status: 404 }
+      );
+    }
+
     const profileData = profileSchema.parse(body);
 
     const usuarioActualizado = await prisma.user.update({

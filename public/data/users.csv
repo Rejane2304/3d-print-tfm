@@ -1,11 +1,11 @@
 _ref,email,password,name,phone,role,isActive
-USER-0001,admin@3dprint.com,admin123,Admin,+34 600 000 001,ADMIN,true
-USER-0002,juan@example.com,pass123,Juan Pérez,+34 600 000 002,CUSTOMER,true
-USER-0003,maria@example.com,pass123,María García,+34 600 000 003,CUSTOMER,true
-USER-0004,pedro@example.com,pass123,Pedro López,+34 600 000 004,CUSTOMER,true
-USER-0005,ana@example.com,pass123,Ana Martínez,+34 600 000 005,CUSTOMER,true
-USER-0006,carlos@example.com,pass123,Carlos Rodríguez,+34 600 000 006,CUSTOMER,true
-USER-0007,laura@example.com,pass123,Laura Sánchez,+34 600 000 007,CUSTOMER,true
-USER-0008,miguel@example.com,pass123,Miguel Torres,+34 600 000 008,CUSTOMER,true
-USER-0009,sofia@example.com,pass123,Sofia Fernández,+34 600 000 009,CUSTOMER,true
-USER-0010,test@example.com,test123,Test User,+34 600 000 010,CUSTOMER,true
+USER-0001,admin@3dprint.com,AdminTFM2024!,Admin,+34 600 000 001,ADMIN,true
+USER-0002,juan@example.com,JuanTFM2024!,Juan Pérez,+34 600 000 002,CUSTOMER,true
+USER-0003,maria@example.com,kR9#mP2$vL7q,María García,+34 600 000 003,CUSTOMER,true
+USER-0004,pedro@example.com,Xw4&Zt8*Fb1n,Pedro López,+34 600 000 004,CUSTOMER,true
+USER-0005,ana@example.com,Hj6!Qp9@Cy3v,Ana Martínez,+34 600 000 005,CUSTOMER,true
+USER-0006,carlos@example.com,Nm5#Kd2$Rs8w,Carlos Rodríguez,+34 600 000 006,CUSTOMER,true
+USER-0007,laura@example.com,Bt7*Gx4&Lm1p,Laura Sánchez,+34 600 000 007,CUSTOMER,true
+USER-0008,miguel@example.com,Vf3@Jh9#Wc6r,Miguel Torres,+34 600 000 008,CUSTOMER,true
+USER-0009,sofia@example.com,Yq8$Pn2*Zd5k,Sofia Fernández,+34 600 000 009,CUSTOMER,true
+USER-0010,test@example.com,Dw6!Mt4#Lb9x,Test User,+34 600 000 010,CUSTOMER,true

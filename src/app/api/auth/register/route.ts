@@ -8,67 +8,52 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
 import { prisma } from '@/lib/db/prisma';
 import { withErrorHandler } from '@/lib/errors/api-wrapper';
+import { registerSchema, addressSchema } from '@/lib/validators';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
+  // Check rate limiting for registration
+  const rateLimitResponse = checkRateLimit(req, 'register');
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   const body = await req.json();
+  const { address: addressData, ...userData } = body;
+  
+  // Validar datos del usuario con Zod schema (incluye validación compleja de contraseña)
+  const userValidationResult = registerSchema.safeParse(userData);
+  
+  if (!userValidationResult.success) {
+    // Extraer el primer error para el mensaje
+    const firstError = userValidationResult.error.errors[0];
+    return NextResponse.json(
+      { success: false, error: firstError.message },
+      { status: 400 }
+    );
+  }
+  
+  // Validar dirección si se proporciona (parcial, ya que algunos campos se completan automáticamente)
+  let validatedAddress = null;
+  if (addressData) {
+    const addressValidationResult = addressSchema.partial().safeParse(addressData);
+    if (!addressValidationResult.success) {
+      const firstError = addressValidationResult.error.errors[0];
+      return NextResponse.json(
+        { success: false, error: `Dirección: ${firstError.message}` },
+        { status: 400 }
+      );
+    }
+    validatedAddress = addressValidationResult.data;
+  }
   
   const { 
     name, 
     email, 
     password, 
-    phone, 
-    address: addressData 
-  } = body;
-  
-  // Validaciones específicas por campo
-  if (!name || name.trim() === '') {
-    return NextResponse.json(
-      { success: false, error: 'El campo nombre es obligatorio' },
-      { status: 400 }
-    );
-  }
-  
-  if (!email || email.trim() === '') {
-    return NextResponse.json(
-      { success: false, error: 'El campo email es obligatorio' },
-      { status: 400 }
-    );
-  }
-  
-  if (!password) {
-    return NextResponse.json(
-      { success: false, error: 'El campo password es obligatorio' },
-      { status: 400 }
-    );
-  }
-  
-  if (password.length < 8) {
-    return NextResponse.json(
-      { success: false, error: 'La contraseña debe tener al menos 8 caracteres' },
-      { status: 400 }
-    );
-  }
-  
-  // Validar formato de email
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    return NextResponse.json(
-      { success: false, error: 'El formato del email no es válido' },
-      { status: 400 }
-    );
-  }
-  
-  // Validar teléfono si se proporciona
-  if (phone && phone.trim() !== '') {
-    const phoneDigits = phone.replace(/\D/g, '');
-    if (phoneDigits.length < 9) {
-      return NextResponse.json(
-        { success: false, error: 'El teléfono debe tener al menos 9 dígitos' },
-        { status: 400 }
-      );
-    }
-  }
-  
+    phone
+  } = userValidationResult.data;
+
   // Verificar si el email ya existe
   const existingUser = await prisma.user.findUnique({
     where: { email: email.toLowerCase() },
@@ -76,15 +61,16 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   
   if (existingUser) {
     return NextResponse.json(
-      { success: false, error: 'Already exists un usuario con este email' },
+      { success: false, error: 'Ya existe un usuario con este email' },
       { status: 409 }
     );
   }
   
-  // Hash de la contraseña
+  // Hash de la contraseña (solo después de validación exitosa)
   const hashedPassword = await bcrypt.hash(password, 12);
   
   // Crear usuario con dirección (si se proporciona)
+  // Initialize failedAttempts=0 and lockedUntil=null explicitly
   const user = await prisma.user.create({
     data: {
       email: email.toLowerCase(),
@@ -93,19 +79,21 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       phone: phone || null,
       role: 'CUSTOMER',
       isActive: true,
+      failedAttempts: 0,
+      lockedUntil: null,
       // Crear dirección si se proporcionan los datos
-      addresses: addressData ? {
+      addresses: validatedAddress ? {
         create: {
-          name: addressData.name || 'Principal',
-          recipient: addressData.recipient || name,
-          phone: addressData.phone || phone || '',
-          address: addressData.address,
-          complement: addressData.complement,
-          postalCode: addressData.postalCode,
-          city: addressData.city,
-          province: addressData.province,
-          country: addressData.country || 'Spain',
-          isDefault: addressData.isDefault ?? true,
+          name: validatedAddress.name || 'Principal',
+          recipient: validatedAddress.recipient || name,
+          phone: validatedAddress.phone || phone || '',
+          address: validatedAddress.address!,
+          complement: validatedAddress.complement,
+          postalCode: validatedAddress.postalCode!,
+          city: validatedAddress.city!,
+          province: validatedAddress.province!,
+          country: validatedAddress.country || 'Spain',
+          isDefault: validatedAddress.isDefault ?? true,
         }
       } : undefined
     },

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { Material, Role, PaymentMethod, OrderStatus } from '@/types/prisma-enums';
+import { isCommonPassword, PASSWORD_SECURITY_ERRORS } from './password-security';
 
 // ============================================
 // AUTHENTICATION VALIDATIONS
@@ -13,7 +14,9 @@ export const loginSchema = z.object({
   password: z
     .string()
     .min(1, 'La contraseña es obligatoria')
-    .min(8, 'La contraseña debe tener al menos 8 caracteres'),
+    .min(10, 'La contraseña debe tener al menos 10 caracteres')
+    .max(128, 'La contraseña no puede exceder 128 caracteres')
+    .regex(/[!@#$%^&*]/, 'La contraseña debe contener al menos un carácter especial (!@#$%^&*)'),
 });
 
 export const registerSchema = z.object({
@@ -29,8 +32,15 @@ export const registerSchema = z.object({
   password: z
     .string()
     .min(1, 'La contraseña es obligatoria')
-    .min(8, 'La contraseña debe tener al menos 8 caracteres')
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'La contraseña debe contener al menos una mayúscula, una minúscula y un número'),
+    .min(10, 'La contraseña debe tener al menos 10 caracteres')
+    .max(128, 'La contraseña no puede exceder 128 caracteres')
+    .regex(/^(?=.*[a-z])/, 'La contraseña debe contener al menos una letra minúscula')
+    .regex(/^(?=.*[A-Z])/, 'La contraseña debe contener al menos una letra mayúscula')
+    .regex(/^(?=.*\d)/, 'La contraseña debe contener al menos un número')
+    .regex(/^(?=.*[!@#$%^&*])/, 'La contraseña debe contener al menos un carácter especial (!@#$%^&*)')
+    .refine((val) => !isCommonPassword(val), {
+      message: PASSWORD_SECURITY_ERRORS.COMMON_PASSWORD,
+    }),
   confirmPassword: z.string(),
   phone: z
     .string()
@@ -47,8 +57,15 @@ export const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, 'La contraseña actual es obligatoria'),
   newPassword: z
     .string()
-    .min(8, 'La nueva contraseña debe tener al menos 8 caracteres')
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'La contraseña debe contener al menos una mayúscula, una minúscula y un número'),
+    .min(10, 'La nueva contraseña debe tener al menos 10 caracteres')
+    .max(128, 'La contraseña no puede exceder 128 caracteres')
+    .regex(/^(?=.*[a-z])/, 'La contraseña debe contener al menos una letra minúscula')
+    .regex(/^(?=.*[A-Z])/, 'La contraseña debe contener al menos una letra mayúscula')
+    .regex(/^(?=.*\d)/, 'La contraseña debe contener al menos un número')
+    .regex(/^(?=.*[!@#$%^&*])/, 'La contraseña debe contener al menos un carácter especial (!@#$%^&*)')
+    .refine((val) => !isCommonPassword(val), {
+      message: PASSWORD_SECURITY_ERRORS.COMMON_PASSWORD,
+    }),
   confirmPassword: z.string(),
 }).refine((data) => data.newPassword === data.confirmPassword, {
   message: 'Las contraseñas no coinciden',

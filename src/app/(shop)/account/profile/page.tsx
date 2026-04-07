@@ -19,6 +19,7 @@ import {
   Eye,
   EyeOff
 } from 'lucide-react';
+import PasswordStrength, { isPasswordValid } from '@/components/auth/PasswordStrength';
 
 interface ProfileData {
   name: string;
@@ -100,8 +101,8 @@ export default function ProfilePage() {
         if (newPassword !== confirmPassword) {
           throw new Error('Las contraseñas no coinciden');
         }
-        if (newPassword.length < 8) {
-          throw new Error('La contraseña debe tener al menos 8 caracteres');
+        if (!isPasswordValid(newPassword)) {
+          throw new Error('La contraseña no cumple con todos los requisitos de seguridad');
         }
       }
 
@@ -317,7 +318,7 @@ export default function ProfilePage() {
                       type={showNewPassword ? 'text' : 'password'}
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      minLength={8}
+                      minLength={10}
                       className="w-full pr-10 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                       required={changePassword}
                     />
@@ -330,8 +331,9 @@ export default function ProfilePage() {
                     </button>
                   </div>
                   <p className="text-xs text-gray-500 mt-1">
-                    Mínimo 8 caracteres
+                    Mínimo 10 caracteres
                   </p>
+                  <PasswordStrength password={newPassword} />
                 </div>
 
                 <div>
