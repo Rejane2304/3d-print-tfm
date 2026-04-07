@@ -506,6 +506,31 @@ export function translateMaterial(material: string): string {
   return enumTranslations.material[material] || material;
 }
 
+// ============================================================================
+// COUNTRY TRANSLATION
+// ============================================================================
+
+export function translateCountry(country: string): string {
+  const countryTranslations: Record<string, string> = {
+    'Spain': 'España',
+    'United States': 'Estados Unidos',
+    'United Kingdom': 'Reino Unido',
+    'France': 'Francia',
+    'Germany': 'Alemania',
+    'Italy': 'Italia',
+    'Portugal': 'Portugal',
+    'Mexico': 'México',
+    'Argentina': 'Argentina',
+    'Chile': 'Chile',
+    'Colombia': 'Colombia',
+    'Peru': 'Perú',
+    'Brazil': 'Brasil',
+    'Andorra': 'Andorra',
+    'Gibraltar': 'Gibraltar',
+  };
+  return countryTranslations[country] || country;
+}
+
 export function translateAddressName(name: string): string {
   return addressNameTranslations[name.toLowerCase()] || name;
 }

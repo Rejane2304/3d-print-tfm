@@ -279,7 +279,7 @@ export default function AdminClientDetailPage() {
                   <p className="text-gray-600">
                     {address.postalCode} {address.city}, {address.province}
                   </p>
-                  <p className="text-gray-600">Tel: {address.phone}</p>
+                  <p className="text-gray-600">Teléfono: {address.phone}</p>
                 </div>
               ))}
             </div>

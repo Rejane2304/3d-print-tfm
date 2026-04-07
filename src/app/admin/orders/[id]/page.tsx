@@ -335,7 +335,7 @@ export default function AdminPedidoDetallePage() {
                   {order.postalCodeEnvio} {order.ciudadEnvio}, {order.provinciaEnvio}
                 </p>
                 <p className="text-gray-600">{order.paisEnvio}</p>
-                <p className="text-gray-600 mt-2">Tel: {order.telefonoEnvio}</p>
+                <p className="text-gray-600 mt-2">Teléfono: {order.telefonoEnvio}</p>
               </div>
             </div>
           </div>

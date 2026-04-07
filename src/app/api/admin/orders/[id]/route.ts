@@ -8,7 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
-import { translateOrderStatus, translatePaymentStatus, translatePaymentMethod, translateErrorMessage } from '@/lib/i18n';
+import { translateOrderStatus, translatePaymentStatus, translatePaymentMethod, translateErrorMessage, translateCountry } from '@/lib/i18n';
 
 export async function GET(
   req: NextRequest,
@@ -98,7 +98,7 @@ export async function GET(
       postalCodeEnvio: order.shippingPostalCode,
       ciudadEnvio: order.shippingCity,
       provinciaEnvio: order.shippingProvince,
-      paisEnvio: order.shippingCountry,
+      paisEnvio: translateCountry(order.shippingCountry),
       paymentMethod: order.paymentMethod ? translatePaymentMethod(order.paymentMethod) : null,
       numeroSeguimiento: order.trackingNumber,
       transportista: order.carrier,
