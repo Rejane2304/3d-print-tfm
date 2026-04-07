@@ -1,11 +1,12 @@
 /**
- * CartSummary Component
- * Resumen del carrito de compras con totales y botón de checkout
- * Responsive: mobile → desktop
+ * Updated CartSummary Component with Coupon Support
+ * Resumen del carrito con integración de cupones
  */
 'use client';
 
-import { ShoppingCart, ArrowRight, Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { ShoppingCart, ArrowRight, Loader2, Tag } from 'lucide-react';
+import { CouponInput } from './CouponInput';
 
 interface CartSummaryProps {
   items: Array<{
@@ -24,6 +25,13 @@ interface CartSummaryProps {
   isProcessing?: boolean;
   onCheckout: () => void;
   onContinueShopping: () => void;
+  onApplyCoupon?: (code: string) => Promise<void>;
+  onRemoveCoupon?: () => void;
+  appliedCoupon?: {
+    code: string;
+    discount: number;
+    type: string;
+  } | null;
 }
 
 export default function CartSummary({
@@ -35,11 +43,21 @@ export default function CartSummary({
   isProcessing = false,
   onCheckout,
   onContinueShopping,
+  onApplyCoupon,
+  onRemoveCoupon,
+  appliedCoupon,
 }: CartSummaryProps) {
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-  const isFreeShipping = subtotal >= freeShippingFrom;
+  
+  // Calcular envío gratis
+  const hasFreeShippingCoupon = appliedCoupon?.type === 'Envío Gratis';
+  const isFreeShipping = subtotal >= freeShippingFrom || hasFreeShippingCoupon;
   const shipping = isFreeShipping ? 0 : shippingCost;
-  const total = subtotal + shipping;
+  
+  // Calcular totales con cupón
+  const couponDiscount = appliedCoupon?.discount || 0;
+  const finalSubtotal = Math.max(0, subtotal - couponDiscount);
+  const total = finalSubtotal + shipping;
   const hasItems = items.length > 0;
 
   return (
@@ -56,11 +74,36 @@ export default function CartSummary({
             {totalItems} {totalItems === 1 ? 'artículo' : 'artículos'}
           </div>
 
+          {/* Sección de Cupón */}
+          {onApplyCoupon && (
+            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-2 mb-3">
+                <Tag className="h-4 w-4 text-indigo-600" />
+                <span className="text-sm font-medium text-gray-700">Código de descuento</span>
+              </div>
+              <CouponInput
+                onApply={onApplyCoupon}
+                onRemove={onRemoveCoupon || (() => {})}
+                appliedCoupon={appliedCoupon}
+                subtotal={subtotal}
+                disabled={isProcessing}
+              />
+            </div>
+          )}
+
           {/* Subtotal */}
           <div className="flex justify-between py-2 border-b border-gray-100">
             <span className="text-gray-600">Subtotal</span>
             <span className="font-medium">{subtotal.toFixed(2)} €</span>
           </div>
+
+          {/* Descuento por cupón */}
+          {couponDiscount > 0 && (
+            <div className="flex justify-between py-2 border-b border-gray-100">
+              <span className="text-green-600">Descuento</span>
+              <span className="font-medium text-green-600">-{couponDiscount.toFixed(2)} €</span>
+            </div>
+          )}
 
           {/* Envío */}
           <div className="flex justify-between py-2 border-b border-gray-100">

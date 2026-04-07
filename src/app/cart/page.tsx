@@ -1,8 +1,6 @@
 /**
- * Shopping Cart Page
- * Displays cart items and allows managing them
- * Works for authenticated (API) and unauthenticated (localStorage) users
- * Responsive: mobile → desktop
+ * Shopping Cart Page with Coupon Support
+ * Displays cart items and allows managing them including coupon application
  */
 'use client';
 
@@ -11,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import { useCart } from '@/hooks/useCart';
 import CartItem from '@/components/cart/CartItem';
 import CartSummary from '@/components/cart/CartSummary';
+import { useCoupon } from '@/hooks/useCoupon';
 import { Loader2, AlertCircle, Info } from 'lucide-react';
 import Link from 'next/link';
 
@@ -25,6 +24,12 @@ export default function CarritoPage() {
     updateQuantity, 
     removeItem
   } = useCart();
+  
+  const { 
+    appliedCoupon, 
+    applyCoupon, 
+    removeCoupon 
+  } = useCoupon();
   
   const [updatingItem, setUpdatingItem] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -57,11 +62,30 @@ export default function CarritoPage() {
     }
   };
 
+  const handleApplyCoupon = async (code: string) => {
+    try {
+      await applyCoupon(code);
+    } catch (err) {
+      // El error ya se maneja en el hook
+      throw err;
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    removeCoupon();
+  };
+
   const handleCheckout = () => {
     if (!isAuthenticated) {
-      // Redirigir a login con callback al checkout
       router.push('/auth?callbackUrl=/checkout');
       return;
+    }
+    
+    // Guardar el cupón aplicado en localStorage para usarlo en checkout
+    if (appliedCoupon) {
+      localStorage.setItem('appliedCoupon', JSON.stringify(appliedCoupon));
+    } else {
+      localStorage.removeItem('appliedCoupon');
     }
     
     setIsProcessing(true);
@@ -112,7 +136,7 @@ export default function CarritoPage() {
         )}
 
         {/* Info para usuarios no autenticados */}
-        {!isAuthenticated && cart && cart.items.length > 0 && (
+        {!isAuthenticated && cart?.items && cart.items.length > 0 && (
           <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-md flex items-center gap-3">
             <Info className="h-5 w-5 text-blue-600 flex-shrink-0" />
             <div className="flex-1">
@@ -185,6 +209,9 @@ export default function CarritoPage() {
               isProcessing={isProcessing}
               onCheckout={handleCheckout}
               onContinueShopping={handleContinueShopping}
+              onApplyCoupon={isAuthenticated && cart?.items?.length > 0 ? handleApplyCoupon : undefined}
+              onRemoveCoupon={handleRemoveCoupon}
+              appliedCoupon={appliedCoupon}
             />
           </div>
         </div>

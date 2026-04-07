@@ -1,10 +1,9 @@
 /**
- * API Route for Simplified Checkout
+ * API Route for Checkout with Coupon Support
  * 
- * POST /api/checkout - Create order and payment in one step
+ * POST /api/checkout - Create order with optional coupon discount
  * 
- * Simplified flow: User chooses method → Confirms → Order created as CONFIRMED
- * No external redirects, no complex forms
+ * Now supports: couponCode in request body
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
@@ -39,7 +38,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   // Get data from request body
   const body = await req.json();
-  const { shippingAddressId, paymentMethod = 'CARD' } = body;
+  const { shippingAddressId, paymentMethod = 'CARD', couponCode } = body;
 
   if (!shippingAddressId) {
     return NextResponse.json(
@@ -102,12 +101,48 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     }
   }
 
-  // Calculate totals (always include 21% VAT)
+  // Calculate totals
   const subtotal = Number(user.cart.subtotal);
-  const shippingCost = subtotal >= 50 ? 0 : 5.99;
+  let couponDiscount = 0;
+  let couponId: string | null = null;
+  let hasFreeShipping = false;
+
+  // Validate and apply coupon if provided
+  if (couponCode) {
+    const coupon = await prisma.coupon.findUnique({
+      where: { code: couponCode.toUpperCase() },
+    });
+
+    if (coupon) {
+      const now = new Date();
+      const isValid = coupon.isActive && 
+        coupon.validFrom <= now && 
+        coupon.validUntil >= now &&
+        (coupon.maxUses === null || coupon.usedCount < coupon.maxUses) &&
+        (coupon.minOrderAmount === null || subtotal >= Number(coupon.minOrderAmount));
+
+      if (isValid) {
+        couponId = coupon.id;
+        
+        if (coupon.type === 'PERCENTAGE') {
+          couponDiscount = subtotal * (Number(coupon.value) / 100);
+        } else if (coupon.type === 'FIXED') {
+          couponDiscount = Math.min(Number(coupon.value), subtotal);
+        } else if (coupon.type === 'FREE_SHIPPING') {
+          hasFreeShipping = true;
+        }
+
+        // Redondear a 2 decimales
+        couponDiscount = Math.round(couponDiscount * 100) / 100;
+      }
+    }
+  }
+
+  const shippingCost = subtotal >= 50 || hasFreeShipping ? 0 : 5.99;
+  const discountedSubtotal = Math.max(0, subtotal - couponDiscount);
   const taxRate = 0.21;
-  const taxAmount = subtotal * taxRate;
-  const total = subtotal + shippingCost + taxAmount;
+  const taxAmount = discountedSubtotal * taxRate;
+  const total = discountedSubtotal + shippingCost + taxAmount;
 
   try {
     // Get shipping address
@@ -133,7 +168,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
     // Create order and payment in a transaction
     const result = await prisma.$transaction(async (tx) => {
-      // 1. Create the order as CONFIRMED (payment completed immediately)
+      // 1. Create the order as CONFIRMED
       const order = await tx.order.create({
         data: {
           userId: user.id,
@@ -141,6 +176,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
           orderNumber,
           subtotal,
           shipping: shippingCost,
+          discount: couponDiscount > 0 ? couponDiscount : undefined,
           total,
           shippingAddressId,
           shippingName: address.recipient,
@@ -182,7 +218,15 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         },
       });
 
-      // 3. Deduct stock from products
+      // 3. Increment coupon usage if applicable
+      if (couponId) {
+        await tx.coupon.update({
+          where: { id: couponId },
+          data: { usedCount: { increment: 1 } },
+        });
+      }
+
+      // 4. Deduct stock from products
       for (const item of cartItems) {
         await tx.product.update({
           where: { id: item.productId },
@@ -194,7 +238,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         });
       }
 
-      // 4. Empty the cart
+      // 5. Empty the cart
       await tx.cartItem.deleteMany({
         where: { cartId: cart.id },
       });
@@ -207,6 +251,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       orderId: result.id,
       orderNumber: result.orderNumber,
       paymentMethod: translatePaymentMethod(paymentMethod),
+      discount: couponDiscount > 0 ? couponDiscount : undefined,
       message: 'Pago completado exitosamente',
     });
   } catch (error) {

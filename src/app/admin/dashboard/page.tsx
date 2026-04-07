@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Loader2, DollarSign, ShoppingBag, Users, TrendingUp, Package, Calendar, ChevronDown, FolderTree, HelpCircle, MessageSquare } from 'lucide-react';
+import { Loader2, DollarSign, ShoppingBag, Users, TrendingUp, Package, Calendar, ChevronDown, FolderTree, HelpCircle, MessageSquare, Ticket } from 'lucide-react';
 
 interface AnalyticsData {
   salesSummary: {
@@ -388,6 +388,14 @@ export default function AdminPanelPage() {
             <MessageSquare className="h-6 w-6 text-pink-600 mb-2" />
             <p className="font-medium text-gray-900">Reseñas</p>
             <p className="text-sm text-gray-500">Opiniones clientes</p>
+          </Link>
+          <Link 
+            href="/admin/coupons"
+            className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow"
+          >
+            <Ticket className="h-6 w-6 text-indigo-600 mb-2" />
+            <p className="font-medium text-gray-900">Cupones</p>
+            <p className="text-sm text-gray-500">Códigos descuento</p>
           </Link>
         </div>
       </div>
