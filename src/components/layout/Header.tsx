@@ -138,11 +138,11 @@ export default function Header() {
                   />
                 </button>
 
-                {/* Horizontal Dropdown Menu */}
+                {/* Dropdown Menu with Scroll */}
                 {userMenuOpen && (
-                  <div className="absolute right-0 mt-3 w-64 bg-white rounded-lg shadow-xl border border-gray-100 z-50">
+                  <div className="absolute right-0 mt-3 w-64 bg-white rounded-lg shadow-xl border border-gray-100 z-50 max-h-[calc(100vh-80px)] overflow-y-auto">
                     {/* User Info */}
-                    <div className="px-4 py-3 border-b border-gray-100 bg-indigo-50 rounded-t-lg">
+                    <div className="px-4 py-3 border-b border-gray-100 bg-indigo-50 rounded-t-lg sticky top-0">
                       <p className="font-medium text-gray-900">{session?.user?.name}</p>
                       <p className="text-xs text-gray-500">{session?.user?.email}</p>
                     </div>
