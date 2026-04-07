@@ -48,6 +48,25 @@ export default function Footer() {
   const companyCity = config?.ciudadEmpresa || 'Barcelona';
   const companyProvince = config?.provinciaEmpresa || 'Barcelona';
 
+  // Formatear número de teléfono en grupos de 3
+  const formatPhoneNumber = (phone: string): string => {
+    // Remover espacios existentes
+    const clean = phone.replace(/\s/g, '');
+    // Si tiene prefijo internacional (+XX), mantenerlo junto
+    if (clean.startsWith('+')) {
+      const prefix = clean.substring(0, 3); // +34
+      const rest = clean.substring(3);
+      // Agrupar el resto en bloques de 3
+      const groups = rest.match(/.{1,3}/g) || [];
+      return `${prefix} ${groups.join(' ')}`;
+    }
+    // Sin prefijo, agrupar todo
+    const groups = clean.match(/.{1,3}/g) || [];
+    return groups.join(' ');
+  };
+
+  const formattedPhone = formatPhoneNumber(companyPhone);
+
   return (
     <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
       {/* Main Footer Content */}
@@ -205,7 +224,7 @@ export default function Footer() {
                 <div>
                   <p className="text-xs text-gray-500 mb-0.5">Teléfono</p>
                   <a href={`tel:${companyPhone.replace(/\s/g, '')}`} className="text-gray-300 hover:text-white text-sm transition-colors">
-                    {companyPhone}
+                    {formattedPhone}
                   </a>
                 </div>
               </li>
