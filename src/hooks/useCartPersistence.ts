@@ -4,35 +4,35 @@ import { useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 
 const CART_STORAGE_KEY = 'cart';
-const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutos
+const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes
 
 /**
- * Hook para gestionar la persistencia del carrito
- * - Usuarios autenticados: Carrito persistente en BD
- * - Usuarios no autenticados: Carrito se limpia al cerrar sesión o después de inactividad
+ * Hook to manage cart persistence
+ * - Authenticated users: Persistent cart in database
+ * - Guest users: Cart is cleared on logout or after inactivity
  */
 export function useCartPersistence() {
   const { status } = useSession();
   const isAuthenticated = status === 'authenticated';
   const isLoading = status === 'loading';
 
-  // Función para limpiar carrito de invitado
+  // Function to clear guest cart
   const clearGuestCart = useCallback(() => {
     if (!isAuthenticated) {
       localStorage.removeItem(CART_STORAGE_KEY);
       window.dispatchEvent(new Event('cartUpdated'));
-      console.log('[CartPersistence] Carrito de invitado limpiado');
+      console.log('[CartPersistence] Guest cart cleared');
     }
   }, [isAuthenticated]);
 
   useEffect(() => {
     if (isLoading) return;
 
-    // Para usuarios NO autenticados
+    // For NON-authenticated users
     if (!isAuthenticated) {
       let inactivityTimer: NodeJS.Timeout;
 
-      // Resetear timer de inactividad
+      // Reset inactivity timer
       const resetInactivityTimer = () => {
         clearTimeout(inactivityTimer);
         inactivityTimer = setTimeout(() => {
@@ -40,26 +40,26 @@ export function useCartPersistence() {
         }, INACTIVITY_TIMEOUT);
       };
 
-      // Eventos que indican actividad del usuario
+      // Events that indicate user activity
       const activityEvents = ['mousedown', 'keydown', 'touchstart', 'scroll'];
       
-      // Iniciar timer
+      // Start timer
       resetInactivityTimer();
 
-      // Agregar listeners
+      // Add listeners
       activityEvents.forEach(event => {
         document.addEventListener(event, resetInactivityTimer);
       });
 
-      // Limpiar carrito al cerrar la pestaña (para invitados)
+      // Clear cart when closing tab (for guests)
       const handleBeforeUnload = () => {
-        // Solo limpiar si no es un refresh
+        // Only clear if not a refresh
         if (!sessionStorage.getItem('isRefreshing')) {
           localStorage.removeItem(CART_STORAGE_KEY);
         }
       };
 
-      // Marcar cuando se está refrescando
+      // Mark when refreshing
       const handleLoad = () => {
         sessionStorage.setItem('isRefreshing', 'true');
         setTimeout(() => {

@@ -13,12 +13,33 @@ const PROTECTED_CLIENT_ROUTES = ['/checkout', '/account'];
 const AUTH_ROUTES = ['/login', '/auth'];
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  
+  const { pathname, search } = request.nextUrl;
+
+  // ============================================
+  // REDIRECTS: Legacy URL redirects
+  // Handle /login and /register before auth checks
+  // ============================================
+  // Redirect /login to /auth
+  if (pathname === '/login') {
+    return NextResponse.redirect(new URL(`/auth${search}`, request.url));
+  }
+
+  // Redirect /register to /auth with tab=register
+  if (pathname === '/register') {
+    const url = new URL('/auth', request.url);
+    // Preserve existing query params
+    if (search) {
+      url.search = search;
+    }
+    // Add parameter to open register tab
+    url.searchParams.set('tab', 'register');
+    return NextResponse.redirect(url);
+  }
+
   // Get JWT token from session
-  const token = await getToken({ 
-    req: request, 
-    secret: process.env.NEXTAUTH_SECRET 
+  const token = await getToken({
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET
   });
   
   const isAuthenticated = !!token;
@@ -39,7 +60,6 @@ export async function middleware(request: NextRequest) {
 
     // Allow profile routes
     if (isProfileRoute) {
-      console.log(`✅ ADMIN accessing profile at ${pathname} - Allowing`);
       return NextResponse.next();
     }
 
@@ -49,7 +69,6 @@ export async function middleware(request: NextRequest) {
 
     // Redirect admin away from shop-only routes
     if (isShopOnlyRoute) {
-      console.log(`🚫 ADMIN tried to access ${pathname} - Redirecting to /admin/dashboard`);
       return NextResponse.redirect(new URL('/admin/dashboard', request.url));
     }
   }
@@ -60,13 +79,11 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith('/admin')) {
     if (!isAuthenticated) {
       // Not authenticated, redirect to auth
-      console.log(`🔒 Unauthenticated user tried to access ${pathname}`);
       return NextResponse.redirect(new URL('/auth', request.url));
     }
 
     if (userRole !== 'ADMIN') {
       // Authenticated but not admin, redirect to home
-      console.log(`🚫 CLIENT tried to access ${pathname} - Redirecting to /`);
       return NextResponse.redirect(new URL('/', request.url));
     }
 
@@ -86,7 +103,6 @@ export async function middleware(request: NextRequest) {
   if (isProtectedClientRoute) {
     if (!isAuthenticated) {
       // Not authenticated, redirect to auth with callback
-      console.log(`🔒 Unauthenticated user tried to access ${pathname}`);
       const callbackUrl = encodeURIComponent(pathname);
       return NextResponse.redirect(
         new URL(`/auth?callbackUrl=${callbackUrl}`, request.url)
@@ -95,7 +111,6 @@ export async function middleware(request: NextRequest) {
 
     if (userRole === 'ADMIN') {
       // Admin tries to access client route
-      console.log(`🚫 ADMIN tried to access ${pathname} - Redirecting to /admin/dashboard`);
       return NextResponse.redirect(new URL('/admin/dashboard', request.url));
     }
 
@@ -116,17 +131,14 @@ export async function middleware(request: NextRequest) {
 
     if (callbackUrl) {
       // If there's a callbackUrl, redirect there instead
-      console.log(`✅ Authenticated user on ${pathname} - Redirecting to callback: ${callbackUrl}`);
       return NextResponse.redirect(new URL(callbackUrl, request.url));
     }
 
     if (userRole === 'ADMIN') {
       // Admin authenticated on login → redirect to admin
-      console.log(`✅ Admin authenticated on ${pathname} - Redirecting to /admin/dashboard`);
       return NextResponse.redirect(new URL('/admin/dashboard', request.url));
     } else {
       // Client authenticated on login → redirect to home
-      console.log(`✅ Client authenticated on ${pathname} - Redirecting to /`);
       return NextResponse.redirect(new URL('/', request.url));
     }
   }

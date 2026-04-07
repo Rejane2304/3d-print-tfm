@@ -1,7 +1,7 @@
 /**
- * Checkout Page - Formulario Simplificado de Pago
- * Flujo: Usuario elige método → Confirma → Pedido creado → Redirección a success
- * Sin redirecciones externas ni formularios complejos
+ * Checkout Page - Simplified Payment Form
+ * Flow: User chooses method → Confirms → Order created → Redirect to success
+ * No external redirects or complex forms
  */
 'use client';
 
@@ -100,7 +100,7 @@ export default function CheckoutPage() {
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderData, setOrderData] = useState<{ orderId: string; orderNumber: string } | null>(null);
 
-  // Cargar datos iniciales
+  // Load initial data
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
@@ -182,18 +182,18 @@ export default function CheckoutPage() {
         throw new Error(data.error || 'Error al procesar el pedido');
       }
 
-      // Pedido completado exitosamente
+      // Order completed successfully
       setOrderComplete(true);
       setOrderData({
         orderId: data.orderId,
         orderNumber: data.orderNumber,
       });
 
-      // Vaciar carrito local
+      // Clear local cart
       setCart({ items: [], subtotal: 0 });
       window.dispatchEvent(new Event('cartUpdated'));
 
-      // Redirigir a la página de éxito después de 2 segundos
+      // Redirect to success page after 2 seconds
       setTimeout(() => {
         router.push(`/checkout/success?orderId=${data.orderId}`);
       }, 2000);
@@ -230,7 +230,7 @@ export default function CheckoutPage() {
     );
   }
 
-  // Si el pedido está completado, mostrar pantalla de éxito
+  // If order is complete, show success screen
   if (orderComplete) {
     return (
       <div className="min-h-screen bg-gray-50 py-8">

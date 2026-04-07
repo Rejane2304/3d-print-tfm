@@ -3,7 +3,7 @@
  * Ensures errors don't reach the client unhandled
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { ApiError, ErrorCode, handleError } from '../errors';
+import { ApiError, ErrorCode, handleError } from './index';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type RouteHandler = (req: NextRequest, ...args: any[]) => Promise<NextResponse>;

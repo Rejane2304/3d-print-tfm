@@ -1,8 +1,8 @@
 /**
- * API de Pedidos Admin
- * CRUD de pedidos para administradores
+ * Admin Orders API
+ * CRUD for orders for administrators
  * 
- * Requiere: Rol ADMIN
+ * Requires: ADMIN role
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
@@ -12,7 +12,7 @@ import { z } from 'zod';
 import { Prisma, OrderStatus } from '@prisma/client';
 import { translateOrderStatus, translateErrorMessage } from '@/lib/i18n';
 
-// Schema de validación para actualización
+// Validation schema for update
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const actualizarPedidoSchema = z.object({
   status: z.enum(['PENDING', 'CONFIRMED', 'PREPARING', 'SHIPPED', 'DELIVERED', 'CANCELLED']),
@@ -22,7 +22,7 @@ const actualizarPedidoSchema = z.object({
   carrier: z.string().optional(),
 });
 
-// GET - Listar pedidos
+// GET - List orders
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -102,7 +102,7 @@ export async function GET(req: NextRequest) {
       limit,
     });
   } catch (error) {
-    console.error('Error listando pedidos:', error);
+    console.error('Error listing orders:', error);
     return NextResponse.json(
       { success: false, error: translateErrorMessage('Internal error') },
       { status: 500 }
@@ -110,7 +110,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// Mapeo de estados de español a inglés
+// Mapping of statuses from Spanish to English
 const estadoToEnglish: Record<string, string> = {
   'Pendiente': 'PENDING',
   'Confirmado': 'CONFIRMED',
@@ -120,7 +120,7 @@ const estadoToEnglish: Record<string, string> = {
   'Cancelado': 'CANCELLED',
 };
 
-// PATCH - Actualizar estado del pedido
+// PATCH - Update order status
 export async function PATCH(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -152,7 +152,7 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    // Convertir estado de español a inglés
+    // Convert status from Spanish to English
     const englishStatus = estadoToEnglish[estado];
     if (!englishStatus) {
       return NextResponse.json(
@@ -161,7 +161,7 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    // Actualizar timestamps según el estado
+    // Update timestamps based on status
     const updateData: Prisma.OrderUpdateInput = {
       status: englishStatus as OrderStatus,
       internalNotes: notasInternas,
@@ -185,7 +185,7 @@ export async function PATCH(req: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('Error actualizando pedido:', error);
+    console.error('Error updating order:', error);
     return NextResponse.json(
       { success: false, error: translateErrorMessage('Internal error') },
       { status: 500 }

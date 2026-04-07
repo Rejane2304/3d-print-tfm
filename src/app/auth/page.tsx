@@ -42,7 +42,6 @@ function AuthContent() {
 
       // If we're migrating cart, don't redirect yet
       if (migratingCart) {
-        console.log('Migration in progress, skipping redirect');
         return;
       }
 
@@ -141,8 +140,7 @@ function AuthContent() {
         if (localCart) {
           try {
             const items = JSON.parse(localCart);
-            console.log(`Migrating ${items.length} items to API cart`);
-            
+
             // Migrate each item to API with credentials
             const migrationResults = await Promise.allSettled(
               items.map(async (item: { productId: string; quantity: number }) => {
@@ -165,9 +163,7 @@ function AuthContent() {
             );
             
             const successful = migrationResults.filter(r => r.status === 'fulfilled' && (r.value as {success: boolean}).success).length;
-            const failed = migrationResults.length - successful;
-            console.log(`Migration complete: ${successful} successful, ${failed} failed`);
-            
+
             // Clear localStorage after migration attempt
             localStorage.removeItem(cartStorageKey);
             
@@ -185,9 +181,8 @@ function AuthContent() {
         
         // Trigger cart update to refresh header counter
         window.dispatchEvent(new Event('cartUpdated'));
-        
+
         // Redirect to callback URL
-        console.log('Redirecting to:', callbackUrl);
         router.push(callbackUrl);
       }
     } catch {
@@ -217,14 +212,14 @@ function AuthContent() {
       return;
     }
 
-    // Validar campos de dirección
+    // Validate address fields
     if (!registerData.direccion || !registerData.codigoPostal || !registerData.ciudad || !registerData.provincia) {
       setRegisterError('Por favor, completa todos los campos de dirección obligatorios');
       setRegisterLoading(false);
       return;
     }
 
-    // Validar código postal (5 dígitos para España)
+    // Validate postal code (5 digits for Spain)
     const cpRegex = /^\d{5}$/;
     if (!cpRegex.test(registerData.codigoPostal)) {
       setRegisterError('El código postal debe tener 5 dígitos');

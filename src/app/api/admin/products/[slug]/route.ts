@@ -1,8 +1,8 @@
 /**
- * API de Producto Individual Admin
- * Obtener, actualizar y eliminar un producto específico
+ * Admin Individual Product API
+ * Get, update and delete a specific product
  *
- * Requiere: Rol ADMIN
+ * Requires: ADMIN role
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
@@ -19,7 +19,7 @@ import {
   translateErrorMessage,
 } from '@/lib/i18n';
 
-// Schema de validación para actualización
+// Validation schema for update
 const updateProductSchema = z.object({
   name: z.string().min(1),
   description: z.string(),
@@ -45,7 +45,7 @@ const updateProductSchema = z.object({
   ).optional(),
 });
 
-// Helper para verificar autenticación admin
+// Helper to verify admin authentication
 async function verifyAdminAuth() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
@@ -63,7 +63,7 @@ async function verifyAdminAuth() {
   return { user };
 }
 
-// GET - Obtener producto por slug
+// GET - Get product by slug
 export async function GET(
   req: NextRequest,
   { params }: { params: { slug: string } }
@@ -94,8 +94,8 @@ export async function GET(
       );
     }
 
-    // Transformar a español
-    const productoTransformado = {
+    // Transform to Spanish
+    const transformedProduct = {
       id: product.id,
       slug: product.slug,
       nombre: translateProductName(product.slug),
@@ -125,9 +125,9 @@ export async function GET(
       actualizadoEn: product.updatedAt,
     };
 
-    return NextResponse.json({ success: true, producto: productoTransformado });
+    return NextResponse.json({ success: true, producto: transformedProduct });
   } catch (error) {
-    console.error('Error obteniendo producto:', error);
+    console.error('Error getting product:', error);
     return NextResponse.json(
       { success: false, error: translateErrorMessage('Internal error') },
       { status: 500 }
@@ -135,7 +135,7 @@ export async function GET(
   }
 }
 
-// PUT - Actualizar producto
+// PUT - Update product
 export async function PUT(
   req: NextRequest,
   { params }: { params: { slug: string } }
@@ -151,7 +151,7 @@ export async function PUT(
 
     const { slug } = params;
 
-    // Verificar que el producto existe
+    // Verify the product exists
     const existingProduct = await prisma.product.findUnique({
       where: { slug },
       include: { images: true },
@@ -167,15 +167,15 @@ export async function PUT(
     const body = await req.json();
     const data = updateProductSchema.parse(body);
 
-    // Generar nuevo slug si cambió el nombre
+    // Generate new slug if name changed
     const newSlug = data.name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
 
-    // Transacción para actualizar producto y manejar imágenes
+    // Transaction to update product and handle images
     const updatedProduct = await prisma.$transaction(async (tx) => {
-      // Actualizar producto
+      // Update product
       const product = await tx.product.update({
         where: { slug },
         data: {
@@ -199,14 +199,14 @@ export async function PUT(
         },
       });
 
-      // Manejar imágenes si se proporcionan
+      // Handle images if provided
       if (data.images && data.images.length > 0) {
-        // Eliminar imágenes existentes
+        // Delete existing images
         await tx.productImage.deleteMany({
           where: { productId: product.id },
         });
 
-        // Crear nuevas imágenes
+        // Create new images
         for (let i = 0; i < data.images.length; i++) {
           const img = data.images[i];
           await tx.productImage.create({
@@ -222,7 +222,7 @@ export async function PUT(
         }
       }
 
-      // Retornar producto con imágenes actualizadas
+      // Return product with updated images
       return tx.product.findUnique({
         where: { id: product.id },
         include: {
@@ -236,8 +236,8 @@ export async function PUT(
       throw new Error('Error al actualizar producto');
     }
 
-    // Transformar respuesta a español
-    const productoTransformado = {
+    // Transform response to Spanish
+    const transformedProduct = {
       id: updatedProduct.id,
       slug: updatedProduct.slug,
       nombre: translateProductName(updatedProduct.slug),
@@ -273,7 +273,7 @@ export async function PUT(
 
     return NextResponse.json({
       success: true,
-      producto: productoTransformado,
+      producto: transformedProduct,
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -282,7 +282,7 @@ export async function PUT(
         { status: 400 }
       );
     }
-    console.error('Error actualizando producto:', error);
+    console.error('Error updating product:', error);
     return NextResponse.json(
       { success: false, error: translateErrorMessage('Internal error') },
       { status: 500 }
@@ -290,7 +290,7 @@ export async function PUT(
   }
 }
 
-// DELETE - Eliminar producto
+// DELETE - Delete product
 export async function DELETE(
   req: NextRequest,
   { params }: { params: { slug: string } }
@@ -306,7 +306,7 @@ export async function DELETE(
 
     const { slug } = params;
 
-    // Verificar que el producto existe
+    // Verify the product exists
     const existingProduct = await prisma.product.findUnique({
       where: { slug },
     });
@@ -318,7 +318,7 @@ export async function DELETE(
       );
     }
 
-    // Eliminar producto (las imágenes se eliminan en cascada por la relación)
+    // Delete product (images are deleted in cascade by the relationship)
     await prisma.product.delete({
       where: { slug },
     });
@@ -328,7 +328,7 @@ export async function DELETE(
       message: translateErrorMessage('Producto eliminado'),
     });
   } catch (error) {
-    console.error('Error eliminando producto:', error);
+    console.error('Error deleting product:', error);
     return NextResponse.json(
       { success: false, error: translateErrorMessage('Internal error') },
       { status: 500 }

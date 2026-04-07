@@ -1,17 +1,17 @@
 /**
  * Backend Translation Module
- * Traducción 100% en backend antes de enviar a frontend
+ * 100% backend translation before sending to frontend
  * 
- * Arquitectura:
- * - BD: Inglés (PENDING, COMPLETED, etc.)
- * - Código: Inglés (getOrders, createUser, etc.)
- * - API Routes: Transforman inglés → español
- * - Frontend: Recibe español directamente
- * - UI: 100% español
+ * Architecture:
+ * - DB: English (PENDING, COMPLETED, etc.)
+ * - Code: English (getOrders, createUser, etc.)
+ * - API Routes: Transform English → Spanish
+ * - Frontend: Receives Spanish directly
+ * - UI: 100% Spanish
  */
 
 // ============================================================================
-// ENUM TRANSLATIONS - Estados, métodos, tipos
+// ENUM TRANSLATIONS - Statuses, methods, types
 // ============================================================================
 
 type TranslationMap = Record<string, string>;

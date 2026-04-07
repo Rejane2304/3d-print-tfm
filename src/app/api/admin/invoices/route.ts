@@ -1,8 +1,8 @@
 /**
- * API de Facturación Admin
- * Gestión de facturas para administradores
+ * Admin Invoicing API
+ * Invoice management for administrators
  *
- * Requiere: Rol ADMIN
+ * Requires: ADMIN role
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
@@ -12,12 +12,12 @@ import { z } from 'zod';
 import { Prisma } from '@prisma/client';
 import { COMPANY_CONFIG } from '@/lib/invoices/pdf-generator';
 
-// Schema de validación
+// Validation schema
 const crearFacturaSchema = z.object({
   orderId: z.string().uuid(),
 });
 
-// GET - Listar facturas
+// GET - List invoices
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -112,7 +112,7 @@ export async function GET(req: NextRequest) {
       limit,
     });
   } catch (error) {
-    console.error('Error listando facturas:', error);
+    console.error('Error listing invoices:', error);
     return NextResponse.json(
       { success: false, error: 'Internal error' },
       { status: 500 }
@@ -120,7 +120,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST - Crear factura
+// POST - Create invoice
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -145,7 +145,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { orderId } = crearFacturaSchema.parse(body);
 
-    // Verificar que el pedido existe
+    // Verify the order exists
     const pedido = await prisma.order.findUnique({
       where: { id: orderId },
       include: {
@@ -161,7 +161,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Verificar que el pedido está entregado
+    // Verify the order is delivered
     if (pedido.status !== 'DELIVERED') {
       return NextResponse.json(
         { success: false, error: 'El pedido debe estar entregado para generar factura' },
@@ -169,7 +169,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Verificar que no existe ya una factura
+    // Verify an invoice doesn't already exist
     const facturaExistente = await prisma.invoice.findFirst({
       where: { orderId },
     });
@@ -181,7 +181,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Generar número de factura: F-AAAA-NNNNNN
+    // Generate invoice number: F-YYYY-NNNNNN
     const year = new Date().getFullYear();
     const ultimaFactura = await prisma.invoice.findFirst({
       where: {
@@ -193,27 +193,27 @@ export async function POST(req: NextRequest) {
     const numero = ultimaFactura ? ultimaFactura.number + 1 : 1;
     const invoiceNumber = `F-${year}-${String(numero).padStart(6, '0')}`;
 
-    // Calcular totales (IVA 21%)
+    // Calculate totals (21% VAT)
     const taxableAmount = Number(pedido.subtotal) + Number(pedido.shipping);
     const vatRate = 21;
     const vatAmount = (taxableAmount * vatRate) / 100;
     const total = taxableAmount + vatAmount;
 
-    // Crear factura
+    // Create invoice
     const factura = await prisma.invoice.create({
       data: {
         invoiceNumber,
         series: 'F',
         number: numero,
         orderId,
-        // Datos empresa
+        // Company data
         companyName: COMPANY_CONFIG.name,
         companyTaxId: COMPANY_CONFIG.taxId,
         companyAddress: COMPANY_CONFIG.address,
         companyCity: COMPANY_CONFIG.city,
         companyProvince: COMPANY_CONFIG.province,
         companyPostalCode: COMPANY_CONFIG.postalCode,
-        // Datos cliente
+        // Client data
         clientName: pedido.shippingName,
         clientTaxId: pedido.user.taxId || '',
         clientAddress: pedido.shippingAddress,
@@ -221,7 +221,7 @@ export async function POST(req: NextRequest) {
         clientProvince: pedido.shippingProvince,
         clientPostalCode: pedido.shippingPostalCode,
         clientCountry: pedido.shippingCountry,
-        // Totales
+        // Totals
         subtotal: Number(pedido.subtotal),
         shipping: Number(pedido.shipping),
         taxableAmount,
@@ -256,7 +256,7 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('Error creando factura:', error);
+    console.error('Error creating invoice:', error);
     return NextResponse.json(
       { success: false, error: 'Internal error' },
       { status: 500 }

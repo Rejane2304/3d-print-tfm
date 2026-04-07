@@ -1,6 +1,6 @@
 /**
- * Página de Gestión de Facturas - Admin
- * Listado y gestión de facturas
+ * Invoice Management Page - Admin
+ * Invoice listing and management
  */
 'use client';
 
@@ -105,7 +105,7 @@ export default function AdminFacturasPage() {
     try {
       setError(null);
 
-      // Primero buscar el pedido por orderNumber para obtener el ID
+      // First search for the order by orderNumber to get the ID
       const searchResponse = await fetch(`/api/admin/orders?search=${encodeURIComponent(orderIdInput.trim())}`);
       const searchData = await searchResponse.json();
 
@@ -121,7 +121,7 @@ export default function AdminFacturasPage() {
         throw new Error('No se encontró el pedido con ese número');
       }
 
-      // Ahora generar la factura con el ID del pedido
+      // Now generate the invoice with the order ID
       const response = await fetch('/api/admin/invoices', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

@@ -3,8 +3,8 @@
  * 
  * POST /api/checkout - Create order and payment in one step
  * 
- * Flujo simplificado: Usuario elige método → Confirma → Pedido creado como CONFIRMED
- * No redirecciones externas, no formularios complejos
+ * Simplified flow: User chooses method → Confirms → Order created as CONFIRMED
+ * No external redirects, no complex forms
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
@@ -92,7 +92,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     );
   }
 
-  // Verificar stock disponible
+  // Verify available stock
   for (const item of user.cart.items as CartItemWithProduct[]) {
     if (item.product.stock < item.quantity) {
       return NextResponse.json(
@@ -102,7 +102,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     }
   }
 
-  // Calcular totales (siempre incluir IVA del 21%)
+  // Calculate totals (always include 21% VAT)
   const subtotal = Number(user.cart.subtotal);
   const shippingCost = subtotal >= 50 ? 0 : 5.99;
   const taxRate = 0.21;
@@ -127,13 +127,13 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     const count = await prisma.order.count();
     const orderNumber = `P-${year}${String(count + 1).padStart(6, '0')}`;
 
-    // Guardar referencia al carrito
+    // Save cart reference
     const cart = user.cart;
     const cartItems = cart.items as CartItemWithProduct[];
 
-    // Crear pedido y pago en una transacción
+    // Create order and payment in a transaction
     const result = await prisma.$transaction(async (tx) => {
-      // 1. Crear el pedido como CONFIRMED (no PENDING)
+      // 1. Create the order as CONFIRMED (not PENDING)
       const order = await tx.order.create({
         data: {
           orderNumber,
@@ -166,7 +166,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         },
       });
 
-      // 2. Crear el pago como COMPLETED
+      // 2. Create the payment as COMPLETED
       await tx.payment.create({
         data: {
           orderId: order.id,
@@ -178,7 +178,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         },
       });
 
-      // 3. Descontar stock de productos
+      // 3. Deduct stock from products
       for (const item of cartItems) {
         await tx.product.update({
           where: { id: item.productId },
@@ -190,7 +190,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         });
       }
 
-      // 4. Vaciar el carrito
+      // 4. Empty the cart
       await tx.cartItem.deleteMany({
         where: { cartId: cart.id },
       });
@@ -206,7 +206,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       message: 'Pago completado exitosamente',
     });
   } catch (error) {
-    console.error('Error en checkout:', error);
+    console.error('Error in checkout:', error);
     return NextResponse.json(
       { success: false, error: translateErrorMessage('Error al procesar el pedido') },
       { status: 500 }

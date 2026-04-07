@@ -1,6 +1,6 @@
 /**
- * Página de Perfil de Usuario
- * Edición de datos personales
+ * User Profile Page
+ * Edit personal information
  */
 'use client';
 
@@ -20,35 +20,35 @@ import {
   EyeOff
 } from 'lucide-react';
 
-interface PerfilData {
-  nombre: string;
+interface ProfileData {
+  name: string;
   email: string;
-  telefono: string;
-  nif: string;
+  phone: string;
+  taxId: string;
 }
 
-export default function PerfilPage() {
+export default function ProfilePage() {
   const { status, update } = useSession();
   const router = useRouter();
-  const [perfil, setPerfil] = useState<PerfilData>({
-    nombre: '',
+  const [profile, setProfile] = useState<ProfileData>({
+    name: '',
     email: '',
-    telefono: '',
-    nif: ''
+    phone: '',
+    taxId: ''
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // Campos de contraseña
-  const [cambiarPassword, setCambiarPassword] = useState(false);
-  const [passwordActual, setPasswordActual] = useState('');
-  const [passwordNuevo, setPasswordNuevo] = useState('');
-  const [passwordConfirmar, setPasswordConfirmar] = useState('');
-  const [mostrarPasswordActual, setMostrarPasswordActual] = useState(false);
-  const [mostrarPasswordNuevo, setMostrarPasswordNuevo] = useState(false);
-  const [mostrarPasswordConfirmar, setMostrarPasswordConfirmar] = useState(false);
+  // Password fields
+  const [changePassword, setChangePassword] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -57,11 +57,11 @@ export default function PerfilPage() {
     }
 
     if (status === 'authenticated') {
-      cargarPerfil();
+      loadProfile();
     }
   }, [status, router]);
 
-  const cargarPerfil = async () => {
+  const loadProfile = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -73,12 +73,12 @@ export default function PerfilPage() {
         throw new Error(data.error || 'Error al cargar perfil');
       }
 
-      console.log('[Profile] Datos recibidos de API:', data.usuario);
-      setPerfil({
-        nombre: data.usuario.name || '',
-        email: data.usuario.email || '',
-        telefono: data.usuario.phone || '',
-        nif: data.usuario.taxId || ''
+      console.log('[Profile] API data received:', data.user);
+      setProfile({
+        name: data.user.name || '',
+        email: data.user.email || '',
+        phone: data.user.phone || '',
+        taxId: data.user.taxId || ''
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error unknown');
@@ -87,7 +87,7 @@ export default function PerfilPage() {
     }
   };
 
-  const guardarPerfil = async (e: React.FormEvent) => {
+  const saveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
@@ -95,26 +95,26 @@ export default function PerfilPage() {
       setError(null);
       setSuccess(null);
 
-      // Validar contraseñas si se está cambiando
-      if (cambiarPassword) {
-        if (passwordNuevo !== passwordConfirmar) {
+      // Validate passwords if changing
+      if (changePassword) {
+        if (newPassword !== confirmPassword) {
           throw new Error('Las contraseñas no coinciden');
         }
-        if (passwordNuevo.length < 8) {
+        if (newPassword.length < 8) {
           throw new Error('La contraseña debe tener al menos 8 caracteres');
         }
       }
 
       const body = {
-        name: perfil.nombre,
-        phone: perfil.telefono || undefined,
-        taxId: perfil.nif || undefined
+        name: profile.name,
+        phone: profile.phone || undefined,
+        taxId: profile.taxId || undefined
       };
 
-      if (cambiarPassword) {
+      if (changePassword) {
         Object.assign(body, {
-          passwordActual: passwordActual,
-          passwordNuevo: passwordNuevo
+          currentPassword: currentPassword,
+          newPassword: newPassword
         });
       }
 
@@ -132,18 +132,18 @@ export default function PerfilPage() {
 
       setSuccess('Perfil actualizado correctamente');
       
-      // Recargar perfil para actualizar datos
-      await cargarPerfil();
+      // Reload profile to update data
+      await loadProfile();
       
-      // Limpiar campos de contraseña
-      if (cambiarPassword) {
-        setPasswordActual('');
-        setPasswordNuevo('');
-        setPasswordConfirmar('');
-        setCambiarPassword(false);
+      // Clear password fields
+      if (changePassword) {
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+        setChangePassword(false);
       }
 
-      // Actualizar sesión
+      // Update session
       await update();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error unknown');
@@ -190,7 +190,7 @@ export default function PerfilPage() {
         )}
 
         {/* Formulario */}
-        <form onSubmit={guardarPerfil} className="space-y-6">
+        <form onSubmit={saveProfile} className="space-y-6">
           {/* Información Personal */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
@@ -205,8 +205,8 @@ export default function PerfilPage() {
                 </label>
                 <input
                   type="text"
-                  value={perfil.nombre}
-                  onChange={(e) => setPerfil({ ...perfil, nombre: e.target.value })}
+                  value={profile.name}
+                  onChange={(e) => setProfile({ ...profile, name: e.target.value })}
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   required
                   minLength={2}
@@ -219,7 +219,7 @@ export default function PerfilPage() {
                 </label>
                 <input
                   type="email"
-                  value={perfil.email}
+                  value={profile.email}
                   disabled
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-100 text-gray-500"
                 />
@@ -236,8 +236,8 @@ export default function PerfilPage() {
                   <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <input
                     type="tel"
-                    value={perfil.telefono}
-                    onChange={(e) => setPerfil({ ...perfil, telefono: e.target.value })}
+                    value={profile.phone}
+                    onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
                     placeholder="+34 600 123 456"
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   />
@@ -252,8 +252,8 @@ export default function PerfilPage() {
                   <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <input
                     type="text"
-                    value={perfil.nif}
-                    onChange={(e) => setPerfil({ ...perfil, nif: e.target.value.toUpperCase() })}
+                    value={profile.taxId}
+                    onChange={(e) => setProfile({ ...profile, taxId: e.target.value.toUpperCase() })}
                     placeholder="12345678A"
                     maxLength={9}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
@@ -274,8 +274,8 @@ export default function PerfilPage() {
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={cambiarPassword}
-                  onChange={(e) => setCambiarPassword(e.target.checked)}
+                  checked={changePassword}
+                  onChange={(e) => setChangePassword(e.target.checked)}
                   className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                 />
                 <span className="text-sm text-gray-700">
@@ -284,7 +284,7 @@ export default function PerfilPage() {
               </label>
             </div>
 
-            {cambiarPassword && (
+            {changePassword && (
               <div className="space-y-4 border-t border-gray-200 pt-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -292,18 +292,18 @@ export default function PerfilPage() {
                   </label>
                   <div className="relative">
                     <input
-                      type={mostrarPasswordActual ? 'text' : 'password'}
-                      value={passwordActual}
-                      onChange={(e) => setPasswordActual(e.target.value)}
+                      type={showCurrentPassword ? 'text' : 'password'}
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
                       className="w-full pr-10 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                      required={cambiarPassword}
+                      required={changePassword}
                     />
                     <button
                       type="button"
-                      onClick={() => setMostrarPasswordActual(!mostrarPasswordActual)}
+                      onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                     >
-                      {mostrarPasswordActual ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      {showCurrentPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
                   </div>
                 </div>
@@ -314,19 +314,19 @@ export default function PerfilPage() {
                   </label>
                   <div className="relative">
                     <input
-                      type={mostrarPasswordNuevo ? 'text' : 'password'}
-                      value={passwordNuevo}
-                      onChange={(e) => setPasswordNuevo(e.target.value)}
+                      type={showNewPassword ? 'text' : 'password'}
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
                       minLength={8}
                       className="w-full pr-10 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                      required={cambiarPassword}
+                      required={changePassword}
                     />
                     <button
                       type="button"
-                      onClick={() => setMostrarPasswordNuevo(!mostrarPasswordNuevo)}
+                      onClick={() => setShowNewPassword(!showNewPassword)}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                     >
-                      {mostrarPasswordNuevo ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      {showNewPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
                   </div>
                   <p className="text-xs text-gray-500 mt-1">
@@ -340,18 +340,18 @@ export default function PerfilPage() {
                   </label>
                   <div className="relative">
                     <input
-                      type={mostrarPasswordConfirmar ? 'text' : 'password'}
-                      value={passwordConfirmar}
-                      onChange={(e) => setPasswordConfirmar(e.target.value)}
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
                       className="w-full pr-10 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                      required={cambiarPassword}
+                      required={changePassword}
                     />
                     <button
                       type="button"
-                      onClick={() => setMostrarPasswordConfirmar(!mostrarPasswordConfirmar)}
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                     >
-                      {mostrarPasswordConfirmar ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
                   </div>
                 </div>

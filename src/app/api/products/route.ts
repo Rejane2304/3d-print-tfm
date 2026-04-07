@@ -18,12 +18,12 @@ import {
 export const GET = withErrorHandler(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
   
-  // Parámetros de paginación
+  // Pagination parameters
   const page = Number.parseInt(searchParams.get('page') || '1', 10);
   const pageSize = Number.parseInt(searchParams.get('pageSize') || '12', 10);
   const skip = (page - 1) * pageSize;
   
-  // Parámetros de filtrado
+  // Filter parameters
   const categorySlug = searchParams.get('category') || searchParams.get('categoria');
   const material = searchParams.get('material') as Material | null;
   const minPrice = searchParams.get('minPrice') || searchParams.get('minPrecio');
@@ -33,7 +33,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   const sortOrder = searchParams.get('sortOrder') || searchParams.get('orden') || 'asc';
   const search = searchParams.get('search') || searchParams.get('busqueda');
 
-  // Construir where clause
+  // Build where clause
   const where: Prisma.ProductWhereInput = {
     isActive: true,
   };
@@ -73,7 +73,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     ];
   }
 
-  // Construir orderBy
+  // Build orderBy
   const orderBy: Prisma.ProductOrderByWithRelationInput = {};
   if (sortBy === 'price' || sortBy === 'precio') {
     orderBy.price = sortOrder as Prisma.SortOrder;
@@ -83,7 +83,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     orderBy.stock = sortOrder as Prisma.SortOrder;
   }
 
-  // Ejecutar queries en paralelo
+  // Execute queries in parallel
   const [products, total] = await Promise.all([
     prisma.product.findMany({
       where,

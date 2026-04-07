@@ -1,8 +1,8 @@
 /**
- * API de Alertas Admin
- * Gestión de alertas del sistema
+ * Admin Alerts API
+ * System alerts management
  * 
- * Requiere: Rol ADMIN
+ * Requires: ADMIN role
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
@@ -17,14 +17,14 @@ import {
   translateErrorMessage,
 } from '@/lib/i18n';
 
-// Schema de validación
+// Validation schema
 const actualizarAlertaSchema = z.object({
   id: z.string().uuid(),
   status: z.enum(['PENDING', 'IN_PROGRESS', 'RESOLVED', 'IGNORED']),
   resolutionNotes: z.string().optional(),
 });
 
-// GET - Listar alertas
+// GET - List alerts
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -115,7 +115,7 @@ export async function GET(req: NextRequest) {
       prisma.alert.count({ where: { status: 'PENDING', severity: 'HIGH' } }),
     ]);
 
-    // Traducir solo para UI, mantener valores originales
+    // Translate only for UI, keep original values
     const translatedAlertas = alertas.map((alerta) => ({
       id: alerta.id,
       type: alerta.type,
@@ -152,7 +152,7 @@ export async function GET(req: NextRequest) {
       limit,
     });
   } catch (error) {
-    console.error('Error listando alertas:', error);
+    console.error('Error listing alerts:', error);
     return NextResponse.json(
       { success: false, error: translateErrorMessage('Internal error') },
       { status: 500 }
@@ -160,7 +160,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// PATCH - Actualizar estado de alerta
+// PATCH - Update alert status
 export async function PATCH(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -189,7 +189,7 @@ export async function PATCH(req: NextRequest) {
       status: validatedData.status,
     };
 
-    // Si se resuelve, guardar quién y cuándo
+    // If resolved, save who and when
     if (validatedData.status === 'RESOLVED') {
       updateData.resolvedAt = new Date();
       updateData.resolvedBy = usuario.id;
@@ -233,7 +233,7 @@ export async function PATCH(req: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('Error actualizando alerta:', error);
+    console.error('Error updating alert:', error);
     return NextResponse.json(
       { success: false, error: translateErrorMessage('Internal error') },
       { status: 500 }

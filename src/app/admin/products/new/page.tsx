@@ -1,6 +1,6 @@
 /**
- * Página de Nuevo Producto - Admin
- * Formulario completo para crear producto según schema Prisma
+ * New Product Page - Admin
+ * Complete form for creating a product according to Prisma schema
  */
 'use client';
 
@@ -47,7 +47,7 @@ export default function NuevoProductoPage() {
   const [images, setImages] = useState<{ url: string; isMain: boolean }[]>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
 
-  // Form state - todos los campos del schema Product
+  // Form state - all fields from Product schema
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -127,7 +127,7 @@ export default function NuevoProductoPage() {
 
     setUploadingImage(true);
     try {
-      // Crear URL temporal para preview
+      // Create temporary URL for preview
       const tempUrl = URL.createObjectURL(file);
       setImages(prev => [...prev, { url: tempUrl, isMain: prev.length === 0 }]);
       
