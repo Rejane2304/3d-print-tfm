@@ -50,6 +50,15 @@ Esta versión representa la entrega final del Trabajo de Fin de Máster - E-comm
 - **Diccionarios** de productos, categorías, enums, FAQs
 - **Traducción automática** en API routes
 
+#### ⚡ Sistema de Tiempo Real
+- **EventStore** - Persistencia de eventos PostgreSQL (7 días retención)
+- **WebSocket** - Notificaciones instantáneas con polling (3s)
+- **Eventos**: order:new, order:status:updated, stock:updated, stock:low
+- **Rooms**: Admin recibe todos, usuarios solo los suyos
+- **Multi-tab**: Todas las pestañas reciben eventos
+- **Offline mode**: Acumulación de eventos al reconectar
+- **Notificaciones visuales**: Badge + panel deslizable
+
 ### 🧪 Testing
 
 ```
@@ -67,12 +76,15 @@ Cobertura: 80%+ objetivo alcanzado
 
 ### 🔐 Seguridad
 
-- Autenticación JWT con NextAuth.js
-- Autorización RBAC (CUSTOMER/ADMIN)
-- Rate limiting en login
-- Hash de contraseñas bcrypt (salt 12)
-- Prevención SQL Injection (Prisma ORM)
-- Prevención XSS
+- **Autenticación**: JWT con NextAuth.js, sesiones httpOnly/secure/sameSite
+- **Autorización**: RBAC (CUSTOMER/ADMIN) con middleware
+- **Contraseñas**: bcrypt con 12 salt rounds, complejidad reforzada (10+ chars + símbolos)
+- **Rate Limiting**: 5 intentos/15min login, 3 registros/hora, 3 cambios/hora
+- **Account Lockout**: 5 intentos fallidos = 30 minutos bloqueo
+- **Historial**: Prevención de reúso de últimas 5 contraseñas
+- **Validación**: Bloqueo de 80+ contraseñas comunes + Have I Been Pwned API
+- **Indicador**: Barra de fortaleza en tiempo real
+- **Prevenciones**: SQL Injection (Prisma), XSS, CSRF
 
 ### ⚡ Performance
 

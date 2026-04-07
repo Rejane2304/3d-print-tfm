@@ -22,12 +22,13 @@ Aplicación web de comercio electrónico especializada en productos impresos en 
 
 - **Catálogo fijo** de productos en PLA/PETG con filtros y búsqueda
 - **Carrito de compras** con gestión completa
-- **Pagos con Stripe** (modo test) - Checkout integrado
+- **Pagos simulados** (CARD, PAYPAL, BIZUM, TRANSFER) - Checkout completo
 - **Gestión de pedidos** con flujo de estados completo
 - **Panel de administración** con CRUDs completos
 - **Responsive** desde mobile hasta 4K
 - **100% en español** (UI y backend)
-- **Seguridad enterprise** con autenticación JWT
+- **Sistema de tiempo real** (WebSockets) - notificaciones instantáneas
+- **Seguridad enterprise-grade** con múltiples capas de protección
 - **Manejo de errores** centralizado
 - **378 tests** (unitarios, integración y E2E)
 
@@ -39,9 +40,9 @@ Aplicación web de comercio electrónico especializada en productos impresos en 
 | **Backend** | Next.js API Routes, TypeScript 5 |
 | **Base de datos** | PostgreSQL (Supabase), Prisma ORM 5.22 |
 | **Autenticación** | NextAuth.js 4.24 |
-| **Pagos** | Stripe (modo test) |
-| **Testing** | Vitest, Playwright |
-| **Validation** | Zod |
+| **Pagos** | Simulados (CARD, PAYPAL, BIZUM, TRANSFER) |
+| **Real-time** | WebSockets con Socket.io + EventStore (PostgreSQL) |
+| **Seguridad** | bcrypt (12 rounds), rate limiting, account lockout, password history |
 | **Deployment** | Vercel (recommended) |
 | **Icons** | Lucide React |
 
