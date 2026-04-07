@@ -13,6 +13,7 @@ import { authOptions } from '@/lib/auth/auth-options';
 import { Prisma } from '@prisma/client';
 import { translatePaymentMethod, translateErrorMessage } from '@/lib/i18n';
 import { getDefaultVatRate } from '@/lib/site-config';
+import { emitNewOrder } from '@/lib/realtime/event-service';
 
 // Type for cart items with product included
 type CartItemWithProduct = Prisma.CartItemGetPayload<{
@@ -248,6 +249,15 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       });
 
       return order;
+    });
+
+    // Emit real-time event for new order
+    await emitNewOrder({
+      orderId: result.id,
+      orderNumber: result.orderNumber,
+      total: Number(result.total),
+      userName: user.name || user.email,
+      timestamp: new Date().toISOString(),
     });
 
     return NextResponse.json({

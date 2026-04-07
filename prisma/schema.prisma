@@ -609,3 +609,38 @@ enum CouponType {
   FIXED
   FREE_SHIPPING
 }
+
+// Modelo para persistencia de eventos WebSocket
+model EventStore {
+  id        String   @id @default(cuid())
+  type      String   // Tipo de evento: order:new, order:status:updated, etc.
+  payload   Json     // Datos completos del evento
+  room      String   // Sala destino: user:{id}, admin, product:{id}, etc.
+  userId    String?  // Usuario relacionado (opcional)
+  timestamp DateTime @default(now())
+  delivered Boolean  @default(false)
+  deliveredAt DateTime?
+  retries   Int      @default(0)
+  expiresAt DateTime // Fecha de expiración (7 días)
+
+  @@index([type, timestamp])
+  @@index([room])
+  @@index([delivered, timestamp])
+  @@index([expiresAt])
+  @@map("event_store")
+}
+
+// Tabla para trackear conexiones WebSocket activas
+model WebSocketConnection {
+  id        String   @id @default(cuid())
+  socketId  String   @unique // ID del socket de Socket.io
+  userId    String?  // Usuario autenticado (null si guest)
+  rooms     String[] // Salas suscritas
+  connectedAt DateTime @default(now())
+  lastPing  DateTime @default(now())
+  isActive  Boolean  @default(true)
+
+  @@index([userId])
+  @@index([isActive])
+  @@map("websocket_connections")
+}

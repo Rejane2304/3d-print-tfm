@@ -4,11 +4,14 @@
 
 **3D Printing E-commerce** developed as a Master's Thesis project with a TDD (Test-Driven Development) approach.
 
-- **Stack**: Next.js 14 + Prisma + PostgreSQL + Stripe
+- **Stack**: Next.js 14 + Prisma + PostgreSQL
 - **Approach**: TDD with 378 tests (100% passing)
-- **Language**: 100% English
+- **Language**: 100% Spanish UI with backend translation
 - **Responsive**: Mobile → 4K
 - **Security**: Enterprise-grade
+- **Status**: ✅ Completed
+
+---
 
 ## 🎯 Completed Phases
 
@@ -18,19 +21,19 @@
 - Base unit tests (37 tests)
 
 ### Phase 2: Authentication ✅
-- Login/Register
+- Login/Register (unified /auth page)
 - Authorization middleware
-- E2E tests (16 tests)
+- E2E tests (114 tests across 6 devices)
 
 ### Phase 3: Product Catalog ✅
 - Grid with filters, search, pagination
-- Product detail
+- Product detail with reviews
 - Tests: 33 tests
 
-### Phase 4: Checkout + Payments ✅
+### Phase 4: Checkout ✅
 - Shopping cart
-- Stripe integration (test mode)
-- Confirmation webhooks
+- Simulated payments (CARD, PAYPAL, BIZUM, TRANSFER)
+- Confirmation system
 - Tests: 31 tests
 
 ### Phase 5: Admin Panel ✅
@@ -45,11 +48,21 @@
 - **Messaging**: Order chat (15 tests)
 - **Profiles**: Personal data editing (17 tests)
 
-### Phase 7: Quality ✅
+### Phase 7: Additional Modules ✅
+- **Categories**: Full CRUD with images
+- **Coupons**: Discount codes (PERCENTAGE, FIXED, FREE_SHIPPING)
+- **Reviews**: Customer reviews with moderation
+- **FAQs**: Public help system
+- **Shipping**: Zones by postal code
+- **Site Config**: Company data editable
+
+### Phase 8: Quality ✅
 - Coverage audit (80% threshold)
 - Performance optimization (Lighthouse 90+)
 - Accessibility WCAG 2.1 AA
 - Complete documentation
+
+---
 
 ## 📊 Project Metrics
 
@@ -100,7 +113,24 @@ E2E by Device (19 tests each):
 - **FID**: <100ms ✅
 - **CLS**: <0.1 ✅
 
+---
+
 ## 🏗️ Architecture
+
+### Backend Translation System
+
+The project uses **100% backend translation**:
+
+- **Database**: All content in English
+- **API Routes**: Transform English → Spanish
+- **Frontend**: Receives Spanish directly
+- **UI**: 100% Spanish for end users
+
+```
+DB (English) → API Translation → Frontend (Spanish)
+```
+
+### Project Structure
 
 ```
 3d-print-tfm/
@@ -109,13 +139,10 @@ E2E by Device (19 tests each):
 │   └── seed.ts            # Initial data from CSV
 ├── src/
 │   ├── app/               # Next.js App Router
-│   │   ├── (auth)/         # Login, Register (unified in /auth)
-│   │   │   ├── auth/         # Unified auth page with tabs
-│   │   │   ├── login/        # Redirects to /auth
-│   │   │   └── register/     # Redirects to /auth?tab=register
+│   │   ├── (auth)/         # Login, Register (unified /auth)
 │   │   ├── (shop)/          # Public shop
-│   │   ├── (admin)/         # Admin panel
-│   │   └── api/             # API routes (30+ endpoints)
+│   │   ├── (admin)/         # Admin panel (13 modules)
+│   │   └── api/             # API routes (50+ endpoints)
 │   ├── components/
 │   │   ├── ui/              # Base components
 │   │   ├── shop/            # Shop components
@@ -124,41 +151,58 @@ E2E by Device (19 tests each):
 │   ├── lib/
 │   │   ├── db/              # Prisma + connection
 │   │   ├── validators/      # Zod schemas
+│   │   ├── i18n/           # Translation system
 │   │   └── errors/          # Error handling
 │   └── hooks/               # Custom React hooks
 ├── tests/
 │   ├── unit/                # Unit tests (37)
 │   ├── integration/         # Integration tests (227)
-│   └── e2e/                 # E2E tests (96, multi-device)
-└── docs/                    # TFM Documentation (10 docs)
+│   └── e2e/                 # E2E tests (114)
+├── docs/                    # Public documentation (English)
+└── private/                 # Private documentation (Spanish OK)
 ```
+
+---
 
 ## 🎨 Implemented Features
 
-### Public
+### Public (Shop)
 - ✅ Home with hero and featured products
 - ✅ Catalog with filters (category, material, price, stock)
 - ✅ Text search
 - ✅ Pagination and sorting
-- ✅ Product detail with gallery
-- ✅ Persistent cart
-- ✅ Checkout with Stripe
-- ✅ Unified auth `/auth` with tabs (modern UI)
+- ✅ Product detail with gallery and reviews
+- ✅ Persistent cart with coupon support
+- ✅ Checkout with simulated payments
+- ✅ FAQ public page
+- ✅ Unified auth `/auth` with tabs
 
-### Admin
+### Admin Panel (13 Modules)
 - ✅ Dashboard with metrics
-- ✅ Complete product CRUD
+- ✅ Complete product CRUD with images
+- ✅ Category management with images
 - ✅ Order management with states
+- ✅ Client management
+- ✅ Inventory with movements
 - ✅ PDF invoicing system
 - ✅ Automatic alerts
 - ✅ Customer messaging
+- ✅ Coupon management
+- ✅ Review moderation
+- ✅ FAQ management
+- ✅ Shipping zones
+- ✅ Site configuration
 
-### Users
+### User Account
 - ✅ Registration/Login (unified /auth page)
 - ✅ Editable profile
-- ✅ Order history
+- ✅ Order history with invoices
 - ✅ Password change
-- ✅ Role-based navigation (admin doesn't see cart)
+- ✅ Address management
+- ✅ My Reviews
+- ✅ Role-based navigation
+
+---
 
 ## 🔐 Security
 
@@ -185,6 +229,8 @@ E2E by Device (19 tests each):
 - Content-Security-Policy configured
 - Referrer-Policy
 
+---
+
 ## 📦 Technologies
 
 | Category | Technology | Version |
@@ -194,25 +240,33 @@ E2E by Device (19 tests each):
 | ORM | Prisma | 5.22.0 |
 | Auth | NextAuth.js | 4.24.13 |
 | DB | PostgreSQL (Supabase) | 15+ |
-| Payments | Stripe | 15.7.0 |
 | Testing | Vitest + Playwright | 1.6.1 |
 | Styling | Tailwind CSS | 3.4.1 |
 | Validation | Zod | 3.23.8 |
 
+---
+
 ## 📚 Documentation
 
-| Document | Description |
-|----------|-------------|
-| `01-business-model-canvas.md` | Business model |
-| `02-entity-analysis.md` | Entity analysis |
-| `03-business-processes.md` | Business processes |
-| `04-use-cases.md` | Use cases |
-| `05-monetization-strategy.md` | Monetization strategy |
-| `06-customer-segments.md` | Customer segments |
-| `07-competitive-analysis.md` | Competitive analysis |
-| `08-implementation-roadmap.md` | Implementation roadmap |
-| `09-quality-audit.md` | Quality audit |
-| `10-deployment-guide.md` | Deployment guide |
+### Public (docs/)
+- `PROJECT-SUMMARY.md` - This file
+- `TESTING.md` - Testing guide
+- `10-deployment-guide.md` - Deployment instructions
+- `01-09*.md` - Academic documentation
+
+### Private (private/)
+- `README.es.md` - Spanish project summary
+- `01-canvas-modelo-negocio.md` - Business model
+- `02-analisis-entidades.md` - Data model
+- `03-procesos-negocio.md` - Business processes
+- `04-casos-uso.md` - Use cases
+- `05-estrategia-monetizacion.md` - Monetization
+- `06-segmentos-clientes.md` - Customer segments
+- `07-analisis-competitivo.md` - Competitive analysis
+- `08-hoja-ruta-implementacion.md` - Implementation roadmap
+- `09-auditoria-calidad.md` - Quality audit
+
+---
 
 ## 🚀 Deployment
 
@@ -227,10 +281,6 @@ E2E by Device (19 tests each):
    - Managed PostgreSQL
    - Connection pooling
    - Automatic backups
-
-3. **Stripe** (Payments)
-   - Configured webhooks
-   - Test/production mode
 
 ### Commands
 
@@ -248,6 +298,8 @@ npm run build
 npm start
 ```
 
+---
+
 ## 📈 Development Statistics
 
 - **Total time**: ~8 weeks
@@ -257,18 +309,33 @@ npm start
 - **Tests**: 378
 - **Coverage**: 80%+ configured
 
-## 🔄 Recent Changes (Auth Unification)
+---
 
-### 2026-04-01: Login/Register Unification
-- **Before**: Separate pages `/login` and `/register`
-- **Now**: Unified `/auth` page with modern tabs
-- **Benefits**:
-  - Improved UX (instant switch between login/register)
-  - Email shared between tabs
-  - Modern header with Lucide icons
-  - More maintainable code
-- **Compatibility**: Old URLs redirect automatically to `/auth`
-- **Tests**: 114 E2E tests updated and passing on all devices
+## 🔄 Recent Changes (Complete Implementation)
+
+### April 2026: All Modules Completed
+
+**New Admin Modules:**
+- ✅ Categories with image upload
+- ✅ Coupons (PERCENTAGE, FIXED, FREE_SHIPPING)
+- ✅ Reviews with moderation
+- ✅ FAQs public and admin
+- ✅ Shipping zones by postal code
+- ✅ Site configuration
+- ✅ Inventory management
+
+**New User Features:**
+- ✅ My Reviews page
+- ✅ Coupon application
+- ✅ Shipping calculation
+- ✅ FAQs access
+
+**Testing:**
+- ✅ 378 tests passing
+- ✅ Multi-device E2E coverage
+- ✅ 80%+ code coverage
+
+---
 
 ## 🎓 Credits
 

@@ -115,10 +115,10 @@ export default function AdminClientsPage() {
     {
       key: 'telefono',
       header: 'Contacto',
-      render: (value) => (
+      render: (value: unknown) => (
         <div className="flex items-center text-sm text-gray-500">
           <Phone className="h-4 w-4 mr-1" />
-          {value || 'N/A'}
+          {value as string || 'N/A'}
         </div>
       ),
     },
@@ -126,11 +126,11 @@ export default function AdminClientsPage() {
       key: 'totalPedidos',
       header: 'Pedidos',
       sortable: true,
-      render: (value, row) => (
+      render: (value: unknown, row) => (
         <div>
           <div className="flex items-center text-sm text-gray-900">
             <ShoppingBag className="h-4 w-4 mr-1 text-indigo-500" />
-            {value}
+            {value as number}
           </div>
           {row.fechaUltimoPedido && (
             <div className="text-xs text-gray-500">

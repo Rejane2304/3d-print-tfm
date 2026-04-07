@@ -280,12 +280,13 @@ export default function AdminAlertsPage() {
       key: 'type',
       header: 'Type',
       sortable: true,
-      render: (value, row) => {
-        const TipoIcon = typeIcons[value as string] || Bell;
+      render: (value: unknown, row) => {
+        const typeValue = value as string;
+        const TipoIcon = typeIcons[typeValue] || Bell;
         return (
           <div className="flex items-center gap-2">
             <TipoIcon className="h-5 w-5 text-gray-600" />
-            <span className="text-sm font-medium text-gray-900">{typeLabels[value as string] || value}</span>
+            <span className="text-sm font-medium text-gray-900">{typeLabels[typeValue] || typeValue}</span>
           </div>
         );
       },
@@ -305,9 +306,9 @@ export default function AdminAlertsPage() {
       key: 'severity',
       header: 'Severity',
       sortable: true,
-      render: (value) => (
+      render: (value: unknown) => (
         <span className={`px-2 py-1 rounded-full text-xs font-medium ${severityColors[value as string] || 'bg-gray-100'}`}>
-          {severityLabels[value as string] || value}
+          {severityLabels[value as string] || (value as string)}
         </span>
       ),
     },
@@ -315,9 +316,9 @@ export default function AdminAlertsPage() {
       key: 'status',
       header: 'Status',
       sortable: true,
-      render: (value) => (
+      render: (value: unknown) => (
         <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[value as string] || 'bg-gray-100'}`}>
-          {statusLabels[value as string] || value}
+          {statusLabels[value as string] || (value as string)}
         </span>
       ),
     },

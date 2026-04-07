@@ -209,7 +209,7 @@ export default function CarritoPage() {
               isProcessing={isProcessing}
               onCheckout={handleCheckout}
               onContinueShopping={handleContinueShopping}
-              onApplyCoupon={isAuthenticated && cart?.items?.length > 0 ? handleApplyCoupon : undefined}
+              onApplyCoupon={isAuthenticated && (cart?.items?.length || 0) > 0 ? handleApplyCoupon : undefined}
               onRemoveCoupon={handleRemoveCoupon}
               appliedCoupon={appliedCoupon}
             />
