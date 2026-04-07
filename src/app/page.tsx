@@ -15,6 +15,7 @@ import {
   translateProductName,
   translateProductDescription,
   translateProductShortDescription,
+  translateCategoryName,
 } from '@/lib/i18n';
 
 async function getFeaturedProducts() {
@@ -67,8 +68,25 @@ async function getFeaturedProducts() {
   return translatedProducts;
 }
 
+async function getCategories() {
+  const categories = await prisma.category.findMany({
+    where: {
+      isActive: true,
+    },
+    orderBy: {
+      displayOrder: 'asc',
+    },
+  });
+
+  return categories.map((category) => ({
+    ...category,
+    name: translateCategoryName(category.slug),
+  }));
+}
+
 export default async function HomePage() {
   const featuredProducts = await getFeaturedProducts();
+  const categories = await getCategories();
 
   return (
     <div className="bg-white">
@@ -106,20 +124,26 @@ export default async function HomePage() {
           </h2>
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-            {[
-              { name: 'Decoración', color: 'bg-pink-100', icon: '🎨' },
-              { name: 'Accesorios', color: 'bg-blue-100', icon: '🔧' },
-              { name: 'Funcional', color: 'bg-green-100', icon: '⚙️' },
-              { name: 'Articulados', color: 'bg-orange-100', icon: '🦖' },
-              { name: 'Juguetes', color: 'bg-purple-100', icon: '🎮' },
-            ].map((category) => (
+            {categories.map((category) => (
               <Link
-                key={category.name}
-                href={`/products?category=${category.name.toUpperCase()}`}
-                className={`${category.color} p-6 lg:p-8 rounded-xl text-center hover:shadow-lg transition-shadow group`}
+                key={category.slug}
+                href={`/products?category=${category.slug.toUpperCase()}`}
+                className="group relative overflow-hidden rounded-xl aspect-[4/3]"
               >
-                <span className="text-3xl lg:text-4xl mb-3 block group-hover:scale-110 transition-transform">{category.icon}</span>
-                <span className="text-gray-800 font-semibold text-lg">{category.name}</span>
+                {category.image ? (
+                  <Image
+                    src={category.image}
+                    alt={category.name}
+                    fill
+                    className="object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-indigo-400 to-purple-500" />
+                )}
+                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors" />
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
+                  <span className="text-xl lg:text-2xl font-bold text-center px-4">{category.name}</span>
+                </div>
               </Link>
             ))}
           </div>

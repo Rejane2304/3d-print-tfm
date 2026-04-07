@@ -49,7 +49,7 @@ interface OrderDetail {
   }>;
   nombreEnvio: string;
   telefonoEnvio: string;
-  shippingAddress: string;
+  direccionEnvio: string;
   complementoEnvio?: string;
   postalCodeEnvio: string;
   ciudadEnvio: string;
@@ -327,7 +327,7 @@ export default function AdminPedidoDetallePage() {
               </div>
               <div className="p-6">
                 <p className="font-medium text-gray-900">{translateAddressName(order.nombreEnvio)}</p>
-                <p className="text-gray-600">{order.shippingAddress}</p>
+                <p className="text-gray-600">{order.direccionEnvio}</p>
                 {order.complementoEnvio && (
                   <p className="text-gray-600">{order.complementoEnvio}</p>
                 )}
