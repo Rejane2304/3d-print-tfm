@@ -11,6 +11,7 @@ import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
 import { Prisma, OrderStatus } from '@prisma/client';
 import { translateOrderStatus, translateErrorMessage } from '@/lib/i18n';
+import { emitOrderStatusUpdated } from '@/lib/realtime/event-service';
 
 // Validation schema for update
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -175,7 +176,23 @@ export async function PATCH(req: NextRequest) {
     const pedido = await prisma.order.update({
       where: { id },
       data: updateData,
+      include: {
+        user: {
+          select: {
+            id: true,
+          },
+        },
+      },
     });
+
+    // Emitir evento de cambio de estado en tiempo real
+    if (pedido.user?.id) {
+      await emitOrderStatusUpdated(
+        pedido.id,
+        estado,
+        pedido.user.id
+      );
+    }
 
     return NextResponse.json({ success: true, pedido });
   } catch (error) {

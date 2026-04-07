@@ -8,7 +8,9 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Loader2, DollarSign, ShoppingBag, Users, TrendingUp, Package, Calendar, ChevronDown, FolderTree, HelpCircle, MessageSquare, Ticket, Settings } from 'lucide-react';
+import { Loader2, DollarSign, ShoppingBag, Users, TrendingUp, Package, Calendar, ChevronDown, FolderTree, HelpCircle, MessageSquare, Ticket, Settings, Bell } from 'lucide-react';
+import RealTimeNotifications from '@/components/admin/RealTimeNotifications';
+import DashboardMetricsUpdater from '@/components/admin/DashboardMetricsUpdater';
 
 interface AnalyticsData {
   salesSummary: {

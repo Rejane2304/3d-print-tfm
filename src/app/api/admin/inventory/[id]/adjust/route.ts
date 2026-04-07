@@ -12,6 +12,10 @@ import {
   translateMovementType,
   translateErrorMessage,
 } from '@/lib/i18n';
+import {
+  emitStockUpdated,
+  emitStockLow,
+} from '@/lib/realtime/event-service';
 
 export async function POST(
   req: NextRequest,
@@ -135,6 +139,18 @@ export async function POST(
 
       return { movement, product: updatedProduct };
     });
+
+    // Emitir evento de stock actualizado en tiempo real
+    await emitStockUpdated(
+      result.product.id,
+      result.product.stock,
+      previousStock
+    );
+
+    // Si el stock está bajo, emitir alerta
+    if (result.product.stock <= 5) {
+      await emitStockLow(result.product.id, result.product.stock);
+    }
 
     return NextResponse.json({
       success: true,
