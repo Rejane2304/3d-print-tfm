@@ -26,6 +26,7 @@ import {
   Download
 } from 'lucide-react';
 import OrderProgressBar from '@/components/orders/OrderProgressBar';
+import { InvoiceNotAvailableModal } from '@/components/invoices/InvoiceNotAvailableModal';
 
 interface OrderDetail {
   id: string;
@@ -148,6 +149,8 @@ export default function OrderDetailPage() {
   const [order, setOrder] = useState<OrderDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
+  const [invoiceModalReason, setInvoiceModalReason] = useState<'not_completed' | 'not_generated' | 'payment_pending' | 'cancelled'>('not_generated');
 
   const loadOrder = useCallback(async () => {
     try {
@@ -183,23 +186,40 @@ export default function OrderDetailPage() {
   const downloadInvoice = () => {
     if (order?.factura && !order.factura.anulada) {
       window.open(`/api/account/invoices/${order.factura.id}/pdf`, '_blank');
+    } else {
+      // Mostrar modal según el estado
+      if (order?.estado === 'Cancelado') {
+        setInvoiceModalReason('cancelled');
+      } else if (order?.estado !== 'Entregado') {
+        setInvoiceModalReason('not_completed');
+      } else {
+        setInvoiceModalReason('not_generated');
+      }
+      setInvoiceModalOpen(true);
     }
   };
 
   const printOrder = async () => {
-    // Si hay factura, descargar el PDF
     if (order?.factura && !order.factura.anulada) {
       try {
-        // Abrir el PDF en una nueva pestaña (el navegador manejará la descarga/visualización)
         window.open(`/api/account/invoices/${order.factura.id}/pdf`, '_blank');
       } catch (error) {
         console.error('Error al abrir factura:', error);
-        alert('Error al abrir la factura. Inténtalo de nuevo.');
+        setInvoiceModalReason('not_generated');
+        setInvoiceModalOpen(true);
       }
     } else if (order?.factura?.anulada) {
-      alert('La factura de este pedido ha sido anulada');
+      setInvoiceModalReason('cancelled');
+      setInvoiceModalOpen(true);
     } else {
-      alert('No hay factura disponible para este pedido');
+      if (order?.estado === 'Cancelado') {
+        setInvoiceModalReason('cancelled');
+      } else if (order?.estado !== 'Entregado') {
+        setInvoiceModalReason('not_completed');
+      } else {
+        setInvoiceModalReason('not_generated');
+      }
+      setInvoiceModalOpen(true);
     }
   };
 
@@ -495,6 +515,14 @@ export default function OrderDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Modal de factura no disponible */}
+      <InvoiceNotAvailableModal
+        isOpen={invoiceModalOpen}
+        onClose={() => setInvoiceModalOpen(false)}
+        orderNumber={order?.orderNumber}
+        reason={invoiceModalReason}
+      />
     </div>
   );
 }

@@ -23,6 +23,7 @@ import {
   Filter,
   Calendar
 } from 'lucide-react';
+import { InvoiceNotAvailableModal } from '@/components/invoices/InvoiceNotAvailableModal';
 
 interface Order {
   id: string;
@@ -67,6 +68,9 @@ export default function MyOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState('');
+  const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
+  const [invoiceModalReason, setInvoiceModalReason] = useState<'not_completed' | 'not_generated' | 'payment_pending' | 'cancelled'>('not_generated');
+  const [selectedOrderNumber, setSelectedOrderNumber] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -314,19 +318,37 @@ export default function MyOrdersPage() {
                       )}
                     </div>
 
-                    {/* Acciones */}
-                    <div className="mt-4 pt-4 border-t flex flex-wrap items-center gap-3">
-                      {order.factura && !order.factura.anulada && (
-                        <a
-                          href={`/api/account/invoices/${order.factura.id}/pdf`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 font-medium"
-                        >
-                          <FileText className="h-4 w-4" />
-                          Descargar factura
-                        </a>
-                      )}
+                      {/* Acciones */}
+                      <div className="mt-4 pt-4 border-t flex flex-wrap items-center gap-3">
+                        {order.factura && !order.factura.anulada ? (
+                          <a
+                            href={`/api/account/invoices/${order.factura.id}/pdf`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 font-medium"
+                          >
+                            <FileText className="h-4 w-4" />
+                            Descargar factura
+                          </a>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              setSelectedOrderNumber(order.orderNumber);
+                              if (order.estado === 'Cancelado') {
+                                setInvoiceModalReason('cancelled');
+                              } else if (order.estado !== 'Entregado') {
+                                setInvoiceModalReason('not_completed');
+                              } else {
+                                setInvoiceModalReason('not_generated');
+                              }
+                              setInvoiceModalOpen(true);
+                            }}
+                            className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-gray-600 font-medium"
+                          >
+                            <FileText className="h-4 w-4" />
+                            Factura no disponible
+                          </button>
+                        )}
 
                       {order.estado === 'SHIPPED' && (
                         <span className="text-sm text-purple-600">
@@ -348,6 +370,14 @@ export default function MyOrdersPage() {
           </div>
         )}
       </div>
+
+      {/* Modal de factura no disponible */}
+      <InvoiceNotAvailableModal
+        isOpen={invoiceModalOpen}
+        onClose={() => setInvoiceModalOpen(false)}
+        orderNumber={selectedOrderNumber}
+        reason={invoiceModalReason}
+      />
     </div>
   );
 }
