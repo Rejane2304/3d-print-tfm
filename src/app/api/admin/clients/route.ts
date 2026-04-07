@@ -90,7 +90,7 @@ export async function GET(req: NextRequest) {
           },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { name: 'asc' },
       skip,
       take: limit,
     });

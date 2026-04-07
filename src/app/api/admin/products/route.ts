@@ -71,7 +71,7 @@ export async function GET() {
         },
         category: true,
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { name: 'asc' },
     });
 
     // Translate products to Spanish for admin panel
