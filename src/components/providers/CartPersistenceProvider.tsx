@@ -4,8 +4,8 @@ import { useCartPersistence } from '@/hooks/useCartPersistence';
 
 /**
  * CartPersistenceProvider
- * Componente wrapper que activa la gestión de persistencia del carrito
- * Limpia el carrito de invitados cuando abandonan el sitio
+ * Wrapper component that activates cart persistence management
+ * Clears guest cart when they leave the site
  */
 export function CartPersistenceProvider({ children }: { children: React.ReactNode }) {
   useCartPersistence();

@@ -16,7 +16,7 @@ export default function DashboardMetricsUpdater({ onMetricsUpdate }: DashboardMe
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { events, pendingEvents, acknowledgeEvents } = useAdminRealTime({
     onEvent: (event) => {
-      // Actualizar métricas cuando hay eventos relevantes
+      // Update metrics when there are relevant events
       if (
         event.type === 'order:new' ||
         event.type === 'order:status:updated' ||
@@ -28,7 +28,7 @@ export default function DashboardMetricsUpdater({ onMetricsUpdate }: DashboardMe
     },
   });
 
-  // Reconocer eventos procesados
+  // Acknowledge processed events
   useEffect(() => {
     if (pendingEvents.length > 0) {
       const eventIds = pendingEvents.map((e) => e.timestamp);
@@ -36,5 +36,5 @@ export default function DashboardMetricsUpdater({ onMetricsUpdate }: DashboardMe
     }
   }, [pendingEvents, acknowledgeEvents]);
 
-  return null; // Componente invisible, solo para lógica
+  return null; // Invisible component, just for logic
 }

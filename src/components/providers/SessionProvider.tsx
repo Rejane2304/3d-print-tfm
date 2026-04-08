@@ -1,5 +1,5 @@
 /**
- * SessionProvider para NextAuth
+ * SessionProvider for NextAuth
  */
 'use client';
 

@@ -1,6 +1,6 @@
 /**
  * FilterSidebar Component
- * Sidebar con filtros para el catálogo de productos
+ * Sidebar with filters for the product catalog
  * Mobile: Collapsible drawer
  * Desktop: Sticky sidebar
  */
@@ -11,16 +11,16 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { SlidersHorizontal, X, ChevronDown } from 'lucide-react';
 
 const CATEGORIAS = [
-  { value: '', label: 'Todas las categorías' },
-  { value: 'DECORATION', label: 'Decoración' },
-  { value: 'ACCESSORIES', label: 'Accesorios' },
-  { value: 'FUNCTIONAL', label: 'Funcional' },
-  { value: 'ARTICULATED', label: 'Articulados' },
-  { value: 'TOYS', label: 'Juguetes' },
+  { value: '', label: 'All categories' },
+  { value: 'DECORATION', label: 'Decoration' },
+  { value: 'ACCESSORIES', label: 'Accessories' },
+  { value: 'FUNCTIONAL', label: 'Functional' },
+  { value: 'ARTICULATED', label: 'Articulated' },
+  { value: 'TOYS', label: 'Toys' },
 ];
 
 const MATERIALES = [
-  { value: '', label: 'Todos los materiales' },
+  { value: '', label: 'All materials' },
   { value: 'PLA', label: 'PLA' },
   { value: 'PETG', label: 'PETG' },
 ];
@@ -78,13 +78,13 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
       params.delete(key);
     }
 
-    // Resetear página al cambiar filtros
+    // Reset page when changing filters
     params.delete('page');
 
     router.push(`/products?${params.toString()}`);
   };
 
-  const limpiarFiltros = () => {
+  const clearFilters = () => {
     router.push('/products');
     setIsOpen(false);
   };
@@ -96,7 +96,7 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
     }));
   };
 
-  const hayFiltrosActivos =
+  const hasActiveFilters =
     searchParams.category ||
     searchParams.material ||
     searchParams.minPrice ||
@@ -114,24 +114,24 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
   const FilterContent = () => (
     <>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-gray-900">Filtros</h2>
-        {hayFiltrosActivos && (
+        <h2 className="text-lg font-semibold text-gray-900">Filters</h2>
+        {hasActiveFilters && (
           <button
-            onClick={limpiarFiltros}
+            onClick={clearFilters}
             className="text-sm text-indigo-600 hover:text-indigo-800 px-3 py-1.5 rounded-md hover:bg-indigo-50 transition-colors min-h-[36px]"
           >
-            Limpiar
+            Clear
           </button>
         )}
       </div>
 
-      {/* Categoría - Collapsible on mobile */}
+      {/* Category - Collapsible on mobile */}
       <div className="mb-6 border-b border-gray-100 pb-6 lg:border-0 lg:pb-0">
         <button
           onClick={() => toggleSection('category')}
           className="flex items-center justify-between w-full mb-3 text-left lg:cursor-default lg:pointer-events-none"
         >
-          <span className="text-sm font-medium text-gray-700">Categoría</span>
+          <span className="text-sm font-medium text-gray-700">Category</span>
           <ChevronDown
             className={`h-4 w-4 text-gray-400 transition-transform lg:hidden ${expandedSections.category ? 'rotate-180' : ''}`}
           />
@@ -177,13 +177,13 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
         </div>
       </div>
 
-      {/* Rango de precio */}
+      {/* Price range */}
       <div className="mb-6 border-b border-gray-100 pb-6 lg:border-0 lg:pb-0">
         <button
           onClick={() => toggleSection('price')}
           className="flex items-center justify-between w-full mb-3 text-left lg:cursor-default lg:pointer-events-none"
         >
-          <span className="text-sm font-medium text-gray-700">Precio</span>
+          <span className="text-sm font-medium text-gray-700">Price</span>
           <ChevronDown
             className={`h-4 w-4 text-gray-400 transition-transform lg:hidden ${expandedSections.price ? 'rotate-180' : ''}`}
           />
@@ -191,7 +191,7 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
         <div className={`${expandedSections.price ? 'block' : 'hidden lg:block'}`}>
           <div className="flex gap-3">
             <div className="flex-1">
-              <label className="text-xs text-gray-500 mb-1.5 block">Mín</label>
+              <label className="text-xs text-gray-500 mb-1.5 block">Min</label>
               <input
                 type="number"
                 placeholder="0"
@@ -202,7 +202,7 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
               />
             </div>
             <div className="flex-1">
-              <label className="text-xs text-gray-500 mb-1.5 block">Máx</label>
+              <label className="text-xs text-gray-500 mb-1.5 block">Max</label>
               <input
                 type="number"
                 placeholder="∞"
@@ -216,13 +216,13 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
         </div>
       </div>
 
-      {/* En stock */}
+      {/* In stock */}
       <div className="mb-2">
         <button
           onClick={() => toggleSection('stock')}
           className="flex items-center justify-between w-full mb-3 text-left lg:hidden"
         >
-          <span className="text-sm font-medium text-gray-700">Disponibilidad</span>
+          <span className="text-sm font-medium text-gray-700">Availability</span>
           <ChevronDown
             className={`h-4 w-4 text-gray-400 transition-transform ${expandedSections.stock ? 'rotate-180' : ''}`}
           />
@@ -236,7 +236,7 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
               onChange={(e) => updateFilter('inStock', e.target.checked ? 'true' : '')}
               className="w-5 h-5 rounded text-indigo-600 focus:ring-indigo-500 border-gray-300"
             />
-            <span className="text-sm text-gray-700">Solo en stock</span>
+            <span className="text-sm text-gray-700">In stock only</span>
           </label>
         </div>
       </div>
@@ -246,7 +246,7 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
         onClick={() => setIsOpen(false)}
         className="lg:hidden w-full bg-indigo-600 text-white py-3.5 rounded-lg font-medium hover:bg-indigo-700 transition-colors mt-6 min-h-[48px]"
       >
-        Ver {activeFiltersCount > 0 ? `${activeFiltersCount} ` : ''}resultados
+        View {activeFiltersCount > 0 ? `${activeFiltersCount} ` : ''}results
       </button>
     </>
   );
@@ -260,7 +260,7 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
           className="w-full flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-50 transition-colors min-h-[48px]"
         >
           <SlidersHorizontal className="h-5 w-5" />
-          Filtros
+          Filters
           {activeFiltersCount > 0 && (
             <span className="ml-1 px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs rounded-full">
               {activeFiltersCount}
@@ -286,11 +286,11 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
           <div className="fixed inset-y-0 left-0 w-full max-w-sm bg-white z-50 lg:hidden flex flex-col">
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white flex-shrink-0">
-              <h2 className="text-xl font-bold text-gray-900">Filtros</h2>
+              <h2 className="text-xl font-bold text-gray-900">Filters</h2>
               <button
                 onClick={() => setIsOpen(false)}
                 className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
-                aria-label="Cerrar filtros"
+                aria-label="Close filters"
               >
                 <X className="h-6 w-6" />
               </button>

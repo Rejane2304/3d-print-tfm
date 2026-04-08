@@ -1,7 +1,7 @@
 /**
- * ProductCard Component - Diseño Moderno
- * Tarjeta de producto con estilo premium y animaciones suaves
- * Server Component - no usar event handlers
+ * ProductCard Component - Modern Design
+ * Product card with premium style and smooth animations
+ * Server Component - do not use event handlers
  */
 import Link from 'next/link';
 import Image from 'next/image';
@@ -39,7 +39,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       data-testid="product-card"
       className="group relative bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 flex flex-col h-full"
     >
-      {/* Image Container con Overlay */}
+      {/* Image Container with Overlay */}
       <div className="relative w-full aspect-[4/3] bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
         {mainImage ? (
           <Image
@@ -111,7 +111,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         {/* Spacer */}
         <div className="flex-1" />
 
-        {/* Price Section - Fijo abajo */}
+        {/* Price Section - Fixed at bottom */}
         <div className="pt-4 border-t border-gray-100 mt-auto">
           <div className="flex items-center justify-between">
             <div>

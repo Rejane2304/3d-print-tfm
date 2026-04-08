@@ -141,9 +141,9 @@ function getTimeRemaining(resetTime: number): string {
   const hours = Math.ceil(remainingMs / (60 * 60 * 1000));
 
   if (hours > 1) {
-    return `${hours} horas`;
+    return `${hours} hours`;
   }
-  return `${minutes} minutos`;
+  return `${minutes} minutes`;
 }
 
 /**
@@ -166,9 +166,9 @@ export function checkRateLimit(
   if (result.limited) {
     const timeRemaining = getTimeRemaining(result.resetTime);
     const messages: Record<RateLimitType, string> = {
-      login: `Demasiados intentos de inicio de sesión. Por favor, inténtalo de nuevo en ${timeRemaining}.`,
-      register: `Demasiados intentos de registro. Por favor, inténtalo de nuevo en ${timeRemaining}.`,
-      passwordChange: `Demasiados intentos de cambio de contraseña. Por favor, inténtalo de nuevo en ${timeRemaining}.`,
+      login: `Too many login attempts. Please try again in ${timeRemaining}.`,
+      register: `Too many registration attempts. Please try again in ${timeRemaining}.`,
+      passwordChange: `Too many password change attempts. Please try again in ${timeRemaining}.`,
     };
 
     return NextResponse.json(

@@ -1,6 +1,6 @@
 /**
  * Invoice Template Component
- * Genera HTML idéntico al InvoiceViewer para consistencia perfecta
+ * Generates HTML identical to InvoiceViewer for perfect consistency
  */
 
 interface InvoiceItem {

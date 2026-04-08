@@ -1,6 +1,6 @@
 /**
  * PDF Generator Service
- * Genera PDFs a partir de HTML usando Puppeteer
+ * Generates PDFs from HTML using Puppeteer
  */
 import puppeteer from 'puppeteer';
 import { getCompanyDataForInvoice, getDefaultVatRate } from '@/lib/site-config';

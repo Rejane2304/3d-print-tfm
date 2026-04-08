@@ -1,8 +1,8 @@
 /**
- * API de Alerta Individual Admin
- * Eliminar alerta específica
+ * Admin Individual Alert API
+ * Delete specific alert
  * 
- * Requiere: Rol ADMIN
+ * Requires: ADMIN Role
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
@@ -33,7 +33,7 @@ export async function DELETE(
       );
     }
 
-    // Verificar que la alerta existe
+    // Check that the alert exists
     const alerta = await prisma.alert.findUnique({
       where: { id: params.id },
     });
@@ -45,7 +45,7 @@ export async function DELETE(
       );
     }
 
-    // Eliminar la alerta
+    // Delete the alert
     await prisma.alert.delete({
       where: { id: params.id },
     });

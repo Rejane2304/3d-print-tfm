@@ -74,7 +74,7 @@ export function DataTable<T extends object>({
   rowKey,
   searchable = false,
   searchKeys,
-  searchPlaceholder = 'Buscar...',
+  searchPlaceholder = 'Search...',
   pagination = true,
   pageSizeOptions = [10, 25, 50, 100],
   defaultPageSize = 25,
@@ -84,8 +84,8 @@ export function DataTable<T extends object>({
   exportable = false,
   exportFilename = 'export.csv',
   loading = false,
-  emptyMessage = 'No hay datos disponibles',
-  noResultsMessage = 'No se encontraron resultados',
+  emptyMessage = 'No data available',
+  noResultsMessage = 'No results found',
   className = '',
   onRowClick,
   selectedRowClassName = 'bg-indigo-50',
@@ -274,7 +274,7 @@ export function DataTable<T extends object>({
                 ) : (
                   <Download className="h-4 w-4" />
                 )}
-                Exportar CSV
+                Export CSV
               </button>
             )}
           </div>
@@ -283,9 +283,9 @@ export function DataTable<T extends object>({
         {/* Bulk Actions */}
         {selectable && selectedRows.size > 0 && (
           <div className="mt-4 flex items-center gap-3 p-3 bg-indigo-50 rounded-lg">
-            <span className="text-sm font-medium text-indigo-900">
-              {selectedRows.size} seleccionados
-            </span>
+              <span className="text-sm font-medium text-indigo-900">
+                {selectedRows.size} selected
+              </span>
             <div className="flex gap-2">
               {bulkActions.map((action) => (
                 <button
@@ -318,7 +318,7 @@ export function DataTable<T extends object>({
         {loading ? (
           <div className="p-12 text-center">
             <Loader2 className="h-8 w-8 animate-spin text-indigo-600 mx-auto mb-4" />
-            <p className="text-gray-500">Cargando...</p>
+            <p className="text-gray-500">Loading...</p>
           </div>
         ) : paginatedData.length === 0 ? (
           <div className="p-12 text-center text-gray-500">
@@ -416,11 +416,11 @@ export function DataTable<T extends object>({
         <div className="p-4 border-t border-gray-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-700">
-                Mostrando {((currentPage - 1) * pageSize) + 1} a{' '}
-                {Math.min(currentPage * pageSize, sortedData.length)} de{' '}
-                {sortedData.length} resultados
-              </span>
+            <span className="text-sm text-gray-700">
+              Showing {((currentPage - 1) * pageSize) + 1} to{' '}
+              {Math.min(currentPage * pageSize, sortedData.length)} of{' '}
+              {sortedData.length} results
+            </span>
               <select
                 value={pageSize}
                 onChange={(e) => {
@@ -431,7 +431,7 @@ export function DataTable<T extends object>({
               >
                 {pageSizeOptions.map((size) => (
                   <option key={size} value={size}>
-                    {size} por página
+                    {size} per page
                   </option>
                 ))}
               </select>
@@ -446,7 +446,7 @@ export function DataTable<T extends object>({
                 <ChevronLeft className="h-5 w-5" />
               </button>
               <span className="text-sm text-gray-700">
-                Página {currentPage} de {totalPages}
+                Page {currentPage} of {totalPages}
               </span>
               <button
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}

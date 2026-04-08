@@ -1,6 +1,6 @@
 /**
- * API Route para detalle de producto
- * GET /api/products/[slug] - Obtener producto por slug
+ * API Route for product detail
+ * GET /api/products/[slug] - Get product by slug
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
@@ -57,7 +57,7 @@ export const GET = withErrorHandler(async (
       : product.category,
   };
 
-  // Obtener productos relacionados (misma categoría, excluyendo el actual)
+  // Get related products (same category, excluding current)
   const related = await prisma.product.findMany({
     where: {
       isActive: true,

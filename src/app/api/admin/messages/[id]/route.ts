@@ -1,8 +1,8 @@
 /**
- * API de Mensaje Individual Admin
- * Eliminar mensaje específico
+ * Admin Individual Message API
+ * Delete specific message
  * 
- * Requiere: Ser el autor del mensaje
+ * Requires: Be the message author
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
@@ -33,7 +33,7 @@ export async function DELETE(
       );
     }
 
-    // Solo admin puede eliminar mensajes
+    // Only admin can delete messages
     if (usuario.role !== 'ADMIN') {
       return NextResponse.json(
         { success: false, error: 'No autorizado' },
@@ -41,7 +41,7 @@ export async function DELETE(
       );
     }
 
-    // Verificar que el mensaje existe
+    // Check that the message exists
     const mensaje = await prisma.orderMessage.findUnique({
       where: { id: params.id },
     });
@@ -53,7 +53,7 @@ export async function DELETE(
       );
     }
 
-    // Eliminar el mensaje
+    // Delete the message
     await prisma.orderMessage.delete({
       where: { id: params.id },
     });

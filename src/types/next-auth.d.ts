@@ -4,8 +4,8 @@ import { Rol } from "@prisma/client"
 
 declare module "next-auth" {
   /**
-   * Extensión del tipo User para incluir propiedades personalizadas
-   * El rol es opcional en el momento de autorización pero se añade en el callback JWT
+   * Extension of User type to include custom properties
+   * The role is optional at authorization time but is added in the JWT callback
    */
   interface User {
     id: string

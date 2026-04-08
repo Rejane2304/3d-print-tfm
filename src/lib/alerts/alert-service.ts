@@ -1,6 +1,6 @@
 /**
  * Alert Service
- * Gestiona la creación automática de alertas del sistema
+ * Manages automatic creation of system alerts
  */
 import { prisma } from '@/lib/db/prisma';
 import { AlertType, AlertSeverity } from '@prisma/client';
@@ -14,7 +14,7 @@ interface AlertConfig {
 
 
 /**
- * Carga la configuración de alertas desde la BD
+ * Load alert configuration from the database
  */
 export async function getAlertConfig(): Promise<AlertConfig> {
   const lowStockThreshold = await getLowStockThreshold();
@@ -25,7 +25,7 @@ export async function getAlertConfig(): Promise<AlertConfig> {
 }
 
 /**
- * Crea una alerta de stock bajo para un producto
+ * Create a low stock alert for a product
  */
 export async function createStockAlert(productId: string, currentStock: number, minStock: number = 5) {
   const product = await prisma.product.findUnique({
@@ -35,7 +35,7 @@ export async function createStockAlert(productId: string, currentStock: number, 
 
   if (!product) return null;
 
-  // Determinar severidad y tipo
+  // Determine severity and type
   let severity: AlertSeverity;
   let type: AlertType;
 
@@ -53,7 +53,7 @@ export async function createStockAlert(productId: string, currentStock: number, 
     return null;
   }
 
-  // Verificar si ya existe una alerta pendiente para este producto
+  // Check if there's already a pending alert for this product
   const existingAlert = await prisma.alert.findFirst({
     where: {
       productId,
@@ -63,7 +63,7 @@ export async function createStockAlert(productId: string, currentStock: number, 
   });
 
   if (existingAlert) {
-    // Actualizar la alerta existente si el stock cambió significativamente
+    // Update the existing alert if stock changed significantly
     if (existingAlert.message !== `${product.name} tiene stock bajo (${currentStock} unidades)`) {
       return await prisma.alert.update({
         where: { id: existingAlert.id },
@@ -77,7 +77,7 @@ export async function createStockAlert(productId: string, currentStock: number, 
     return existingAlert;
   }
 
-  // Crear nueva alerta
+  // Create new alert
   const alert = await prisma.alert.create({
     data: {
       type,
@@ -93,7 +93,7 @@ export async function createStockAlert(productId: string, currentStock: number, 
 }
 
 /**
- * Verifica y crea alertas para todos los productos con stock bajo
+ * Check and create alerts for all products with low stock
  */
 export async function checkAllStockAlerts(config?: AlertConfig) {
   // Load config from DB if not provided
@@ -117,10 +117,10 @@ export async function checkAllStockAlerts(config?: AlertConfig) {
 }
 
 /**
- * Resuelve automáticamente alertas de stock cuando se repone
+ * Automatically resolve stock alerts when restocked
  */
 export async function resolveStockAlert(productId: string, newStock: number) {
-  if (newStock <= 5) return; // Aún es stock bajo
+  if (newStock <= 5) return; // Still low stock
 
   const pendingAlerts = await prisma.alert.findMany({
     where: {
@@ -143,7 +143,7 @@ export async function resolveStockAlert(productId: string, newStock: number) {
 }
 
 /**
- * Crea alerta para pedidos sin pagar después de cierto tiempo
+ * Create alert for unpaid orders after a certain time
  */
 export async function createUnpaidOrderAlerts(hoursThreshold: number = 24) {
   const cutoffDate = new Date();
@@ -162,14 +162,14 @@ export async function createUnpaidOrderAlerts(hoursThreshold: number = 24) {
     },
   });
 
-  // Filtrar solo los que no están pagados
+  // Filter only those that are not paid
   const ordersNotPaid = unpaidOrders.filter(order => 
     order.payment?.status !== 'COMPLETED'
   );
 
   const alerts = [];
   for (const order of ordersNotPaid) {
-    // Verificar si ya existe alerta
+    // Check if alert already exists
     const existingAlert = await prisma.alert.findFirst({
       where: {
         orderId: order.id,
@@ -197,7 +197,7 @@ export async function createUnpaidOrderAlerts(hoursThreshold: number = 24) {
 }
 
 /**
- * Crea alerta para pedidos atrasados en envío
+ * Create alert for delayed orders in shipping
  */
 export async function createDelayedOrderAlerts(daysThreshold: number = 3) {
   const cutoffDate = new Date();
@@ -244,7 +244,7 @@ export async function createDelayedOrderAlerts(daysThreshold: number = 3) {
 }
 
 /**
- * Crea alerta para nuevo pedido
+ * Create alert for new order
  */
 export async function createNewOrderAlert(orderId: string) {
   const order = await prisma.order.findUnique({
@@ -282,7 +282,7 @@ export async function createNewOrderAlert(orderId: string) {
 }
 
 /**
- * Crea alerta para reseña negativa
+ * Create alert for negative review
  */
 export async function createNegativeReviewAlert(reviewId: string) {
   const review = await prisma.review.findUnique({
@@ -320,7 +320,7 @@ export async function createNegativeReviewAlert(reviewId: string) {
 }
 
 /**
- * Crea alerta para pedido de alto valor
+ * Create alert for high value order
  */
 export async function createHighValueOrderAlert(orderId: string, threshold: number = 100) {
   const order = await prisma.order.findUnique({
@@ -357,7 +357,7 @@ export async function createHighValueOrderAlert(orderId: string, threshold: numb
 }
 
 /**
- * Crea alerta para nuevo usuario registrado
+ * Create alert for new registered user
  */
 export async function createNewUserAlert(userId: string) {
   const user = await prisma.user.findUnique({
@@ -367,7 +367,7 @@ export async function createNewUserAlert(userId: string) {
 
   if (!user) return null;
 
-  // Solo alertar si el usuario se creó hace menos de 1 hora
+  // Only alert if user was created less than 1 hour ago
   const oneHourAgo = new Date();
   oneHourAgo.setHours(oneHourAgo.getHours() - 1);
 
@@ -398,7 +398,7 @@ export async function createNewUserAlert(userId: string) {
 }
 
 /**
- * Crea alerta para cupón próximo a expirar
+ * Create alert for coupon nearing expiration
  */
 export async function createCouponExpiringAlert(couponId: string, daysThreshold: number = 3) {
   const coupon = await prisma.coupon.findUnique({
@@ -446,7 +446,7 @@ export async function createCouponExpiringAlert(couponId: string, daysThreshold:
 }
 
 /**
- * Ejecuta todas las verificaciones de alertas
+ * Run all alert checks
  */
 export async function runAllAlertChecks() {
   const config = await getAlertConfig();
