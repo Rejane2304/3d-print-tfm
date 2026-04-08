@@ -18,6 +18,19 @@ import {
   translateErrorMessage,
 } from '@/lib/i18n';
 
+// Schema de validación para imágenes
+const imageSchema = z.object({
+  url: z.string().min(1, 'La URL de la imagen es obligatoria').refine(
+    (url) => {
+      const validExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
+      const lowercaseUrl = url.toLowerCase();
+      return validExtensions.some(ext => lowercaseUrl.endsWith(ext));
+    },
+    { message: 'La URL debe terminar en .jpg, .jpeg, .png, .webp o .gif' }
+  ),
+  isMain: z.boolean().default(false),
+});
+
 // Schema de validación
 const productSchema = z.object({
   name: z.string().min(1),
@@ -35,6 +48,12 @@ const productSchema = z.object({
   printTime: z.number().optional(),
   isActive: z.boolean().default(true),
   isFeatured: z.boolean().default(false),
+  images: z.array(imageSchema)
+    .min(1, 'Debe agregar al menos una imagen')
+    .refine(
+      (images) => images.some(img => img.isMain),
+      { message: 'Debe marcar al menos una imagen como principal' }
+    ),
 });
 
 // GET - Listar productos
@@ -153,26 +172,50 @@ export async function POST(req: NextRequest) {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
 
-    // Crear producto
-    const product = await prisma.product.create({
-      data: {
-        name: data.name,
-        description: data.description,
-        shortDescription: data.shortDescription,
-        price: data.price,
-        previousPrice: data.previousPrice,
-        stock: data.stock,
-        categoryId: data.categoryId,
-        material: data.material,
-        widthCm: data.widthCm,
-        heightCm: data.heightCm,
-        depthCm: data.depthCm,
-        weight: data.weight,
-        printTime: data.printTime,
-        isActive: data.isActive,
-        isFeatured: data.isFeatured,
-        slug,
-      },
+    // Crear producto e imágenes en una transacción
+    const product = await prisma.$transaction(async (tx) => {
+      // Crear el producto
+      const newProduct = await tx.product.create({
+        data: {
+          name: data.name,
+          description: data.description,
+          shortDescription: data.shortDescription,
+          price: data.price,
+          previousPrice: data.previousPrice,
+          stock: data.stock,
+          categoryId: data.categoryId,
+          material: data.material,
+          widthCm: data.widthCm,
+          heightCm: data.heightCm,
+          depthCm: data.depthCm,
+          weight: data.weight,
+          printTime: data.printTime,
+          isActive: data.isActive,
+          isFeatured: data.isFeatured,
+          slug,
+        },
+      });
+
+      // Crear las imágenes del producto
+      for (let i = 0; i < data.images.length; i++) {
+        const img = data.images[i];
+        await tx.productImage.create({
+          data: {
+            productId: newProduct.id,
+            url: img.url,
+            filename: img.url.split('/').pop() || 'image.jpg',
+            isMain: img.isMain ?? (i === 0), // Primera imagen como principal por defecto
+            displayOrder: i,
+            altText: data.name,
+          },
+        });
+      }
+
+      // Retornar el producto con imágenes
+      return tx.product.findUnique({
+        where: { id: newProduct.id },
+        include: { images: true },
+      });
     });
 
     return NextResponse.json(

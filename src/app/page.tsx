@@ -34,7 +34,7 @@ async function getFeaturedProducts() {
     orderBy: {
       updatedAt: 'desc',
     },
-    take: 6,
+    take: 3,
   });
 
   // Traducir productos destacados al español
@@ -217,13 +217,9 @@ export default async function HomePage() {
                     {/* Content */}
                     <div className="p-6 flex flex-col flex-grow">
                       <div className="flex-grow">
-                        <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors duration-300 line-clamp-1">
+                        <h3 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-indigo-600 transition-colors duration-300 line-clamp-2">
                           {product.name}
                         </h3>
-                        
-                        <p className="text-sm text-gray-500 mb-4 line-clamp-2 leading-relaxed">
-                          {product.shortDescription || product.description}
-                        </p>
                       </div>
                       
                       {/* Price and Action */}

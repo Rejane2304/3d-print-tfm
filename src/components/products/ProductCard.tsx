@@ -69,15 +69,9 @@ export default function ProductCard({ product }: ProductCardProps) {
       </div>
 
       <div className="p-4">
-        <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-indigo-600 transition-colors line-clamp-2" data-testid="product-name">
+        <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors line-clamp-2" data-testid="product-name">
           {product.name}
         </h3>
-
-        {product.shortDescription && (
-          <p className="text-sm text-gray-500 mb-2 line-clamp-2" data-testid="product-description">
-            {product.shortDescription}
-          </p>
-        )}
 
         {/* Rating stars */}
         {hasRating && (
