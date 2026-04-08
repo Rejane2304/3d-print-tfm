@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
 
     if (!orderId) {
       return NextResponse.json(
-        { error: 'Order ID requerido' },
+        { error: 'El ID de pedido es requerido' },
         { status: 400 }
       );
     }

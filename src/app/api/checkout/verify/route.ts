@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
 
     if (!sessionId) {
       return NextResponse.json(
-        { error: 'Session ID requerido' },
+        { error: 'El ID de sesión es requerido' },
         { status: 400 }
       );
     }

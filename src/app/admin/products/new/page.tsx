@@ -93,7 +93,7 @@ export default function NuevoProductoPage() {
         setCategories(data.categories || []);
       }
     } catch (err) {
-      console.error('Error loading categories:', err);
+      console.error('Error al cargar categorías:', err);
     }
   };
 

@@ -53,7 +53,7 @@ export const GET = withErrorHandler(async () => {
 
   if (!user) {
     return NextResponse.json(
-      { success: false, error: translateErrorMessage('Usuario not found') },
+      { success: false, error: 'Usuario no encontrado' },
       { status: 404 }
     );
   }
@@ -122,14 +122,14 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   // Validations
   if (!productId) {
     return NextResponse.json(
-      { success: false, error: 'Producto requerido' },
+      { success: false, error: 'El producto es requerido' },
       { status: 400 }
     );
   }
 
   if (quantity <= 0) {
     return NextResponse.json(
-      { success: false, error: 'Cantidad debe ser mayor a 0' },
+      { success: false, error: 'La cantidad debe ser mayor a 0' },
       { status: 400 }
     );
   }
@@ -142,7 +142,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   if (!user) {
     return NextResponse.json(
-      { success: false, error: 'Usuario not found' },
+      { success: false, error: 'Usuario no encontrado' },
       { status: 404 }
     );
   }

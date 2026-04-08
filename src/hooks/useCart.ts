@@ -63,7 +63,7 @@ export function useCart() {
             setCart(data.cart);
           }
         } else {
-          throw new Error('Error loading cart');
+          throw new Error('Error al cargar carrito');
         }
       } else {
         // Load from localStorage

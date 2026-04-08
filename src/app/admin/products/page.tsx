@@ -71,7 +71,7 @@ export default function AdminProductsPage() {
 
       setProducts(data.productos || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
     }

@@ -66,7 +66,7 @@ export default function AdminInvoicesPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error loading invoices');
+        throw new Error(data.error || 'Error al cargar facturas');
       }
 
       setInvoices(data.facturas || []);
@@ -95,7 +95,7 @@ export default function AdminInvoicesPage() {
 
   const generateInvoice = async () => {
     if (!orderIdInput.trim()) {
-      setError('Enter order number');
+      setError('Introduce el número de pedido');
       return;
     }
 
@@ -131,7 +131,7 @@ export default function AdminInvoicesPage() {
 
       setShowGenerateModal(false);
       setOrderIdInput('');
-      setSuccessMessage('Invoice generated successfully');
+      setSuccessMessage('Factura generada correctamente');
       setTimeout(() => setSuccessMessage(null), 3000);
       await loadInvoices();
     } catch (err) {
@@ -167,7 +167,7 @@ export default function AdminInvoicesPage() {
   };
 
   const handleDeleteInvoices = async (selectedIds: string[]) => {
-    if (!confirm(`¿Estás seguro de que deseas eliminar ${selectedIds.length} invoice(s)?`)) {
+    if (!confirm(`¿Estás seguro de que deseas eliminar ${selectedIds.length} factura(s)?`)) {
       return;
     }
     
@@ -179,7 +179,7 @@ export default function AdminInvoicesPage() {
       );
       await loadInvoices();
     } catch (error) {
-      console.error('Error deleting invoices:', error);
+      console.error('Error al eliminar facturas:', error);
     }
   };
 

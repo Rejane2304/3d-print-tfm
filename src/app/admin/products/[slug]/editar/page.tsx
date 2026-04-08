@@ -99,7 +99,7 @@ export default function EditarProductoPage() {
         setCategories(data.categories || []);
       }
     } catch (err) {
-      console.error('Error loading categories:', err);
+      console.error('Error al cargar categorías:', err);
     }
   };
 
@@ -141,7 +141,7 @@ export default function EditarProductoPage() {
         setImages(formattedImages);
       }
     } catch (err) {
-      console.error('Error loading product:', err);
+      console.error('Error al cargar producto:', err);
       setError('Error al cargar el producto');
     } finally {
       setLoading(false);

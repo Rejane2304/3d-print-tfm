@@ -62,12 +62,12 @@ export default function AdminOrdersPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error loading orders');
+        throw new Error(data.error || 'Error al cargar pedidos');
       }
 
       setOrders(data.pedidos || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
     }
@@ -106,7 +106,7 @@ export default function AdminOrdersPage() {
   };
 
   const handleDeleteOrders = async (selectedIds: string[]) => {
-    if (!confirm(`¿Estás seguro de que deseas eliminar ${selectedIds.length} order(s)?`)) {
+    if (!confirm(`¿Estás seguro de que deseas eliminar ${selectedIds.length} pedido(s)?`)) {
       return;
     }
     

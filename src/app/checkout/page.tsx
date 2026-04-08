@@ -141,7 +141,7 @@ export default function CheckoutPage() {
       }
     } catch (err) {
       setError('Error al cargar datos del checkout');
-      console.error('Error loading checkout data:', err);
+      console.error('Error al cargar datos de checkout:', err);
     } finally {
       setLoading(false);
     }

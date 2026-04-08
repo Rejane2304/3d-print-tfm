@@ -45,13 +45,13 @@ export function SiteConfigProvider({ children }: { children: ReactNode }) {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error loading site config');
+        throw new Error(data.error || 'Error al cargar configuración del sitio');
       }
 
       setConfig(data.config);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
-      console.error('Error loading site config:', err);
+      setError(err instanceof Error ? err.message : 'Error desconocido');
+      console.error('Error al cargar configuración del sitio:', err);
     } finally {
       setLoading(false);
     }

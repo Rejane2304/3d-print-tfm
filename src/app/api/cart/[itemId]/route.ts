@@ -88,7 +88,7 @@ export const PATCH = withErrorHandler(async (
 
     return NextResponse.json({
       success: true,
-      message: 'Item eliminado',
+      message: 'Artículo eliminado',
     });
   }
 
@@ -190,6 +190,6 @@ export const DELETE = withErrorHandler(async (
 
   return NextResponse.json({
     success: true,
-    message: 'Item eliminado del carrito',
+    message: 'Artículo eliminado del carrito',
   });
 });

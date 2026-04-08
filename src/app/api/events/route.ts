@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ events });
   } catch (error) {
     console.error('Error fetching events:', error);
-    return NextResponse.json({ error: translateErrorMessage('Internal server error') }, { status: 500 });
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }
 
@@ -49,14 +49,14 @@ export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
-      return NextResponse.json({ error: translateErrorMessage('Unauthorized') }, { status: 401 });
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const body = await req.json();
     const { eventIds } = body;
 
     if (!eventIds || !Array.isArray(eventIds) || eventIds.length === 0) {
-      return NextResponse.json({ error: translateErrorMessage('Invalid') + ' eventIds' }, { status: 400 });
+      return NextResponse.json({ error: 'IDs de eventos inválidos' }, { status: 400 });
     }
 
     await prisma.eventStore.updateMany({
@@ -72,6 +72,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error acknowledging events:', error);
-    return NextResponse.json({ error: translateErrorMessage('Internal server error') }, { status: 500 });
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }
