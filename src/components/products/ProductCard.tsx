@@ -1,12 +1,12 @@
 /**
  * ProductCard Component - Diseño Moderno
  * Tarjeta de producto con estilo premium y animaciones suaves
+ * Server Component - no usar event handlers
  */
 import Link from 'next/link';
 import Image from 'next/image';
 import { Decimal } from '@prisma/client/runtime/library';
 import { StarRating } from '@/components/ui/StarRating';
-import { ShoppingCart, Eye } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -57,28 +57,6 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         {/* Gradient Overlay on Hover */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-        {/* Quick Actions Overlay */}
-        <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-4 group-hover:translate-y-0">
-          <button
-            className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-indigo-50 transition-colors"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-            }}
-          >
-            <Eye className="h-5 w-5 text-gray-700" />
-          </button>
-          <button
-            className="w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center shadow-lg hover:bg-indigo-700 transition-colors"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-            }}
-          >
-            <ShoppingCart className="h-5 w-5 text-white" />
-          </button>
-        </div>
 
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-2">
