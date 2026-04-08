@@ -60,7 +60,6 @@ export function ReviewFormClient({ productId, productName }: ReviewFormClientPro
         </div>
       )}
       <ReviewForm
-        productId={productId}
         productName={productName}
         onSubmit={handleSubmit}
       />

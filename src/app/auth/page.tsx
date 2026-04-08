@@ -163,6 +163,7 @@ function AuthContent() {
               })
             );
             
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const successful = migrationResults.filter(r => r.status === 'fulfilled' && (r.value as {success: boolean}).success).length;
 
             // Clear localStorage after migration attempt

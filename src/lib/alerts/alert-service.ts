@@ -3,7 +3,7 @@
  * Gestiona la creación automática de alertas del sistema
  */
 import { prisma } from '@/lib/db/prisma';
-import { AlertType, AlertSeverity, AlertStatus, OrderStatus, PaymentStatus } from '@prisma/client';
+import { AlertType, AlertSeverity } from '@prisma/client';
 import { getLowStockThreshold } from '@/lib/site-config';
 
 interface AlertConfig {
@@ -11,10 +11,7 @@ interface AlertConfig {
   criticalStockThreshold: number;
 }
 
-const DEFAULT_CONFIG: AlertConfig = {
-  lowStockThreshold: 5,
-  criticalStockThreshold: 2,
-};
+
 
 /**
  * Carga la configuración de alertas desde la BD

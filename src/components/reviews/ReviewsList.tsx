@@ -43,7 +43,6 @@ export function ReviewsList({
   onPageChange,
 }: ReviewsListProps) {
   const [sortBy, setSortBy] = useState('newest');
-  const [filterRating, setFilterRating] = useState<number | null>(null);
 
   const handleSortChange = (value: string) => {
     setSortBy(value);

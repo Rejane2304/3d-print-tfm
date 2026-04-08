@@ -8,7 +8,6 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { withErrorHandler } from '@/lib/errors/api-wrapper';
-import { translateFAQ, faqTranslations } from '@/lib/i18n';
 
 // Mapeo de categorías en inglés → español
 const categoryTranslations: Record<string, string> = {
@@ -49,13 +48,11 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
 
   // Agrupar por categoría con traducción al español
   const groupedByCategory = faqs.reduce((acc, faq) => {
-    // Extraer el ref de la FAQ (FAQ-0001, FAQ-0002, etc.)
-    const ref = faq.id.slice(0, 8).toUpperCase();
-    
     // Traducir usando el módulo i18n
-    const preguntaTraducida = translateFAQ(ref, 'question') || faq.question;
-    const respuestaTraducida = translateFAQ(ref, 'answer') || faq.answer;
-    const categoriaTraducida = translateFAQ(ref, 'category') || categoryTranslations[faq.category] || faq.category;
+    // translateFAQ removed - data now comes from database in Spanish
+    const preguntaTraducida = faq.question;
+    const respuestaTraducida = faq.answer;
+    const categoriaTraducida = categoryTranslations[faq.category] || faq.category;
     
     if (!acc[categoriaTraducida]) {
       acc[categoriaTraducida] = [];

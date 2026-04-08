@@ -43,7 +43,7 @@ const rateLimitStore: Record<string, Record<RateLimitType, RateLimitEntry>> = {}
  * Get client IP address from request
  * Handles various proxy configurations
  */
-export function getClientIp(request: NextRequest): string {
+function getClientIp(request: NextRequest): string {
   // Check for forwarded headers (common in production with proxies)
   const forwardedFor = request.headers.get('x-forwarded-for');
   if (forwardedFor) {

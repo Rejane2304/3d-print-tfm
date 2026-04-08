@@ -8,7 +8,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
 import bcrypt from 'bcrypt';
-import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
+import { checkRateLimit } from '@/lib/rate-limit';
 import { changePasswordSchema } from '@/lib/validators';
 import { translateErrorMessage } from '@/lib/i18n';
 

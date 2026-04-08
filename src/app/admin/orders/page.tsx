@@ -20,6 +20,7 @@ import {
   XCircle,
   Trash2
 } from 'lucide-react';
+// RealTimeNotifications and DashboardMetricsUpdater removed - unused
 import { DataTable, Column, BulkAction } from '@/components/ui/DataTable';
 
 interface Order {

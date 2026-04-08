@@ -9,7 +9,7 @@ import { Prisma } from '@prisma/client';
 const SITE_CONFIG_ID = 'site-config';
 
 // Type from Prisma
-export type SiteConfig = Prisma.SiteConfigGetPayload<{}>;
+export type SiteConfig = Prisma.SiteConfigGetPayload<Record<string, never>>;
 
 /**
  * Get or create the site configuration (singleton)

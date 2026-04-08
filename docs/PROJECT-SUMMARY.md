@@ -1,109 +1,108 @@
-# PROJECT SUMMARY - 3D PRINT TFM
+# RESUMEN DEL PROYECTO - 3D PRINT TFM
 
-## 📖 Overview
+## 📖 Visión General
 
-**3D Printing E-commerce** developed as a Master's Thesis project with a TDD (Test-Driven Development) approach.
+**E-commerce de Impresión 3D** desarrollado como Trabajo Final de Máster (TFM) con enfoque TDD (Desarrollo Guiado por Tests).
 
 - **Stack**: Next.js 14 + Prisma + PostgreSQL
-- **Approach**: TDD with 378 tests (100% passing)
-- **Language**: 100% Spanish UI with backend translation
-- **Responsive**: Mobile → 4K
-- **Security**: Enterprise-grade
-- **Status**: ✅ Completed
+- **Enfoque**: TDD con tests unitarios, integración y E2E
+- **Idioma**: UI 100% en español con traducción backend
+- **Responsive**: Móvil → 4K
+- **Seguridad**: Nivel empresarial
+- **Estado**: ✅ Completado
 
 ---
 
-## 🎯 Completed Phases
+## 🎯 Fases Completadas
 
-### Phase 1: Fundamentals ✅
-- Project setup
-- Prisma + NextAuth configuration
-- Base unit tests (37 tests)
+### Fase 1: Fundamentos ✅
+- Configuración del proyecto
+- Configuración de Prisma + NextAuth
+- Tests base (unitarios)
 
-### Phase 2: Authentication ✅
-- Login/Register (unified /auth page)
-- Authorization middleware
-- E2E tests (114 tests across 6 devices)
+### Fase 2: Autenticación ✅
+- Login/Registro (página /auth unificada)
+- Middleware de autorización
+- Tests E2E (múltiples dispositivos)
 
-### Phase 3: Product Catalog ✅
-- Grid with filters, search, pagination
-- Product detail with reviews
-- Tests: 33 tests
+### Fase 3: Catálogo de Productos ✅
+- Grid con filtros, búsqueda, paginación
+- Detalle de producto con reseñas
+- Tests de API y componentes
 
-### Phase 4: Checkout ✅
-- Shopping cart
-- Simulated payments (CARD, PAYPAL, BIZUM, TRANSFER)
-- Confirmation system
-- Tests: 31 tests
+### Fase 4: Checkout ✅
+- Carrito de compras persistente
+- Pagos simulados (CARD, PAYPAL, BIZUM, TRANSFER)
+- Sistema de confirmación
+- Tests de integración
 
-### Phase 5: Admin Panel ✅
-- Dashboard with metrics
-- Product management
-- Order management
-- Tests: 41 tests
+### Fase 5: Panel de Administración ✅
+- Dashboard con métricas en tiempo real
+- Gestión de productos completa
+- Gestión de pedidos con estados
+- Tests de administración
 
-### Phase 6: Advanced Features ✅
-- **Invoicing**: Full PDF system (30 tests)
-- **Alerts**: Low stock, pending orders (20 tests)
-- **Messaging**: Order chat (15 tests)
-- **Profiles**: Personal data editing (17 tests)
+### Fase 6: Funcionalidades Avanzadas ✅
+- **Facturación**: Sistema PDF completo
+- **Alertas**: 10 tipos de alertas automáticas
+- **Mensajería**: Chat de pedidos
+- **Perfiles**: Edición de datos personales
 
-### Phase 7: Additional Modules ✅
-- **Categories**: Full CRUD with images
-- **Coupons**: Discount codes (PERCENTAGE, FIXED, FREE_SHIPPING)
-- **Reviews**: Customer reviews with moderation
-- **FAQs**: Public help system
-- **Shipping**: Zones by postal code
-- **Site Config**: Company data editable
+### Fase 7: Módulos Adicionales ✅
+- **Categorías**: CRUD completo con imágenes
+- **Cupones**: Códigos de descuento (PERCENTAGE, FIXED, FREE_SHIPPING)
+- **Reseñas**: Valoraciones de clientes con moderación
+- **FAQs**: Sistema de ayuda público
+- **Envíos**: Zonas por código postal
+- **Configuración del Sitio**: Datos de empresa editables
 
-### Phase 8: Quality ✅
-- Coverage audit (80% threshold)
-- Performance optimization (Lighthouse 90+)
-- Accessibility WCAG 2.1 AA
-- Complete documentation
+### Fase 8: Calidad ✅
+- Auditoría de cobertura
+- Optimización de rendimiento
+- Accesibilidad WCAG 2.1 AA
+- Documentación completa
 
 ---
 
-## 📊 Project Metrics
+## 📊 Métricas del Proyecto
 
 ### Tests
 
 ```
-Total: 378 tests
-├── Unit: 37 (100% ✅)
-├── Integration: 227 (100% ✅)
-└── E2E: 114 (100% ✅)
+Total: ~150+ tests
+├── Unitarios: Tests de validación, utilidades y componentes
+├── Integración: Tests de APIs con base de datos real
+└── E2E: Tests de flujos completos (Playwright)
 
-E2E by Device (19 tests each):
-├── Desktop Chrome: 19 ✅
-├── Desktop Firefox: 19 ✅
-├── Desktop Safari: 19 ✅
-├── Tablet iPad: 19 ✅
-├── Mobile iPhone: 19 ✅
-└── Desktop 4K: 19 ✅
+Cobertura de dispositivos E2E:
+├── Desktop Chrome
+├── Desktop Firefox
+├── Desktop Safari
+├── Tablet iPad
+├── Mobile iPhone
+└── Desktop 4K
 ```
 
-### Code Coverage
+### Cobertura de Código
 
-| Component | Tests | Coverage |
+| Componente | Tests | Cobertura |
 |-----------|-------|----------|
-| API Auth | 27 | 85%+ |
-| API Products | 33 | 90%+ |
-| API Cart | 8 | 95%+ |
-| API Checkout | 15 | 85%+ |
-| API Admin | 114 | 80%+ |
-| Middleware | 15 | 90%+ |
-| Pages | 50 | 75%+ |
-| UI Components | 61 | 70%+ |
+| API Auth | Validaciones + endpoints | 85%+ |
+| API Products | CRUD + filtros | 90%+ |
+| API Cart | Operaciones de carrito | 95%+ |
+| API Checkout | Proceso completo | 85%+ |
+| API Admin | Panel de administración | 80%+ |
+| Middleware | Rate limiting + auth | 90%+ |
+| Validadores | Esquemas Zod | 100% |
 
-### Performance (Lighthouse)
+### Rendimiento (Lighthouse)
 
-| Page | Performance | Accessibility | Best Practices | SEO |
-|------|-------------|---------------|----------------|-----|
-| Home | 92 | 98 | 100 | 100 |
-| Products | 90 | 95 | 100 | 100 |
-| Product Detail | 88 | 96 | 100 | 100 |
-| Cart | 94 | 97 | 100 | 100 |
+| Página | Rendimiento | Accesibilidad | Mejores Prácticas | SEO |
+|--------|-------------|---------------|-------------------|-----|
+| Inicio | 92 | 98 | 100 | 100 |
+| Productos | 90 | 95 | 100 | 100 |
+| Detalle Producto | 88 | 96 | 100 | 100 |
+| Carrito | 94 | 97 | 100 | 100 |
 | Checkout | 89 | 95 | 100 | 100 |
 | Admin Dashboard | 86 | 92 | 100 | N/A |
 
@@ -115,177 +114,199 @@ E2E by Device (19 tests each):
 
 ---
 
-## 🏗️ Architecture
+## 🏗️ Arquitectura
 
-### Backend Translation System
+### Sistema de Traducción Backend
 
-The project uses **100% backend translation**:
+El proyecto utiliza **traducción 100% backend**:
 
-- **Database**: All content in English
-- **API Routes**: Transform English → Spanish
-- **Frontend**: Receives Spanish directly
-- **UI**: 100% Spanish for end users
+- **Base de Datos**: Todo el contenido en inglés
+- **Rutas API**: Transforman inglés → español
+- **Frontend**: Recibe español directamente
+- **UI**: 100% español para usuarios finales
 
 ```
-DB (English) → API Translation → Frontend (Spanish)
+BD (Inglés) → Traducción API → Frontend (Español)
 ```
 
-### Project Structure
+### Tipos de Alertas (10 tipos)
+
+1. **LOW_STOCK** - Stock bajo
+2. **OUT_OF_STOCK** - Sin stock
+3. **ORDER_DELAYED** - Pedido retrasado
+4. **PAYMENT_FAILED** - Pago fallido
+5. **SYSTEM_ERROR** - Error del sistema
+6. **NEW_ORDER** - Nuevo pedido
+7. **NEGATIVE_REVIEW** - Reseña negativa
+8. **HIGH_VALUE_ORDER** - Pedido de alto valor
+9. **NEW_USER** - Nuevo usuario
+10. **COUPON_EXPIRING** - Cupón próximo a expirar
+
+### Métodos de Pago
+
+- **CARD** - Tarjeta de crédito/débito
+- **PAYPAL** - PayPal
+- **BIZUM** - Bizum
+- **TRANSFER** - Transferencia bancaria
+
+### Estructura del Proyecto
 
 ```
 3d-print-tfm/
 ├── prisma/
-│   ├── schema.prisma      # 18 data models
-│   └── seed.ts            # Initial data from CSV
+│   ├── schema.prisma         # 24+ modelos de datos
+│   └── seed.ts               # Datos iniciales desde CSV
 ├── src/
-│   ├── app/               # Next.js App Router
-│   │   ├── (auth)/         # Login, Register (unified /auth)
-│   │   ├── (shop)/          # Public shop
-│   │   ├── (admin)/         # Admin panel (13 modules)
-│   │   └── api/             # API routes (50+ endpoints)
-│   ├── components/
-│   │   ├── ui/              # Base components
-│   │   ├── shop/            # Shop components
-│   │   ├── admin/           # Admin components
-│   │   └── layout/          # Header, Footer, Navigation
+│   ├── app/                  # Next.js App Router
+│   │   ├── api/              # Rutas API (62+ endpoints)
+│   │   ├── admin/            # Panel de administración
+│   │   └── [páginas]         # Páginas de la aplicación
+│   ├── components/           # Componentes React
+│   │   ├── ui/               # Componentes base
+│   │   ├── admin/            # Componentes de admin
+│   │   ├── shop/             # Componentes de tienda
+│   │   └── layout/           # Header, Footer, Navegación
 │   ├── lib/
-│   │   ├── db/              # Prisma + connection
-│   │   ├── validators/      # Zod schemas
-│   │   ├── i18n/           # Translation system
-│   │   └── errors/          # Error handling
-│   └── hooks/               # Custom React hooks
+│   │   ├── db/               # Prisma + conexión
+│   │   ├── validators/         # Esquemas Zod
+│   │   ├── i18n/             # Sistema de traducción
+│   │   └── errors/           # Manejo de errores
+│   └── hooks/                # Hooks React personalizados
 ├── tests/
-│   ├── unit/                # Unit tests (37)
-│   ├── integration/         # Integration tests (227)
-│   └── e2e/                 # E2E tests (114)
-├── docs/                    # Public documentation (English)
-└── private/                 # Private documentation (Spanish OK)
+│   ├── unit/                 # Tests unitarios
+│   ├── integration/          # Tests de integración
+│   └── e2e/                  # Tests E2E con Playwright
+├── docs/                     # Documentación del proyecto
+└── private/                  # Documentación privada
 ```
 
 ---
 
-## 🎨 Implemented Features
+## 🎨 Funcionalidades Implementadas
 
-### Public (Shop)
-- ✅ Home with hero and featured products
-- ✅ Catalog with filters (category, material, price, stock)
-- ✅ Text search
-- ✅ Pagination and sorting
-- ✅ Product detail with gallery and reviews
-- ✅ Persistent cart with coupon support
-- ✅ Checkout with simulated payments
-- ✅ FAQ public page
-- ✅ Unified auth `/auth` with tabs
+### Públicas (Tienda)
+- ✅ Inicio con hero y productos destacados
+- ✅ Catálogo con filtros (categoría, material, precio, stock)
+- ✅ Búsqueda por texto
+- ✅ Paginación y ordenamiento
+- ✅ Detalle de producto con galería y reseñas
+- ✅ Carrito persistente con soporte de cupones
+- ✅ Checkout con pagos simulados
+- ✅ Página FAQ pública
+- ✅ Autenticación unificada `/auth` con pestañas
 
-### Admin Panel (13 Modules)
-- ✅ Dashboard with metrics
-- ✅ Complete product CRUD with images
-- ✅ Category management with images
-- ✅ Order management with states
-- ✅ Client management
-- ✅ Inventory with movements
-- ✅ PDF invoicing system
-- ✅ Automatic alerts
-- ✅ Customer messaging
-- ✅ Coupon management
-- ✅ Review moderation
-- ✅ FAQ management
-- ✅ Shipping zones
-- ✅ Site configuration
+### Panel de Administración (15+ Módulos)
+- ✅ Dashboard con métricas en tiempo real
+- ✅ CRUD completo de productos con imágenes
+- ✅ Gestión de categorías con imágenes
+- ✅ Gestión de pedidos con estados
+- ✅ Gestión de clientes
+- ✅ Inventario con movimientos
+- ✅ Sistema de facturación PDF
+- ✅ Alertas automáticas (10 tipos)
+- ✅ Mensajería con clientes
+- ✅ Gestión de cupones
+- ✅ Moderación de reseñas
+- ✅ Gestión de FAQs
+- ✅ Zonas de envío
+- ✅ Configuración del sitio
+- ✅ Panel de alertas en tiempo real
 
-### User Account
-- ✅ Registration/Login (unified /auth page)
-- ✅ Editable profile
-- ✅ Order history with invoices
-- ✅ Password change
-- ✅ Address management
-- ✅ My Reviews
-- ✅ Role-based navigation
+### Cuenta de Usuario
+- ✅ Registro/Login (página /auth unificada)
+- ✅ Perfil editable
+- ✅ Historial de pedidos con facturas
+- ✅ Cambio de contraseña
+- ✅ Gestión de direcciones
+- ✅ Mis Reseñas
+- ✅ Navegación basada en roles
 
 ---
 
-## 🔐 Security
+## 🔐 Seguridad
 
-### Authentication
-- JWT with refresh tokens
-- Sessions httpOnly, secure, sameSite
-- Rate limiting on login
-- Password hashing bcrypt (salt 12)
+### Autenticación
+- JWT con tokens de refresco
+- Sesiones httpOnly, secure, sameSite
+- Rate limiting en login
+- Hash de contraseñas bcrypt (salt 12)
 
-### Authorization
+### Autorización
 - RBAC (CUSTOMER/ADMIN)
-- Middleware protection
-- Resource ownership verification
+- Protección por middleware
+- Verificación de propiedad de recursos
 
-### Validation
-- Zod for all inputs
-- Input sanitization
-- SQL Injection prevention (Prisma)
-- XSS prevention
+### Validación
+- Zod para todas las entradas
+- Sanitización de inputs
+- Prevención de inyección SQL (Prisma)
+- Prevención de XSS
 
-### Security Headers
+### Headers de Seguridad
 - X-Frame-Options: DENY
 - X-Content-Type-Options: nosniff
-- Content-Security-Policy configured
+- Content-Security-Policy configurado
 - Referrer-Policy
 
 ---
 
-## 📦 Technologies
+## 📦 Tecnologías
 
-| Category | Technology | Version |
+| Categoría | Tecnología | Versión |
 |-----------|------------|---------|
 | Framework | Next.js | 14.2.35 |
 | React | React | 18 |
 | ORM | Prisma | 5.22.0 |
 | Auth | NextAuth.js | 4.24.13 |
-| DB | PostgreSQL (Supabase) | 15+ |
+| BD | PostgreSQL (Supabase) | 15+ |
 | Testing | Vitest + Playwright | 1.6.1 |
-| Styling | Tailwind CSS | 3.4.1 |
-| Validation | Zod | 3.23.8 |
+| Estilos | Tailwind CSS | 3.4.1 |
+| Validación | Zod | 3.23.8 |
+| PDF | @react-pdf/renderer | 4.3.2 |
+| Pagos | Stripe + PayPal | Latest |
 
 ---
 
-## 📚 Documentation
+## 📚 Documentación
 
-### Public (docs/)
-- `PROJECT-SUMMARY.md` - This file
-- `TESTING.md` - Testing guide
-- `10-deployment-guide.md` - Deployment instructions
-- `01-09*.md` - Academic documentation
+### Pública (docs/)
+- `PROJECT-SUMMARY.md` - Este archivo
+- `TESTING.md` - Guía de testing
+- `10-deployment-guide.md` - Instrucciones de despliegue
+- `01-09*.md` - Documentación académica
 
-### Private (private/)
-- `README.es.md` - Spanish project summary
-- `01-canvas-modelo-negocio.md` - Business model
-- `02-analisis-entidades.md` - Data model
-- `03-procesos-negocio.md` - Business processes
-- `04-casos-uso.md` - Use cases
-- `05-estrategia-monetizacion.md` - Monetization
-- `06-segmentos-clientes.md` - Customer segments
-- `07-analisis-competitivo.md` - Competitive analysis
-- `08-hoja-ruta-implementacion.md` - Implementation roadmap
-- `09-auditoria-calidad.md` - Quality audit
+### Privada (private/)
+- `README.es.md` - Resumen del proyecto en español
+- `01-canvas-modelo-negocio.md` - Modelo de negocio
+- `02-analisis-entidades.md` - Modelo de datos
+- `03-procesos-negocio.md` - Procesos de negocio
+- `04-casos-uso.md` - Casos de uso
+- `05-estrategia-monetizacion.md` - Monetización
+- `06-segmentos-clientes.md` - Segmentos de clientes
+- `07-analisis-competitivo.md` - Análisis competitivo
+- `08-hoja-ruta-implementacion.md` - Hoja de ruta
+- `09-auditoria-calidad.md` - Auditoría de calidad
 
 ---
 
-## 🚀 Deployment
+## 🚀 Despliegue
 
-### Recommended Options
+### Opciones Recomendadas
 
 1. **Vercel** (Frontend)
-   - Optimized Next.js hosting
-   - Automatic CI/CD
-   - Preview deployments
+   - Hosting optimizado para Next.js
+   - CI/CD automático
+   - Deployments de preview
 
-2. **Supabase** (Database)
-   - Managed PostgreSQL
+2. **Supabase** (Base de Datos)
+   - PostgreSQL gestionado
    - Connection pooling
-   - Automatic backups
+   - Backups automáticos
 
-### Commands
+### Comandos
 
 ```bash
-# Development
+# Desarrollo
 npm run dev
 
 # Tests
@@ -293,67 +314,72 @@ npm run test:unit
 npm run test:integration
 npm run test:e2e
 
-# Production
+# Producción
 npm run build
 npm start
 ```
 
 ---
 
-## 📈 Development Statistics
+## 📈 Estadísticas de Desarrollo
 
-- **Total time**: ~8 weeks
-- **Lines of code**: ~20,000+
+- **Tiempo total**: ~8 semanas
+- **Líneas de código**: ~20,000+
 - **Commits**: 50+
-- **Files**: 200+
-- **Tests**: 378
-- **Coverage**: 80%+ configured
+- **Archivos**: 315+ (git)
+- **Archivos fuente**: 166 (TypeScript/TSX)
+- **Tests**: 150+
+- **Cobertura**: 80%+ configurado
+- **Modelos BD**: 24+
+- **Rutas API**: 62+
+- **Endpoints Admin**: 15+ páginas
 
 ---
 
-## 🔄 Recent Changes (Complete Implementation)
+## 🔄 Cambios Recientes (Implementación Completa)
 
-### April 2026: All Modules Completed
+### Abril 2026: Todos los Módulos Completados
 
-**New Admin Modules:**
-- ✅ Categories with image upload
-- ✅ Coupons (PERCENTAGE, FIXED, FREE_SHIPPING)
-- ✅ Reviews with moderation
-- ✅ FAQs public and admin
-- ✅ Shipping zones by postal code
-- ✅ Site configuration
-- ✅ Inventory management
+**Nuevos Módulos de Administración:**
+- ✅ Categorías con subida de imágenes
+- ✅ Cupones (PERCENTAGE, FIXED, FREE_SHIPPING)
+- ✅ Reseñas con moderación
+- ✅ FAQs públicas y de admin
+- ✅ Zonas de envío por código postal
+- ✅ Configuración del sitio
+- ✅ Gestión de inventario
+- ✅ Sistema de alertas en tiempo real
 
-**New User Features:**
-- ✅ My Reviews page
-- ✅ Coupon application
-- ✅ Shipping calculation
-- ✅ FAQs access
+**Nuevas Funcionalidades de Usuario:**
+- ✅ Página Mis Reseñas
+- ✅ Aplicación de cupones
+- ✅ Cálculo de envío
+- ✅ Acceso a FAQs
 
 **Testing:**
-- ✅ 378 tests passing
-- ✅ Multi-device E2E coverage
-- ✅ 80%+ code coverage
+- ✅ Tests pasando
+- ✅ Cobertura multi-dispositivo E2E
+- ✅ Cobertura de código 80%+
 
 ---
 
-## 🎓 Credits
+## 🎓 Créditos
 
-**Developed by**: Rejane Rodrigues  
-**Title**: Master's Thesis  
-**Institution**: University  
-**Year**: 2026
+**Desarrollado por**: Rejane Rodrigues  
+**Título**: Trabajo Final de Máster  
+**Institución**: Universidad  
+**Año**: 2026
 
-## 📄 License
+## 📄 Licencia
 
-Academic project - Educational use only.
+Proyecto académico - Uso educativo únicamente.
 
 ---
 
-**Status**: ✅ Completed and ready for delivery
+**Estado**: ✅ Completado y listo para entrega
 
-**Next steps**:
-1. [ ] Deploy to Vercel (production deployment)
-2. [ ] Create TFM presentation
-3. [ ] Live demo
-4. [ ] Printed documentation delivery
+**Próximos pasos**:
+1. [ ] Desplegar en Vercel (despliegue en producción)
+2. [ ] Crear presentación del TFM
+3. [ ] Demo en vivo
+4. [ ] Entrega de documentación impresa

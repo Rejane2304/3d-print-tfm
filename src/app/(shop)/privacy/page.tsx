@@ -513,7 +513,7 @@ const privacySections: PrivacySection[] = [
         <p className="mb-4 text-gray-700">
           Al acceder a nuestra web, se te mostrará un banner de cookies donde podrás
           configurar tus preferencias. Puedes modificar estas preferencias en cualquier
-          momento desde el enlace "Configuración de cookies" en el footer.
+          momento desde el enlace &quot;Configuración de cookies&quot; en el footer.
         </p>
         <p className="text-gray-700">
           Para más información, consulta nuestra{" "}

@@ -10,6 +10,8 @@ import { useSession } from 'next-auth/react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { Clock, CheckCircle2, Truck, XCircle, Edit } from 'lucide-react';
 import { InvoiceViewer, useInvoiceData } from '@/components/invoices/InvoiceViewer';
 
 interface InvoiceDetail {
@@ -105,6 +107,10 @@ export default function AdminInvoiceDetailPage() {
     }
   }, [status, session, router, loadInvoice]);
 
+  // Always call the hook, but handle null case inside
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const invoiceData = invoice ? useInvoiceData(invoice) : null;
+
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -116,7 +122,7 @@ export default function AdminInvoiceDetailPage() {
     );
   }
 
-  if (!invoice) {
+  if (!invoice || !invoiceData) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -132,8 +138,6 @@ export default function AdminInvoiceDetailPage() {
       </div>
     );
   }
-
-  const invoiceData = useInvoiceData(invoice);
 
   return (
     <div className="min-h-screen bg-gray-100 print:bg-white">

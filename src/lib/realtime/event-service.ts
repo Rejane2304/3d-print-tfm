@@ -1,5 +1,12 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
+import type { Server as SocketIOServer } from 'socket.io';
+
+// Extend global to include Socket.IO server instance
+declare global {
+  // eslint-disable-next-line no-var
+  var io: SocketIOServer | undefined;
+}
 
 export type EventType = 
   | 'order:new'
@@ -13,6 +20,19 @@ export type EventType =
 
 export interface EventPayload {
   [key: string]: unknown;
+}
+
+// Interface for EventStore record from Prisma
+interface EventStoreRecord {
+  id: string;
+  type: string;
+  payload: Prisma.JsonValue;
+  room: string;
+  userId: string | null;
+  timestamp: Date;
+  delivered: boolean;
+  deliveredAt: Date | null;
+  expiresAt: Date;
 }
 
 export async function emitEvent(
@@ -37,8 +57,8 @@ export async function emitEvent(
 
     // Also emit to any connected WebSocket clients (if server-side)
     // This will be handled by the socket.io server
-    if (typeof global !== 'undefined' && (global as any).io) {
-      const io = (global as any).io;
+    if (typeof global !== 'undefined' && global.io) {
+      const io = global.io;
       io.to(room).emit(type, payload);
     }
   } catch (error) {
@@ -63,9 +83,9 @@ export async function getPendingEvents(
     },
     orderBy: { timestamp: 'asc' },
     take: 100
-  });
+  }) as EventStoreRecord[];
 
-  return events.map(e => ({
+  return events.map((e: EventStoreRecord) => ({
     id: e.id,
     type: e.type,
     payload: e.payload as EventPayload,

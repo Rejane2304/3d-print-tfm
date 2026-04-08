@@ -12,10 +12,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import {
   Package,
-  Clock,
-  CheckCircle2,
-  Truck,
-  XCircle,
   Loader2,
   AlertCircle,
   ArrowLeft,

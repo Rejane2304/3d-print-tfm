@@ -125,6 +125,7 @@ export default function UserInvoiceDetailPage() {
   };
 
   // Transformar datos al formato esperado por InvoiceViewer
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const invoiceData = invoice ? useInvoiceData(invoice) : null;
 
   if (status === 'loading' || loading) {

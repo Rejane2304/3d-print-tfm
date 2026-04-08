@@ -10,8 +10,10 @@ interface DashboardMetricsUpdaterProps {
 
 export default function DashboardMetricsUpdater({ onMetricsUpdate }: DashboardMetricsUpdaterProps) {
   const { data: session } = useSession();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const userRole = session?.user?.rol;
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { events, pendingEvents, acknowledgeEvents } = useAdminRealTime({
     onEvent: (event) => {
       // Actualizar métricas cuando hay eventos relevantes

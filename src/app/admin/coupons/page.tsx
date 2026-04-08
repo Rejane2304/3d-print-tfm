@@ -18,7 +18,6 @@ import {
   Percent,
   Euro,
   Truck,
-  Calendar,
   Activity,
 } from 'lucide-react';
 import { DataTable, Column, BulkAction } from '@/components/ui/DataTable';
@@ -69,6 +68,7 @@ export default function AdminCouponsPage() {
     }
   }, [status, session, router]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const loadCoupons = async () => {
     try {
       setLoading(true);
@@ -144,7 +144,6 @@ export default function AdminCouponsPage() {
 
   // Estadísticas
   const activeCoupons = coupons.filter(c => c.estado === 'Activo').length;
-  const expiredCoupons = coupons.filter(c => c.estado === 'Expirado').length;
   const totalUses = coupons.reduce((sum, c) => sum + c.usosActuales, 0);
   const percentageCoupons = coupons.filter(c => c.tipoRaw === 'PERCENTAGE').length;
 
@@ -242,7 +241,6 @@ export default function AdminCouponsPage() {
         const isExpired = date < now;
         return (
           <div className="flex items-center gap-1">
-            <Calendar className={`h-3 w-3 flex-shrink-0 ${isExpired ? 'text-red-400' : 'text-gray-400'}`} />
             <span className={`text-xs ${isExpired ? 'text-red-600' : 'text-gray-600'}`}>
               {date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' })}
             </span>
@@ -401,7 +399,7 @@ export default function AdminCouponsPage() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-purple-100 rounded-lg">
-                <Calendar className="h-5 w-5 text-purple-600" />
+                <Activity className="h-5 w-5 text-purple-600" />
               </div>
               <div>
                 <p className="text-sm text-gray-500">Usos Totales</p>

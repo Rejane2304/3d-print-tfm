@@ -189,7 +189,6 @@ export async function GET(
     // Generar PDF usando Puppeteer
     const pdfBuffer = await generatePDF({
       html,
-      filename: `factura-${factura.invoiceNumber}.pdf`,
     });
 
     // Retornar el PDF como descarga

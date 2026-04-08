@@ -15,13 +15,7 @@ interface AppliedCoupon {
   freeShipping: boolean;
 }
 
-interface CouponSummary {
-  subtotal: number;
-  discount: number;
-  discountType: 'amount' | 'percentage' | 'free_shipping';
-  freeShipping: boolean;
-  totalAfterDiscount: number;
-}
+
 
 export function useCoupon() {
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);

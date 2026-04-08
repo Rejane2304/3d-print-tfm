@@ -7,10 +7,9 @@ import { getCompanyDataForInvoice, getDefaultVatRate } from '@/lib/site-config';
 
 interface PDFOptions {
   html: string;
-  filename: string;
 }
 
-export async function generatePDF({ html, filename }: PDFOptions): Promise<Buffer> {
+export async function generatePDF({ html }: PDFOptions): Promise<Buffer> {
   // Launch browser
   const browser = await puppeteer.launch({
     headless: true,

@@ -4,7 +4,7 @@
  */
 'use client';
 
-import { useState } from 'react';
+
 import { ShoppingCart, ArrowRight, Loader2, Tag } from 'lucide-react';
 import { CouponInput } from './CouponInput';
 

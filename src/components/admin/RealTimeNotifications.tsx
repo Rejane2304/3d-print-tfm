@@ -20,8 +20,10 @@ export default function RealTimeNotifications() {
   const [showPanel, setShowPanel] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const userId = session?.user?.id;
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { isConnected, events } = useAdminRealTime({
     onEvent: (event) => {
       const notification: Notification = {

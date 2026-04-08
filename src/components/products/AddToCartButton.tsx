@@ -27,7 +27,7 @@ interface AddToCartButtonProps {
 }
 
 export default function AddToCartButton({ productId, stock, product }: AddToCartButtonProps) {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const { addItem } = useCart();
   
   // Check if user is admin - admins cannot purchase

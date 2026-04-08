@@ -4,7 +4,6 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
-import { translateProductName } from '@/lib/i18n';
 
 // GET - Obtener reseñas de un producto
 export async function GET(

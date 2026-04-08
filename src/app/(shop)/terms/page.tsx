@@ -46,11 +46,11 @@ const termsSections: TermsSection[] = [
       <div className="space-y-4">
         <p>
           Las presentes condiciones generales de venta se aplican a todas las ventas de productos realizadas
-          a través del sitio web 3dprint.com, propiedad de 3D Print (en adelante, "la Empresa"),
+          a través del sitio web 3dprint.com, propiedad de 3D Print (en adelante, &quot;la Empresa&quot;),
           con domicilio social en Calle Admin 123, 08001 Barcelona, Barcelona, España.
         </p>
         <p>
-          Al realizar un pedido en nuestra tienda online, el cliente (en adelante, "el Cliente") acepta 
+          Al realizar un pedido en nuestra tienda online, el cliente (en adelante, &quot;el Cliente&quot;) acepta 
           sin reservas estas condiciones generales de venta, las cuales prevalecen sobre cualquier otra 
           documentación o comunicación previa, ya sea verbal o escrita.
         </p>

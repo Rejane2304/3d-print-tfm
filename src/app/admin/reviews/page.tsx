@@ -12,7 +12,6 @@ import {
   MessageSquare, 
   Loader2,
   AlertCircle,
-  Edit,
   Trash2,
   CheckCircle2,
   XCircle,
@@ -68,6 +67,7 @@ export default function AdminReviewsPage() {
       }
       loadResenas();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, session, router]);
 
   const loadResenas = async () => {

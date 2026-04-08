@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Loader2, User, ShoppingBag, DollarSign, Calendar, Eye, Trash2 } from 'lucide-react';
+import { Loader2, User, ShoppingBag, DollarSign, Eye, Trash2 } from 'lucide-react';
 import { DataTable, Column, BulkAction } from '@/components/ui/DataTable';
 
 interface Client {

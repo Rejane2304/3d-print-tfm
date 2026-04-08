@@ -9,7 +9,6 @@ import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
-import { translateFAQ } from '@/lib/i18n';
 
 // Mapeo de categorías en inglés → español
 const categoryTranslations: Record<string, string> = {
@@ -68,16 +67,13 @@ export async function GET() {
     // Formatear para el panel admin (traducir inglés → español)
     const faqsFormateadas = faqs.map((faq) => {
       const ref = faq.id.slice(0, 8).toUpperCase();
-      const preguntaTraducida = translateFAQ(ref, 'question') || faq.question;
-      const respuestaTraducida = translateFAQ(ref, 'answer') || faq.answer;
-      const categoriaTraducida = translateFAQ(ref, 'category') || categoryTranslations[faq.category] || faq.category;
 
       return {
         id: faq.id,
         _ref: ref,
-        pregunta: preguntaTraducida,
-        respuesta: respuestaTraducida,
-        categoria: categoriaTraducida,
+        pregunta: faq.question,
+        respuesta: faq.answer,
+        categoria: categoryTranslations[faq.category] || faq.category,
         ordenVisualizacion: faq.displayOrder,
         activo: faq.isActive,
         creadoEn: faq.createdAt,

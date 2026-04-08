@@ -144,17 +144,54 @@ Cobertura: 80%+ objetivo alcanzado
 - **Fix**: Sistema de seed con datos reales
 - **Fix**: Traducción completa de enums y estados
 
-### 📊 Estadísticas del Proyecto
+---
 
-- **Líneas de código**: ~20,000+
-- **Archivos**: 200+
-- **Commits**: 50+
-- **Tiempo de desarrollo**: ~8 semanas
-- **Tests**: 378 (100% passing)
+## [1.0.1] - 2026-04-08
 
-### 🎯 Estado
+### 🎨 Mejoras de UI/UX
 
-**✅ COMPLETADO Y LISTO PARA ENTREGA**
+- **Catálogo de Productos**: Rediseño moderno con nueva hero section y mejoras en ProductCard
+- **Notificaciones en Tiempo Real**: Implementación de componente de notificaciones con badge y panel deslizable
+- **DataTable Responsive**: Todas las tablas del panel de administración ahora son completamente responsive
+- **ProductImageGallery**: Mejoras para prevenir el recorte de imágenes de productos
+
+### 🔔 Sistema de Alertas
+
+- **Nuevos tipos de alertas**: Implementación de 5 nuevos tipos de alertas automáticas:
+  - `NEW_ORDER` - Notificación de nuevos pedidos
+  - `NEGATIVE_REVIEW` - Alerta de reseñas negativas
+  - `HIGH_VALUE_ORDER` - Alerta de pedidos de alto valor
+  - `NEW_USER` - Notificación de nuevos usuarios registrados
+  - `COUPON_EXPIRING` - Alerta de cupones próximos a expirar
+- **Triggers automáticos**: Sistema de disparadores automáticos para generar alertas basado en eventos del sistema
+
+### 🔧 Correcciones Técnicas
+
+- **Fix API de Reseñas**: Corrección del método GET en el endpoint de reseñas de usuario
+- **Fix Métodos de Pago**: Corrección en la visualización de "Transferencia" y "Bizum" en el checkout
+- **Fix Traducción de Cupones**: Mejora en la visualización de cupones (ej: "5 € SAVE5")
+- **Fix Modal de Facturas**: Mejoras en el texto del modal de disponibilidad de facturas
+
+### 📄 Páginas Legales
+
+Creación de todas las páginas legales requeridas:
+- **Términos y Condiciones** (`/terms`)
+- **Política de Privacidad** (`/privacy`)
+- **Política de Cookies** (`/cookies`)
+- **Aviso Legal** (`/legal`)
+
+### ⚡ Responsive Design
+
+- **Todas las tablas de administración**: Adaptación responsive completa para:
+  - Tabla de productos
+  - Tabla de pedidos
+  - Tabla de clientes
+  - Tabla de facturas
+  - Tabla de cupones
+  - Tabla de reseñas
+  - Tabla de FAQs
+  - Tabla de envíos
+  - Tabla de inventario
 
 ---
 

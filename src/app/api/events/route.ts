@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
-import { translateErrorMessage } from '@/lib/i18n';
+// translateErrorMessage removed - unused
 
 // GET /api/events - Obtener eventos pendientes
 export async function GET(req: NextRequest) {

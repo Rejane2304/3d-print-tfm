@@ -9,7 +9,7 @@
  */
 'use client';
 
-import React, { useState, useMemo, useCallback, useId } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   Search,
   ChevronLeft,
@@ -18,7 +18,6 @@ import {
   ChevronDown,
   Download,
   Loader2,
-  Trash2,
 } from 'lucide-react';
 
 // Types
@@ -100,8 +99,6 @@ export function DataTable<T extends object>({
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [isExporting, setIsExporting] = useState(false);
   const [bulkActionLoading, setBulkActionLoading] = useState<string | null>(null);
-
-  const uniqueId = useId();
 
   // Reset page when search changes
   React.useEffect(() => {
@@ -370,7 +367,7 @@ export function DataTable<T extends object>({
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {paginatedData.map((row, index) => {
+              {paginatedData.map((row) => {
                 const rowId = String(row[rowKey as keyof T]);
                 const isSelected = selectedRows.has(rowId);
 

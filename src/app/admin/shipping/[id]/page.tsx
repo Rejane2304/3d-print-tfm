@@ -64,6 +64,7 @@ export default function EditarZonaEnvioPage() {
       }
       loadZone();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, session, router, zoneId]);
 
   const loadZone = async () => {

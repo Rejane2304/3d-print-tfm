@@ -20,10 +20,7 @@ import {
   Clock,
   Trash2,
   Eye,
-  RefreshCw,
-  Wrench,
-  CheckSquare,
-  Square
+  RefreshCw
 } from 'lucide-react';
 import { DataTable, Column, BulkAction } from '@/components/ui/DataTable';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
@@ -292,7 +289,7 @@ export default function AdminAlertsPage() {
       header: 'Tipo',
       sortable: true,
       className: '',
-      render: (value: unknown, row) => {
+      render: (value: unknown) => {
         const typeValue = value as string;
         const TipoIcon = typeIcons[typeValue] || Bell;
         return (

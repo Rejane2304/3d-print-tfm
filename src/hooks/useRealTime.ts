@@ -35,7 +35,6 @@ export function useRealTime(options: UseRealTimeOptions = {}) {
   const lastEventIdRef = useRef<string | null>(null);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const userId = session?.user?.id;
-  const userRole = session?.user?.rol;
 
   // Polling function to fetch events from server
   const pollEvents = useCallback(async () => {
@@ -83,7 +82,7 @@ export function useRealTime(options: UseRealTimeOptions = {}) {
       setIsConnected(false);
       options.onDisconnect?.();
     }
-  }, [userId, options.eventTypes, options.onEvent, options.onConnect, options.onDisconnect]);
+  }, [userId, options]);
 
   // Start polling on mount
   useEffect(() => {

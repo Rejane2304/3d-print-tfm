@@ -13,8 +13,7 @@ import {
   Mail, 
   Phone, 
   MapPin, 
-  Heart,
-  HelpCircle
+  Heart
 } from 'lucide-react';
 
 // Iconos SVG para redes sociales

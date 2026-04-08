@@ -9,7 +9,6 @@ import { StarRating } from '@/components/ui/StarRating';
 import { AlertCircle, Loader2 } from 'lucide-react';
 
 interface ReviewFormProps {
-  productId: string;
   productName: string;
   onSubmit: (data: { rating: number; title: string; comment: string }) => Promise<void>;
   onCancel?: () => void;
@@ -22,7 +21,6 @@ interface ReviewFormProps {
 }
 
 export function ReviewForm({
-  productId,
   productName,
   onSubmit,
   onCancel,

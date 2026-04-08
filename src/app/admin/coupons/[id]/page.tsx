@@ -81,6 +81,7 @@ export default function EditarCuponPage() {
     if (status === 'authenticated' && couponId) {
       loadCoupon();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, session, router, couponId]);
 
   const loadCoupon = useCallback(async () => {

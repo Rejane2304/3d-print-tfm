@@ -5,7 +5,6 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Head from 'next/head';
 import { 
@@ -32,7 +31,7 @@ interface Category {
 }
 
 export default function FAQsPage() {
-  const router = useRouter();
+  // Router removed - unused
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

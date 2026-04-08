@@ -250,52 +250,7 @@ export const errorMessages: TranslationMap = {
   'Cliente eliminado': 'Cliente eliminado',
 };
 
-// ============================================================================
-// FAQ TRANSLATIONS
-// ============================================================================
-
-export const faqTranslations: Record<string, { question: string; answer: string; category: string }> = {
-  'FAQ-0001': {
-    question: '¿Qué materiales usan para imprimir?',
-    answer: 'Usamos principalmente PLA (plástico biodegradable a base de plantas) y PETG (más resistente y tolerante al calor). Ambos son seguros y ecológicos.',
-    category: 'Materiales'
-  },
-  'FAQ-0002': {
-    question: '¿Cuánto tarda el envío?',
-    answer: 'El envío estándar tarda 3-5 días hábiles. El envío express se entrega en 1-2 días hábiles. Los pedidos superiores a 50€ califican para envío gratuito.',
-    category: 'Envío'
-  },
-  'FAQ-0003': {
-    question: '¿Puedo devolver o cambiar un producto?',
-    answer: '¡Sí! Tienes 14 días desde la entrega para devolver cualquier producto en su estado original. Contáctanos en info@3dprint.com para iniciar una devolución.',
-    category: 'Devoluciones'
-  },
-  'FAQ-0004': {
-    question: '¿Aceptan pedidos personalizados?',
-    answer: 'Actualmente solo ofrecemos productos de nuestro catálogo fijo. Los pedidos personalizados podrían estar disponibles en el futuro.',
-    category: 'Pedidos'
-  },
-  'FAQ-0005': {
-    question: '¿Cómo debo cuidar mis objetos impresos en 3D?',
-    answer: 'Mantén alejados de la luz solar directa y fuentes de calor (especialmente los objetos de PLA). Limpia con un paño húmedo. Evita sumergir en agua.',
-    category: 'Cuidado'
-  },
-  'FAQ-0006': {
-    question: '¿Qué métodos de pago aceptan?',
-    answer: 'Aceptamos tarjetas de crédito/débito (Visa, Mastercard) y PayPal. Todos los pagos se procesan de forma segura a través de Stripe.',
-    category: 'Pagos'
-  },
-  'FAQ-0007': {
-    question: '¿Son seguros sus productos para niños?',
-    answer: 'La mayoría de nuestros productos son aptos para niños mayores de 3 años. Consulta las descripciones individuales de productos para recomendaciones específicas de edad.',
-    category: 'Seguridad'
-  },
-  'FAQ-0008': {
-    question: '¿Hacen envíos internacionales?',
-    answer: 'Actualmente solo enviamos dentro de España. El envío internacional estará disponible pronto.',
-    category: 'Envío'
-  }
-};
+// FAQ translations removed - unused, data comes from database
 
 // ============================================================================
 // COUPON TRANSLATIONS
@@ -374,13 +329,7 @@ export const alertTranslations: Record<string, { title: string; message: string 
   }
 };
 
-// ============================================================================
-// FAQ TRANSLATION HELPERS
-// ============================================================================
-
-export function translateFAQ(ref: string, field: 'question' | 'answer' | 'category'): string {
-  return faqTranslations[ref]?.[field] || '';
-}
+// FAQ translation helpers removed - unused
 
 export function translateShipping(ref: string, field: 'name' | 'description'): string {
   return shippingTranslations?.[ref]?.[field] || '';

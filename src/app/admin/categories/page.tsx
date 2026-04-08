@@ -16,7 +16,6 @@ import {
   AlertCircle,
   Edit,
   Trash2,
-  Eye,
   ImageIcon,
 } from 'lucide-react';
 import { DataTable, Column, BulkAction } from '@/components/ui/DataTable';
