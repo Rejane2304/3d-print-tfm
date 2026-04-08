@@ -10,6 +10,7 @@ import { prisma } from '@/lib/db/prisma';
 import {
   translateMovementType,
   translateErrorMessage,
+  translateProductName,
 } from '@/lib/i18n';
 
 export async function GET(
@@ -114,7 +115,7 @@ export async function GET(
       success: true,
       producto: {
         id: product.id,
-        nombre: product.name,
+        nombre: translateProductName(product.slug),
         slug: product.slug,
         stockActual: product.stock,
         imagen: product.images[0]?.url || null,

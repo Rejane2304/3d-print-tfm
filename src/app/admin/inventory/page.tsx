@@ -14,17 +14,17 @@ import { DataTable, Column, BulkAction } from '@/components/ui/DataTable';
 
 interface Product {
   id: string;
-  name: string;
+  nombre: string;
   slug: string;
   stock: number;
   minStock: number;
   price: number;
-  category: string;
+  categoria: string;
   isActive: boolean;
   stockStatus: 'normal' | 'low' | 'critical';
   movementCount: number;
   lastMovementAt: string | null;
-  lastMovementType: string | null;
+  ultimoMovimientoTipo: string | null;
   imagenes?: Array<{ url: string }>;
 }
 
@@ -160,7 +160,7 @@ export default function AdminInventoryPage() {
 
   const columns: Column<Product>[] = [
     {
-      key: 'name',
+      key: 'nombre',
       header: 'Producto',
       sortable: true,
       render: (value, row) => (
@@ -169,7 +169,7 @@ export default function AdminInventoryPage() {
             <div className="flex-shrink-0 h-10 w-10 bg-gray-100 flex items-center justify-center overflow-hidden">
               <Image
                 src={row.imagenes[0].url}
-                alt={row.name}
+                alt={row.nombre}
                 width={40}
                 height={40}
                 className="object-cover"
@@ -188,7 +188,7 @@ export default function AdminInventoryPage() {
       ),
     },
     {
-      key: 'category',
+      key: 'categoria',
       header: 'Categoría',
       sortable: true,
     },
@@ -340,7 +340,7 @@ export default function AdminInventoryPage() {
           columns={columns}
           rowKey="id"
           searchable
-          searchKeys={['name', 'category']}
+          searchKeys={['nombre', 'categoria']}
           searchPlaceholder="Buscar productos..."
           pagination
           selectable
@@ -365,7 +365,7 @@ export default function AdminInventoryPage() {
             <form onSubmit={handleAdjustment}>
               <div className="mb-4">
                 <div className="block text-sm font-medium text-gray-700 mb-1">Producto</div>
-                <div className="text-gray-900 font-medium">{adjustingProduct.name}</div>
+                <div className="text-gray-900 font-medium">{adjustingProduct.nombre}</div>
                 <div className="text-sm text-gray-500">Stock actual: {adjustingProduct.stock}</div>
               </div>
               
