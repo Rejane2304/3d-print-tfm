@@ -143,7 +143,10 @@ export async function POST(req: NextRequest) {
     const data = productSchema.parse(body);
 
     // Generar slug
+    // Normalize accented characters first, then convert to lowercase and replace special chars
     const slug = data.name
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');

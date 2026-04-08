@@ -206,7 +206,10 @@ export async function PUT(
     const data = updateProductSchema.parse(body);
 
     // Generate new slug if name changed
+    // Normalize accented characters first, then convert to lowercase and replace special chars
     const newSlug = data.name
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
