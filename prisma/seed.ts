@@ -394,6 +394,81 @@ async function seedShippingConfig(): Promise<number> {
   return shippingConfigCSV.length;
 }
 
+async function seedShippingZones(): Promise<number> {
+  console.log('🌍 Creating shipping zones...');
+
+  const defaultZones = [
+    {
+      name: 'Península',
+      country: 'España',
+      regions: ['Madrid', 'Barcelona', 'Valencia', 'Sevilla', 'Zaragoza', 'Málaga', 'Murcia', 'Palma', 'Las Palmas', 'Bilbao', 'Alicante', 'Córdoba', 'Valladolid', 'Vigo', 'Gijón', 'LHospitalet', 'Vitoria', 'La Coruña', 'Elche', 'Granada', 'Terrassa', 'Tarragona', 'Pamplona', 'León', 'Albacete', 'Cádiz', 'Logroño', 'Huelva', 'Salamanca', 'Burgos', 'Almería', 'Castellón de la Plana', 'Alcorcón', 'Gasteiz/Vitoria', 'Guadalajara', 'San Cristóbal de La Laguna', 'Badalona', 'Santander', 'Torrejón de Ardoz', 'Sabadell', 'San Sebastián', 'Cartagena', 'Móstoles', 'Fuenlabrada', 'Getafe', 'Leganés', 'Baracaldo', 'Getxo', 'Badajoz', 'Algeciras', 'Marbella', 'Santiago de Compostela', 'Cáceres', 'Segovia', 'Ciudad Real', 'Toledo', 'Huesca', 'Soria', 'Zamora', 'Ávila', 'Palencia', 'Cuenca'],
+      postalCodePrefixes: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47', '48', '49', '50'],
+      baseCost: 5.99,
+      freeShippingThreshold: 50,
+      estimatedDaysMin: 3,
+      estimatedDaysMax: 5,
+      isActive: true,
+      displayOrder: 1,
+    },
+    {
+      name: 'Islas Baleares',
+      country: 'España',
+      regions: ['Mallorca', 'Menorca', 'Ibiza', 'Formentera'],
+      postalCodePrefixes: ['07'],
+      baseCost: 7.99,
+      freeShippingThreshold: 75,
+      estimatedDaysMin: 4,
+      estimatedDaysMax: 7,
+      isActive: true,
+      displayOrder: 2,
+    },
+    {
+      name: 'Islas Canarias',
+      country: 'España',
+      regions: ['Tenerife', 'Gran Canaria', 'Lanzarote', 'Fuerteventura', 'La Palma', 'La Gomera', 'El Hierro'],
+      postalCodePrefixes: ['35', '38'],
+      baseCost: 9.99,
+      freeShippingThreshold: 100,
+      estimatedDaysMin: 5,
+      estimatedDaysMax: 10,
+      isActive: true,
+      displayOrder: 3,
+    },
+    {
+      name: 'Ceuta y Melilla',
+      country: 'España',
+      regions: ['Ceuta', 'Melilla'],
+      postalCodePrefixes: ['51', '52'],
+      baseCost: 12.99,
+      freeShippingThreshold: null,
+      estimatedDaysMin: 5,
+      estimatedDaysMax: 8,
+      isActive: true,
+      displayOrder: 4,
+    },
+  ];
+
+  for (const zone of defaultZones) {
+    await prisma.shippingZone.create({
+      data: {
+        name: zone.name,
+        country: zone.country,
+        regions: zone.regions,
+        postalCodePrefixes: zone.postalCodePrefixes,
+        baseCost: zone.baseCost,
+        freeShippingThreshold: zone.freeShippingThreshold,
+        estimatedDaysMin: zone.estimatedDaysMin,
+        estimatedDaysMax: zone.estimatedDaysMax,
+        isActive: zone.isActive,
+        displayOrder: zone.displayOrder,
+      },
+    });
+  }
+
+  console.log(`✅ ${defaultZones.length} shipping zones created\n`);
+  return defaultZones.length;
+}
+
 async function seedFAQs(): Promise<number> {
   console.log('❓ Creating FAQs...');
   const faqsCSV = parseCSV<FAQCSV>('faqs.csv');
@@ -752,7 +827,7 @@ async function cleanDatabase(): Promise<void> {
     "reviews", "order_messages", "inventory_movements", "payments", 
     "order_items", "orders", "invoices", "product_images", "products", 
     "categories", "addresses", "users", "alerts", "shipping_configs", 
-    "site_configs", "sessions", "verification_tokens", "audit_logs", 
+    "shipping_zones", "site_configs", "sessions", "verification_tokens", "audit_logs", 
     "carts", "cart_items", "coupons", "faqs" CASCADE`;
   console.log('✅ Data cleaned\n');
 }
@@ -771,6 +846,7 @@ async function main(): Promise<void> {
   const categories = await seedCategories();
   await seedSiteConfig();
   await seedShippingConfig();
+  await seedShippingZones();
   await seedFAQs();
   await seedCoupons();
   const addresses = await seedAddresses();

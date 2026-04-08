@@ -11,6 +11,7 @@ import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
+import { translateCouponCode } from '@/lib/i18n';
 
 const applySchema = z.object({
   code: z.string().min(1, 'El código es obligatorio'),
@@ -151,7 +152,7 @@ export async function POST(req: NextRequest) {
       applied: true,
       coupon: {
         id: coupon.id,
-        code: coupon.code,
+        code: translateCouponCode(coupon.code),
         type: tipoTexto,
         typeRaw: coupon.type,
         value: Number(coupon.value),

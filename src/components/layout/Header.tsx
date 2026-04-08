@@ -260,7 +260,7 @@ export default function Header() {
                           </Link>
                           <div className="border-t border-gray-100 my-2" />
                           <Link
-                            href="/account"
+                            href="/account/profile"
                             onClick={() => setUserMenuOpen(false)}
                             className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
                           >
@@ -272,7 +272,7 @@ export default function Header() {
                         // Client Menu
                         <>
                           <Link
-                            href="/account"
+                            href="/account/profile"
                             onClick={() => setUserMenuOpen(false)}
                             className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
                           >
@@ -380,7 +380,7 @@ export default function Header() {
               <>
                 <hr className="my-2 border-gray-200" />
                 <Link
-                  href="/account"
+                  href="/account/profile"
                   className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50"
                   onClick={() => setMobileMenuOpen(false)}
                 >

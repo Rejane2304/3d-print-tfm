@@ -21,7 +21,6 @@ import {
 } from 'lucide-react';
 import { DataTable, Column, BulkAction } from '@/components/ui/DataTable';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
-import { StarRating } from '@/components/ui/StarRating';
 
 interface Resena extends Record<string, unknown> {
   id: string;
@@ -212,14 +211,15 @@ export default function AdminReviewsPage() {
       key: 'productoNombre',
       header: 'Producto',
       sortable: true,
+      width: '180px',
       render: (_, resena) => (
-        <div className="flex flex-col">
-          <span className="text-sm font-medium text-gray-900 line-clamp-1 max-w-xs">
+        <div className="flex flex-col min-w-0">
+          <span className="text-sm font-medium text-gray-900 truncate">
             {resena.productoNombre}
           </span>
           <Link 
             href={`/products/${resena.productoSlug}`}
-            className="text-xs text-indigo-600 hover:text-indigo-800"
+            className="text-xs text-indigo-600 hover:text-indigo-800 truncate"
             onClick={(e) => e.stopPropagation()}
           >
             Ver producto
@@ -231,12 +231,13 @@ export default function AdminReviewsPage() {
       key: 'usuarioNombre',
       header: 'Usuario',
       sortable: true,
+      width: '160px',
       render: (_, resena) => (
-        <div className="flex flex-col">
-          <span className="text-sm font-medium text-gray-900">
+        <div className="flex flex-col min-w-0">
+          <span className="text-sm font-medium text-gray-900 truncate">
             {resena.usuarioNombre}
           </span>
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-gray-500 truncate">
             {resena.usuarioEmail}
           </span>
         </div>
@@ -244,12 +245,13 @@ export default function AdminReviewsPage() {
     },
     {
       key: 'puntuacion',
-      header: 'Puntuación',
+      header: 'Punt.',
       sortable: true,
+      width: '80px',
       render: (_, resena) => (
         <div className="flex items-center gap-1">
-          <StarRating rating={resena.puntuacion} size="sm" />
-          <span className="text-sm text-gray-600 ml-1">({resena.puntuacion})</span>
+          <span className="text-sm font-bold text-gray-900">{resena.puntuacion}</span>
+          <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
         </div>
       ),
     },
@@ -257,107 +259,109 @@ export default function AdminReviewsPage() {
       key: 'titulo',
       header: 'Reseña',
       sortable: true,
+      width: '200px',
       render: (_, resena) => (
-        <div className="flex flex-col max-w-xs">
-          <span className="text-sm font-medium text-gray-900 line-clamp-1">
+        <div className="flex flex-col min-w-0">
+          <span className="text-sm font-medium text-gray-900 truncate">
             {resena.titulo}
           </span>
           <span className="text-xs text-gray-500 line-clamp-2">
-            {resena.comentario.substring(0, 100)}...
+            {resena.comentario.substring(0, 80)}{resena.comentario.length > 80 ? '...' : ''}
           </span>
         </div>
       ),
     },
     {
-      key: 'verificado',
-      header: 'Verificado',
-      sortable: true,
-      render: (value) => (
-        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-          value 
-            ? 'bg-green-100 text-green-800' 
-            : 'bg-gray-100 text-gray-600'
-        }`}>
-          {value ? (
-            <>
-              <CheckCircle2 className="h-3 w-3" />
-              Sí
-            </>
-          ) : (
-            <>
-              <XCircle className="h-3 w-3" />
-              No
-            </>
-          )}
-        </span>
-      ),
-    },
-    {
-      key: 'aprobado',
+      key: 'status',
       header: 'Estado',
-      sortable: true,
-      render: (value) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-          value 
-            ? 'bg-green-100 text-green-800' 
-            : 'bg-yellow-100 text-yellow-800'
-        }`}>
-          {value ? 'Aprobado' : 'Pendiente'}
-        </span>
+      sortable: false,
+      width: '100px',
+      render: (_, resena) => (
+        <div className="flex flex-col gap-1">
+          <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium ${
+            resena.aprobado 
+              ? 'bg-green-100 text-green-800' 
+              : 'bg-yellow-100 text-yellow-800'
+          }`}>
+            {resena.aprobado ? (
+              <>
+                <CheckCircle2 className="h-3 w-3" />
+                Visible
+              </>
+            ) : (
+              <>
+                <XCircle className="h-3 w-3" />
+                Oculto
+              </>
+            )}
+          </span>
+          {resena.verificado && (
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-100 text-blue-800">
+              <CheckCircle2 className="h-3 w-3" />
+              Verif.
+            </span>
+          )}
+        </div>
       ),
     },
     {
       key: 'creadoEn',
       header: 'Fecha',
       sortable: true,
+      width: '90px',
       render: (value) => (
-        <span className="text-sm text-gray-600">
-          {new Date(value as string).toLocaleDateString('es-ES')}
+        <span className="text-xs text-gray-600 whitespace-nowrap">
+          {new Date(value as string).toLocaleDateString('es-ES', { 
+            day: '2-digit', 
+            month: '2-digit',
+            year: '2-digit'
+          })}
         </span>
       ),
     },
     {
       key: 'actions',
-      header: 'Acciones',
+      header: 'Acc.',
+      width: '100px',
       render: (_, resena) => (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
           <button
             onClick={(e) => {
               e.stopPropagation();
               toggleVerification(resena);
             }}
-            className={`p-1.5 rounded-lg transition-colors ${
+            className={`p-1 rounded transition-colors ${
               resena.verificado
                 ? 'text-green-600 hover:bg-green-50'
                 : 'text-gray-400 hover:bg-gray-50'
             }`}
             title={resena.verificado ? 'Quitar verificación' : 'Verificar'}
           >
-            <CheckCircle2 className="h-4 w-4" />
+            <CheckCircle2 className="h-3.5 w-3.5" />
           </button>
           <button
             onClick={(e) => {
               e.stopPropagation();
               toggleApproval(resena);
             }}
-            className={`p-1.5 rounded-lg transition-colors ${
+            className={`p-1 rounded transition-colors ${
               resena.aprobado
                 ? 'text-green-600 hover:bg-green-50'
                 : 'text-yellow-600 hover:bg-yellow-50'
             }`}
             title={resena.aprobado ? 'Ocultar' : 'Mostrar'}
           >
-            {resena.aprobado ? <XCircle className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
+            {resena.aprobado ? <XCircle className="h-3.5 w-3.5" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
           </button>
           <button
             onClick={(e) => {
               e.stopPropagation();
               handleDelete(resena);
             }}
-            className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
             title="Eliminar"
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="h-3.5 w-3.5" />
           </button>
         </div>
       ),

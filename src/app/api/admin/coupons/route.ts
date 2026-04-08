@@ -10,6 +10,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
 import { CouponType } from '@prisma/client';
+import { translateCouponCode } from '@/lib/i18n';
 
 // Schema de validación
 const couponSchema = z.object({
@@ -86,7 +87,7 @@ export async function GET() {
       return {
         id: coupon.id,
         _ref: coupon.id.slice(0, 8).toUpperCase(),
-        codigo: coupon.code,
+        codigo: translateCouponCode(coupon.code),
         tipo: tipoTexto,
         tipoRaw: coupon.type,
         valor: valorTexto,

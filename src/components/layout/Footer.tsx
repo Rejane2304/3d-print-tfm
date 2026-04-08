@@ -43,8 +43,8 @@ export default function Footer() {
   const isAdmin = session?.user?.rol === 'ADMIN';
 
   // Use config values with fallbacks
-  const companyEmail = config?.emailEmpresa || 'info@3dprint-tfm.com';
-  const companyPhone = config?.telefonoEmpresa || '+34 900 123 456';
+  const companyEmail = config?.emailEmpresa || 'info@3dprint.com';
+  const companyPhone = config?.telefonoEmpresa || '+34 930 000 001';
   const companyCity = config?.ciudadEmpresa || 'Barcelona';
   const companyProvince = config?.provinciaEmpresa || 'Barcelona';
 
@@ -177,24 +177,28 @@ export default function Footer() {
             </h4>
             <ul className="space-y-3">
               <li>
-                <span className="text-gray-400 hover:text-white text-sm cursor-pointer transition-colors flex items-center gap-2">
+                <Link href="/terms" className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-2 group">
+                  <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-indigo-400 transition-colors"></span>
                   Términos y condiciones
-                </span>
+                </Link>
               </li>
               <li>
-                <span className="text-gray-400 hover:text-white text-sm cursor-pointer transition-colors flex items-center gap-2">
+                <Link href="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-2 group">
+                  <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-indigo-400 transition-colors"></span>
                   Política de privacidad
-                </span>
+                </Link>
               </li>
               <li>
-                <span className="text-gray-400 hover:text-white text-sm cursor-pointer transition-colors flex items-center gap-2">
+                <Link href="/cookies" className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-2 group">
+                  <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-indigo-400 transition-colors"></span>
                   Política de cookies
-                </span>
+                </Link>
               </li>
               <li>
-                <span className="text-gray-400 hover:text-white text-sm cursor-pointer transition-colors flex items-center gap-2">
+                <Link href="/legal" className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-2 group">
+                  <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-indigo-400 transition-colors"></span>
                   Aviso legal
-                </span>
+                </Link>
               </li>
             </ul>
           </div>

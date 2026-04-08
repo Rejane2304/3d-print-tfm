@@ -298,7 +298,27 @@ export const faqTranslations: Record<string, { question: string; answer: string;
 };
 
 // ============================================================================
-// SHIPPING CONFIG TRANSLATIONS
+// COUPON TRANSLATIONS
+// ============================================================================
+
+export const couponTranslations: Record<string, string> = {
+  'SUMMER20': 'VERANO20',
+  'WELCOME10': 'BIENVENIDO10',
+  'FIRSTORDER': 'PRIMERPEDIDO',
+  'LOYALTY15': 'Fidelidad15',
+  'FLASH25': 'FLASH25',
+  'FREESHIP': 'EnvioGratis',
+  'SPECIAL30': 'ESPECIAL30',
+  'VIP20': 'VIP20',
+  'BIRTHDAY': 'Cumpleanos',
+  'HOLIDAY50': 'Vacaciones50',
+  'SPRING15': 'PRIMAVERA15',
+  'BLACKFRIDAY': 'ViernesNegro',
+  'SAVES': 'AHORRA',
+};
+
+// ============================================================================
+// SHIPPING ZONE TRANSLATIONS (for zones)
 // ============================================================================
 
 export const shippingTranslations: Record<string, { name: string; description: string }> = {
@@ -315,10 +335,6 @@ export const shippingTranslations: Record<string, { name: string; description: s
     description: 'Envío gratis para pedidos superiores a 50€'
   }
 };
-
-// ============================================================================
-// SHIPPING ZONE TRANSLATIONS (for zones)
-// ============================================================================
 
 export const shippingZoneTranslations: Record<string, { name: string; country: string }> = {
   'ZONA-PENINSULA': {
@@ -363,7 +379,7 @@ export function translateFAQ(ref: string, field: 'question' | 'answer' | 'catego
 }
 
 export function translateShipping(ref: string, field: 'name' | 'description'): string {
-  return shippingTranslations[ref]?.[field] || '';
+  return shippingTranslations?.[ref]?.[field] || '';
 }
 
 export function translateAlert(ref: string, field: 'title' | 'message'): string {
@@ -525,6 +541,10 @@ export function translateMovementType(type: string): string {
 
 export function translateCouponType(type: string): string {
   return enumTranslations.couponType[type] || type;
+}
+
+export function translateCouponCode(code: string): string {
+  return couponTranslations[code.toUpperCase()] || code;
 }
 
 export function translateMaterial(material: string): string {

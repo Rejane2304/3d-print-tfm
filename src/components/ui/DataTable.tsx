@@ -326,7 +326,7 @@ export function DataTable<T extends object>({
             <thead className="bg-gray-50">
               <tr>
                 {selectable && (
-                  <th className="px-6 py-3 w-12">
+                  <th className="px-4 py-3 w-10">
                     <input
                       type="checkbox"
                       checked={
@@ -343,7 +343,7 @@ export function DataTable<T extends object>({
                 {columns.map((column) => (
                   <th
                     key={String(column.key)}
-                    className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
+                    className={`px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
                       column.sortable ? 'cursor-pointer hover:bg-gray-100' : ''
                     }`}
                     style={{ width: column.width }}
@@ -378,7 +378,7 @@ export function DataTable<T extends object>({
                   >
                     {selectable && (
                       <td
-                        className="px-6 py-4"
+                        className="px-4 py-3"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <input
@@ -392,7 +392,10 @@ export function DataTable<T extends object>({
                     {columns.map((column) => (
                       <td
                         key={String(column.key)}
-                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                        className={`px-4 py-3 text-sm text-gray-900 ${
+                          column.width ? '' : 'whitespace-nowrap'
+                        }`}
+                        style={{ width: column.width }}
                       >
                         {getCellValue(row, column)}
                       </td>
