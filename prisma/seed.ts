@@ -401,6 +401,7 @@ async function seedFAQs(): Promise<number> {
   for (const faq of faqsCSV) {
     await prisma.fAQ.create({
       data: {
+        id: faq._ref, // Usar el ref como ID para permitir traducción
         question: faq.question,
         answer: faq.answer,
         category: faq.category,

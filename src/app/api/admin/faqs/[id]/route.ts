@@ -9,6 +9,18 @@ import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
+import { translateFAQ } from '@/lib/i18n';
+
+// Mapeo de categorías en inglés → español
+const categoryTranslations: Record<string, string> = {
+  'Materials': 'Materiales',
+  'Shipping': 'Envío',
+  'Returns': 'Devoluciones',
+  'Orders': 'Pedidos',
+  'Care': 'Cuidado',
+  'Payments': 'Pagos',
+  'Safety': 'Seguridad',
+};
 
 // Schema de validación
 const faqUpdateSchema = z.object({
@@ -62,13 +74,14 @@ export async function GET(
       );
     }
 
-    // Formatear para el panel admin (español)
+    // Formatear para el panel admin (traducir inglés → español)
+    const ref = faq.id.slice(0, 8).toUpperCase();
     const faqFormateada = {
       id: faq.id,
-      _ref: faq.id.slice(0, 8).toUpperCase(),
-      pregunta: faq.question,
-      respuesta: faq.answer,
-      categoria: faq.category,
+      _ref: ref,
+      pregunta: translateFAQ(ref, 'question') || faq.question,
+      respuesta: translateFAQ(ref, 'answer') || faq.answer,
+      categoria: translateFAQ(ref, 'category') || categoryTranslations[faq.category] || faq.category,
       ordenVisualizacion: faq.displayOrder,
       activo: faq.isActive,
       creadoEn: faq.createdAt,
