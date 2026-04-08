@@ -46,7 +46,7 @@ interface OrderDetail {
   ciudadEnvio: string;
   provinciaEnvio: string;
   paisEnvio: string;
-  paymentMethod: string;
+  metodoPago: string;
   numeroSeguimiento?: string;
   transportista?: string;
   notasCliente?: string;
@@ -80,10 +80,14 @@ interface OrderDetail {
   }>;
 }
 
+// El método de pago ya viene traducido de la API
 const metodosPago: Record<string, string> = {
   Tarjeta: 'Tarjeta',
+  PAYPAL: 'PayPal',
   PayPal: 'PayPal',
+  BIZUM: 'Bizum',
   Bizum: 'Bizum',
+  TRANSFER: 'Transferencia',
   Transferencia: 'Transferencia',
 };
 
@@ -433,7 +437,7 @@ export default function OrderDetailPage() {
               <div className="space-y-2 sm:space-y-3">
                 <div className="flex justify-between text-xs sm:text-sm">
                   <span className="text-gray-600">Método:</span>
-                  <span className="font-medium">{metodosPago[order.paymentMethod] || order.paymentMethod}</span>
+                  <span className="font-medium">{metodosPago[order.metodoPago] || order.metodoPago || 'No disponible'}</span>
                 </div>
                 {order.pago && (
                   <>
