@@ -216,7 +216,7 @@ export default function AdminClientDetailPage() {
                 <ShoppingBag className="h-8 w-8 text-indigo-500" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Total Pedidos</p>
-                  <p className="text-2xl font-bold text-gray-900">{client.stats.totalOrders}</p>
+                  <p className="text-2xl font-bold text-gray-900">{client.stats?.totalOrders ?? 0}</p>
                 </div>
               </div>
             </div>
@@ -226,7 +226,7 @@ export default function AdminClientDetailPage() {
                 <DollarSign className="h-8 w-8 text-green-500" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Total Gastado</p>
-                  <p className="text-2xl font-bold text-gray-900">{formatCurrency(client.stats.totalSpent)}</p>
+                  <p className="text-2xl font-bold text-gray-900">{formatCurrency(client.stats?.totalSpent ?? 0)}</p>
                 </div>
               </div>
             </div>
@@ -236,7 +236,7 @@ export default function AdminClientDetailPage() {
                 <Package className="h-8 w-8 text-blue-500" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Completados</p>
-                  <p className="text-2xl font-bold text-gray-900">{client.stats.completedOrders}</p>
+                  <p className="text-2xl font-bold text-gray-900">{client.stats?.completedOrders ?? 0}</p>
                 </div>
               </div>
             </div>
@@ -246,7 +246,7 @@ export default function AdminClientDetailPage() {
                 <DollarSign className="h-8 w-8 text-purple-500" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Ticket Medio</p>
-                  <p className="text-2xl font-bold text-gray-900">{formatCurrency(client.stats.averageOrderValue)}</p>
+                  <p className="text-2xl font-bold text-gray-900">{formatCurrency(client.stats?.averageOrderValue ?? 0)}</p>
                 </div>
               </div>
             </div>
