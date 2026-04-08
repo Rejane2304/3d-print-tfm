@@ -153,7 +153,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/account" className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-2 group">
+                <Link href="/account/profile" className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-2 group">
                   <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-indigo-400 transition-colors"></span>
                   Mi Cuenta
                 </Link>
