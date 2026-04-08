@@ -447,7 +447,24 @@ export const categoryTranslations: Record<string, { name: string; description: s
 // ============================================================================
 
 export function translateProductName(slug: string): string {
-  return productTranslations[slug]?.name || slug;
+  // Clean slug: remove extra whitespace, convert to lowercase
+  const cleanSlug = slug.trim().toLowerCase();
+  
+  // Try exact match first
+  if (productTranslations[cleanSlug]) {
+    return productTranslations[cleanSlug].name;
+  }
+  
+  // Try with normalized characters (remove accents for fallback)
+  const normalizedSlug = cleanSlug.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  if (productTranslations[normalizedSlug]) {
+    return productTranslations[normalizedSlug].name;
+  }
+  
+  // If no translation found, format the slug nicely
+  return cleanSlug
+    .replace(/-/g, ' ')
+    .replace(/\b\w/g, c => c.toUpperCase());
 }
 
 export function translateProductDescription(slug: string): string {
