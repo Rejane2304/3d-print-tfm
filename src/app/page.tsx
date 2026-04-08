@@ -156,7 +156,7 @@ export default async function HomePage() {
       </section>
 
       {/* Categorías Section */}
-      <section className="py-16 lg:py-24 bg-gray-50">
+      <section className="pt-16 pb-12 lg:pt-20 lg:pb-16 bg-gray-50">
         <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 3xl:px-20">
           <h2 className="text-3xl lg:text-4xl font-bold text-center text-gray-900 mb-12">
             Explora por categorías
@@ -190,7 +190,7 @@ export default async function HomePage() {
       </section>
 
       {/* Productos Destacados */}
-      <section className="py-20 lg:py-28 bg-gray-50">
+      <section className="pt-12 pb-20 lg:pt-16 lg:pb-28 bg-gray-50">
         <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 3xl:px-20">
           {/* Section Header */}
           <div className="text-center mb-16">
