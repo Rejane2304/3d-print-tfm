@@ -183,70 +183,68 @@ export default function AdminCouponsPage() {
       key: 'codigo',
       header: 'Código',
       sortable: true,
+      className: '',
       render: (_, coupon) => (
         <div className="flex items-center gap-2">
           {getTypeIcon(coupon.tipoRaw)}
-          <span className="font-mono font-medium text-gray-900">{coupon.codigo}</span>
+          <span className="font-mono font-medium text-gray-900 text-sm">{coupon.codigo}</span>
         </div>
       ),
     },
     {
-      key: 'tipo',
-      header: 'Tipo',
+      key: 'tipoValor',
+      header: 'Tipo/Valor',
       sortable: true,
-      render: (value) => (
-        <span className="text-sm text-gray-600">{value as string}</span>
-      ),
-    },
-    {
-      key: 'valor',
-      header: 'Valor',
-      sortable: true,
-      render: (value) => (
-        <span className="font-medium text-indigo-600">{value as string}</span>
+      className: '',
+      render: (_, coupon) => (
+        <div className="flex flex-col">
+          <span className="text-xs text-gray-500">{coupon.tipo}</span>
+          <span className="font-medium text-indigo-600 text-sm">{coupon.valor}</span>
+        </div>
       ),
     },
     {
       key: 'minimoCompra',
-      header: 'Mínimo',
+      header: 'Mín.',
       sortable: true,
+      className: 'hidden sm:table-cell',
       render: (value) => (
         value 
-          ? <span className="text-sm text-gray-600">{Number(value).toFixed(2)}€</span>
-          : <span className="text-sm text-gray-400">Sin mínimo</span>
+          ? <span className="text-sm text-gray-600">{Number(value).toFixed(0)}€</span>
+          : <span className="text-xs text-gray-400">-</span>
       ),
     },
     {
       key: 'usos',
       header: 'Usos',
       sortable: true,
+      className: 'hidden md:table-cell',
       render: (_, coupon) => (
         <div className="flex flex-col">
           <span className="text-sm text-gray-900">
             {coupon.usosActuales}
-            {coupon.usosMaximos !== null && ` / ${coupon.usosMaximos}`}
+            {coupon.usosMaximos !== null && <span className="text-gray-400">/{coupon.usosMaximos}</span>}
           </span>
-          {coupon.usosRestantes !== null && (
-            <span className="text-xs text-gray-500">
-              {coupon.usosRestantes} restantes
-            </span>
+          {coupon.usosRestantes !== null && coupon.usosRestantes > 0 && (
+            <span className="text-[10px] text-gray-500">{coupon.usosRestantes} rest.</span>
           )}
         </div>
       ),
     },
     {
       key: 'validoHasta',
-      header: 'Válido hasta',
+      header: 'Expira',
       sortable: true,
+      className: 'hidden lg:table-cell',
       render: (value) => {
         const date = new Date(value as string);
         const now = new Date();
         const isExpired = date < now;
         return (
           <div className="flex items-center gap-1">
-            <Calendar className={`h-3 w-3 ${isExpired ? 'text-red-400' : 'text-gray-400'}`} />
-            <span className={`text-sm ${isExpired ? 'text-red-600' : 'text-gray-600'}`}>
-              {date.toLocaleDateString('es-ES')}
+            <Calendar className={`h-3 w-3 flex-shrink-0 ${isExpired ? 'text-red-400' : 'text-gray-400'}`} />
+            <span className={`text-xs ${isExpired ? 'text-red-600' : 'text-gray-600'}`}>
+              {date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' })}
             </span>
           </div>
         );
@@ -256,8 +254,9 @@ export default function AdminCouponsPage() {
       key: 'estado',
       header: 'Estado',
       sortable: true,
+      className: 'hidden xl:table-cell',
       render: (value) => (
-        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(value as string)}`}>
+        <span className={`px-2 py-0.5 inline-flex text-[10px] leading-4 font-semibold rounded-full ${getStatusColor(value as string)}`}>
           {value as string}
         </span>
       ),
@@ -265,24 +264,25 @@ export default function AdminCouponsPage() {
     {
       key: 'actions',
       header: 'Acciones',
+      className: '',
       render: (_, coupon) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <Link
             href={`/admin/coupons/${coupon.id}`}
-            className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+            className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
             title="Editar"
           >
-            <Edit className="h-4 w-4" />
+            <Edit className="h-3.5 w-3.5" />
           </Link>
           <button
             onClick={(e) => {
               e.stopPropagation();
               handleDelete(coupon);
             }}
-            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
             title="Eliminar"
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="h-3.5 w-3.5" />
           </button>
         </div>
       ),

@@ -29,6 +29,12 @@ export interface Column<T> {
   header: string;
   sortable?: boolean;
   width?: string;
+  /**
+   * Responsive breakpoints to hide column
+   * e.g., 'hidden sm:table-cell' shows on sm and up
+   * 'hidden lg:table-cell' shows on lg and up
+   */
+  className?: string;
   render?: (value: unknown, row: T) => React.ReactNode;
 }
 
@@ -345,7 +351,7 @@ export function DataTable<T extends object>({
                     key={String(column.key)}
                     className={`px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
                       column.sortable ? 'cursor-pointer hover:bg-gray-100' : ''
-                    }`}
+                    } ${column.className || ''}`}
                     style={{ width: column.width }}
                     onClick={() => column.sortable && handleSort(column.key)}
                   >
@@ -394,7 +400,7 @@ export function DataTable<T extends object>({
                         key={String(column.key)}
                         className={`px-4 py-3 text-sm text-gray-900 ${
                           column.width ? '' : 'whitespace-nowrap'
-                        }`}
+                        } ${column.className || ''}`}
                         style={{ width: column.width }}
                       >
                         {getCellValue(row, column)}

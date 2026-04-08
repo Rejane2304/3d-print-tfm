@@ -109,7 +109,7 @@ export default function RealTimeNotifications() {
             className="fixed inset-0 z-40"
             onClick={() => setShowPanel(false)}
           />
-          <div className="absolute right-0 top-full mt-2 w-96 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-[80vh] overflow-hidden">
+          <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-[80vh] overflow-hidden">
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
               <div>

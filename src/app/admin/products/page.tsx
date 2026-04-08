@@ -119,6 +119,7 @@ export default function AdminProductsPage() {
       key: 'nombre',
       header: 'Producto',
       sortable: true,
+      className: '',
       render: (_, product) => (
         <div className="flex items-center">
           <div className="flex-shrink-0 h-10 w-10">
@@ -137,9 +138,9 @@ export default function AdminProductsPage() {
               </div>
             )}
           </div>
-          <div className="ml-4">
-            <div className="text-sm font-medium text-gray-900">{product.nombre}</div>
-            <div className="text-sm text-gray-500">{product.material}</div>
+          <div className="ml-4 min-w-0">
+            <div className="text-sm font-medium text-gray-900 truncate">{product.nombre}</div>
+            <div className="text-xs text-gray-500">{product.material}</div>
           </div>
         </div>
       ),
@@ -148,17 +149,20 @@ export default function AdminProductsPage() {
       key: 'categoria',
       header: 'Categoría',
       sortable: true,
+      className: 'hidden sm:table-cell',
     },
     {
       key: 'precio',
       header: 'Precio',
       sortable: true,
+      className: '',
       render: (value) => `${Number(value).toFixed(2)} €`,
     },
     {
       key: 'stock',
       header: 'Stock',
       sortable: true,
+      className: 'hidden md:table-cell',
       render: (value) => (
         <span className={Number(value) <= 5 ? 'text-red-600 font-medium' : ''}>
           {String(value)}
@@ -169,6 +173,7 @@ export default function AdminProductsPage() {
       key: 'activo',
       header: 'Estado',
       sortable: true,
+      className: 'hidden lg:table-cell',
       render: (value) => (
         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
           value 
@@ -182,15 +187,16 @@ export default function AdminProductsPage() {
     {
       key: 'acciones',
       header: 'Acciones',
+      className: '',
       render: (_, product) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <Link
             href={`/admin/products/${product.slug}/editar`}
             className="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-50 transition-colors"
             title="Editar"
             onClick={(e) => e.stopPropagation()}
           >
-            <Edit className="h-5 w-5" />
+            <Edit className="h-4 w-4" />
           </Link>
           <button
             onClick={(e) => {
@@ -200,7 +206,7 @@ export default function AdminProductsPage() {
             className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors"
             title="Eliminar"
           >
-            <Trash2 className="h-5 w-5" />
+            <Trash2 className="h-4 w-4" />
           </button>
         </div>
       ),
