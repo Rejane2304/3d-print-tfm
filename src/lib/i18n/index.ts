@@ -315,6 +315,8 @@ export const couponTranslations: Record<string, string> = {
   'SPRING15': 'PRIMAVERA15',
   'BLACKFRIDAY': 'ViernesNegro',
   'SAVES': 'AHORRA',
+  '€ SAVES': '€ AHORRA',
+  '€ SAVES ': '€ AHORRA',
 };
 
 // ============================================================================
