@@ -74,12 +74,12 @@ export default function ProfilePage() {
         throw new Error(data.error || 'Error al cargar perfil');
       }
 
-      console.log('[Profile] API data received:', data.user);
+      console.log('[Profile] API data received:', data.usuario);
       setProfile({
-        name: data.user.name || '',
-        email: data.user.email || '',
-        phone: data.user.phone || '',
-        taxId: data.user.taxId || ''
+        name: data.usuario?.name || '',
+        email: data.usuario?.email || '',
+        phone: data.usuario?.phone || '',
+        taxId: data.usuario?.taxId || ''
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
