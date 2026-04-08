@@ -109,12 +109,20 @@ export default function AdminPanelPage() {
 
   const getStatusBadge = (status: string) => {
     const statusMap: Record<string, string> = {
-      PENDING: 'bg-yellow-100 text-yellow-800',
-      CONFIRMED: 'bg-blue-100 text-blue-800',
-      PREPARING: 'bg-purple-100 text-purple-800',
-      SHIPPED: 'bg-indigo-100 text-indigo-800',
-      DELIVERED: 'bg-green-100 text-green-800',
-      CANCELLED: 'bg-red-100 text-red-800',
+      // Spanish status names (translated from API)
+      'Pendiente': 'bg-yellow-100 text-yellow-800',
+      'Confirmado': 'bg-blue-100 text-blue-800',
+      'En preparación': 'bg-purple-100 text-purple-800',
+      'Enviado': 'bg-indigo-100 text-indigo-800',
+      'Entregado': 'bg-green-100 text-green-800',
+      'Cancelado': 'bg-red-100 text-red-800',
+      // Legacy English status names (for backwards compatibility)
+      'PENDING': 'bg-yellow-100 text-yellow-800',
+      'CONFIRMED': 'bg-blue-100 text-blue-800',
+      'PREPARING': 'bg-purple-100 text-purple-800',
+      'SHIPPED': 'bg-indigo-100 text-indigo-800',
+      'DELIVERED': 'bg-green-100 text-green-800',
+      'CANCELLED': 'bg-red-100 text-red-800',
     };
     return statusMap[status] || 'bg-gray-100 text-gray-800';
   };
