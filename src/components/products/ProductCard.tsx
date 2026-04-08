@@ -1,11 +1,12 @@
 /**
- * ProductCard Component
- * Product card for the catalog with rating display
+ * ProductCard Component - Diseño Moderno
+ * Tarjeta de producto con estilo premium y animaciones suaves
  */
 import Link from 'next/link';
 import Image from 'next/image';
 import { Decimal } from '@prisma/client/runtime/library';
 import { StarRating } from '@/components/ui/StarRating';
+import { ShoppingCart, Eye } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -34,73 +35,129 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link
-      href={`/products/${product.slug}`} data-testid="product-card"
-      className="group bg-white shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col h-full"
+      href={`/products/${product.slug}`}
+      data-testid="product-card"
+      className="group relative bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 flex flex-col h-full"
     >
-      <div className="relative w-full aspect-square bg-gray-200 overflow-hidden">
+      {/* Image Container con Overlay */}
+      <div className="relative w-full aspect-[4/3] bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
         {mainImage ? (
           <Image
             src={mainImage.url}
             alt={product.name}
             fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover group-hover:scale-110 transition-transform duration-700"
           />
         ) : (
-          <div className="flex items-center justify-center h-full text-gray-400 text-sm">
-            Sin imagen
+          <div className="flex items-center justify-center h-full text-gray-400">
+            <span className="text-sm">Sin imagen</span>
           </div>
         )}
 
-        {/* Low stock badge */}
-        {product.stock > 0 && product.stock < 5 && (
-          <span className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded shadow-sm">
-            ¡Últimas unidades!
-          </span>
-        )}
+        {/* Gradient Overlay on Hover */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-        {/* Out of stock badge */}
-        {product.stock === 0 && (
-          <span className="absolute top-2 right-2 bg-gray-500 text-white text-xs px-2 py-1 rounded shadow-sm">
-            Sin stock
-          </span>
+        {/* Quick Actions Overlay */}
+        <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-4 group-hover:translate-y-0">
+          <button
+            className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-indigo-50 transition-colors"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+          >
+            <Eye className="h-5 w-5 text-gray-700" />
+          </button>
+          <button
+            className="w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center shadow-lg hover:bg-indigo-700 transition-colors"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+          >
+            <ShoppingCart className="h-5 w-5 text-white" />
+          </button>
+        </div>
+
+        {/* Badges */}
+        <div className="absolute top-3 left-3 flex flex-col gap-2">
+          {product.stock > 0 && product.stock < 5 && (
+            <span className="bg-red-500 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-md">
+              ¡Últimas unidades!
+            </span>
+          )}
+          {product.stock === 0 && (
+            <span className="bg-gray-800 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-md">
+              Agotado
+            </span>
+          )}
+        </div>
+
+        {/* Rating Badge */}
+        {hasRating && (
+          <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full shadow-md flex items-center gap-1">
+            <span className="text-yellow-500">★</span>
+            <span className="text-sm font-semibold text-gray-700">{product._avgRating?.toFixed(1)}</span>
+          </div>
         )}
       </div>
 
-      <div className="p-4 flex flex-col flex-1">
-        <h3 
-          className="font-semibold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors line-clamp-2 text-sm sm:text-base leading-tight" 
+      {/* Content */}
+      <div className="p-5 flex flex-col flex-1">
+        {/* Category Tag */}
+        <span className="text-xs font-medium text-indigo-600 uppercase tracking-wider mb-2">
+          {product.stock > 0 ? 'En Stock' : 'Agotado'}
+        </span>
+
+        {/* Product Name */}
+        <h3
+          className="font-bold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors line-clamp-2 text-base leading-tight"
           data-testid="product-name"
           title={product.name}
         >
           {product.name}
         </h3>
 
-        {/* Rating stars */}
+        {/* Divider */}
+        <div className="w-12 h-0.5 bg-gray-200 mb-4 group-hover:bg-indigo-500 transition-colors group-hover:w-20" />
+
+        {/* Rating */}
         {hasRating && (
-          <div className="flex items-center gap-2 mb-2 flex-wrap">
+          <div className="flex items-center gap-2 mb-3">
             <StarRating rating={product._avgRating || 0} size="sm" />
-            <span className="text-xs text-gray-500">({product._reviewCount})</span>
+            <span className="text-xs text-gray-400">({product._reviewCount})</span>
           </div>
         )}
 
-        <div className="flex items-center justify-between mt-auto pt-2 border-t border-gray-100">
-          <span 
-            className="text-lg sm:text-xl font-bold text-indigo-600 whitespace-nowrap" 
-            data-testid="product-price"
-          >
-            {price.toFixed(2)} €
-          </span>
+        {/* Spacer */}
+        <div className="flex-1" />
 
-          <span 
-            className={`text-xs sm:text-sm whitespace-nowrap ${
-              product.stock > 0 ? 'text-green-600' : 'text-red-600'
-            }`} 
-            data-testid="product-stock"
-          >
-            {product.stock > 0 ? '✅ En stock' : 'Sin stock'}
-          </span>
+        {/* Price Section - Fijo abajo */}
+        <div className="pt-4 border-t border-gray-100 mt-auto">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-xs text-gray-400 block mb-0.5">Precio</span>
+              <span
+                className="text-2xl font-bold text-gray-900"
+                data-testid="product-price"
+              >
+                {price.toFixed(2)} €
+              </span>
+            </div>
+
+            <div className="text-right">
+              <span className="text-xs text-gray-400 block mb-0.5">Disponibilidad</span>
+              <span
+                className={`text-sm font-medium ${
+                  product.stock > 0 ? 'text-green-600' : 'text-red-500'
+                }`}
+                data-testid="product-stock"
+              >
+                {product.stock > 0 ? `${product.stock} unid.` : 'Sin stock'}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </Link>
