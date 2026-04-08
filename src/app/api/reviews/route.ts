@@ -112,8 +112,19 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Formatear reseña para el frontend (español)
+    const resenaFormateada = {
+      id: review.id,
+      usuarioNombre: review.user.name,
+      puntuacion: review.rating,
+      titulo: review.title,
+      comentario: review.comment,
+      verificado: review.isVerified,
+      creadoEn: review.createdAt,
+    };
+
     return NextResponse.json(
-      { success: true, review },
+      { success: true, resena: resenaFormateada },
       { status: 201 }
     );
   } catch (error) {

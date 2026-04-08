@@ -200,7 +200,18 @@ export async function PATCH(
       },
     });
 
-    return NextResponse.json({ success: true, review });
+    // Formatear reseña para el frontend (español)
+    const resenaFormateada = {
+      id: review.id,
+      usuarioNombre: review.user.name,
+      puntuacion: review.rating,
+      titulo: review.title,
+      comentario: review.comment,
+      verificado: review.isVerified,
+      creadoEn: review.createdAt,
+    };
+
+    return NextResponse.json({ success: true, resena: resenaFormateada });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
