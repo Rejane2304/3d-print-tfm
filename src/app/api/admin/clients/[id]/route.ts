@@ -93,12 +93,12 @@ export async function GET(
       success: true,
       client: {
         id: client.id,
-        name: client.name,
+        nombre: client.name,
         email: client.email,
-        phone: client.phone,
-        isActive: client.isActive,
-        createdAt: client.createdAt,
-        lastAccess: client.lastAccess,
+        telefono: client.phone,
+        activo: client.isActive,
+        creadoEn: client.createdAt,
+        ultimoAcceso: client.lastAccess,
         addresses: client.addresses.map((addr) => ({
           id: addr.id,
           name: addr.name,
@@ -112,7 +112,7 @@ export async function GET(
         })),
         orders: client.orders.map((order) => ({
           id: order.id,
-          orderNumber: order.orderNumber,
+          numeroPedido: order.orderNumber,
           estado: translateOrderStatus(order.status),
           total: order.total,
           createdAt: order.createdAt,
@@ -120,12 +120,12 @@ export async function GET(
           pagoEstado: translatePaymentStatus(order.payment?.status || 'PENDING'),
           pagoMetodo: translatePaymentMethod(order.payment?.method || 'CARD'),
         })),
-        stats: {
-          totalOrders: totalOrders,
-          totalSpent: totalSpent.toFixed(2),
-          completedOrders: completedOrders,
-          pendingOrders: pendingOrders,
-          averageOrderValue: totalOrders > 0 ? (totalSpent / totalOrders).toFixed(2) : '0.00',
+        estadisticas: {
+          totalPedidos: totalOrders,
+          totalGastado: totalSpent.toFixed(2),
+          pedidosCompletados: completedOrders,
+          pedidosPendientes: pendingOrders,
+          valorPromedio: totalOrders > 0 ? (totalSpent / totalOrders).toFixed(2) : '0.00',
         },
       },
     });

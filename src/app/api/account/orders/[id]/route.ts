@@ -96,7 +96,7 @@ export async function GET(
     // Translate enums from English (DB) to Spanish (UI)
     const pedidoTransformado = {
       id: pedido.id,
-      orderNumber: pedido.orderNumber,
+      numeroPedido: pedido.orderNumber,
       estado: translateOrderStatus(pedido.status),
       subtotal: Number(pedido.subtotal),
       envio: Number(pedido.shipping),
@@ -111,7 +111,7 @@ export async function GET(
       ciudadEnvio: pedido.shippingCity,
       provinciaEnvio: pedido.shippingProvince,
       paisEnvio: pedido.shippingCountry,
-      paymentMethod: pedido.paymentMethod ? translatePaymentMethod(pedido.paymentMethod) : null,
+      metodoPago: pedido.paymentMethod ? translatePaymentMethod(pedido.paymentMethod) : null,
       numeroSeguimiento: pedido.trackingNumber,
       transportista: pedido.carrier,
       notasCliente: pedido.customerNotes,
@@ -128,7 +128,7 @@ export async function GET(
       })),
       factura: pedido.invoice ? {
         id: pedido.invoice.id,
-        invoiceNumber: pedido.invoice.invoiceNumber,
+        numeroFactura: pedido.invoice.invoiceNumber,
         anulada: pedido.invoice.isCancelled,
         emitidaEn: pedido.invoice.issuedAt,
       } : undefined,

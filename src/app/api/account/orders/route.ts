@@ -75,7 +75,7 @@ export async function GET() {
     // Traducir enums de inglés (BD) a español (UI)
     const pedidos = pedidosRaw.map(pedido => ({
       id: pedido.id,
-      orderNumber: pedido.orderNumber,
+      numeroPedido: pedido.orderNumber,
       estado: translateOrderStatus(pedido.status),
       total: pedido.total,
       createdAt: pedido.createdAt,
@@ -91,7 +91,7 @@ export async function GET() {
       })),
       factura: pedido.invoice ? {
         id: pedido.invoice.id,
-        invoiceNumber: pedido.invoice.invoiceNumber,
+        numeroFactura: pedido.invoice.invoiceNumber,
         anulada: pedido.invoice.isCancelled
       } : undefined,
       pago: pedido.payment ? {

@@ -54,25 +54,25 @@ interface Alert {
 }
 
 const typeLabels: Record<string, string> = {
-  LOW_STOCK: 'Low Stock',
-  OUT_OF_STOCK: 'Out of Stock',
-  PAYMENT_FAILED: 'Payment Failed',
-  ORDER_DELAYED: 'Order Delayed',
-  SYSTEM_ERROR: 'System Error',
+  LOW_STOCK: 'Stock Bajo',
+  OUT_OF_STOCK: 'Sin Stock',
+  PAYMENT_FAILED: 'Pago Fallido',
+  ORDER_DELAYED: 'Pedido Retrasado',
+  SYSTEM_ERROR: 'Error del Sistema',
 };
 
 const severityLabels: Record<string, string> = {
-  LOW: 'Low',
-  MEDIUM: 'Medium',
-  HIGH: 'High',
-  CRITICAL: 'Critical',
+  LOW: 'Baja',
+  MEDIUM: 'Media',
+  HIGH: 'Alta',
+  CRITICAL: 'Crítica',
 };
 
 const statusLabels: Record<string, string> = {
-  PENDING: 'Pending',
-  IN_PROGRESS: 'In Progress',
-  RESOLVED: 'Resolved',
-  IGNORED: 'Ignored',
+  PENDING: 'Pendiente',
+  IN_PROGRESS: 'En Progreso',
+  RESOLVED: 'Resuelta',
+  IGNORED: 'Ignorada',
 };
 
 const typeIcons: Record<string, React.ElementType> = {
@@ -132,7 +132,7 @@ export default function AdminAlertsPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error loading alerts');
+        throw new Error(data.error || 'Error cargando alertas');
       }
 
       setAlerts(data.alertas || []);
@@ -143,7 +143,7 @@ export default function AdminAlertsPage() {
         total: data.total || 0,
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
     }
@@ -184,7 +184,7 @@ export default function AdminAlertsPage() {
         setSelectedAlert(null);
       } else {
         const data = await response.json();
-        setError(data.error || 'Error updating');
+        setError(data.error || 'Error actualizando');
       }
     } catch {
       setError('Error al actualizar alerta');
@@ -211,7 +211,7 @@ export default function AdminAlertsPage() {
         setError(data.error || 'Error al eliminar');
       }
     } catch {
-      setError('Error deleting alert');
+      setError('Error eliminando alerta');
     } finally {
       setDeleteModalOpen(false);
       setAlertToDelete(null);
@@ -225,7 +225,7 @@ export default function AdminAlertsPage() {
   };
 
   const handleBulkDelete = async (selectedIds: string[]) => {
-    if (!confirm(`Are you sure you want to delete ${selectedIds.length} alert(s)?`)) {
+    if (!confirm(`¿Estás seguro de que quieres eliminar ${selectedIds.length} alerta(s)?`)) {
       return;
     }
     
@@ -254,7 +254,7 @@ export default function AdminAlertsPage() {
       );
       await loadAlerts();
     } catch (error) {
-      console.error('Error resolving alerts:', error);
+      console.error('Error resolviendo alertas:', error);
     }
   };
 
@@ -271,14 +271,14 @@ export default function AdminAlertsPage() {
       );
       await loadAlerts();
     } catch (error) {
-      console.error('Error ignoring alerts:', error);
+      console.error('Error ignorando alertas:', error);
     }
   };
 
   const columns: Column<Alert>[] = [
     {
       key: 'type',
-      header: 'Type',
+      header: 'Tipo',
       sortable: true,
       render: (value: unknown, row) => {
         const typeValue = value as string;
@@ -293,7 +293,7 @@ export default function AdminAlertsPage() {
     },
     {
       key: 'title',
-      header: 'Alert',
+      header: 'Alerta',
       sortable: true,
       render: (value, row) => (
         <div>
@@ -304,7 +304,7 @@ export default function AdminAlertsPage() {
     },
     {
       key: 'severity',
-      header: 'Severity',
+      header: 'Severidad',
       sortable: true,
       render: (value: unknown) => (
         <span className={`px-2 py-1 rounded-full text-xs font-medium ${severityColors[value as string] || 'bg-gray-100'}`}>
@@ -314,7 +314,7 @@ export default function AdminAlertsPage() {
     },
     {
       key: 'status',
-      header: 'Status',
+      header: 'Estado',
       sortable: true,
       render: (value: unknown) => (
         <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[value as string] || 'bg-gray-100'}`}>
@@ -324,17 +324,17 @@ export default function AdminAlertsPage() {
     },
     {
       key: 'createdAt',
-      header: 'Date',
+      header: 'Fecha',
       sortable: true,
       render: (value) => (
         <span className="text-sm text-gray-500">
-          {new Date(value as string).toLocaleDateString('en-US')}
+          {new Date(value as string).toLocaleDateString('es-ES')}
         </span>
       ),
     },
     {
       key: 'actions',
-      header: 'Actions',
+      header: 'Acciones',
       render: (_, row) => (
         <div className="flex items-center justify-end gap-1">
           {row.status === 'PENDING' && (
@@ -345,7 +345,7 @@ export default function AdminAlertsPage() {
                   updateStatus(row.id, 'IN_PROGRESS');
                 }}
                 className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 p-2 rounded-lg transition-colors"
-                title="Mark In Progress"
+                title="Marcar En Progreso"
               >
                 <Clock className="h-4 w-4" />
               </button>
@@ -355,7 +355,7 @@ export default function AdminAlertsPage() {
                   openResolveModal(row);
                 }}
                 className="text-green-600 hover:text-green-800 hover:bg-green-50 p-2 rounded-lg transition-colors"
-                title="Resolve"
+                title="Resolver"
               >
                 <CheckCircle2 className="h-4 w-4" />
               </button>
@@ -365,7 +365,7 @@ export default function AdminAlertsPage() {
                   updateStatus(row.id, 'IGNORED');
                 }}
                 className="text-gray-600 hover:text-gray-800 hover:bg-gray-50 p-2 rounded-lg transition-colors"
-                title="Ignore"
+                title="Ignorar"
               >
                 <Eye className="h-4 w-4" />
               </button>
@@ -378,7 +378,7 @@ export default function AdminAlertsPage() {
                 openResolveModal(row);
               }}
               className="text-green-600 hover:text-green-800 hover:bg-green-50 p-2 rounded-lg transition-colors"
-              title="Resolve"
+              title="Resolver"
             >
               <CheckCircle2 className="h-4 w-4" />
             </button>
@@ -389,7 +389,7 @@ export default function AdminAlertsPage() {
               deleteAlert(row.id);
             }}
             className="text-red-600 hover:text-red-800 hover:bg-red-50 p-2 rounded-lg transition-colors"
-            title="Delete"
+            title="Eliminar"
           >
             <Trash2 className="h-4 w-4" />
           </button>
@@ -401,21 +401,21 @@ export default function AdminAlertsPage() {
   const bulkActions: BulkAction[] = [
     {
       key: 'resolve',
-      label: 'Resolve Selected',
+      label: 'Resolver Seleccionadas',
       icon: <CheckCircle2 className="h-4 w-4" />,
       variant: 'primary',
       onClick: handleBulkResolve,
     },
     {
       key: 'ignore',
-      label: 'Ignore Selected',
+      label: 'Ignorar Seleccionadas',
       icon: <Eye className="h-4 w-4" />,
       variant: 'secondary',
       onClick: handleBulkIgnore,
     },
     {
       key: 'delete',
-      label: 'Delete Selected',
+      label: 'Eliminar Seleccionadas',
       icon: <Trash2 className="h-4 w-4" />,
       variant: 'danger',
       onClick: handleBulkDelete,
@@ -427,7 +427,7 @@ export default function AdminAlertsPage() {
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-indigo-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading alerts...</p>
+          <p className="text-gray-600">Cargando alertas...</p>
         </div>
       </div>
     );
@@ -449,9 +449,9 @@ export default function AdminAlertsPage() {
                 )}
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">System Alerts</h1>
+                <h1 className="text-2xl font-bold text-gray-900">Alertas del Sistema</h1>
                 <p className="text-sm text-gray-500">
-                  {stats.pending} pending · {stats.critical} critical · {stats.high} high
+                  {stats.pending} pendientes · {stats.critical} críticas · {stats.high} altas
                 </p>
               </div>
             </div>
@@ -461,7 +461,7 @@ export default function AdminAlertsPage() {
                 className="flex items-center gap-2 text-gray-600 hover:text-indigo-600 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
               >
                 <RefreshCw className="h-5 w-5" />
-                <span className="hidden sm:inline">Refresh</span>
+                <span className="hidden sm:inline">Actualizar</span>
               </button>
               <Link
                 href="/admin/dashboard"
@@ -478,19 +478,19 @@ export default function AdminAlertsPage() {
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <div className="text-sm text-gray-500">Total Alerts</div>
+            <div className="text-sm text-gray-500">Total de Alertas</div>
             <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
           </div>
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <div className="text-sm text-gray-500">Pending</div>
+            <div className="text-sm text-gray-500">Pendientes</div>
             <div className="text-2xl font-bold text-red-600">{stats.pending}</div>
           </div>
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <div className="text-sm text-gray-500">Critical</div>
+            <div className="text-sm text-gray-500">Críticas</div>
             <div className="text-2xl font-bold text-red-700">{stats.critical}</div>
           </div>
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <div className="text-sm text-gray-500">High</div>
+            <div className="text-sm text-gray-500">Altas</div>
             <div className="text-2xl font-bold text-orange-600">{stats.high}</div>
           </div>
         </div>
@@ -511,34 +511,34 @@ export default function AdminAlertsPage() {
               onChange={(e) => setTypeFilter(e.target.value)}
               className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             >
-              <option value="">All Types</option>
-              <option value="LOW_STOCK">Low Stock</option>
-              <option value="OUT_OF_STOCK">Out of Stock</option>
-              <option value="PAYMENT_FAILED">Payment Failed</option>
-              <option value="ORDER_DELAYED">Order Delayed</option>
-              <option value="SYSTEM_ERROR">System Error</option>
+              <option value="">Todos los Tipos</option>
+              <option value="LOW_STOCK">Stock Bajo</option>
+              <option value="OUT_OF_STOCK">Sin Stock</option>
+              <option value="PAYMENT_FAILED">Pago Fallido</option>
+              <option value="ORDER_DELAYED">Pedido Retrasado</option>
+              <option value="SYSTEM_ERROR">Error del Sistema</option>
             </select>
             <select
               value={severityFilter}
               onChange={(e) => setSeverityFilter(e.target.value)}
               className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             >
-              <option value="">All Severities</option>
-              <option value="LOW">Low</option>
-              <option value="MEDIUM">Medium</option>
-              <option value="HIGH">High</option>
-              <option value="CRITICAL">Critical</option>
+              <option value="">Todas las Severidades</option>
+              <option value="LOW">Baja</option>
+              <option value="MEDIUM">Media</option>
+              <option value="HIGH">Alta</option>
+              <option value="CRITICAL">Crítica</option>
             </select>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             >
-              <option value="">All Statuses</option>
-              <option value="PENDING">Pending</option>
-              <option value="IN_PROGRESS">In Progress</option>
-              <option value="RESOLVED">Resolved</option>
-              <option value="IGNORED">Ignored</option>
+              <option value="">Todos los Estados</option>
+              <option value="PENDING">Pendiente</option>
+              <option value="IN_PROGRESS">En Progreso</option>
+              <option value="RESOLVED">Resuelta</option>
+              <option value="IGNORED">Ignorada</option>
             </select>
           </div>
         </div>
@@ -550,14 +550,14 @@ export default function AdminAlertsPage() {
           rowKey="id"
           searchable
           searchKeys={['title', 'message', 'type']}
-          searchPlaceholder="Search alerts..."
+          searchPlaceholder="Buscar alertas..."
           pagination
           selectable
           bulkActions={bulkActions}
           exportable
           exportFilename="alerts.csv"
-          emptyMessage="No alerts to display"
-          noResultsMessage="No alerts match your search"
+          emptyMessage="No hay alertas para mostrar"
+          noResultsMessage="Ninguna alerta coincide con tu búsqueda"
         />
       </div>
 
@@ -570,7 +570,7 @@ export default function AdminAlertsPage() {
                 <CheckCircle2 className="h-6 w-6 text-green-600" />
               </div>
               <h2 className="text-xl font-bold text-gray-900">
-                Resolve Alert
+                Resolver Alerta
               </h2>
             </div>
             <p className="text-gray-600 mb-4">
@@ -578,13 +578,13 @@ export default function AdminAlertsPage() {
             </p>
             <div className="mb-4">
               <label htmlFor="resolutionNotes" className="block text-sm font-medium text-gray-700 mb-1">
-                Resolution Notes (optional)
+                Notas de Resolución (opcional)
               </label>
               <textarea
                 id="resolutionNotes"
                 value={resolutionNotes}
                 onChange={(e) => setResolutionNotes(e.target.value)}
-                placeholder="Describe how the alert was resolved..."
+                placeholder="Describe cómo se resolvió la alerta..."
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 rows={3}
               />
@@ -594,7 +594,7 @@ export default function AdminAlertsPage() {
                 onClick={() => updateStatus(selectedAlert.id, 'RESOLVED')}
                 className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors"
               >
-                Mark as Resolved
+                Marcar como Resuelta
               </button>
               <button
                 onClick={() => {
@@ -604,7 +604,7 @@ export default function AdminAlertsPage() {
                 }}
                 className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-300 transition-colors"
               >
-                Cancel
+                Cancelar
               </button>
             </div>
           </div>
@@ -619,9 +619,9 @@ export default function AdminAlertsPage() {
           setAlertToDelete(null);
         }}
         onConfirm={confirmDeleteAlert}
-        title="Delete Alert?"
-        description="This action cannot be undone. The alert will be permanently deleted."
-        confirmText="Delete"
+        title="¿Eliminar Alerta?"
+        description="Esta acción no se puede deshacer. La alerta será eliminada permanentemente."
+        confirmText="Eliminar"
         type="danger"
       />
     </div>

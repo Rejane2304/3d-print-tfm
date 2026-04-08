@@ -22,7 +22,7 @@ def load_product_images():
                     img = Image.open(path)
                     if img.width >= 400 and img.height >= 400:
                         images.append(img.copy())
-                except:
+                except Exception:
                     pass
     
     return images
@@ -45,11 +45,10 @@ def create_realistic_hero():
         # Fallback to abstract design
         draw.rectangle([0, 0, WIDTH, HEIGHT], fill='#0f0f1a')
         # Add some geometric shapes
-        for i in range(20):
+        for _ in range(20):
             x = random.randint(0, WIDTH)
             y = random.randint(0, HEIGHT)
             size = random.randint(50, 200)
-            opacity = random.randint(20, 60)
             color = (random.randint(40, 80), random.randint(40, 80), random.randint(80, 120))
             draw.ellipse([x, y, x+size, y+size], fill=color)
         base.save('/Users/rejanerodrigues/MASTER/3d-print-tfm/public/images/hero/hero-bg.jpg', 'JPEG', quality=95)
@@ -93,7 +92,7 @@ def create_realistic_hero():
         # Paste with transparency
         try:
             base.paste(img_resized, (x, y), mask)
-        except:
+        except Exception:
             base.paste(img_resized, (x, y))
     
     # Add gradient overlay for text readability

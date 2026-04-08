@@ -83,7 +83,7 @@ export async function GET(req: NextRequest) {
     // Transform to Spanish response format matching frontend expectations
     const pedidosTraducidos = pedidos.map(pedido => ({
       id: pedido.id,
-      orderNumber: pedido.orderNumber,
+      numeroPedido: pedido.orderNumber,
       estado: translateOrderStatus(pedido.status),
       total: pedido.total,
       createdAt: pedido.createdAt,

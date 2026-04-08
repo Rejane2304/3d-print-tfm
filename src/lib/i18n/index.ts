@@ -119,6 +119,7 @@ export const errorMessages: TranslationMap = {
   'You do not have permission to perform this action': 'No tienes permiso para realizar esta acción',
   'No autenticado': 'No autenticado',
   'No autorizado': 'No autorizado',
+  'Unauthorized': 'No autorizado',
   
   // Validation errors
   'The field ${field} is not valid': 'El campo ${field} no es válido',
@@ -147,13 +148,20 @@ export const errorMessages: TranslationMap = {
   
   // Server errors
   'Internal error of the server': 'Error interno del servidor',
-  'Internal error': 'Error interno',
+  'Internal error': 'Error interno del servidor',
+  'Internal server error': 'Error interno del servidor',
   'Service unavailable, try again later': 'Servicio no disponible, inténtalo más tarde',
   'Webhook processing failed': 'Procesamiento de webhook fallido',
   
   // General
   'Error unknown': 'Error desconocido',
   'Unknown': 'Desconocido',
+  'not found': 'no encontrado',
+  'is required': 'es obligatorio',
+  'Invalid': 'Inválido',
+  'Missing required fields': 'Faltan campos obligatorios',
+  'User ID required': 'ID de usuario requerido',
+  'Already exists': 'Ya existe',
   'No image': 'Sin imagen',
   'Last units!': '¡Últimas unidades!',
   'Out of stock': 'Agotado',

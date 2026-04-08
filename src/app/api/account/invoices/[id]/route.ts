@@ -82,10 +82,10 @@ export async function GET(
     // Transformar datos al formato esperado por el componente InvoiceViewer
     const facturaFormateada = {
       id: factura.id,
-      invoiceNumber: factura.invoiceNumber,
-      issuedAt: factura.issuedAt,
-      isCancelled: factura.isCancelled,
-      cancelledAt: factura.cancelledAt,
+      numeroFactura: factura.invoiceNumber,
+      emitidaEn: factura.issuedAt,
+      anulada: factura.isCancelled,
+      anuladaEn: factura.cancelledAt,
       baseImponible: Number(factura.taxableAmount),
       cuotaIva: Number(factura.vatAmount),
       tipoIva: Number(factura.vatRate),
@@ -113,8 +113,8 @@ export async function GET(
       clienteTelefono: factura.order?.user?.phone || undefined,
       // Items con imágenes
       order: {
-        orderNumber: factura.order?.orderNumber || '',
-        paymentMethod: factura.order?.paymentMethod || 'CARD',
+        numeroPedido: factura.order?.orderNumber || '',
+        metodoPago: factura.order?.paymentMethod || 'CARD',
         items: factura.order?.items.map(item => ({
           id: item.id,
           name: item.name,

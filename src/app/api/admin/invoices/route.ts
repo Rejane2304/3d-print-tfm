@@ -90,12 +90,12 @@ export async function GET(req: NextRequest) {
 
     const facturasTraducidas = facturas.map(factura => ({
       id: factura.id,
-      invoiceNumber: factura.invoiceNumber,
+      numeroFactura: factura.invoiceNumber,
       anulada: factura.isCancelled,
       emitidaEn: factura.issuedAt?.toISOString(),
       total: factura.total,
       pedido: {
-        orderNumber: factura.order?.orderNumber,
+        numeroPedido: factura.order?.orderNumber,
         usuario: {
           nombre: factura.order?.user?.name,
           nif: factura.order?.user?.taxId,
