@@ -78,7 +78,7 @@ export default function ProductImageGallery({ images, productName }: ProductImag
       <div className="space-y-4">
         {/* Main Image - Clickable */}
         <div 
-          className="relative aspect-square bg-gray-200 overflow-hidden cursor-zoom-in group"
+          className="relative aspect-[4/3] bg-gray-100 overflow-hidden cursor-zoom-in group rounded-xl"
           onClick={openModal}
         >
           <Image
@@ -86,7 +86,7 @@ export default function ProductImageGallery({ images, productName }: ProductImag
             alt={selectedImage.altText || productName}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 50vw"
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            className="object-contain transition-transform duration-300 group-hover:scale-105 bg-gray-50"
             priority
           />
           {/* Zoom icon overlay */}
@@ -103,7 +103,7 @@ export default function ProductImageGallery({ images, productName }: ProductImag
               <button
                 key={image.id}
                 onClick={() => setSelectedIndex(index)}
-                className={`relative flex-shrink-0 w-16 h-16 sm:w-full sm:aspect-square bg-gray-200 overflow-hidden transition-all ${
+                className={`relative flex-shrink-0 w-16 h-12 sm:w-full sm:aspect-[4/3] bg-gray-100 overflow-hidden transition-all rounded-lg ${
                   selectedIndex === index 
                     ? 'ring-2 ring-indigo-600 ring-offset-2' 
                     : 'hover:ring-2 hover:ring-indigo-400 hover:ring-offset-2'
@@ -116,7 +116,7 @@ export default function ProductImageGallery({ images, productName }: ProductImag
                   alt={image.altText || `${productName} - imagen ${index + 1}`}
                   fill
                   sizes="(max-width: 640px) 64px, (max-width: 768px) 25vw, (max-width: 1200px) 15vw, 12vw"
-                  className="object-cover"
+                  className="object-contain bg-gray-50"
                 />
               </button>
             ))}
