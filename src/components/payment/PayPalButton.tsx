@@ -78,9 +78,9 @@ export default function PayPalButton({ total, orderId, onSuccess, onError }: Pay
 
   if (isPending) {
     return (
-      <div className="flex items-center justify-center py-4">
-        <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
-        <span className="ml-2 text-gray-600">Cargando PayPal...</span>
+      <div className="flex items-center justify-center py-4 px-4">
+        <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin text-indigo-600 flex-shrink-0" />
+        <span className="ml-2 text-gray-600 text-sm sm:text-base">Cargando PayPal...</span>
       </div>
     );
   }

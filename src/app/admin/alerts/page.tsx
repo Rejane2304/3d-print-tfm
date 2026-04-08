@@ -8,6 +8,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { 
   Bell, 
   Loader2,
@@ -280,6 +281,7 @@ export default function AdminAlertsPage() {
       key: 'type',
       header: 'Tipo',
       sortable: true,
+      className: '',
       render: (value: unknown, row) => {
         const typeValue = value as string;
         const TipoIcon = typeIcons[typeValue] || Bell;
@@ -295,10 +297,39 @@ export default function AdminAlertsPage() {
       key: 'title',
       header: 'Alerta',
       sortable: true,
+      className: '',
       render: (value, row) => (
-        <div>
-          <div className="text-sm font-medium text-gray-900">{value as string}</div>
-          <div className="text-sm text-gray-500 max-w-md truncate">{row.message}</div>
+        <div className="flex items-start gap-3">
+          {row.product ? (
+            <Link href={`/admin/products/${row.product.slug}/editar`}>
+              {row.product.image ? (
+                <Image
+                  src={row.product.image}
+                  alt={row.product.name}
+                  width={40}
+                  height={40}
+                  className="h-10 w-10 object-cover rounded-md flex-shrink-0"
+                />
+              ) : (
+                <div className="h-10 w-10 bg-gray-100 rounded-md flex items-center justify-center flex-shrink-0">
+                  <Package className="h-5 w-5 text-gray-400" />
+                </div>
+              )}
+            </Link>
+          ) : null}
+          <div className="min-w-0 flex-1">
+            {row.product ? (
+              <Link
+                href={`/admin/products/${row.product.slug}/editar`}
+                className="text-sm font-medium text-gray-900 hover:text-indigo-600 truncate block"
+              >
+                {value as string}
+              </Link>
+            ) : (
+              <div className="text-sm font-medium text-gray-900 truncate">{value as string}</div>
+            )}
+            <div className="text-sm text-gray-500 max-w-xs sm:max-w-md truncate">{row.message}</div>
+          </div>
         </div>
       ),
     },
@@ -306,6 +337,7 @@ export default function AdminAlertsPage() {
       key: 'severity',
       header: 'Severidad',
       sortable: true,
+      className: 'hidden sm:table-cell',
       render: (value: unknown) => (
         <span className={`px-2 py-1 rounded-full text-xs font-medium ${severityColors[value as string] || 'bg-gray-100'}`}>
           {severityLabels[value as string] || (value as string)}
@@ -316,6 +348,7 @@ export default function AdminAlertsPage() {
       key: 'status',
       header: 'Estado',
       sortable: true,
+      className: 'hidden md:table-cell',
       render: (value: unknown) => (
         <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[value as string] || 'bg-gray-100'}`}>
           {statusLabels[value as string] || (value as string)}
@@ -326,6 +359,7 @@ export default function AdminAlertsPage() {
       key: 'createdAt',
       header: 'Fecha',
       sortable: true,
+      className: 'hidden lg:table-cell',
       render: (value) => (
         <span className="text-sm text-gray-500">
           {new Date(value as string).toLocaleDateString('es-ES')}
@@ -335,6 +369,7 @@ export default function AdminAlertsPage() {
     {
       key: 'actions',
       header: 'Acciones',
+      className: '',
       render: (_, row) => (
         <div className="flex items-center justify-end gap-1">
           {row.status === 'PENDING' && (

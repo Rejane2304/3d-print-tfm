@@ -221,10 +221,10 @@ export default function CheckoutPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-indigo-600 mx-auto mb-4" />
-          <p className="text-gray-600">Cargando checkout...</p>
+          <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin text-indigo-600 mx-auto mb-4" />
+          <p className="text-gray-600 text-sm sm:text-base">Cargando checkout...</p>
         </div>
       </div>
     );
@@ -233,33 +233,33 @@ export default function CheckoutPage() {
   // If order is complete, show success screen
   if (orderComplete) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-2xl mx-auto px-4">
-          <div className="bg-white rounded-lg shadow-sm border p-8 text-center">
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle2 className="h-10 w-10 text-green-600" />
+      <div className="min-h-screen bg-gray-50 py-6 sm:py-8">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6">
+          <div className="bg-white rounded-lg shadow-sm border p-6 sm:p-8 text-center">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+              <CheckCircle2 className="h-8 w-8 sm:h-10 sm:w-10 text-green-600" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
               ¡Pago completado!
             </h1>
-            
-            <p className="text-gray-600 mb-4">
+
+            <p className="text-gray-600 mb-4 text-sm sm:text-base">
               Tu pedido ha sido procesado exitosamente.
             </p>
-            
+
             {orderData && (
-              <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                <p className="text-sm text-gray-600 mb-1">Número de pedido:</p>
-                <p className="text-xl font-bold text-indigo-600">{orderData.orderNumber}</p>
+              <div className="bg-gray-50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
+                <p className="text-xs sm:text-sm text-gray-600 mb-1">Número de pedido:</p>
+                <p className="text-lg sm:text-xl font-bold text-indigo-600">{orderData.orderNumber}</p>
               </div>
             )}
-            
-            <p className="text-sm text-gray-500 mb-6">
+
+            <p className="text-xs sm:text-sm text-gray-500 mb-4 sm:mb-6">
               Redirigiendo a los detalles de tu pedido...
             </p>
-            
+
             <div className="animate-pulse">
-              <Loader2 className="h-6 w-6 animate-spin text-indigo-600 mx-auto" />
+              <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin text-indigo-600 mx-auto" />
             </div>
           </div>
         </div>
@@ -278,47 +278,47 @@ export default function CheckoutPage() {
   const selectedPaymentMethod = paymentMethods.find(m => m.id === paymentMethod);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-6 sm:py-8">
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 sm:mb-4">
             Finalizar Compra
           </h1>
-          <p className="text-gray-600">Revisa tu pedido, elige método de pago y confirma</p>
+          <p className="text-gray-600 text-sm sm:text-base">Revisa tu pedido, elige método de pago y confirma</p>
         </div>
 
         {/* Error */}
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-red-700">{error}</p>
+          <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-red-700 text-sm sm:text-base">{error}</p>
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
           {/* Columna izquierda: Datos de envío y productos */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Dirección de envío */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center justify-between mb-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-2">
                 <div className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-indigo-600" />
-                  <h2 className="text-xl font-semibold">Dirección de envío</h2>
+                  <MapPin className="h-5 w-5 text-indigo-600 flex-shrink-0" />
+                  <h2 className="text-lg sm:text-xl font-semibold">Dirección de envío</h2>
                 </div>
                 <a
                   href="/account/addresses"
-                  className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
+                  className="text-sm text-indigo-600 hover:text-indigo-800 font-medium whitespace-nowrap"
                 >
                   Gestionar direcciones →
                 </a>
               </div>
 
               {addresses.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-gray-600 mb-4">No tienes direcciones guardadas</p>
+                <div className="text-center py-6 sm:py-8">
+                  <p className="text-gray-600 mb-4 text-sm sm:text-base">No tienes direcciones guardadas</p>
                   <a
                     href="/account/addresses"
-                    className="inline-flex items-center bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+                    className="inline-flex items-center bg-indigo-600 text-white px-4 py-2.5 rounded-lg hover:bg-indigo-700 transition-colors text-sm sm:text-base min-h-[44px]"
                   >
                     Añadir dirección
                   </a>
@@ -329,7 +329,7 @@ export default function CheckoutPage() {
                     <label
                       key={address.id}
                       htmlFor={`address-${address.id}`}
-                      className={`flex items-start gap-4 p-4 rounded-lg border-2 cursor-pointer transition-colors ${
+                      className={`flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-colors min-h-[44px] ${
                         selectedAddressId === address.id
                           ? 'border-indigo-600 bg-indigo-50'
                           : 'border-gray-200 hover:border-gray-300'
@@ -342,11 +342,11 @@ export default function CheckoutPage() {
                         value={address.id}
                         checked={selectedAddressId === address.id}
                         onChange={() => setSelectedAddressId(address.id)}
-                        className="mt-1"
+                        className="mt-1 w-4 h-4 min-w-[16px] min-h-[16px]"
                       />
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium text-gray-900">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-medium text-gray-900 text-sm sm:text-base">
                             {translateAddressName(address.name)}
                           </span>
                           {address.isDefault && (
@@ -355,14 +355,14 @@ export default function CheckoutPage() {
                             </span>
                           )}
                         </div>
-                        <p className="text-sm text-gray-600 mt-1">{address.address}</p>
+                        <p className="text-sm text-gray-600 mt-1 truncate">{address.address}</p>
                         {address.complement && (
-                          <p className="text-sm text-gray-600">{address.complement}</p>
+                          <p className="text-sm text-gray-600 truncate">{address.complement}</p>
                         )}
                         <p className="text-sm text-gray-600">
                           {address.postalCode} {address.city}, {address.province}
                         </p>
-                        <p className="text-sm text-gray-600">Teléfono: {address.phone}</p>
+                        <p className="text-sm text-gray-600">Tel: {address.phone}</p>
                       </div>
                     </label>
                   ))}
@@ -371,32 +371,32 @@ export default function CheckoutPage() {
             </div>
 
             {/* Productos */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="text-xl font-semibold mb-4">Resumen del pedido</h2>
-              
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-semibold mb-4">Resumen del pedido</h2>
+
               {cart?.items.map((item) => (
-                <div key={item.id} className="flex items-center gap-4 py-3 border-b border-gray-100 last:border-0">
-                  <div className="w-20 h-20 bg-gray-100 flex-shrink-0 overflow-hidden relative">
+                <div key={item.id} className="flex items-center gap-3 sm:gap-4 py-3 border-b border-gray-100 last:border-0">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 flex-shrink-0 overflow-hidden relative rounded">
                     {item.product.image ? (
                       <Image
                         src={item.product.image}
                         alt={item.product.name}
                         fill
-                        sizes="80px"
+                        sizes="(max-width: 640px) 64px, 80px"
                         className="object-cover"
                         unoptimized
                       />
                     ) : (
-                      <Package className="w-full h-full p-4 text-gray-400" />
+                      <Package className="w-full h-full p-3 sm:p-4 text-gray-400" />
                     )}
                   </div>
-                  <div className="flex-1">
-                    <p className="font-medium">{item.product.name}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm sm:text-base truncate">{item.product.name}</p>
                     <p className="text-sm text-gray-600">
                       {item.quantity} x {(item.unitPrice || 0).toFixed(2)} €
                     </p>
                   </div>
-                  <p className="font-semibold">
+                  <p className="font-semibold text-sm sm:text-base whitespace-nowrap">
                     {((item.quantity || 1) * (item.unitPrice || 0)).toFixed(2)} €
                   </p>
                 </div>
@@ -406,18 +406,18 @@ export default function CheckoutPage() {
 
           {/* Columna derecha: Método de pago y confirmación */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-24">
-              <h2 className="text-xl font-semibold mb-6">Método de pago</h2>
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 lg:sticky lg:top-24">
+              <h2 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6">Método de pago</h2>
 
               {/* Selector de métodos de pago */}
-              <div className="space-y-3 mb-6">
+              <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
                 {paymentMethods.map((method) => {
                   const Icon = method.icon;
                   return (
                     <label
                       key={method.id}
                       htmlFor={`payment-${method.id}`}
-                      className={`flex items-center gap-4 p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                      className={`flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-all min-h-[44px] ${
                         paymentMethod === method.id
                           ? `${method.borderColor} ${method.bgColor}`
                           : 'border-gray-200 hover:border-gray-300'
@@ -435,12 +435,12 @@ export default function CheckoutPage() {
                         }}
                         className="sr-only"
                       />
-                      <div className={`p-2 rounded-lg ${method.bgColor}`}>
-                        <Icon className={`h-6 w-6 ${method.color}`} />
+                      <div className={`p-1.5 sm:p-2 rounded-lg ${method.bgColor} flex-shrink-0`}>
+                        <Icon className={`h-5 w-5 sm:h-6 sm:w-6 ${method.color}`} />
                       </div>
-                      <div className="flex-1">
-                        <span className="font-medium text-gray-900">{method.name}</span>
-                        <p className="text-sm text-gray-500">{method.description}</p>
+                      <div className="flex-1 min-w-0">
+                        <span className="font-medium text-gray-900 text-sm sm:text-base block">{method.name}</span>
+                        <p className="text-xs sm:text-sm text-gray-500">{method.description}</p>
                       </div>
                     </label>
                   );
@@ -448,25 +448,25 @@ export default function CheckoutPage() {
               </div>
 
               {/* Resumen de totales */}
-              <div className="border-t pt-6 mb-6">
-                <h3 className="text-lg font-semibold mb-4">Total del pedido</h3>
-                
-                <div className="space-y-3">
-                  <div className="flex justify-between text-gray-600">
+              <div className="border-t pt-4 sm:pt-6 mb-4 sm:mb-6">
+                <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Total del pedido</h3>
+
+                <div className="space-y-2 sm:space-y-3">
+                  <div className="flex justify-between text-gray-600 text-sm sm:text-base">
                     <span>Subtotal</span>
                     <span>{subtotal.toFixed(2)} €</span>
                   </div>
-                  <div className="flex justify-between text-gray-600">
+                  <div className="flex justify-between text-gray-600 text-sm sm:text-base">
                     <span>Envío</span>
                     <span className={shippingCost === 0 ? 'text-green-600' : ''}>
                       {shippingCost === 0 ? 'Gratis' : `${shippingCost.toFixed(2)} €`}
                     </span>
                   </div>
-                  <div className="flex justify-between text-gray-600">
+                  <div className="flex justify-between text-gray-600 text-sm sm:text-base">
                     <span>IVA (21%)</span>
                     <span>{taxAmount.toFixed(2)} €</span>
                   </div>
-                  <div className="flex justify-between text-xl font-bold border-t pt-3">
+                  <div className="flex justify-between text-lg sm:text-xl font-bold border-t pt-3">
                     <span>Total</span>
                     <span className="text-indigo-600">{total.toFixed(2)} €</span>
                   </div>
@@ -478,14 +478,14 @@ export default function CheckoutPage() {
                 <button
                   onClick={() => setShowConfirmation(true)}
                   disabled={!selectedAddressId || addresses.length === 0}
-                  className="w-full bg-indigo-600 text-white py-4 px-6 rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="w-full bg-indigo-600 text-white py-3.5 sm:py-4 px-6 rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px]"
                 >
                   Confirmar pedido
                 </button>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {/* Confirmación final */}
-                  <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-4">
+                  <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 sm:p-4">
                     <p className="text-sm text-indigo-900 font-medium mb-2">
                       ¿Confirmar compra?
                     </p>
@@ -495,21 +495,21 @@ export default function CheckoutPage() {
                     </p>
                   </div>
 
-                  <div className="flex gap-3">
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                     <button
                       onClick={processPayment}
                       disabled={processing}
-                      className="flex-1 bg-indigo-600 text-white py-4 px-6 rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
+                      className="flex-1 bg-indigo-600 text-white py-3.5 sm:py-4 px-4 sm:px-6 rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors min-h-[44px]"
                     >
                       {processing ? (
                         <>
-                          <Loader2 className="h-5 w-5 animate-spin" />
-                          Procesando...
+                          <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                          <span className="text-sm sm:text-base">Procesando...</span>
                         </>
                       ) : (
                         <>
-                          <CheckCircle2 className="h-5 w-5" />
-                          Sí, pagar {total.toFixed(2)} €
+                          <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                          <span className="text-sm sm:text-base">Sí, pagar {total.toFixed(2)} €</span>
                         </>
                       )}
                     </button>
@@ -517,7 +517,7 @@ export default function CheckoutPage() {
                     <button
                       onClick={() => setShowConfirmation(false)}
                       disabled={processing}
-                      className="flex-1 bg-gray-200 text-gray-700 py-4 px-6 rounded-lg font-medium hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="flex-1 bg-gray-200 text-gray-700 py-3.5 sm:py-4 px-4 sm:px-6 rounded-lg font-medium hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px] text-sm sm:text-base"
                     >
                       Cancelar
                     </button>

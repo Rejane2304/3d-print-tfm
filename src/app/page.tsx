@@ -138,11 +138,11 @@ export default async function HomePage() {
       {/* Categorías Section */}
       <section className="pt-16 pb-12 lg:pt-20 lg:pb-16 bg-gray-50">
         <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 3xl:px-20">
-          <h2 className="text-3xl lg:text-4xl font-bold text-center text-gray-900 mb-12">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center text-gray-900 mb-8 sm:mb-12">
             Explora por categorías
           </h2>
-          
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-6">
             {categories.map((category) => (
               <Link
                 key={category.slug}
@@ -160,8 +160,8 @@ export default async function HomePage() {
                   <div className="w-full h-full bg-gradient-to-br from-indigo-400 to-purple-500" />
                 )}
                 <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors" />
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
-                  <span className="text-xl lg:text-2xl font-bold text-center px-4">{category.name}</span>
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-2">
+                  <span className="text-base sm:text-lg lg:text-2xl font-bold text-center px-2 sm:px-4">{category.name}</span>
                 </div>
               </Link>
             ))}
@@ -173,12 +173,12 @@ export default async function HomePage() {
       <section className="pt-12 pb-20 lg:pt-16 lg:pb-28 bg-gray-50">
         <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 3xl:px-20">
           {/* Section Header */}
-          <div className="text-center mb-16">
-            <span className="inline-block px-4 py-1.5 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium mb-4">
+          <div className="text-center mb-10 sm:mb-16">
+            <span className="inline-block px-3 sm:px-4 py-1.5 bg-indigo-100 text-indigo-700 rounded-full text-xs sm:text-sm font-medium mb-3 sm:mb-4">
               Más Populares
             </span>
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">Productos Destacados</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4">Productos Destacados</h2>
+            <p className="text-sm sm:text-lg text-gray-600 max-w-2xl mx-auto px-4 sm:px-0">
               Los favoritos de nuestros clientes, impresos con la mejor calidad
             </p>
           </div>
@@ -270,9 +270,9 @@ export default async function HomePage() {
       </section>
 
       {/* Características */}
-      <section className="py-16 lg:py-24 bg-indigo-50">
+      <section className="py-12 sm:py-16 lg:py-24 bg-indigo-50">
         <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 3xl:px-20">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 lg:gap-12">
             {[
               {
                 icon: '🏆',
@@ -290,10 +290,10 @@ export default async function HomePage() {
                 description: 'Atención al cliente especializada. Resolvemos tus dudas en 24 horas.',
               },
             ].map((feature) => (
-              <div key={feature.title} className="text-center">
-                <span className="text-4xl lg:text-5xl mb-4 block">{feature.icon}</span>
-                <h3 className="text-xl lg:text-2xl font-semibold text-gray-900 mb-3">{feature.title}</h3>
-                <p className="text-gray-600">{feature.description}</p>
+              <div key={feature.title} className="text-center px-2 sm:px-0">
+                <span className="text-3xl sm:text-4xl lg:text-5xl mb-3 sm:mb-4 block">{feature.icon}</span>
+                <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900 mb-2 sm:mb-3">{feature.title}</h3>
+                <p className="text-sm sm:text-base text-gray-600">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -301,19 +301,19 @@ export default async function HomePage() {
       </section>
 
       {/* CTA Final */}
-      <section className="py-16 lg:py-24">
+      <section className="py-12 sm:py-16 lg:py-24">
         <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 3xl:px-20 text-center">
-          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 sm:mb-6 px-4 sm:px-0">
             ¿Listo para empezar?
           </h2>
-          
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+
+          <p className="text-base sm:text-xl text-gray-600 mb-6 sm:mb-8 max-w-2xl mx-auto px-4 sm:px-0">
             Descubre nuestra colección única de productos impresos en 3D.
           </p>
-          
+
           <Link
             href="/products"
-            className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-lg font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
+            className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 border border-transparent text-base sm:text-lg font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
           >
             Ver productos
           </Link>

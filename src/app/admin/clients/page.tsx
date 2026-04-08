@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Loader2, User, Phone, ShoppingBag, DollarSign, Calendar, Trash2 } from 'lucide-react';
+import { Loader2, User, ShoppingBag, DollarSign, Calendar, Eye, Trash2 } from 'lucide-react';
 import { DataTable, Column, BulkAction } from '@/components/ui/DataTable';
 
 interface Client {
@@ -98,52 +98,47 @@ export default function AdminClientsPage() {
   const columns: Column<Client>[] = [
     {
       key: 'nombre',
-      header: 'Cliente',
+      header: 'Nombre',
       sortable: true,
+      className: '',
       render: (_, row) => (
         <div className="flex items-center">
           <div className="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
             <User className="h-5 w-5 text-indigo-600" />
           </div>
-          <div className="ml-4">
-            <div className="text-sm font-medium text-gray-900">{row.nombre}</div>
-            <div className="text-sm text-gray-500">{row.email}</div>
+          <div className="ml-4 min-w-0">
+            <div className="text-sm font-medium text-gray-900 truncate">{row.nombre}</div>
+            <div className="text-sm text-gray-500 hidden sm:block">{row.email}</div>
           </div>
         </div>
       ),
     },
     {
-      key: 'telefono',
-      header: 'Contacto',
-      render: (value: unknown) => (
-        <div className="flex items-center text-sm text-gray-500">
-          <Phone className="h-4 w-4 mr-1" />
-          {value as string || 'N/A'}
-        </div>
+      key: 'email',
+      header: 'Email',
+      sortable: true,
+      className: 'hidden sm:table-cell',
+      render: (value) => (
+        <span className="text-sm text-gray-600 truncate">{value as string}</span>
       ),
     },
     {
       key: 'totalPedidos',
       header: 'Pedidos',
       sortable: true,
-      render: (value: unknown, row) => (
-        <div>
-          <div className="flex items-center text-sm text-gray-900">
-            <ShoppingBag className="h-4 w-4 mr-1 text-indigo-500" />
-            {value as number}
-          </div>
-          {row.fechaUltimoPedido && (
-            <div className="text-xs text-gray-500">
-              Último: {formatDate(row.fechaUltimoPedido)}
-            </div>
-          )}
+      className: 'hidden md:table-cell',
+      render: (value: unknown) => (
+        <div className="flex items-center text-sm text-gray-900">
+          <ShoppingBag className="h-4 w-4 mr-1 text-indigo-500" />
+          {value as number}
         </div>
       ),
     },
     {
       key: 'totalGastado',
-      header: 'Total Gastado',
+      header: 'Total',
       sortable: true,
+      className: 'hidden lg:table-cell',
       render: (value) => (
         <div className="flex items-center text-sm font-medium text-gray-900">
           <DollarSign className="h-4 w-4 mr-1 text-green-500" />
@@ -152,40 +147,28 @@ export default function AdminClientsPage() {
       ),
     },
     {
-      key: 'creadoEn',
-      header: 'Registro',
+      key: 'fechaUltimoPedido',
+      header: 'Último',
       sortable: true,
+      className: 'hidden xl:table-cell',
       render: (value) => (
-        <div className="flex items-center text-sm text-gray-500">
-          <Calendar className="h-4 w-4 mr-1" />
-          {formatDate(value as string)}
-        </div>
-      ),
-    },
-    {
-      key: 'activo',
-      header: 'Estado',
-      sortable: true,
-      render: (value) => (
-        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-          value 
-            ? 'bg-green-100 text-green-800' 
-            : 'bg-red-100 text-red-800'
-        }`}>
-          {value ? 'Activo' : 'Inactivo'}
-        </span>
+        <span className="text-sm text-gray-500">{formatDate(value as string)}</span>
       ),
     },
     {
       key: 'actions',
       header: 'Acciones',
+      className: '',
       render: (_, row) => (
-        <Link
-          href={`/admin/clients/${row.id}`}
-          className="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
-        >
-          Ver detalles
-        </Link>
+        <div className="flex items-center gap-1">
+          <Link
+            href={`/admin/clients/${row.id}`}
+            className="text-indigo-600 hover:text-indigo-900 p-1.5 rounded hover:bg-indigo-50 transition-colors"
+            title="Ver detalles"
+          >
+            <Eye className="h-4 w-4" />
+          </Link>
+        </div>
       ),
     },
   ];

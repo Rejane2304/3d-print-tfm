@@ -70,11 +70,12 @@ export default function Footer() {
   return (
     <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
       {/* Main Footer Content */}
-      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 3xl:px-20 py-12 lg:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-12">
+      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-12 lg:py-16">
+        {/* Responsive Grid: 1 col mobile, 2 cols sm, 4 cols lg */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-12">
           
-          {/* Logo y descripción - ocupa más espacio */}
-          <div className="lg:col-span-5">
+          {/* Logo y descripción - spans full width on mobile, 6 cols on lg */}
+          <div className="lg:col-span-6">
             {/* Logo en color */}
             <div className="mb-6">
               <Image
@@ -82,24 +83,22 @@ export default function Footer() {
                 alt="3D Print"
                 width={180}
                 height={60}
-                className="h-12 w-auto brightness-0 invert"
+                className="h-10 sm:h-12 w-auto brightness-0 invert"
                 style={{ filter: 'none' }}
               />
             </div>
             
-            <p className="text-gray-300 text-sm lg:text-base leading-relaxed mb-6 max-w-md">
+            <p className="text-gray-300 text-sm sm:text-base leading-relaxed mb-6 max-w-md">
               E-commerce especializado en productos impresos en 3D de alta calidad.
             </p>
 
-            {/* Social Links */}
-            
-            <div className="flex items-center gap-4">
-              
+            {/* Social Links - Wrap on small screens */}
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4">
               <a
                 href="https://instagram.com/3dprint_tfm"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-indigo-600 transition-all duration-300 group"
+                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-indigo-600 transition-all duration-300 min-h-[44px] min-w-[44px]"
                 aria-label="Instagram"
               >
                 <InstagramIcon />
@@ -109,7 +108,7 @@ export default function Footer() {
                 href="https://facebook.com/3dprint_tfm"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-indigo-600 transition-all duration-300 group"
+                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-indigo-600 transition-all duration-300 min-h-[44px] min-w-[44px]"
                 aria-label="Facebook"
               >
                 <FacebookIcon />
@@ -119,7 +118,7 @@ export default function Footer() {
                 href="https://tiktok.com/@3dprint_tfm"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-indigo-600 transition-all duration-300 group"
+                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-indigo-600 transition-all duration-300 min-h-[44px] min-w-[44px]"
                 aria-label="TikTok"
               >
                 <TikTokIcon />
@@ -127,138 +126,144 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Enlaces rápidos */}
-          <div className="lg:col-span-2">
-            <h4 className="text-lg font-semibold mb-4 text-white flex items-center gap-2">
-              <span className="w-1 h-5 bg-indigo-500 rounded-full"></span>
-              Enlaces
-            </h4>
-            <ul className="space-y-3">
-              <li>
-                <Link href="/" className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-2 group">
-                  <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-indigo-400 transition-colors"></span>
-                  Inicio
-                </Link>
-              </li>
-              <li>
-                <Link href="/products" className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-2 group">
-                  <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-indigo-400 transition-colors"></span>
-                  Catálogo
-                </Link>
-              </li>
-              <li>
-                <Link href="/faqs" className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-2 group">
-                  <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-indigo-400 transition-colors"></span>
-                  FAQs
-                </Link>
-              </li>
-              <li>
-                <Link href="/account/profile" className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-2 group">
-                  <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-indigo-400 transition-colors"></span>
-                  Mi Cuenta
-                </Link>
-              </li>
-              {!isAdmin && (
-                <li>
-                  <Link href="/cart" className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-2 group">
-                    <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-indigo-400 transition-colors"></span>
-                    Carrito
-                  </Link>
-                </li>
-              )}
-            </ul>
-          </div>
+          {/* Enlaces rápidos - 6 cols on lg */}
+          <div className="lg:col-span-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+              {/* Quick Links */}
+              <div>
+                <h4 className="text-base sm:text-lg font-semibold mb-4 text-white flex items-center gap-2">
+                  <span className="w-1 h-5 bg-indigo-500 rounded-full flex-shrink-0"></span>
+                  <span className="truncate">Enlaces</span>
+                </h4>
+                <ul className="space-y-3">
+                  <li>
+                    <Link href="/" className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-2 group min-h-[24px]">
+                      <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-indigo-400 transition-colors flex-shrink-0"></span>
+                      <span className="truncate">Inicio</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/products" className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-2 group min-h-[24px]">
+                      <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-indigo-400 transition-colors flex-shrink-0"></span>
+                      <span className="truncate">Catálogo</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/faqs" className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-2 group min-h-[24px]">
+                      <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-indigo-400 transition-colors flex-shrink-0"></span>
+                      <span className="truncate">FAQs</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/account/profile" className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-2 group min-h-[24px]">
+                      <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-indigo-400 transition-colors flex-shrink-0"></span>
+                      <span className="truncate">Mi Cuenta</span>
+                    </Link>
+                  </li>
+                  {!isAdmin && (
+                    <li>
+                      <Link href="/cart" className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-2 group min-h-[24px]">
+                        <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-indigo-400 transition-colors flex-shrink-0"></span>
+                        <span className="truncate">Carrito</span>
+                      </Link>
+                    </li>
+                  )}
+                </ul>
+              </div>
 
-          {/* Información legal */}
-          <div className="lg:col-span-2">
-            <h4 className="text-lg font-semibold mb-4 text-white flex items-center gap-2">
-              <span className="w-1 h-5 bg-indigo-500 rounded-full"></span>
-              Legal
-            </h4>
-            <ul className="space-y-3">
-              <li>
-                <Link href="/terms" className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-2 group">
-                  <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-indigo-400 transition-colors"></span>
-                  Términos y condiciones
-                </Link>
-              </li>
-              <li>
-                <Link href="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-2 group">
-                  <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-indigo-400 transition-colors"></span>
-                  Política de privacidad
-                </Link>
-              </li>
-              <li>
-                <Link href="/cookies" className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-2 group">
-                  <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-indigo-400 transition-colors"></span>
-                  Política de cookies
-                </Link>
-              </li>
-              <li>
-                <Link href="/legal" className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-2 group">
-                  <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-indigo-400 transition-colors"></span>
-                  Aviso legal
-                </Link>
-              </li>
-            </ul>
-          </div>
+              {/* Legal Links */}
+              <div>
+                <h4 className="text-base sm:text-lg font-semibold mb-4 text-white flex items-center gap-2">
+                  <span className="w-1 h-5 bg-indigo-500 rounded-full flex-shrink-0"></span>
+                  <span className="truncate">Legal</span>
+                </h4>
+                <ul className="space-y-3">
+                  <li>
+                    <Link href="/terms" className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-2 group min-h-[24px]">
+                      <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-indigo-400 transition-colors flex-shrink-0"></span>
+                      <span className="truncate">Términos y condiciones</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-2 group min-h-[24px]">
+                      <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-indigo-400 transition-colors flex-shrink-0"></span>
+                      <span className="truncate">Política de privacidad</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/cookies" className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-2 group min-h-[24px]">
+                      <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-indigo-400 transition-colors flex-shrink-0"></span>
+                      <span className="truncate">Política de cookies</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/legal" className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-2 group min-h-[24px]">
+                      <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-indigo-400 transition-colors flex-shrink-0"></span>
+                      <span className="truncate">Aviso legal</span>
+                    </Link>
+                  </li>
+                </ul>
+              </div>
 
-          {/* Contacto */}
-          <div className="lg:col-span-3">
-            <h4 className="text-lg font-semibold mb-4 text-white flex items-center gap-2">
-              <span className="w-1 h-5 bg-indigo-500 rounded-full"></span>
-              Contacto
-            </h4>
-            <ul className="space-y-4">
-              <li className="flex items-start gap-3 group">
-                <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 group-hover:bg-indigo-600 transition-colors">
-                  <Mail className="h-4 w-4 text-gray-300 group-hover:text-white" />
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-0.5">Email</p>
-                  <a href={`mailto:${companyEmail}`} className="text-gray-300 hover:text-white text-sm transition-colors">
-                    {companyEmail}
-                  </a>
-                </div>
-              </li>
-              <li className="flex items-start gap-3 group">
-                <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 group-hover:bg-indigo-600 transition-colors">
-                  <Phone className="h-4 w-4 text-gray-300 group-hover:text-white" />
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-0.5">Teléfono</p>
-                  <a href={`tel:${companyPhone.replace(/\s/g, '')}`} className="text-gray-300 hover:text-white text-sm transition-colors">
-                    {formattedPhone}
-                  </a>
-                </div>
-              </li>
-              <li className="flex items-start gap-3 group">
-                <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 group-hover:bg-indigo-600 transition-colors">
-                  <MapPin className="h-4 w-4 text-gray-300 group-hover:text-white" />
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-0.5">Ubicación</p>
-                  <p className="text-gray-300 text-sm">
-                    {companyCity}, {companyProvince}
-                  </p>
-                </div>
-              </li>
-            </ul>
+              {/* Contact */}
+              <div>
+                <h4 className="text-base sm:text-lg font-semibold mb-4 text-white flex items-center gap-2">
+                  <span className="w-1 h-5 bg-indigo-500 rounded-full flex-shrink-0"></span>
+                  <span className="truncate">Contacto</span>
+                </h4>
+                <ul className="space-y-4">
+                  <li className="flex items-start gap-3 group min-h-[44px]">
+                    <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 group-hover:bg-indigo-600 transition-colors">
+                      <Mail className="h-4 w-4 text-gray-300 group-hover:text-white" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-gray-500 mb-0.5">Email</p>
+                      <a href={`mailto:${companyEmail}`} className="text-gray-300 hover:text-white text-sm transition-colors block truncate">
+                        {companyEmail}
+                      </a>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3 group min-h-[44px]">
+                    <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 group-hover:bg-indigo-600 transition-colors">
+                      <Phone className="h-4 w-4 text-gray-300 group-hover:text-white" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-gray-500 mb-0.5">Teléfono</p>
+                      <a href={`tel:${companyPhone.replace(/\s/g, '')}`} className="text-gray-300 hover:text-white text-sm transition-colors block truncate">
+                        {formattedPhone}
+                      </a>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3 group min-h-[44px]">
+                    <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 group-hover:bg-indigo-600 transition-colors">
+                      <MapPin className="h-4 w-4 text-gray-300 group-hover:text-white" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-gray-500 mb-0.5">Ubicación</p>
+                      <p className="text-gray-300 text-sm truncate">
+                        {companyCity}, {companyProvince}
+                      </p>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Bottom Bar */}
       <div className="border-t border-white/10">
-        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 3xl:px-20 py-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-gray-400 text-sm text-center md:text-left flex items-center gap-1">
-              © {currentYear} 3D Print. Hecho con 
-              <Heart className="h-4 w-4 text-red-500 fill-red-500" /> 
-              en Barcelona
+        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-6">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <p className="text-gray-400 text-sm text-center sm:text-left flex items-center justify-center sm:justify-start gap-1 flex-wrap">
+              <span className="whitespace-nowrap">© {currentYear} 3D Print.</span>
+              <span className="flex items-center gap-1 whitespace-nowrap">
+                Hecho con <Heart className="h-4 w-4 text-red-500 fill-red-500" /> en Barcelona
+              </span>
             </p>
-            <p className="text-gray-500 text-xs text-center md:text-right flex items-center gap-2">
-              <span className="bg-white/5 px-3 py-1 rounded-full">
+            <p className="text-gray-500 text-xs text-center sm:text-right">
+              <span className="bg-white/5 px-3 py-1 rounded-full inline-block">
                 Next.js · Prisma · PostgreSQL · Tailwind
               </span>
             </p>

@@ -1,6 +1,7 @@
 /**
  * Página de Mis Pedidos - Usuario
  * Historial completo de pedidos del usuario autenticado
+ * Responsive: mobile → 4K
  */
 'use client';
 
@@ -109,10 +110,10 @@ export default function MyOrdersPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-indigo-600 mx-auto mb-4" />
-          <p className="text-gray-600">Cargando pedidos...</p>
+          <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin text-indigo-600 mx-auto mb-4" />
+          <p className="text-gray-600 text-sm sm:text-base">Cargando pedidos...</p>
         </div>
       </div>
     );
@@ -122,43 +123,37 @@ export default function MyOrdersPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
-        <div className="max-w-[1920px] 3xl:max-w-[2200px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="max-w-[1920px] 3xl:max-w-[2200px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Mis Pedidos</h1>
-              <p className="mt-2 text-gray-600">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Mis Pedidos</h1>
+              <p className="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">
                 {orders.length} {orders.length === 1 ? 'pedido' : 'pedidos'} en total
               </p>
             </div>
-            <Link
-              href="/account"
-              className="text-indigo-600 hover:text-indigo-800 font-medium"
-            >
-              ← Volver a mi cuenta
-            </Link>
           </div>
         </div>
       </div>
 
-      <div className="max-w-[1920px] 3xl:max-w-[2200px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-[1920px] 3xl:max-w-[2200px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Error */}
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
-            <AlertCircle className="h-5 w-5 text-red-600" />
-            <p className="text-red-700">{error}</p>
+          <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 sm:gap-3">
+            <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-600 flex-shrink-0" />
+            <p className="text-red-700 text-sm">{error}</p>
           </div>
         )}
 
         {/* Filtros */}
-        <div className="bg-white rounded-lg shadow-sm border p-4 mb-6">
+        <div className="bg-white rounded-lg shadow-sm border p-3 sm:p-4 mb-4 sm:mb-6 overflow-x-auto">
           <div className="flex items-center gap-2 mb-3">
-            <Filter className="h-5 w-5 text-gray-500" />
-            <span className="font-medium text-gray-700">Filtrar por estado:</span>
+            <Filter className="h-4 w-4 text-gray-500 flex-shrink-0" />
+            <span className="font-medium text-gray-700 text-sm whitespace-nowrap">Filtrar por estado:</span>
           </div>
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setStatusFilter('')}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
                 statusFilter === ''
                   ? 'bg-indigo-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -173,17 +168,17 @@ export default function MyOrdersPage() {
                 <button
                   key={estado}
                   onClick={() => setStatusFilter(estado)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2 ${
+                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-colors flex items-center gap-1.5 sm:gap-2 whitespace-nowrap ${
                     statusFilter === estado
                       ? 'bg-indigo-600 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
-                  <Icon className="h-4 w-4" />
-                  {config.label}
+                  <Icon className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span>{config.label}</span>
                   {count > 0 && (
-                    <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${
-                      statusFilter === estado ? 'bg-indigo-500' : 'bg-gray-300 text-gray-700'
+                    <span className={`ml-0.5 sm:ml-1 px-1.5 sm:px-2 py-0.5 rounded-full text-xs ${
+                      statusFilter === estado ? 'bg-indigo-500 text-white' : 'bg-gray-300 text-gray-700'
                     }`}>
                       {count}
                     </span>
@@ -196,26 +191,26 @@ export default function MyOrdersPage() {
 
         {/* Lista de pedidos */}
         {filteredOrders.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm border p-12 text-center">
-            <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+          <div className="bg-white rounded-lg shadow-sm border p-8 sm:p-12 text-center">
+            <Package className="h-12 w-12 sm:h-16 sm:w-16 text-gray-300 mx-auto mb-3 sm:mb-4" />
+            <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">
               {statusFilter ? 'No hay pedidos con este estado' : 'No tienes pedidos'}
             </h3>
-            <p className="text-gray-500 mb-6">
+            <p className="text-sm text-gray-500 mb-4 sm:mb-6">
               {statusFilter
                 ? 'Prueba con otro filtro o espera a que se actualicen tus pedidos'
                 : 'Aún no has realizado ningún pedido. ¡Explora nuestro catálogo!'}
             </p>
             <Link
               href="/products"
-              className="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+              className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors text-sm sm:text-base"
             >
-              <Package className="h-5 w-5" />
+              <Package className="h-4 w-4 sm:h-5 sm:w-5" />
               Explorar productos
             </Link>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {filteredOrders.map((order) => {
               const statusConfig = estadosConfig[order.estado] || estadosConfig.PENDING;
               const StatusIcon = statusConfig.icon;
@@ -225,46 +220,46 @@ export default function MyOrdersPage() {
               return (
                 <div
                   key={order.id}
-                  className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow"
+                  className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow overflow-hidden"
                 >
                   {/* Header del pedido */}
-                  <div className="p-6 border-b">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                      <div className="flex items-start gap-4">
+                  <div className="p-4 sm:p-6 border-b">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                      <div className="flex items-start gap-3 sm:gap-4">
                         {/* Imagen del primer producto */}
-                        <div className="w-20 h-20 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden relative">
+                        <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden relative">
                           {firstImage ? (
-                        <Image
-                          src={firstImage}
-                          alt={firstItem?.producto?.nombre || 'Producto'}
-                          fill
-                          sizes="80px"
-                          className="object-cover"
-                          unoptimized
-                        />
+                            <Image
+                              src={firstImage}
+                              alt={firstItem?.producto?.nombre || 'Producto'}
+                              fill
+                              sizes="80px"
+                              className="object-cover"
+                              unoptimized
+                            />
                           ) : (
-                            <Package className="w-full h-full p-4 text-gray-400" />
+                            <Package className="w-full h-full p-3 sm:p-4 text-gray-400" />
                           )}
                         </div>
 
                         {/* Info del pedido */}
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-lg font-semibold text-gray-900">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2 mb-1">
+                            <span className="text-base sm:text-lg font-semibold text-gray-900">
                               {order.orderNumber}
                             </span>
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium border flex items-center gap-1 ${statusConfig.color}`}>
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium border flex items-center gap-1 ${statusConfig.color}`}>
                               <StatusIcon className="h-3 w-3" />
-                              {statusConfig.label}
+                              <span className="whitespace-nowrap">{statusConfig.label}</span>
                             </span>
                           </div>
-                          <div className="flex items-center gap-4 text-sm text-gray-500">
+                          <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-500">
                             <span className="flex items-center gap-1">
-                              <Calendar className="h-4 w-4" />
+                              <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
                               {new Date(order.createdAt).toLocaleDateString('es-ES')}
                             </span>
                             <span className="flex items-center gap-1">
-                              <Package className="h-4 w-4" />
+                              <Package className="h-3 w-3 sm:h-4 sm:w-4" />
                               {order.items?.length || 0} {order.items?.length === 1 ? 'producto' : 'productos'}
                             </span>
                           </div>
@@ -272,93 +267,91 @@ export default function MyOrdersPage() {
                       </div>
 
                       {/* Total y acciones */}
-                      <div className="flex flex-col items-end gap-2">
-                        <span className="text-2xl font-bold text-gray-900">
+                      <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2">
+                        <span className="text-xl sm:text-2xl font-bold text-gray-900">
                           {Number(order.total).toFixed(2)} €
                         </span>
-                        <div className="flex items-center gap-2">
-                          <Link
-                            href={`/account/orders/${order.id}`}
-                            className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-800 font-medium text-sm"
-                          >
-                            <Eye className="h-4 w-4" />
-                            Ver detalle
-                            <ChevronRight className="h-4 w-4" />
-                          </Link>
-                        </div>
+                        <Link
+                          href={`/account/orders/${order.id}`}
+                          className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-800 font-medium text-xs sm:text-sm"
+                        >
+                          <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                          Ver detalle
+                          <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
+                        </Link>
                       </div>
                     </div>
                   </div>
 
                   {/* Productos */}
-                  <div className="p-6 bg-gray-50">
-                    <div className="space-y-3">
+                  <div className="p-4 sm:p-6 bg-gray-50">
+                    <div className="space-y-2 sm:space-y-3">
                       {order.items?.slice(0, 3).map((item) => (
-                        <div key={item.id} className="flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-3">
+                        <div key={item.id} className="flex items-center justify-between text-xs sm:text-sm">
+                          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                             <span className="font-medium text-gray-900">
                               {item.quantity}x
                             </span>
                             <Link
                               href={`/products/${item.producto?.slug || '#'}`}
-                              className="text-gray-700 hover:text-indigo-600"
+                              className="text-gray-700 hover:text-indigo-600 truncate"
                             >
                               {item.producto?.nombre || 'Producto'}
                             </Link>
                           </div>
-                          <span className="text-gray-600">
+                          <span className="text-gray-600 whitespace-nowrap ml-2">
                             {(item.quantity * Number(item.unitPrice)).toFixed(2)} €
                           </span>
                         </div>
                       ))}
                       {(order.items?.length || 0) > 3 && (
-                        <p className="text-sm text-gray-500 italic">
+                        <p className="text-xs sm:text-sm text-gray-500 italic">
                           +{(order.items?.length || 0) - 3} productos más...
                         </p>
                       )}
                     </div>
 
-                      {/* Acciones */}
-                      <div className="mt-4 pt-4 border-t flex flex-wrap items-center gap-3">
-                        {order.factura && !order.factura.anulada ? (
-                          <a
-                            href={`/api/account/invoices/${order.factura.id}/pdf`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 font-medium"
-                          >
-                            <FileText className="h-4 w-4" />
-                            Descargar factura
-                          </a>
-                        ) : (
-                          <button
-                            onClick={() => {
-                              setSelectedOrderNumber(order.orderNumber);
-                              if (order.estado === 'Cancelado') {
-                                setInvoiceModalReason('cancelled');
-                              } else if (order.estado !== 'Entregado') {
-                                setInvoiceModalReason('not_completed');
-                              } else {
-                                setInvoiceModalReason('not_generated');
-                              }
-                              setInvoiceModalOpen(true);
-                            }}
-                            className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-gray-600 font-medium"
-                          >
-                            <FileText className="h-4 w-4" />
-                            Factura no disponible
-                          </button>
-                        )}
+                    {/* Acciones */}
+                    <div className="mt-4 pt-4 border-t flex flex-wrap items-center gap-3">
+                      {order.factura && !order.factura.anulada ? (
+                        <a
+                          href={`/api/account/invoices/${order.factura.id}/pdf`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-blue-600 hover:text-blue-800 font-medium"
+                        >
+                          <FileText className="h-3 w-3 sm:h-4 sm:w-4" />
+                          Descargar factura
+                        </a>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setSelectedOrderNumber(order.orderNumber);
+                            if (order.estado === 'Cancelado') {
+                              setInvoiceModalReason('cancelled');
+                            } else if (order.estado !== 'Entregado') {
+                              setInvoiceModalReason('not_completed');
+                            } else {
+                              setInvoiceModalReason('not_generated');
+                            }
+                            setInvoiceModalOpen(true);
+                          }}
+                          className="inline-flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-400 hover:text-gray-600 font-medium"
+                        >
+                          <FileText className="h-3 w-3 sm:h-4 sm:w-4" />
+                          Factura no disponible
+                        </button>
+                      )}
 
                       {order.estado === 'SHIPPED' && (
-                        <span className="text-sm text-purple-600">
+                        <span className="text-xs sm:text-sm text-purple-600">
                           Pedido en camino
                         </span>
                       )}
 
                       {order.estado === 'DELIVERED' && (
-                        <span className="text-sm text-green-600 flex items-center gap-1">
-                          <CheckCircle2 className="h-4 w-4" />
+                        <span className="text-xs sm:text-sm text-green-600 flex items-center gap-1">
+                          <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />
                           Entregado
                         </span>
                       )}

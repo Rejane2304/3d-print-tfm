@@ -93,43 +93,44 @@ export function ConfirmModal({
     >
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity backdrop-blur-sm"
+        className="fixed inset-0 bg-gray-500/75 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
 
       {/* Modal Container */}
-      <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+      <div className="flex min-h-full items-center justify-center p-3 sm:p-4 text-center">
         <div
-          className="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg"
+          className="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all w-full max-w-sm sm:max-w-lg mx-auto"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="absolute right-4 top-4 text-gray-400 hover:text-gray-600 transition-colors"
+            className="absolute right-3 top-3 sm:right-4 sm:top-4 text-gray-400 hover:text-gray-600 transition-colors p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full hover:bg-gray-100"
+            aria-label="Cerrar modal"
           >
             <X className="h-5 w-5" />
           </button>
 
           {/* Content */}
-          <div className="p-6 sm:p-8">
-            <div className="sm:flex sm:items-start">
+          <div className="p-5 sm:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-5">
               {/* Icon */}
               <div
-                className={`mx-auto flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full ${config.iconBg} sm:mx-0 sm:h-12 sm:w-12`}
+                className={`mx-auto sm:mx-0 flex-shrink-0 h-12 w-12 sm:h-14 sm:w-14 flex items-center justify-center rounded-full ${config.iconBg}`}
               >
-                <Icon className={`h-7 w-7 ${config.iconColor}`} aria-hidden="true" />
+                <Icon className={`h-6 w-6 sm:h-7 sm:w-7 ${config.iconColor}`} aria-hidden="true" />
               </div>
 
               {/* Text */}
-              <div className="mt-4 text-center sm:ml-5 sm:mt-0 sm:text-left flex-1">
+              <div className="flex-1 text-center sm:text-left min-w-0">
                 <h3
-                  className="text-xl font-semibold leading-6 text-gray-900"
+                  className="text-lg sm:text-xl font-semibold leading-tight text-gray-900 pr-8"
                   id="modal-title"
                 >
                   {title}
                 </h3>
-                <div className="mt-3">
+                <div className="mt-2 sm:mt-3">
                   <p className="text-sm text-gray-600 leading-relaxed">
                     {description}
                   </p>
@@ -138,12 +139,12 @@ export function ConfirmModal({
             </div>
 
             {/* Actions */}
-            <div className="mt-8 sm:flex sm:flex-row-reverse sm:gap-3">
+            <div className="mt-6 sm:mt-8 flex flex-col-reverse sm:flex-row sm:flex-row-reverse sm:gap-3 gap-2">
               <button
                 type="button"
                 onClick={onConfirm}
                 disabled={isLoading || confirmDisabled}
-                className={`inline-flex w-full justify-center items-center rounded-xl px-5 py-3 text-sm font-semibold text-white shadow-sm ${config.buttonBg} ${config.buttonFocus} focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 sm:w-auto sm:min-w-[120px]`}
+                className={`w-full sm:w-auto inline-flex justify-center items-center rounded-xl px-4 sm:px-5 py-3 text-sm font-semibold text-white shadow-sm ${config.buttonBg} ${config.buttonFocus} focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 min-h-[48px] sm:min-w-[120px]`}
               >
                 {isLoading ? (
                   <>
@@ -177,7 +178,7 @@ export function ConfirmModal({
                 type="button"
                 onClick={onClose}
                 disabled={isLoading}
-                className="mt-3 inline-flex w-full justify-center items-center rounded-xl bg-white px-5 py-3 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200 sm:mt-0 sm:w-auto sm:min-w-[120px]"
+                className="w-full sm:w-auto inline-flex justify-center items-center rounded-xl bg-white px-4 sm:px-5 py-3 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200 min-h-[48px] sm:min-w-[120px]"
               >
                 {cancelText}
               </button>

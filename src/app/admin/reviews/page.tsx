@@ -211,7 +211,7 @@ export default function AdminReviewsPage() {
       key: 'productoNombre',
       header: 'Producto',
       sortable: true,
-      width: '180px',
+      className: '',
       render: (_, resena) => (
         <div className="flex flex-col min-w-0">
           <span className="text-sm font-medium text-gray-900 truncate">
@@ -219,7 +219,7 @@ export default function AdminReviewsPage() {
           </span>
           <Link 
             href={`/products/${resena.productoSlug}`}
-            className="text-xs text-indigo-600 hover:text-indigo-800 truncate"
+            className="text-xs text-indigo-600 hover:text-indigo-800 truncate hidden sm:block"
             onClick={(e) => e.stopPropagation()}
           >
             Ver producto
@@ -231,13 +231,13 @@ export default function AdminReviewsPage() {
       key: 'usuarioNombre',
       header: 'Usuario',
       sortable: true,
-      width: '160px',
+      className: 'hidden sm:table-cell',
       render: (_, resena) => (
         <div className="flex flex-col min-w-0">
           <span className="text-sm font-medium text-gray-900 truncate">
             {resena.usuarioNombre}
           </span>
-          <span className="text-xs text-gray-500 truncate">
+          <span className="text-xs text-gray-500 truncate hidden md:block">
             {resena.usuarioEmail}
           </span>
         </div>
@@ -247,7 +247,7 @@ export default function AdminReviewsPage() {
       key: 'puntuacion',
       header: 'Punt.',
       sortable: true,
-      width: '80px',
+      className: '',
       render: (_, resena) => (
         <div className="flex items-center gap-1">
           <span className="text-sm font-bold text-gray-900">{resena.puntuacion}</span>
@@ -259,7 +259,7 @@ export default function AdminReviewsPage() {
       key: 'titulo',
       header: 'Reseña',
       sortable: true,
-      width: '200px',
+      className: 'hidden md:table-cell',
       render: (_, resena) => (
         <div className="flex flex-col min-w-0">
           <span className="text-sm font-medium text-gray-900 truncate">
@@ -275,7 +275,7 @@ export default function AdminReviewsPage() {
       key: 'status',
       header: 'Estado',
       sortable: false,
-      width: '100px',
+      className: 'hidden lg:table-cell',
       render: (_, resena) => (
         <div className="flex flex-col gap-1">
           <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium ${
@@ -308,7 +308,7 @@ export default function AdminReviewsPage() {
       key: 'creadoEn',
       header: 'Fecha',
       sortable: true,
-      width: '90px',
+      className: 'hidden xl:table-cell',
       render: (value) => (
         <span className="text-xs text-gray-600 whitespace-nowrap">
           {new Date(value as string).toLocaleDateString('es-ES', { 
@@ -322,7 +322,7 @@ export default function AdminReviewsPage() {
     {
       key: 'actions',
       header: 'Acc.',
-      width: '100px',
+      className: '',
       render: (_, resena) => (
         <div className="flex items-center gap-0.5">
           <button
@@ -337,7 +337,7 @@ export default function AdminReviewsPage() {
             }`}
             title={resena.verificado ? 'Quitar verificación' : 'Verificar'}
           >
-            <CheckCircle2 className="h-3.5 w-3.5" />
+            <CheckCircle2 className="h-4 w-4" />
           </button>
           <button
             onClick={(e) => {
@@ -351,7 +351,7 @@ export default function AdminReviewsPage() {
             }`}
             title={resena.aprobado ? 'Ocultar' : 'Mostrar'}
           >
-            {resena.aprobado ? <XCircle className="h-3.5 w-3.5" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
+            {resena.aprobado ? <XCircle className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
           </button>
           <button
             onClick={(e) => {
@@ -361,7 +361,7 @@ export default function AdminReviewsPage() {
             className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
             title="Eliminar"
           >
-            <Trash2 className="h-3.5 w-3.5" />
+            <Trash2 className="h-4 w-4" />
           </button>
         </div>
       ),

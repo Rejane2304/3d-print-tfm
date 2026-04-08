@@ -95,30 +95,34 @@ export default function ProductImageGallery({ images, productName }: ProductImag
           </div>
         </div>
 
-        {/* Thumbnails */}
-        {images.length > 1 && (
-          <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-4 gap-2">
+      {/* Thumbnails - Horizontal scroll on mobile */}
+      {images.length > 1 && (
+        <div className="overflow-x-auto pb-2 -mx-2 px-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+          <div className="flex gap-2 sm:grid sm:grid-cols-4 sm:gap-3 min-w-min">
             {images.map((image, index) => (
               <button
                 key={image.id}
                 onClick={() => setSelectedIndex(index)}
-                className={`relative aspect-square bg-gray-200 overflow-hidden transition-all ${
+                className={`relative flex-shrink-0 w-16 h-16 sm:w-full sm:aspect-square bg-gray-200 overflow-hidden transition-all ${
                   selectedIndex === index 
                     ? 'ring-2 ring-indigo-600 ring-offset-2' 
                     : 'hover:ring-2 hover:ring-indigo-400 hover:ring-offset-2'
                 }`}
+                aria-label={`Ver imagen ${index + 1}`}
+                aria-current={selectedIndex === index ? 'true' : undefined}
               >
                 <Image
                   src={image.url}
                   alt={image.altText || `${productName} - imagen ${index + 1}`}
                   fill
-                  sizes="(max-width: 768px) 25vw, (max-width: 1200px) 15vw, 12vw"
+                  sizes="(max-width: 640px) 64px, (max-width: 768px) 25vw, (max-width: 1200px) 15vw, 12vw"
                   className="object-cover"
                 />
               </button>
             ))}
           </div>
-        )}
+        </div>
+      )}
       </div>
 
       {/* Fullscreen Modal/Lightbox */}
@@ -130,14 +134,14 @@ export default function ProductImageGallery({ images, productName }: ProductImag
           {/* Close button */}
           <button
             onClick={closeModal}
-            className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors p-2 z-10"
+            className="absolute top-3 right-3 sm:top-4 sm:right-4 text-white hover:text-gray-300 transition-colors p-2 z-10 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-white/10"
             aria-label="Cerrar galeria"
           >
-            <X className="w-8 h-8" />
+            <X className="w-6 h-6 sm:w-8 sm:h-8" />
           </button>
 
           {/* Image counter */}
-          <div className="absolute top-4 left-4 text-white text-sm">
+          <div className="absolute top-3 left-3 sm:top-4 sm:left-4 text-white text-sm bg-black/50 px-3 py-1 rounded-full">
             {selectedIndex + 1} / {images.length}
           </div>
 
@@ -145,19 +149,19 @@ export default function ProductImageGallery({ images, productName }: ProductImag
           {images.length > 1 && (
             <button
               onClick={(e) => { e.stopPropagation(); prevImage(); }}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 transition-colors p-2 hover:bg-white/10 rounded-full"
+              className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 transition-colors p-2 sm:p-3 hover:bg-white/10 rounded-full min-w-[44px] min-h-[44px] flex items-center justify-center"
               aria-label="Imagen anterior"
             >
-              <ChevronLeft className="w-10 h-10" />
+              <ChevronLeft className="w-6 h-6 sm:w-10 sm:h-10" />
             </button>
           )}
 
           {/* Main image in modal */}
           <div 
-            className="relative w-full h-full max-w-7xl max-h-screen mx-4 flex items-center justify-center"
+            className="relative w-full h-full max-w-7xl max-h-screen mx-4 flex items-center justify-center px-12 sm:px-16"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="relative w-full h-full max-h-[90vh]">
+            <div className="relative w-full h-full max-h-[85vh] sm:max-h-[90vh]">
               <Image
                 src={selectedImage.url}
                 alt={selectedImage.altText || productName}
@@ -173,28 +177,30 @@ export default function ProductImageGallery({ images, productName }: ProductImag
           {images.length > 1 && (
             <button
               onClick={(e) => { e.stopPropagation(); nextImage(); }}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 transition-colors p-2 hover:bg-white/10 rounded-full"
+              className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 transition-colors p-2 sm:p-3 hover:bg-white/10 rounded-full min-w-[44px] min-h-[44px] flex items-center justify-center"
               aria-label="Imagen siguiente"
             >
-              <ChevronRight className="w-10 h-10" />
+              <ChevronRight className="w-6 h-6 sm:w-10 sm:h-10" />
             </button>
           )}
 
           {/* Thumbnails at bottom */}
           {images.length > 1 && (
             <div 
-              className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 px-4 py-2 bg-black/50 rounded-lg overflow-x-auto max-w-[90vw]"
+              className="absolute bottom-16 sm:bottom-4 left-1/2 -translate-x-1/2 flex gap-2 px-4 py-2 bg-black/50 rounded-lg overflow-x-auto max-w-[calc(100vw-32px)] scrollbar-thin scrollbar-thumb-white/30 scrollbar-track-transparent"
               onClick={(e) => e.stopPropagation()}
             >
               {images.map((image, index) => (
                 <button
                   key={image.id}
                   onClick={() => setSelectedIndex(index)}
-                  className={`relative w-16 h-16 flex-shrink-0 bg-gray-800 rounded overflow-hidden transition-all ${
+                  className={`relative w-12 h-12 sm:w-16 sm:h-16 flex-shrink-0 bg-gray-800 rounded overflow-hidden transition-all ${
                     selectedIndex === index 
                       ? 'ring-2 ring-white' 
                       : 'opacity-60 hover:opacity-100'
                   }`}
+                  aria-label={`Ir a imagen ${index + 1}`}
+                  aria-current={selectedIndex === index ? 'true' : undefined}
                 >
                   <Image
                     src={image.url}
@@ -208,8 +214,8 @@ export default function ProductImageGallery({ images, productName }: ProductImag
             </div>
           )}
 
-          {/* Instructions */}
-          <div className="absolute bottom-20 left-1/2 -translate-x-1/2 text-white/60 text-sm hidden sm:block">
+          {/* Instructions - Hidden on small screens */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/60 text-xs sm:text-sm hidden sm:block">
             Usa ← → para navegar • ESC para cerrar • Click fuera para cerrar
           </div>
         </div>

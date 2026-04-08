@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Loader2, Package, AlertTriangle, CheckCircle, Plus, Minus, RotateCcw } from 'lucide-react';
+import { Loader2, Package, AlertTriangle, CheckCircle, Plus, Minus, RotateCcw, Eye } from 'lucide-react';
 import Image from 'next/image';
 import { DataTable, Column, BulkAction } from '@/components/ui/DataTable';
 
@@ -163,6 +163,7 @@ export default function AdminInventoryPage() {
       key: 'nombre',
       header: 'Producto',
       sortable: true,
+      className: '',
       render: (value, row) => (
         <div className="flex items-center">
           {row.imagenes?.[0] ? (
@@ -180,9 +181,9 @@ export default function AdminInventoryPage() {
               <Package className="h-5 w-5 text-gray-500" />
             </div>
           )}
-          <div className="ml-4">
-            <div className="text-sm font-medium text-gray-900">{value as string}</div>
-            <div className="text-xs text-gray-500">{row.movementCount} movimientos</div>
+          <div className="ml-4 min-w-0">
+            <div className="text-sm font-medium text-gray-900 truncate">{value as string}</div>
+            <div className="text-xs text-gray-500 hidden xl:block">{row.movementCount} movimientos</div>
           </div>
         </div>
       ),
@@ -191,11 +192,16 @@ export default function AdminInventoryPage() {
       key: 'categoria',
       header: 'Categoría',
       sortable: true,
+      className: 'hidden sm:table-cell',
+      render: (value) => (
+        <span className="text-sm text-gray-600 truncate">{value as string}</span>
+      ),
     },
     {
       key: 'stock',
-      header: 'Stock Actual',
+      header: 'Stock',
       sortable: true,
+      className: '',
       render: (value, row) => {
         let stockColorClass: string;
         if (row.stockStatus === 'critical') {
@@ -216,11 +222,16 @@ export default function AdminInventoryPage() {
       key: 'minStock',
       header: 'Mínimo',
       sortable: true,
+      className: 'hidden md:table-cell',
+      render: (value) => (
+        <span className="text-sm text-gray-600">{value as number}</span>
+      ),
     },
     {
       key: 'stockStatus',
       header: 'Estado',
       sortable: true,
+      className: 'hidden lg:table-cell',
       render: (value) => (
         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(value as string)}`}>
           {(value as string) === 'critical' && <AlertTriangle className="h-3 w-3 mr-1" />}
@@ -230,16 +241,26 @@ export default function AdminInventoryPage() {
       ),
     },
     {
+      key: 'movementCount',
+      header: 'Movimientos',
+      sortable: true,
+      className: 'hidden xl:table-cell',
+      render: (value) => (
+        <span className="text-sm text-gray-600">{value as number}</span>
+      ),
+    },
+    {
       key: 'actions',
       header: 'Acciones',
+      className: '',
       render: (_, row) => (
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex items-center justify-end gap-1">
           <button
             onClick={(e) => {
               e.stopPropagation();
               openAdjustModal(row, 'IN');
             }}
-            className="p-2 text-green-600 hover:bg-green-50 rounded-lg"
+            className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg"
             title="Añadir stock"
           >
             <Plus className="h-4 w-4" />
@@ -249,7 +270,7 @@ export default function AdminInventoryPage() {
               e.stopPropagation();
               openAdjustModal(row, 'OUT');
             }}
-            className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+            className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg"
             title="Reducir stock"
           >
             <Minus className="h-4 w-4" />
@@ -259,16 +280,17 @@ export default function AdminInventoryPage() {
               e.stopPropagation();
               openAdjustModal(row, 'ADJUST');
             }}
-            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg"
             title="Ajustar stock"
           >
             <RotateCcw className="h-4 w-4" />
           </button>
           <Link
             href={`/admin/inventory/${row.id}`}
-            className="ml-2 text-indigo-600 hover:text-indigo-900 text-sm"
+            className="ml-1 p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg"
+            title="Historial"
           >
-            Historial
+            <Eye className="h-4 w-4" />
           </Link>
         </div>
       ),

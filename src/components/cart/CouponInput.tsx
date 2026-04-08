@@ -105,15 +105,15 @@ export function CouponInput({
   // Si ya hay un cupón aplicado, mostrar resumen
   if (appliedCoupon) {
     return (
-      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="h-5 w-5 text-green-600" />
-            <div>
-              <p className="text-sm font-medium text-green-800">
+      <div className="bg-green-50 border border-green-200 rounded-lg p-3 sm:p-4">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
+            <div className="min-w-0">
+              <p className="text-xs sm:text-sm font-medium text-green-800">
                 Cupón aplicado
               </p>
-              <p className="text-lg font-bold text-green-900">
+              <p className="text-base sm:text-lg font-bold text-green-900 truncate">
                 {appliedCoupon.code}
               </p>
             </div>
@@ -121,13 +121,14 @@ export function CouponInput({
           <button
             onClick={handleRemove}
             disabled={disabled}
-            className="p-1 text-green-600 hover:bg-green-100 rounded transition-colors disabled:opacity-50"
+            className="p-2 text-green-600 hover:bg-green-100 rounded transition-colors disabled:opacity-50 flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
             title="Eliminar cupón"
+            aria-label="Eliminar cupón"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
-        
+
         {appliedCoupon.discount > 0 && (
           <div className="mt-2 pt-2 border-t border-green-200">
             <div className="flex justify-between text-sm">
@@ -144,37 +145,39 @@ export function CouponInput({
 
   return (
     <div className="space-y-2">
-      <form onSubmit={handleSubmit} className="flex gap-2">
+      <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2">
         <div className="flex-1 relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <Ticket className="h-4 w-4 text-gray-400" />
           </div>
           <input
             type="text"
+            inputMode="text"
+            autoComplete="off"
             value={code}
             onChange={handleCodeChange}
             placeholder="Ingresa tu código de cupón"
             disabled={disabled || loading}
-            className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent uppercase disabled:bg-gray-100 disabled:cursor-not-allowed"
+            className="w-full pl-10 pr-10 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent uppercase disabled:bg-gray-100 disabled:cursor-not-allowed text-sm sm:text-base min-h-[44px]"
           />
-          
+
           {validating && (
             <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
               <Loader2 className="h-4 w-4 text-gray-400 animate-spin" />
             </div>
           )}
         </div>
-        
+
         <button
           type="submit"
           disabled={disabled || loading || !code.trim()}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          className="px-4 py-2.5 sm:py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[44px] text-sm sm:text-base whitespace-nowrap"
         >
           {loading && <Loader2 className="h-4 w-4 animate-spin" />}
           Aplicar
         </button>
       </form>
-      
+
       {/* Error message */}
       {error && (
         <div className="flex items-center gap-2 text-sm text-red-600">
@@ -182,7 +185,7 @@ export function CouponInput({
           <span>{error}</span>
         </div>
       )}
-      
+
       <p className="text-xs text-gray-500">
         Ejemplos: WELCOME10, VERANO2024
       </p>

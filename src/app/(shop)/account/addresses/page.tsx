@@ -286,7 +286,7 @@ export default function MyAddressesPage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               {addresses.map((address) => (
                 <div
                   key={address.id}
@@ -295,29 +295,31 @@ export default function MyAddressesPage() {
                   }`}
                 >
                   {/* Header de la dirección */}
-                  <div className="p-6 border-b">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-gray-900">{translateAddressName(address.name)}</h3>
+                  <div className="p-4 sm:p-6 border-b">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex flex-wrap items-center gap-2 min-w-0">
+                        <h3 className="font-semibold text-gray-900 text-sm sm:text-base truncate">{translateAddressName(address.name)}</h3>
                         {address.isDefault && (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded-full">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs font-medium rounded-full flex-shrink-0">
                             <Star className="h-3 w-3 fill-current" />
                             Principal
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1 flex-shrink-0">
                         <button
                           onClick={() => openEditModal(address)}
-                          className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                          className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                           title="Editar"
+                          aria-label="Editar dirección"
                         >
                           <Edit2 className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => confirmDelete(address)}
-                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                           title="Eliminar"
+                          aria-label="Eliminar dirección"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -326,20 +328,20 @@ export default function MyAddressesPage() {
                   </div>
 
                   {/* Contenido */}
-                  <div className="p-6 space-y-3">
+                  <div className="p-4 sm:p-6 space-y-2 sm:space-y-3">
                     <div className="flex items-start gap-3">
-                      <User className="h-5 w-5 text-gray-400 mt-0.5" />
-                      <div>
-                        <p className="font-medium text-gray-900">{address.recipient}</p>
+                      <User className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 mt-0.5 flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="font-medium text-gray-900 text-sm sm:text-base">{address.recipient}</p>
                       </div>
                     </div>
 
                     <div className="flex items-start gap-3">
-                      <MapPin className="h-5 w-5 text-gray-400 mt-0.5" />
-                      <div className="text-sm">
-                        <p className="text-gray-900">{address.address}</p>
+                      <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 mt-0.5 flex-shrink-0" />
+                      <div className="text-xs sm:text-sm min-w-0">
+                        <p className="text-gray-900 break-words">{address.address}</p>
                         {address.complement && (
-                          <p className="text-gray-600">{address.complement}</p>
+                          <p className="text-gray-600 break-words">{address.complement}</p>
                         )}
                         <p className="text-gray-900">
                           {address.postalCode} {address.city}
@@ -349,23 +351,23 @@ export default function MyAddressesPage() {
                     </div>
 
                     <div className="flex items-center gap-3">
-                      <Phone className="h-5 w-5 text-gray-400" />
-                      <span className="text-sm text-gray-700">{address.phone}</span>
+                      <Phone className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0" />
+                      <span className="text-xs sm:text-sm text-gray-700">{address.phone}</span>
                     </div>
                   </div>
 
                   {/* Footer */}
-                  <div className="px-6 py-4 bg-gray-50 border-t">
+                  <div className="px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 border-t">
                     {!address.isDefault ? (
                       <button
                         onClick={() => setAsPrimary(address.id)}
-                        className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
+                        className="text-xs sm:text-sm text-indigo-600 hover:text-indigo-800 font-medium min-h-[44px] flex items-center"
                       >
                         Establecer como dirección principal
                       </button>
                     ) : (
-                      <span className="text-sm text-gray-500 flex items-center gap-1">
-                        <CheckCircle2 className="h-4 w-4" />
+                      <span className="text-xs sm:text-sm text-gray-500 flex items-center gap-1">
+                        <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
                         Dirección principal
                       </span>
                     )}
@@ -393,30 +395,31 @@ export default function MyAddressesPage() {
       {/* Modal de formulario */}
       {formModalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4">
+          <div className="flex min-h-full items-center justify-center p-3 sm:p-4">
             <div className="fixed inset-0 bg-gray-500 bg-opacity-75" onClick={closeModal} />
-            
-            <div className="relative bg-white rounded-2xl shadow-xl max-w-lg w-full p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gray-900">
+
+            <div className="relative bg-white rounded-2xl shadow-xl max-w-lg w-full p-4 sm:p-6 m-2">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900">
                   {editingAddress ? 'Editar dirección' : 'Nueva dirección'}
                 </h2>
                 <button
                   onClick={closeModal}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-400 hover:text-gray-600 p-1 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  aria-label="Cerrar"
                 >
-                  <X className="h-6 w-6" />
+                  <X className="h-5 w-5 sm:h-6 sm:w-6" />
                 </button>
               </div>
 
               {error && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
-                  <AlertCircle className="h-5 w-5 text-red-600" />
+                <div className="mb-3 sm:mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
+                  <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
                   <p className="text-red-700 text-sm">{error}</p>
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Nombre de la dirección *
@@ -426,12 +429,12 @@ export default function MyAddressesPage() {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="Ej: Casa, Trabajo, Casa de mis padres"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base min-h-[44px]"
                     required
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Destinatario *
@@ -441,7 +444,7 @@ export default function MyAddressesPage() {
                       value={formData.recipient}
                       onChange={(e) => setFormData({ ...formData, recipient: e.target.value })}
                       placeholder="Nombre y apellidos"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base min-h-[44px]"
                       required
                     />
                   </div>
@@ -451,10 +454,12 @@ export default function MyAddressesPage() {
                     </label>
                     <input
                       type="tel"
+                      inputMode="tel"
+                      autoComplete="tel"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       placeholder="612345678"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base min-h-[44px]"
                       required
                     />
                   </div>
@@ -466,10 +471,11 @@ export default function MyAddressesPage() {
                   </label>
                   <input
                     type="text"
+                    autoComplete="street-address"
                     value={formData.address}
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                     placeholder="Calle, número, piso..."
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base min-h-[44px]"
                     required
                   />
                 </div>
@@ -483,22 +489,24 @@ export default function MyAddressesPage() {
                     value={formData.complement}
                     onChange={(e) => setFormData({ ...formData, complement: e.target.value })}
                     placeholder="Piso, puerta, escalera..."
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base min-h-[44px]"
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Código Postal *
                     </label>
                     <input
                       type="text"
+                      inputMode="numeric"
+                      autoComplete="postal-code"
                       value={formData.postalCode}
                       onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
                       placeholder="28001"
                       maxLength={5}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base min-h-[44px]"
                       required
                     />
                   </div>
@@ -508,10 +516,11 @@ export default function MyAddressesPage() {
                     </label>
                     <input
                       type="text"
+                      autoComplete="address-level2"
                       value={formData.city}
                       onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                       placeholder="Madrid"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base min-h-[44px]"
                       required
                     />
                   </div>
@@ -523,10 +532,11 @@ export default function MyAddressesPage() {
                   </label>
                   <input
                     type="text"
+                    autoComplete="address-level1"
                     value={formData.province}
                     onChange={(e) => setFormData({ ...formData, province: e.target.value })}
                     placeholder="Madrid"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base min-h-[44px]"
                     required
                   />
                 </div>
@@ -538,7 +548,7 @@ export default function MyAddressesPage() {
                       id="isDefault"
                       checked={formData.isDefault}
                       onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })}
-                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                      className="h-4 w-4 min-h-[16px] min-w-[16px] text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                     />
                     <label htmlFor="isDefault" className="text-sm text-gray-700">
                       Establecer como dirección principal
@@ -546,18 +556,18 @@ export default function MyAddressesPage() {
                   </div>
                 )}
 
-                <div className="flex gap-3 pt-4">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-3 sm:pt-4">
                   <button
                     type="button"
                     onClick={closeModal}
-                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50"
+                    className="flex-1 px-4 py-2.5 sm:py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 min-h-[44px]"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
                     disabled={saving}
-                    className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="flex-1 px-4 py-2.5 sm:py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2 min-h-[44px]"
                   >
                     {saving && <Loader2 className="h-4 w-4 animate-spin" />}
                     {editingAddress ? 'Guardar cambios' : 'Agregar dirección'}

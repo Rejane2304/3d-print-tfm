@@ -1,6 +1,7 @@
 /**
  * Shopping Cart Page with Coupon Support
  * Displays cart items and allows managing them including coupon application
+ * Responsive: mobile → 4K
  */
 'use client';
 
@@ -99,36 +100,36 @@ export default function CarritoPage() {
   // Show loading while loading
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-indigo-600 mx-auto mb-4" />
-          <p className="text-gray-600">Cargando carrito...</p>
+          <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin text-indigo-600 mx-auto mb-4" />
+          <p className="text-gray-600 text-sm sm:text-base">Cargando carrito...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-6 sm:py-8">
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 sm:mb-4">
             Tu Carrito
           </h1>
-          <p className="text-gray-600 text-lg">
+          <p className="text-sm sm:text-base text-gray-600">
             Revisa tus items y procede al pago cuando estés listo
           </p>
         </div>
 
         {/* Error */}
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md flex items-center gap-3">
-            <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
-            <p className="text-red-700">{error}</p>
+          <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-md flex items-center gap-2 sm:gap-3">
+            <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-600 flex-shrink-0" />
+            <p className="text-red-700 text-sm flex-1">{error}</p>
             <button
               onClick={() => setError(null)}
-              className="ml-auto text-red-600 hover:text-red-800"
+              className="text-red-600 hover:text-red-800 text-sm"
             >
               Cerrar
             </button>
@@ -137,27 +138,27 @@ export default function CarritoPage() {
 
         {/* Info para usuarios no autenticados */}
         {!isAuthenticated && cart?.items && cart.items.length > 0 && (
-          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-md flex items-center gap-3">
-            <Info className="h-5 w-5 text-blue-600 flex-shrink-0" />
+          <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-blue-50 border border-blue-200 rounded-md flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            <Info className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 flex-shrink-0 mt-0.5 sm:mt-0" />
             <div className="flex-1">
-              <p className="text-blue-700">
+              <p className="text-blue-700 text-sm">
                 Estás comprando como invitado. Para finalizar tu compra, necesitarás iniciar sesión o registrarte.
               </p>
             </div>
             <Link
               href="/auth?callbackUrl=/checkout"
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium whitespace-nowrap"
+              className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium whitespace-nowrap text-center"
             >
               Iniciar sesión
             </Link>
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Lista de items */}
           <div className="lg:col-span-2">
             {cart?.items && cart.items.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {cart.items.map((item) => (
                   <CartItem
                     key={item.id}
@@ -169,10 +170,10 @@ export default function CarritoPage() {
                 ))}
               </div>
             ) : (
-              <div data-testid="empty-cart" className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+              <div data-testid="empty-cart" className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 sm:p-12 text-center">
                 <div className="text-gray-400 mb-4">
                   <svg
-                    className="h-24 w-24 mx-auto"
+                    className="h-16 w-16 sm:h-24 sm:w-24 mx-auto"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -185,15 +186,15 @@ export default function CarritoPage() {
                     />
                   </svg>
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
                   Tu carrito está vacío
                 </h2>
-                <p className="text-gray-600 mb-6">
+                <p className="text-sm sm:text-base text-gray-600 mb-6">
                   Añade algunos productos para comenzar tu compra
                 </p>
                 <button
                   onClick={handleContinueShopping}
-                  className="bg-indigo-600 text-white py-3 px-8 rounded-md font-medium hover:bg-indigo-700 transition-colors"
+                  className="bg-indigo-600 text-white py-2.5 sm:py-3 px-6 sm:px-8 rounded-md font-medium hover:bg-indigo-700 transition-colors text-sm sm:text-base"
                 >
                   Explorar productos
                 </button>

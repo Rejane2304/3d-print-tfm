@@ -1,6 +1,7 @@
 /**
  * Layout para sección de Cuenta
  * Navegación lateral adaptada según el rol del usuario
+ * Responsive: Desktop - sidebar lateral | Mobile - tabs horizontales
  */
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -39,11 +40,30 @@ export default async function CuentaLayout({ children }: CuentaLayoutProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-[1920px] 3xl:max-w-[2200px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar Navigation */}
-          <aside className="lg:w-64 flex-shrink-0">
-            <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+      <div className="max-w-[1920px] 3xl:max-w-[2200px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+          {/* Mobile Horizontal Tabs */}
+          <div className="lg:hidden">
+            <nav className="flex overflow-x-auto gap-2 pb-2 scrollbar-hide">
+              {menuItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="flex items-center gap-2 px-4 py-2.5 bg-white rounded-lg border border-gray-200 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50 transition-colors whitespace-nowrap flex-shrink-0"
+                  >
+                    <Icon className="h-4 w-4" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+
+          {/* Desktop Sidebar Navigation */}
+          <aside className="hidden lg:block lg:w-64 flex-shrink-0">
+            <div className="bg-white rounded-lg shadow-sm border overflow-hidden sticky top-24">
               <div className="p-4 border-b bg-gray-50">
                 <h2 className="font-semibold text-gray-900">Mi Cuenta</h2>
               </div>

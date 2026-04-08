@@ -129,41 +129,41 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   const { products, total, totalPages, page } = await getProducts(searchParams);
 
   return (
-    <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 3xl:px-20 py-8">
+    <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 3xl:px-20 py-6 sm:py-8">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 sm:mb-4">
           Catálogo de Productos
         </h1>
-        <p className="text-gray-600 max-w-3xl">
+        <p className="text-sm sm:text-base text-gray-600 max-w-3xl">
           Descubre nuestra colección de productos impresos en 3D. 
           Todos nuestros productos están fabricados con materiales de alta calidad.
         </p>
       </div>
 
       {/* Search and Filters */}
-      <div className="mb-8 space-y-4">
+      <div className="mb-6 sm:mb-8 space-y-4">
         <SearchBar />
         
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
           <SortSelector />
-          <p className="text-sm text-gray-600">
+          <p className="text-xs sm:text-sm text-gray-600">
             Mostrando {products.length} de {total} productos
           </p>
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-8">
+      <div className="flex flex-col lg:flex-row gap-6 sm:gap-8">
         {/* Sidebar Filters */}
         <aside className="w-full lg:w-64 flex-shrink-0">
           <FilterSidebar searchParams={searchParams} />
         </aside>
 
         {/* Product Grid */}
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           {products.length > 0 ? (
             <>
-              <div data-testid="product-grid" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div data-testid="product-grid" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                 {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
@@ -171,7 +171,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="mt-12">
+                <div className="mt-8 sm:mt-12">
                   <Pagination
                     currentPage={page}
                     totalPages={totalPages}
@@ -181,11 +181,11 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
               )}
             </>
           ) : (
-            <div className="text-center py-16">
-              <p className="text-lg text-gray-600 mb-2">
+            <div className="text-center py-12 sm:py-16">
+              <p className="text-base sm:text-lg text-gray-600 mb-2">
                 No se encontraron productos
               </p>
-              <p className="text-gray-500">
+              <p className="text-sm text-gray-500">
                 Intenta ajustar los filtros o términos de búsqueda
               </p>
             </div>

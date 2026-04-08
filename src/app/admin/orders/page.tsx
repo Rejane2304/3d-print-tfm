@@ -124,33 +124,33 @@ export default function AdminOrdersPage() {
 
   const columns: Column<Order>[] = [
     {
-      key: 'orderNumber',
-      header: 'Pedido',
-      sortable: true,
-      render: (value, row) => (
-        <div>
-          <div className="text-sm font-medium text-indigo-600">{value as string}</div>
-          <div className="text-sm text-gray-500">{row.items.length} productos</div>
-        </div>
-      ),
-    },
-    {
       key: 'usuario',
       header: 'Cliente',
+      className: '',
       render: (value) => {
         const user = value as { nombre: string; email: string };
         return (
           <div>
-            <div className="text-sm font-medium text-gray-900">{user.nombre}</div>
-            <div className="text-sm text-gray-500">{user.email}</div>
+            <div className="text-sm font-medium text-gray-900 truncate">{user.nombre}</div>
+            <div className="text-sm text-gray-500 hidden sm:block">{user.email}</div>
           </div>
         );
       },
     },
     {
+      key: 'total',
+      header: 'Total',
+      sortable: true,
+      className: '',
+      render: (value) => (
+        <span className="text-sm text-gray-900 font-medium">{Number(value).toFixed(2)} €</span>
+      ),
+    },
+    {
       key: 'estado',
       header: 'Estado',
       sortable: true,
+      className: '',
       render: (value) => {
         const statusConfig = orderStatuses[value as string] || { 
           color: 'bg-gray-100 text-gray-800', 
@@ -161,23 +161,16 @@ export default function AdminOrdersPage() {
         return (
           <span className={`px-2 inline-flex items-center gap-1 text-xs leading-5 font-semibold rounded-full ${statusConfig.color}`}>
             <StatusIcon className="h-3 w-3" />
-            {statusConfig.label}
+            <span className="hidden sm:inline">{statusConfig.label}</span>
           </span>
         );
       },
     },
     {
-      key: 'total',
-      header: 'Total',
-      sortable: true,
-      render: (value) => (
-        <span className="text-sm text-gray-900">{Number(value).toFixed(2)} €</span>
-      ),
-    },
-    {
       key: 'createdAt',
       header: 'Fecha',
       sortable: true,
+      className: 'hidden lg:table-cell',
       render: (value) => (
         <span className="text-sm text-gray-500">
           {new Date(value as string).toLocaleDateString('es-ES')}
@@ -185,13 +178,23 @@ export default function AdminOrdersPage() {
       ),
     },
     {
+      key: 'items',
+      header: 'Productos',
+      sortable: true,
+      className: 'hidden md:table-cell',
+      render: (_, row) => (
+        <span className="text-sm text-gray-600">{row.items.length}</span>
+      ),
+    },
+    {
       key: 'actions',
       header: 'Acciones',
+      className: '',
       render: (_, row) => (
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex items-center justify-end gap-1">
           <Link
             href={`/admin/orders/${row.id}`}
-            className="text-indigo-600 hover:text-indigo-900 p-2"
+            className="text-indigo-600 hover:text-indigo-900 p-1.5 rounded hover:bg-indigo-50"
             title="Ver detalles"
           >
             <Eye className="h-4 w-4" />
@@ -202,7 +205,7 @@ export default function AdminOrdersPage() {
                 e.stopPropagation();
                 updateStatus(row.id, 'En preparación');
               }}
-              className="text-blue-600 hover:text-blue-900 p-2"
+              className="text-blue-600 hover:text-blue-900 p-1.5 rounded hover:bg-blue-50"
               title="Marcar como En preparación"
             >
               <Box className="h-4 w-4" />
@@ -214,7 +217,7 @@ export default function AdminOrdersPage() {
                 e.stopPropagation();
                 updateStatus(row.id, 'Enviado');
               }}
-              className="text-purple-600 hover:text-purple-900 p-2"
+              className="text-purple-600 hover:text-purple-900 p-1.5 rounded hover:bg-purple-50"
               title="Marcar como Enviado"
             >
               <Truck className="h-4 w-4" />

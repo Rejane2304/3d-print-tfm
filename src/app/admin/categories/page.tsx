@@ -139,27 +139,28 @@ export default function AdminCategoriesPage() {
       key: 'nombre',
       header: 'Categoría',
       sortable: true,
+      className: '',
       render: (_, category) => (
         <div className="flex items-center">
-          <div className="flex-shrink-0 h-12 w-12">
+          <div className="flex-shrink-0 h-10 w-10">
             {category.imagen ? (
               <Image
-                className="h-12 w-12 object-cover rounded-lg"
+                className="h-10 w-10 object-cover rounded-lg"
                 src={category.imagen}
                 alt={category.nombre}
-                width={48}
-                height={48}
+                width={40}
+                height={40}
                 unoptimized
               />
             ) : (
-              <div className="h-12 w-12 bg-gray-200 rounded-lg flex items-center justify-center">
-                <ImageIcon className="h-6 w-6 text-gray-400" />
+              <div className="h-10 w-10 bg-gray-200 rounded-lg flex items-center justify-center">
+                <ImageIcon className="h-5 w-5 text-gray-400" />
               </div>
             )}
           </div>
-          <div className="ml-4">
-            <div className="text-sm font-medium text-gray-900">{category.nombre}</div>
-            <div className="text-sm text-gray-500">/{category.slug}</div>
+          <div className="ml-4 min-w-0">
+            <div className="text-sm font-medium text-gray-900 truncate">{category.nombre}</div>
+            <div className="text-sm text-gray-500 hidden sm:block">/{category.slug}</div>
           </div>
         </div>
       ),
@@ -168,6 +169,7 @@ export default function AdminCategoriesPage() {
       key: 'descripcion',
       header: 'Descripción',
       sortable: true,
+      className: 'hidden sm:table-cell',
       render: (value) => (
         <div className="max-w-xs truncate text-sm text-gray-600">
           {value as string || '-'}
@@ -175,19 +177,10 @@ export default function AdminCategoriesPage() {
       ),
     },
     {
-      key: 'ordenVisualizacion',
-      header: 'Orden',
-      sortable: true,
-      render: (value) => (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-          {value as number}
-        </span>
-      ),
-    },
-    {
       key: 'totalProductos',
       header: 'Productos',
       sortable: true,
+      className: 'hidden md:table-cell',
       render: (value) => (
         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
           (value as number) > 0 
@@ -199,9 +192,21 @@ export default function AdminCategoriesPage() {
       ),
     },
     {
+      key: 'ordenVisualizacion',
+      header: 'Orden',
+      sortable: true,
+      className: 'hidden lg:table-cell',
+      render: (value) => (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+          {value as number}
+        </span>
+      ),
+    },
+    {
       key: 'activo',
       header: 'Estado',
       sortable: true,
+      className: 'hidden xl:table-cell',
       render: (value) => (
         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
           value 
@@ -215,11 +220,12 @@ export default function AdminCategoriesPage() {
     {
       key: 'actions',
       header: 'Acciones',
+      className: '',
       render: (_, category) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <Link
             href={`/admin/categories/${category.id}`}
-            className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+            className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
             title="Editar"
           >
             <Edit className="h-4 w-4" />
@@ -229,11 +235,11 @@ export default function AdminCategoriesPage() {
               e.stopPropagation();
               handleDelete(category);
             }}
-            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
             title="Eliminar"
             disabled={category.totalProductos > 0}
           >
-            <Trash2 className={`h-4 w-4 ${category.totalProductos > 0 ? 'opacity-50 cursor-not-allowed' : ''}`} />
+            <Trash2 className={`h-4 w-4 ${category.totalProductos > 0 ? 'cursor-not-allowed' : ''}`} />
           </button>
         </div>
       ),

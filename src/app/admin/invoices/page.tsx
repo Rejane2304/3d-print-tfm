@@ -188,6 +188,7 @@ export default function AdminInvoicesPage() {
       key: 'invoiceNumber',
       header: 'Factura #',
       sortable: true,
+      className: '',
       render: (value) => (
         <div className="text-sm font-medium text-indigo-600">{value as string}</div>
       ),
@@ -195,45 +196,38 @@ export default function AdminInvoicesPage() {
     {
       key: 'pedido',
       header: 'Cliente',
+      className: '',
       render: (value) => {
-        const pedido = value as { usuario: { nombre: string; email: string; nif: string | null } };
+        const pedido = value as { usuario: { nombre: string; email: string; nif: string | null }; orderNumber: string };
         return (
           <div>
-            <div className="text-sm font-medium text-gray-900">{pedido.usuario.nombre}</div>
-            <div className="text-sm text-gray-500">{pedido.usuario.nif || 'No NIF'}</div>
+            <div className="text-sm font-medium text-gray-900 truncate">{pedido.usuario.nombre}</div>
+            <div className="text-sm text-gray-500 hidden sm:block">{pedido.orderNumber}</div>
           </div>
         );
       },
     },
     {
-      key: 'pedido',
-      header: 'Pedido',
-      render: (value) => {
-        const pedido = value as { orderNumber: string };
-        return (
-          <div className="text-sm text-gray-900">{pedido.orderNumber}</div>
-        );
-      },
+      key: 'total',
+      header: 'Total',
+      sortable: true,
+      className: '',
+      render: (value) => (
+        <span className="text-sm text-gray-900 font-medium">
+          {Number(value).toFixed(2)} €
+        </span>
+      ),
     },
     {
       key: 'emitidaEn',
       header: 'Fecha',
       sortable: true,
+      className: 'hidden md:table-cell',
       render: (value) => (
         <span className="text-sm text-gray-500">
           {value 
             ? new Date(value as string).toLocaleDateString('es-ES')
-            : 'Fecha no disponible'}
-        </span>
-      ),
-    },
-    {
-      key: 'total',
-      header: 'Total',
-      sortable: true,
-      render: (value) => (
-        <span className="text-sm text-gray-900 font-medium">
-          ${Number(value).toFixed(2)}
+            : 'N/A'}
         </span>
       ),
     },
@@ -241,16 +235,17 @@ export default function AdminInvoicesPage() {
       key: 'anulada',
       header: 'Estado',
       sortable: true,
+      className: 'hidden lg:table-cell',
       render: (value) => (
         value ? (
           <span className="px-2 inline-flex items-center gap-1 text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
             <XCircle className="h-3 w-3" />
-            Anulada
+            <span className="hidden xl:inline">Anulada</span>
           </span>
         ) : (
           <span className="px-2 inline-flex items-center gap-1 text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
             <CheckCircle2 className="h-3 w-3" />
-            Activa
+            <span className="hidden xl:inline">Activa</span>
           </span>
         )
       ),
@@ -258,15 +253,15 @@ export default function AdminInvoicesPage() {
     {
       key: 'actions',
       header: 'Acciones',
+      className: '',
       render: (_, row) => (
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex items-center justify-end gap-1">
           <Link
             href={`/admin/invoices/${row.id}`}
-            className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-900 px-3 py-1.5 rounded-md hover:bg-indigo-50 transition-colors"
-            title="Ver detalles de factura"
+            className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+            title="Ver detalles"
           >
             <Eye className="h-4 w-4" />
-            <span className="hidden sm:inline">Detalles</span>
           </Link>
           <button
             onClick={(e) => {
@@ -274,11 +269,10 @@ export default function AdminInvoicesPage() {
               openPDF(row.id);
             }}
             disabled={row.anulada}
-            className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-900 px-3 py-1.5 rounded-md hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            title={row.anulada ? "Factura anulada - no disponible" : "Descargar PDF"}
+            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            title={row.anulada ? "Anulada - no disponible" : "Descargar PDF"}
           >
             <Printer className="h-4 w-4" />
-            <span className="hidden sm:inline">PDF</span>
           </button>
           {!row.anulada && (
             <button
@@ -286,7 +280,7 @@ export default function AdminInvoicesPage() {
                 e.stopPropagation();
                 cancelInvoice(row.id);
               }}
-              className="text-red-600 hover:text-red-900 p-2"
+              className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg"
               title="Anular factura"
             >
               <AlertTriangle className="h-4 w-4" />

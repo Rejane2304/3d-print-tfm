@@ -137,12 +137,13 @@ export default function AdminFAQsPage() {
       key: 'pregunta',
       header: 'Pregunta',
       sortable: true,
+      className: '',
       render: (_, faq) => (
-        <div className="flex flex-col">
+        <div className="flex flex-col min-w-0">
           <span className="text-sm font-medium text-gray-900 line-clamp-2 max-w-md">
             {faq.pregunta}
           </span>
-          <span className="text-xs text-gray-500 mt-1 line-clamp-1 max-w-md">
+          <span className="text-xs text-gray-500 mt-1 line-clamp-1 max-w-md hidden sm:block">
             {faq.respuesta.substring(0, 100)}...
           </span>
         </div>
@@ -152,6 +153,7 @@ export default function AdminFAQsPage() {
       key: 'categoria',
       header: 'Categoría',
       sortable: true,
+      className: 'hidden sm:table-cell',
       render: (value) => (
         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
           {value as string}
@@ -162,6 +164,7 @@ export default function AdminFAQsPage() {
       key: 'ordenVisualizacion',
       header: 'Orden',
       sortable: true,
+      className: 'hidden md:table-cell',
       render: (value) => (
         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
           {value as number}
@@ -172,6 +175,7 @@ export default function AdminFAQsPage() {
       key: 'activo',
       header: 'Estado',
       sortable: true,
+      className: 'hidden lg:table-cell',
       render: (value) => (
         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
           value 
@@ -185,11 +189,12 @@ export default function AdminFAQsPage() {
     {
       key: 'actions',
       header: 'Acciones',
+      className: '',
       render: (_, faq) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <Link
             href={`/admin/faqs/${faq.id}`}
-            className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+            className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
             title="Editar"
           >
             <Edit className="h-4 w-4" />
@@ -199,7 +204,7 @@ export default function AdminFAQsPage() {
               e.stopPropagation();
               handleDelete(faq);
             }}
-            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
             title="Eliminar"
           >
             <Trash2 className="h-4 w-4" />

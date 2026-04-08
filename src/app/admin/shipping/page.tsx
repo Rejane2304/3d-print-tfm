@@ -167,10 +167,11 @@ export default function AdminShippingPage() {
       key: 'nombre',
       header: 'Zona',
       sortable: true,
+      className: '',
       render: (value) => (
-        <div className="flex items-center gap-2">
-          <MapPin className="h-4 w-4 text-indigo-600" />
-          <span className="font-medium text-gray-900">{value as string}</span>
+        <div className="flex items-center gap-2 min-w-0">
+          <MapPin className="h-4 w-4 text-indigo-600 flex-shrink-0" />
+          <span className="font-medium text-gray-900 truncate">{value as string}</span>
         </div>
       ),
     },
@@ -178,9 +179,10 @@ export default function AdminShippingPage() {
       key: 'pais',
       header: 'País',
       sortable: true,
+      className: 'hidden sm:table-cell',
       render: (value) => (
         <div className="flex items-center gap-1">
-          <Globe className="h-3 w-3 text-gray-400" />
+          <Globe className="h-3 w-3 text-gray-400 flex-shrink-0" />
           <span className="text-sm text-gray-600">{value as string}</span>
         </div>
       ),
@@ -189,29 +191,21 @@ export default function AdminShippingPage() {
       key: 'regionesTexto',
       header: 'Regiones',
       sortable: true,
+      className: 'hidden md:table-cell',
       render: (value) => (
-        <span className="text-sm text-gray-600 truncate max-w-[200px] block">
-          {value as string}
-        </span>
-      ),
-    },
-    {
-      key: 'prefijosCPTexto',
-      header: 'Códigos Postales',
-      sortable: true,
-      render: (value) => (
-        <span className="text-sm text-gray-600 font-mono">
+        <span className="text-sm text-gray-600 truncate max-w-[150px] block">
           {value as string}
         </span>
       ),
     },
     {
       key: 'costoBase',
-      header: 'Costo Base',
+      header: 'Costo',
       sortable: true,
+      className: 'hidden lg:table-cell',
       render: (_, zone) => (
         <div className="flex items-center gap-1">
-          <Euro className="h-3 w-3 text-gray-400" />
+          <Euro className="h-3 w-3 text-gray-400 flex-shrink-0" />
           <span className="font-medium text-gray-900">{zone.costoBaseTexto}</span>
         </div>
       ),
@@ -220,6 +214,7 @@ export default function AdminShippingPage() {
       key: 'envioGratisDesde',
       header: 'Envío Gratis',
       sortable: true,
+      className: 'hidden xl:table-cell',
       render: (value) => (
         value 
           ? <span className="text-sm text-green-600 font-medium">{value as string}€</span>
@@ -230,9 +225,10 @@ export default function AdminShippingPage() {
       key: 'diasEstimadosTexto',
       header: 'Entrega',
       sortable: true,
+      className: 'hidden lg:table-cell',
       render: (value) => (
         <div className="flex items-center gap-1">
-          <Clock className="h-3 w-3 text-gray-400" />
+          <Clock className="h-3 w-3 text-gray-400 flex-shrink-0" />
           <span className="text-sm text-gray-600">{value as string}</span>
         </div>
       ),
@@ -241,8 +237,9 @@ export default function AdminShippingPage() {
       key: 'estado',
       header: 'Estado',
       sortable: true,
+      className: 'hidden md:table-cell',
       render: (value) => (
-        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(value as string)}`}>
+        <span className={`px-2 py-0.5 inline-flex text-[10px] leading-4 font-semibold rounded-full ${getStatusColor(value as string)}`}>
           {value as string}
         </span>
       ),
@@ -250,11 +247,12 @@ export default function AdminShippingPage() {
     {
       key: 'actions',
       header: 'Acciones',
+      className: '',
       render: (_, zone) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <Link
             href={`/admin/shipping/${zone.id}`}
-            className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+            className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
             title="Editar"
           >
             <Edit className="h-4 w-4" />
@@ -264,7 +262,7 @@ export default function AdminShippingPage() {
               e.stopPropagation();
               handleDelete(zone);
             }}
-            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
             title="Eliminar"
           >
             <Trash2 className="h-4 w-4" />

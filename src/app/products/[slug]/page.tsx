@@ -191,28 +191,30 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   
   return (
     <div data-testid="product-detail" className="min-h-screen bg-gray-50">
-      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 3xl:px-20 py-8 lg:py-12">
+      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 3xl:px-20 py-6 sm:py-8 lg:py-12">
         {/* Breadcrumb */}
-        <nav className="mb-6 text-sm text-gray-600">
-          <Link href="/" className="hover:text-indigo-600">Inicio</Link>
-          <span className="mx-2">/</span>
-          <Link href="/products" className="hover:text-indigo-600">Productos</Link>
-          <span className="mx-2">/</span>
-          <span className="text-gray-900">{product.name}</span>
+        <nav className="mb-4 sm:mb-6 text-sm text-gray-600 overflow-hidden">
+          <div className="flex items-center flex-wrap gap-1">
+            <Link href="/" className="hover:text-indigo-600 whitespace-nowrap">Inicio</Link>
+            <span className="mx-1">/</span>
+            <Link href="/products" className="hover:text-indigo-600 whitespace-nowrap">Productos</Link>
+            <span className="mx-1">/</span>
+            <span className="text-gray-900 truncate max-w-[200px] sm:max-w-xs">{product.name}</span>
+          </div>
         </nav>
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12">
           {/* Imágenes del Producto - Galería Interactiva */}
           <ProductImageGallery images={product.images} productName={product.name} />
           
           {/* Información del Producto */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <div>
-              <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
                 {product.name}
               </h1>
               
-              <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
+              <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600 mb-4">
                 <span className="bg-indigo-100 text-indigo-800 px-2 py-1 rounded">
                   {product.category?.name}
                 </span>
@@ -223,12 +225,12 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             </div>
             
             {/* Precio */}
-            <div className="flex items-baseline gap-2">
-              <span className="text-4xl font-bold text-indigo-600">
+            <div className="flex items-baseline gap-2 flex-wrap">
+              <span className="text-3xl sm:text-4xl font-bold text-indigo-600">
                 {Number(product.price).toFixed(2)} €
               </span>
               {product.previousPrice && (
-                <span className="text-xl text-gray-500 line-through">
+                <span className="text-lg sm:text-xl text-gray-500 line-through">
                   {Number(product.previousPrice).toFixed(2)} €
                 </span>
               )}
@@ -249,18 +251,18 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             
             {/* Descripción */}
             <div className="prose max-w-none">
-              <h3 className="text-lg font-semibold mb-2">Descripción</h3>
-              <p className="text-gray-600">
+              <h3 className="text-base sm:text-lg font-semibold mb-2">Descripción</h3>
+              <p className="text-sm sm:text-base text-gray-600">
                 {product.description}
               </p>
             </div>
 
             {/* Rating Summary */}
             {(reviewStats as { total: number }).total > 0 && (
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="flex items-center gap-4">
+              <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                   <div>
-                    <p className="text-3xl font-bold text-gray-900">
+                    <p className="text-2xl sm:text-3xl font-bold text-gray-900">
                       {(reviewStats as { promedio: number }).promedio}
                     </p>
                     <StarRating 
@@ -268,7 +270,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                       size="sm" 
                     />
                   </div>
-                  <div className="border-l pl-4">
+                  <div className="border-l-0 sm:border-l pl-0 sm:pl-4">
                     <p className="text-sm text-gray-600">
                       {(reviewStats as { total: number }).total} reseñas
                     </p>
@@ -285,9 +287,9 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             
             {/* Detalles */}
             {(product.widthCm || product.heightCm || product.depthCm || product.weight || (isAdmin && product.printTime)) && (
-              <div className="border-t pt-6">
-                <h3 className="text-lg font-semibold mb-4">Especificaciones</h3>
-                <dl className="grid grid-cols-2 gap-4">
+              <div className="border-t pt-4 sm:pt-6">
+                <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Especificaciones</h3>
+                <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm sm:text-base">
                   {(product.widthCm || product.heightCm || product.depthCm) && (
                     <>
                       <dt className="text-gray-600">Dimensiones:</dt>
@@ -316,7 +318,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             )}
             
             {/* Botones de acción */}
-              <div className="border-t pt-6 space-y-4">
+            <div className="border-t pt-4 sm:pt-6 space-y-3 sm:space-y-4">
               <AddToCartButton
                 productId={product.id}
                 stock={product.stock}
@@ -341,12 +343,12 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
         </div>
 
         {/* Sección de Reseñas */}
-        <div id="reviews" className="mt-16 pt-8 border-t">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8">
+        <div id="reviews" className="mt-12 sm:mt-16 pt-6 sm:pt-8 border-t">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">
             Reseñas de Clientes
           </h2>
           
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
             {/* Reviews List */}
             <div className="lg:col-span-2">
               <ReviewsList 
@@ -363,8 +365,8 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
             {/* Review Form */}
             {isLoggedIn ? (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 h-fit">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 h-fit">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">
                   Escribe una reseña
                 </h3>
                 <ReviewFormClient 
@@ -373,8 +375,8 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 />
               </div>
             ) : (
-              <div className="bg-gray-50 rounded-xl p-6 h-fit">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <div className="bg-gray-50 rounded-xl p-4 sm:p-6 h-fit">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
                   Escribe una reseña
                 </h3>
                 <p className="text-gray-600 text-sm mb-4">
@@ -394,5 +396,3 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
     </div>
   );
 }
-
-
