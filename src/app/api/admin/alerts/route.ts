@@ -15,6 +15,7 @@ import {
   translateAlertSeverity,
   translateAlertStatus,
   translateErrorMessage,
+  translateProductName,
 } from '@/lib/i18n';
 
 // Validation schema
@@ -116,29 +117,44 @@ export async function GET(req: NextRequest) {
     ]);
 
     // Translate only for UI, keep original values
-    const translatedAlertas = alertas.map((alerta) => ({
-      id: alerta.id,
-      type: alerta.type,
-      typeTranslated: translateAlertType(alerta.type),
-      severity: alerta.severity,
-      severityTranslated: translateAlertSeverity(alerta.severity),
-      status: alerta.status,
-      statusTranslated: translateAlertStatus(alerta.status),
-      title: alerta.title,
-      message: alerta.message,
-      createdAt: alerta.createdAt,
-      resolvedAt: alerta.resolvedAt,
-      resolutionNotes: alerta.resolutionNotes,
-      product: alerta.product ? {
-        id: alerta.product.id,
-        name: alerta.product.name,
-        slug: alerta.product.slug,
-        stock: alerta.product.stock,
-        minStock: alerta.product.minStock,
-        image: alerta.product.images[0]?.url || null,
-      } : null,
-      resolvedByUser: alerta.resolvedByUser,
-    }));
+    const translatedAlertas = alertas.map((alerta) => {
+      // Traducir nombre del producto si existe
+      const productNameTranslated = alerta.product 
+        ? translateProductName(alerta.product.slug) 
+        : null;
+      
+      // Reconstruir título y mensaje con nombre traducido
+      const titleTranslated = productNameTranslated 
+        ? alerta.title.replace(alerta.product!.name, productNameTranslated)
+        : alerta.title;
+      const messageTranslated = productNameTranslated 
+        ? alerta.message.replace(alerta.product!.name, productNameTranslated)
+        : alerta.message;
+      
+      return {
+        id: alerta.id,
+        type: alerta.type,
+        typeTranslated: translateAlertType(alerta.type),
+        severity: alerta.severity,
+        severityTranslated: translateAlertSeverity(alerta.severity),
+        status: alerta.status,
+        statusTranslated: translateAlertStatus(alerta.status),
+        title: titleTranslated,
+        message: messageTranslated,
+        createdAt: alerta.createdAt,
+        resolvedAt: alerta.resolvedAt,
+        resolutionNotes: alerta.resolutionNotes,
+        product: alerta.product ? {
+          id: alerta.product.id,
+          name: productNameTranslated || alerta.product.name,
+          slug: alerta.product.slug,
+          stock: alerta.product.stock,
+          minStock: alerta.product.minStock,
+          image: alerta.product.images[0]?.url || null,
+        } : null,
+        resolvedByUser: alerta.resolvedByUser,
+      };
+    });
 
     return NextResponse.json({
       success: true,
