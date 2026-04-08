@@ -66,8 +66,7 @@ export async function GET() {
     const products = await prisma.product.findMany({
       include: {
         images: {
-          where: { isMain: true },
-          take: 1,
+          orderBy: { displayOrder: 'asc' },
         },
         category: true,
       },

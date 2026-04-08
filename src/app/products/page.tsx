@@ -81,8 +81,7 @@ async function getProducts(searchParams: ProductsPageProps['searchParams']) {
       where,
       include: {
         images: {
-          where: { isMain: true },
-          take: 1,
+          orderBy: { displayOrder: 'asc' },
         },
       },
       orderBy,

@@ -115,28 +115,28 @@ export default function EditarProductoPage() {
       if (data.success && data.producto) {
         const p = data.producto;
         setFormData({
-          name: p.nombre || '',
+          name: p.name || '',
           slug: p.slug || '',
-          description: p.descripcion || '',
-          shortDescription: p.descripcionCorta || '',
-          price: p.precio?.toString() || '',
-          previousPrice: p.precioAnterior?.toString() || '',
+          description: p.description || '',
+          shortDescription: p.shortDescription || '',
+          price: p.price?.toString() || '',
+          previousPrice: p.previousPrice?.toString() || '',
           stock: p.stock?.toString() || '',
-          minStock: p.stockMinimo?.toString() || '5',
-          categoryId: p.categoriaId || '',
+          minStock: p.minStock?.toString() || '5',
+          categoryId: p.categoryId || '',
           material: p.material || 'PLA',
-          widthCm: p.anchoCm?.toString() || '',
-          heightCm: p.altoCm?.toString() || '',
-          depthCm: p.profundidadCm?.toString() || '',
-          weight: p.peso?.toString() || '',
-          printTime: p.tiempoImpresion?.toString() || '',
-          isActive: p.activo !== false,
-          isFeatured: p.destacado === true,
+          widthCm: p.widthCm?.toString() || '',
+          heightCm: p.heightCm?.toString() || '',
+          depthCm: p.depthCm?.toString() || '',
+          weight: p.weight?.toString() || '',
+          printTime: p.printTime?.toString() || '',
+          isActive: p.isActive !== false,
+          isFeatured: p.isFeatured === true,
         });
-        // Convertir imágenes del API (español) al formato del formulario (inglés)
-        const formattedImages = (p.imagenes || []).map((img: { url: string; esPrincipal?: boolean; isMain?: boolean }) => ({
+        // Load images from API
+        const formattedImages = (p.images || []).map((img: { url: string; isMain?: boolean }) => ({
           url: img.url,
-          isMain: img.esPrincipal ?? img.isMain ?? false,
+          isMain: img.isMain ?? false,
         }));
         setImages(formattedImages);
       }

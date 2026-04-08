@@ -89,8 +89,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       where,
       include: {
         images: {
-          where: { isMain: true },
-          take: 1,
+          orderBy: { displayOrder: 'asc' },
         },
         category: true,
       },

@@ -11,11 +11,7 @@ import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
 import { Material } from '@prisma/client';
 import {
-  translateProductName,
-  translateProductDescription,
-  translateProductShortDescription,
   translateCategoryName,
-  translateMaterial,
   translateErrorMessage,
 } from '@/lib/i18n';
 
@@ -26,13 +22,15 @@ const updateProductSchema = z.object({
   shortDescription: z.string().optional(),
   price: z.preprocess(
     (val) => (val === null || val === undefined || val === '' ? undefined : Number(val)),
-    z.number({ required_error: 'El precio es obligatorio', invalid_type_error: 'El precio debe ser un número' })
+    z.number({ required_error: 'El precio es obligatorio', invalid_type_error: 'El precio debe ser un número válido' })
       .min(0.01, 'El precio debe ser mayor que 0')
+      .max(99999.99, 'El precio máximo permitido es 99999.99')
   ),
   previousPrice: z.preprocess(
     (val) => (val === null || val === undefined || val === '' ? null : Number(val)),
-    z.number({ invalid_type_error: 'El precio anterior debe ser un número' })
+    z.number({ invalid_type_error: 'El precio anterior debe ser un número válido' })
       .min(0, 'El precio anterior no puede ser negativo')
+      .max(99999.99, 'El precio anterior máximo es 99999.99')
       .optional()
   ).nullable().default(null),
   stock: z.preprocess(
@@ -71,6 +69,8 @@ const updateProductSchema = z.object({
       .int('El tiempo debe ser un número entero')
       .optional()
   ).nullable().default(null),
+  metaTitle: z.string().max(200, 'El meta título no puede exceder 200 caracteres').optional(),
+  metaDescription: z.string().max(300, 'La meta descripción no puede exceder 300 caracteres').optional(),
   isActive: z.boolean().default(true),
   isFeatured: z.boolean().default(false),
   images: z.array(
@@ -130,35 +130,37 @@ export async function GET(
       );
     }
 
-    // Transform to Spanish
+    // Return original data from database (not translated) for editing
     const transformedProduct = {
       id: product.id,
       slug: product.slug,
-      nombre: translateProductName(product.slug),
-      descripcion: translateProductDescription(product.slug),
-      descripcionCorta: translateProductShortDescription(product.slug),
-      precio: Number(product.price),
-      precioAnterior: product.previousPrice ? Number(product.previousPrice) : null,
+      name: product.name,
+      description: product.description,
+      shortDescription: product.shortDescription,
+      price: Number(product.price),
+      previousPrice: product.previousPrice ? Number(product.previousPrice) : null,
       stock: product.stock,
       minStock: product.minStock,
-      categoriaId: product.categoryId,
-      categoria: product.category ? translateCategoryName(product.category.slug) : 'Sin categoría',
-      material: translateMaterial(product.material),
-      anchoCm: product.widthCm,
-      altoCm: product.heightCm,
-      profundidadCm: product.depthCm,
-      peso: product.weight,
-      tiempoImpresion: product.printTime,
-      activo: product.isActive,
-      destacado: product.isFeatured,
-      imagenes: product.images.map((img) => ({
+      categoryId: product.categoryId,
+      category: product.category ? translateCategoryName(product.category.slug) : 'Sin categoría',
+      material: product.material,
+      widthCm: product.widthCm,
+      heightCm: product.heightCm,
+      depthCm: product.depthCm,
+      weight: product.weight,
+      printTime: product.printTime,
+      metaTitle: product.metaTitle,
+      metaDescription: product.metaDescription,
+      isActive: product.isActive,
+      isFeatured: product.isFeatured,
+      images: product.images.map((img) => ({
         id: img.id,
         url: img.url,
-        esPrincipal: img.isMain,
-        orden: img.displayOrder,
+        isMain: img.isMain,
+        displayOrder: img.displayOrder,
       })),
-      creadoEn: product.createdAt,
-      actualizadoEn: product.updatedAt,
+      createdAt: product.createdAt,
+      updatedAt: product.updatedAt,
     };
 
     return NextResponse.json({ success: true, producto: transformedProduct });
@@ -271,39 +273,41 @@ export async function PUT(
       throw new Error('Error al actualizar producto');
     }
 
-    // Transform response to Spanish
+    // Return original data for admin editing
     const transformedProduct = {
       id: updatedProduct.id,
       slug: updatedProduct.slug,
-      nombre: translateProductName(updatedProduct.slug),
-      descripcion: translateProductDescription(updatedProduct.slug),
-      descripcionCorta: translateProductShortDescription(updatedProduct.slug),
-      precio: Number(updatedProduct.price),
-      precioAnterior: updatedProduct.previousPrice
+      name: updatedProduct.name,
+      description: updatedProduct.description,
+      shortDescription: updatedProduct.shortDescription,
+      price: Number(updatedProduct.price),
+      previousPrice: updatedProduct.previousPrice
         ? Number(updatedProduct.previousPrice)
         : null,
       stock: updatedProduct.stock,
       minStock: updatedProduct.minStock,
-      categoriaId: updatedProduct.categoryId,
-      categoria: updatedProduct.category
+      categoryId: updatedProduct.categoryId,
+      category: updatedProduct.category
         ? translateCategoryName(updatedProduct.category.slug)
         : 'Sin categoría',
-      material: translateMaterial(updatedProduct.material),
-      anchoCm: updatedProduct.widthCm,
-      altoCm: updatedProduct.heightCm,
-      profundidadCm: updatedProduct.depthCm,
-      peso: updatedProduct.weight,
-      tiempoImpresion: updatedProduct.printTime,
-      activo: updatedProduct.isActive,
-      destacado: updatedProduct.isFeatured,
-      imagenes: updatedProduct.images.map((img) => ({
+      material: updatedProduct.material,
+      widthCm: updatedProduct.widthCm,
+      heightCm: updatedProduct.heightCm,
+      depthCm: updatedProduct.depthCm,
+      weight: updatedProduct.weight,
+      printTime: updatedProduct.printTime,
+      metaTitle: updatedProduct.metaTitle,
+      metaDescription: updatedProduct.metaDescription,
+      isActive: updatedProduct.isActive,
+      isFeatured: updatedProduct.isFeatured,
+      images: updatedProduct.images.map((img) => ({
         id: img.id,
         url: img.url,
-        esPrincipal: img.isMain,
-        orden: img.displayOrder,
+        isMain: img.isMain,
+        displayOrder: img.displayOrder,
       })),
-      creadoEn: updatedProduct.createdAt,
-      actualizadoEn: updatedProduct.updatedAt,
+      createdAt: updatedProduct.createdAt,
+      updatedAt: updatedProduct.updatedAt,
     };
 
     return NextResponse.json({
