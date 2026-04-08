@@ -139,7 +139,7 @@ export default function AdminProductsPage() {
           </div>
           <div className="ml-4">
             <div className="text-sm font-medium text-gray-900">{product.nombre}</div>
-            <div className="text-sm text-gray-500 capitalize">{product.material.toLowerCase()}</div>
+            <div className="text-sm text-gray-500">{product.material}</div>
           </div>
         </div>
       ),
