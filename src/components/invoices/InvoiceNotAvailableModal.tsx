@@ -17,27 +17,27 @@ interface InvoiceNotAvailableModalProps {
 const reasonConfig = {
   not_completed: {
     icon: Clock,
-    title: 'Invoice Not Available',
-    message: 'This invoice will be generated once the order is completed and delivered.',
-    action: 'Please check back later or contact support if you need assistance.',
+    title: 'Factura No Disponible',
+    message: 'Esta factura se generará automáticamente una vez que el pago sea procesado. Por favor, inténtalo de nuevo más tarde.',
+    action: 'Por favor, revisa más tarde o contacta con soporte si el problema persiste.',
   },
   not_generated: {
     icon: FileText,
-    title: 'Invoice Not Generated',
-    message: 'The invoice for this order has not been generated yet.',
-    action: 'Contact the administrator to generate the invoice.',
+    title: 'Factura No Generada',
+    message: 'La factura aún no ha sido generada para este pedido.',
+    action: 'Contacta al administrador si necesitas la factura urgentemente.',
   },
   payment_pending: {
     icon: AlertCircle,
-    title: 'Payment Pending',
-    message: 'The invoice will be available once the payment is confirmed.',
-    action: 'Please complete the payment to receive your invoice.',
+    title: 'Pago Pendiente',
+    message: 'La factura estará disponible una vez que se complete el pago.',
+    action: 'Por favor, completa el pago para generar la factura.',
   },
   cancelled: {
     icon: X,
-    title: 'Order Cancelled',
-    message: 'This order has been cancelled. No invoice will be generated.',
-    action: 'Contact support if you believe this is an error.',
+    title: 'Pedido Cancelado',
+    message: 'Este pedido ha sido cancelado. No se generará factura.',
+    action: 'Contacta con soporte si tienes alguna pregunta.',
   },
 };
 
@@ -82,7 +82,7 @@ export function InvoiceNotAvailableModal({
         <div className="p-6">
           {orderNumber && (
             <div className="mb-4 text-center">
-              <span className="text-sm text-gray-500">Order</span>
+              <span className="text-sm text-gray-500">Pedido</span>
               <p className="text-lg font-semibold text-indigo-600">{orderNumber}</p>
             </div>
           )}
@@ -103,7 +103,7 @@ export function InvoiceNotAvailableModal({
               onClick={onClose}
               className="flex-1 bg-indigo-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-indigo-700 transition-colors"
             >
-              Understood
+              Entendido
             </button>
           </div>
         </div>
@@ -111,7 +111,7 @@ export function InvoiceNotAvailableModal({
         {/* Footer */}
         <div className="bg-gray-50 px-6 py-4 border-t border-gray-100">
           <p className="text-xs text-gray-400 text-center">
-            Need help? Contact our support team at{' '}
+            ¿Necesitas ayuda? Contacta a nuestro equipo de soporte en{' '}
             <a href="mailto:support@3dprint.com" className="text-indigo-600 hover:underline">
               support@3dprint.com
             </a>
