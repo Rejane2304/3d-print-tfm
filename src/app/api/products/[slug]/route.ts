@@ -21,7 +21,7 @@ export const GET = withErrorHandler(async (
   const { slug } = params;
   
   if (!slug) {
-    throw new ApiError(ErrorCode.VALIDATION_INVALID_INPUT, 'Slug is required', 400);
+    throw new ApiError(ErrorCode.VALIDATION_INVALID_INPUT, 'El identificador del producto es requerido', 400);
   }
   
   const product = await prisma.product.findUnique({
@@ -35,7 +35,7 @@ export const GET = withErrorHandler(async (
   });
 
   if (!product) {
-    throw new ApiError(ErrorCode.DB_NOT_FOUND, 'Producto not found', 404);
+    throw new ApiError(ErrorCode.DB_NOT_FOUND, 'Producto no encontrado', 404);
   }
 
   if (!product.isActive) {
