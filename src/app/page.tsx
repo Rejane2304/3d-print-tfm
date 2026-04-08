@@ -19,7 +19,7 @@ import {
 } from '@/lib/i18n';
 
 async function getFeaturedProducts() {
-  // Primero buscar productos marcados como destacados por el admin
+  // Solo productos marcados como destacados por el admin (exclusivamente)
   const featuredProducts = await prisma.product.findMany({
     where: {
       isActive: true,
@@ -37,61 +37,8 @@ async function getFeaturedProducts() {
     take: 6,
   });
 
-  // Si no hay suficientes productos destacados, completar con los más vendidos
-  let finalProducts = featuredProducts;
-  if (featuredProducts.length < 3) {
-    const deliveredOrders = await prisma.order.findMany({
-      where: {
-        status: 'DELIVERED',
-      },
-      include: {
-        items: true,
-      },
-    });
-
-    const salesByProduct: Record<string, number> = {};
-    for (const order of deliveredOrders) {
-      for (const item of order.items) {
-        if (item.productId) {
-          salesByProduct[item.productId] = (salesByProduct[item.productId] || 0) + item.quantity;
-        }
-      }
-    }
-
-    // Obtener IDs de productos ya seleccionados
-    const featuredIds = new Set(featuredProducts.map(p => p.id));
-
-    // Buscar productos más vendidos excluyendo los ya destacados
-    const additionalProducts = await prisma.product.findMany({
-      where: {
-        isActive: true,
-        isFeatured: false,
-        id: {
-          notIn: Array.from(featuredIds),
-        },
-      },
-      include: {
-        images: {
-          where: { isMain: true },
-          take: 1,
-        },
-      },
-    });
-
-    // Ordenar por ventas y tomar los necesarios
-    const topSellingProducts = additionalProducts
-      .map((product) => ({
-        ...product,
-        sales: salesByProduct[product.id] || 0,
-      }))
-      .sort((a, b) => b.sales - a.sales)
-      .slice(0, 6 - featuredProducts.length);
-
-    finalProducts = [...featuredProducts, ...topSellingProducts];
-  }
-
   // Traducir productos destacados al español
-  const translatedProducts = finalProducts.slice(0, 6).map((product) => ({
+  const translatedProducts = featuredProducts.map((product) => ({
     ...product,
     name: translateProductName(product.slug),
     description: translateProductDescription(product.slug),
@@ -265,30 +212,6 @@ export default async function HomePage() {
                       
                       {/* Hover Overlay */}
                       <div className="absolute inset-0 bg-indigo-600/0 group-hover:bg-indigo-600/10 transition-all duration-500" />
-                      
-                      {/* Badge */}
-                      <div className="absolute top-4 left-4">
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-indigo-600 text-white shadow-lg">
-                          <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                          </svg>
-                          Top #{index + 1}
-                        </span>
-                      </div>
-                      
-                      {/* Stock Badge */}
-                      <div className="absolute top-4 right-4">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-                          product.stock > 0 
-                            ? 'bg-green-100 text-green-700' 
-                            : 'bg-gray-100 text-gray-600'
-                        }`}>
-                          <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
-                            product.stock > 0 ? 'bg-green-500 animate-pulse' : 'bg-gray-400'
-                          }`} />
-                          {product.stock > 0 ? 'En stock' : 'Agotado'}
-                        </span>
-                      </div>
                     </div>
                     
                     {/* Content */}

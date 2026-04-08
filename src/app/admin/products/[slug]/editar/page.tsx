@@ -133,7 +133,12 @@ export default function EditarProductoPage() {
           isActive: p.activo !== false,
           isFeatured: p.destacado === true,
         });
-        setImages(p.imagenes || []);
+        // Convertir imágenes del API (español) al formato del formulario (inglés)
+        const formattedImages = (p.imagenes || []).map((img: { url: string; esPrincipal?: boolean; isMain?: boolean }) => ({
+          url: img.url,
+          isMain: img.esPrincipal ?? img.isMain ?? false,
+        }));
+        setImages(formattedImages);
       }
     } catch (err) {
       console.error('Error loading product:', err);

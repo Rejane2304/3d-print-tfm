@@ -235,28 +235,27 @@ export async function PUT(
         },
       });
 
-      // Handle images if provided
-      if (data.images && data.images.length > 0) {
-        // Delete existing images
-        await tx.productImage.deleteMany({
-          where: { productId: product.id },
-        });
+    // Handle images - always delete and recreate to ensure consistency
+    await tx.productImage.deleteMany({
+      where: { productId: product.id },
+    });
 
-        // Create new images
-        for (let i = 0; i < data.images.length; i++) {
-          const img = data.images[i];
-          await tx.productImage.create({
-            data: {
-              productId: product.id,
-              url: img.url,
-              filename: img.url.split('/').pop() || 'image.jpg',
-              isMain: img.isMain,
-              displayOrder: i,
-              altText: data.name,
-            },
-          });
-        }
+    // Create images from the provided data
+    if (data.images && data.images.length > 0) {
+      for (let i = 0; i < data.images.length; i++) {
+        const img = data.images[i];
+        await tx.productImage.create({
+          data: {
+            productId: product.id,
+            url: img.url,
+            filename: img.url.split('/').pop() || 'image.jpg',
+            isMain: img.isMain ?? (i === 0), // Default to first image as main
+            displayOrder: i,
+            altText: data.name,
+          },
+        });
       }
+    }
 
       // Return product with updated images
       return tx.product.findUnique({
