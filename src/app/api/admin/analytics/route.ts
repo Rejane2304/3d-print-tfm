@@ -9,7 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
-import { translateProductName } from '@/lib/i18n';
+import { translateProductName, translateOrderStatus } from '@/lib/i18n';
 
 export async function GET(req: NextRequest) {
   try {
@@ -233,7 +233,8 @@ export async function GET(req: NextRequest) {
 
     const statusCounts: Record<string, number> = {};
     orderStats[4].forEach((s) => {
-      statusCounts[s.status] = s._count.status;
+      const translatedStatus = translateOrderStatus(s.status);
+      statusCounts[translatedStatus] = s._count.status;
     });
 
     return NextResponse.json({
@@ -265,7 +266,7 @@ export async function GET(req: NextRequest) {
           numeroPedido: o.orderNumber,
           clienteNombre: o.user?.name || 'N/A',
           total: Number(o.total),
-          estado: o.status,
+          estado: translateOrderStatus(o.status),
           creadoEn: o.createdAt,
         })),
       },
