@@ -157,7 +157,7 @@ export default function AdminProductsPage() {
     },
     {
       key: 'stock',
-      header: 'Existencias',
+      header: 'Stock',
       sortable: true,
       render: (value) => (
         <span className={Number(value) <= 5 ? 'text-red-600 font-medium' : ''}>

@@ -74,14 +74,14 @@ export async function GET() {
       // No ordering in DB - will sort after translation
     });
 
-    // Return original English data from database for admin panel
-    // Admin should see/edit data in English (database standard)
-    const productosFormateados = products.map((product) => ({
+    // Translate products to Spanish for admin panel
+    // Admin should see data in Spanish following project UI standard
+    const productosTraducidos = products.map((product) => ({
       id: product.id,
       slug: product.slug,
-      nombre: product.name, // Original English name from DB
-      descripcion: product.description, // Original English description from DB
-      descripcionCorta: product.shortDescription, // Original English short description from DB
+      nombre: translateProductName(product.slug),
+      descripcion: translateProductDescription(product.slug),
+      descripcionCorta: translateProductShortDescription(product.slug),
       precio: Number(product.price),
       precioAnterior: product.previousPrice ? Number(product.previousPrice) : null,
       stock: product.stock,
@@ -99,12 +99,12 @@ export async function GET() {
       actualizadoEn: product.updatedAt,
     }));
 
-    // Sort by English name alphabetically
-    productosFormateados.sort((a, b) => 
-      a.nombre.localeCompare(b.nombre, 'en', { sensitivity: 'base' })
+    // Sort by translated Spanish name alphabetically
+    productosTraducidos.sort((a, b) => 
+      a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' })
     );
 
-    return NextResponse.json({ success: true, productos: productosFormateados });
+    return NextResponse.json({ success: true, productos: productosTraducidos });
   } catch (error) {
     console.error('Error listando productos:', error);
     return NextResponse.json(

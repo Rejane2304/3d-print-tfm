@@ -11,6 +11,9 @@ import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
 import { Material } from '@prisma/client';
 import {
+  translateProductName,
+  translateProductDescription,
+  translateProductShortDescription,
   translateCategoryName,
   translateErrorMessage,
 } from '@/lib/i18n';
@@ -130,13 +133,13 @@ export async function GET(
       );
     }
 
-    // Return original data from database (not translated) for editing
+    // Return translated data for admin panel
     const transformedProduct = {
       id: product.id,
       slug: product.slug,
-      name: product.name,
-      description: product.description,
-      shortDescription: product.shortDescription,
+      name: translateProductName(product.slug),
+      description: translateProductDescription(product.slug),
+      shortDescription: translateProductShortDescription(product.slug),
       price: Number(product.price),
       previousPrice: product.previousPrice ? Number(product.previousPrice) : null,
       stock: product.stock,

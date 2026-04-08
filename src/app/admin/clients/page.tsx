@@ -70,7 +70,7 @@ export default function AdminClientsPage() {
   };
 
   const handleDeleteClients = async (selectedIds: string[]) => {
-    if (!confirm(`Are you sure you want to delete ${selectedIds.length} cliente(s)?`)) {
+    if (!confirm(`¿Estás seguro de que deseas eliminar ${selectedIds.length} cliente(s)?`)) {
       return;
     }
     
