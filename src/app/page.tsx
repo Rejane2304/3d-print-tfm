@@ -229,9 +229,9 @@ export default async function HomePage() {
                       {/* Price and Action */}
                       <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                         <div>
-                          <span className="text-2xl font-bold text-gray-900">
+                          <span className="text-2xl font-bold text-indigo-600">
                             {Number(product.price).toFixed(2)}
-                            <span className="text-lg text-gray-500">€</span>
+                            <span className="text-lg text-indigo-400">€</span>
                           </span>
                         </div>
 
