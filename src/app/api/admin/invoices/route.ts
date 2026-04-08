@@ -11,6 +11,7 @@ import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
 import { Prisma } from '@prisma/client';
 import { COMPANY_CONFIG } from '@/lib/invoices/pdf-generator';
+import { translateErrorMessage } from '@/lib/i18n';
 
 // Validation schema
 const crearFacturaSchema = z.object({
@@ -23,7 +24,7 @@ export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: 'No autenticado' },
+        { success: false, error: translateErrorMessage('No autenticado') },
         { status: 401 }
       );
     }
@@ -34,7 +35,7 @@ export async function GET(req: NextRequest) {
 
     if (!usuario || usuario.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: 'No autorizado' },
+        { success: false, error: translateErrorMessage('No autorizado') },
         { status: 403 }
       );
     }
@@ -114,7 +115,7 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error('Error listing invoices:', error);
     return NextResponse.json(
-      { success: false, error: 'Internal error' },
+      { success: false, error: translateErrorMessage('Internal error') },
       { status: 500 }
     );
   }
@@ -126,7 +127,7 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: 'No autenticado' },
+        { success: false, error: translateErrorMessage('No autenticado') },
         { status: 401 }
       );
     }
@@ -137,7 +138,7 @@ export async function POST(req: NextRequest) {
 
     if (!usuario || usuario.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: 'No autorizado' },
+        { success: false, error: translateErrorMessage('No autorizado') },
         { status: 403 }
       );
     }
@@ -156,7 +157,7 @@ export async function POST(req: NextRequest) {
 
     if (!pedido) {
       return NextResponse.json(
-        { success: false, error: 'Pedido not found' },
+        { success: false, error: translateErrorMessage('Pedido not found') },
         { status: 404 }
       );
     }
@@ -176,7 +177,7 @@ export async function POST(req: NextRequest) {
 
     if (facturaExistente) {
       return NextResponse.json(
-        { success: false, error: 'Already exists una factura para este pedido' },
+        { success: false, error: translateErrorMessage('Already exists una factura para este pedido') },
         { status: 400 }
       );
     }
@@ -258,7 +259,7 @@ export async function POST(req: NextRequest) {
     }
     console.error('Error creating invoice:', error);
     return NextResponse.json(
-      { success: false, error: 'Internal error' },
+      { success: false, error: translateErrorMessage('Internal error') },
       { status: 500 }
     );
   }

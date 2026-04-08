@@ -11,6 +11,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import Stripe from 'stripe';
+import { translateErrorMessage } from '@/lib/i18n';
 
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
@@ -35,7 +36,7 @@ export async function POST(req: NextRequest) {
     } catch (err: unknown) {
       console.error('Webhook signature verification failed:', err instanceof Error ? err.message : 'Unknown error');
       return NextResponse.json(
-        { error: 'Invalid signature' },
+        { error: translateErrorMessage('Invalid signature') },
         { status: 400 }
       );
     }
@@ -68,7 +69,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error('Webhook error:', error);
     return NextResponse.json(
-      { error: 'Webhook processing failed' },
+      { error: translateErrorMessage('Webhook processing failed') },
       { status: 500 }
     );
   }

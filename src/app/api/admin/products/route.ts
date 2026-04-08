@@ -15,6 +15,7 @@ import {
   translateProductDescription,
   translateProductShortDescription,
   translateCategoryName,
+  translateErrorMessage,
 } from '@/lib/i18n';
 
 // Schema de validación
@@ -47,7 +48,7 @@ export async function GET() {
     }
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: 'No autenticado' },
+        { success: false, error: translateErrorMessage('No autenticado') },
         { status: 401 }
       );
     }
@@ -58,7 +59,7 @@ export async function GET() {
 
     if (!user || user.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: 'No autorizado' },
+        { success: false, error: translateErrorMessage('No autorizado') },
         { status: 401 }
       );
     }
@@ -107,7 +108,7 @@ export async function GET() {
   } catch (error) {
     console.error('Error listando productos:', error);
     return NextResponse.json(
-      { success: false, error: 'Internal error' },
+      { success: false, error: translateErrorMessage('Internal error') },
       { status: 500 }
     );
   }
@@ -124,7 +125,7 @@ export async function POST(req: NextRequest) {
     }
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: 'No autenticado' },
+        { success: false, error: translateErrorMessage('No autenticado') },
         { status: 401 }
       );
     }
@@ -135,7 +136,7 @@ export async function POST(req: NextRequest) {
 
     if (!user || user.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: 'No autorizado' },
+        { success: false, error: translateErrorMessage('No autorizado') },
         { status: 401 }
       );
     }
@@ -187,7 +188,7 @@ export async function POST(req: NextRequest) {
     }
     console.error('Error creando producto:', error);
     return NextResponse.json(
-      { success: false, error: 'Internal error' },
+      { success: false, error: translateErrorMessage('Internal error') },
       { status: 500 }
     );
   }

@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
+import { translateErrorMessage } from '@/lib/i18n';
 
 export async function GET(
   req: NextRequest,
@@ -17,7 +18,7 @@ export async function GET(
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: 'No autenticado' },
+        { success: false, error: translateErrorMessage('No autenticado') },
         { status: 401 }
       );
     }
@@ -28,7 +29,7 @@ export async function GET(
 
     if (!usuario || usuario.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: 'No autorizado' },
+        { success: false, error: translateErrorMessage('No autorizado') },
         { status: 403 }
       );
     }
@@ -63,7 +64,7 @@ export async function GET(
 
     if (!factura) {
       return NextResponse.json(
-        { success: false, error: 'Factura no encontrada' },
+        { success: false, error: translateErrorMessage('Factura not found') },
         { status: 404 }
       );
     }
@@ -125,7 +126,7 @@ export async function GET(
   } catch (error) {
     console.error('Error obteniendo factura:', error);
     return NextResponse.json(
-      { success: false, error: 'Internal error' },
+      { success: false, error: translateErrorMessage('Internal error') },
       { status: 500 }
     );
   }
@@ -139,7 +140,7 @@ export async function DELETE(
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: 'No autenticado' },
+        { success: false, error: translateErrorMessage('No autenticado') },
         { status: 401 }
       );
     }
@@ -150,7 +151,7 @@ export async function DELETE(
 
     if (!usuario || usuario.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: 'No autorizado' },
+        { success: false, error: translateErrorMessage('No autorizado') },
         { status: 403 }
       );
     }
@@ -168,7 +169,7 @@ export async function DELETE(
   } catch (error) {
     console.error('Error anulando factura:', error);
     return NextResponse.json(
-      { success: false, error: 'Internal error' },
+      { success: false, error: translateErrorMessage('Internal error') },
       { status: 500 }
     );
   }

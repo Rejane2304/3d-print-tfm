@@ -10,6 +10,7 @@ import { z } from 'zod';
 import bcrypt from 'bcrypt';
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 import { changePasswordSchema } from '@/lib/validators';
+import { translateErrorMessage } from '@/lib/i18n';
 
 // Schema de validación para actualizar perfil - más permisivo
 const profileSchema = z.object({
@@ -62,7 +63,7 @@ export async function GET() {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: 'No autenticado' },
+        { success: false, error: translateErrorMessage('No autenticado') },
         { status: 401 }
       );
     }
@@ -82,7 +83,7 @@ export async function GET() {
 
     if (!usuario) {
       return NextResponse.json(
-        { success: false, error: 'Usuario not found' },
+        { success: false, error: translateErrorMessage('Usuario not found') },
         { status: 404 }
       );
     }
@@ -91,7 +92,7 @@ export async function GET() {
   } catch (error) {
     console.error('Error obteniendo perfil:', error);
     return NextResponse.json(
-      { success: false, error: 'Internal error' },
+      { success: false, error: translateErrorMessage('Internal error') },
       { status: 500 }
     );
   }
@@ -103,7 +104,7 @@ export async function PATCH(req: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: 'No autenticado' },
+        { success: false, error: translateErrorMessage('No autenticado') },
         { status: 401 }
       );
     }
@@ -124,7 +125,7 @@ export async function PATCH(req: NextRequest) {
 
       if (!usuario) {
         return NextResponse.json(
-          { success: false, error: 'Usuario not found' },
+          { success: false, error: translateErrorMessage('Usuario not found') },
           { status: 404 }
         );
       }
@@ -184,7 +185,7 @@ export async function PATCH(req: NextRequest) {
 
     if (!usuario) {
       return NextResponse.json(
-        { success: false, error: 'Usuario not found' },
+        { success: false, error: translateErrorMessage('Usuario not found') },
         { status: 404 }
       );
     }
@@ -217,7 +218,7 @@ export async function PATCH(req: NextRequest) {
     }
     console.error('Error actualizando perfil:', error);
     return NextResponse.json(
-      { success: false, error: 'Internal error' },
+      { success: false, error: translateErrorMessage('Internal error') },
       { status: 500 }
     );
   }

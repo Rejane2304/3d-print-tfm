@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
+import { translateErrorMessage } from '@/lib/i18n';
 
 const PAYPAL_API = process.env.NODE_ENV === 'production'
   ? 'https://api-m.paypal.com'
@@ -43,7 +44,7 @@ export async function POST(req: NextRequest) {
 
     if (!session?.user?.email) {
       return NextResponse.json(
-        { error: 'No autenticado' },
+        { error: translateErrorMessage('No autenticado') },
         { status: 401 }
       );
     }
@@ -53,7 +54,7 @@ export async function POST(req: NextRequest) {
 
     if (!paypalOrderId || !orderId) {
       return NextResponse.json(
-        { error: 'Datos incompletos' },
+        { error: translateErrorMessage('Missing required fields') },
         { status: 400 }
       );
     }
