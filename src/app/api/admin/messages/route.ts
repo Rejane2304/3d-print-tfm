@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
 
     if (!usuario) {
       return NextResponse.json(
-        { success: false, error: 'Usuario not found' },
+        { success: false, error: 'Usuario no encontrado' },
         { status: 401 }
       );
     }
@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
 
     if (!orderId) {
       return NextResponse.json(
-        { success: false, error: 'orderId is required' },
+        { success: false, error: 'El ID de pedido es requerido' },
         { status: 400 }
       );
     }
@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
 
     if (!pedido) {
       return NextResponse.json(
-        { success: false, error: 'Pedido not found' },
+        { success: false, error: 'Pedido no encontrado' },
         { status: 404 }
       );
     }
@@ -89,7 +89,7 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error('Error listando mensajes:', error);
     return NextResponse.json(
-      { success: false, error: 'Internal error' },
+      { success: false, error: 'Error interno del servidor' },
       { status: 500 }
     );
   }
@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
 
     if (!usuario) {
       return NextResponse.json(
-        { success: false, error: 'Usuario not found' },
+        { success: false, error: 'Usuario no encontrado' },
         { status: 401 }
       );
     }
@@ -127,7 +127,7 @@ export async function POST(req: NextRequest) {
 
     if (!pedido) {
       return NextResponse.json(
-        { success: false, error: 'Pedido not found' },
+        { success: false, error: 'Pedido no encontrado' },
         { status: 404 }
       );
     }
@@ -172,7 +172,7 @@ export async function POST(req: NextRequest) {
     }
     console.error('Error creando mensaje:', error);
     return NextResponse.json(
-      { success: false, error: 'Internal error' },
+      { success: false, error: 'Error interno del servidor' },
       { status: 500 }
     );
   }

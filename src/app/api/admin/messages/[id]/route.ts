@@ -28,7 +28,7 @@ export async function DELETE(
 
     if (!usuario) {
       return NextResponse.json(
-        { success: false, error: 'Usuario not found' },
+        { success: false, error: 'Usuario no encontrado' },
         { status: 401 }
       );
     }
@@ -48,7 +48,7 @@ export async function DELETE(
 
     if (!mensaje) {
       return NextResponse.json(
-        { success: false, error: 'Mensaje not found' },
+        { success: false, error: 'Mensaje no encontrado' },
         { status: 404 }
       );
     }
@@ -62,7 +62,7 @@ export async function DELETE(
   } catch (error) {
     console.error('Error eliminando mensaje:', error);
     return NextResponse.json(
-      { success: false, error: 'Internal error' },
+      { success: false, error: 'Error interno del servidor' },
       { status: 500 }
     );
   }
