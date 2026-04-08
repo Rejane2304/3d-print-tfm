@@ -19,9 +19,11 @@ import {
 } from '@/lib/i18n';
 
 async function getFeaturedProducts() {
-  const products = await prisma.product.findMany({
+  // Primero buscar productos marcados como destacados por el admin
+  const featuredProducts = await prisma.product.findMany({
     where: {
       isActive: true,
+      isFeatured: true,
     },
     include: {
       images: {
@@ -29,36 +31,67 @@ async function getFeaturedProducts() {
         take: 1,
       },
     },
+    orderBy: {
+      updatedAt: 'desc',
+    },
+    take: 6,
   });
 
-  const deliveredOrders = await prisma.order.findMany({
-    where: {
-      status: 'DELIVERED',
-    },
-    include: {
-      items: true,
-    },
-  });
+  // Si no hay suficientes productos destacados, completar con los más vendidos
+  let finalProducts = featuredProducts;
+  if (featuredProducts.length < 3) {
+    const deliveredOrders = await prisma.order.findMany({
+      where: {
+        status: 'DELIVERED',
+      },
+      include: {
+        items: true,
+      },
+    });
 
-  const salesByProduct: Record<string, number> = {};
-  for (const order of deliveredOrders) {
-    for (const item of order.items) {
-      if (item.productId) {
-        salesByProduct[item.productId] = (salesByProduct[item.productId] || 0) + item.quantity;
+    const salesByProduct: Record<string, number> = {};
+    for (const order of deliveredOrders) {
+      for (const item of order.items) {
+        if (item.productId) {
+          salesByProduct[item.productId] = (salesByProduct[item.productId] || 0) + item.quantity;
+        }
       }
     }
+
+    // Obtener IDs de productos ya seleccionados
+    const featuredIds = new Set(featuredProducts.map(p => p.id));
+
+    // Buscar productos más vendidos excluyendo los ya destacados
+    const additionalProducts = await prisma.product.findMany({
+      where: {
+        isActive: true,
+        isFeatured: false,
+        id: {
+          notIn: Array.from(featuredIds),
+        },
+      },
+      include: {
+        images: {
+          where: { isMain: true },
+          take: 1,
+        },
+      },
+    });
+
+    // Ordenar por ventas y tomar los necesarios
+    const topSellingProducts = additionalProducts
+      .map((product) => ({
+        ...product,
+        sales: salesByProduct[product.id] || 0,
+      }))
+      .sort((a, b) => b.sales - a.sales)
+      .slice(0, 6 - featuredProducts.length);
+
+    finalProducts = [...featuredProducts, ...topSellingProducts];
   }
 
-  const productsWithSales = products
-    .map((product) => ({
-      ...product,
-      sales: salesByProduct[product.id] || 0,
-    }))
-    .sort((a, b) => b.sales - a.sales)
-    .slice(0, 3);
-
   // Traducir productos destacados al español
-  const translatedProducts = productsWithSales.map((product) => ({
+  const translatedProducts = finalProducts.slice(0, 6).map((product) => ({
     ...product,
     name: translateProductName(product.slug),
     description: translateProductDescription(product.slug),

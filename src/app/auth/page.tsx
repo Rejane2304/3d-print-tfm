@@ -748,12 +748,12 @@ function AuthContent() {
           </h3>
           <div className="space-y-2 text-xs text-gray-600">
             <div className="flex items-center justify-between bg-white p-2 rounded-lg border border-gray-100">
-              <span><strong>Admin:</strong> admin@3dprint.com</span>
-              <span className="text-gray-400 font-mono">admin123</span>
+              <span><strong>Admin:</strong> admin@3dprint-tfm.com</span>
+              <span className="text-gray-400 font-mono">AdminPass123!</span>
             </div>
             <div className="flex items-center justify-between bg-white p-2 rounded-lg border border-gray-100">
-              <span><strong>Cliente:</strong> juan@example.com</span>
-              <span className="text-gray-400 font-mono">pass123</span>
+              <span><strong>Cliente:</strong> maria@example.com</span>
+              <span className="text-gray-400 font-mono">Password123!</span>
             </div>
           </div>
         </div>

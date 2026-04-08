@@ -169,47 +169,42 @@ export const productSchema = z.object({
     .string()
     .max(255, 'La descripción corta no puede exceder 255 caracteres')
     .optional(),
-  price: z.preprocess(
-    (val) => (val === null || val === undefined || val === '' ? undefined : Number(val)),
-    z.number({ required_error: 'El precio es obligatorio', invalid_type_error: 'El precio debe ser un número' })
-      .min(0.01, 'El precio debe ser mayor que 0')
-      .max(99999.99, 'El precio máximo permitido es 99999.99')
-  ),
-  previousPrice: z.preprocess(
-    (val) => (val === null || val === undefined || val === '' ? undefined : Number(val)),
-    z.number({ invalid_type_error: 'El precio anterior debe ser un número' })
-      .min(0, 'El precio anterior no puede ser negativo')
-      .max(99999.99, 'El precio anterior máximo es 99999.99')
-      .optional()
-  ).nullable(),
-  stock: z.preprocess(
-    (val) => (val === null || val === undefined || val === '' ? undefined : Number(val)),
-    z.number({ required_error: 'El stock es obligatorio', invalid_type_error: 'El stock debe ser un número' })
-      .min(0, 'El stock no puede ser negativo')
-  ),
-  minStock: z.preprocess(
-    (val) => (val === null || val === undefined || val === '' ? 5 : Number(val)),
-    z.number({ invalid_type_error: 'El stock mínimo debe ser un número' })
-      .min(1, 'El stock mínimo debe ser al menos 1')
-  ).default(5),
+  price: z
+    .number({ required_error: 'El precio es obligatorio', invalid_type_error: 'El precio debe ser un número' })
+    .min(0.01, 'El precio debe ser mayor que 0')
+    .max(99999.99, 'El precio máximo permitido es 99999.99'),
+  previousPrice: z
+    .number({ invalid_type_error: 'El precio anterior debe ser un número' })
+    .min(0, 'El precio anterior no puede ser negativo')
+    .max(99999.99, 'El precio anterior máximo es 99999.99')
+    .optional()
+    .nullable(),
+  stock: z
+    .number({ required_error: 'El stock es obligatorio', invalid_type_error: 'El stock debe ser un número' })
+    .int('El stock debe ser un número entero')
+    .min(0, 'El stock no puede ser negativo'),
+  minStock: z
+    .number({ invalid_type_error: 'El stock mínimo debe ser un número' })
+    .int('El stock mínimo debe ser un número entero')
+    .min(1, 'El stock mínimo debe ser al menos 1')
+    .default(5),
   categoryId: z.string().uuid('ID de categoría inválido').optional(),
   material: z.nativeEnum(Material).optional(),
   dimensions: z
     .string()
     .max(50, 'Las dimensiones no pueden exceder 50 caracteres')
     .optional(),
-  weight: z.preprocess(
-    (val) => (val === null || val === undefined || val === '' ? undefined : Number(val)),
-    z.number({ invalid_type_error: 'El peso debe ser un número' })
-      .min(0, 'El peso no puede ser negativo')
-      .optional()
-  ).nullable(),
-  printTime: z.preprocess(
-    (val) => (val === null || val === undefined || val === '' ? undefined : Number(val)),
-    z.number({ invalid_type_error: 'El tiempo debe ser un número' })
-      .min(1, 'El tiempo debe ser de al menos 1 minuto')
-      .optional()
-  ).nullable(),
+  weight: z
+    .number({ invalid_type_error: 'El peso debe ser un número' })
+    .min(0, 'El peso no puede ser negativo')
+    .optional()
+    .nullable(),
+  printTime: z
+    .number({ invalid_type_error: 'El tiempo debe ser un número' })
+    .int('El tiempo debe ser un número entero')
+    .min(1, 'El tiempo debe ser de al menos 1 minuto')
+    .optional()
+    .nullable(),
   metaTitle: z
     .string()
     .max(200, 'El meta título no puede exceder 200 caracteres')

@@ -19,22 +19,58 @@ import {
   translateErrorMessage,
 } from '@/lib/i18n';
 
-// Validation schema for update
+// Validation schema for update with Spanish error messages
 const updateProductSchema = z.object({
-  name: z.string().min(1),
-  description: z.string(),
+  name: z.string().min(1, 'El nombre es obligatorio'),
+  description: z.string().min(1, 'La descripción es obligatoria'),
   shortDescription: z.string().optional(),
-  price: z.number().positive(),
-  previousPrice: z.number().optional(),
-  stock: z.number().int().min(0),
-  minStock: z.number().int().min(1).optional(),
-  categoryId: z.string().uuid(),
+  price: z.preprocess(
+    (val) => (val === null || val === undefined || val === '' ? undefined : Number(val)),
+    z.number({ required_error: 'El precio es obligatorio', invalid_type_error: 'El precio debe ser un número' })
+      .min(0.01, 'El precio debe ser mayor que 0')
+  ),
+  previousPrice: z.preprocess(
+    (val) => (val === null || val === undefined || val === '' ? null : Number(val)),
+    z.number({ invalid_type_error: 'El precio anterior debe ser un número' })
+      .min(0, 'El precio anterior no puede ser negativo')
+      .optional()
+  ).nullable().default(null),
+  stock: z.preprocess(
+    (val) => (val === null || val === undefined || val === '' ? undefined : Number(val)),
+    z.number({ required_error: 'El stock es obligatorio', invalid_type_error: 'El stock debe ser un número' })
+      .int('El stock debe ser un número entero')
+      .min(0, 'El stock no puede ser negativo')
+  ),
+  minStock: z.preprocess(
+    (val) => (val === null || val === undefined || val === '' ? 5 : Number(val)),
+    z.number({ invalid_type_error: 'El stock mínimo debe ser un número' })
+      .int('El stock mínimo debe ser un número entero')
+      .min(1, 'El stock mínimo debe ser al menos 1')
+  ).default(5),
+  categoryId: z.string().uuid('ID de categoría inválido'),
   material: z.nativeEnum(Material),
-  widthCm: z.number().optional(),
-  heightCm: z.number().optional(),
-  depthCm: z.number().optional(),
-  weight: z.number().optional(),
-  printTime: z.number().optional(),
+  widthCm: z.preprocess(
+    (val) => (val === null || val === undefined || val === '' ? undefined : Number(val)),
+    z.number({ invalid_type_error: 'El ancho debe ser un número' }).optional()
+  ).optional(),
+  heightCm: z.preprocess(
+    (val) => (val === null || val === undefined || val === '' ? undefined : Number(val)),
+    z.number({ invalid_type_error: 'El alto debe ser un número' }).optional()
+  ).optional(),
+  depthCm: z.preprocess(
+    (val) => (val === null || val === undefined || val === '' ? undefined : Number(val)),
+    z.number({ invalid_type_error: 'La profundidad debe ser un número' }).optional()
+  ).optional(),
+  weight: z.preprocess(
+    (val) => (val === null || val === undefined || val === '' ? null : Number(val)),
+    z.number({ invalid_type_error: 'El peso debe ser un número' }).optional()
+  ).nullable().default(null),
+  printTime: z.preprocess(
+    (val) => (val === null || val === undefined || val === '' ? null : Number(val)),
+    z.number({ invalid_type_error: 'El tiempo de impresión debe ser un número' })
+      .int('El tiempo debe ser un número entero')
+      .optional()
+  ).nullable().default(null),
   isActive: z.boolean().default(true),
   isFeatured: z.boolean().default(false),
   images: z.array(
