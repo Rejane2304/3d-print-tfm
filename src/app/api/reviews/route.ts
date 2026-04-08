@@ -19,6 +19,60 @@ const reviewCreateSchema = z.object({
   comment: z.string().min(1, 'El comentario es obligatorio').max(2000, 'Máximo 2000 caracteres'),
 });
 
+// GET - Obtener reseñas del usuario autenticado
+export async function GET() {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { success: false, error: 'No autenticado' },
+        { status: 401 }
+      );
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'Usuario no encontrado' },
+        { status: 404 }
+      );
+    }
+
+    const reviews = await prisma.review.findMany({
+      where: { userId: user.id },
+      include: {
+        product: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            images: {
+              where: { isMain: true },
+              select: { url: true },
+              take: 1,
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: reviews,
+    });
+  } catch (error) {
+    console.error('Error obteniendo reseñas:', error);
+    return NextResponse.json(
+      { success: false, error: 'Error interno' },
+      { status: 500 }
+    );
+  }
+}
+
 // POST - Crear reseña
 export async function POST(req: NextRequest) {
   try {
