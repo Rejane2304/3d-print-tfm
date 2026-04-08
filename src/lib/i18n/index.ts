@@ -316,6 +316,9 @@ export const couponTranslations: Record<string, string> = {
   'BLACKFRIDAY': 'ViernesNegro',
   'SAVES': 'AHORRA',
   '€ SAVE5': '€ AHORRA5',
+  '€ SAVE5 ': '€ AHORRA5',  // Por si hay espacio al final
+  'SAVE5': 'AHORRA5',  // Sin el símbolo €
+  '€SAVE5': '€AHORRA5',  // Sin espacio
 };
 
 // ============================================================================
@@ -545,7 +548,13 @@ export function translateCouponType(type: string): string {
 }
 
 export function translateCouponCode(code: string): string {
-  return couponTranslations[code.toUpperCase()] || code;
+  const trimmedCode = code.trim().toUpperCase();
+  // Primero buscar con el código exacto
+  if (couponTranslations[trimmedCode]) {
+    return couponTranslations[trimmedCode];
+  }
+  // Si no se encuentra, devolver el código original
+  return code;
 }
 
 export function translateMaterial(material: string): string {
