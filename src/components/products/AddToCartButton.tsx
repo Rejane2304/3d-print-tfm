@@ -27,9 +27,11 @@ interface AddToCartButtonProps {
 }
 
 export default function AddToCartButton({ productId, stock, product }: AddToCartButtonProps) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { status } = useSession();
+  const { data: session, status } = useSession();
   const { addItem } = useCart();
+  
+  // Check if user is admin - admins cannot purchase
+  const isAdmin = session?.user?.rol === 'ADMIN';
   
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -59,8 +61,9 @@ export default function AddToCartButton({ productId, stock, product }: AddToCart
     }
   };
 
-  // Si no hay stock, deshabilitar botón
+  // Si no hay stock o es admin, deshabilitar botón
   const isOutOfStock = stock <= 0;
+  const isDisabled = isOutOfStock || isAdmin || loading;
 
   return (
     <div className="space-y-4" data-testid="add-to-cart-container">
@@ -73,7 +76,7 @@ export default function AddToCartButton({ productId, stock, product }: AddToCart
           <button
             type="button"
             onClick={() => setQuantity(Math.max(1, quantity - 1))}
-            disabled={quantity <= 1 || loading || isOutOfStock}
+            disabled={quantity <= 1 || isDisabled}
             className="p-2 rounded-md border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             aria-label="Decrementar quantity"
             data-testid="decrease-quantity"
@@ -96,14 +99,14 @@ export default function AddToCartButton({ productId, stock, product }: AddToCart
             }}
             min={1}
             max={stock}
-            disabled={loading || isOutOfStock}
+            disabled={isDisabled}
             className="w-16 text-center border border-gray-300 rounded-md py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           />
           
           <button
             type="button"
             onClick={() => setQuantity(Math.min(stock, quantity + 1))}
-            disabled={quantity >= stock || loading || isOutOfStock}
+            disabled={quantity >= stock || isDisabled}
             className="p-2 rounded-md border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             aria-label="Incrementar quantity"
             data-testid="increase-quantity"
@@ -119,12 +122,12 @@ export default function AddToCartButton({ productId, stock, product }: AddToCart
       <button
         type="button"
         onClick={handleAddToCart}
-        disabled={loading || isOutOfStock}
+        disabled={isDisabled}
         data-testid="add-to-cart-button"
         className={`w-full py-3 px-6 rounded-md font-medium text-white transition-all duration-200 flex items-center justify-center gap-2 ${
           success
             ? 'bg-green-600 hover:bg-green-700'
-            : isOutOfStock
+            : isDisabled
             ? 'bg-gray-400 cursor-not-allowed'
             : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
         }`}
@@ -138,6 +141,11 @@ export default function AddToCartButton({ productId, stock, product }: AddToCart
           <>
             <Check className="h-5 w-5" />
             ¡Añadido!
+          </>
+        ) : isAdmin ? (
+          <>
+            <ShoppingCart className="h-5 w-5" />
+            No disponible para admins
           </>
         ) : isOutOfStock ? (
           <>
