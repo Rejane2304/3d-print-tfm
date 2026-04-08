@@ -12,6 +12,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import Stripe from 'stripe';
 import { translateErrorMessage } from '@/lib/i18n';
+import { createNewOrderAlert, createHighValueOrderAlert } from '@/lib/alerts/alert-service';
 
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
@@ -143,6 +144,18 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     }
 
     console.log('Payment processed successfully for order:', order.id);
+    
+    // Crear alertas automáticas para el pedido
+    try {
+      // Alerta de nuevo pedido
+      await createNewOrderAlert(order.id);
+      
+      // Alerta de pedido de alto valor (≥100€)
+      await createHighValueOrderAlert(order.id, 100);
+    } catch (alertError) {
+      console.error('Error creating order alerts:', alertError);
+      // No fallar el webhook si la alerta falla
+    }
   } catch (error) {
     console.error('Error processing checkout completed:', error);
     throw error;

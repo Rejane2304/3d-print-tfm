@@ -9,6 +9,7 @@ import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
+import { createNegativeReviewAlert } from '@/lib/alerts/alert-service';
 
 // Schema de validación
 const reviewCreateSchema = z.object({
@@ -111,6 +112,15 @@ export async function POST(req: NextRequest) {
         },
       },
     });
+
+    // Crear alerta para reseñas negativas (1-2 estrellas)
+    if (data.rating <= 2) {
+      try {
+        await createNegativeReviewAlert(review.id);
+      } catch (alertError) {
+        console.error('Error creating negative review alert:', alertError);
+      }
+    }
 
     // Formatear reseña para el frontend (español)
     const resenaFormateada = {

@@ -10,6 +10,7 @@ import { prisma } from '@/lib/db/prisma';
 import { withErrorHandler } from '@/lib/errors/api-wrapper';
 import { registerSchema, addressSchema } from '@/lib/validators';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { createNewUserAlert } from '@/lib/alerts/alert-service';
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
   // Check rate limiting for registration
@@ -101,6 +102,13 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       addresses: true
     }
   });
+  
+  // Crear alerta para nuevo usuario registrado
+  try {
+    await createNewUserAlert(user.id);
+  } catch (alertError) {
+    console.error('Error creating new user alert:', alertError);
+  }
   
   return NextResponse.json(
     { 
