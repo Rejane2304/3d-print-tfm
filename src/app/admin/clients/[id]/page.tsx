@@ -13,20 +13,20 @@ import { translateAddressName } from '@/lib/i18n';
 
 interface ClientDetail {
   id: string;
-  name: string;
+  nombre: string;
   email: string;
-  phone: string | null;
-  isActive: boolean;
-  createdAt: string;
-  lastAccess: string | null;
+  telefono: string | null;
+  activo: boolean;
+  creadoEn: string;
+  ultimoAcceso: string | null;
   addresses: Address[];
   orders: Order[];
-  stats: {
-    totalOrders: number;
-    totalSpent: string;
-    completedOrders: number;
-    pendingOrders: number;
-    averageOrderValue: string;
+  estadisticas: {
+    totalPedidos: number;
+    totalGastado: string;
+    pedidosCompletados: number;
+    pedidosPendientes: number;
+    valorPromedio: string;
   };
 }
 
@@ -156,7 +156,7 @@ export default function AdminClientDetailPage() {
                 <ArrowLeft className="h-6 w-6" />
               </Link>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">{client.name}</h1>
+                <h1 className="text-2xl font-bold text-gray-900">{client.nombre}</h1>
                 <p className="text-sm text-gray-500">Detalle del cliente</p>
               </div>
             </div>
@@ -180,11 +180,11 @@ export default function AdminClientDetailPage() {
                 <User className="h-8 w-8 text-indigo-600" />
               </div>
               <div className="ml-4">
-                <h2 className="text-xl font-semibold text-gray-900">{client.name}</h2>
+                <h2 className="text-xl font-semibold text-gray-900">{client.nombre}</h2>
                 <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                  client.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  client.activo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                 }`}>
-                  {client.isActive ? 'Activo' : 'Inactivo'}
+                  {client.activo ? 'Activo' : 'Inactivo'}
                 </span>
               </div>
             </div>
@@ -196,15 +196,15 @@ export default function AdminClientDetailPage() {
               </div>
               <div className="flex items-center text-gray-600">
                 <Phone className="h-5 w-5 mr-3 text-gray-400" />
-                <span>{client.phone || 'N/A'}</span>
+                <span>{client.telefono || 'N/A'}</span>
               </div>
               <div className="flex items-center text-gray-600">
                 <Calendar className="h-5 w-5 mr-3 text-gray-400" />
-                <span>Registrado: {formatDate(client.createdAt)}</span>
+                <span>Registrado: {formatDate(client.creadoEn)}</span>
               </div>
               <div className="flex items-center text-gray-600">
                 <Calendar className="h-5 w-5 mr-3 text-gray-400" />
-                <span>Último acceso: {formatDate(client.lastAccess)}</span>
+                <span>Último acceso: {formatDate(client.ultimoAcceso)}</span>
               </div>
             </div>
           </div>
@@ -216,7 +216,7 @@ export default function AdminClientDetailPage() {
                 <ShoppingBag className="h-8 w-8 text-indigo-500" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Total Pedidos</p>
-                  <p className="text-2xl font-bold text-gray-900">{client.stats?.totalOrders ?? 0}</p>
+                  <p className="text-2xl font-bold text-gray-900">{client.estadisticas?.totalPedidos ?? 0}</p>
                 </div>
               </div>
             </div>
@@ -226,7 +226,7 @@ export default function AdminClientDetailPage() {
                 <DollarSign className="h-8 w-8 text-green-500" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Total Gastado</p>
-                  <p className="text-2xl font-bold text-gray-900">{formatCurrency(client.stats?.totalSpent ?? 0)}</p>
+                  <p className="text-2xl font-bold text-gray-900">{formatCurrency(client.estadisticas?.totalGastado ?? 0)}</p>
                 </div>
               </div>
             </div>
@@ -236,7 +236,7 @@ export default function AdminClientDetailPage() {
                 <Package className="h-8 w-8 text-blue-500" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Completados</p>
-                  <p className="text-2xl font-bold text-gray-900">{client.stats?.completedOrders ?? 0}</p>
+                  <p className="text-2xl font-bold text-gray-900">{client.estadisticas?.pedidosCompletados ?? 0}</p>
                 </div>
               </div>
             </div>
@@ -246,7 +246,7 @@ export default function AdminClientDetailPage() {
                 <DollarSign className="h-8 w-8 text-purple-500" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Ticket Medio</p>
-                  <p className="text-2xl font-bold text-gray-900">{formatCurrency(client.stats?.averageOrderValue ?? 0)}</p>
+                  <p className="text-2xl font-bold text-gray-900">{formatCurrency(client.estadisticas?.valorPromedio ?? 0)}</p>
                 </div>
               </div>
             </div>
