@@ -247,6 +247,208 @@ export async function createDelayedOrderAlerts(daysThreshold: number = 3) {
 }
 
 /**
+ * Crea alerta para nuevo pedido
+ */
+export async function createNewOrderAlert(orderId: string) {
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: {
+      user: { select: { name: true, email: true } },
+      items: { include: { product: { select: { name: true, slug: true } } } },
+    },
+  });
+
+  if (!order) return null;
+
+  const existingAlert = await prisma.alert.findFirst({
+    where: {
+      orderId: order.id,
+      type: 'NEW_ORDER',
+      status: { in: ['PENDING', 'IN_PROGRESS'] },
+    },
+  });
+
+  if (!existingAlert) {
+    return await prisma.alert.create({
+      data: {
+        type: 'NEW_ORDER',
+        severity: 'LOW',
+        title: 'Nuevo Pedido',
+        message: `Pedido ${order.orderNumber} de ${order.user.name || order.user.email} por ${Number(order.total).toFixed(2)}€`,
+        orderId: order.id,
+        status: 'PENDING',
+      },
+    });
+  }
+
+  return existingAlert;
+}
+
+/**
+ * Crea alerta para reseña negativa
+ */
+export async function createNegativeReviewAlert(reviewId: string) {
+  const review = await prisma.review.findUnique({
+    where: { id: reviewId },
+    include: {
+      product: { select: { name: true, slug: true } },
+      user: { select: { name: true } },
+    },
+  });
+
+  if (!review || review.rating >= 3) return null;
+
+  const existingAlert = await prisma.alert.findFirst({
+    where: {
+      reviewId: review.id,
+      type: 'NEGATIVE_REVIEW',
+      status: { in: ['PENDING', 'IN_PROGRESS'] },
+    },
+  });
+
+  if (!existingAlert) {
+    return await prisma.alert.create({
+      data: {
+        type: 'NEGATIVE_REVIEW',
+        severity: 'MEDIUM',
+        title: 'Reseña Negativa',
+        message: `${review.user.name || 'Usuario'} dejó ${review.rating} estrellas en ${review.product.name}`,
+        reviewId: review.id,
+        status: 'PENDING',
+      },
+    });
+  }
+
+  return existingAlert;
+}
+
+/**
+ * Crea alerta para pedido de alto valor
+ */
+export async function createHighValueOrderAlert(orderId: string, threshold: number = 100) {
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: {
+      user: { select: { name: true, email: true } },
+    },
+  });
+
+  if (!order || Number(order.total) < threshold) return null;
+
+  const existingAlert = await prisma.alert.findFirst({
+    where: {
+      orderId: order.id,
+      type: 'HIGH_VALUE_ORDER',
+      status: { in: ['PENDING', 'IN_PROGRESS'] },
+    },
+  });
+
+  if (!existingAlert) {
+    return await prisma.alert.create({
+      data: {
+        type: 'HIGH_VALUE_ORDER',
+        severity: 'MEDIUM',
+        title: 'Pedido de Alto Valor',
+        message: `Pedido ${order.orderNumber} de ${Number(order.total).toFixed(2)}€ de ${order.user.name || order.user.email}`,
+        orderId: order.id,
+        status: 'PENDING',
+      },
+    });
+  }
+
+  return existingAlert;
+}
+
+/**
+ * Crea alerta para nuevo usuario registrado
+ */
+export async function createNewUserAlert(userId: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, name: true, email: true, createdAt: true },
+  });
+
+  if (!user) return null;
+
+  // Solo alertar si el usuario se creó hace menos de 1 hora
+  const oneHourAgo = new Date();
+  oneHourAgo.setHours(oneHourAgo.getHours() - 1);
+
+  if (user.createdAt < oneHourAgo) return null;
+
+  const existingAlert = await prisma.alert.findFirst({
+    where: {
+      userId: user.id,
+      type: 'NEW_USER',
+      status: { in: ['PENDING', 'IN_PROGRESS'] },
+    },
+  });
+
+  if (!existingAlert) {
+    return await prisma.alert.create({
+      data: {
+        type: 'NEW_USER',
+        severity: 'LOW',
+        title: 'Nuevo Usuario',
+        message: `${user.name || user.email} se registró`,
+        userId: user.id,
+        status: 'PENDING',
+      },
+    });
+  }
+
+  return existingAlert;
+}
+
+/**
+ * Crea alerta para cupón próximo a expirar
+ */
+export async function createCouponExpiringAlert(couponId: string, daysThreshold: number = 3) {
+  const coupon = await prisma.coupon.findUnique({
+    where: { id: couponId },
+    select: {
+      id: true,
+      code: true,
+      validUntil: true,
+      usedCount: true,
+      maxUses: true,
+    },
+  });
+
+  if (!coupon || !coupon.validUntil) return null;
+
+  const daysUntilExpiry = Math.ceil((new Date(coupon.validUntil).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+
+  if (daysUntilExpiry > daysThreshold || daysUntilExpiry < 0) return null;
+
+  const existingAlert = await prisma.alert.findFirst({
+    where: {
+      couponId: coupon.id,
+      type: 'COUPON_EXPIRING',
+      status: { in: ['PENDING', 'IN_PROGRESS'] },
+    },
+  });
+
+  if (!existingAlert) {
+    const usageText = coupon.maxUses
+      ? ` (${coupon.usedCount}/${coupon.maxUses} usados)`
+      : '';
+    return await prisma.alert.create({
+      data: {
+        type: 'COUPON_EXPIRING',
+        severity: daysUntilExpiry <= 1 ? 'HIGH' : 'MEDIUM',
+        title: 'Cupón por Expirar',
+        message: `Cupón ${coupon.code} expira en ${daysUntilExpiry} día(s)${usageText}`,
+        couponId: coupon.id,
+        status: 'PENDING',
+      },
+    });
+  }
+
+  return existingAlert;
+}
+
+/**
  * Ejecuta todas las verificaciones de alertas
  */
 export async function runAllAlertChecks() {

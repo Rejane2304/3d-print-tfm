@@ -307,7 +307,9 @@ model Alert {
   message         String
   productId       String?
   orderId         String?
+  reviewId        String?
   userId          String?
+  couponId        String?
   status          AlertStatus   @default(PENDING)
   resolvedAt      DateTime?
   resolvedBy      String?
@@ -320,6 +322,10 @@ model Alert {
   @@index([status])
   @@index([severity])
   @@index([productId])
+  @@index([orderId])
+  @@index([reviewId])
+  @@index([userId])
+  @@index([couponId])
   @@index([createdAt])
   @@map("alerts")
 }
@@ -598,6 +604,11 @@ enum AlertType {
   ORDER_DELAYED
   PAYMENT_FAILED
   SYSTEM_ERROR
+  NEW_ORDER
+  NEGATIVE_REVIEW
+  HIGH_VALUE_ORDER
+  NEW_USER
+  COUPON_EXPIRING
 }
 
 enum AlertSeverity {

@@ -60,6 +60,11 @@ const typeLabels: Record<string, string> = {
   PAYMENT_FAILED: 'Pago Fallido',
   ORDER_DELAYED: 'Pedido Retrasado',
   SYSTEM_ERROR: 'Error del Sistema',
+  NEW_ORDER: 'Nuevo Pedido',
+  NEGATIVE_REVIEW: 'Reseña Negativa',
+  HIGH_VALUE_ORDER: 'Pedido Alto Valor',
+  NEW_USER: 'Nuevo Usuario',
+  COUPON_EXPIRING: 'Cupón por Expirar',
 };
 
 const severityLabels: Record<string, string> = {
@@ -82,6 +87,11 @@ const typeIcons: Record<string, React.ElementType> = {
   PAYMENT_FAILED: Clock,
   ORDER_DELAYED: AlertTriangle,
   SYSTEM_ERROR: AlertCircle,
+  NEW_ORDER: Package,
+  NEGATIVE_REVIEW: AlertCircle,
+  HIGH_VALUE_ORDER: Package,
+  NEW_USER: Bell,
+  COUPON_EXPIRING: Clock,
 };
 
 const severityColors: Record<string, string> = {
