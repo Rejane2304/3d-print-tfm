@@ -252,7 +252,7 @@ describe('Invoices API', () => {
       const body = await res.json();
 
       expect(res.status).toBe(400);
-      expect(body.error).toContain('Already exists');
+      expect(body.error).toContain('Ya existe');
     });
 
     it('should reject invoice for non-delivered order', async () => {
