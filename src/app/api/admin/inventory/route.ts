@@ -14,6 +14,7 @@ import {
   translateMovementType,
   translateErrorMessage,
   translateProductName,
+  translateCategoryName,
 } from '@/lib/i18n';
 
 export async function GET(req: NextRequest) {
@@ -87,6 +88,7 @@ export async function GET(req: NextRequest) {
         category: {
           select: {
             name: true,
+            slug: true,
           },
         },
         images: {
@@ -131,7 +133,7 @@ export async function GET(req: NextRequest) {
         stock: product.stock,
         minStock: product.minStock,
         price: product.price,
-        categoria: product.category?.name || 'Sin categoría',
+        categoria: product.category ? translateCategoryName(product.category.slug) : 'Sin categoría',
         isActive: product.isActive,
         stockStatus,
         movementCount: product._count.movements,
