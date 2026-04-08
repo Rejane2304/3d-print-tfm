@@ -1,0 +1,554 @@
+{
+  "info": {
+    "name": "3D Print TFM - API Collection",
+    "description": "Colección completa de APIs para el e-commerce 3D Print TFM\n\n**Base URL:** `http://localhost:3000/api`\n\n## Autenticación\n- **NextAuth Session**: Las rutas protegidas requieren cookie de sesión\n- **Roles**: USER (cliente), ADMIN (administrador)\n\n## Convenciones\n- Respuestas en español para el frontend\n- Códigos de estado HTTP estándar\n- Errores traducidos al español\n\n---",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "3d-print-tfm-api-collection"
+  },
+  "item": [
+    {
+      "name": "Auth - Autenticación",
+      "description": "Endpoints de autenticación y gestión de sesiones",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/auth/callback/credentials",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "description": "Iniciar sesión con credenciales. Devuelve cookie de sesión."
+          }
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Juan Pérez\",\n  \"email\": \"nuevo@example.com\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "description": "Registrar nuevo usuario"
+          }
+        },
+        {
+          "name": "Session",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/auth/session",
+            "description": "Obtener sesión actual del usuario"
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/auth/signout",
+            "description": "Cerrar sesión"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products - Productos",
+      "description": "Gestión de catálogo de productos",
+      "item": [
+        {
+          "name": "List Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/products?page=1&limit=12&category=DECORACION",
+            "description": "Listar productos con filtros y paginación"
+          }
+        },
+        {
+          "name": "Get Product Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/products/lampara-lunar-3d",
+            "description": "Obtener detalle de producto por slug"
+          }
+        },
+        {
+          "name": "Search Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/products?search=lampara&minPrice=10&maxPrice=50",
+            "description": "Buscar productos con filtros"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cart - Carrito",
+      "description": "Gestión del carrito de compras",
+      "item": [
+        {
+          "name": "Get Cart",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/cart",
+            "description": "Obtener contenido del carrito del usuario"
+          }
+        },
+        {
+          "name": "Add to Cart",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/cart",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"uuid-del-producto\",\n  \"quantity\": 2\n}"
+            },
+            "description": "Añadir producto al carrito"
+          }
+        },
+        {
+          "name": "Update Quantity",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/cart",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"itemId\": \"uuid-del-item\",\n  \"quantity\": 3\n}"
+            },
+            "description": "Actualizar cantidad de un item"
+          }
+        },
+        {
+          "name": "Remove from Cart",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/cart?itemId=uuid-del-item",
+            "description": "Eliminar item del carrito"
+          }
+        },
+        {
+          "name": "Clear Cart",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/cart?clear=true",
+            "description": "Vaciar carrito completo"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders - Pedidos",
+      "description": "Gestión de pedidos",
+      "item": [
+        {
+          "name": "Create Order",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/account/orders",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"addressId\": \"uuid-direccion\",\n  \"paymentMethod\": \"CARD\",\n  \"customerNotes\": \"Notas opcionales\"\n}"
+            },
+            "description": "Crear nuevo pedido desde el carrito"
+          }
+        },
+        {
+          "name": "List My Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/account/orders",
+            "description": "Listar pedidos del usuario autenticado"
+          }
+        },
+        {
+          "name": "Get Order Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/account/orders/orden-uuid",
+            "description": "Ver detalle de un pedido específico"
+          }
+        },
+        {
+          "name": "Cancel Order",
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/account/orders/orden-uuid",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"cancel\",\n  \"reason\": \"Cambio de opinión\"\n}"
+            },
+            "description": "Cancelar pedido (solo si está pendiente)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payment - Pagos",
+      "description": "Procesamiento de pagos",
+      "item": [
+        {
+          "name": "Create Stripe Payment",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/payments/stripe/create",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"orden-uuid\"\n}"
+            },
+            "description": "Crear sesión de pago con Stripe"
+          }
+        },
+        {
+          "name": "Create PayPal Order",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/payments/paypal/create",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"orden-uuid\"\n}"
+            },
+            "description": "Crear orden de pago con PayPal"
+          }
+        },
+        {
+          "name": "Capture PayPal Payment",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/payments/paypal/capture",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"paypal-order-id\",\n  \"platformOrderId\": \"orden-uuid\"\n}"
+            },
+            "description": "Capturar pago de PayPal"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Shipping - Envíos",
+      "description": "Gestión de envíos y zonas",
+      "item": [
+        {
+          "name": "Calculate Shipping",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/shipping/calculate",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"postalCode\": \"08001\",\n  \"subtotal\": 100.00\n}"
+            },
+            "description": "Calcular costo de envío"
+          }
+        },
+        {
+          "name": "List Shipping Zones",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/shipping/zones",
+            "description": "Listar zonas de envío disponibles"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reviews - Reseñas",
+      "description": "Gestión de reseñas de productos",
+      "item": [
+        {
+          "name": "List Product Reviews",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/reviews/product/producto-uuid",
+            "description": "Ver reseñas de un producto"
+          }
+        },
+        {
+          "name": "Create Review",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/reviews",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"producto-uuid\",\n  \"rating\": 5,\n  \"title\": \"Excelente producto\",\n  \"comment\": \"Muy buena calidad de impresión\"\n}"
+            },
+            "description": "Crear reseña (requiere compra verificada)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Account - Mi Cuenta",
+      "description": "Gestión de perfil y direcciones",
+      "item": [
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/account/profile",
+            "description": "Obtener datos del perfil"
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/account/profile",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nombre Actualizado\",\n  \"phone\": \"+34 666 777 888\",\n  \"taxId\": \"12345678A\"\n}"
+            },
+            "description": "Actualizar datos personales"
+          }
+        },
+        {
+          "name": "List Addresses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/account/addresses",
+            "description": "Listar direcciones del usuario"
+          }
+        },
+        {
+          "name": "Create Address",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/account/addresses",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Casa\",\n  \"recipient\": \"Juan Pérez\",\n  \"phone\": \"+34 666 777 888\",\n  \"address\": \"Calle Ejemplo 123\",\n  \"postalCode\": \"08001\",\n  \"city\": \"Barcelona\",\n  \"province\": \"Barcelona\"\n}"
+            },
+            "description": "Crear nueva dirección"
+          }
+        },
+        {
+          "name": "Delete Address",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/account/addresses/direccion-uuid",
+            "description": "Eliminar dirección"
+          }
+        },
+        {
+          "name": "Get Invoices",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/account/invoices",
+            "description": "Listar facturas del usuario"
+          }
+        }
+      ]
+    },
+    {
+      "name": "FAQs - Preguntas Frecuentes",
+      "description": "Gestión de FAQs",
+      "item": [
+        {
+          "name": "List FAQs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/faqs",
+            "description": "Listar preguntas frecuentes agrupadas por categoría"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - Panel Admin",
+      "description": "Endpoints exclusivos para administradores",
+      "item": [
+        {
+          "name": "Dashboard Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/analytics?range=month",
+            "description": "Obtener métricas del dashboard (ventas, pedidos, clientes)"
+          }
+        },
+        {
+          "name": "List All Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/orders?status=PENDING&page=1&limit=25",
+            "description": "Listar todos los pedidos (con filtros)"
+          }
+        },
+        {
+          "name": "Update Order Status",
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/admin/orders",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"orden-uuid\",\n  \"estado\": \"Enviado\",\n  \"numeroSeguimiento\": \"ABC123456\",\n  \"transportista\": \"SEUR\"\n}"
+            },
+            "description": "Actualizar estado de pedido (admin)"
+          }
+        },
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/admin/products",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"slug\": \"nuevo-producto\",\n  \"name\": \"Nuevo Producto\",\n  \"description\": \"Descripción del producto\",\n  \"price\": 29.99,\n  \"stock\": 50,\n  \"categoryId\": \"categoria-uuid\",\n  \"material\": \"PLA\"\n}"
+            },
+            "description": "Crear producto (admin)"
+          }
+        },
+        {
+          "name": "List Inventory",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/inventory",
+            "description": "Ver inventario y movimientos"
+          }
+        },
+        {
+          "name": "Update Inventory",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/admin/inventory",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"producto-uuid\",\n  \"quantity\": 10,\n  \"reason\": \"Reposición de stock\"\n}"
+            },
+            "description": "Ajustar inventario (admin)"
+          }
+        },
+        {
+          "name": "List Coupons",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/coupons",
+            "description": "Ver cupones de descuento"
+          }
+        },
+        {
+          "name": "Create Coupon",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/admin/coupons",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"DESCUENTO20\",\n  \"type\": \"PERCENTAGE\",\n  \"value\": 20,\n  \"maxUses\": 100,\n  \"validFrom\": \"2025-01-01\",\n  \"validUntil\": \"2025-12-31\"\n}"
+            },
+            "description": "Crear cupón (admin)"
+          }
+        },
+        {
+          "name": "List FAQs Admin",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/faqs",
+            "description": "Ver todas las FAQs (admin)"
+          }
+        },
+        {
+          "name": "Create FAQ",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/admin/faqs",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question\": \"¿Pregunta?\",\n  \"answer\": \"Respuesta a la pregunta\",\n  \"category\": \"General\",\n  \"displayOrder\": 1\n}"
+            },
+            "description": "Crear FAQ (admin)"
+          }
+        },
+        {
+          "name": "List Alerts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/alerts",
+            "description": "Ver alertas del sistema (stock bajo, pedidos retrasados)"
+          }
+        },
+        {
+          "name": "Resolve Alert",
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/admin/alerts/alerta-uuid",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"RESOLVED\",\n  \"resolutionNotes\": \"Alerta resuelta\"\n}"
+            },
+            "description": "Resolver alerta"
+          }
+        },
+        {
+          "name": "List Site Config",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/config",
+            "description": "Ver configuración del sitio"
+          }
+        },
+        {
+          "name": "Update Site Config",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/admin/config",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"companyName\": \"3D Print SL\",\n  \"companyEmail\": \"info@3dprint.com\",\n  \"maintenanceMode\": false\n}"
+            },
+            "description": "Actualizar configuración del sitio"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api",
+      "type": "string",
+      "description": "URL base de la API"
+    }
+  ]
+}
