@@ -101,18 +101,6 @@ Cobertura: 80%+ objetivo alcanzado
   - 10-deployment-guide.md
   - Documentación académica (01-09)
 
-- **private/**: Documentación interna en español
-  - README.es.md
-  - 01-canvas-modelo-negocio.md
-  - 02-analisis-entidades.md
-  - 03-procesos-negocio.md
-  - 04-casos-uso.md
-  - 05-estrategia-monetizacion.md
-  - 06-segmentos-clientes.md
-  - 07-analisis-competitivo.md
-  - 08-hoja-ruta-implementacion.md
-  - 09-auditoria-calidad.md
-
 ### 🗃️ Base de Datos
 
 - **18 modelos** de entidades

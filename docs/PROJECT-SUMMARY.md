@@ -176,8 +176,7 @@ BD (Inglés) → Traducción API → Frontend (Español)
 │   ├── unit/                 # Tests unitarios
 │   ├── integration/          # Tests de integración
 │   └── e2e/                  # Tests E2E con Playwright
-├── docs/                     # Documentación del proyecto
-└── private/                  # Documentación privada
+└── docs/                     # Documentación del proyecto
 ```
 
 ---
@@ -274,18 +273,6 @@ BD (Inglés) → Traducción API → Frontend (Español)
 - `TESTING.md` - Guía de testing
 - `10-deployment-guide.md` - Instrucciones de despliegue
 - `01-09*.md` - Documentación académica
-
-### Privada (private/)
-- `README.es.md` - Resumen del proyecto en español
-- `01-canvas-modelo-negocio.md` - Modelo de negocio
-- `02-analisis-entidades.md` - Modelo de datos
-- `03-procesos-negocio.md` - Procesos de negocio
-- `04-casos-uso.md` - Casos de uso
-- `05-estrategia-monetizacion.md` - Monetización
-- `06-segmentos-clientes.md` - Segmentos de clientes
-- `07-analisis-competitivo.md` - Análisis competitivo
-- `08-hoja-ruta-implementacion.md` - Hoja de ruta
-- `09-auditoria-calidad.md` - Auditoría de calidad
 
 ---
 

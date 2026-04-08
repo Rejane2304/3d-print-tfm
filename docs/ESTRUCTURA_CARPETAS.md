@@ -42,8 +42,6 @@
 │   │   └── [migraciones automáticas]
 │   └── seed.ts                   # Datos iniciales (semilla)
 │
-├── 📁 private/                   # 🔒 Archivos privados (no en git)
-│
 ├── 📁 public/                    # 🌐 Archivos públicos
 │   ├── images/
 │   │   ├── hero/                 # Imágenes del hero
