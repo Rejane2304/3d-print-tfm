@@ -398,24 +398,24 @@ export const productTranslations: Record<string, { name: string; description: st
     shortDescription: 'Casa miniatura victoriana con techo extraíble'
   },
   'dragon-pencil-brush-holder': {
-    name: 'Portalápices en Forma de Dragón',
-    description: 'Portalápices/Lapiceros en forma de dragón estilizado. Escamas texturizadas y alas detalladas. Cabe lápices y pinceles estándar.',
+    name: 'Porta Lápices/Pinceles Dragón',
+    description: 'Soporte con forma de dragón estilizado para lápices o pinceles. Presenta escamas texturizadas y alas detalladas. Ajusta lápices y pinceles estándar.',
     shortDescription: 'Organizador de escritorio en forma de dragón'
   },
   'articulated-classic-car': {
-    name: 'Coche Clásico Articulado',
-    description: 'Coche clásico articulado con ruedas móviles. Diseño vintage de los años 50 con puertas que se abren. Interior detallado y acabados cromados.',
-    shortDescription: 'Coche vintage articulado con piezas móviles'
+    name: 'Auto Clásico Articulado',
+    description: 'Auto clásico articulado con ruedas móviles. Diseño vintage de los años 50 con puertas que se abren. Interior detallado y efectos cromados.',
+    shortDescription: 'Auto vintage con piezas móviles'
   },
   '3d-moon-lamp': {
-    name: 'Lámpara Lunar 3D',
-    description: 'Lámpara de noche LED con forma realista de luna. Incluye base recargable USB con atenuador táctil. Superficie lunar texturizada.',
-    shortDescription: 'Lámpara lunar LED con base táctil'
+    name: 'Lámpara Luna 3D',
+    description: 'Lámpara LED nocturna con forma realista de luna. Incluye base recargable USB con atenuador táctil. Textura superficial lunar realista.',
+    shortDescription: 'Lámpara luna LED con atenuador táctil'
   },
   'medieval-secret-box': {
     name: 'Caja Secreta Medieval',
-    description: 'Caja secreta con mecanismo de acertijo estilo medieval. Compartimento oculto para pequeños objetos de valor. Ideal como regalo o para guardar secretos.',
-    shortDescription: 'Caja con cerradura de acertijo medieval'
+    description: 'Caja secreta con diseño de castillo medieval. Compartimento oculto con mecanismo de puzzle. Ideal para guardar pequeños objetos de valor o como regalo.',
+    shortDescription: 'Caja puzzle con compartimento oculto'
   }
 };
 
