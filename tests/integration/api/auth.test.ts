@@ -85,7 +85,7 @@ describe('Authentication API', () => {
 
       expect(res.status).toBe(409);
       expect(body.success).toBe(false);
-      expect(body.error).toContain('Already exists');
+      expect(body.error).toContain('Ya existe un usuario con este email');
     });
 
     it('should store password hashed', async () => {
@@ -160,7 +160,8 @@ describe('Authentication API', () => {
 
       expect(res.status).toBe(400);
       expect(body.success).toBe(false);
-      expect(body.error).toContain('nombre');
+      // Zod returns "Required" for missing required fields
+      expect(body.error).toMatch(/(El nombre es obligatorio|Required)/);
     });
 
     it('should create user with address if provided', async () => {

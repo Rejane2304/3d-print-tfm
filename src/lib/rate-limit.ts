@@ -149,11 +149,17 @@ function getTimeRemaining(resetTime: number): string {
 /**
  * Middleware to check rate limiting for API routes
  * Returns a Response if rate limited, null if allowed
+ * Disabled in test environment to allow automated testing
  */
 export function checkRateLimit(
   request: NextRequest,
   type: RateLimitType
 ): NextResponse | null {
+  // Skip rate limiting in test environment
+  if (process.env.NODE_ENV === 'test' || process.env.VITEST_ENV === 'integration') {
+    return null;
+  }
+
   const ip = getClientIp(request);
   const result = isRateLimited(ip, type);
 

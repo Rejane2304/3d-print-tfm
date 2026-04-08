@@ -1,11 +1,11 @@
-# Documentación TFM - 3D Print E-commerce
+# Presentación TFM - 3D Print E-commerce
 
 ## Resumen Ejecutivo del Proyecto
 
 **Autor**: Rejane Rodrigues  
 **Tutor**: Brais Moure  
 **Proyecto**: Trabajo de Fin de Máster - Máster en Desarrollo de Software  
-**Título**: Desarrollo de una Aplicación E-commerce para Impresión 3D con Next.js y Metodología TDD  
+**Título**: E-commerce de Impresión 3D con Next.js, TDD y Sistema de Tiempo Real  
 **Fecha**: Abril 2026
 
 ---
@@ -13,12 +13,12 @@
 ## Slide 1: Portada
 
 # 3D Print TFM
-## E-commerce de Impresión 3D
+## E-commerce de Impresión 3D con Sistema de Tiempo Real
 
-**Desarrollo de una Aplicación Web con Next.js y Metodología TDD**
+**Desarrollo de una Aplicación Web Full-Stack con Next.js, Metodología TDD y Seguridad Enterprise**
 
 **Autor**: Rejane Rodrigues  
-**Tutor**: Brais Moure 
+**Tutor**: Brais Moure  
 **Máster en Desarrollo de Software**  
 **Abril 2026**
 
@@ -26,33 +26,30 @@
 
 ## Slide 2: Índice
 
-1. Introducción y Contexto
-2. Objetivos del Proyecto
-3. Análisis y Diseño
-4. Arquitectura Tecnológica
-5. Implementación
-6. Testing y Calidad
-7. Resultados
-8. Conclusiones y Trabajo Futuro
+1. Introducción y Contexto  
+2. Objetivos del Proyecto  
+3. Análisis del Modelo de Negocio  
+4. Arquitectura y Tecnologías  
+5. Sistema de Tiempo Real  
+6. Seguridad Enterprise  
+7. Testing y Calidad  
+8. Resultados  
+9. Conclusiones
 
 ---
 
 ## Slide 3: Introducción y Contexto
 
-### Contexto del Proyecto
+### Problemática Identificada
 
-- **Mercado 3D**: Crecimiento del 20% anual en impresión 3D
-- **Necesidad Identificada**: Brecha entre plataformas corporativas (Sculpteo) y marketplaces genéricos (Etsy). Falta soluciones modulares, open source y con enfoque en calidad técnica (TDD) para pequeños emprendedores 3D
-- **Oportunidad**: Plataforma especializada con catálogo fijo, arquitectura moderna y stack tecnológico profesional accesible
-- **Enfoque**: TDD (Test-Driven Development) para garantizar calidad
+- **Brecha en el mercado**: Entre plataformas corporativas (Sculpteo) y marketplaces genéricos (Etsy)
+- **Falta de soluciones**: Open source, modulares y con enfoque en calidad técnica (TDD)
+- **Barrera de entrada**: Alta para pequeños emprendedores 3D
+- **Necesidad**: Plataforma especializada con arquitectura moderna
 
-### Problemática
+### Oportunidad
 
-- Productos genéricos vs especializados en 3D
-- Alta barrera de entrada para makers
-- Complejidad técnica para usuarios finales
-- Soluciones técnicamente obsoletas o propietarias en el sector
-- Difícil acceso a plataformas de calidad para pequeños emprendedores
+> Plataforma e-commerce especializada en productos 3D de calidad, con sistema de tiempo real y seguridad enterprise-grade.
 
 ---
 
@@ -60,177 +57,162 @@
 
 ### Objetivo General
 
-Desarrollar una aplicación e-commerce completa para la venta de productos impresos en 3D, aplicando metodología TDD y arquitectura moderna.
+Desarrollar aplicación e-commerce completa para productos impresos en 3D con:
+- Metodología TDD (Test-Driven Development)
+- Arquitectura moderna y escalable
+- Sistema de tiempo real
+- Seguridad enterprise-grade
 
-### Objetivos Específicos
+### Objetivos Específicos ✅
 
-1. ✅ Implementar catálogo con filtros y búsqueda
-2. ✅ Desarrollar sistema de carrito y checkout
-3. ✅ Crear panel de administración completo
-4. ✅ Aplicar TDD con cobertura >80%
-5. ✅ Garantizar accesibilidad WCAG 2.1 AA
-6. ✅ Optimizar performance Lighthouse >90
+| Objetivo | Estado |
+|----------|--------|
+| Catálogo con filtros y búsqueda | ✅ |
+| Carrito y checkout con pagos simulados | ✅ |
+| Panel admin con 13 módulos CRUD | ✅ |
+| Sistema de tiempo real (WebSockets) | ✅ |
+| Seguridad enterprise (rate limiting, lockout, password history) | ✅ |
+| Testing con cobertura >80% | ✅ |
+| Accesibilidad WCAG 2.1 AA | ✅ |
+| Performance Lighthouse >90 | ✅ |
 
 ---
 
 ## Slide 5: Análisis - Modelo de Negocio
 
-### Canvas del Modelo de Negocio
+### Canvas Resumido
 
-| Bloque | Descripción |
-|--------|-------------|
-| **Propuesta de Valor** | Catálogo especializado de productos 3D de calidad profesional, entrega 3-5 días |
+| Elemento | Descripción |
+|----------|-------------|
+| **Propuesta Valor** | Catálogo especializado de productos 3D, entrega 3-5 días, calidad profesional |
 | **Segmentos** | Tech enthusiasts, decoradores, compradores de regalos, makers |
 | **Canales** | E-commerce web, SEO, redes sociales |
-| **Relaciones** | Soporte personalizado, sistema de reseñas, cupones de fidelización |
 | **Ingresos** | Ventas directas (margen 45-60%), cupones, envíos |
-| **Recursos** | Plataforma Next.js, impresoras 3D, catálogo de diseños |
-| **Actividades** | Desarrollo, producción, marketing, atención al cliente |
-| **Socios** | Proveedores de filamento, mensajería, diseñadores |
+| **Actividades** | Desarrollo software, gestión catálogo, atención cliente |
+
+### Modelo de Datos
+
+**19 entidades principales**: User, Product, Category, Order, Payment, Cart, Review, Coupon, FAQ, ShippingZone, Alert, InventoryMovement, EventStore, WebSocketConnection, PasswordHistory
 
 ---
 
-## Slide 6: Análisis - Entidades del Sistema
+## Slide 6: Arquitectura Tecnológica
 
-### Modelo de Datos (18 Entidades)
+### Stack Principal
 
-```
-USUARIOS Y AUTENTICACIÓN
-├── User, Session, VerificationToken
-
-CATÁLOGO Y TIENDA  
-├── Product, Category, ProductImage, Review, Coupon, FAQ
-
-COMPRAS Y PAGOS
-├── Cart, CartItem, Order, OrderItem, Payment, Invoice
-
-CONFIGURACIÓN
-├── Address, ShippingZone, ShippingConfig, SiteConfig
-
-ADMINISTRACIÓN
-├── Alert, OrderMessage, AuditLog, InventoryMovement
-```
-
-**Relaciones**: 30+ relaciones entre entidades  
-**Índices**: 50+ para optimización
-
----
-
-## Slide 7: Diseño - Arquitectura
+| Capa | Tecnología |
+|------|------------|
+| **Framework** | Next.js 14.2.35 (App Router) |
+| **Frontend** | React 18, Tailwind CSS 3.4 |
+| **Backend** | Next.js API Routes, TypeScript |
+| **Base de Datos** | PostgreSQL (Supabase) + Prisma 5.22 |
+| **Autenticación** | NextAuth.js 4.24 |
+| **Testing** | Vitest + Playwright |
+| **Validación** | Zod |
 
 ### Arquitectura de Traducción Backend
 
 ```
-┌─────────────────────────────────────────┐
-│   BASE DE DATOS (Inglés)               │
-│   "Floral Decorative Vase"              │
-└────────────────┬────────────────────────┘
-                 │
-                 ▼
-┌─────────────────────────────────────────┐
-│   API ROUTE (Traducción)               │
-│   translateProductName(slug)           │
-│   → "Jarrón Decorativo Floral"         │
-└────────────────┬────────────────────────┘
-                 │
-                 ▼
-┌─────────────────────────────────────────┐
-│   FRONTEND (Español)                   │
-│   Muestra: "Jarrón Decorativo Floral"  │
-└─────────────────────────────────────────┘
+BD (Inglés) → API Routes (Traducción) → Frontend (Español)
 ```
 
-**Ventaja**: No hay i18n en frontend, traducción 100% backend
+**Ventaja**: UI 100% español sin librerías i18n en cliente
 
 ---
 
-## Slide 8: Tecnologías Utilizadas
+## Slide 7: Sistema de Tiempo Real
 
-### Stack Tecnológico
-
-| Capa | Tecnología | Versión |
-|------|------------|---------|
-| **Framework** | Next.js | 14.2.35 |
-| **Frontend** | React + Tailwind CSS | 18 + 3.4 |
-| **Backend** | Next.js API Routes | 14.2.35 |
-| **ORM** | Prisma | 5.22.0 |
-| **Base de Datos** | PostgreSQL (Supabase) | 15+ |
-| **Autenticación** | NextAuth.js | 4.24.13 |
-| **Testing** | Vitest + Playwright | 1.6.1 |
-| **Validación** | Zod | 3.23.8 |
-
-### Decisiones Técnicas
-
-- ✅ App Router de Next.js 14
-- ✅ Server Components para SEO
-- ✅ Traducción backend para performance
-- ✅ PostgreSQL para datos relacionales
-- ✅ TDD desde el inicio del proyecto
-
----
-
-## Slide 9: Implementación - Módulos
-
-### Módulos Implementados (20+)
-
-**Tienda Pública (8)**
-1. Home con productos destacados
-2. Catálogo con filtros avanzados
-3. Detalle de producto con galería
-4. Carrito persistente
-5. Checkout con cupones
-6. Sistema de reseñas
-7. FAQs públicas
-8. Autenticación unificada
-
-**Panel Admin (13)**
-1. Dashboard con métricas
-2. Productos (CRUD + imágenes)
-3. Categorías
-4. Pedidos con estados
-5. Clientes
-6. Inventario con movimientos
-7. Facturas (PDF)
-8. Cupones (3 tipos)
-9. Reseñas (moderación)
-10. FAQs
-11. Envíos (zonas CP)
-12. Configuración
-13. Alertas
-
----
-
-## Slide 10: Implementación - Funcionalidades Clave
-
-### Características Destacadas
-
-**Sistema de Cupones**
-- PERCENTAGE: Descuento porcentaje
-- FIXED: Descuento fijo
-- FREE_SHIPPING: Envío gratis
-
-**Gestión de Envíos**
-- Zonas por prefijos de código postal
-- Costo base configurable
-- Umbral de envío gratis
-- Cálculo automático
-
-**Sistema de Reviews**
-- Puntuación 1-5 estrellas
-- Moderación por admin
-- Solo compradores verificados
-- Estadísticas de valoración
-
----
-
-## Slide 11: Testing - Metodología TDD
-
-### Enfoque Test-Driven Development
+### Arquitectura de Eventos
 
 ```
-1. Escribir test (falla)
-2. Implementar código mínimo (pasa)
-3. Refactorizar
+┌─────────────────────────────────────┐
+│  EventStore (PostgreSQL)            │
+│  • Persistencia 7 días              │
+│  • 20+ tipos de eventos              │
+└──────────────┬──────────────────────┘
+               │
+        ┌──────▼──────┐
+        │  useRealTime  │
+        │  Hook (3s)    │
+        └──────┬──────┘
+               │
+        ┌──────▼──────┐
+        │  Notificaciones  │
+        │  Panel Admin      │
+        └─────────────────┘
+```
+
+### Eventos Implementados
+
+- `order:new` - Nuevo pedido
+- `order:status:updated` - Cambio de estado
+- `stock:updated` - Stock actualizado
+- `stock:low` - Alerta stock bajo
+- `alert:new` - Nueva alerta sistema
+
+**Features**: Multi-tab, offline mode con acumulación, rooms privados
+
+---
+
+## Slide 8: Seguridad Enterprise
+
+### Autenticación y Autorización
+
+- ✅ JWT con NextAuth.js (sesiones httpOnly, secure, sameSite)
+- ✅ RBAC (CUSTOMER/ADMIN) con middleware
+
+### Contraseñas (Reforzadas)
+
+| Requisito | Implementación |
+|-----------|----------------|
+| **Complejidad** | 10+ chars, mayúsculas, minúsculas, números, símbolos |
+| **Rate Limiting** | 5 intentos/15min login, 3 registros/hora |
+| **Account Lockout** | 5 fallidos = 30 minutos bloqueo |
+| **Historial** | Prevención reúso últimas 5 contraseñas |
+| **Validación** | 80+ comunes bloqueadas + Have I Been Pwned |
+| **Indicador** | Barra fortaleza en tiempo real |
+
+### Protección
+
+SQL Injection (Prisma), XSS, CSRF, sanitización inputs
+
+---
+
+## Slide 9: Módulos Implementados
+
+### Tienda Pública (8 módulos)
+
+- Home, Catálogo, Detalle Producto, Carrito, Checkout
+- Sistema de reseñas, FAQs, Autenticación
+
+### Panel Admin (13 módulos + Tiempo Real)
+
+| Módulo | Funcionalidad |
+|--------|---------------|
+| Dashboard | Métricas con actualización tiempo real |
+| Productos | CRUD completo con imágenes |
+| Categorías | CRUD con imágenes |
+| Pedidos | Gestión estados con notificaciones |
+| Clientes | Gestión usuarios |
+| Inventario | Control stock + alertas automáticas |
+| Facturas | Generación PDF |
+| Cupones | 3 tipos (PERCENTAGE, FIXED, FREE_SHIPPING) |
+| Reseñas | Moderación |
+| FAQs | Gestión pública |
+| Envíos | Zonas por código postal |
+| Configuración | Datos empresa |
+| Alertas | Sistema automático |
+
+---
+
+## Slide 10: Testing - Metodología TDD
+
+### Enfoque Red-Green-Refactor
+
+```
+1. Escribir test (falla)     → Red
+2. Implementar mínimo (pasa) → Green  
+3. Refactorizar               → Refactor
 4. Repetir
 ```
 
@@ -238,241 +220,253 @@ ADMINISTRACIÓN
 
 ```
          /\
-        /  \     E2E: 114 tests
-       /____\       (6 dispositivos)
-      /      \   
-     /--------\   Integration: 227 tests
-    /          \     (API, DB, Pages)
-   /____________\  
-   Unit: 37 tests
-   (Validaciones Zod)
+        /  \     E2E: 114 tests (6 dispositivos)
+       /____\
+      /      \   Integration: 227 tests
+     /--------\ 
+    Unit: 37 tests
 ```
 
----
+### Métricas
 
-## Slide 12: Testing - Métricas
-
-### Cobertura de Tests
-
-| Tipo | Cantidad | Cobertura | Estado |
-|------|----------|-----------|--------|
-| **Unitarios** | 37 | ~3ms/test | ✅ 100% |
-| **Integración** | 227 | ~500ms/test | ✅ 100% |
-| **E2E** | 114 | ~6s/test | ✅ 100% |
-| **TOTAL** | **378** | - | **✅ 100%** |
-
-### Tests E2E Multi-Dispositivo
-
-- Desktop Chrome: 19 ✅
-- Desktop Firefox: 19 ✅
-- Desktop Safari: 19 ✅
-- Tablet iPad: 19 ✅
-- Mobile iPhone: 19 ✅
-- Desktop 4K: 19 ✅
+| Tipo | Cantidad | Estado |
+|------|----------|--------|
+| **Unitarios** | 37 | ✅ 100% |
+| **Integración** | 227 | ✅ 100% |
+| **E2E** | 114 | ✅ 100% |
+| **TOTAL** | **378** | **✅ 100%** |
 
 ---
 
-## Slide 13: Calidad - Métricas
+## Slide 11: Testing - E2E Multi-Dispositivo
+
+### Cobertura Completa
+
+| Dispositivo | Tests | Estado |
+|-------------|-------|--------|
+| Desktop Chrome | 19 | ✅ |
+| Desktop Firefox | 19 | ✅ |
+| Desktop Safari | 19 | ✅ |
+| Tablet iPad | 19 | ✅ |
+| Mobile iPhone | 19 | ✅ |
+| Desktop 4K | 19 | ✅ |
 
 ### Performance (Lighthouse)
 
-| Página | Performance | Accesibilidad | Mejores Prácticas | SEO |
-|--------|-------------|---------------|-------------------|-----|
-| Home | 92 | 98 | 100 | 100 |
-| Products | 90 | 95 | 100 | 100 |
-| Product Detail | 88 | 96 | 100 | 100 |
-| Cart | 94 | 97 | 100 | 100 |
-| Checkout | 89 | 95 | 100 | 100 |
-
-### Core Web Vitals
-
-- **LCP** (Largest Contentful Paint): <2.5s ✅
-- **FID** (First Input Delay): <100ms ✅
-- **CLS** (Cumulative Layout Shift): <0.1 ✅
+| Página | Performance | Accesibilidad | SEO |
+|--------|-------------|---------------|-----|
+| Home | 92 | 98 | 100 |
+| Products | 90 | 95 | 100 |
+| Checkout | 89 | 95 | 100 |
 
 ### Accesibilidad
 
 - WCAG 2.1 Nivel A: ✅ Completo
 - WCAG 2.1 Nivel AA: ✅ Completo
-- Navegación por teclado: ✅
-- Textos alternativos: ✅
+- Navegación teclado: ✅
 
 ---
 
-## Slide 14: Seguridad
+## Slide 12: Funcionalidades Clave
 
-### Medidas Implementadas
+### Sistema de Cupones
 
-**Autenticación**
-- ✅ JWT con refresh tokens
-- ✅ Sesiones httpOnly, secure, sameSite
-- ✅ Rate limiting (5 intentos/min)
-- ✅ bcrypt con salt 12
+- **PERCENTAGE**: Descuento porcentaje
+- **FIXED**: Descuento fijo
+- **FREE_SHIPPING**: Envío gratis
 
-**Autorización**
-- ✅ RBAC (CUSTOMER/ADMIN)
-- ✅ Middleware de protección
-- ✅ Verificación de propiedad
+### Gestión de Envíos
 
-**Validación**
-- ✅ Zod para todas las entradas
-- ✅ Sanitización de inputs
-- ✅ Prevención SQL Injection (Prisma)
-- ✅ Prevención XSS
+- Zonas por prefijos de código postal
+- Costo base configurable
+- Umbral envío gratis
+- Cálculo automático en checkout
 
----
+### Sistema de Reviews
 
-## Slide 15: Resultados - Datos
+- Puntuación 1-5 estrellas
+- Solo compradores verificados
+- Moderación por admin
+- Estadísticas de valoración
 
-### Estadísticas del Proyecto
+### Facturación PDF
 
-| Métrica | Valor |
-|---------|-------|
-| **Líneas de código** | ~20,000+ |
-| **Archivos** | 200+ |
-| **Commits** | 50+ |
-| **Tests** | 378 (100% passing) |
-| **Cobertura** | 80%+ |
-| **Tiempo desarrollo** | ~8 semanas |
-| **Módulos** | 20+ |
-| **Entidades BD** | 18 |
-
-### Seed Data
-
-- 10 usuarios (incl. admin)
-- 5 categorías
-- 10 productos
-- 30 imágenes
-- 15 reseñas
-- 4 cupones
-- 9 direcciones
-- 10 pedidos
+- Generación automática
+- Numeración: F-AAAA-NNNNNN
+- IVA 21% configurado
+- Descarga desde panel
 
 ---
 
-## Slide 16: Demo - Funcionalidades
-
-### Flujo de Compra
-
-1. **Navegación**: Usuario explora catálogo
-2. **Selección**: Añade producto al carrito
-3. **Checkout**: Selecciona dirección y método de pago
-4. **Pago**: Simulación de pago exitoso
-5. **Confirmación**: Pedido creado con estado CONFIRMED
-
-### Panel de Admin
-
-1. Dashboard con métricas
-2. Gestión de productos con imágenes
-3. Moderación de reseñas
-4. Configuración de cupones
-5. Generación de facturas PDF
-
----
-
-## Slide 17: Lecciones Aprendidas
+## Slide 13: Lecciones Aprendidas
 
 ### Aspectos Positivos
 
-1. **TDD Funciona**: Detectó bugs temprano, código más robusto
-2. **Next.js 14**: App Router muy potente y flexible
-3. **Prisma**: ORM muy productivo, tipado automático
-4. **Traducción Backend**: Simplifica frontend, mejor SEO
-5. **Testing Multi-Dispositivo**: Garantiza calidad cross-platform
+1. **TDD Funciona**: Detectó bugs temprano, código robusto
+2. **Next.js 14**: App Router potente y flexible
+3. **Prisma**: ORM productivo, tipado automático
+4. **Traducción Backend**: Mejor SEO, frontend simplificado
+5. **Sistema Tiempo Real**: Notificaciones instantáneas efectivas
+6. **Seguridad Enterprise**: Múltiples capas protegen datos
 
 ### Desafíos Superados
 
-1. **Configuración E2E**: Multi-dispositivo con Playwright
-2. **Traducción**: Sistema backend i18n sin librerías
-3. **Testing con BD**: Testcontainers para PostgreSQL real
-4. **PDF Generation**: Puppeteer para facturas
-5. **Upload de Imágenes**: Sistema de archivos + optimización
+1. Testing E2E multi-dispositivo con Playwright
+2. Sistema backend i18n sin librerías
+3. Testcontainers para PostgreSQL real
+4. PDF generation con Puppeteer
+5. Implementación rate limiting y account lockout
 
 ---
 
-## Slide 18: Conclusiones
+## Slide 14: Resultados - Estadísticas
+
+### Métricas del Proyecto
+
+| Métrica | Valor |
+|---------|-------|
+| **Líneas de código** | ~22,000+ |
+| **Archivos** | 220+ |
+| **Commits** | 60+ |
+| **Tests** | 378 (100% passing) |
+| **Cobertura** | 80%+ |
+| **Entidades BD** | 19 |
+| **Módulos** | 20+ |
+| **Tiempo desarrollo** | ~8 semanas |
+
+### Seed Data Completo
+
+- 10 usuarios (contraseñas seguras: AdminTFM2024!, JuanTFM2024!)
+- 5 categorías con imágenes
+- 10 productos (30 imágenes)
+- 15 reseñas
+- 4 cupones
+- 10 pedidos con facturas
+
+---
+
+## Slide 15: Estado Actual - Completado
+
+### ✅ Sistema 100% Funcional
+
+**Plataforma completa con:**
+- ✅ Catálogo navegable con filtros y búsqueda
+- ✅ Carrito persistente y checkout funcional
+- ✅ Panel admin con 13 módulos + tiempo real
+- ✅ Sistema de autenticación y autorización RBAC
+- ✅ Gestión completa de pedidos con estados
+- ✅ Facturación PDF automática
+- ✅ Inventario con movimientos y alertas
+- ✅ Sistema de reseñas con moderación
+- ✅ Cupones configurables
+- ✅ Zonas de envío por CP
+- ✅ Sistema de tiempo real con notificaciones
+- ✅ Seguridad enterprise-grade
+- ✅ 378 tests pasando al 100%
+
+**Build exitoso**, **migraciones aplicadas**, **seed ejecutado**
+
+---
+
+## Slide 16: Conclusiones
 
 ### Logros del Proyecto
 
 ✅ **E-commerce completo** con todas las funcionalidades  
 ✅ **TDD aplicado** con 378 tests y 100% passing  
-✅ **Calidad profesional** Lighthouse 90+, WCAG AA  
-✅ **Arquitectura escalable** Next.js 14 + Prisma  
-✅ **Documentación completa** español e inglés  
+✅ **Calidad profesional**: Lighthouse 90+, WCAG AA  
+✅ **Arquitectura escalable**: Next.js 14 + Prisma  
+✅ **Sistema tiempo real**: WebSockets + EventStore  
+✅ **Seguridad enterprise**: Rate limiting, lockout, password history  
+✅ **Documentación completa**: español e inglés  
 
 ### Valor Académico
 
-- Aplicación práctica de TDD en proyecto real
-- Integración de múltiples tecnologías modernas
-- Resolución de problemas complejos
+- Aplicación práctica TDD en proyecto real
+- Integración tecnologías modernas (Next.js 14, Prisma, WebSockets)
+- Resolución problemas complejos (seguridad, tiempo real, testing)
 - Metodología ágil aplicada
 
 ---
 
-## Slide 19: Trabajo Futuro
+## Slide 17: Trabajo Futuro
 
-### Mejoras Identificadas
+### Corto Plazo
 
-**Corto Plazo**
-- [ ] Integración pagos reales (Stripe/PayPal)
-- [ ] Producción física con impresoras 3D
-- [ ] Sistema de notificaciones email/SMS
-- [ ] Dashboard analítico avanzado
+- Integración pagos reales (Stripe/PayPal)
+- Producción física con impresoras 3D
+- Notificaciones email/SMS
+- Dashboard analítico avanzado
 
-**Medio Plazo**
-- [ ] App móvil (PWA/React Native)
-- [ ] Inteligencia artificial para recomendaciones
-- [ ] Sistema de suscripciones
-- [ ] Marketplace multi-vendedor
+### Medio Plazo
 
-**Largo Plazo**
-- [ ] Expansión internacional
-- [ ] Integración con marketplaces (Etsy, Amazon)
-- [ ] Impresoras conectadas IoT
-- [ ] Blockchain para autenticidad
+- App móvil (PWA/React Native)
+- IA para recomendaciones
+- Sistema de suscripciones
+- Marketplace multi-vendedor
+
+### Largo Plazo
+
+- Expansión internacional
+- Integración marketplaces (Etsy, Amazon)
+- Impresoras IoT conectadas
+- Blockchain para autenticidad
+
+---
+
+## Slide 18: Información del Proyecto
+
+### Enlaces y Recursos
+
+- **Repositorio**: github.com/[username]/3d-print-tfm
+- **Documentación PDF**: docs/TFM-PRESENTACION.pdf
+- **Demo**: [URL Vercel]
+
+### Tecnologías Clave
+
+Next.js 14 · React 18 · TypeScript 5 · Prisma · PostgreSQL · NextAuth.js · Vitest · Playwright · Zod · Socket.io
+
+### Seguridad Implementada
+
+bcrypt (12 rounds) · Rate limiting · Account lockout · Password history · Have I Been Pwned · XSS prevention · SQL Injection prevention
+
+---
+
+## Slide 19: Agradecimientos
+
+### Reconocimientos
+
+- **Tutor**: Brais Moure - Por la orientación y apoyo
+- **Universidad**: Por la formación académica
+- **Comunidad Open Source**: Por las herramientas y recursos
+
+### Contacto
+
+**Autor**: Rejane Rodrigues  
+**Proyecto**: 3D Print TFM  
+**Máster en Desarrollo de Software**  
+**Abril 2026**
 
 ---
 
 ## Slide 20: Cierre
 
-### Agradecimientos
+### Estado Final
 
-- Al tutor por la orientación
-- A la universidad por la formación
-- A la comunidad open source
+> **Proyecto 100% completado y listo para entrega**
 
-### Contacto
+- ✅ Todas las funcionalidades implementadas
+- ✅ Testing completo (378 tests)
+- ✅ Documentación actualizada
+- ✅ Seguridad enterprise-grade
+- ✅ Sistema de tiempo real operativo
+- ✅ Build exitoso
+
+**TFM - 3D Print E-commerce**  
+*Desarrollo Full-Stack con Next.js, TDD y Seguridad Enterprise*
+
+---
 
 **Autor**: Rejane Rodrigues  
-**Email**: [email]  
-**GitHub**: github.com/[username]/3d-print-tfm  
-**Demo**: [URL desplegada]
-
----
-
-## Anexos
-
-### Enlaces del Proyecto
-
-- **Repositorio**: https://github.com/[username]/3d-print-tfm
-- **Documentación**: /docs/
-- **Demo en vivo**: [URL Vercel]
-
-### Tecnologías Clave
-
-- Next.js 14, React 18, TypeScript 5
-- Prisma ORM, PostgreSQL, NextAuth.js
-- Vitest, Playwright, Tailwind CSS
-- Zod, Lucide React
-
----
-
-**Autor**
-
-# Rejane Rodrigues
-
-**Tutor**
-
-# Brais Moure
-
+**Tutor**: Brais Moure  
 *Máster en Desarrollo de Software · Abril 2026*

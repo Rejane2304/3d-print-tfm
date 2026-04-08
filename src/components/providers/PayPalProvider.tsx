@@ -1,11 +1,17 @@
 /**
  * PayPal Provider Component
- * Wraps children with PayPal Script Provider
+ * Wraps children with PayPal Script Provider - Lazy loaded to avoid SSR issues
  */
 'use client';
 
-import { PayPalScriptProvider } from '@paypal/react-paypal-js';
+import dynamic from 'next/dynamic';
 import { ReactNode } from 'react';
+
+// Dynamically import PayPal components to avoid SSR issues
+const DynamicPayPalScriptProvider = dynamic(
+  () => import('@paypal/react-paypal-js').then((mod) => mod.PayPalScriptProvider),
+  { ssr: false }
+);
 
 interface PayPalProviderProps {
   children: ReactNode;
@@ -20,7 +26,7 @@ export default function PayPalProvider({ children }: PayPalProviderProps) {
   }
 
   return (
-    <PayPalScriptProvider
+    <DynamicPayPalScriptProvider
       options={{
         clientId,
         currency: 'EUR',
@@ -28,6 +34,6 @@ export default function PayPalProvider({ children }: PayPalProviderProps) {
       }}
     >
       {children}
-    </PayPalScriptProvider>
+    </DynamicPayPalScriptProvider>
   );
 }

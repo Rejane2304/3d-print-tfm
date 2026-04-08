@@ -14,12 +14,43 @@ async function generatePDF() {
     'utf-8'
   );
   
-  const rawSlides = mdContent.split('---');
-  const slides = rawSlides.map(s => s.trim()).filter(s => {
-    if (!s) return false;
-    const cleanContent = s.replace(/\n/g, '').replace(/\s/g, '');
-    return cleanContent.length > 10;
-  });
+  // Split by --- but ignore --- inside tables
+  const lines = mdContent.split('\n');
+  let inTable = false;
+  let currentSlide = [];
+  const slides = [];
+  
+  for (const line of lines) {
+    // Check if we're entering/leaving a table
+    if (line.trim().startsWith('|')) {
+      inTable = true;
+    } else if (inTable && !line.trim().startsWith('|') && line.trim() !== '') {
+      inTable = false;
+    }
+    
+    // Only split on --- when not in a table
+    if (line.trim() === '---' && !inTable) {
+      if (currentSlide.length > 0) {
+        const slideContent = currentSlide.join('\n').trim();
+        // Only include slides that have "Slide X:" in the content (valid presentation slides)
+        if (slideContent.length > 10 && slideContent.includes('Slide')) {
+          slides.push(slideContent);
+        }
+        currentSlide = [];
+      }
+    } else {
+      currentSlide.push(line);
+    }
+  }
+  
+  // Don't forget the last slide - only if it has Slide X: header
+  if (currentSlide.length > 0) {
+    const slideContent = currentSlide.join('\n').trim();
+    // Only include slides that have "Slide X:" in the content
+    if (slideContent.length > 10 && slideContent.includes('Slide')) {
+      slides.push(slideContent);
+    }
+  }
   
   console.log(`📄 Procesando ${slides.length} slides...`);
   
