@@ -17,27 +17,27 @@ interface InvoiceNotAvailableModalProps {
 const reasonConfig = {
   not_completed: {
     icon: Clock,
-    title: 'Factura No Disponible',
-    message: 'Esta factura se generará automáticamente una vez que el pago sea procesado. Por favor, inténtalo de nuevo más tarde.',
-    action: 'Por favor, revisa más tarde o contacta con soporte si el problema persiste.',
+    title: 'Factura Pendiente',
+    message: 'Tu factura se generará automáticamente cuando el pedido sea entregado.',
+    action: 'Estado actual: En proceso de envío o preparación.',
   },
   not_generated: {
     icon: FileText,
-    title: 'Factura No Generada',
-    message: 'La factura aún no ha sido generada para este pedido.',
-    action: 'Contacta al administrador si necesitas la factura urgentemente.',
+    title: 'Factura en Proceso',
+    message: 'Tu pedido ha sido entregado y la factura está siendo generada.',
+    action: 'Esto suele tardar unos minutos. Por favor, inténtalo de nuevo en breve.',
   },
   payment_pending: {
     icon: AlertCircle,
     title: 'Pago Pendiente',
-    message: 'La factura estará disponible una vez que se complete el pago.',
-    action: 'Por favor, completa el pago para generar la factura.',
+    message: 'La factura se generará una vez que completes el pago del pedido.',
+    action: 'Por favor, finaliza el pago para poder descargar tu factura.',
   },
   cancelled: {
     icon: X,
     title: 'Pedido Cancelado',
-    message: 'Este pedido ha sido cancelado. No se generará factura.',
-    action: 'Contacta con soporte si tienes alguna pregunta.',
+    message: 'Este pedido ha sido cancelado y no se generará factura.',
+    action: 'Si tienes alguna duda sobre la cancelación, contacta con soporte.',
   },
 };
 
@@ -87,14 +87,20 @@ export function InvoiceNotAvailableModal({
             </div>
           )}
 
-          <div className="bg-gray-50 rounded-xl p-4 mb-4">
-            <p className="text-gray-700 text-center">
+          <div className="bg-indigo-50 rounded-xl p-4 mb-4 border border-indigo-100">
+            <p className="text-gray-800 text-center font-medium">
               {config.message}
             </p>
           </div>
 
+          <div className="bg-gray-50 rounded-xl p-4 mb-4">
+            <p className="text-gray-600 text-center">
+              {config.action}
+            </p>
+          </div>
+
           <p className="text-sm text-gray-500 text-center mb-6">
-            {config.action}
+            Una vez entregado el pedido, podrás descargar tu factura desde esta página.
           </p>
 
           {/* Actions */}
