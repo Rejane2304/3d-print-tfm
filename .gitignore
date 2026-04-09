@@ -47,6 +47,10 @@ next-env.d.ts
 .env.production
 .env.staging
 
+# Additional env files
+.env.test
+.env.production
+
 # Excepto archivos de ejemplo (asegúrate de que no contengan datos reales)
 !.env.example
 !.env.template
