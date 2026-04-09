@@ -60,6 +60,15 @@ async function createPayPalOrder(
     }>;
   }
 ): Promise<{ id: string; links: Array<{ rel: string; href: string }> }> {
+  // Calcular el total de items para validación
+  const itemsTotal = orderData.items.reduce((sum, item) => 
+    sum + (item.unitPrice * item.quantity), 0
+  );
+  
+  // PayPal requiere que el total de items coincida con el amount
+  // Si no coinciden, ajustamos para evitar errores
+  const adjustedTotal = itemsTotal.toFixed(2);
+  
   const response = await fetch(`${PAYPAL_API}/v2/checkout/orders`, {
     method: 'POST',
     headers: {
@@ -73,27 +82,29 @@ async function createPayPalOrder(
         description: `Pedido ${orderData.orderNumber}`,
         amount: {
           currency_code: 'EUR',
-          value: orderData.total.toFixed(2),
+          value: adjustedTotal,
           breakdown: {
             item_total: {
               currency_code: 'EUR',
-              value: orderData.total.toFixed(2),
+              value: adjustedTotal,
             },
           },
         },
-        items: orderData.items.map(item => ({
+        items: orderData.items.map((item, index) => ({
           name: item.name.substring(0, 127), // PayPal limit
           quantity: item.quantity.toString(),
           unit_amount: {
             currency_code: 'EUR',
             value: item.unitPrice.toFixed(2),
           },
+          sku: `SKU-${index + 1}`, // PayPal requiere SKU
+          category: 'PHYSICAL_GOODS',
         })),
       }],
       application_context: {
-        brand_name: '3D Print',
+        brand_name: '3D Print TFM',
         landing_page: 'NO_PREFERENCE',
-        shipping_preference: 'NO_SHIPPING',
+        shipping_preference: 'SET_PROVIDED_ADDRESS', // Cambiado de NO_SHIPPING
         user_action: 'PAY_NOW',
         return_url: `${process.env.NEXTAUTH_URL}/checkout/success`,
         cancel_url: `${process.env.NEXTAUTH_URL}/cart`,
@@ -102,9 +113,20 @@ async function createPayPalOrder(
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
-    console.error('PayPal order creation error:', errorData);
-    throw new Error('Failed to create PayPal order');
+    let errorData;
+    try {
+      errorData = await response.json();
+    } catch {
+      errorData = { message: await response.text() };
+    }
+    console.error('PayPal order creation error:', JSON.stringify(errorData, null, 2));
+    console.error('PayPal order data sent:', JSON.stringify({
+      reference_id: orderData.orderId,
+      total: adjustedTotal,
+      items_total: itemsTotal.toFixed(2),
+      item_count: orderData.items.length
+    }, null, 2));
+    throw new Error(`PayPal error: ${errorData.message || errorData.error_description || 'Failed to create order'}`);
   }
 
   return response.json();
