@@ -382,6 +382,23 @@ export default function CheckoutPage() {
           <p className="text-gray-600 text-sm sm:text-base">Revisa tu pedido, elige método de pago y confirma</p>
         </div>
 
+        {/* Pedido cancelado - volviendo de Stripe/PayPal */}
+        {cancelledOrderId && (
+          <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-orange-50 border border-orange-200 rounded-md">
+            <div className="flex items-start gap-3">
+              <svg className="h-5 w-5 text-orange-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <div>
+                <p className="text-orange-800 font-medium text-sm sm:text-base">Pago no completado</p>
+                <p className="text-orange-700 text-xs sm:text-sm mt-1">
+                  Has vuelto desde la página de pago. Tu pedido sigue pendiente y puedes reintentar el pago cuando quieras.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Error */}
         {error && (
           <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-md">
