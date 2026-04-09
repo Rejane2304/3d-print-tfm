@@ -75,44 +75,10 @@ export default function MyOrdersPage() {
   const [selectedOrderNumber, setSelectedOrderNumber] = useState<string | undefined>(undefined);
   const [restoringOrder, setRestoringOrder] = useState<string | null>(null);
   const [restoredMessage, setRestoredMessage] = useState<string | null>(null);
+  const [hiddenOrders, setHiddenOrders] = useState<Set<string>>(new Set());
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth?callbackUrl=/account/orders');
-      return;
-    }
-
-    if (status === 'authenticated') {
-      loadOrders();
-    }
-  }, [status, router]);
-
-  const loadOrders = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await fetch('/api/account/orders');
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Error al cargar pedidos');
-      }
-
-      setOrders(data.pedidos || []);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filteredOrders = statusFilter
-    ? orders.filter(o => o.estado === statusFilter)
-    : orders;
-
-  // Contar pedidos cancelados
-  const cancelledOrders = orders.filter(o => o.estado === 'Cancelado');
+  // Recalcular pedidos cancelados excluyendo los ocultos
+  const cancelledOrders = orders.filter(o => o.estado === 'Cancelado' && !hiddenOrders.has(o.id));
 
   const handleRestoreCart = async (orderId: string) => {
     try {
@@ -129,8 +95,8 @@ export default function MyOrdersPage() {
 
       setRestoredMessage('Carrito restaurado correctamente');
       
-      // Actualizar la lista de pedidos para eliminar el pedido restaurado
-      setOrders(prevOrders => prevOrders.filter(o => o.id !== orderId));
+      // Ocultar el pedido inmediatamente
+      setHiddenOrders(prev => new Set([...prev, orderId]));
       
       setTimeout(() => {
         router.push('/checkout');
@@ -143,6 +109,10 @@ export default function MyOrdersPage() {
       setTimeout(() => setRestoredMessage(null), 3000);
     }
   };
+
+  const filteredOrders = statusFilter
+    ? orders.filter(o => o.estado === statusFilter && !hiddenOrders.has(o.id))
+    : orders.filter(o => !hiddenOrders.has(o.id));
 
   if (status === 'loading' || loading) {
     return (
