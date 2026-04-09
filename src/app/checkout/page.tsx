@@ -560,7 +560,7 @@ export default function CheckoutPage() {
                 {paymentMethod === 'CARD' && (
                   <div className="text-sm space-y-1">
                     <p className="font-mono text-gray-700">Número: <span className="text-blue-600 font-semibold">4242 4242 4242 4242</span></p>
-                    <p className="font-mono text-gray-700">Expira: <span className="text-blue-600">12/25</span> | CVC: <span className="text-blue-600">123</span></p>
+                            <p className="font-mono text-gray-700">Expira: <span className="text-blue-600">12/30</span> | CVC: <span className="text-blue-600">123</span></p>
                   </div>
                 )}
                 {paymentMethod === 'PAYPAL' && (
@@ -650,7 +650,7 @@ export default function CheckoutPage() {
                           <p className="text-sm text-gray-600 mb-2">💳 Tarjeta de prueba (Stripe)</p>
                           <div className="space-y-1 font-mono text-sm">
                             <p className="text-blue-700 font-semibold text-lg">4242 4242 4242 4242</p>
-                            <p className="text-gray-600">Expira: <span className="font-semibold">12/25</span> | CVC: <span className="font-semibold">123</span></p>
+                            <p className="text-gray-600">Expira: <span className="font-semibold">12/30</span> | CVC: <span className="font-semibold">123</span></p>
                           </div>
                         </div>
                       )}
