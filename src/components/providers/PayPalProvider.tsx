@@ -25,12 +25,21 @@ export default function PayPalProvider({ children }: PayPalProviderProps) {
     return <>{children}</>;
   }
 
+  // Determinar si es sandbox (sandbox creds empiezan con 'sb' o contienen 'sandbox')
+  const isSandbox = clientId.includes('sb') || clientId.startsWith('AY') || clientId.startsWith('AZ') || process.env.NODE_ENV !== 'production';
+
   return (
     <DynamicPayPalScriptProvider
       options={{
         clientId,
         currency: 'EUR',
         intent: 'capture',
+        components: 'buttons',
+        "disable-funding": 'credit,card',
+        // Solo usar env sandbox si estamos en desarrollo
+        ...(isSandbox && { 
+          "buyer-country": 'ES',
+        }),
       }}
     >
       {children}
