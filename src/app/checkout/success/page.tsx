@@ -19,6 +19,8 @@ function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
   const orderId = searchParams.get('orderId'); // Para verificación directa por ID
+  const paypalToken = searchParams.get('token'); // PayPal devuelve 'token'
+  const payerId = searchParams.get('PayerID'); // PayPal devuelve 'PayerID'
   const [pedido, setPedido] = useState<OrderData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,6 +53,39 @@ function CheckoutSuccessContent() {
     }
   }, []);
 
+  // Capturar pago de PayPal
+  const capturarPagoPayPal = useCallback(async (paypalOrderId: string) => {
+    try {
+      // Primero obtener el orderId desde el paypalOrderId
+      const orderResponse = await fetch(`/api/paypal/find-order?paypalOrderId=${paypalOrderId}`);
+      if (!orderResponse.ok) {
+        throw new Error('No se encontró el pedido asociado a PayPal');
+      }
+      const { orderId } = await orderResponse.json();
+
+      // Capturar el pago
+      const captureResponse = await fetch('/api/paypal/capture-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paypalOrderId, orderId }),
+      });
+
+      if (!captureResponse.ok) {
+        const errorData = await captureResponse.json();
+        throw new Error(errorData.error || 'Error al capturar pago de PayPal');
+      }
+
+      const captureData = await captureResponse.json();
+      
+      // Obtener datos del pedido actualizado
+      const orderData = await verificarPedidoPorId(orderId);
+      return orderData;
+    } catch (err) {
+      console.error('Error capturando pago PayPal:', err);
+      throw err;
+    }
+  }, [verificarPedidoPorId]);
+
   const clearCart = useCallback(() => {
     localStorage.removeItem('cart');
     window.dispatchEvent(new Event('cartUpdated'));
@@ -70,8 +105,11 @@ function CheckoutSuccessContent() {
         if (sessionId) {
           // Stripe payment
           orderData = await verificarPagoStripe(sessionId);
+        } else if (paypalToken && payerId) {
+          // PayPal payment - capturar primero
+          orderData = await capturarPagoPayPal(paypalToken);
         } else if (orderId) {
-          // Verificación por ID de pedido (PayPal o redirección directa)
+          // Verificación por ID de pedido (redirección directa)
           orderData = await verificarPedidoPorId(orderId);
         } else {
           setError('No se encontró información del pago');
@@ -83,7 +121,8 @@ function CheckoutSuccessContent() {
           setPedido(orderData);
           clearCart();
         }
-      } catch {
+      } catch (err) {
+        console.error('Error en verificación de pago:', err);
         setError('Error al verificar el pago. Por favor, contacta con soporte.');
       } finally {
         setLoading(false);
@@ -91,7 +130,7 @@ function CheckoutSuccessContent() {
     };
 
     verifyPayment();
-  }, [sessionId, orderId, verificarPagoStripe, verificarPedidoPorId, clearCart]);
+  }, [sessionId, orderId, paypalToken, payerId, verificarPagoStripe, verificarPedidoPorId, capturarPagoPayPal, clearCart]);
 
   if (loading) {
     return (
