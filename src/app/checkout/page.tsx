@@ -288,6 +288,36 @@ export default function CheckoutPage() {
           <p className="text-gray-600 text-sm sm:text-base">Revisa tu pedido, elige método de pago y confirma</p>
         </div>
 
+        {/* Academic Project - Test Data Banner */}
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="font-semibold text-blue-900">Proyecto Académico - Datos de Prueba</h3>
+              <p className="text-sm text-blue-700 mt-1">
+                Este es un entorno de demostración. Usa los siguientes datos para probar el pago:
+              </p>
+              <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div className="bg-white rounded p-3 border border-blue-100">
+                  <p className="font-semibold text-gray-700 mb-2">💳 Tarjeta (Stripe)</p>
+                  <p className="font-mono text-gray-600">Número: <span className="text-blue-600">4242 4242 4242 4242</span></p>
+                  <p className="font-mono text-gray-600">Expira: <span className="text-blue-600">12/25</span></p>
+                  <p className="font-mono text-gray-600">CVC: <span className="text-blue-600">123</span></p>
+                </div>
+                <div className="bg-white rounded p-3 border border-blue-100">
+                  <p className="font-semibold text-gray-700 mb-2">💰 PayPal Sandbox</p>
+                  <p className="font-mono text-gray-600">Usuario: <span className="text-blue-600">sb-buyer@example.com</span></p>
+                  <p className="font-mono text-gray-600">Password: <span className="text-blue-600">Cualquiera válida</span></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Error */}
         {error && (
           <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-md">
