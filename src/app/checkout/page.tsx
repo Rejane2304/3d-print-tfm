@@ -256,7 +256,11 @@ export default function CheckoutPage() {
             throw new Error(paypalData.error || 'Error al iniciar pago con PayPal');
           }
 
-          // Abrir PayPal en nueva ventana y mostrar datos de prueba
+          // Guardar el paypalOrderId para recuperarlo después
+          localStorage.setItem('pendingPayPalOrderId', orderId);
+          localStorage.setItem('pendingPayPalToken', paypalData.paypalOrderId || '');
+
+          // Abrir PayPal en nueva ventana
           window.open(paypalData.url, '_blank');
           setExternalPaymentUrl(paypalData.url);
           setPendingOrderId(orderId);

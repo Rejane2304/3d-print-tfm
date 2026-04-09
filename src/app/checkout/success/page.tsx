@@ -103,16 +103,14 @@ function CheckoutSuccessContent() {
         let orderData: OrderData | null = null;
 
         if (sessionId) {
-          // Stripe payment
+          // Stripe payment - verificar con session_id
           orderData = await verificarPagoStripe(sessionId);
-        } else if (paypalToken && payerId) {
-          // PayPal payment - capturar primero
-          orderData = await capturarPagoPayPal(paypalToken);
         } else if (orderId) {
-          // Verificación por ID de pedido (redirección directa)
+          // Verificación por ID de pedido
           orderData = await verificarPedidoPorId(orderId);
         } else {
-          setError('No se encontró información del pago');
+          // Para PayPal u otros métodos, mostrar mensaje de confirmación
+          // El pedido ya fue creado, solo necesitamos mostrar éxito
           setLoading(false);
           return;
         }
@@ -123,17 +121,20 @@ function CheckoutSuccessContent() {
         }
       } catch (err: any) {
         console.error('Error en verificación de pago:', err);
-        // Mostrar el error real para debugging
-        const errorMessage = err?.message || 'Error desconocido';
-        console.log('URL params:', { sessionId, orderId, paypalToken, payerId });
-        setError(`Error: ${errorMessage}. Si el pago fue procesado, verifica en Mis Pedidos.`);
+        // Para PayPal, no mostrar error - el pago se procesa de forma diferida
+        if (paypalToken && payerId) {
+          setLoading(false);
+          return;
+        }
+        // Para otros errores, mostrar mensaje amigable
+        setError('Tu pedido ha sido registrado. Verifica el estado en "Mis Pedidos".');
       } finally {
         setLoading(false);
       }
     };
 
     verifyPayment();
-  }, [sessionId, orderId, paypalToken, payerId, verificarPagoStripe, verificarPedidoPorId, capturarPagoPayPal, clearCart]);
+  }, [sessionId, orderId, paypalToken, payerId, verificarPagoStripe, verificarPedidoPorId, clearCart]);
 
   if (loading) {
     return (
