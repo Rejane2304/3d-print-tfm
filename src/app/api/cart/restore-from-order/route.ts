@@ -29,11 +29,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Buscar el pedido
+    // Buscar el pedido (puede ser PENDING o CANCELLED)
     const order = await prisma.order.findFirst({
       where: {
         id: orderId,
-        status: 'PENDING',
+        status: { in: ['PENDING', 'CANCELLED'] },
         user: { email: session.user.email }
       },
       include: {
