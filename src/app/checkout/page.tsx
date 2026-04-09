@@ -378,8 +378,8 @@ export default function CheckoutPage() {
                 </div>
                 <div className="bg-white rounded p-3 border border-blue-100">
                   <p className="font-semibold text-gray-700 mb-2">💰 PayPal Sandbox</p>
-                  <p className="font-mono text-gray-600">Usuario: <span className="text-blue-600">sb-buyer@example.com</span></p>
-                  <p className="font-mono text-gray-600">Password: <span className="text-blue-600">Cualquiera válida</span></p>
+                  <p className="font-mono text-gray-600">Usuario: <span className="text-blue-600">sb-rb3ao50452979@personal.example.com</span></p>
+                  <p className="font-mono text-gray-600">Password: <span className="text-blue-600">Q+7&gt;jQ^8</span></p>
                 </div>
               </div>
             </div>
