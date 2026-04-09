@@ -111,28 +111,32 @@ export default function CheckoutPage() {
   useEffect(() => {
     const cancelled = searchParams.get('cancelled');
     const orderId = searchParams.get('orderId');
+    console.log('Checkout params:', { cancelled, orderId }); // Debug
     if (cancelled === 'true' && orderId) {
       setCancelledOrderId(orderId);
+      console.log('Setting cancelledOrderId:', orderId); // Debug
       // Automatically cancel order and restore stock
       const cancelOrder = async () => {
         try {
+          console.log('Calling cancel-and-restore for order:', orderId); // Debug
           const response = await fetch('/api/orders/cancel-and-restore', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ orderId }),
           });
+          const data = await response.json();
           if (!response.ok) {
-            console.error('Error cancelling order:', await response.json());
+            console.error('Error cancelling order:', data);
+          } else {
+            console.log('Order cancelled successfully:', data); // Debug
           }
         } catch (err) {
           console.error('Error calling cancel API:', err);
         }
       };
       cancelOrder();
-      // Clear the URL params
-      router.replace('/checkout');
     }
-  }, [searchParams, router]);
+  }, [searchParams]);
 
   // Load initial data
   const loadData = useCallback(async () => {
