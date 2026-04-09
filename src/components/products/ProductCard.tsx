@@ -83,11 +83,6 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       {/* Content */}
       <div className="p-5 flex flex-col flex-1">
-        {/* Category Tag */}
-        <span className="text-xs font-medium text-indigo-600 uppercase tracking-wider mb-2">
-          {product.stock > 0 ? 'En Stock' : 'Agotado'}
-        </span>
-
         {/* Product Name */}
         <h3
           className="font-bold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors line-clamp-2 text-base leading-tight"
