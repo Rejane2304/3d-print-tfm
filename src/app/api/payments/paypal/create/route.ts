@@ -25,6 +25,12 @@ async function getPayPalAccessToken(): Promise<string> {
     throw new Error('Credenciales de PayPal no configuradas');
   }
 
+  // Log para depuración (solo en desarrollo)
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('PayPal API URL:', PAYPAL_API);
+    console.log('PayPal Client ID (primeros 10 chars):', clientId.substring(0, 10) + '...');
+  }
+
   const response = await fetch(`${PAYPAL_API}/v1/oauth2/token`, {
     method: 'POST',
     headers: {
@@ -41,6 +47,12 @@ async function getPayPalAccessToken(): Promise<string> {
   }
 
   const data = await response.json();
+  
+  // Verificar si estamos en sandbox
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('PayPal token obtenido exitosamente');
+  }
+  
   return data.access_token;
 }
 
@@ -128,7 +140,7 @@ async function createPayPalOrder(
       shipping_preference: 'SET_PROVIDED_ADDRESS',
       user_action: 'PAY_NOW',
       return_url: `${process.env.NEXTAUTH_URL}/checkout/success`,
-      cancel_url: `${process.env.NEXTAUTH_URL}/cart`,
+      cancel_url: `${process.env.NEXTAUTH_URL}/checkout?orderId=${orderData.orderId}&cancelled=true`,
     },
   };
 
