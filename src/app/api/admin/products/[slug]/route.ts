@@ -1,7 +1,8 @@
 /**
- * Admin Individual Product API
- * Get, update and delete a specific product
- *
+ * Admin Product Detail API
+ * GET, PUT, DELETE /api/admin/products/[identifier]
+ * 
+ * Soporta tanto ID (UUID) como SLUG
  * Requires: ADMIN role
  */
 import { NextRequest, NextResponse } from 'next/server';
@@ -17,71 +18,27 @@ import {
   translateCategoryName,
   translateErrorMessage,
 } from '@/lib/i18n';
+import { unlink } from 'fs/promises';
+import { existsSync } from 'fs';
+import path from 'path';
 
-// Validation schema for update with Spanish error messages
+// Validation schema for update
 const updateProductSchema = z.object({
-  name: z.string().min(1, 'El nombre es obligatorio'),
-  description: z.string().min(1, 'La descripción es obligatoria'),
+  name: z.string().min(1).optional(),
+  description: z.string().optional(),
   shortDescription: z.string().optional(),
-  price: z.preprocess(
-    (val) => (val === null || val === undefined || val === '' ? undefined : Number(val)),
-    z.number({ required_error: 'El precio es obligatorio', invalid_type_error: 'El precio debe ser un número válido' })
-      .min(0.01, 'El precio debe ser mayor que 0')
-      .max(99999.99, 'El precio máximo permitido es 99999.99')
-  ),
-  previousPrice: z.preprocess(
-    (val) => (val === null || val === undefined || val === '' ? null : Number(val)),
-    z.number({ invalid_type_error: 'El precio anterior debe ser un número válido' })
-      .min(0, 'El precio anterior no puede ser negativo')
-      .max(99999.99, 'El precio anterior máximo es 99999.99')
-      .optional()
-  ).nullable().default(null),
-  stock: z.preprocess(
-    (val) => (val === null || val === undefined || val === '' ? undefined : Number(val)),
-    z.number({ required_error: 'El stock es obligatorio', invalid_type_error: 'El stock debe ser un número' })
-      .int('El stock debe ser un número entero')
-      .min(0, 'El stock no puede ser negativo')
-  ),
-  minStock: z.preprocess(
-    (val) => (val === null || val === undefined || val === '' ? 5 : Number(val)),
-    z.number({ invalid_type_error: 'El stock mínimo debe ser un número' })
-      .int('El stock mínimo debe ser un número entero')
-      .min(1, 'El stock mínimo debe ser al menos 1')
-  ).default(5),
-  categoryId: z.string().uuid('ID de categoría inválido'),
-  material: z.nativeEnum(Material),
-  widthCm: z.preprocess(
-    (val) => (val === null || val === undefined || val === '' ? undefined : Number(val)),
-    z.number({ invalid_type_error: 'El ancho debe ser un número' }).optional()
-  ).optional(),
-  heightCm: z.preprocess(
-    (val) => (val === null || val === undefined || val === '' ? undefined : Number(val)),
-    z.number({ invalid_type_error: 'El alto debe ser un número' }).optional()
-  ).optional(),
-  depthCm: z.preprocess(
-    (val) => (val === null || val === undefined || val === '' ? undefined : Number(val)),
-    z.number({ invalid_type_error: 'La profundidad debe ser un número' }).optional()
-  ).optional(),
-  weight: z.preprocess(
-    (val) => (val === null || val === undefined || val === '' ? null : Number(val)),
-    z.number({ invalid_type_error: 'El peso debe ser un número' }).optional()
-  ).nullable().default(null),
-  printTime: z.preprocess(
-    (val) => (val === null || val === undefined || val === '' ? null : Number(val)),
-    z.number({ invalid_type_error: 'El tiempo de impresión debe ser un número' })
-      .int('El tiempo debe ser un número entero')
-      .optional()
-  ).nullable().default(null),
-  metaTitle: z.string().max(200, 'El meta título no puede exceder 200 caracteres').optional(),
-  metaDescription: z.string().max(300, 'La meta descripción no puede exceder 300 caracteres').optional(),
-  isActive: z.boolean().default(true),
-  isFeatured: z.boolean().default(false),
-  images: z.array(
-    z.object({
-      url: z.string(),
-      isMain: z.boolean().default(false),
-    })
-  ).optional(),
+  price: z.number().positive().optional(),
+  previousPrice: z.number().optional().nullable(),
+  stock: z.number().int().min(0).optional(),
+  categoryId: z.string().uuid().optional(),
+  material: z.nativeEnum(Material).optional(),
+  widthCm: z.number().optional().nullable(),
+  heightCm: z.number().optional().nullable(),
+  depthCm: z.number().optional().nullable(),
+  weight: z.number().optional().nullable(),
+  printTime: z.number().int().optional().nullable(),
+  isActive: z.boolean().optional(),
+  isFeatured: z.boolean().optional(),
 });
 
 // Helper to verify admin authentication
@@ -102,7 +59,25 @@ async function verifyAdminAuth() {
   return { user };
 }
 
-// GET - Get product by slug
+// Helper to find product by ID or slug
+async function findProduct(identifier: string) {
+  // Check if it looks like a UUID
+  const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier);
+  
+  if (isUUID) {
+    return await prisma.product.findUnique({
+      where: { id: identifier },
+      include: { images: true, category: true },
+    });
+  } else {
+    return await prisma.product.findUnique({
+      where: { slug: identifier },
+      include: { images: true, category: true },
+    });
+  }
+}
+
+// GET - Get product by ID or slug
 export async function GET(
   req: NextRequest,
   { params }: { params: { slug: string } }
@@ -116,15 +91,8 @@ export async function GET(
       );
     }
 
-    const { slug } = params;
-
-    const product = await prisma.product.findUnique({
-      where: { slug },
-      include: {
-        images: true,
-        category: true,
-      },
-    });
+    const { slug: identifier } = params;
+    const product = await findProduct(identifier);
 
     if (!product) {
       return NextResponse.json(
@@ -152,8 +120,6 @@ export async function GET(
       depthCm: product.depthCm,
       weight: product.weight,
       printTime: product.printTime,
-      metaTitle: product.metaTitle,
-      metaDescription: product.metaDescription,
       isActive: product.isActive,
       isFeatured: product.isFeatured,
       images: product.images.map((img) => ({
@@ -190,13 +156,8 @@ export async function PUT(
       );
     }
 
-    const { slug } = params;
-
-    // Verify the product exists
-    const existingProduct = await prisma.product.findUnique({
-      where: { slug },
-      include: { images: true },
-    });
+    const { slug: identifier } = params;
+    const existingProduct = await findProduct(identifier);
 
     if (!existingProduct) {
       return NextResponse.json(
@@ -209,117 +170,32 @@ export async function PUT(
     const data = updateProductSchema.parse(body);
 
     // Generate new slug if name changed
-    // Normalize accented characters first, then convert to lowercase and replace special chars
     const newSlug = data.name
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
+      ? data.name
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '')
+      : existingProduct.slug;
 
-    // Transaction to update product and handle images
-    const updatedProduct = await prisma.$transaction(async (tx) => {
-      // Update product
-      const product = await tx.product.update({
-        where: { slug },
-        data: {
-          name: data.name,
-          description: data.description,
-          shortDescription: data.shortDescription,
-          price: data.price,
-          previousPrice: data.previousPrice,
-          stock: data.stock,
-          minStock: data.minStock,
-          categoryId: data.categoryId,
-          material: data.material,
-          widthCm: data.widthCm,
-          heightCm: data.heightCm,
-          depthCm: data.depthCm,
-          weight: data.weight,
-          printTime: data.printTime,
-          isActive: data.isActive,
-          isFeatured: data.isFeatured,
-          slug: newSlug,
-        },
-      });
-
-    // Handle images - always delete and recreate to ensure consistency
-    await tx.productImage.deleteMany({
-      where: { productId: product.id },
+    // Update product
+    const updated = await prisma.product.update({
+      where: { id: existingProduct.id },
+      data: {
+        ...data,
+        slug: newSlug,
+        previousPrice: data.previousPrice ?? undefined,
+        widthCm: data.widthCm ?? undefined,
+        heightCm: data.heightCm ?? undefined,
+        depthCm: data.depthCm ?? undefined,
+        weight: data.weight ?? undefined,
+        printTime: data.printTime ?? undefined,
+      },
+      include: { images: true, category: true },
     });
 
-    // Create images from the provided data
-    if (data.images && data.images.length > 0) {
-      for (let i = 0; i < data.images.length; i++) {
-        const img = data.images[i];
-        await tx.productImage.create({
-          data: {
-            productId: product.id,
-            url: img.url,
-            filename: img.url.split('/').pop() || 'image.jpg',
-            isMain: img.isMain ?? (i === 0), // Default to first image as main
-            displayOrder: i,
-            altText: data.name,
-          },
-        });
-      }
-    }
-
-      // Return product with updated images
-      return tx.product.findUnique({
-        where: { id: product.id },
-        include: {
-          images: true,
-          category: true,
-        },
-      });
-    });
-
-    if (!updatedProduct) {
-      throw new Error('Error al actualizar producto');
-    }
-
-    // Return original data for admin editing
-    const transformedProduct = {
-      id: updatedProduct.id,
-      slug: updatedProduct.slug,
-      name: updatedProduct.name,
-      description: updatedProduct.description,
-      shortDescription: updatedProduct.shortDescription,
-      price: Number(updatedProduct.price),
-      previousPrice: updatedProduct.previousPrice
-        ? Number(updatedProduct.previousPrice)
-        : null,
-      stock: updatedProduct.stock,
-      minStock: updatedProduct.minStock,
-      categoryId: updatedProduct.categoryId,
-      category: updatedProduct.category
-        ? translateCategoryName(updatedProduct.category.slug)
-        : 'Sin categoría',
-      material: updatedProduct.material,
-      widthCm: updatedProduct.widthCm,
-      heightCm: updatedProduct.heightCm,
-      depthCm: updatedProduct.depthCm,
-      weight: updatedProduct.weight,
-      printTime: updatedProduct.printTime,
-      metaTitle: updatedProduct.metaTitle,
-      metaDescription: updatedProduct.metaDescription,
-      isActive: updatedProduct.isActive,
-      isFeatured: updatedProduct.isFeatured,
-      images: updatedProduct.images.map((img) => ({
-        id: img.id,
-        url: img.url,
-        isMain: img.isMain,
-        displayOrder: img.displayOrder,
-      })),
-      createdAt: updatedProduct.createdAt,
-      updatedAt: updatedProduct.updatedAt,
-    };
-
-    return NextResponse.json({
-      success: true,
-      producto: transformedProduct,
-    });
+    return NextResponse.json({ success: true, product: updated });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -349,12 +225,8 @@ export async function DELETE(
       );
     }
 
-    const { slug } = params;
-
-    // Verify the product exists
-    const existingProduct = await prisma.product.findUnique({
-      where: { slug },
-    });
+    const { slug: identifier } = params;
+    const existingProduct = await findProduct(identifier);
 
     if (!existingProduct) {
       return NextResponse.json(
@@ -363,15 +235,35 @@ export async function DELETE(
       );
     }
 
-    // Delete product (images are deleted in cascade by the relationship)
+    // Delete images from filesystem
+    for (const image of existingProduct.images) {
+      try {
+        const filePath = path.join(process.cwd(), 'public', image.url);
+        if (existsSync(filePath)) {
+          await unlink(filePath);
+        }
+      } catch (err) {
+        console.warn('Error deleting image file:', err);
+      }
+    }
+
+    // Delete product directory if exists
+    try {
+      const dirPath = path.join(process.cwd(), 'public', 'images', 'products', existingProduct.slug);
+      if (existsSync(dirPath)) {
+        const { rmdir } = await import('fs/promises');
+        await rmdir(dirPath, { recursive: true });
+      }
+    } catch (err) {
+      console.warn('Error deleting product directory:', err);
+    }
+
+    // Delete product (cascades delete images from DB)
     await prisma.product.delete({
-      where: { slug },
+      where: { id: existingProduct.id },
     });
 
-    return NextResponse.json({
-      success: true,
-      message: translateErrorMessage('Producto eliminado'),
-    });
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting product:', error);
     return NextResponse.json(
