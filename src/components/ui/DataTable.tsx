@@ -413,47 +413,49 @@ export function DataTable<T extends object>({
 
       {/* Pagination */}
       {pagination && sortedData.length > 0 && (
-        <div className="p-4 border-t border-gray-200">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-700">
-              Showing {((currentPage - 1) * pageSize) + 1} to{' '}
-              {Math.min(currentPage * pageSize, sortedData.length)} of{' '}
-              {sortedData.length} results
-            </span>
+        <div className="p-2 sm:p-4 border-t border-gray-200">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-4 text-xs sm:text-sm">
+              <span className="text-gray-700 whitespace-nowrap">
+                Mostrando {((currentPage - 1) * pageSize) + 1} a{' '}
+                {Math.min(currentPage * pageSize, sortedData.length)} de{' '}
+                {sortedData.length} resultados
+              </span>
               <select
                 value={pageSize}
                 onChange={(e) => {
                   setPageSize(Number(e.target.value));
                   setCurrentPage(1);
                 }}
-                className="border border-gray-300 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="border border-gray-300 rounded-lg px-2 py-1 text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               >
                 {pageSizeOptions.map((size) => (
                   <option key={size} value={size}>
-                    {size} per page
+                    {size} / pág
                   </option>
                 ))}
               </select>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               <button
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-1.5 sm:p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label="Página anterior"
               >
-                <ChevronLeft className="h-5 w-5" />
+                <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
-              <span className="text-sm text-gray-700">
-                Page {currentPage} of {totalPages}
+              <span className="text-xs sm:text-sm text-gray-700 px-1 sm:px-2 whitespace-nowrap">
+                Pág. {currentPage} de {totalPages}
               </span>
               <button
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-1.5 sm:p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label="Página siguiente"
               >
-                <ChevronRight className="h-5 w-5" />
+                <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
             </div>
           </div>
