@@ -1,13 +1,13 @@
 /**
  * API de Upload de Imágenes - Admin
- * POST /api/admin/upload - Recibe imagen base64 y la valida
- * 
- * En Vercel (serverless), las imágenes se guardan como base64 en la BD
- * En desarrollo local, se pueden guardar en el sistema de archivos
+ * POST /api/admin/upload - Recibe imagen base64 y la guarda en el sistema de archivos
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
+import { writeFile } from 'fs/promises';
+import { existsSync, mkdirSync } from 'fs';
+import { join } from 'path';
 
 // POST /api/admin/upload
 export async function POST(req: NextRequest) {
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { image } = body;
+    const { image, filename, slug } = body;
 
     if (!image) {
       return NextResponse.json(
@@ -40,11 +40,34 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // La imagen ya está en base64, la retornamos directamente
-    // Se guardará en la BD cuando se cree el producto
+    const mimeType = base64Match[1];
+    const base64Data = base64Match[2];
+    const buffer = Buffer.from(base64Data, 'base64');
+
+    // Generar nombre de archivo seguro
+    const ext = mimeType === 'jpeg' ? 'jpg' : mimeType;
+    const safeSlug = slug?.replace(/[^a-z0-9]/gi, '-') || 'product';
+    const safeFilename = filename?.replace(/[^a-zA-Z0-9.-]/g, '') || `image.${ext}`;
+    const timestamp = Date.now();
+    const finalFilename = `${safeSlug}-${timestamp}-${safeFilename}`;
+
+    // Crear directorio si no existe
+    const uploadDir = join(process.cwd(), 'public', 'images', 'products');
+    if (!existsSync(uploadDir)) {
+      mkdirSync(uploadDir, { recursive: true });
+    }
+
+    // Guardar archivo
+    const filePath = join(uploadDir, finalFilename);
+    await writeFile(filePath, buffer);
+
+    // Retornar URL relativa
+    const url = `/images/products/${finalFilename}`;
+
     return NextResponse.json({
       success: true,
-      url: image, // Retornamos el base64 completo como URL
+      url,
+      filename: finalFilename,
     });
   } catch (error) {
     console.error('Error uploading image:', error);

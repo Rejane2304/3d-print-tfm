@@ -95,11 +95,19 @@ export async function POST(req: NextRequest) {
     }
 
     // 5. Build line items for Stripe
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = order.items.map((item) => {
       // Translate product name to Spanish
       const translatedName = item.product
         ? translateProductName(item.product.slug) || item.name
         : item.name;
+
+      // Stripe requires absolute URLs for images - convert relative to absolute
+      let imageUrl: string | undefined = item.product?.images?.[0]?.url;
+      if (imageUrl && imageUrl.startsWith('/')) {
+        imageUrl = `${baseUrl}${imageUrl}`;
+      }
 
       return {
         price_data: {
@@ -107,9 +115,7 @@ export async function POST(req: NextRequest) {
           product_data: {
             name: translatedName,
             description: item.description || undefined,
-            images: item.product?.images?.[0]?.url
-              ? [item.product.images[0].url]
-              : undefined,
+            images: imageUrl ? [imageUrl] : undefined,
           },
           unit_amount: Math.round(Number(item.price) * 100), // Convert to cents
         },
@@ -133,8 +139,6 @@ export async function POST(req: NextRequest) {
     }
 
     // 6. Create Stripe Checkout session
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-
     const stripeSession = await stripe.checkout.sessions.create({
       mode: 'payment',
       success_url: `${baseUrl}/checkout/success?orderId=${order.id}&session_id={CHECKOUT_SESSION_ID}`,
