@@ -109,34 +109,48 @@ export default function CheckoutPage() {
 
   // Check if returning from cancelled payment
   useEffect(() => {
-    const cancelled = searchParams.get('cancelled');
-    const orderId = searchParams.get('orderId');
-    console.log('Checkout params:', { cancelled, orderId }); // Debug
-    if (cancelled === 'true' && orderId) {
-      setCancelledOrderId(orderId);
-      console.log('Setting cancelledOrderId:', orderId); // Debug
-      // Automatically cancel order and restore stock
-      const cancelOrder = async () => {
-        try {
-          console.log('Calling cancel-and-restore for order:', orderId); // Debug
-          const response = await fetch('/api/orders/cancel-and-restore', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ orderId }),
-          });
-          const data = await response.json();
-          if (!response.ok) {
-            console.error('Error cancelling order:', data);
-          } else {
-            console.log('Order cancelled successfully:', data); // Debug
+    // Check URL params and localStorage for cancelled orders
+    const checkCancelledPayment = () => {
+      // First check URL params
+      const urlParams = new URLSearchParams(window.location.search);
+      const cancelled = urlParams.get('cancelled');
+      const orderId = urlParams.get('orderId');
+      
+      console.log('Checkout params:', { cancelled, orderId, url: window.location.href }); // Debug
+      
+      if (cancelled === 'true' && orderId) {
+        console.log('Found cancelled order in URL:', orderId);
+        setCancelledOrderId(orderId);
+        
+        // Clear URL params
+        window.history.replaceState({}, '', '/checkout');
+        
+        // Automatically cancel order and restore stock
+        const cancelOrder = async () => {
+          try {
+            console.log('Calling cancel-and-restore for order:', orderId);
+            const response = await fetch('/api/orders/cancel-and-restore', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ orderId }),
+            });
+            const data = await response.json();
+            if (!response.ok) {
+              console.error('Error cancelling order:', data);
+            } else {
+              console.log('Order cancelled successfully:', data);
+            }
+          } catch (err) {
+            console.error('Error calling cancel API:', err);
           }
-        } catch (err) {
-          console.error('Error calling cancel API:', err);
-        }
-      };
-      cancelOrder();
-    }
-  }, [searchParams]);
+        };
+        cancelOrder();
+      }
+    };
+    
+    // Run immediately
+    checkCancelledPayment();
+  }, []);
 
   // Load initial data
   const loadData = useCallback(async () => {
