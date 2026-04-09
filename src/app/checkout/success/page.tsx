@@ -114,7 +114,7 @@ function CheckoutSuccessContent() {
     };
 
     verifyPayment();
-  }, [sessionId, orderId, paypalToken, payerId, verificarPagoStripe, verificarPedidoPorId, capturarPagoPayPal, clearCart]);
+  }, [sessionId, orderId, paypalToken, payerId, verificarPagoStripe, verificarPedidoPorId, verificarPagoPayPal, clearCart]);
 
   if (loading) {
     return (
