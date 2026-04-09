@@ -8,17 +8,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { withErrorHandler } from '@/lib/errors/api-wrapper';
-
-// Mapeo de categorías en inglés → español
-const categoryTranslations: Record<string, string> = {
-  'Materials': 'Materiales',
-  'Shipping': 'Envío',
-  'Returns': 'Devoluciones',
-  'Orders': 'Pedidos',
-  'Care': 'Cuidado',
-  'Payments': 'Pagos',
-  'Safety': 'Seguridad',
-};
+import { faqTranslations, faqCategoryTranslations } from '@/lib/i18n/faq-translations';
 
 // GET /api/faqs - Listar FAQs agrupadas por categoría
 export const GET = withErrorHandler(async (req: NextRequest) => {
@@ -48,11 +38,11 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
 
   // Agrupar por categoría con traducción al español
   const groupedByCategory = faqs.reduce((acc, faq) => {
-    // Traducir usando el módulo i18n
-    // translateFAQ removed - data now comes from database in Spanish
-    const preguntaTraducida = faq.question;
-    const respuestaTraducida = faq.answer;
-    const categoriaTraducida = categoryTranslations[faq.category] || faq.category;
+    // Traducir pregunta y respuesta usando el módulo i18n
+    const translation = faqTranslations[faq.id];
+    const preguntaTraducida = translation?.question || faq.question;
+    const respuestaTraducida = translation?.answer || faq.answer;
+    const categoriaTraducida = faqCategoryTranslations[faq.category] || faq.category;
     
     if (!acc[categoriaTraducida]) {
       acc[categoriaTraducida] = [];
