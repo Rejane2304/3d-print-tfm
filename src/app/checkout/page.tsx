@@ -113,6 +113,22 @@ export default function CheckoutPage() {
     const orderId = searchParams.get('orderId');
     if (cancelled === 'true' && orderId) {
       setCancelledOrderId(orderId);
+      // Automatically cancel order and restore stock
+      const cancelOrder = async () => {
+        try {
+          const response = await fetch('/api/orders/cancel-and-restore', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderId }),
+          });
+          if (!response.ok) {
+            console.error('Error cancelling order:', await response.json());
+          }
+        } catch (err) {
+          console.error('Error calling cancel API:', err);
+        }
+      };
+      cancelOrder();
       // Clear the URL params
       router.replace('/checkout');
     }
