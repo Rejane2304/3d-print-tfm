@@ -1,16 +1,13 @@
 /**
  * API de Upload de Imágenes - Admin
- * POST /api/admin/upload - Recibe imagen base64 y la guarda
+ * POST /api/admin/upload - Recibe imagen base64 y la valida
  * 
- * Guarda las imágenes en public/images/products/[slug]/
+ * En Vercel (serverless), las imágenes se guardan como base64 en la BD
+ * En desarrollo local, se pueden guardar en el sistema de archivos
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
-import { prisma } from '@/lib/db/prisma';
-import { writeFile, mkdir } from 'fs/promises';
-import { existsSync } from 'fs';
-import path from 'path';
 
 // POST /api/admin/upload
 export async function POST(req: NextRequest) {
@@ -24,23 +21,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
-
-    if (!user || user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 403 }
-      );
-    }
-
     const body = await req.json();
-    const { image, filename, slug } = body;
+    const { image } = body;
 
-    if (!image || !filename || !slug) {
+    if (!image) {
       return NextResponse.json(
-        { success: false, error: 'Faltan datos requeridos' },
+        { success: false, error: 'Falta la imagen' },
         { status: 400 }
       );
     }
@@ -54,37 +40,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const ext = base64Match[1] === 'jpeg' ? 'jpg' : base64Match[1];
-    const base64Data = base64Match[2];
-    const buffer = Buffer.from(base64Data, 'base64');
-
-    // Crear directorio si no existe
-    const uploadDir = path.join(process.cwd(), 'public', 'images', 'products', slug);
-    if (!existsSync(uploadDir)) {
-      await mkdir(uploadDir, { recursive: true });
-    }
-
-    // Generar nombre único con extensión correcta
-    const timestamp = Date.now();
-    const sanitizedFilename = filename.replace(/[^a-zA-Z0-9.-]/g, '_');
-    const finalFilename = `${timestamp}-${sanitizedFilename.replace(/\.[^.]+$/, '')}.${ext}`;
-    const filePath = path.join(uploadDir, finalFilename);
-
-    // Guardar archivo
-    await writeFile(filePath, buffer);
-
-    // Retornar URL relativa
-    const url = `/images/products/${slug}/${finalFilename}`;
-
+    // La imagen ya está en base64, la retornamos directamente
+    // Se guardará en la BD cuando se cree el producto
     return NextResponse.json({
       success: true,
-      url,
-      filename: finalFilename,
+      url: image, // Retornamos el base64 completo como URL
     });
   } catch (error) {
     console.error('Error uploading image:', error);
     return NextResponse.json(
-      { success: false, error: 'Error al subir imagen' },
+      { success: false, error: 'Error al procesar imagen' },
       { status: 500 }
     );
   }
