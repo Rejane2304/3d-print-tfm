@@ -7,8 +7,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import { Loader2, MapPin, CreditCard, Wallet, Banknote, ArrowRightLeft, Package, CheckCircle2 } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Loader2, MapPin, CreditCard, Wallet, Banknote, ArrowRightLeft, Package, CheckCircle2, ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
 
 interface UserProfile {
@@ -88,6 +88,7 @@ const paymentMethods = [
 export default function CheckoutPage() {
   const { status } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [, setUserProfile] = useState<UserProfile | null>(null);
   const [addresses, setAddresses] = useState<Address[]>([]);
@@ -100,10 +101,22 @@ export default function CheckoutPage() {
   const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('CARD');
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [cancelledOrderId, setCancelledOrderId] = useState<string | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [orderComplete, _setOrderComplete] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [orderData, _setOrderData] = useState<{ orderId: string; orderNumber: string } | null>(null);
+
+  // Check if returning from cancelled payment
+  useEffect(() => {
+    const cancelled = searchParams.get('cancelled');
+    const orderId = searchParams.get('orderId');
+    if (cancelled === 'true' && orderId) {
+      setCancelledOrderId(orderId);
+      // Clear the URL params
+      router.replace('/checkout');
+    }
+  }, [searchParams, router]);
 
   // Load initial data
   const loadData = useCallback(async () => {
