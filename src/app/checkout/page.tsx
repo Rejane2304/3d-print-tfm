@@ -560,14 +560,13 @@ export default function CheckoutPage() {
                       {shippingCost === 0 ? 'Gratis' : `${shippingCost.toFixed(2)} €`}
                     </span>
                   </div>
-                  <div className="flex justify-between text-gray-600 text-sm sm:text-base">
-                    <span>IVA (21%)</span>
-                    <span>{taxAmount.toFixed(2)} €</span>
-                  </div>
                   <div className="flex justify-between text-lg sm:text-xl font-bold border-t pt-3">
                     <span>Total</span>
                     <span className="text-indigo-600">{total.toFixed(2)} €</span>
                   </div>
+                  <p className="text-xs text-gray-500 text-right">
+                    IVA incluido (21%)
+                  </p>
                 </div>
               </div>
 

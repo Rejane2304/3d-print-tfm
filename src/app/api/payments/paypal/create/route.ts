@@ -22,7 +22,7 @@ async function getPayPalAccessToken(): Promise<string> {
   const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
 
   if (!clientId || !clientSecret) {
-    throw new Error('PayPal credentials not configured');
+    throw new Error('Credenciales de PayPal no configuradas');
   }
 
   const response = await fetch(`${PAYPAL_API}/v1/oauth2/token`, {
@@ -37,7 +37,7 @@ async function getPayPalAccessToken(): Promise<string> {
   if (!response.ok) {
     const errorData = await response.text();
     console.error('PayPal token error:', errorData);
-    throw new Error('Failed to get PayPal access token');
+    throw new Error('Error al obtener token de acceso de PayPal');
   }
 
   const data = await response.json();
@@ -53,63 +53,94 @@ async function createPayPalOrder(
     orderId: string;
     orderNumber: string;
     total: number;
+    shipping: number;
     items: Array<{
       name: string;
       quantity: number;
       unitPrice: number;
     }>;
+    shippingAddress: {
+      name: string;
+      address: string;
+      city: string;
+      postalCode: string;
+      country: string;
+    };
   }
 ): Promise<{ id: string; links: Array<{ rel: string; href: string }> }> {
-  // Calcular el total de items para validación
+  // Calcular el total de items
   const itemsTotal = orderData.items.reduce((sum, item) => 
     sum + (item.unitPrice * item.quantity), 0
   );
   
-  // PayPal requiere que el total de items coincida con el amount
-  // Si no coinciden, ajustamos para evitar errores
-  const adjustedTotal = itemsTotal.toFixed(2);
+  // El total debe ser exacto: items + shipping
+  const calculatedTotal = itemsTotal + orderData.shipping;
   
+  // Asegurar que tenemos al menos 2 decimales
+  const itemTotalStr = itemsTotal.toFixed(2);
+  const shippingStr = orderData.shipping.toFixed(2);
+  const totalStr = calculatedTotal.toFixed(2);
+  
+  const requestBody = {
+    intent: 'CAPTURE',
+    purchase_units: [{
+      reference_id: orderData.orderId,
+      description: `Pedido ${orderData.orderNumber}`,
+      amount: {
+        currency_code: 'EUR',
+        value: totalStr,
+        breakdown: {
+          item_total: {
+            currency_code: 'EUR',
+            value: itemTotalStr,
+          },
+          shipping: {
+            currency_code: 'EUR',
+            value: shippingStr,
+          },
+        },
+      },
+      items: orderData.items.map((item, index) => ({
+        name: item.name.substring(0, 127),
+        quantity: item.quantity.toString(),
+        unit_amount: {
+          currency_code: 'EUR',
+          value: item.unitPrice.toFixed(2),
+        },
+        sku: `ITEM-${index + 1}`,
+        category: 'PHYSICAL_GOODS',
+      })),
+      shipping: {
+        name: {
+          full_name: orderData.shippingAddress.name,
+        },
+        address: {
+          address_line_1: orderData.shippingAddress.address.substring(0, 100),
+          admin_area_2: orderData.shippingAddress.city,
+          postal_code: orderData.shippingAddress.postalCode,
+          country_code: orderData.shippingAddress.country === 'Spain' ? 'ES' : 'ES',
+        },
+      },
+    }],
+    application_context: {
+      brand_name: '3D Print TFM',
+      landing_page: 'LOGIN',
+      shipping_preference: 'SET_PROVIDED_ADDRESS',
+      user_action: 'PAY_NOW',
+      return_url: `${process.env.NEXTAUTH_URL}/checkout/success`,
+      cancel_url: `${process.env.NEXTAUTH_URL}/cart`,
+    },
+  };
+
+  console.log('PayPal request:', JSON.stringify(requestBody, null, 2));
+
   const response = await fetch(`${PAYPAL_API}/v2/checkout/orders`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${accessToken}`,
     },
-    body: JSON.stringify({
-      intent: 'CAPTURE',
-      purchase_units: [{
-        reference_id: orderData.orderId,
-        description: `Pedido ${orderData.orderNumber}`,
-        amount: {
-          currency_code: 'EUR',
-          value: adjustedTotal,
-          breakdown: {
-            item_total: {
-              currency_code: 'EUR',
-              value: adjustedTotal,
-            },
-          },
-        },
-        items: orderData.items.map((item, index) => ({
-          name: item.name.substring(0, 127), // PayPal limit
-          quantity: item.quantity.toString(),
-          unit_amount: {
-            currency_code: 'EUR',
-            value: item.unitPrice.toFixed(2),
-          },
-          sku: `SKU-${index + 1}`, // PayPal requiere SKU
-          category: 'PHYSICAL_GOODS',
-        })),
-      }],
-      application_context: {
-        brand_name: '3D Print TFM',
-        landing_page: 'NO_PREFERENCE',
-        shipping_preference: 'SET_PROVIDED_ADDRESS', // Cambiado de NO_SHIPPING
-        user_action: 'PAY_NOW',
-        return_url: `${process.env.NEXTAUTH_URL}/checkout/success`,
-        cancel_url: `${process.env.NEXTAUTH_URL}/cart`,
-      },
-    }),
+    body: JSON.stringify(requestBody),
   });
 
   if (!response.ok) {
@@ -119,14 +150,30 @@ async function createPayPalOrder(
     } catch {
       errorData = { message: await response.text() };
     }
-    console.error('PayPal order creation error:', JSON.stringify(errorData, null, 2));
-    console.error('PayPal order data sent:', JSON.stringify({
-      reference_id: orderData.orderId,
-      total: adjustedTotal,
-      items_total: itemsTotal.toFixed(2),
-      item_count: orderData.items.length
-    }, null, 2));
-    throw new Error(`PayPal error: ${errorData.message || errorData.error_description || 'Failed to create order'}`);
+    
+    console.error('PayPal error response:', JSON.stringify(errorData, null, 2));
+    
+    // Traducir errores comunes de PayPal
+    let errorMessage = 'Error al crear el pedido de PayPal';
+    
+    if (errorData.details && errorData.details.length > 0) {
+      const detail = errorData.details[0];
+      if (detail.issue === 'ITEM_TOTAL_MISMATCH') {
+        errorMessage = 'El total de los items no coincide con el importe del pedido';
+      } else if (detail.issue === 'AMOUNT_MISMATCH') {
+        errorMessage = 'El importe total no es correcto';
+      } else if (detail.issue === 'INVALID_CURRENCY_CODE') {
+        errorMessage = 'Moneda no válida';
+      } else if (detail.issue === 'MISSING_REQUIRED_PARAMETER') {
+        errorMessage = `Falta el parámetro requerido: ${detail.field}`;
+      } else {
+        errorMessage = detail.description || errorData.message || 'Error en la validación del pedido';
+      }
+    } else if (errorData.message) {
+      errorMessage = errorData.message;
+    }
+    
+    throw new Error(errorMessage);
   }
 
   return response.json();
@@ -139,7 +186,7 @@ export async function POST(req: NextRequest) {
 
     if (!session?.user?.email) {
       return NextResponse.json(
-        { error: translateErrorMessage('No autenticado') },
+        { error: 'No autenticado' },
         { status: 401 }
       );
     }
@@ -150,7 +197,7 @@ export async function POST(req: NextRequest) {
 
     if (!orderId || !paymentId) {
       return NextResponse.json(
-        { error: translateErrorMessage('Missing required fields') },
+        { error: 'Faltan campos requeridos' },
         { status: 400 }
       );
     }
@@ -160,7 +207,7 @@ export async function POST(req: NextRequest) {
       where: { id: orderId },
       include: {
         user: {
-          select: { id: true, email: true },
+          select: { id: true, email: true, name: true },
         },
         items: {
           select: {
@@ -170,12 +217,13 @@ export async function POST(req: NextRequest) {
           },
         },
         payment: true,
+        address: true,
       },
     });
 
     if (!order) {
       return NextResponse.json(
-        { error: translateErrorMessage('Pedido not found') },
+        { error: 'Pedido no encontrado' },
         { status: 404 }
       );
     }
@@ -183,8 +231,16 @@ export async function POST(req: NextRequest) {
     // Verify order belongs to authenticated user
     if (order.user.email !== session.user.email) {
       return NextResponse.json(
-        { error: translateErrorMessage('No autorizado') },
+        { error: 'No autorizado' },
         { status: 403 }
+      );
+    }
+
+    // Verificar que hay items
+    if (!order.items || order.items.length === 0) {
+      return NextResponse.json(
+        { error: 'El pedido no tiene items' },
+        { status: 400 }
       );
     }
 
@@ -196,11 +252,19 @@ export async function POST(req: NextRequest) {
       orderId: order.id,
       orderNumber: order.orderNumber,
       total: Number(order.total),
+      shipping: Number(order.shipping),
       items: order.items.map(item => ({
         name: item.name,
         quantity: item.quantity,
         unitPrice: Number(item.price),
       })),
+      shippingAddress: {
+        name: order.shippingName || order.user.name || 'Cliente',
+        address: order.shippingAddress,
+        city: order.shippingCity,
+        postalCode: order.shippingPostalCode,
+        country: order.shippingCountry,
+      },
     });
 
     // 6. Update payment with paypalOrderId
@@ -225,7 +289,7 @@ export async function POST(req: NextRequest) {
     const paypalApprovalUrl = approvalLink?.href;
 
     if (!paypalApprovalUrl) {
-      throw new Error('No approval URL found in PayPal response');
+      throw new Error('No se encontró la URL de aprobación en la respuesta de PayPal');
     }
 
     // 8. Return success with approval URL
@@ -241,7 +305,7 @@ export async function POST(req: NextRequest) {
     const errorMessage = error instanceof Error ? error.message : 'Error interno del servidor';
 
     return NextResponse.json(
-      { error: translateErrorMessage(errorMessage) },
+      { error: errorMessage },
       { status: 500 }
     );
   }
