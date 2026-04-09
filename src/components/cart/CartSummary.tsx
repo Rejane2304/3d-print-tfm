@@ -6,7 +6,7 @@
 
 
 import { ShoppingCart, ArrowRight, Loader2, Tag } from 'lucide-react';
-import { CouponInput } from './CouponInput';
+import { CouponSelector } from './CouponSelector';
 
 interface CartSummaryProps {
   items: Array<{
@@ -81,7 +81,7 @@ export default function CartSummary({
                 <Tag className="h-4 w-4 text-indigo-600 flex-shrink-0" />
                 <span className="text-sm font-medium text-gray-700">Código de descuento</span>
               </div>
-              <CouponInput
+              <CouponSelector
                 onApply={onApplyCoupon}
                 onRemove={onRemoveCoupon || (() => {})}
                 appliedCoupon={appliedCoupon}

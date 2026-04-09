@@ -40,7 +40,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   // Get data from request body
   const body = await req.json();
-  const { shippingAddressId, paymentMethod = 'CARD', couponCode } = body;
+  const { shippingAddressId, paymentMethod = 'CARD', couponCode, cartItems: clientCartItems } = body;
 
   if (!shippingAddressId) {
     return NextResponse.json(

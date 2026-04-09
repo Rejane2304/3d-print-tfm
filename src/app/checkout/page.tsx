@@ -136,9 +136,37 @@ export default function CheckoutPage() {
       if (resCart.ok) {
         const data = await resCart.json();
         setCart(data.cart);
-        if (!data.cart?.items?.length) {
+        // Solo redirigir si realmente no hay items (tanto en API como en localStorage)
+        if (!data.cart?.items?.length && !localStorage.getItem('cart')) {
           router.push('/cart');
           return;
+        }
+        // Si hay items en localStorage, intentar migrarlos
+        const localCartData = localStorage.getItem('cart');
+        if (localCartData && JSON.parse(localCartData).length > 0) {
+          try {
+            // Migrar items del localStorage
+            const localItems = JSON.parse(localCartData);
+            for (const item of localItems) {
+              await fetch('/api/cart', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  productId: item.productId,
+                  quantity: item.quantity
+                }),
+              });
+            }
+            // Limpiar localStorage y recargar carrito
+            localStorage.removeItem('cart');
+            const refreshedCart = await fetch('/api/cart');
+            if (refreshedCart.ok) {
+              const refreshedData = await refreshedCart.json();
+              setCart(refreshedData.cart);
+            }
+          } catch (migrationError) {
+            console.error('Error migrando carrito:', migrationError);
+          }
         }
       }
     } catch (err) {
