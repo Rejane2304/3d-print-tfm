@@ -128,6 +128,10 @@ export default function MyOrdersPage() {
       }
 
       setRestoredMessage('Carrito restaurado correctamente');
+      
+      // Actualizar la lista de pedidos para eliminar el pedido restaurado
+      setOrders(prevOrders => prevOrders.filter(o => o.id !== orderId));
+      
       setTimeout(() => {
         router.push('/checkout');
       }, 1500);
