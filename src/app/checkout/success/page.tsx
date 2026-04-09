@@ -9,6 +9,7 @@ export const dynamic = 'force-dynamic';
 
 interface OrderData {
   orderNumber?: string;
+  numeroPedido?: string;
   total?: number;
   estado?: string;
   paymentMethod?: string;
@@ -161,7 +162,7 @@ function CheckoutSuccessContent() {
               <div className="space-y-2 text-sm sm:text-base">
                 <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
                   <span className="text-gray-600">Número de pedido:</span>
-                  <span className="font-medium">{pedido.orderNumber}</span>
+                  <span className="font-medium">{pedido.orderNumber || pedido.numeroPedido}</span>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
                   <span className="text-gray-600">Total:</span>
