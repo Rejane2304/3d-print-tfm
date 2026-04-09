@@ -22,7 +22,8 @@ import {
   FileText,
   Eye,
   Filter,
-  Calendar
+  Calendar,
+  ShoppingCart
 } from 'lucide-react';
 import { InvoiceNotAvailableModal } from '@/components/invoices/InvoiceNotAvailableModal';
 
@@ -72,6 +73,8 @@ export default function MyOrdersPage() {
   const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
   const [invoiceModalReason, setInvoiceModalReason] = useState<'not_completed' | 'not_generated' | 'payment_pending' | 'cancelled'>('not_generated');
   const [selectedOrderNumber, setSelectedOrderNumber] = useState<string | undefined>(undefined);
+  const [restoringOrder, setRestoringOrder] = useState<string | null>(null);
+  const [restoredMessage, setRestoredMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -107,6 +110,35 @@ export default function MyOrdersPage() {
   const filteredOrders = statusFilter
     ? orders.filter(o => o.estado === statusFilter)
     : orders;
+
+  // Contar pedidos cancelados
+  const cancelledOrders = orders.filter(o => o.estado === 'Cancelado');
+
+  const handleRestoreCart = async (orderId: string) => {
+    try {
+      setRestoringOrder(orderId);
+      const response = await fetch('/api/cart/restore-from-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al restaurar carrito');
+      }
+
+      setRestoredMessage('Carrito restaurado correctamente');
+      setTimeout(() => {
+        router.push('/checkout');
+      }, 1500);
+    } catch (err) {
+      console.error('Error restoring cart:', err);
+      setRestoredMessage('Error al restaurar carrito');
+    } finally {
+      setRestoringOrder(null);
+      setTimeout(() => setRestoredMessage(null), 3000);
+    }
+  };
 
   if (status === 'loading' || loading) {
     return (
@@ -188,6 +220,45 @@ export default function MyOrdersPage() {
             })}
           </div>
         </div>
+
+        {/* Pedidos cancelados - Banner informativo */}
+        {cancelledOrders.length > 0 && !statusFilter && (
+          <div className="mb-4 sm:mb-6 p-4 sm:p-5 bg-orange-50 border border-orange-200 rounded-lg">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+              <div className="flex-shrink-0">
+                <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                  <ShoppingCart className="h-5 w-5 text-orange-600" />
+                </div>
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-orange-900 text-sm sm:text-base">
+                  Tienes {cancelledOrders.length} {cancelledOrders.length === 1 ? 'pedido cancelado' : 'pedidos cancelados'}
+                </h3>
+                <p className="text-orange-700 text-xs sm:text-sm mt-0.5">
+                  Puedes restaurar el carrito de cualquier pedido cancelado para volver a intentar la compra.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Mensaje de restauración */}
+        {restoredMessage && (
+          <div className={`mb-4 sm:mb-6 p-3 sm:p-4 rounded-lg flex items-center gap-2 sm:gap-3 ${
+            restoredMessage.includes('Error') 
+              ? 'bg-red-50 border border-red-200' 
+              : 'bg-green-50 border border-green-200'
+          }`}>
+            {restoredMessage.includes('Error') ? (
+              <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-600 flex-shrink-0" />
+            ) : (
+              <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 flex-shrink-0" />
+            )}
+            <p className={`text-sm ${restoredMessage.includes('Error') ? 'text-red-700' : 'text-green-700'}`}>
+              {restoredMessage}
+            </p>
+          </div>
+        )}
 
         {/* Lista de pedidos */}
         {filteredOrders.length === 0 ? (
@@ -354,6 +425,27 @@ export default function MyOrdersPage() {
                           <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />
                           Entregado
                         </span>
+                      )}
+
+                      {/* Botón de restaurar carrito para pedidos cancelados */}
+                      {order.estado === 'Cancelado' && (
+                        <button
+                          onClick={() => handleRestoreCart(order.id)}
+                          disabled={restoringOrder === order.id}
+                          className="inline-flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-orange-600 hover:text-orange-800 font-medium disabled:opacity-50"
+                        >
+                          {restoringOrder === order.id ? (
+                            <>
+                              <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
+                              Restaurando...
+                            </>
+                          ) : (
+                            <>
+                              <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4" />
+                              Restaurar carrito
+                            </>
+                          )}
+                        </button>
                       )}
                     </div>
                   </div>
