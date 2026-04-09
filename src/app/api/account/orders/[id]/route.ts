@@ -94,12 +94,30 @@ export async function GET(
 
     // Transform to Spanish response format matching frontend expectations
     // Translate enums from English (DB) to Spanish (UI)
+    // Get coupon info if discount exists
+    let couponInfo = null;
+    if (pedido.couponId) {
+      const coupon = await prisma.coupon.findUnique({
+        where: { id: pedido.couponId },
+        select: { code: true, type: true }
+      });
+      if (coupon) {
+        couponInfo = {
+          code: coupon.code,
+          type: coupon.type === 'PERCENTAGE' ? 'Porcentaje' : 
+                coupon.type === 'FIXED' ? 'Monto Fijo' : 'Envío Gratis'
+        };
+      }
+    }
+    
     const pedidoTransformado = {
       id: pedido.id,
       numeroPedido: pedido.orderNumber,
       estado: translateOrderStatus(pedido.status),
       subtotal: Number(pedido.subtotal),
       envio: Number(pedido.shipping),
+      descuento: pedido.discount ? Number(pedido.discount) : null,
+      cupon: couponInfo,
       total: Number(pedido.total),
       createdAt: pedido.createdAt,
       updatedAt: pedido.updatedAt,

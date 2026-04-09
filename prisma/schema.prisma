@@ -211,6 +211,7 @@ model Order {
   cancelledAt           DateTime?
   cancelledBy           String?
   cancelReason          String?
+  couponId              String?
   movements             InventoryMovement[]
   invoice               Invoice?
   items                 OrderItem[]
@@ -218,6 +219,7 @@ model Order {
   address               Address?            @relation("ShippingAddress", fields: [shippingAddressId], references: [id])
   user                  User                @relation(fields: [userId], references: [id])
   payment               Payment?
+  coupon                Coupon?             @relation(fields: [couponId], references: [id])
 
   @@index([userId])
   @@index([status])
@@ -531,6 +533,7 @@ model Coupon {
   isActive       Boolean    @default(true)
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
+  orders         Order[]
 
   @@index([code])
   @@index([isActive])

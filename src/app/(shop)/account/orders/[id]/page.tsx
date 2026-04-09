@@ -31,6 +31,11 @@ interface OrderDetail {
   estado: string;
   subtotal: number;
   envio: number;
+  descuento?: number | null;
+  cupon?: {
+    code: string;
+    type: string;
+  } | null;
   total: number;
   createdAt: string;
   updatedAt: string;
@@ -328,6 +333,19 @@ export default function OrderDetailPage() {
                     <span className="text-gray-600">Envío</span>
                     <span>{Number(order.envio).toFixed(2)} €</span>
                   </div>
+                  {order.descuento && order.descuento > 0 && (
+                    <div className="flex justify-between text-sm text-green-600">
+                      <span className="flex items-center gap-1">
+                        Descuento
+                        {order.cupon && (
+                          <span className="text-xs bg-green-100 px-2 py-0.5 rounded">
+                            {order.cupon.code}
+                          </span>
+                        )}
+                      </span>
+                      <span>-{Number(order.descuento).toFixed(2)} €</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-base sm:text-lg font-semibold pt-2 border-t">
                     <span className="text-gray-900">Total</span>
                     <span className="text-indigo-600">{Number(order.total).toFixed(2)} €</span>
