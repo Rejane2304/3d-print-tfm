@@ -97,8 +97,10 @@ export default function CheckoutPage() {
   const [error, setError] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('CARD');
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [orderComplete, setOrderComplete] = useState(false);
-  const [orderData, setOrderData] = useState<{ orderId: string; orderNumber: string } | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [orderComplete, _setOrderComplete] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [orderData, _setOrderData] = useState<{ orderId: string; orderNumber: string } | null>(null);
 
   // Load initial data
   const loadData = useCallback(async () => {
@@ -167,7 +169,8 @@ export default function CheckoutPage() {
       setProcessing(true);
       setError(null);
 
-      const response = await fetch('/api/checkout', {
+      // Step 1: Create order in PENDING status
+      const checkoutResponse = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -176,27 +179,64 @@ export default function CheckoutPage() {
         }),
       });
 
-      const data = await response.json();
+      const checkoutData = await checkoutResponse.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Error al procesar el pedido');
+      if (!checkoutResponse.ok) {
+        throw new Error(checkoutData.error || 'Error al crear el pedido');
       }
 
-      // Order completed successfully
-      setOrderComplete(true);
-      setOrderData({
-        orderId: data.orderId,
-        orderNumber: data.orderNumber,
-      });
+      const { orderId, paymentId } = checkoutData;
 
-      // Clear local cart
-      setCart({ items: [], subtotal: 0 });
-      window.dispatchEvent(new Event('cartUpdated'));
+      // Step 2: Route to specific payment method
+      switch (paymentMethod) {
+        case 'CARD': {
+          // Stripe - Real payment
+          const stripeResponse = await fetch('/api/payments/stripe/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderId, paymentId }),
+          });
 
-      // Redirect to success page after 2 seconds
-      setTimeout(() => {
-        router.push(`/checkout/success?orderId=${data.orderId}`);
-      }, 2000);
+          const stripeData = await stripeResponse.json();
+
+          if (!stripeResponse.ok) {
+            throw new Error(stripeData.error || 'Error al iniciar pago con Stripe');
+          }
+
+          // Redirect to Stripe Checkout
+          window.location.href = stripeData.url;
+          return;
+        }
+
+        case 'PAYPAL': {
+          // PayPal - Real payment
+          const paypalResponse = await fetch('/api/payments/paypal/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderId, paymentId }),
+          });
+
+          const paypalData = await paypalResponse.json();
+
+          if (!paypalResponse.ok) {
+            throw new Error(paypalData.error || 'Error al iniciar pago con PayPal');
+          }
+
+          // Redirect to PayPal
+          window.location.href = paypalData.url;
+          return;
+        }
+
+        case 'BIZUM':
+        case 'TRANSFER': {
+          // Fake payments - Go to processing page
+          router.push(`/checkout/processing?orderId=${orderId}&paymentId=${paymentId}&method=${paymentMethod.toLowerCase()}`);
+          return;
+        }
+
+        default:
+          throw new Error('Método de pago no soportado');
+      }
 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');

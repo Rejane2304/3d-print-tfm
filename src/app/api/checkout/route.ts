@@ -173,11 +173,11 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
     // Create order and payment in a transaction
     const result = await prisma.$transaction(async (tx) => {
-      // 1. Create the order as CONFIRMED
+      // 1. Create the order as PENDING (payment will be processed separately)
       const order = await tx.order.create({
         data: {
           userId: user.id,
-          status: 'CONFIRMED',
+          status: 'PENDING',
           orderNumber,
           subtotal,
           shipping: shippingCost,
@@ -211,15 +211,15 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         },
       });
 
-      // 2. Create the payment as COMPLETED
-      await tx.payment.create({
+      // 2. Create the payment as PENDING (will be processed by frontend)
+      const payment = await tx.payment.create({
         data: {
           orderId: order.id,
           userId: user.id,
           amount: total,
           method: paymentMethod as 'CARD' | 'PAYPAL' | 'BIZUM' | 'TRANSFER',
-          status: 'COMPLETED',
-          processedAt: new Date(),
+          status: 'PENDING',
+          // processedAt will be set when payment is completed
         },
       });
 
@@ -231,7 +231,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         });
       }
 
-      // 4. Deduct stock from products
+      // 4. Deduct stock from products (reserve stock)
       for (const item of cartItems) {
         await tx.product.update({
           where: { id: item.productId },
@@ -248,25 +248,28 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         where: { cartId: cart.id },
       });
 
-      return order;
+      return { order, payment };
     });
 
     // Emit real-time event for new order
     await emitNewOrder({
-      orderId: result.id,
-      orderNumber: result.orderNumber,
-      total: Number(result.total),
+      orderId: result.order.id,
+      orderNumber: result.order.orderNumber,
+      total: Number(result.order.total),
       userName: user.name || user.email,
       timestamp: new Date().toISOString(),
     });
 
+    // Return order and payment IDs for frontend to handle payment processing
     return NextResponse.json({
       success: true,
-      orderId: result.id,
-      orderNumber: result.orderNumber,
+      orderId: result.order.id,
+      paymentId: result.payment.id,
+      orderNumber: result.order.orderNumber,
+      status: 'PENDING',
       paymentMethod: translatePaymentMethod(paymentMethod),
       discount: couponDiscount > 0 ? couponDiscount : undefined,
-      message: 'Pago completado exitosamente',
+      message: 'Pedido creado. Proceda al pago.',
     });
   } catch (error) {
     console.error('Error in checkout:', error);
