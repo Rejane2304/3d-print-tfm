@@ -78,7 +78,7 @@ export default function MyOrdersPage() {
   const [hiddenOrders, setHiddenOrders] = useState<Set<string>>(new Set());
 
   // Recalcular pedidos cancelados excluyendo los ocultos
-  const cancelledOrders = orders.filter(o => o.estado === 'Cancelado' && !hiddenOrders.has(o.id));
+  const cancelledOrders = orders.filter(o => o.estado === 'Cancelado');
 
   const handleRestoreCart = async (orderId: string) => {
     try {
