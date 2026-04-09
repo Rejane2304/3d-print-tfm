@@ -99,7 +99,7 @@ export default function EditarCuponPage() {
       const loadedCoupon = data.coupon;
       setCoupon(loadedCoupon);
       setFormData({
-        code: loadedCoupon.codigoRaw || loadedCoupon.codigo || '',
+        code: loadedCoupon.codigo || '',
         type: loadedCoupon.tipoRaw || 'PERCENTAGE',
         value: loadedCoupon.valorRaw || 0,
         minOrderAmount: loadedCoupon.minimoCompra ? String(loadedCoupon.minimoCompra) : '',
@@ -164,7 +164,7 @@ export default function EditarCuponPage() {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          code: formData.code.toUpperCase(),
+          // NO se envía el código - no es editable
           type: formData.type,
           value: formData.type === 'FREE_SHIPPING' ? 0 : Number(formData.value),
           minOrderAmount: formData.minOrderAmount ? Number(formData.minOrderAmount) : null,
@@ -338,18 +338,20 @@ export default function EditarCuponPage() {
                   <div className="space-y-4">
                     <div>
                       <label htmlFor="code" className="block text-sm font-medium text-gray-700 mb-1">
-                        Código del Cupón *
+                        Código del Cupón
                       </label>
                       <input
                         type="text"
                         id="code"
                         name="code"
                         value={formData.code}
-                        onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent uppercase"
-                        placeholder="Ej: VERANO2024"
-                        required
+                        disabled
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 uppercase cursor-not-allowed"
+                        title="El código del cupón no puede modificarse. Para cambiar el código, cree un nuevo cupón."
                       />
+                      <p className="text-xs text-gray-500 mt-1">
+                        El código no puede modificarse. Cree un nuevo cupón si necesita un código diferente.
+                      </p>
                     </div>
 
                     <div>

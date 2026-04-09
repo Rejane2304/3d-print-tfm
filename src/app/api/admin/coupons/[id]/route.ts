@@ -198,11 +198,11 @@ export async function PATCH(
       }
     }
 
-    // Actualizar cupón
+    // Actualizar cupón - NOTA: No se permite cambiar el código del cupón
     const coupon = await prisma.coupon.update({
       where: { id },
       data: {
-        ...(data.code && { code: data.code.toUpperCase() }),
+        // El código NO se actualiza - es inmutable
         ...(data.type && { type: data.type as CouponType }),
         ...(data.value !== undefined && { value: data.value }),
         ...(data.minOrderAmount !== undefined && { minOrderAmount: data.minOrderAmount }),
