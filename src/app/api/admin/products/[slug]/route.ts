@@ -22,23 +22,31 @@ import { unlink } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
 
+// Schema for image updates
+const imageUpdateSchema = z.object({
+  url: z.string().min(1),
+  isMain: z.boolean().default(false),
+});
+
 // Validation schema for update
+// Coerce converts strings to appropriate types
 const updateProductSchema = z.object({
   name: z.string().min(1).optional(),
   description: z.string().optional(),
   shortDescription: z.string().optional(),
-  price: z.number().positive().optional(),
-  previousPrice: z.number().optional().nullable(),
-  stock: z.number().int().min(0).optional(),
+  price: z.coerce.number().positive().optional(),
+  previousPrice: z.coerce.number().optional().nullable(),
+  stock: z.coerce.number().int().min(0).optional(),
   categoryId: z.string().uuid().optional(),
   material: z.nativeEnum(Material).optional(),
-  widthCm: z.number().optional().nullable(),
-  heightCm: z.number().optional().nullable(),
-  depthCm: z.number().optional().nullable(),
-  weight: z.number().optional().nullable(),
-  printTime: z.number().int().optional().nullable(),
+  widthCm: z.coerce.number().optional().nullable(),
+  heightCm: z.coerce.number().optional().nullable(),
+  depthCm: z.coerce.number().optional().nullable(),
+  weight: z.coerce.number().optional().nullable(),
+  printTime: z.coerce.number().int().optional().nullable(),
   isActive: z.boolean().optional(),
   isFeatured: z.boolean().optional(),
+  images: z.array(imageUpdateSchema).optional(),
 });
 
 // Helper to verify admin authentication
@@ -102,26 +110,27 @@ export async function GET(
     }
 
     // Return translated data for admin panel
+    // Use translation if available, otherwise use actual DB data
     const transformedProduct = {
       id: product.id,
       slug: product.slug,
-      name: translateProductName(product.slug),
-      description: translateProductDescription(product.slug),
-      shortDescription: translateProductShortDescription(product.slug),
-      price: Number(product.price),
-      previousPrice: product.previousPrice ? Number(product.previousPrice) : null,
+      nombre: translateProductName(product.slug) || product.name,
+      descripcion: translateProductDescription(product.slug) || product.description,
+      descripcionCorta: translateProductShortDescription(product.slug) || product.shortDescription,
+      precio: Number(product.price),
+      precioAnterior: product.previousPrice ? Number(product.previousPrice) : null,
       stock: product.stock,
       minStock: product.minStock,
       categoryId: product.categoryId,
-      category: product.category ? translateCategoryName(product.category.slug) : 'Sin categoría',
+      categoria: product.category ? translateCategoryName(product.category.slug) : 'Sin categoría',
       material: product.material,
-      widthCm: product.widthCm,
-      heightCm: product.heightCm,
-      depthCm: product.depthCm,
-      weight: product.weight,
-      printTime: product.printTime,
-      isActive: product.isActive,
-      isFeatured: product.isFeatured,
+      anchoCm: product.widthCm,
+      altoCm: product.heightCm,
+      profundidadCm: product.depthCm,
+      peso: product.weight,
+      tiempoImpresion: product.printTime,
+      activo: product.isActive,
+      destacado: product.isFeatured,
       images: product.images.map((img) => ({
         id: img.id,
         url: img.url,
@@ -179,20 +188,84 @@ export async function PUT(
           .replace(/(^-|-$)/g, '')
       : existingProduct.slug;
 
-    // Update product
-    const updated = await prisma.product.update({
-      where: { id: existingProduct.id },
-      data: {
-        ...data,
-        slug: newSlug,
+    // Update product and images in a transaction
+    const updated = await prisma.$transaction(async (tx) => {
+      // Update product data
+      const productUpdateData: any = {
+        name: data.name,
+        description: data.description,
+        shortDescription: data.shortDescription,
+        price: data.price,
         previousPrice: data.previousPrice ?? undefined,
+        stock: data.stock,
+        categoryId: data.categoryId,
+        material: data.material,
         widthCm: data.widthCm ?? undefined,
         heightCm: data.heightCm ?? undefined,
         depthCm: data.depthCm ?? undefined,
         weight: data.weight ?? undefined,
         printTime: data.printTime ?? undefined,
-      },
-      include: { images: true, category: true },
+        isActive: data.isActive,
+        isFeatured: data.isFeatured,
+        slug: newSlug,
+      };
+
+      const updatedProduct = await tx.product.update({
+        where: { id: existingProduct.id },
+        data: productUpdateData,
+      });
+
+      // Handle images update if provided
+      if (data.images) {
+        // Get current images
+        const currentImages = await tx.productImage.findMany({
+          where: { productId: existingProduct.id },
+        });
+
+        // Find images to delete (not in new list)
+        const newImageUrls = new Set(data.images.map((img: { url: string }) => img.url));
+        const imagesToDelete = currentImages.filter(
+          (img) => !newImageUrls.has(img.url)
+        );
+
+        // Delete removed images from filesystem
+        for (const img of imagesToDelete) {
+          try {
+            const filePath = path.join(process.cwd(), 'public', img.url);
+            if (existsSync(filePath)) {
+              await unlink(filePath);
+            }
+          } catch (err) {
+            console.warn('Error deleting old image file:', err);
+          }
+        }
+
+        // Delete all existing images from DB
+        await tx.productImage.deleteMany({
+          where: { productId: existingProduct.id },
+        });
+
+        // Create new images
+        for (let i = 0; i < data.images.length; i++) {
+          const img = data.images[i];
+          await tx.productImage.create({
+            data: {
+              productId: updatedProduct.id,
+              url: img.url,
+              filename: img.url.split('/').pop() || 'image.jpg',
+              isMain: img.isMain ?? (i === 0),
+              displayOrder: i,
+              altText: data.name || existingProduct.name,
+            },
+          });
+        }
+      }
+
+      // Return updated product with images
+      return tx.product.findUnique({
+        where: { id: updatedProduct.id },
+        include: { images: true, category: true },
+      });
     });
 
     return NextResponse.json({ success: true, product: updated });

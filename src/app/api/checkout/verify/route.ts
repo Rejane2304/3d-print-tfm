@@ -75,18 +75,24 @@ export async function GET(req: NextRequest) {
             }
           });
 
-          // Crear registro de pago
-          await prisma.payment.create({
-            data: {
-              orderId: order.id,
-              userId: order.userId,
-              amount: order.total,
-              status: 'COMPLETED',
-              method: 'CARD',
-              stripePaymentIntentId: stripeSession.payment_intent as string,
-              processedAt: new Date()
-            }
+          // Crear registro de pago (solo si no existe)
+          const existingPayment = await prisma.payment.findUnique({
+            where: { orderId: order.id }
           });
+          
+          if (!existingPayment) {
+            await prisma.payment.create({
+              data: {
+                orderId: order.id,
+                userId: order.userId,
+                amount: order.total,
+                status: 'COMPLETED',
+                method: 'CARD',
+                stripePaymentIntentId: stripeSession.payment_intent as string,
+                processedAt: new Date()
+              }
+            });
+          }
 
           // Vaciar carrito del usuario
           const user = await prisma.user.findUnique({

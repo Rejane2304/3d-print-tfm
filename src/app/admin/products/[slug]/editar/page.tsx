@@ -114,24 +114,25 @@ export default function EditarProductoPage() {
       
       if (data.success && data.producto) {
         const p = data.producto;
+        // API returns Spanish field names with actual DB data as fallback
         setFormData({
-          name: p.name || '',
+          name: p.nombre || '',
           slug: p.slug || '',
-          description: p.description || '',
-          shortDescription: p.shortDescription || '',
-          price: p.price?.toString() || '',
-          previousPrice: p.previousPrice?.toString() || '',
+          description: p.descripcion || '',
+          shortDescription: p.descripcionCorta || '',
+          price: p.precio?.toString() || '',
+          previousPrice: p.precioAnterior?.toString() || '',
           stock: p.stock?.toString() || '',
           minStock: p.minStock?.toString() || '5',
           categoryId: p.categoryId || '',
           material: p.material || 'PLA',
-          widthCm: p.widthCm?.toString() || '',
-          heightCm: p.heightCm?.toString() || '',
-          depthCm: p.depthCm?.toString() || '',
-          weight: p.weight?.toString() || '',
-          printTime: p.printTime?.toString() || '',
-          isActive: p.isActive !== false,
-          isFeatured: p.isFeatured === true,
+          widthCm: p.anchoCm?.toString() || '',
+          heightCm: p.altoCm?.toString() || '',
+          depthCm: p.profundidadCm?.toString() || '',
+          weight: p.peso?.toString() || '',
+          printTime: p.tiempoImpresion?.toString() || '',
+          isActive: p.activo !== false,
+          isFeatured: p.destacado === true,
         });
         // Load images from API
         const formattedImages = (p.images || []).map((img: { url: string; isMain?: boolean }) => ({
