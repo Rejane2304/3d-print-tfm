@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { z } from 'zod';
+import { couponTranslations } from '@/lib/i18n';
 
 const validateSchema = z.object({
   code: z.string().min(1, 'El código es obligatorio'),
@@ -19,9 +20,28 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const data = validateSchema.parse(body);
 
-    const coupon = await prisma.coupon.findUnique({
-      where: { code: data.code.toUpperCase() },
+    const searchCode = data.code.toUpperCase();
+    
+    // Primero buscar por código directo
+    let coupon = await prisma.coupon.findUnique({
+      where: { code: searchCode },
     });
+    
+    // Si no se encuentra, buscar en traducciones inversas
+    if (!coupon) {
+      // Buscar si el código proporcionado es una traducción española
+      const reverseTranslations: Record<string, string> = {};
+      for (const [eng, esp] of Object.entries(couponTranslations)) {
+        reverseTranslations[esp.toUpperCase()] = eng.toUpperCase();
+      }
+      
+      const originalCode = reverseTranslations[searchCode];
+      if (originalCode) {
+        coupon = await prisma.coupon.findUnique({
+          where: { code: originalCode },
+        });
+      }
+    }
 
     if (!coupon) {
       return NextResponse.json(

@@ -61,10 +61,27 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Buscar cupón
-    const coupon = await prisma.coupon.findUnique({
-      where: { code: data.code.toUpperCase() },
+    // Buscar cupón (directo o por traducción)
+    const searchCode = data.code.toUpperCase();
+    let coupon = await prisma.coupon.findUnique({
+      where: { code: searchCode },
     });
+    
+    // Si no se encuentra, buscar en traducciones inversas
+    if (!coupon) {
+      const { couponTranslations } = await import('@/lib/i18n');
+      const reverseTranslations: Record<string, string> = {};
+      for (const [eng, esp] of Object.entries(couponTranslations)) {
+        reverseTranslations[esp.toUpperCase()] = eng.toUpperCase();
+      }
+      
+      const originalCode = reverseTranslations[searchCode];
+      if (originalCode) {
+        coupon = await prisma.coupon.findUnique({
+          where: { code: originalCode },
+        });
+      }
+    }
 
     if (!coupon) {
       return NextResponse.json(

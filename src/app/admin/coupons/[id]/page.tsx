@@ -99,7 +99,7 @@ export default function EditarCuponPage() {
       const loadedCoupon = data.coupon;
       setCoupon(loadedCoupon);
       setFormData({
-        code: loadedCoupon.codigo || '',
+        code: loadedCoupon.codigoRaw || loadedCoupon.codigo || '',
         type: loadedCoupon.tipoRaw || 'PERCENTAGE',
         value: loadedCoupon.valorRaw || 0,
         minOrderAmount: loadedCoupon.minimoCompra ? String(loadedCoupon.minimoCompra) : '',
