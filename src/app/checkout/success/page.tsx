@@ -53,38 +53,21 @@ function CheckoutSuccessContent() {
     }
   }, []);
 
-  // Capturar pago de PayPal
-  const capturarPagoPayPal = useCallback(async (paypalOrderId: string) => {
+  const verificarPagoPayPal = useCallback(async (paypalOrderId: string, payerId: string) => {
     try {
-      // Primero obtener el orderId desde el paypalOrderId
-      const orderResponse = await fetch(`/api/paypal/find-order?paypalOrderId=${paypalOrderId}`);
-      if (!orderResponse.ok) {
-        throw new Error('No se encontró el pedido asociado a PayPal');
+      // Usar la misma API que Stripe - verifica y captura en un solo paso
+      const response = await fetch(`/api/paypal/verify?token=${paypalOrderId}&PayerID=${payerId}`);
+      if (response.ok) {
+        const data = await response.json();
+        return data.order;
       }
-      const { orderId } = await orderResponse.json();
-
-      // Capturar el pago
-      const captureResponse = await fetch('/api/paypal/capture-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ paypalOrderId, orderId }),
-      });
-
-      if (!captureResponse.ok) {
-        const errorData = await captureResponse.json();
-        throw new Error(errorData.error || 'Error al capturar pago de PayPal');
-      }
-
-      const captureData = await captureResponse.json();
-      
-      // Obtener datos del pedido actualizado
-      const orderData = await verificarPedidoPorId(orderId);
-      return orderData;
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Error verificando pago de PayPal');
     } catch (err) {
-      console.error('Error capturando pago PayPal:', err);
+      console.error('Error verificando pago PayPal:', err);
       throw err;
     }
-  }, [verificarPedidoPorId]);
+  }, []);
 
   const clearCart = useCallback(() => {
     localStorage.removeItem('cart');
@@ -106,19 +89,9 @@ function CheckoutSuccessContent() {
           // Stripe payment - verificar con session_id
           orderData = await verificarPagoStripe(sessionId);
         } else if (paypalToken && payerId) {
-          // PayPal payment - capturar primero
+          // PayPal payment - usar API similar a Stripe
           console.log('PayPal return detected:', { paypalToken, payerId });
-          try {
-            orderData = await capturarPagoPayPal(paypalToken);
-          } catch (captureErr) {
-            console.error('Error capturando PayPal:', captureErr);
-            // Si falla la captura, buscar el pedido en localStorage
-            const savedOrderId = localStorage.getItem('pendingPayPalOrderId');
-            if (savedOrderId) {
-              orderData = await verificarPedidoPorId(savedOrderId);
-              localStorage.removeItem('pendingPayPalOrderId');
-            }
-          }
+          orderData = await verificarPagoPayPal(paypalToken, payerId);
         } else if (orderId) {
           // Verificación por ID de pedido
           orderData = await verificarPedidoPorId(orderId);
