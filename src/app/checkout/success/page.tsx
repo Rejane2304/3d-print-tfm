@@ -105,12 +105,25 @@ function CheckoutSuccessContent() {
         if (sessionId) {
           // Stripe payment - verificar con session_id
           orderData = await verificarPagoStripe(sessionId);
+        } else if (paypalToken && payerId) {
+          // PayPal payment - capturar primero
+          console.log('PayPal return detected:', { paypalToken, payerId });
+          try {
+            orderData = await capturarPagoPayPal(paypalToken);
+          } catch (captureErr) {
+            console.error('Error capturando PayPal:', captureErr);
+            // Si falla la captura, buscar el pedido en localStorage
+            const savedOrderId = localStorage.getItem('pendingPayPalOrderId');
+            if (savedOrderId) {
+              orderData = await verificarPedidoPorId(savedOrderId);
+              localStorage.removeItem('pendingPayPalOrderId');
+            }
+          }
         } else if (orderId) {
           // Verificación por ID de pedido
           orderData = await verificarPedidoPorId(orderId);
         } else {
-          // Para PayPal u otros métodos, mostrar mensaje de confirmación
-          // El pedido ya fue creado, solo necesitamos mostrar éxito
+          setError('No se encontró información del pago');
           setLoading(false);
           return;
         }
@@ -121,12 +134,6 @@ function CheckoutSuccessContent() {
         }
       } catch (err: any) {
         console.error('Error en verificación de pago:', err);
-        // Para PayPal, no mostrar error - el pago se procesa de forma diferida
-        if (paypalToken && payerId) {
-          setLoading(false);
-          return;
-        }
-        // Para otros errores, mostrar mensaje amigable
         setError('Tu pedido ha sido registrado. Verifica el estado en "Mis Pedidos".');
       } finally {
         setLoading(false);
@@ -134,7 +141,7 @@ function CheckoutSuccessContent() {
     };
 
     verifyPayment();
-  }, [sessionId, orderId, paypalToken, payerId, verificarPagoStripe, verificarPedidoPorId, clearCart]);
+  }, [sessionId, orderId, paypalToken, payerId, verificarPagoStripe, verificarPedidoPorId, capturarPagoPayPal, clearCart]);
 
   if (loading) {
     return (
