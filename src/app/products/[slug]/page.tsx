@@ -224,14 +224,15 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
               </div>
             </div>
             
-            {/* Precio */}
+            {/* Precio con IVA incluido */}
             <div className="flex items-baseline gap-2 flex-wrap">
               <span className="text-3xl sm:text-4xl font-bold text-indigo-600">
-                {Number(product.price).toFixed(2)} €
+                {(Number(product.price) * 1.21).toFixed(2)} €
               </span>
+              <span className="text-sm text-gray-500">IVA incluido</span>
               {product.previousPrice && (
                 <span className="text-lg sm:text-xl text-gray-500 line-through">
-                  {Number(product.previousPrice).toFixed(2)} €
+                  {(Number(product.previousPrice) * 1.21).toFixed(2)} €
                 </span>
               )}
             </div>

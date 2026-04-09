@@ -1,52 +1,117 @@
-# Testing Guide - 3D Print TFM
+# Guía de Testing - 3D Print TFM
 
-## 🚀 Commands
+Guía completa para ejecutar y mantener tests del proyecto.
 
-### Run Tests
+---
+
+## 🚀 Comandos
+
+### Ejecutar Tests
 
 ```bash
-# All tests
+# Todos los tests
 npm test
 
-# Unit tests (validation, components)
+# Tests unitarios (validadores, utilidades)
 npm run test:unit
 
-# Integration tests (APIs, database) - Requires PostgreSQL
+# Tests de integración (APIs, BD) - Requiere PostgreSQL/Docker
 npm run test:integration
 
-# E2E tests (full flows) - Requires server running
+# Tests E2E (flujos completos) - Requiere servidor corriendo
 npm run test:e2e
 
-# With coverage
+# Con reporte de cobertura
 npm run test:coverage
-
-# With UI
-npm run test:ui
 ```
 
 ---
 
-## 🔧 Configuration
+## 🔧 Configuración
 
 ### Vitest (`vitest.config.ts`)
 
-```typescript
-import { defineConfig } from 'vitest/config'
-
-export default defineConfig({
-  test: {
-    environment: 'node',
-    globals: true,
-    include: ['tests/**/*.{test,spec}.ts'],
-    exclude: ['**/node_modules/**', '**/.next/**'],
-    testTimeout: 10000,
-  },
-})
-```
+Configuración para tests unitarios e integración.
 
 ### Playwright (`playwright.config.ts`)
 
-See `playwright.config.ts` for browser and device configuration.
+Configuración para tests E2E en múltiples navegadores y dispositivos.
+
+**Dispositivos soportados:**
+- Desktop Chrome/Firefox/Safari
+- Tablet iPad
+- Mobile iPhone
+- Desktop 4K
+
+---
+
+## 📁 Estructura de Tests
+
+```
+tests/
+├── unit/                       # Tests unitarios
+│   ├── validators/             # Validaciones Zod
+│   ├── security/               # Seguridad de contraseñas
+│   └── helpers/                # Utilidades
+├── integration/                # Tests de integración
+│   └── api/
+│       ├── auth.test.ts
+│       ├── products.test.ts
+│       ├── cart.test.ts
+│       ├── checkout.test.ts
+│       ├── orders.test.ts
+│       ├── invoices.test.ts
+│       └── ...
+└── e2e/                        # Tests E2E (Playwright)
+    ├── auth.spec.ts
+    ├── shop.spec.ts
+    └── admin.spec.ts
+```
+
+---
+
+## 🧪 Tipos de Tests
+
+### Tests Unitarios
+
+Lógica pura, sin dependencias externas.
+
+**Ejemplos:**
+- Validadores Zod (auth, productos, órdenes, direcciones)
+- Seguridad de contraseñas (fuerza, patrones)
+- Formateo de datos
+- Utilidades de cálculo
+
+### Tests de Integración
+
+APIs con base de datos real (testcontainers).
+
+**Ejemplos:**
+- CRUD de productos
+- Operaciones de carrito
+- Proceso de checkout
+- Generación de facturas
+
+### Tests E2E
+
+Flujos completos de usuario.
+
+**Ejemplos:**
+- Registro → Login → Compra
+- Panel admin: crear producto → editar → eliminar
+- Aplicación de cupones en checkout
+
+---
+
+## 📊 Métricas Actuales
+
+| Tipo | Tests | Cobertura |
+|------|-------|-----------|
+| Unitarios | 25+ | 80%+ |
+| Integración | 290+ | 80%+ |
+| E2E | 19 | 6 dispositivos |
+
+**Meta de cobertura:** 80%+
 
 ---
 
@@ -55,115 +120,75 @@ See `playwright.config.ts` for browser and device configuration.
 ### Error: "Database connection failed"
 
 ```bash
-# Check that Docker is running
-1. Add `await` where missing
+# Verificar que Docker Desktop está abierto
+docker ps
 
-# If not running:
-2. Verify DB cleanup between tests
-
-# Wait 5 seconds and retry
-sleep 5 && npm run test:integration
+# Si no está corriendo, iniciar Docker y reintentar
+npm run test:integration
 ```
 
-### Error: "Cannot find module '@/lib/db/prisma'"
+### Tests Intermitentes (Flaky)
 
-```bash
-# Check that path alias is configured
-# In vitest.config.ts you should have:
-resolve: {
-  alias: { '@': path.resolve(__dirname, './src') }
-}
-```
-
-### Flaky Tests
-
-If a test fails randomly:
-1. Add `await` where missing
-2. Check DB cleanup between tests
-3. Increase timeout if needed: `it('...', async () => { ... }, 15000)`
+Si un test falla aleatoriamente:
+1. Verificar `await` en operaciones asíncronas
+2. Verificar limpieza de BD entre tests
+3. Aumentar timeout si es necesario: `it('...', async () => {}, 15000)`
 
 ---
 
-## 📊 Coverage
+## ✅ Buenas Prácticas
 
-### Current Metrics (Goal)
+### ✅ Hacer
 
-| Type | Current Tests | Goal | Status |
-|------|---------------|------|--------|
-| Unit | ~25 | 60+ | 🟡 In progress |
-| Integration | ~290 | ~100 (focused) | 🟡 Consolidating |
-| E2E | 19 | 60+ | 🔴 Pending |
+- **Probar comportamiento**, no implementación
+- **Nombres descriptivos**: `it('should return 401 when unauthenticated')`
+- **Limpiar después**: usar `afterEach` para limpiar BD
+- **Datos predecibles**: usar IDs fijos, no aleatorios
 
-### View Coverage
+### ❌ Evitar
 
-```bash
-npm run test:coverage
-# Open coverage/index.html
-```
+- No hardcodear IDs de producción
+- No usar `setTimeout` arbitrario para "esperar"
+- No repetir mismos tests en 3 capas
 
 ---
 
-## 🎯 Best Practices
+## 📝 Agregar Nuevos Tests
 
-### ✅ Do
+### Paso 1: Decidir el Tipo
 
-- **Test behavior**, not implementation
-- **One assert per test** (ideally)
-- **Descriptive names**: `it('should return 401 when unauthenticated')`
-- **Clean up after**: use `afterEach` or `afterAll` to clean DB
-- **Predictable test data**: use fixed IDs, not random
+- **¿Es lógica pura?** → `tests/unit/`
+- **¿Usa BD o APIs?** → `tests/integration/`
+- **¿Es un flujo de usuario?** → `tests/e2e/`
 
-### ❌ Don't
-
-- Don't test internal implementation (changing implementation shouldn't break tests)
-- Don't use arbitrary `setTimeout` to "wait"
-- Don't hardcode production IDs
-- Don't leave tests with `expect(true).toBe(true)` (placeholders)
-- Don't repeat validation tests in 3 layers (unit, integration, E2E)
-
----
-
-## 📝 Adding New Tests
-
-### Step 1: Decide the Type
-
-- **Is it pure logic?** → `tests/unit/`
-- **Uses database or APIs?** → `tests/integration/`
-- **Is it a full user flow?** → `tests/e2e/`
-
-### Step 2: Create the File
+### Paso 2: Crear Archivo
 
 ```bash
-# Unit
-touch tests/unit/my-feature.test.ts
+# Unitario
+touch tests/unit/validators/my-feature.test.ts
 
-# Integration
+# Integración
 touch tests/integration/api/my-endpoint.test.ts
 
 # E2E
 touch tests/e2e/my-flow.spec.ts
 ```
 
-### Step 3: Write the Test
-
-See examples in "Conventions" above.
-
-### Step 4: Run and Verify
+### Paso 3: Verificar
 
 ```bash
-npm run test:unit -- tests/unit/my-feature.test.ts
+npm run test:unit -- tests/unit/validators/my-feature.test.ts
 ```
 
 ---
 
-## 📚 Resources
+## 📚 Recursos
 
 - [Vitest Docs](https://vitest.dev/)
 - [Playwright Docs](https://playwright.dev/)
 - [Testing Library](https://testing-library.com/)
-- [Prisma Testing Guide](https://www.prisma.io/docs/guides/testing)
+- [Prisma Testing](https://www.prisma.io/docs/guides/testing)
 
 ---
 
-**Last updated:** April 2, 2026  
-**Maintainer:** 3D Print TFM Team
+**Última actualización:** Abril 2025

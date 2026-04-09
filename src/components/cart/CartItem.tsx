@@ -39,7 +39,7 @@ export default function CartItem({
 }: CartItemProps) {
   const [quantity, setQuantity] = useState(item.quantity);
   const [modalOpen, setModalOpen] = useState(false);
-  const subtotal = item.unitPrice * item.quantity;
+  const subtotal = item.unitPrice * item.quantity * 1.21; // IVA incluido
 
   // Si el producto ya no existe (puede haber sido eliminado), mostrar mensaje
   if (!item.product) {
@@ -120,7 +120,7 @@ export default function CartItem({
             {product.name}
           </Link>
           <p className="text-sm text-gray-500 mt-1">
-            {item.unitPrice.toFixed(2)} € / unidad
+            {(item.unitPrice * 1.21).toFixed(2)} € / unidad (IVA incluido)
           </p>
         </div>
 

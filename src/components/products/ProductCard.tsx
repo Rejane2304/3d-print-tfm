@@ -7,6 +7,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Decimal } from '@prisma/client/runtime/library';
 import { StarRating } from '@/components/ui/StarRating';
+import { formatPriceWithVat } from '@/lib/pricing';
 
 interface Product {
   id: string;
@@ -30,7 +31,6 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const mainImage = product.images?.find(img => img.isMain) || product.images?.[0];
-  const price = Number(product.price);
   const hasRating = product._avgRating !== undefined && product._reviewCount !== undefined && product._reviewCount > 0;
 
   return (
@@ -115,7 +115,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 className="text-2xl font-bold text-gray-900"
                 data-testid="product-price"
               >
-                {price.toFixed(2)} €
+                {formatPriceWithVat(product.price)}
               </span>
             </div>
 
