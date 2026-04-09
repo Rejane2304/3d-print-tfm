@@ -37,15 +37,15 @@ const productSchema = z.object({
   description: z.string(),
   shortDescription: z.string().optional(),
   price: z.number().positive(),
-  previousPrice: z.number().optional(),
+  previousPrice: z.number().optional().nullable(),
   stock: z.number().int().min(0),
   categoryId: z.string().uuid(),
   material: z.nativeEnum(Material),
-  widthCm: z.number().optional(),
-  heightCm: z.number().optional(),
-  depthCm: z.number().optional(),
-  weight: z.number().optional(),
-  printTime: z.number().optional(),
+  widthCm: z.number().optional().nullable(),
+  heightCm: z.number().optional().nullable(),
+  depthCm: z.number().optional().nullable(),
+  weight: z.number().optional().nullable(),
+  printTime: z.number().int().optional().nullable(),
   isActive: z.boolean().default(true),
   isFeatured: z.boolean().default(false),
   images: z.array(imageSchema)
@@ -174,22 +174,22 @@ export async function POST(req: NextRequest) {
 
     // Crear producto e imágenes en una transacción
     const product = await prisma.$transaction(async (tx) => {
-      // Crear el producto
+      // Crear el producto - usar spread para construir el objeto dinámicamente
       const newProduct = await tx.product.create({
         data: {
           name: data.name,
           description: data.description,
           shortDescription: data.shortDescription,
           price: data.price,
-          previousPrice: data.previousPrice,
+          previousPrice: data.previousPrice ?? undefined,
           stock: data.stock,
           categoryId: data.categoryId,
           material: data.material,
-          widthCm: data.widthCm,
-          heightCm: data.heightCm,
-          depthCm: data.depthCm,
-          weight: data.weight,
-          printTime: data.printTime,
+          widthCm: data.widthCm ?? undefined,
+          heightCm: data.heightCm ?? undefined,
+          depthCm: data.depthCm ?? undefined,
+          weight: data.weight ?? undefined,
+          printTime: data.printTime ?? undefined,
           isActive: data.isActive,
           isFeatured: data.isFeatured,
           slug,

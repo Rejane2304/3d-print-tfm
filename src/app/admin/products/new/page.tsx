@@ -185,18 +185,37 @@ export default function NuevoProductoPage() {
     setError(null);
 
     try {
+      // Preparar datos: convertir strings vacíos a undefined para campos opcionales
+      const optionalNumberFields = ['widthCm', 'heightCm', 'depthCm', 'weight', 'previousPrice'];
+      const payload: Record<string, unknown> = {
+        ...formData,
+        price: parseFloat(formData.price),
+        stock: Number.parseInt(formData.stock) || 0,
+        minStock: Number.parseInt(formData.minStock) || 5,
+        images,
+      };
+
+      // Convertir campos opcionales vacíos a undefined
+      optionalNumberFields.forEach((field) => {
+        const value = formData[field as keyof typeof formData];
+        if (value === '' || value === null || value === undefined) {
+          payload[field] = undefined;
+        } else {
+          payload[field] = parseFloat(value as string);
+        }
+      });
+
+      // printTime es opcional pero entero
+      if (formData.printTime) {
+        payload.printTime = Number.parseInt(formData.printTime);
+      } else {
+        payload.printTime = undefined;
+      }
+
       const response = await fetch('/api/admin/products', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          price: parseFloat(formData.price),
-          previousPrice: formData.previousPrice ? parseFloat(formData.previousPrice) : null,
-          stock: Number.parseInt(formData.stock) || 0,
-          minStock: Number.parseInt(formData.minStock) || 5,
-          printTime: formData.printTime ? Number.parseInt(formData.printTime) : null,
-          images,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
