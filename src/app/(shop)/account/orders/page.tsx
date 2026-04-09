@@ -29,7 +29,7 @@ import { InvoiceNotAvailableModal } from '@/components/invoices/InvoiceNotAvaila
 
 interface Order {
   id: string;
-  orderNumber: string;
+  numeroPedido: string;
   estado: string;
   total: number;
   createdAt: string;
@@ -45,7 +45,7 @@ interface Order {
   }>;
   factura?: {
     id: string;
-    invoiceNumber: string;
+    numeroFactura: string;
     anulada: boolean;
   };
   pago?: {
@@ -110,9 +110,11 @@ export default function MyOrdersPage() {
     }
   };
 
+  // Convert hiddenOrders Set to Array for compatibility
+  const hiddenOrdersArray = Array.from(hiddenOrders);
   const filteredOrders = statusFilter
-    ? orders.filter(o => o.estado === statusFilter && !hiddenOrders.has(o.id))
-    : orders.filter(o => !hiddenOrders.has(o.id));
+    ? orders.filter(o => o.estado === statusFilter && !hiddenOrdersArray.includes(o.id))
+    : orders.filter(o => !hiddenOrdersArray.includes(o.id));
 
   if (status === 'loading' || loading) {
     return (
@@ -291,7 +293,7 @@ export default function MyOrdersPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex flex-wrap items-center gap-2 mb-1">
                             <span className="text-base sm:text-lg font-semibold text-gray-900">
-                              {order.orderNumber}
+                              {order.numeroPedido}
                             </span>
                             <span className={`px-2 py-0.5 rounded-full text-xs font-medium border flex items-center gap-1 ${statusConfig.color}`}>
                               <StatusIcon className="h-3 w-3" />
@@ -371,7 +373,7 @@ export default function MyOrdersPage() {
                       ) : (
                         <button
                           onClick={() => {
-                            setSelectedOrderNumber(order.orderNumber);
+                            setSelectedOrderNumber(order.numeroPedido);
                             if (order.estado === 'Cancelado') {
                               setInvoiceModalReason('cancelled');
                             } else if (order.estado !== 'Entregado') {
