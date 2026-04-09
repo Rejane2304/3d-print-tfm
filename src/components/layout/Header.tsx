@@ -38,6 +38,7 @@ export default function Header() {
   const { data: session, status } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [adminMenuOpen, setAdminMenuOpen] = useState(false); // Submenu for admin on mobile
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   const isAuthenticated = status === 'authenticated';
@@ -467,15 +468,133 @@ export default function Header() {
                   </Link>
                 </>
               )}
+              {/* Mobile Admin Submenu */}
               {isAdmin && (
-                <Link
-                  href="/admin/dashboard"
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 min-h-[48px] transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <LayoutDashboard className="h-5 w-5 flex-shrink-0" />
-                  <span className="font-medium">Panel Admin</span>
-                </Link>
+                <div className="space-y-1">
+                  {/* Admin Menu Toggle Button */}
+                  <button
+                    onClick={() => setAdminMenuOpen(!adminMenuOpen)}
+                    className="flex w-full items-center justify-between gap-3 px-4 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 min-h-[48px] transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <LayoutDashboard className="h-5 w-5 flex-shrink-0" />
+                      <span className="font-medium">Panel Admin</span>
+                    </div>
+                    <ChevronDown 
+                      className={`h-5 w-5 flex-shrink-0 transition-transform duration-200 ${adminMenuOpen ? 'rotate-180' : ''}`}
+                    />
+                  </button>
+                  
+                  {/* Admin Submenu - Scrollable */}
+                  {adminMenuOpen && (
+                    <div className="ml-4 pl-4 border-l-2 border-indigo-200 space-y-1 max-h-[60vh] overflow-y-auto">
+                      <Link
+                        href="/admin/dashboard"
+                        className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-h-[44px] transition-colors"
+                        onClick={() => { setMobileMenuOpen(false); setAdminMenuOpen(false); }}
+                      >
+                        <LayoutDashboard className="h-4 w-4 flex-shrink-0" />
+                        <span className="text-sm">Dashboard</span>
+                      </Link>
+                      <Link
+                        href="/admin/clients"
+                        className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-h-[44px] transition-colors"
+                        onClick={() => { setMobileMenuOpen(false); setAdminMenuOpen(false); }}
+                      >
+                        <Users className="h-4 w-4 flex-shrink-0" />
+                        <span className="text-sm">Clientes</span>
+                      </Link>
+                      <Link
+                        href="/admin/orders"
+                        className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-h-[44px] transition-colors"
+                        onClick={() => { setMobileMenuOpen(false); setAdminMenuOpen(false); }}
+                      >
+                        <ClipboardList className="h-4 w-4 flex-shrink-0" />
+                        <span className="text-sm">Pedidos</span>
+                      </Link>
+                      <Link
+                        href="/admin/products"
+                        className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-h-[44px] transition-colors"
+                        onClick={() => { setMobileMenuOpen(false); setAdminMenuOpen(false); }}
+                      >
+                        <Package className="h-4 w-4 flex-shrink-0" />
+                        <span className="text-sm">Productos</span>
+                      </Link>
+                      <Link
+                        href="/admin/inventory"
+                        className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-h-[44px] transition-colors"
+                        onClick={() => { setMobileMenuOpen(false); setAdminMenuOpen(false); }}
+                      >
+                        <Warehouse className="h-4 w-4 flex-shrink-0" />
+                        <span className="text-sm">Inventario</span>
+                      </Link>
+                      <Link
+                        href="/admin/invoices"
+                        className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-h-[44px] transition-colors"
+                        onClick={() => { setMobileMenuOpen(false); setAdminMenuOpen(false); }}
+                      >
+                        <FileText className="h-4 w-4 flex-shrink-0" />
+                        <span className="text-sm">Facturas</span>
+                      </Link>
+                      <Link
+                        href="/admin/alerts"
+                        className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-h-[44px] transition-colors"
+                        onClick={() => { setMobileMenuOpen(false); setAdminMenuOpen(false); }}
+                      >
+                        <Bell className="h-4 w-4 flex-shrink-0" />
+                        <span className="text-sm">Alertas</span>
+                      </Link>
+                      <Link
+                        href="/admin/categories"
+                        className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-h-[44px] transition-colors"
+                        onClick={() => { setMobileMenuOpen(false); setAdminMenuOpen(false); }}
+                      >
+                        <Folder className="h-4 w-4 flex-shrink-0" />
+                        <span className="text-sm">Categorías</span>
+                      </Link>
+                      <Link
+                        href="/admin/coupons"
+                        className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-h-[44px] transition-colors"
+                        onClick={() => { setMobileMenuOpen(false); setAdminMenuOpen(false); }}
+                      >
+                        <Ticket className="h-4 w-4 flex-shrink-0" />
+                        <span className="text-sm">Cupones</span>
+                      </Link>
+                      <Link
+                        href="/admin/faqs"
+                        className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-h-[44px] transition-colors"
+                        onClick={() => { setMobileMenuOpen(false); setAdminMenuOpen(false); }}
+                      >
+                        <HelpCircle className="h-4 w-4 flex-shrink-0" />
+                        <span className="text-sm">FAQs</span>
+                      </Link>
+                      <Link
+                        href="/admin/reviews"
+                        className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-h-[44px] transition-colors"
+                        onClick={() => { setMobileMenuOpen(false); setAdminMenuOpen(false); }}
+                      >
+                        <Star className="h-4 w-4 flex-shrink-0" />
+                        <span className="text-sm">Reseñas</span>
+                      </Link>
+                      <Link
+                        href="/admin/shipping"
+                        className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-h-[44px] transition-colors"
+                        onClick={() => { setMobileMenuOpen(false); setAdminMenuOpen(false); }}
+                      >
+                        <Truck className="h-4 w-4 flex-shrink-0" />
+                        <span className="text-sm">Envíos</span>
+                      </Link>
+                      <Link
+                        href="/admin/site-config"
+                        className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-h-[44px] transition-colors"
+                        onClick={() => { setMobileMenuOpen(false); setAdminMenuOpen(false); }}
+                      >
+                        <Settings className="h-4 w-4 flex-shrink-0" />
+                        <span className="text-sm">Configuración</span>
+                      </Link>
+                    </div>
+                  )}
+                </div>
               )}
               {isAuthenticated && (
                 <>
