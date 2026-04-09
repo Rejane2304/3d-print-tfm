@@ -121,9 +121,12 @@ function CheckoutSuccessContent() {
           setPedido(orderData);
           clearCart();
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error en verificación de pago:', err);
-        setError('Error al verificar el pago. Por favor, contacta con soporte.');
+        // Mostrar el error real para debugging
+        const errorMessage = err?.message || 'Error desconocido';
+        console.log('URL params:', { sessionId, orderId, paypalToken, payerId });
+        setError(`Error: ${errorMessage}. Si el pago fue procesado, verifica en Mis Pedidos.`);
       } finally {
         setLoading(false);
       }
