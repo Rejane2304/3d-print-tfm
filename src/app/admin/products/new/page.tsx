@@ -44,7 +44,8 @@ export default function NuevoProductoPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [images, setImages] = useState<{ url: string; isMain: boolean }[]>([]);
+  // Almacena tanto la URL de preview como el archivo para subir luego
+  const [images, setImages] = useState<{ url: string; isMain: boolean; file?: File }[]>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
 
   // Form state - all fields from Product schema
@@ -127,15 +128,12 @@ export default function NuevoProductoPage() {
 
     setUploadingImage(true);
     try {
-      // Create temporary URL for preview
+      // Crear URL temporal para preview
       const tempUrl = URL.createObjectURL(file);
-      setImages(prev => [...prev, { url: tempUrl, isMain: prev.length === 0 }]);
-      
-      // Aquí se subiría al servidor en producción
-      // Por ahora usamos la URL temporal
+      setImages(prev => [...prev, { url: tempUrl, isMain: prev.length === 0, file }]);
     } catch (err) {
       console.error('Error uploading image:', err);
-      alert('Error al subir imagen. Intente nuevamente.');
+      alert('Error al preparar imagen. Intente nuevamente.');
     } finally {
       setUploadingImage(false);
     }
@@ -185,14 +183,50 @@ export default function NuevoProductoPage() {
     setError(null);
 
     try {
-      // Preparar datos: convertir strings vacíos a undefined para campos opcionales
+      // Primero: subir las imágenes que tienen archivo
+      const uploadedImages: { url: string; isMain: boolean }[] = [];
+      
+      for (const img of images) {
+        if (img.file) {
+          // Subir archivo a la API
+          const reader = new FileReader();
+          const base64Promise = new Promise<string>((resolve) => {
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(img.file!);
+          });
+          const base64 = await base64Promise;
+
+          const uploadResponse = await fetch('/api/admin/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              image: base64,
+              filename: img.file.name,
+              slug: formData.slug,
+            }),
+          });
+
+          if (!uploadResponse.ok) {
+            const uploadData = await uploadResponse.json();
+            throw new Error(uploadData.error || 'Error al subir imagen');
+          }
+
+          const uploadData = await uploadResponse.json();
+          uploadedImages.push({ url: uploadData.url, isMain: img.isMain });
+        } else {
+          // Ya es una URL permanente (ej: agregada manualmente)
+          uploadedImages.push({ url: img.url, isMain: img.isMain });
+        }
+      }
+
+      // Preparar datos del producto
       const optionalNumberFields = ['widthCm', 'heightCm', 'depthCm', 'weight', 'previousPrice'];
       const payload: Record<string, unknown> = {
         ...formData,
         price: parseFloat(formData.price),
         stock: Number.parseInt(formData.stock) || 0,
         minStock: Number.parseInt(formData.minStock) || 5,
-        images,
+        images: uploadedImages,
       };
 
       // Convertir campos opcionales vacíos a undefined
