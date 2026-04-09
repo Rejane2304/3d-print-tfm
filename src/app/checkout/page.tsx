@@ -95,6 +95,9 @@ export default function CheckoutPage() {
   const [cart, setCart] = useState<{ items: CartItem[]; subtotal: number } | null>(null);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showTestDataModal, setShowTestDataModal] = useState(false);
+  const [externalPaymentUrl, setExternalPaymentUrl] = useState<string | null>(null);
+  const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('CARD');
   const [showConfirmation, setShowConfirmation] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -231,8 +234,11 @@ export default function CheckoutPage() {
             throw new Error(stripeData.error || 'Error al iniciar pago con Stripe');
           }
 
-          // Redirect to Stripe Checkout
-          window.location.href = stripeData.url;
+          // Abrir Stripe en nueva ventana y mostrar datos de prueba
+          window.open(stripeData.url, '_blank');
+          setExternalPaymentUrl(stripeData.url);
+          setPendingOrderId(orderId);
+          setShowTestDataModal(true);
           return;
         }
 
@@ -250,8 +256,11 @@ export default function CheckoutPage() {
             throw new Error(paypalData.error || 'Error al iniciar pago con PayPal');
           }
 
-          // Redirect to PayPal
-          window.location.href = paypalData.url;
+          // Abrir PayPal en nueva ventana y mostrar datos de prueba
+          window.open(paypalData.url, '_blank');
+          setExternalPaymentUrl(paypalData.url);
+          setPendingOrderId(orderId);
+          setShowTestDataModal(true);
           return;
         }
 
@@ -613,6 +622,77 @@ export default function CheckoutPage() {
                     >
                       Cancelar
                     </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Modal de Datos de Prueba - Visible cuando se abre Stripe/PayPal */}
+              {showTestDataModal && (
+                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                  <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
+                    <div className="text-center mb-6">
+                      <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+                        <svg className="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">
+                        Ventana de pago abierta
+                      </h3>
+                      <p className="text-gray-600">
+                        Completa el pago en la ventana emergente. Usa estos datos de prueba:
+                      </p>
+                    </div>
+
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                      {paymentMethod === 'CARD' && (
+                        <div className="text-center">
+                          <p className="text-sm text-gray-600 mb-2">💳 Tarjeta de prueba (Stripe)</p>
+                          <div className="space-y-1 font-mono text-sm">
+                            <p className="text-blue-700 font-semibold text-lg">4242 4242 4242 4242</p>
+                            <p className="text-gray-600">Expira: <span className="font-semibold">12/25</span> | CVC: <span className="font-semibold">123</span></p>
+                          </div>
+                        </div>
+                      )}
+                      {paymentMethod === 'PAYPAL' && (
+                        <div className="text-center">
+                          <p className="text-sm text-gray-600 mb-2">💰 Cuenta PayPal Sandbox</p>
+                          <div className="space-y-1 text-sm">
+                            <p className="font-mono text-blue-700 font-semibold break-all">sb-rb3ao50452979@personal.example.com</p>
+                            <p className="font-mono text-gray-700">Password: <span className="font-semibold">Q+7&gt;jQ^8</span></p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-3">
+                      <button
+                        onClick={() => {
+                          if (externalPaymentUrl) {
+                            window.open(externalPaymentUrl, '_blank');
+                          }
+                        }}
+                        className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                      >
+                        🔄 Reabrir ventana de pago
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setShowTestDataModal(false);
+                          if (pendingOrderId) {
+                            router.push(`/account/orders`);
+                          }
+                        }}
+                        className="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+                      >
+                        ✓ Ya completé el pago - Ver mis pedidos
+                      </button>
+                    </div>
+
+                    <p className="text-xs text-gray-500 text-center mt-4">
+                      Si cierras esta ventana, puedes volver a abrir el pago desde tus pedidos
+                    </p>
                   </div>
                 </div>
               )}
