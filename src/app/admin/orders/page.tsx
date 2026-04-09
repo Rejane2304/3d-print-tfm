@@ -125,6 +125,15 @@ export default function AdminOrdersPage() {
 
   const columns: Column<Order>[] = [
     {
+      key: 'orderNumber',
+      header: 'Nº Pedido',
+      sortable: true,
+      className: 'font-medium text-gray-900',
+      render: (value) => (
+        <span className="text-sm font-mono font-semibold text-indigo-600">{value as string}</span>
+      ),
+    },
+    {
       key: 'usuario',
       header: 'Cliente',
       className: '',
