@@ -98,12 +98,12 @@ export default function ProductImageGallery({ images, productName }: ProductImag
       {/* Thumbnails - Horizontal scroll on mobile */}
       {images.length > 1 && (
         <div className="overflow-x-auto pb-2 -mx-2 px-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-          <div className="flex gap-2 sm:grid sm:grid-cols-4 sm:gap-3 min-w-min">
+          <div className="flex gap-3 sm:grid sm:grid-cols-4 sm:gap-4 min-w-min">
             {images.map((image, index) => (
               <button
                 key={image.id}
                 onClick={() => setSelectedIndex(index)}
-                className={`relative flex-shrink-0 w-16 h-12 sm:w-full sm:aspect-[4/3] bg-gray-100 overflow-hidden transition-all rounded-lg ${
+                className={`relative flex-shrink-0 w-24 h-20 sm:w-full sm:aspect-[4/3] bg-gray-100 overflow-hidden transition-all rounded-lg ${
                   selectedIndex === index 
                     ? 'ring-2 ring-indigo-600 ring-offset-2' 
                     : 'hover:ring-2 hover:ring-indigo-400 hover:ring-offset-2'
@@ -115,7 +115,7 @@ export default function ProductImageGallery({ images, productName }: ProductImag
                   src={image.url}
                   alt={image.altText || `${productName} - imagen ${index + 1}`}
                   fill
-                  sizes="(max-width: 640px) 64px, (max-width: 768px) 25vw, (max-width: 1200px) 15vw, 12vw"
+                  sizes="(max-width: 640px) 96px, (max-width: 768px) 25vw, (max-width: 1200px) 15vw, 12vw"
                   className="object-contain bg-gray-50"
                 />
               </button>
