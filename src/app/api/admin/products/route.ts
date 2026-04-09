@@ -22,11 +22,15 @@ import {
 const imageSchema = z.object({
   url: z.string().min(1, 'La URL de la imagen es obligatoria').refine(
     (url) => {
+      // Permitir URLs blob: temporales (para preview) o URLs con extensión válida
+      if (url.startsWith('blob:') || url.startsWith('data:')) {
+        return true;
+      }
       const validExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
       const lowercaseUrl = url.toLowerCase();
       return validExtensions.some(ext => lowercaseUrl.endsWith(ext));
     },
-    { message: 'La URL debe terminar en .jpg, .jpeg, .png, .webp o .gif' }
+    { message: 'La URL debe terminar en .jpg, .jpeg, .png, .webp o .gif o ser una URL temporal válida' }
   ),
   isMain: z.boolean().default(false),
 });
