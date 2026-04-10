@@ -8,6 +8,30 @@ import { Decimal } from "@prisma/client/runtime/library";
 const DEFAULT_VAT_RATE = 0.21; // 21% IVA en España
 
 /**
+ * Format price WITHOUT VAT for display in product cards
+ * Shows the base price as stored in database
+ */
+export function formatPrice(
+  price: number | string | Decimal | undefined,
+  options: { showSymbol?: boolean; decimals?: number } = {},
+): string {
+  const { showSymbol = true, decimals = 2 } = options;
+  if (price === undefined || price === null) return showSymbol ? "0 €" : "0";
+
+  const numPrice =
+    price instanceof Decimal
+      ? price.toNumber()
+      : typeof price === "string"
+        ? parseFloat(price)
+        : price;
+
+  if (isNaN(numPrice)) return showSymbol ? "0 €" : "0";
+
+  const formatted = numPrice.toFixed(decimals);
+  return showSymbol ? `${formatted} €` : formatted;
+}
+
+/**
  * Add VAT to a price (use this for display purposes)
  * When storing in DB, prices are without VAT
  * When displaying to customers, prices include VAT

@@ -7,7 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Decimal } from "@prisma/client/runtime/library";
 import { StarRating } from "@/components/ui/StarRating";
-import { formatPriceWithVat } from "@/lib/pricing";
+import { formatPrice } from "@/lib/pricing";
 
 interface Product {
   id: string;
@@ -123,7 +123,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 className="text-2xl font-bold text-gray-900"
                 data-testid="product-price"
               >
-                {formatPriceWithVat(product.price)}
+                {formatPrice(product.price)}
               </span>
             </div>
 
