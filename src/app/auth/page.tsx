@@ -366,7 +366,7 @@ function AuthContent() {
                   : "opacity-0 translate-x-10 absolute pointer-events-none"
               }`}
             >
-              <form onSubmit={handleLogin} className="space-y-5">
+              <form onSubmit={handleLogin} data-testid="login-form" className="space-y-5">
                 {loginError && (
                   <div
                     data-testid="login-error"

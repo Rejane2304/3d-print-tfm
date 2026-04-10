@@ -2,10 +2,10 @@
 /**
  * ZERO TOLERANCE CODE CHECK
  * Script de monitoreo en tiempo real para detectar TODOS los errores
- * 
+
  * REGLA DE TOLERANCIA CERO:
  * - 0 errores de TypeScript
- * - 0 errores de ESLint  
+ * - 0 errores de ESLint
  * - 0 errores de SonarQube
  * - 0 advertencias (warnings)
  * - 0 archivos sin formato correcto
@@ -13,7 +13,7 @@
  * - 0 variables no usadas
  * - 0 funciones vacías
  * - 0 tipos 'any' implícitos
- * 
+
  * Cualquier error detiene el commit.
  */
 
