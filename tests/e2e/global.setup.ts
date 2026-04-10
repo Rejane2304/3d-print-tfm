@@ -251,6 +251,107 @@ async function createSampleProducts(): Promise<void> {
 }
 
 /**
+ * Create sample orders for admin tests
+ * Creates orders with different statuses including DELIVERED for invoice tests
+ */
+async function createSampleOrders(): Promise<void> {
+  console.log('📋 Creating sample orders...');
+
+  const existingCount = await prisma.order.count();
+  if (existingCount > 0) {
+    console.log('  ℹ️ Orders already exist, skipping');
+    return;
+  }
+
+  // Get test users
+  const customer = await prisma.user.findUnique({
+    where: { email: 'juan@example.com' },
+  });
+
+  const admin = await prisma.user.findUnique({
+    where: { email: 'admin@3dprint.com' },
+  });
+
+  if (!customer || !admin) {
+    console.log('  ⚠️ Test users not found, skipping order creation');
+    return;
+  }
+
+  // Get a product for the order
+  const product = await prisma.product.findFirst();
+  if (!product) {
+    console.log('  ⚠️ No products found, skipping order creation');
+    return;
+  }
+
+  // Create a DELIVERED order (for invoice generation test)
+  const deliveredOrder = await prisma.order.create({
+    data: {
+      userId: customer.id,
+      orderNumber: 'ORD-2024-001',
+      status: 'DELIVERED',
+      subtotal: 24.99,
+      shipping: 5.99,
+      total: 36.23, // 24.99 * 1.21 + 5.99
+      shippingName: customer.name,
+      shippingPhone: '+34 600 123 456',
+      shippingAddress: 'Calle Mayor 123',
+      shippingPostalCode: '28001',
+      shippingCity: 'Madrid',
+      shippingProvince: 'Madrid',
+      shippingCountry: 'Spain',
+      paymentMethod: 'CARD',
+      items: {
+        create: {
+          productId: product.id,
+          name: product.name,
+          price: 24.99,
+          quantity: 1,
+          subtotal: 24.99,
+          category: 'Decoración',
+          material: 'PLA',
+        },
+      },
+    },
+  });
+  console.log(`  ✓ DELIVERED order: ${deliveredOrder.orderNumber}`);
+
+  // Create a CONFIRMED order (for status update test)
+  const confirmedOrder = await prisma.order.create({
+    data: {
+      userId: customer.id,
+      orderNumber: 'ORD-2024-002',
+      status: 'CONFIRMED',
+      subtotal: 18.50,
+      shipping: 5.99,
+      total: 28.38, // 18.50 * 1.21 + 5.99
+      shippingName: customer.name,
+      shippingPhone: '+34 600 123 456',
+      shippingAddress: 'Calle Mayor 123',
+      shippingPostalCode: '28001',
+      shippingCity: 'Madrid',
+      shippingProvince: 'Madrid',
+      shippingCountry: 'Spain',
+      paymentMethod: 'PAYPAL',
+      items: {
+        create: {
+          productId: product.id,
+          name: product.name,
+          price: 18.50,
+          quantity: 1,
+          subtotal: 18.50,
+          category: 'Decoración',
+          material: 'PLA',
+        },
+      },
+    },
+  });
+  console.log(`  ✓ CONFIRMED order: ${confirmedOrder.orderNumber}`);
+
+  console.log('✅ Sample orders created');
+}
+
+/**
  * Verify the server is responding
  */
 async function verifyServer(): Promise<void> {
@@ -297,7 +398,10 @@ setup('global setup', async () => {
     // 4. Create sample products (for shopping tests)
     await createSampleProducts();
 
-    // 5. Verify server is ready
+    // 5. Create sample orders (for admin tests)
+    await createSampleOrders();
+
+    // 6. Verify server is ready
     await verifyServer();
 
     console.log('\n✅ Setup completed successfully!\n');
