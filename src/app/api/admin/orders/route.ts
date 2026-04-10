@@ -35,6 +35,16 @@ const actualizarPedidoSchema = z.object({
   carrier: z.string().optional(),
 });
 
+// Mapping of statuses from Spanish to English
+const estadoToEnglish: Record<string, string> = {
+  Pendiente: "PENDING",
+  Confirmado: "CONFIRMED",
+  "En preparación": "PREPARING",
+  Enviado: "SHIPPED",
+  Entregado: "DELIVERED",
+  Cancelado: "CANCELLED",
+};
+
 // GET - List orders
 export async function GET(req: NextRequest) {
   try {
@@ -65,7 +75,11 @@ export async function GET(req: NextRequest) {
 
     const where: Prisma.OrderWhereInput = {};
     if (status) {
-      where.status = status as OrderStatus;
+      // Convert Spanish status to English for database query
+      const englishStatus = estadoToEnglish[status];
+      if (englishStatus) {
+        where.status = englishStatus as OrderStatus;
+      }
     }
 
     const [pedidos, total] = await Promise.all([

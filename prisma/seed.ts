@@ -596,35 +596,73 @@ async function seedOrders(): Promise<number> {
   console.log('📋 Creating orders...');
   const ordersCSV = parseCSV<OrderCSV>('orders.csv');
   
+  // Base date for order timestamps (30 days ago)
+  const baseDate = new Date();
+  baseDate.setDate(baseDate.getDate() - 30);
+  
   for (const order of ordersCSV) {
     const userId = idMaps.users.get(order._userRef);
     if (!userId) {
       console.warn(`⚠️ User ${order._userRef} not found for order ${order._ref}`);
       continue;
     }
+    
     const shippingAddressId = order._shippingAddressRef ? idMaps.addresses.get(order._shippingAddressRef) : null;
+    
+    // Calculate timestamps based on order status for realistic data
+    const orderDate = new Date(baseDate);
+    orderDate.setDate(orderDate.getDate() + Math.floor(Math.random() * 30)); // Random day within last 30 days
+    
+    const orderData: any = {
+      orderNumber: order.orderNumber,
+      userId: userId,
+      subtotal: toDecimal(order.subtotal),
+      shipping: toDecimal(order.shipping),
+      discount: order.discount ? toDecimal(order.discount) : null,
+      total: toDecimal(order.total),
+      status: order.status as OrderStatus,
+      paymentMethod: order.paymentMethod as PaymentMethod,
+      shippingAddressId: shippingAddressId,
+      shippingName: order.shippingName,
+      shippingPhone: order.shippingPhone,
+      shippingAddress: order.shippingAddress,
+      shippingComplement: toNullableString(order.shippingComplement),
+      shippingPostalCode: order.shippingPostalCode,
+      shippingCity: order.shippingCity,
+      shippingProvince: order.shippingProvince,
+      shippingCountry: order.shippingCountry,
+      trackingNumber: toNullableString(order.trackingNumber),
+      customerNotes: toNullableString(order.customerNotes),
+      createdAt: orderDate,
+    };
+    
+    // Add timestamps based on status for realistic order flow
+    switch (order.status) {
+      case 'DELIVERED':
+        orderData.confirmedAt = new Date(orderDate.getTime() + 3600000); // 1 hour later
+        orderData.preparingAt = new Date(orderDate.getTime() + 86400000); // 1 day later
+        orderData.shippedAt = new Date(orderDate.getTime() + 172800000); // 2 days later
+        orderData.deliveredAt = new Date(orderDate.getTime() + 432000000); // 5 days later
+        break;
+      case 'SHIPPED':
+        orderData.confirmedAt = new Date(orderDate.getTime() + 3600000);
+        orderData.preparingAt = new Date(orderDate.getTime() + 86400000);
+        orderData.shippedAt = new Date(orderDate.getTime() + 172800000);
+        break;
+      case 'PREPARING':
+        orderData.confirmedAt = new Date(orderDate.getTime() + 3600000);
+        orderData.preparingAt = new Date(orderDate.getTime() + 86400000);
+        break;
+      case 'CONFIRMED':
+        orderData.confirmedAt = new Date(orderDate.getTime() + 3600000);
+        break;
+      case 'CANCELLED':
+        orderData.cancelledAt = new Date(orderDate.getTime() + 7200000); // 2 hours later
+        break;
+    }
+    
     const created = await prisma.order.create({
-      data: {
-        orderNumber: order.orderNumber,
-        userId: userId,
-        subtotal: toDecimal(order.subtotal),
-        shipping: toDecimal(order.shipping),
-        discount: order.discount ? toDecimal(order.discount) : null,
-        total: toDecimal(order.total),
-        status: order.status as OrderStatus,
-        paymentMethod: order.paymentMethod as PaymentMethod,
-        shippingAddressId: shippingAddressId,
-        shippingName: order.shippingName,
-        shippingPhone: order.shippingPhone,
-        shippingAddress: order.shippingAddress,
-        shippingComplement: toNullableString(order.shippingComplement),
-        shippingPostalCode: order.shippingPostalCode,
-        shippingCity: order.shippingCity,
-        shippingProvince: order.shippingProvince,
-        shippingCountry: order.shippingCountry,
-        trackingNumber: toNullableString(order.trackingNumber),
-        customerNotes: toNullableString(order.customerNotes),
-      },
+      data: orderData,
     });
     idMaps.orders.set(order._ref, created.id);
   }
