@@ -137,16 +137,6 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// Mapping of statuses from Spanish to English
-const estadoToEnglish: Record<string, string> = {
-  Pendiente: "PENDING",
-  Confirmado: "CONFIRMED",
-  "En preparación": "PREPARING",
-  Enviado: "SHIPPED",
-  Entregado: "DELIVERED",
-  Cancelado: "CANCELLED",
-};
-
 // PATCH - Update order status
 export async function PATCH(req: NextRequest) {
   try {

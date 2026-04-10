@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const range = searchParams.get("range") || "month";
 
-    // Calculate date ranges
+    // Calculate date ranges - use ISO format for PostgreSQL compatibility
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const weekAgo = new Date(today);
@@ -53,6 +53,15 @@ export async function GET(req: NextRequest) {
     );
     const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
     const yearStart = new Date(today.getFullYear(), 0, 1);
+
+    // Debug logging
+    console.log('Analytics Date Ranges:', {
+      today: today.toISOString(),
+      weekAgo: weekAgo.toISOString(),
+      monthAgo: monthAgo.toISOString(),
+      lastMonthStart: lastMonthStart.toISOString(),
+      lastMonthEnd: lastMonthEnd.toISOString(),
+    });
 
     // Build date filters
     let dateFilter: Date;
