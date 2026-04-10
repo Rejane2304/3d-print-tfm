@@ -13,16 +13,14 @@ test.describe('Admin Dashboard', () => {
     // Wait for form to be ready
     await page.waitForSelector('[data-testid="login-email"]', { timeout: 10000 });
     
-    // Fill in credentials
-    await page.locator('[data-testid="login-email"]').fill('admin@test.com');
-    await page.locator('[data-testid="login-password"]').fill('Test123!');
+    // Fill in credentials (must match seed data)
+    await page.locator('[data-testid="login-email"]').fill('admin@3dprint.com');
+    await page.locator('[data-testid="login-password"]').fill('AdminTFM2024!');
     
     // Submit login and wait for navigation
-    await Promise.all([
-      page.waitForNavigation({ timeout: 15000 }),
-      page.locator('[data-testid="login-submit"]').click()
-    ]);
-    
+    await page.locator('[data-testid="login-submit"]').click();
+    await page.waitForURL(/\//, { timeout: 20000 });
+
     // Additional wait for page to fully load
     await page.waitForTimeout(2000);
   }
@@ -39,11 +37,9 @@ test.describe('Admin Dashboard', () => {
     await page.locator('[data-testid="login-password"]').fill('JuanTFM2024!');
     
     // Submit login and wait for navigation
-    await Promise.all([
-      page.waitForNavigation({ timeout: 15000 }),
-      page.locator('[data-testid="login-submit"]').click()
-    ]);
-    
+    await page.locator('[data-testid="login-submit"]').click();
+    await page.waitForURL(/\//, { timeout: 20000 });
+
     // Additional wait for page to fully load
     await page.waitForTimeout(2000);
   }
