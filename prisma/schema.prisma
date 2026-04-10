@@ -230,7 +230,6 @@ model Invoice {
   subtotal          Decimal  @db.Decimal(10, 2)
   shipping          Decimal  @db.Decimal(10, 2)
   discount          Decimal? @db.Decimal(10, 2)
-  taxableAmount     Decimal? @db.Decimal(10, 2) // DEPRECATED: Will be removed
   vatRate           Decimal  @default(21) @db.Decimal(5, 2)
   vatAmount         Decimal  @db.Decimal(10, 2)
   total             Decimal  @db.Decimal(10, 2)

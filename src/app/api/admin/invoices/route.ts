@@ -211,8 +211,6 @@ export async function POST(req: NextRequest) {
     const vatRate = 21;
     const vatAmount = (Math.max(0, subtotal - discount) * vatRate) / 100;
     const total = (subtotal - discount) * (1 + vatRate / 100) + shipping;
-    // DEPRECATED: taxableAmount kept for DB compatibility, will be removed
-    const taxableAmount = Math.max(0, subtotal - discount) + shipping;
 
     // Create invoice
     const factura = await prisma.invoice.create({
@@ -240,7 +238,6 @@ export async function POST(req: NextRequest) {
         // Totals
         subtotal: Number(pedido.subtotal),
         shipping: Number(pedido.shipping),
-        taxableAmount, // DEPRECATED
         vatRate,
         vatAmount,
         total,
