@@ -77,7 +77,35 @@ export default function MyOrdersPage() {
   const [restoredMessage, setRestoredMessage] = useState<string | null>(null);
   const [hiddenOrders, setHiddenOrders] = useState<Set<string>>(new Set());
 
-  // Recalcular pedidos cancelados excluyendo los ocultos
+  // Cargar pedidos al montar el componente
+  useEffect(() => {
+    if (status === 'authenticated') {
+      loadOrders();
+    }
+  }, [status]);
+
+  const loadOrders = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch('/api/account/orders');
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al cargar pedidos');
+      }
+
+      setOrders(data.pedidos || []);
+    } catch (err) {
+      console.error('Error loading orders:', err);
+      setError(err instanceof Error ? err.message : 'Error desconocido');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Recalcular pedidos cancelados
   const cancelledOrders = orders.filter(o => o.estado === 'Cancelado');
 
   const handleRestoreCart = async (orderId: string) => {

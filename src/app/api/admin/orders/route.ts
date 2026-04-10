@@ -12,6 +12,7 @@ import { z } from 'zod';
 import { Prisma, OrderStatus } from '@prisma/client';
 import { translateOrderStatus, translateErrorMessage } from '@/lib/i18n';
 import { emitOrderStatusUpdated } from '@/lib/realtime/event-service';
+import { createOrderStatusChangedAlert } from '@/lib/alerts/alert-service';
 
 // Validation schema for update
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -173,6 +174,21 @@ export async function PATCH(req: NextRequest) {
       if (transportista) updateData.carrier = transportista;
     }
 
+    // Get current order to obtain old status
+    const existingOrder = await prisma.order.findUnique({
+      where: { id },
+      select: { status: true, orderNumber: true },
+    });
+
+    if (!existingOrder) {
+      return NextResponse.json(
+        { success: false, error: 'Pedido no encontrado' },
+        { status: 404 }
+      );
+    }
+
+    const oldStatus = existingOrder.status;
+
     const pedido = await prisma.order.update({
       where: { id },
       data: updateData,
@@ -192,6 +208,13 @@ export async function PATCH(req: NextRequest) {
         estado,
         pedido.user.id
       );
+    }
+
+    // Create alert for order status change
+    try {
+      await createOrderStatusChangedAlert(id, existingOrder.orderNumber, oldStatus, englishStatus);
+    } catch (alertError) {
+      console.error('Error creating order status changed alert:', alertError);
     }
 
     return NextResponse.json({ success: true, pedido });

@@ -5,6 +5,8 @@
 import { prisma } from '@/lib/db/prisma';
 import { AlertType, AlertSeverity } from '@prisma/client';
 import { getLowStockThreshold } from '@/lib/site-config';
+import { emitNewAlert } from '@/lib/realtime/event-service';
+import { translateOrderStatus } from '@/lib/i18n';
 
 interface AlertConfig {
   lowStockThreshold: number;
@@ -243,81 +245,7 @@ export async function createDelayedOrderAlerts(daysThreshold: number = 3) {
   return alerts;
 }
 
-/**
- * Create alert for new order
- */
-export async function createNewOrderAlert(orderId: string) {
-  const order = await prisma.order.findUnique({
-    where: { id: orderId },
-    include: {
-      user: { select: { name: true, email: true } },
-      items: { include: { product: { select: { name: true, slug: true } } } },
-    },
-  });
 
-  if (!order) return null;
-
-  const existingAlert = await prisma.alert.findFirst({
-    where: {
-      orderId: order.id,
-      type: 'NEW_ORDER',
-      status: { in: ['PENDING', 'IN_PROGRESS'] },
-    },
-  });
-
-  if (!existingAlert) {
-    return await prisma.alert.create({
-      data: {
-        type: 'NEW_ORDER',
-        severity: 'LOW',
-        title: 'Nuevo Pedido',
-        message: `Pedido ${order.orderNumber} de ${order.user.name || order.user.email} por ${Number(order.total).toFixed(2)}€`,
-        orderId: order.id,
-        status: 'PENDING',
-      },
-    });
-  }
-
-  return existingAlert;
-}
-
-/**
- * Create alert for negative review
- */
-export async function createNegativeReviewAlert(reviewId: string) {
-  const review = await prisma.review.findUnique({
-    where: { id: reviewId },
-    include: {
-      product: { select: { name: true, slug: true } },
-      user: { select: { name: true } },
-    },
-  });
-
-  if (!review || review.rating >= 3) return null;
-
-  const existingAlert = await prisma.alert.findFirst({
-    where: {
-      reviewId: review.id,
-      type: 'NEGATIVE_REVIEW',
-      status: { in: ['PENDING', 'IN_PROGRESS'] },
-    },
-  });
-
-  if (!existingAlert) {
-    return await prisma.alert.create({
-      data: {
-        type: 'NEGATIVE_REVIEW',
-        severity: 'MEDIUM',
-        title: 'Reseña Negativa',
-        message: `${review.user.name || 'Usuario'} dejó ${review.rating} estrellas en ${review.product.name}`,
-        reviewId: review.id,
-        status: 'PENDING',
-      },
-    });
-  }
-
-  return existingAlert;
-}
 
 /**
  * Create alert for high value order
@@ -460,4 +388,252 @@ export async function runAllAlertChecks() {
     delayedAlerts: delayedAlerts.length,
     total: stockAlerts.length + unpaidAlerts.length + delayedAlerts.length,
   };
+}
+
+// ============================================================================
+// INSTANT ALERT FUNCTIONS
+// ============================================================================
+
+/**
+ * Create alert for new order
+ */
+export async function createNewOrderAlert(orderId: string, orderNumber: string, total: number) {
+  try {
+    // Verificar si ya existe alerta PENDING para este pedido
+    const existing = await prisma.alert.findFirst({
+      where: {
+        orderId,
+        type: 'NEW_ORDER',
+        status: { in: ['PENDING', 'IN_PROGRESS'] },
+      },
+    });
+    if (existing) return existing;
+
+    // Obtener info del pedido
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: { user: { select: { name: true } } },
+    });
+
+    // Crear alerta
+    const alert = await prisma.alert.create({
+      data: {
+        type: 'NEW_ORDER',
+        severity: 'LOW',
+        title: `Nuevo Pedido #${orderNumber}`,
+        message: `Pedido por ${Number(total).toFixed(2)}€ de ${order?.user?.name || 'Cliente'}`,
+        orderId,
+        status: 'PENDING',
+      },
+    });
+
+    // Emitir evento realtime
+    await emitNewAlert(alert);
+
+    return alert;
+  } catch (error) {
+    console.error('Error creating new order alert:', error);
+    throw error;
+  }
+}
+
+/**
+ * Create alert for cancelled order
+ */
+export async function createOrderCancelledAlert(orderId: string, orderNumber: string | null) {
+  try {
+    // Verificar si ya existe alerta
+    const existing = await prisma.alert.findFirst({
+      where: {
+        orderId,
+        type: 'ORDER_CANCELLED',
+        status: { in: ['PENDING', 'IN_PROGRESS'] },
+      },
+    });
+    if (existing) return existing;
+
+    // Crear alerta
+    const alert = await prisma.alert.create({
+      data: {
+        type: 'ORDER_CANCELLED',
+        severity: 'MEDIUM',
+        title: `Pedido Cancelado #${orderNumber}`,
+        message: `El pedido ha sido cancelado`,
+        orderId,
+        status: 'PENDING',
+      },
+    });
+
+    // Emitir evento
+    await emitNewAlert(alert);
+
+    return alert;
+  } catch (error) {
+    console.error('Error creating order cancelled alert:', error);
+    throw error;
+  }
+}
+
+/**
+ * Create alert for order status change
+ */
+export async function createOrderStatusChangedAlert(
+  orderId: string,
+  orderNumber: string,
+  oldStatus: string,
+  newStatus: string
+) {
+  try {
+    // Crear alerta
+    const alert = await prisma.alert.create({
+      data: {
+        type: 'ORDER_STATUS_CHANGED',
+        severity: 'LOW',
+        title: `Estado Actualizado #${orderNumber}`,
+        message: `De ${translateOrderStatus(oldStatus)} a ${translateOrderStatus(newStatus)}`,
+        orderId,
+        status: 'PENDING',
+      },
+    });
+
+    // Emitir evento
+    await emitNewAlert(alert);
+
+    return alert;
+  } catch (error) {
+    console.error('Error creating order status changed alert:', error);
+    throw error;
+  }
+}
+
+/**
+ * Create alert for failed payment
+ */
+export async function createPaymentFailedAlert(
+  orderId: string,
+  orderNumber: string,
+  errorMessage: string
+) {
+  try {
+    // Verificar si ya existe alerta
+    const existing = await prisma.alert.findFirst({
+      where: {
+        orderId,
+        type: 'PAYMENT_FAILED',
+        status: { in: ['PENDING', 'IN_PROGRESS'] },
+      },
+    });
+    if (existing) return existing;
+
+    // Crear alerta
+    const alert = await prisma.alert.create({
+      data: {
+        type: 'PAYMENT_FAILED',
+        severity: 'HIGH',
+        title: `Pago Fallido #${orderNumber}`,
+        message: errorMessage,
+        orderId,
+        status: 'PENDING',
+      },
+    });
+
+    // Emitir evento
+    await emitNewAlert(alert);
+
+    return alert;
+  } catch (error) {
+    console.error('Error creating payment failed alert:', error);
+    throw error;
+  }
+}
+
+/**
+ * Create alert for new review
+ */
+export async function createNewReviewAlert(
+  reviewId: string,
+  rating: number,
+  productName: string
+) {
+  try {
+    // Verificar si ya existe alerta
+    const existing = await prisma.alert.findFirst({
+      where: {
+        reviewId,
+        type: 'NEW_REVIEW',
+        status: { in: ['PENDING', 'IN_PROGRESS'] },
+      },
+    });
+    if (existing) return existing;
+
+    // Determinar severidad
+    const severity: AlertSeverity = rating <= 2 ? 'HIGH' : 'LOW';
+
+    // Crear alerta
+    const alert = await prisma.alert.create({
+      data: {
+        type: 'NEW_REVIEW',
+        severity,
+        title: `Nueva Reseña ${rating}★ - ${productName}`,
+        message: `${productName} recibió una reseña de ${rating} estrellas`,
+        reviewId,
+        status: 'PENDING',
+      },
+    });
+
+    // Emitir evento
+    await emitNewAlert(alert);
+
+    return alert;
+  } catch (error) {
+    console.error('Error creating new review alert:', error);
+    throw error;
+  }
+}
+
+/**
+ * Create alert for new message
+ */
+export async function createNewMessageAlert(
+  messageId: string,
+  orderId: string,
+  userName: string
+) {
+  try {
+    // Obtener el orderNumber del pedido
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      select: { orderNumber: true },
+    });
+
+    // Verificar si ya existe alerta
+    const existing = await prisma.alert.findFirst({
+      where: {
+        orderId,
+        type: 'NEW_MESSAGE',
+        status: { in: ['PENDING', 'IN_PROGRESS'] },
+      },
+    });
+    if (existing) return existing;
+
+    // Crear alerta
+    const alert = await prisma.alert.create({
+      data: {
+        type: 'NEW_MESSAGE',
+        severity: 'MEDIUM',
+        title: `Nuevo Mensaje de ${userName}`,
+        message: `Pedido #${order?.orderNumber || 'N/A'}`,
+        orderId,
+        status: 'PENDING',
+      },
+    });
+
+    // Emitir evento
+    await emitNewAlert(alert);
+
+    return alert;
+  } catch (error) {
+    console.error('Error creating new message alert:', error);
+    throw error;
+  }
 }

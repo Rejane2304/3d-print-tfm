@@ -148,7 +148,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     // Crear alertas automáticas para el pedido
     try {
       // Alerta de nuevo pedido
-      await createNewOrderAlert(order.id);
+      await createNewOrderAlert(order.id, order.orderNumber, Number(order.total));
       
       // Alerta de pedido de alto valor (≥100€)
       await createHighValueOrderAlert(order.id, 100);

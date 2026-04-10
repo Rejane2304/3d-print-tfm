@@ -16,6 +16,7 @@ import {
   emitStockUpdated,
   emitStockLow,
 } from '@/lib/realtime/event-service';
+import { createStockAlert } from '@/lib/alerts/alert-service';
 
 export async function POST(
   req: NextRequest,
@@ -150,6 +151,13 @@ export async function POST(
     // Si el stock está bajo, emitir alerta
     if (result.product.stock <= 5) {
       await emitStockLow(result.product.id, result.product.stock);
+      
+      // Create stock alert in database
+      try {
+        await createStockAlert(result.product.id, result.product.stock);
+      } catch (alertError) {
+        console.error('Error creating stock alert:', alertError);
+      }
     }
 
     return NextResponse.json({

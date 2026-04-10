@@ -14,6 +14,7 @@ import { Prisma } from '@prisma/client';
 import { translatePaymentMethod, translateErrorMessage } from '@/lib/i18n';
 import { getDefaultVatRate } from '@/lib/site-config';
 import { emitNewOrder } from '@/lib/realtime/event-service';
+import { createNewOrderAlert } from '@/lib/alerts/alert-service';
 
 // Type for cart items with product included
 type CartItemWithProduct = Prisma.CartItemGetPayload<{
@@ -259,6 +260,13 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       userName: user.name || user.email,
       timestamp: new Date().toISOString(),
     });
+
+    // Create alert for new order
+    try {
+      await createNewOrderAlert(result.order.id, result.order.orderNumber, Number(result.order.total));
+    } catch (alertError) {
+      console.error('Error creating new order alert:', alertError);
+    }
 
     // Return order and payment IDs for frontend to handle payment processing
     return NextResponse.json({

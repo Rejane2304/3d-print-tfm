@@ -17,6 +17,7 @@ import {
   translateErrorMessage,
   translateProductName,
 } from '@/lib/i18n';
+import { runAllScheduledChecks } from '@/lib/alerts/scheduled-checks';
 
 // Validation schema
 const actualizarAlertaSchema = z.object({
@@ -46,6 +47,9 @@ export async function GET(req: NextRequest) {
         { status: 403 }
       );
     }
+
+    // Ejecutar verificaciones programadas al cargar el panel
+    await runAllScheduledChecks();
 
     const { searchParams } = new URL(req.url);
     const type = searchParams.get('type');

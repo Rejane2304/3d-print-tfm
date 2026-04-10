@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
+import { createOrderCancelledAlert } from '@/lib/alerts/alert-service';
 
 export async function POST(req: NextRequest) {
   try {
@@ -37,7 +38,13 @@ export async function POST(req: NextRequest) {
         user: { email: session.user.email }
       },
       include: {
-        items: true
+        items: {
+          select: {
+            id: true,
+            productId: true,
+            quantity: true,
+          }
+        }
       }
     });
 
@@ -52,6 +59,7 @@ export async function POST(req: NextRequest) {
     await prisma.$transaction(async (tx) => {
       // 1. Restaurar stock de cada producto
       for (const item of order.items) {
+        if (!item.productId) continue;
         await tx.product.update({
           where: { id: item.productId },
           data: {
@@ -80,6 +88,14 @@ export async function POST(req: NextRequest) {
         }
       });
     });
+
+    // Create alert for cancelled order
+    try {
+      const orderNumber = order.orderNumber || `N/A-${orderId.slice(0, 8)}`;
+      await createOrderCancelledAlert(orderId, orderNumber);
+    } catch (alertError) {
+      console.error('Error creating order cancelled alert:', alertError);
+    }
 
     return NextResponse.json({
       success: true,

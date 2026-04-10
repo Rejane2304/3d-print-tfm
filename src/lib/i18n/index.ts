@@ -52,6 +52,16 @@ export const enumTranslations = {
     ORDER_DELAYED: 'Pedido retrasado',
     PAYMENT_FAILED: 'Pago fallido',
     SYSTEM_ERROR: 'Error del sistema',
+    NEW_ORDER: 'Nuevo Pedido',
+    NEGATIVE_REVIEW: 'Reseña Negativa',
+    HIGH_VALUE_ORDER: 'Pedido de Alto Valor',
+    NEW_USER: 'Nuevo Usuario',
+    COUPON_EXPIRING: 'Cupón por Expirar',
+    ORDER_CANCELLED: 'Pedido Cancelado',
+    ORDER_STATUS_CHANGED: 'Estado Actualizado',
+    NEW_REVIEW: 'Nueva Reseña',
+    NEW_MESSAGE: 'Nuevo Mensaje',
+    PREPARING_ORDER: 'Preparación Prolongada',
   } as TranslationMap,
 
   // Alert severity

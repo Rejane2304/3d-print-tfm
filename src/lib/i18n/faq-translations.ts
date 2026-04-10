@@ -1,6 +1,7 @@
 /**
  * FAQ Translations
- * Traducciones para preguntas frecuentes desde CSV (inglés → español)
+ * Traducciones completas para todas las FAQs del sistema
+ * Inglés (CSV/BD) → Español (UI)
  */
 
 export const faqTranslations: Record<string, { question: string; answer: string }> = {
@@ -10,7 +11,7 @@ export const faqTranslations: Record<string, { question: string; answer: string 
     answer: 'Utilizamos principalmente PLA (plástico biodegradable a base de plantas) y PETG (más resistente y térmicamente estable). Ambos son seguros y respetuosos con el medio ambiente.'
   },
   
-  // FAQ-0002 - Shipping
+  // FAQ-0002 - Shipping  
   'FAQ-0002': {
     question: '¿Cuánto tarda el envío?',
     answer: 'El envío estándar tarda de 3 a 5 días laborables. El envío express se entrega en 1-2 días laborables. Los pedidos superiores a 50€ califican para envío gratuito.'
@@ -57,7 +58,7 @@ export const faqTranslations: Record<string, { question: string; answer: string 
 export const faqCategoryTranslations: Record<string, string> = {
   'Materials': 'Materiales',
   'Shipping': 'Envío',
-  'Returns': 'Devoluciones',
+  'Returns': 'Devoluciones', 
   'Orders': 'Pedidos',
   'Care': 'Cuidado',
   'Payments': 'Pagos',
@@ -66,12 +67,12 @@ export const faqCategoryTranslations: Record<string, string> = {
 };
 
 // Helper functions
-export function translateFAQQuestion(ref: string): string {
-  return faqTranslations[ref]?.question || '';
+export function translateFAQQuestion(id: string): string {
+  return faqTranslations[id]?.question || '';
 }
 
-export function translateFAQAnswer(ref: string): string {
-  return faqTranslations[ref]?.answer || '';
+export function translateFAQAnswer(id: string): string {
+  return faqTranslations[id]?.answer || '';
 }
 
 export function translateFAQCategory(category: string): string {

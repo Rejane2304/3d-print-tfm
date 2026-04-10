@@ -10,6 +10,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
 import { translateErrorMessage, translateProductName } from '@/lib/i18n';
+import { createPaymentFailedAlert } from '@/lib/alerts/alert-service';
 import Stripe from 'stripe';
 
 // Initialize Stripe with TEST mode
@@ -189,6 +190,23 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error('Error creating Stripe checkout session:', error);
+
+    // Create alert for failed payment
+    try {
+      const body = await req.json().catch(() => ({}));
+      const { orderId } = body;
+      if (orderId) {
+        const order = await prisma.order.findUnique({
+          where: { id: orderId },
+          select: { orderNumber: true },
+        });
+        if (order) {
+          await createPaymentFailedAlert(orderId, order.orderNumber, error instanceof Error ? error.message : 'Error desconocido');
+        }
+      }
+    } catch (alertError) {
+      console.error('Error creating payment failed alert:', alertError);
+    }
 
     // Handle Stripe-specific errors
     if (error instanceof Stripe.errors.StripeError) {

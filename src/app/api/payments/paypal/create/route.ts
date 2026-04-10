@@ -8,6 +8,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
 import { translateErrorMessage } from '@/lib/i18n';
+import { createPaymentFailedAlert } from '@/lib/alerts/alert-service';
 
 // PayPal API base URLs
 const PAYPAL_API = process.env.NODE_ENV === 'production'
@@ -313,6 +314,23 @@ export async function POST(req: NextRequest) {
 
   } catch (error) {
     console.error('Error creating PayPal payment:', error);
+
+    // Create alert for failed payment
+    try {
+      const body = await req.json().catch(() => ({}));
+      const { orderId } = body;
+      if (orderId) {
+        const order = await prisma.order.findUnique({
+          where: { id: orderId },
+          select: { orderNumber: true },
+        });
+        if (order) {
+          await createPaymentFailedAlert(orderId, order.orderNumber, error instanceof Error ? error.message : 'Error desconocido');
+        }
+      }
+    } catch (alertError) {
+      console.error('Error creating payment failed alert:', alertError);
+    }
 
     const errorMessage = error instanceof Error ? error.message : 'Error interno del servidor';
 
