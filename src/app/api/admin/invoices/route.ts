@@ -4,14 +4,14 @@
  *
  * Requires: ADMIN role
  */
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
-import { z } from 'zod';
-import { Prisma } from '@prisma/client';
-import { COMPANY_CONFIG } from '@/lib/invoices/pdf-generator';
-import { translateErrorMessage } from '@/lib/i18n';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/auth-options";
+import { z } from "zod";
+import { Prisma } from "@prisma/client";
+import { COMPANY_CONFIG } from "@/lib/invoices/pdf-generator";
+import { translateErrorMessage } from "@/lib/i18n";
 
 // Validation schema
 const crearFacturaSchema = z.object({
@@ -24,8 +24,8 @@ export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage('No autenticado') },
-        { status: 401 }
+        { success: false, error: translateErrorMessage("No autenticado") },
+        { status: 401 },
       );
     }
 
@@ -33,26 +33,26 @@ export async function GET(req: NextRequest) {
       where: { email: session.user.email },
     });
 
-    if (!usuario || usuario.role !== 'ADMIN') {
+    if (!usuario || usuario.role !== "ADMIN") {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage('No autorizado') },
-        { status: 403 }
+        { success: false, error: translateErrorMessage("No autorizado") },
+        { status: 403 },
       );
     }
 
     const { searchParams } = new URL(req.url);
-    const busqueda = searchParams.get('busqueda') || '';
-    const desde = searchParams.get('desde');
-    const hasta = searchParams.get('hasta');
-    const anulada = searchParams.get('anulada');
-    const limit = Number.parseInt(searchParams.get('limit') || '50', 10);
-    const page = Number.parseInt(searchParams.get('page') || '1', 10);
+    const busqueda = searchParams.get("busqueda") || "";
+    const desde = searchParams.get("desde");
+    const hasta = searchParams.get("hasta");
+    const anulada = searchParams.get("anulada");
+    const limit = Number.parseInt(searchParams.get("limit") || "50", 10);
+    const page = Number.parseInt(searchParams.get("page") || "1", 10);
     const skip = (page - 1) * limit;
 
     const where: Prisma.InvoiceWhereInput = {};
 
     if (busqueda) {
-      where.invoiceNumber = { contains: busqueda, mode: 'insensitive' };
+      where.invoiceNumber = { contains: busqueda, mode: "insensitive" };
     }
 
     if (desde || hasta) {
@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
     }
 
     if (anulada !== null) {
-      where.isCancelled = anulada === 'true';
+      where.isCancelled = anulada === "true";
     }
 
     const [facturas, total] = await Promise.all([
@@ -82,14 +82,14 @@ export async function GET(req: NextRequest) {
             },
           },
         },
-        orderBy: { issuedAt: 'desc' },
+        orderBy: { issuedAt: "desc" },
         skip,
         take: limit,
       }),
       prisma.invoice.count({ where }),
     ]);
 
-    const facturasTraducidas = facturas.map(factura => ({
+    const facturasTraducidas = facturas.map((factura) => ({
       id: factura.id,
       invoiceNumber: factura.invoiceNumber,
       anulada: factura.isCancelled,
@@ -100,12 +100,12 @@ export async function GET(req: NextRequest) {
         usuario: {
           nombre: factura.order?.user?.name,
           nif: factura.order?.user?.taxId,
-        }
-      }
+        },
+      },
     }));
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       facturas: facturasTraducidas,
       total,
       pages: Math.ceil(total / limit),
@@ -113,10 +113,10 @@ export async function GET(req: NextRequest) {
       limit,
     });
   } catch (error) {
-    console.error('Error listing invoices:', error);
+    console.error("Error listing invoices:", error);
     return NextResponse.json(
-      { success: false, error: translateErrorMessage('Internal error') },
-      { status: 500 }
+      { success: false, error: translateErrorMessage("Internal error") },
+      { status: 500 },
     );
   }
 }
@@ -127,8 +127,8 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage('No autenticado') },
-        { status: 401 }
+        { success: false, error: translateErrorMessage("No autenticado") },
+        { status: 401 },
       );
     }
 
@@ -136,10 +136,10 @@ export async function POST(req: NextRequest) {
       where: { email: session.user.email },
     });
 
-    if (!usuario || usuario.role !== 'ADMIN') {
+    if (!usuario || usuario.role !== "ADMIN") {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage('No autorizado') },
-        { status: 403 }
+        { success: false, error: translateErrorMessage("No autorizado") },
+        { status: 403 },
       );
     }
 
@@ -157,16 +157,19 @@ export async function POST(req: NextRequest) {
 
     if (!pedido) {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage('Pedido not found') },
-        { status: 404 }
+        { success: false, error: translateErrorMessage("Pedido not found") },
+        { status: 404 },
       );
     }
 
     // Verify the order is delivered
-    if (pedido.status !== 'DELIVERED') {
+    if (pedido.status !== "DELIVERED") {
       return NextResponse.json(
-        { success: false, error: 'El pedido debe estar entregado para generar factura' },
-        { status: 400 }
+        {
+          success: false,
+          error: "El pedido debe estar entregado para generar factura",
+        },
+        { status: 400 },
       );
     }
 
@@ -177,8 +180,13 @@ export async function POST(req: NextRequest) {
 
     if (facturaExistente) {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage('Already exists una factura para este pedido') },
-        { status: 400 }
+        {
+          success: false,
+          error: translateErrorMessage(
+            "Already exists una factura para este pedido",
+          ),
+        },
+        { status: 400 },
       );
     }
 
@@ -186,16 +194,21 @@ export async function POST(req: NextRequest) {
     const year = new Date().getFullYear();
     const ultimaFactura = await prisma.invoice.findFirst({
       where: {
-        series: 'F',
+        series: "F",
       },
-      orderBy: { number: 'desc' },
+      orderBy: { number: "desc" },
     });
 
     const numero = ultimaFactura ? ultimaFactura.number + 1 : 1;
-    const invoiceNumber = `F-${year}-${String(numero).padStart(6, '0')}`;
+    const invoiceNumber = `F-${year}-${String(numero).padStart(6, "0")}`;
 
-    // Calculate totals (21% VAT)
-    const taxableAmount = Number(pedido.subtotal) + Number(pedido.shipping);
+    // Calculate totals with VAT separated and discount applied (transparent)
+    const subtotal = Number(pedido.subtotal);
+    const discount = Number(pedido.discount || 0);
+    const shipping = Number(pedido.shipping);
+
+    // BASE IMPONIBLE: subtotal con descuento + envío (el envío lleva IVA)
+    const taxableAmount = Math.max(0, subtotal - discount) + shipping;
     const vatRate = 21;
     const vatAmount = (taxableAmount * vatRate) / 100;
     const total = taxableAmount + vatAmount;
@@ -203,10 +216,11 @@ export async function POST(req: NextRequest) {
     // Create invoice
     const factura = await prisma.invoice.create({
       data: {
+        id: crypto.randomUUID(),
         invoiceNumber,
-        series: 'F',
+        series: "F",
         number: numero,
-        orderId,
+        order: { connect: { id: orderId } },
         // Company data
         companyName: COMPANY_CONFIG.name,
         companyTaxId: COMPANY_CONFIG.taxId,
@@ -216,7 +230,7 @@ export async function POST(req: NextRequest) {
         companyPostalCode: COMPANY_CONFIG.postalCode,
         // Client data
         clientName: pedido.shippingName,
-        clientTaxId: pedido.user.taxId || '',
+        clientTaxId: pedido.user.taxId || "",
         clientAddress: pedido.shippingAddress,
         clientCity: pedido.shippingCity,
         clientProvince: pedido.shippingProvince,
@@ -246,21 +260,18 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json(
-      { success: true, factura },
-      { status: 201 }
-    );
+    return NextResponse.json({ success: true, factura }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { success: false, error: error.errors[0].message },
-        { status: 400 }
+        { status: 400 },
       );
     }
-    console.error('Error creating invoice:', error);
+    console.error("Error creating invoice:", error);
     return NextResponse.json(
-      { success: false, error: translateErrorMessage('Internal error') },
-      { status: 500 }
+      { success: false, error: translateErrorMessage("Internal error") },
+      { status: 500 },
     );
   }
 }

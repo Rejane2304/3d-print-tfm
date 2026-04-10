@@ -1,6 +1,6 @@
-import { Prisma } from '@prisma/client';
-import { prisma } from '@/lib/db/prisma';
-import type { Server as SocketIOServer } from 'socket.io';
+import { Prisma } from "@prisma/client";
+import { prisma } from "@/lib/db/prisma";
+import type { Server as SocketIOServer } from "socket.io";
 
 // Extend global to include Socket.IO server instance
 declare global {
@@ -8,15 +8,15 @@ declare global {
   var io: SocketIOServer | undefined;
 }
 
-export type EventType = 
-  | 'order:new'
-  | 'order:status:updated'
-  | 'payment:confirmed'
-  | 'stock:low'
-  | 'stock:updated'
-  | 'alert:new'
-  | 'review:new'
-  | 'metrics:update';
+export type EventType =
+  | "order:new"
+  | "order:status:updated"
+  | "payment:confirmed"
+  | "stock:low"
+  | "stock:updated"
+  | "alert:new"
+  | "review:new"
+  | "metrics:update";
 
 export interface EventPayload {
   [key: string]: unknown;
@@ -39,57 +39,62 @@ export async function emitEvent(
   type: EventType,
   payload: EventPayload,
   room: string,
-  userId?: string
+  userId?: string,
 ): Promise<void> {
   try {
     // Store event in database - serialize payload properly
-    const serializedPayload = JSON.parse(JSON.stringify(payload)) as Prisma.InputJsonValue;
+    const serializedPayload = JSON.parse(
+      JSON.stringify(payload),
+    ) as Prisma.InputJsonValue;
     await prisma.eventStore.create({
       data: {
+        id: crypto.randomUUID(),
         type,
         payload: serializedPayload,
         room,
         userId: userId || null,
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-        delivered: false
-      }
+        delivered: false,
+      },
     });
 
     // Also emit to any connected WebSocket clients (if server-side)
     // This will be handled by the socket.io server
-    if (typeof global !== 'undefined' && global.io) {
+    if (typeof global !== "undefined" && global.io) {
       const io = global.io;
       io.to(room).emit(type, payload);
     }
   } catch (error) {
-    console.error('Error emitting event:', error);
+    console.error("Error emitting event:", error);
     throw error;
   }
 }
 
 export async function getPendingEvents(
   userId: string,
-  userRole?: string
-): Promise<Array<{ id: string; type: string; payload: EventPayload; timestamp: Date }>> {
+  userRole?: string,
+): Promise<
+  Array<{ id: string; type: string; payload: EventPayload; timestamp: Date }>
+> {
   const rooms = [`user:${userId}`];
-  if (userRole === 'ADMIN') {
-    rooms.push('admin');
+  if (userRole === "ADMIN") {
+    rooms.push("admin");
   }
 
-  const events = await prisma.eventStore.findMany({
+  const events = (await prisma.eventStore.findMany({
     where: {
       room: { in: rooms },
-      delivered: false
+      delivered: false,
     },
-    orderBy: { timestamp: 'asc' },
-    take: 100
-  }) as EventStoreRecord[];
+    orderBy: { timestamp: "asc" },
+    take: 100,
+  })) as EventStoreRecord[];
 
   return events.map((e: EventStoreRecord) => ({
     id: e.id,
     type: e.type,
     payload: e.payload as EventPayload,
-    timestamp: e.timestamp
+    timestamp: e.timestamp,
   }));
 }
 
@@ -98,76 +103,98 @@ export async function markEventsAsDelivered(eventIds: string[]): Promise<void> {
 
   await prisma.eventStore.updateMany({
     where: {
-      id: { in: eventIds }
+      id: { in: eventIds },
     },
     data: {
       delivered: true,
-      deliveredAt: new Date()
-    }
+      deliveredAt: new Date(),
+    },
   });
 }
 
 // Specific event emitters
 export async function emitNewOrder(order: unknown): Promise<void> {
-  await emitEvent('order:new', { order }, 'admin');
+  await emitEvent("order:new", { order }, "admin");
 }
 
 export async function emitOrderStatusUpdated(
   orderId: string,
   status: string,
-  userId: string
+  userId: string,
 ): Promise<void> {
   await emitEvent(
-    'order:status:updated',
+    "order:status:updated",
     { orderId, status, timestamp: new Date().toISOString() },
     `user:${userId}`,
-    userId
+    userId,
   );
 }
 
 export async function emitPaymentConfirmed(
   orderId: string,
   payment: unknown,
-  userId: string
+  userId: string,
 ): Promise<void> {
   await emitEvent(
-    'payment:confirmed',
+    "payment:confirmed",
     { orderId, payment, timestamp: new Date().toISOString() },
     `user:${userId}`,
-    userId
+    userId,
   );
-  await emitEvent('payment:confirmed', { orderId, payment }, 'admin');
+  await emitEvent("payment:confirmed", { orderId, payment }, "admin");
 }
 
-export async function emitStockLow(productId: string, stock: number): Promise<void> {
-  await emitEvent('stock:low', { productId, stock, timestamp: new Date().toISOString() }, 'admin');
+export async function emitStockLow(
+  productId: string,
+  stock: number,
+): Promise<void> {
+  await emitEvent(
+    "stock:low",
+    { productId, stock, timestamp: new Date().toISOString() },
+    "admin",
+  );
 }
 
 export async function emitStockUpdated(
   productId: string,
   newStock: number,
-  previousStock: number
+  previousStock: number,
 ): Promise<void> {
   await emitEvent(
-    'stock:updated',
+    "stock:updated",
     { productId, newStock, previousStock, timestamp: new Date().toISOString() },
-    'admin'
+    "admin",
   );
   await emitEvent(
-    'stock:updated',
+    "stock:updated",
     { productId, newStock, previousStock, timestamp: new Date().toISOString() },
-    `product:${productId}`
+    `product:${productId}`,
   );
 }
 
 export async function emitNewAlert(alert: unknown): Promise<void> {
-  await emitEvent('alert:new', { alert, timestamp: new Date().toISOString() }, 'admin');
+  await emitEvent(
+    "alert:new",
+    { alert, timestamp: new Date().toISOString() },
+    "admin",
+  );
 }
 
-export async function emitNewReview(review: unknown, productId: string): Promise<void> {
-  await emitEvent('review:new', { review, productId, timestamp: new Date().toISOString() }, 'admin');
+export async function emitNewReview(
+  review: unknown,
+  productId: string,
+): Promise<void> {
+  await emitEvent(
+    "review:new",
+    { review, productId, timestamp: new Date().toISOString() },
+    "admin",
+  );
 }
 
 export async function emitMetricsUpdate(metrics: unknown): Promise<void> {
-  await emitEvent('metrics:update', { metrics, timestamp: new Date().toISOString() }, 'admin');
+  await emitEvent(
+    "metrics:update",
+    { metrics, timestamp: new Date().toISOString() },
+    "admin",
+  );
 }

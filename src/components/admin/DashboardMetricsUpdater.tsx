@@ -1,14 +1,16 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { useAdminRealTime } from '@/hooks/useRealTime';
+import { useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useAdminRealTime } from "@/hooks/useRealTime";
 
 interface DashboardMetricsUpdaterProps {
   onMetricsUpdate: () => void;
 }
 
-export default function DashboardMetricsUpdater({ onMetricsUpdate }: DashboardMetricsUpdaterProps) {
+export default function DashboardMetricsUpdater({
+  onMetricsUpdate,
+}: DashboardMetricsUpdaterProps) {
   const { data: session } = useSession();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const userRole = session?.user?.rol;
@@ -18,10 +20,10 @@ export default function DashboardMetricsUpdater({ onMetricsUpdate }: DashboardMe
     onEvent: (event) => {
       // Update metrics when there are relevant events
       if (
-        event.type === 'order:new' ||
-        event.type === 'order:status:updated' ||
-        event.type === 'payment:confirmed' ||
-        event.type === 'metrics:update'
+        event.type === "order:new" ||
+        event.type === "order:status:updated" ||
+        event.type === "payment:confirmed" ||
+        event.type === "metrics:update"
       ) {
         onMetricsUpdate();
       }

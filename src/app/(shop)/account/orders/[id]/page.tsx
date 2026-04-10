@@ -3,13 +3,13 @@
  * Vista completa de un pedido específico del usuario autenticado
  * Responsive: mobile → 4K
  */
-'use client';
+"use client";
 
-import { useEffect, useState, useCallback } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter, useParams } from 'next/navigation';
-import Link from 'next/link';
-import Image from 'next/image';
+import { useEffect, useState, useCallback } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter, useParams } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
 import {
   Package,
   Loader2,
@@ -20,10 +20,10 @@ import {
   Phone,
   MessageSquare,
   Printer,
-  Download
-} from 'lucide-react';
-import OrderProgressBar from '@/components/orders/OrderProgressBar';
-import { InvoiceNotAvailableModal } from '@/components/invoices/InvoiceNotAvailableModal';
+  Download,
+} from "lucide-react";
+import OrderProgressBar from "@/components/orders/OrderProgressBar";
+import { InvoiceNotAvailableModal } from "@/components/invoices/InvoiceNotAvailableModal";
 
 interface OrderDetail {
   id: string;
@@ -83,26 +83,26 @@ interface OrderDetail {
 
 // El método de pago ya viene traducido de la API
 const metodosPago: Record<string, string> = {
-  Tarjeta: 'Tarjeta',
-  PAYPAL: 'PayPal',
-  PayPal: 'PayPal',
-  BIZUM: 'Bizum',
-  Bizum: 'Bizum',
-  TRANSFER: 'Transferencia',
-  Transferencia: 'Transferencia',
+  Tarjeta: "Tarjeta",
+  PAYPAL: "PayPal",
+  PayPal: "PayPal",
+  BIZUM: "Bizum",
+  Bizum: "Bizum",
+  TRANSFER: "Transferencia",
+  Transferencia: "Transferencia",
 };
 
 // Traducir nombres de dirección comunes
 const translateAddressName = (name: string): string => {
   const translations: { [key: string]: string } = {
-    'home': 'Casa',
-    'house': 'Casa',
-    'work': 'Trabajo',
-    'office': 'Oficina',
-    'apartment': 'Apartamento',
-    'flat': 'Piso',
-    'parents': 'Casa de padres',
-    'family': 'Casa familiar',
+    home: "Casa",
+    house: "Casa",
+    work: "Trabajo",
+    office: "Oficina",
+    apartment: "Apartamento",
+    flat: "Piso",
+    parents: "Casa de padres",
+    family: "Casa familiar",
   };
   const lowerName = name?.toLowerCase().trim();
   return translations[lowerName] || name;
@@ -116,7 +116,9 @@ export default function OrderDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
-  const [invoiceModalReason, setInvoiceModalReason] = useState<'not_completed' | 'not_generated' | 'payment_pending' | 'cancelled'>('not_generated');
+  const [invoiceModalReason, setInvoiceModalReason] = useState<
+    "not_completed" | "not_generated" | "payment_pending" | "cancelled"
+  >("not_generated");
 
   const loadOrder = useCallback(async () => {
     try {
@@ -127,38 +129,38 @@ export default function OrderDetailPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error al cargar pedido');
+        throw new Error(data.error || "Error al cargar pedido");
       }
 
       setOrder(data.pedido);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : "Error desconocido");
     } finally {
       setLoading(false);
     }
   }, [params.id]);
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth?callbackUrl=/account/orders');
+    if (status === "unauthenticated") {
+      router.push("/auth?callbackUrl=/account/orders");
       return;
     }
 
-    if (status === 'authenticated' && params.id) {
+    if (status === "authenticated" && params.id) {
       loadOrder();
     }
   }, [status, router, params.id, loadOrder]);
 
   const downloadInvoice = () => {
     if (order?.factura && !order.factura.anulada) {
-      window.open(`/api/account/invoices/${order.factura.id}/pdf`, '_blank');
+      window.open(`/api/account/invoices/${order.factura.id}/pdf`, "_blank");
     } else {
-      if (order?.estado === 'Cancelado') {
-        setInvoiceModalReason('cancelled');
-      } else if (order?.estado !== 'Entregado') {
-        setInvoiceModalReason('not_completed');
+      if (order?.estado === "Cancelado") {
+        setInvoiceModalReason("cancelled");
+      } else if (order?.estado !== "Entregado") {
+        setInvoiceModalReason("not_completed");
       } else {
-        setInvoiceModalReason('not_generated');
+        setInvoiceModalReason("not_generated");
       }
       setInvoiceModalOpen(true);
     }
@@ -167,33 +169,35 @@ export default function OrderDetailPage() {
   const printOrder = async () => {
     if (order?.factura && !order.factura.anulada) {
       try {
-        window.open(`/api/account/invoices/${order.factura.id}/pdf`, '_blank');
+        window.open(`/api/account/invoices/${order.factura.id}/pdf`, "_blank");
       } catch (error) {
-        console.error('Error al abrir factura:', error);
-        setInvoiceModalReason('not_generated');
+        console.error("Error al abrir factura:", error);
+        setInvoiceModalReason("not_generated");
         setInvoiceModalOpen(true);
       }
     } else if (order?.factura?.anulada) {
-      setInvoiceModalReason('cancelled');
+      setInvoiceModalReason("cancelled");
       setInvoiceModalOpen(true);
     } else {
-      if (order?.estado === 'Cancelado') {
-        setInvoiceModalReason('cancelled');
-      } else if (order?.estado !== 'Entregado') {
-        setInvoiceModalReason('not_completed');
+      if (order?.estado === "Cancelado") {
+        setInvoiceModalReason("cancelled");
+      } else if (order?.estado !== "Entregado") {
+        setInvoiceModalReason("not_completed");
       } else {
-        setInvoiceModalReason('not_generated');
+        setInvoiceModalReason("not_generated");
       }
       setInvoiceModalOpen(true);
     }
   };
 
-  if (status === 'loading' || loading) {
+  if (status === "loading" || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="text-center">
           <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin text-indigo-600 mx-auto mb-4" />
-          <p className="text-gray-600 text-sm sm:text-base">Cargando pedido...</p>
+          <p className="text-gray-600 text-sm sm:text-base">
+            Cargando pedido...
+          </p>
         </div>
       </div>
     );
@@ -204,8 +208,13 @@ export default function OrderDetailPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="text-center">
           <AlertCircle className="h-10 w-10 sm:h-12 sm:w-12 text-red-600 mx-auto mb-4" />
-          <p className="text-gray-900 font-medium text-sm sm:text-base">Pedido no encontrado</p>
-          <Link href="/account/orders" className="text-indigo-600 hover:text-indigo-800 mt-2 inline-block text-sm">
+          <p className="text-gray-900 font-medium text-sm sm:text-base">
+            Pedido no encontrado
+          </p>
+          <Link
+            href="/account/orders"
+            className="text-indigo-600 hover:text-indigo-800 mt-2 inline-block text-sm"
+          >
             ← Volver a mis pedidos
           </Link>
         </div>
@@ -227,13 +236,16 @@ export default function OrderDetailPage() {
                 <ArrowLeft className="h-5 w-5 sm:h-6 sm:w-6" />
               </Link>
               <div>
-                <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Pedido {order.orderNumber}</h1>
+                <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
+                  Pedido {order.orderNumber}
+                </h1>
                 <p className="text-xs sm:text-sm text-gray-500">
-                  Realizado el {new Date(order.createdAt).toLocaleDateString('es-ES', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
+                  Realizado el{" "}
+                  {new Date(order.createdAt).toLocaleDateString("es-ES", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
                   })}
                 </p>
               </div>
@@ -348,7 +360,9 @@ export default function OrderDetailPage() {
                   )}
                   <div className="flex justify-between text-base sm:text-lg font-semibold pt-2 border-t">
                     <span className="text-gray-900">Total</span>
-                    <span className="text-indigo-600">{Number(order.total).toFixed(2)} €</span>
+                    <span className="text-indigo-600">
+                      {Number(order.total).toFixed(2)} €
+                    </span>
                   </div>
                 </div>
               </div>
@@ -368,21 +382,31 @@ export default function OrderDetailPage() {
                     <div
                       key={message.id}
                       className={`p-3 sm:p-4 rounded-lg ${
-                        message.tipoRemitente === 'ADMIN'
-                          ? 'bg-indigo-50 border border-indigo-100'
-                          : 'bg-gray-50 border border-gray-100'
+                        message.tipoRemitente === "ADMIN"
+                          ? "bg-indigo-50 border border-indigo-100"
+                          : "bg-gray-50 border border-gray-100"
                       }`}
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
-                        <span className={`text-xs sm:text-sm font-medium ${
-                          message.tipoRemitente === 'ADMIN'
-                            ? 'text-indigo-700'
-                            : 'text-gray-700'
-                        }`}>
-                          {message.tipoRemitente === 'ADMIN' ? 'Administrador' : 'Tú'}
+                        <span
+                          className={`text-xs sm:text-sm font-medium ${
+                            message.tipoRemitente === "ADMIN"
+                              ? "text-indigo-700"
+                              : "text-gray-700"
+                          }`}
+                        >
+                          {message.tipoRemitente === "ADMIN"
+                            ? "Administrador"
+                            : "Tú"}
                         </span>
                         <span className="text-xs text-gray-400">
-                          {new Date(message.createdAt).toLocaleDateString('es-ES')} {new Date(message.createdAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+                          {new Date(message.createdAt).toLocaleDateString(
+                            "es-ES",
+                          )}{" "}
+                          {new Date(message.createdAt).toLocaleTimeString(
+                            "es-ES",
+                            { hour: "2-digit", minute: "2-digit" },
+                          )}
                         </span>
                       </div>
                       <p className="text-sm text-gray-700">{message.mensaje}</p>
@@ -398,15 +422,23 @@ export default function OrderDetailPage() {
             {/* Acciones rápidas */}
             {order.factura && !order.factura.anulada && (
               <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-6">
-                <h3 className="font-semibold text-gray-900 mb-4 text-sm sm:text-base">Factura</h3>
+                <h3 className="font-semibold text-gray-900 mb-4 text-sm sm:text-base">
+                  Factura
+                </h3>
                 <div className="space-y-2 sm:space-y-3">
                   <div className="flex justify-between text-xs sm:text-sm">
                     <span className="text-gray-600">Número:</span>
-                    <span className="font-mono">{order.factura.invoiceNumber}</span>
+                    <span className="font-mono">
+                      {order.factura.invoiceNumber}
+                    </span>
                   </div>
                   <div className="flex justify-between text-xs sm:text-sm">
                     <span className="text-gray-600">Fecha:</span>
-                    <span>{new Date(order.factura.emitidaEn).toLocaleDateString('es-ES')}</span>
+                    <span>
+                      {new Date(order.factura.emitidaEn).toLocaleDateString(
+                        "es-ES",
+                      )}
+                    </span>
                   </div>
                   <button
                     onClick={downloadInvoice}
@@ -426,7 +458,9 @@ export default function OrderDetailPage() {
                 Dirección de envío
               </h3>
               <div className="space-y-1 text-xs sm:text-sm">
-                <p className="font-medium text-gray-900">{translateAddressName(order.nombreEnvio)}</p>
+                <p className="font-medium text-gray-900">
+                  {translateAddressName(order.nombreEnvio)}
+                </p>
                 <p className="text-gray-600">{order.shippingAddress}</p>
                 {order.complementoEnvio && (
                   <p className="text-gray-600">{order.complementoEnvio}</p>
@@ -434,7 +468,9 @@ export default function OrderDetailPage() {
                 <p className="text-gray-600">
                   {order.postalCodeEnvio} {order.ciudadEnvio}
                 </p>
-                <p className="text-gray-600">{order.provinciaEnvio}, {order.paisEnvio}</p>
+                <p className="text-gray-600">
+                  {order.provinciaEnvio}, {order.paisEnvio}
+                </p>
                 <div className="flex items-center gap-2 pt-1 text-gray-600">
                   <Phone className="h-3 w-3 sm:h-4 sm:w-4" />
                   {order.telefonoEnvio}
@@ -451,21 +487,35 @@ export default function OrderDetailPage() {
               <div className="space-y-2 sm:space-y-3">
                 <div className="flex justify-between text-xs sm:text-sm">
                   <span className="text-gray-600">Método:</span>
-                  <span className="font-medium">{metodosPago[order.metodoPago] || order.metodoPago || 'No disponible'}</span>
+                  <span className="font-medium">
+                    {metodosPago[order.metodoPago] ||
+                      order.metodoPago ||
+                      "No disponible"}
+                  </span>
                 </div>
                 {order.pago && (
                   <>
                     <div className="flex justify-between text-xs sm:text-sm">
                       <span className="text-gray-600">Estado:</span>
-                      <span className={`font-medium ${
-                        order.pago.estado === 'COMPLETADO' ? 'text-green-600' : 'text-yellow-600'
-                      }`}>
-                        {order.pago.estado === 'COMPLETADO' ? 'Pagado' : order.pago.estado}
+                      <span
+                        className={`font-medium ${
+                          order.pago.estado === "COMPLETADO"
+                            ? "text-green-600"
+                            : "text-yellow-600"
+                        }`}
+                      >
+                        {order.pago.estado === "COMPLETADO"
+                          ? "Pagado"
+                          : order.pago.estado}
                       </span>
                     </div>
                     <div className="flex justify-between text-xs sm:text-sm">
                       <span className="text-gray-600">Fecha:</span>
-                      <span>{new Date(order.pago.createdAt).toLocaleDateString('es-ES')}</span>
+                      <span>
+                        {new Date(order.pago.createdAt).toLocaleDateString(
+                          "es-ES",
+                        )}
+                      </span>
                     </div>
                   </>
                 )}
@@ -474,7 +524,9 @@ export default function OrderDetailPage() {
 
             {/* Información del pedido */}
             <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-6">
-              <h3 className="font-semibold text-gray-900 mb-3 sm:mb-4 text-sm sm:text-base">Información</h3>
+              <h3 className="font-semibold text-gray-900 mb-3 sm:mb-4 text-sm sm:text-base">
+                Información
+              </h3>
               <div className="space-y-2 text-xs sm:text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Número:</span>
@@ -482,11 +534,15 @@ export default function OrderDetailPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Fecha:</span>
-                  <span>{new Date(order.createdAt).toLocaleDateString('es-ES')}</span>
+                  <span>
+                    {new Date(order.createdAt).toLocaleDateString("es-ES")}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Actualizado:</span>
-                  <span>{new Date(order.updatedAt).toLocaleDateString('es-ES')}</span>
+                  <span>
+                    {new Date(order.updatedAt).toLocaleDateString("es-ES")}
+                  </span>
                 </div>
               </div>
             </div>

@@ -1,14 +1,14 @@
 /**
  * API de Reseñas Admin
  * Listar todas las reseñas para administradores
- * 
+ *
  * Requiere: Rol ADMIN
  */
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
-import { translateProductName } from '@/lib/i18n';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/auth-options";
+import { translateProductName } from "@/lib/i18n";
 
 // GET - Listar todas las reseñas
 export async function GET(req: NextRequest) {
@@ -21,8 +21,8 @@ export async function GET(req: NextRequest) {
     }
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 }
+        { success: false, error: "No autenticado" },
+        { status: 401 },
       );
     }
 
@@ -30,28 +30,28 @@ export async function GET(req: NextRequest) {
       where: { email: session.user.email },
     });
 
-    if (!user || user.role !== 'ADMIN') {
+    if (!user || user.role !== "ADMIN") {
       return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 401 }
+        { success: false, error: "No autorizado" },
+        { status: 401 },
       );
     }
 
     // Get query params for filtering
     const { searchParams } = new URL(req.url);
-    const productFilter = searchParams.get('product');
-    const ratingFilter = searchParams.get('rating');
-    const verifiedFilter = searchParams.get('verified');
+    const productFilter = searchParams.get("product");
+    const ratingFilter = searchParams.get("rating");
+    const verifiedFilter = searchParams.get("verified");
 
     const where: Record<string, unknown> = {};
-    
+
     if (ratingFilter) {
       where.rating = parseInt(ratingFilter);
     }
-    
-    if (verifiedFilter === 'true') {
+
+    if (verifiedFilter === "true") {
       where.isVerified = true;
-    } else if (verifiedFilter === 'false') {
+    } else if (verifiedFilter === "false") {
       where.isVerified = false;
     }
 
@@ -74,15 +74,17 @@ export async function GET(req: NextRequest) {
         },
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
     });
 
     // Filter by product name if provided (after translation)
     let filteredReviews = reviews;
     if (productFilter) {
-      filteredReviews = reviews.filter(review => {
-        const productName = translateProductName(review.product.slug).toLowerCase();
+      filteredReviews = reviews.filter((review) => {
+        const productName = translateProductName(
+          review.product.slug,
+        ).toLowerCase();
         return productName.includes(productFilter.toLowerCase());
       });
     }
@@ -108,10 +110,10 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ success: true, resenas: resenasFormateadas });
   } catch (error) {
-    console.error('Error listando reseñas:', error);
+    console.error("Error listando reseñas:", error);
     return NextResponse.json(
-      { success: false, error: 'Error interno' },
-      { status: 500 }
+      { success: false, error: "Error interno" },
+      { status: 500 },
     );
   }
 }
@@ -127,8 +129,8 @@ export async function DELETE(req: NextRequest) {
     }
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 }
+        { success: false, error: "No autenticado" },
+        { status: 401 },
       );
     }
 
@@ -136,10 +138,10 @@ export async function DELETE(req: NextRequest) {
       where: { email: session.user.email },
     });
 
-    if (!user || user.role !== 'ADMIN') {
+    if (!user || user.role !== "ADMIN") {
       return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 401 }
+        { success: false, error: "No autorizado" },
+        { status: 401 },
       );
     }
 
@@ -148,8 +150,8 @@ export async function DELETE(req: NextRequest) {
 
     if (!Array.isArray(ids) || ids.length === 0) {
       return NextResponse.json(
-        { success: false, error: 'IDs de reseñas requeridos' },
-        { status: 400 }
+        { success: false, error: "IDs de reseñas requeridos" },
+        { status: 400 },
       );
     }
 
@@ -162,15 +164,15 @@ export async function DELETE(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({ 
-      success: true, 
-      message: `${ids.length} reseñas eliminadas` 
+    return NextResponse.json({
+      success: true,
+      message: `${ids.length} reseñas eliminadas`,
     });
   } catch (error) {
-    console.error('Error eliminando reseñas:', error);
+    console.error("Error eliminando reseñas:", error);
     return NextResponse.json(
-      { success: false, error: 'Error interno' },
-      { status: 500 }
+      { success: false, error: "Error interno" },
+      { status: 500 },
     );
   }
 }

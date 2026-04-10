@@ -49,12 +49,10 @@ export default function RootLayout({
             <CartPersistenceProvider>
               <SiteConfigProvider>
                 <Header />
-                
+
                 {/* Main Content Area */}
-                <main className="flex-grow">
-                  {children}
-                </main>
-                
+                <main className="flex-grow">{children}</main>
+
                 <Footer />
               </SiteConfigProvider>
             </CartPersistenceProvider>

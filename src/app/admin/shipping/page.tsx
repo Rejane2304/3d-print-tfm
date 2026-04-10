@@ -2,14 +2,14 @@
  * Admin Shipping Page
  * Zone management with DataTable
  */
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { 
-  Plus, 
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import {
+  Plus,
   Truck,
   Loader2,
   AlertCircle,
@@ -20,9 +20,9 @@ import {
   Clock,
   Package,
   Globe,
-} from 'lucide-react';
-import { DataTable, Column, BulkAction } from '@/components/ui/DataTable';
-import { ConfirmModal } from '@/components/ui/ConfirmModal';
+} from "lucide-react";
+import { DataTable, Column, BulkAction } from "@/components/ui/DataTable";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 interface ShippingZone extends Record<string, unknown> {
   id: string;
@@ -56,15 +56,15 @@ export default function AdminShippingPage() {
   const [zoneToDelete, setZoneToDelete] = useState<ShippingZone | null>(null);
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login?callbackUrl=/admin/shipping');
+    if (status === "unauthenticated") {
+      router.push("/login?callbackUrl=/admin/shipping");
       return;
     }
 
-    if (status === 'authenticated') {
+    if (status === "authenticated") {
       const user = session?.user as { rol?: string } | undefined;
-      if (user?.rol !== 'ADMIN') {
-        router.push('/');
+      if (user?.rol !== "ADMIN") {
+        router.push("/");
         return;
       }
       loadZones();
@@ -77,16 +77,16 @@ export default function AdminShippingPage() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('/api/admin/shipping');
+      const response = await fetch("/api/admin/shipping");
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error cargando zonas de envío');
+        throw new Error(data.error || "Error cargando zonas de envío");
       }
 
       setZones(data.zones || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : "Error desconocido");
     } finally {
       setLoading(false);
     }
@@ -102,18 +102,20 @@ export default function AdminShippingPage() {
 
     try {
       const response = await fetch(`/api/admin/shipping/${zoneToDelete.id}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        setZones(zones.filter(z => z.id !== zoneToDelete.id));
+        setZones(zones.filter((z) => z.id !== zoneToDelete.id));
       } else {
-        throw new Error(data.error || 'Error eliminando zona de envío');
+        throw new Error(data.error || "Error eliminando zona de envío");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error eliminando zona de envío');
+      setError(
+        err instanceof Error ? err.message : "Error eliminando zona de envío",
+      );
     } finally {
       setModalOpen(false);
       setZoneToDelete(null);
@@ -123,64 +125,69 @@ export default function AdminShippingPage() {
   const handleBulkDelete = async (selectedIds: string[]) => {
     try {
       let hasError = false;
-      
+
       await Promise.all(
         selectedIds.map(async (id) => {
-          const response = await fetch(`/api/admin/shipping/${id}`, { 
-            method: 'DELETE' 
+          const response = await fetch(`/api/admin/shipping/${id}`, {
+            method: "DELETE",
           });
           if (!response.ok) {
             hasError = true;
           }
-        })
+        }),
       );
-      
+
       if (hasError) {
-        setError('Algunas zonas de envío no pudieron ser eliminadas');
+        setError("Algunas zonas de envío no pudieron ser eliminadas");
       }
-      
-      setZones(zones.filter(z => !selectedIds.includes(z.id)));
+
+      setZones(zones.filter((z) => !selectedIds.includes(z.id)));
     } catch {
-      setError('Error eliminando zonas de envío');
+      setError("Error eliminando zonas de envío");
     }
   };
 
   // Estadísticas
-  const activeZones = zones.filter(z => z.activo).length;
-  const averageCost = zones.length > 0 
-    ? zones.reduce((sum, z) => sum + z.costoBase, 0) / zones.length 
-    : 0;
-  const zonesWithFreeShipping = zones.filter(z => z.envioGratisDesde !== null).length;
+  const activeZones = zones.filter((z) => z.activo).length;
+  const averageCost =
+    zones.length > 0
+      ? zones.reduce((sum, z) => sum + z.costoBase, 0) / zones.length
+      : 0;
+  const zonesWithFreeShipping = zones.filter(
+    (z) => z.envioGratisDesde !== null,
+  ).length;
 
   const getStatusColor = (estado: string) => {
     switch (estado) {
-      case 'Activo':
-        return 'bg-green-100 text-green-800';
-      case 'Inactivo':
-        return 'bg-gray-100 text-gray-800';
+      case "Activo":
+        return "bg-green-100 text-green-800";
+      case "Inactivo":
+        return "bg-gray-100 text-gray-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const columns: Column<ShippingZone>[] = [
     {
-      key: 'nombre',
-      header: 'Zona',
+      key: "nombre",
+      header: "Zona",
       sortable: true,
-      className: '',
+      className: "",
       render: (value) => (
         <div className="flex items-center gap-2 min-w-0">
           <MapPin className="h-4 w-4 text-indigo-600 flex-shrink-0" />
-          <span className="font-medium text-gray-900 truncate">{value as string}</span>
+          <span className="font-medium text-gray-900 truncate">
+            {value as string}
+          </span>
         </div>
       ),
     },
     {
-      key: 'pais',
-      header: 'País',
+      key: "pais",
+      header: "País",
       sortable: true,
-      className: 'hidden sm:table-cell',
+      className: "hidden sm:table-cell",
       render: (value) => (
         <div className="flex items-center gap-1">
           <Globe className="h-3 w-3 text-gray-400 flex-shrink-0" />
@@ -189,10 +196,10 @@ export default function AdminShippingPage() {
       ),
     },
     {
-      key: 'regionesTexto',
-      header: 'Regiones',
+      key: "regionesTexto",
+      header: "Regiones",
       sortable: true,
-      className: 'hidden md:table-cell',
+      className: "hidden md:table-cell",
       render: (value) => (
         <span className="text-sm text-gray-600 truncate max-w-[150px] block">
           {value as string}
@@ -200,33 +207,38 @@ export default function AdminShippingPage() {
       ),
     },
     {
-      key: 'costoBase',
-      header: 'Costo',
+      key: "costoBase",
+      header: "Costo",
       sortable: true,
-      className: 'hidden lg:table-cell',
+      className: "hidden lg:table-cell",
       render: (_, zone) => (
         <div className="flex items-center gap-1">
           <Euro className="h-3 w-3 text-gray-400 flex-shrink-0" />
-          <span className="font-medium text-gray-900">{zone.costoBaseTexto}</span>
+          <span className="font-medium text-gray-900">
+            {zone.costoBaseTexto}
+          </span>
         </div>
       ),
     },
     {
-      key: 'envioGratisDesde',
-      header: 'Envío Gratis',
+      key: "envioGratisDesde",
+      header: "Envío Gratis",
       sortable: true,
-      className: 'hidden xl:table-cell',
-      render: (value) => (
-        value 
-          ? <span className="text-sm text-green-600 font-medium">{value as string}€</span>
-          : <span className="text-sm text-gray-400">-</span>
-      ),
+      className: "hidden xl:table-cell",
+      render: (value) =>
+        value ? (
+          <span className="text-sm text-green-600 font-medium">
+            {value as string}€
+          </span>
+        ) : (
+          <span className="text-sm text-gray-400">-</span>
+        ),
     },
     {
-      key: 'diasEstimadosTexto',
-      header: 'Entrega',
+      key: "diasEstimadosTexto",
+      header: "Entrega",
       sortable: true,
-      className: 'hidden lg:table-cell',
+      className: "hidden lg:table-cell",
       render: (value) => (
         <div className="flex items-center gap-1">
           <Clock className="h-3 w-3 text-gray-400 flex-shrink-0" />
@@ -235,20 +247,22 @@ export default function AdminShippingPage() {
       ),
     },
     {
-      key: 'estado',
-      header: 'Estado',
+      key: "estado",
+      header: "Estado",
       sortable: true,
-      className: 'hidden md:table-cell',
+      className: "hidden md:table-cell",
       render: (value) => (
-        <span className={`px-2 py-0.5 inline-flex text-[10px] leading-4 font-semibold rounded-full ${getStatusColor(value as string)}`}>
+        <span
+          className={`px-2 py-0.5 inline-flex text-[10px] leading-4 font-semibold rounded-full ${getStatusColor(value as string)}`}
+        >
           {value as string}
         </span>
       ),
     },
     {
-      key: 'actions',
-      header: 'Acciones',
-      className: '',
+      key: "actions",
+      header: "Acciones",
+      className: "",
       render: (_, zone) => (
         <div className="flex items-center gap-1">
           <Link
@@ -275,15 +289,15 @@ export default function AdminShippingPage() {
 
   const bulkActions: BulkAction[] = [
     {
-      key: 'delete',
-      label: 'Eliminar seleccionados',
+      key: "delete",
+      label: "Eliminar seleccionados",
       icon: <Trash2 className="h-4 w-4" />,
-      variant: 'danger',
+      variant: "danger",
       onClick: handleBulkDelete,
     },
   ];
 
-  if (status === 'loading' || loading) {
+  if (status === "loading" || loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -302,7 +316,9 @@ export default function AdminShippingPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Truck className="h-8 w-8 text-indigo-600" />
-              <h1 className="text-2xl font-bold text-gray-900">Configuración de Envío</h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Configuración de Envío
+              </h1>
             </div>
             <div className="flex items-center gap-4">
               <Link
@@ -328,7 +344,10 @@ export default function AdminShippingPage() {
         <nav className="flex mb-6" aria-label="Breadcrumb">
           <ol className="flex items-center space-x-2">
             <li>
-              <Link href="/admin/dashboard" className="text-gray-500 hover:text-gray-700">
+              <Link
+                href="/admin/dashboard"
+                className="text-gray-500 hover:text-gray-700"
+              >
                 Panel
               </Link>
             </li>
@@ -356,7 +375,9 @@ export default function AdminShippingPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-500">Total Zonas</p>
-                <p className="text-2xl font-bold text-gray-900">{zones.length}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {zones.length}
+                </p>
               </div>
             </div>
           </div>
@@ -367,7 +388,9 @@ export default function AdminShippingPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-500">Activas</p>
-                <p className="text-2xl font-bold text-green-600">{activeZones}</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {activeZones}
+                </p>
               </div>
             </div>
           </div>
@@ -378,7 +401,9 @@ export default function AdminShippingPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-500">Costo Promedio</p>
-                <p className="text-2xl font-bold text-blue-600">{averageCost.toFixed(2)}€</p>
+                <p className="text-2xl font-bold text-blue-600">
+                  {averageCost.toFixed(2)}€
+                </p>
               </div>
             </div>
           </div>
@@ -389,7 +414,9 @@ export default function AdminShippingPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-500">Con Envío Gratis</p>
-                <p className="text-2xl font-bold text-purple-600">{zonesWithFreeShipping}</p>
+                <p className="text-2xl font-bold text-purple-600">
+                  {zonesWithFreeShipping}
+                </p>
               </div>
             </div>
           </div>
@@ -401,7 +428,7 @@ export default function AdminShippingPage() {
           columns={columns}
           rowKey="id"
           searchable={true}
-          searchKeys={['nombre', 'pais', 'regionesTexto']}
+          searchKeys={["nombre", "pais", "regionesTexto"]}
           searchPlaceholder="Buscar zonas..."
           pagination={true}
           pageSizeOptions={[10, 25, 50, 100]}

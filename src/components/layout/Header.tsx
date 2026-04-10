@@ -2,16 +2,16 @@
  * Header Component with Avatar Menu
  * Shows avatar with first letter for authenticated users
  */
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useSession, signOut } from 'next-auth/react';
-import { useState, useRef, useEffect } from 'react';
-import Image from 'next/image';
-import { 
-  Home, 
-  User, 
-  LogOut, 
+import Link from "next/link";
+import { useSession, signOut } from "next-auth/react";
+import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
+import {
+  Home,
+  User,
+  LogOut,
   LayoutDashboard,
   Menu,
   X,
@@ -30,9 +30,9 @@ import {
   Ticket,
   HelpCircle,
   Star,
-  Truck
-} from 'lucide-react';
-import CartIcon from '@/components/cart/CartIcon';
+  Truck,
+} from "lucide-react";
+import CartIcon from "@/components/cart/CartIcon";
 
 export default function Header() {
   const { data: session, status } = useSession();
@@ -41,62 +41,65 @@ export default function Header() {
   const [adminMenuOpen, setAdminMenuOpen] = useState(false); // Submenu for admin on mobile
   const userMenuRef = useRef<HTMLDivElement>(null);
 
-  const isAuthenticated = status === 'authenticated';
-  const isAdmin = session?.user?.rol === 'ADMIN';
+  const isAuthenticated = status === "authenticated";
+  const isAdmin = session?.user?.rol === "ADMIN";
 
   // Get first letter of user's name
-  const userName = session?.user?.name || '';
+  const userName = session?.user?.name || "";
   const firstLetter = userName.charAt(0).toUpperCase();
 
   const handleLogout = async () => {
     try {
       // Clear cart from database for authenticated users
       if (isAuthenticated) {
-        await fetch('/api/cart/clear', { method: 'DELETE' });
+        await fetch("/api/cart/clear", { method: "DELETE" });
       }
     } catch (err) {
-      console.error('Error clearing cart on logout:', err);
+      console.error("Error clearing cart on logout:", err);
     } finally {
       // Always clear localStorage and sign out
-      localStorage.removeItem('cart');
-      window.dispatchEvent(new Event('cartUpdated'));
-      await signOut({ callbackUrl: '/' });
+      localStorage.removeItem("cart");
+      window.dispatchEvent(new Event("cartUpdated"));
+      await signOut({ callbackUrl: "/" });
     }
   };
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(event.target as Node)
+      ) {
         setUserMenuOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Close mobile menu on escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         setMobileMenuOpen(false);
         setUserMenuOpen(false);
       }
     };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   // Prevent body scroll when mobile menu is open
   useEffect(() => {
     if (mobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     }
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     };
   }, [mobileMenuOpen]);
 
@@ -106,15 +109,15 @@ export default function Header() {
         <div className="flex justify-between items-center h-16 lg:h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-              <Image
-                src="/images/logo.svg"
-                alt="3D Print"
-                width={120}
-                height={40}
-                className="h-8 lg:h-10 w-auto"
-                style={{ height: 'auto', width: 'auto' }}
-                priority
-              />
+            <Image
+              src="/images/logo.svg"
+              alt="3D Print"
+              width={120}
+              height={40}
+              className="h-8 lg:h-10 w-auto"
+              style={{ height: "auto", width: "auto" }}
+              priority
+            />
           </Link>
 
           {/* Desktop Navigation */}
@@ -136,8 +139,6 @@ export default function Header() {
               <Package className="h-5 w-5" />
               <span className="text-sm font-medium">Catálogo</span>
             </Link>
-
-
           </nav>
 
           {/* User Menu */}
@@ -164,22 +165,27 @@ export default function Header() {
                     {firstLetter || <User className="h-4 w-4" />}
                   </div>
                   {/* Dropdown Arrow - Hidden on very small screens */}
-                  <ChevronDown 
-                    className={`hidden sm:block h-4 w-4 text-gray-500 transition-transform duration-200 ${userMenuOpen ? 'rotate-180' : ''}`} 
+                  <ChevronDown
+                    className={`hidden sm:block h-4 w-4 text-gray-500 transition-transform duration-200 ${userMenuOpen ? "rotate-180" : ""}`}
                     aria-hidden="true"
                   />
                 </button>
 
                 {/* Dropdown Menu with Scroll */}
                 {userMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-56 sm:w-64 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 max-h-[calc(100vh-100px)] overflow-y-auto overscroll-contain"
+                  <div
+                    className="absolute right-0 mt-2 w-56 sm:w-64 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 max-h-[calc(100vh-100px)] overflow-y-auto overscroll-contain"
                     role="menu"
                     aria-label="Menú de usuario"
                   >
                     {/* User Info */}
                     <div className="px-4 py-3 border-b border-gray-100 bg-indigo-50 rounded-t-lg sticky top-0">
-                      <p className="font-medium text-gray-900">{session?.user?.name}</p>
-                      <p className="text-xs text-gray-500">{session?.user?.email}</p>
+                      <p className="font-medium text-gray-900">
+                        {session?.user?.name}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {session?.user?.email}
+                      </p>
                     </div>
 
                     {/* Menu Links */}
@@ -251,7 +257,9 @@ export default function Header() {
                             <span className="text-sm">Alertas</span>
                           </Link>
                           <div className="border-t border-gray-100 my-2" />
-                          <p className="px-4 py-1 text-xs text-gray-400 font-medium uppercase tracking-wider">Configuración</p>
+                          <p className="px-4 py-1 text-xs text-gray-400 font-medium uppercase tracking-wider">
+                            Configuración
+                          </p>
                           <Link
                             href="/admin/categories"
                             onClick={() => setUserMenuOpen(false)}
@@ -385,7 +393,9 @@ export default function Header() {
                 title="Iniciar sesión"
               >
                 <User className="h-5 w-5 flex-shrink-0" />
-                <span className="text-sm font-medium hidden sm:block">Iniciar sesión</span>
+                <span className="text-sm font-medium hidden sm:block">
+                  Iniciar sesión
+                </span>
               </Link>
             )}
           </div>
@@ -394,10 +404,14 @@ export default function Header() {
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="md:hidden p-3 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors"
-            aria-label={mobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
+            aria-label={mobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
             aria-expanded={mobileMenuOpen}
           >
-            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            {mobileMenuOpen ? (
+              <X className="h-6 w-6" />
+            ) : (
+              <Menu className="h-6 w-6" />
+            )}
           </button>
         </div>
       </div>
@@ -406,7 +420,7 @@ export default function Header() {
       {mobileMenuOpen && (
         <div className="md:hidden fixed inset-0 top-16 z-40">
           {/* Backdrop */}
-          <div 
+          <div
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setMobileMenuOpen(false)}
           />
@@ -480,66 +494,21 @@ export default function Header() {
                       <LayoutDashboard className="h-5 w-5 flex-shrink-0" />
                       <span className="font-medium">Panel Admin</span>
                     </div>
-                    <ChevronDown 
-                      className={`h-5 w-5 flex-shrink-0 transition-transform duration-200 ${adminMenuOpen ? 'rotate-180' : ''}`}
+                    <ChevronDown
+                      className={`h-5 w-5 flex-shrink-0 transition-transform duration-200 ${adminMenuOpen ? "rotate-180" : ""}`}
                     />
                   </button>
-                  
-                  {/* Admin Submenu - Scrollable */}
+
+                  {/* Admin Submenu - Scrollable - ORDEN ALFABÉTICO */}
                   {adminMenuOpen && (
                     <div className="ml-4 pl-4 border-l-2 border-indigo-200 space-y-1 max-h-[60vh] overflow-y-auto">
                       <Link
-                        href="/admin/dashboard"
-                        className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-h-[44px] transition-colors"
-                        onClick={() => { setMobileMenuOpen(false); setAdminMenuOpen(false); }}
-                      >
-                        <LayoutDashboard className="h-4 w-4 flex-shrink-0" />
-                        <span className="text-sm">Dashboard</span>
-                      </Link>
-                      <Link
-                        href="/admin/clients"
-                        className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-h-[44px] transition-colors"
-                        onClick={() => { setMobileMenuOpen(false); setAdminMenuOpen(false); }}
-                      >
-                        <Users className="h-4 w-4 flex-shrink-0" />
-                        <span className="text-sm">Clientes</span>
-                      </Link>
-                      <Link
-                        href="/admin/orders"
-                        className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-h-[44px] transition-colors"
-                        onClick={() => { setMobileMenuOpen(false); setAdminMenuOpen(false); }}
-                      >
-                        <ClipboardList className="h-4 w-4 flex-shrink-0" />
-                        <span className="text-sm">Pedidos</span>
-                      </Link>
-                      <Link
-                        href="/admin/products"
-                        className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-h-[44px] transition-colors"
-                        onClick={() => { setMobileMenuOpen(false); setAdminMenuOpen(false); }}
-                      >
-                        <Package className="h-4 w-4 flex-shrink-0" />
-                        <span className="text-sm">Productos</span>
-                      </Link>
-                      <Link
-                        href="/admin/inventory"
-                        className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-h-[44px] transition-colors"
-                        onClick={() => { setMobileMenuOpen(false); setAdminMenuOpen(false); }}
-                      >
-                        <Warehouse className="h-4 w-4 flex-shrink-0" />
-                        <span className="text-sm">Inventario</span>
-                      </Link>
-                      <Link
-                        href="/admin/invoices"
-                        className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-h-[44px] transition-colors"
-                        onClick={() => { setMobileMenuOpen(false); setAdminMenuOpen(false); }}
-                      >
-                        <FileText className="h-4 w-4 flex-shrink-0" />
-                        <span className="text-sm">Facturas</span>
-                      </Link>
-                      <Link
                         href="/admin/alerts"
                         className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-h-[44px] transition-colors"
-                        onClick={() => { setMobileMenuOpen(false); setAdminMenuOpen(false); }}
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setAdminMenuOpen(false);
+                        }}
                       >
                         <Bell className="h-4 w-4 flex-shrink-0" />
                         <span className="text-sm">Alertas</span>
@@ -547,50 +516,134 @@ export default function Header() {
                       <Link
                         href="/admin/categories"
                         className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-h-[44px] transition-colors"
-                        onClick={() => { setMobileMenuOpen(false); setAdminMenuOpen(false); }}
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setAdminMenuOpen(false);
+                        }}
                       >
                         <Folder className="h-4 w-4 flex-shrink-0" />
                         <span className="text-sm">Categorías</span>
                       </Link>
                       <Link
+                        href="/admin/clients"
+                        className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-h-[44px] transition-colors"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setAdminMenuOpen(false);
+                        }}
+                      >
+                        <Users className="h-4 w-4 flex-shrink-0" />
+                        <span className="text-sm">Clientes</span>
+                      </Link>
+                      <Link
+                        href="/admin/site-config"
+                        className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-h-[44px] transition-colors"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setAdminMenuOpen(false);
+                        }}
+                      >
+                        <Settings className="h-4 w-4 flex-shrink-0" />
+                        <span className="text-sm">Configuración</span>
+                      </Link>
+                      <Link
                         href="/admin/coupons"
                         className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-h-[44px] transition-colors"
-                        onClick={() => { setMobileMenuOpen(false); setAdminMenuOpen(false); }}
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setAdminMenuOpen(false);
+                        }}
                       >
                         <Ticket className="h-4 w-4 flex-shrink-0" />
                         <span className="text-sm">Cupones</span>
                       </Link>
                       <Link
-                        href="/admin/faqs"
+                        href="/admin/dashboard"
                         className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-h-[44px] transition-colors"
-                        onClick={() => { setMobileMenuOpen(false); setAdminMenuOpen(false); }}
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setAdminMenuOpen(false);
+                        }}
                       >
-                        <HelpCircle className="h-4 w-4 flex-shrink-0" />
-                        <span className="text-sm">FAQs</span>
-                      </Link>
-                      <Link
-                        href="/admin/reviews"
-                        className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-h-[44px] transition-colors"
-                        onClick={() => { setMobileMenuOpen(false); setAdminMenuOpen(false); }}
-                      >
-                        <Star className="h-4 w-4 flex-shrink-0" />
-                        <span className="text-sm">Reseñas</span>
+                        <LayoutDashboard className="h-4 w-4 flex-shrink-0" />
+                        <span className="text-sm">Dashboard</span>
                       </Link>
                       <Link
                         href="/admin/shipping"
                         className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-h-[44px] transition-colors"
-                        onClick={() => { setMobileMenuOpen(false); setAdminMenuOpen(false); }}
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setAdminMenuOpen(false);
+                        }}
                       >
                         <Truck className="h-4 w-4 flex-shrink-0" />
                         <span className="text-sm">Envíos</span>
                       </Link>
                       <Link
-                        href="/admin/site-config"
+                        href="/admin/invoices"
                         className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-h-[44px] transition-colors"
-                        onClick={() => { setMobileMenuOpen(false); setAdminMenuOpen(false); }}
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setAdminMenuOpen(false);
+                        }}
                       >
-                        <Settings className="h-4 w-4 flex-shrink-0" />
-                        <span className="text-sm">Configuración</span>
+                        <FileText className="h-4 w-4 flex-shrink-0" />
+                        <span className="text-sm">Facturas</span>
+                      </Link>
+                      <Link
+                        href="/admin/faqs"
+                        className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-h-[44px] transition-colors"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setAdminMenuOpen(false);
+                        }}
+                      >
+                        <HelpCircle className="h-4 w-4 flex-shrink-0" />
+                        <span className="text-sm">FAQs</span>
+                      </Link>
+                      <Link
+                        href="/admin/inventory"
+                        className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-h-[44px] transition-colors"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setAdminMenuOpen(false);
+                        }}
+                      >
+                        <Warehouse className="h-4 w-4 flex-shrink-0" />
+                        <span className="text-sm">Inventario</span>
+                      </Link>
+                      <Link
+                        href="/admin/orders"
+                        className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-h-[44px] transition-colors"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setAdminMenuOpen(false);
+                        }}
+                      >
+                        <ClipboardList className="h-4 w-4 flex-shrink-0" />
+                        <span className="text-sm">Pedidos</span>
+                      </Link>
+                      <Link
+                        href="/admin/products"
+                        className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-h-[44px] transition-colors"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setAdminMenuOpen(false);
+                        }}
+                      >
+                        <Package className="h-4 w-4 flex-shrink-0" />
+                        <span className="text-sm">Productos</span>
+                      </Link>
+                      <Link
+                        href="/admin/reviews"
+                        className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-h-[44px] transition-colors"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setAdminMenuOpen(false);
+                        }}
+                      >
+                        <Star className="h-4 w-4 flex-shrink-0" />
+                        <span className="text-sm">Reseñas</span>
                       </Link>
                     </div>
                   )}

@@ -2,13 +2,13 @@
  * Gestión de Facturas Page - Admin
  * Invoice listing and management with DataTable component
  */
-'use client';
+"use client";
 
-import { useEffect, useState, useCallback } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { 
+import { useEffect, useState, useCallback } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import {
   Loader2,
   FileText,
   Plus,
@@ -17,10 +17,10 @@ import {
   Printer,
   Eye,
   XCircle,
-  Trash2
-} from 'lucide-react';
-import { DataTable, Column, BulkAction } from '@/components/ui/DataTable';
-import ConfirmModal from '@/components/ui/ConfirmModal';
+  Trash2,
+} from "lucide-react";
+import { DataTable, Column, BulkAction } from "@/components/ui/DataTable";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 
 interface Invoice {
   id: string;
@@ -44,9 +44,9 @@ export default function AdminInvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState("");
   const [showGenerateModal, setShowGenerateModal] = useState(false);
-  const [orderIdInput, setOrderIdInput] = useState('');
+  const [orderIdInput, setOrderIdInput] = useState("");
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [invoiceToCancel, setInvoiceToCancel] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -58,35 +58,35 @@ export default function AdminInvoicesPage() {
 
       const params = new URLSearchParams();
       if (statusFilter) {
-        if (statusFilter === 'active') params.append('anulada', 'false');
-        if (statusFilter === 'cancelled') params.append('anulada', 'true');
+        if (statusFilter === "active") params.append("anulada", "false");
+        if (statusFilter === "cancelled") params.append("anulada", "true");
       }
 
       const response = await fetch(`/api/admin/invoices?${params.toString()}`);
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error al cargar facturas');
+        throw new Error(data.error || "Error al cargar facturas");
       }
 
       setInvoices(data.facturas || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : "Error desconocido");
     } finally {
       setLoading(false);
     }
   }, [statusFilter]);
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login?callbackUrl=/admin/invoices');
+    if (status === "unauthenticated") {
+      router.push("/login?callbackUrl=/admin/invoices");
       return;
     }
 
-    if (status === 'authenticated') {
+    if (status === "authenticated") {
       const user = session?.user as { rol?: string } | undefined;
-      if (user?.rol !== 'ADMIN') {
-        router.push('/');
+      if (user?.rol !== "ADMIN") {
+        router.push("/");
         return;
       }
       loadInvoices();
@@ -95,47 +95,50 @@ export default function AdminInvoicesPage() {
 
   const generateInvoice = async () => {
     if (!orderIdInput.trim()) {
-      setError('Introduce el número de pedido');
+      setError("Introduce el número de pedido");
       return;
     }
 
     try {
       setError(null);
 
-      const searchResponse = await fetch(`/api/admin/orders?search=${encodeURIComponent(orderIdInput.trim())}`);
+      const searchResponse = await fetch(
+        `/api/admin/orders?search=${encodeURIComponent(orderIdInput.trim())}`,
+      );
       const searchData = await searchResponse.json();
 
       if (!searchResponse.ok) {
-        throw new Error('Error al buscar pedido');
+        throw new Error("Error al buscar pedido");
       }
 
-      const pedido = searchData.pedidos?.find((p: { orderNumber: string }) =>
-        p.orderNumber.toLowerCase() === orderIdInput.trim().toLowerCase()
+      const pedido = searchData.pedidos?.find(
+        (p: { orderNumber: string }) =>
+          p.orderNumber.toLowerCase() === orderIdInput.trim().toLowerCase(),
       );
 
       if (!pedido) {
-        throw new Error('Pedido no encontrado con ese número');
+        throw new Error("Pedido no encontrado con ese número");
       }
 
-      const response = await fetch('/api/admin/invoices', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/admin/invoices", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ orderId: pedido.id }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error al generar factura');
+        throw new Error(data.error || "Error al generar factura");
       }
 
       setShowGenerateModal(false);
-      setOrderIdInput('');
-      setSuccessMessage('Factura generada correctamente');
+      setOrderIdInput("");
+      setSuccessMessage("Factura generada correctamente");
       setTimeout(() => setSuccessMessage(null), 3000);
       await loadInvoices();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : "Error desconocido");
     }
   };
 
@@ -149,7 +152,7 @@ export default function AdminInvoicesPage() {
 
     try {
       const response = await fetch(`/api/admin/invoices/${invoiceToCancel}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (response.ok) {
@@ -158,60 +161,73 @@ export default function AdminInvoicesPage() {
         await loadInvoices();
       }
     } catch {
-      setError('Error al anular factura');
+      setError("Error al anular factura");
     }
   };
 
   const openPDF = (id: string) => {
-    window.open(`/api/admin/invoices/${id}/pdf`, '_blank');
+    window.open(`/api/admin/invoices/${id}/pdf`, "_blank");
   };
 
   const handleDeleteInvoices = async (selectedIds: string[]) => {
-    if (!confirm(`¿Estás seguro de que deseas eliminar ${selectedIds.length} factura(s)?`)) {
+    if (
+      !confirm(
+        `¿Estás seguro de que deseas eliminar ${selectedIds.length} factura(s)?`,
+      )
+    ) {
       return;
     }
-    
+
     try {
       await Promise.all(
-        selectedIds.map(id =>
-          fetch(`/api/admin/invoices/${id}`, { method: 'DELETE' })
-        )
+        selectedIds.map((id) =>
+          fetch(`/api/admin/invoices/${id}`, { method: "DELETE" }),
+        ),
       );
       await loadInvoices();
     } catch (error) {
-      console.error('Error al eliminar facturas:', error);
+      console.error("Error al eliminar facturas:", error);
     }
   };
 
   const columns: Column<Invoice>[] = [
     {
-      key: 'invoiceNumber',
-      header: 'Factura #',
+      key: "invoiceNumber",
+      header: "Factura #",
       sortable: true,
-      className: '',
+      className: "",
       render: (value) => (
-        <div className="text-sm font-medium text-indigo-600">{value as string}</div>
+        <div className="text-sm font-medium text-indigo-600">
+          {value as string}
+        </div>
       ),
     },
     {
-      key: 'pedido',
-      header: 'Cliente',
-      className: '',
+      key: "pedido",
+      header: "Cliente",
+      className: "",
       render: (value) => {
-        const pedido = value as { usuario: { nombre: string; email: string; nif: string | null }; orderNumber: string };
+        const pedido = value as {
+          usuario: { nombre: string; email: string; nif: string | null };
+          orderNumber: string;
+        };
         return (
           <div>
-            <div className="text-sm font-medium text-gray-900 truncate">{pedido.usuario.nombre}</div>
-            <div className="text-sm text-gray-500 hidden sm:block">{pedido.orderNumber}</div>
+            <div className="text-sm font-medium text-gray-900 truncate">
+              {pedido.usuario.nombre}
+            </div>
+            <div className="text-sm text-gray-500 hidden sm:block">
+              {pedido.orderNumber}
+            </div>
           </div>
         );
       },
     },
     {
-      key: 'total',
-      header: 'Total',
+      key: "total",
+      header: "Total",
       sortable: true,
-      className: '',
+      className: "",
       render: (value) => (
         <span className="text-sm text-gray-900 font-medium">
           {Number(value).toFixed(2)} €
@@ -219,24 +235,24 @@ export default function AdminInvoicesPage() {
       ),
     },
     {
-      key: 'emitidaEn',
-      header: 'Fecha',
+      key: "emitidaEn",
+      header: "Fecha",
       sortable: true,
-      className: 'hidden md:table-cell',
+      className: "hidden md:table-cell",
       render: (value) => (
         <span className="text-sm text-gray-500">
-          {value 
-            ? new Date(value as string).toLocaleDateString('es-ES')
-            : 'N/A'}
+          {value
+            ? new Date(value as string).toLocaleDateString("es-ES")
+            : "N/A"}
         </span>
       ),
     },
     {
-      key: 'anulada',
-      header: 'Estado',
+      key: "anulada",
+      header: "Estado",
       sortable: true,
-      className: 'hidden lg:table-cell',
-      render: (value) => (
+      className: "hidden lg:table-cell",
+      render: (value) =>
         value ? (
           <span className="px-2 inline-flex items-center gap-1 text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
             <XCircle className="h-3 w-3" />
@@ -247,13 +263,12 @@ export default function AdminInvoicesPage() {
             <CheckCircle2 className="h-3 w-3" />
             <span className="hidden xl:inline">Activa</span>
           </span>
-        )
-      ),
+        ),
     },
     {
-      key: 'actions',
-      header: 'Acciones',
-      className: '',
+      key: "actions",
+      header: "Acciones",
+      className: "",
       render: (_, row) => (
         <div className="flex items-center justify-end gap-1">
           <Link
@@ -293,15 +308,15 @@ export default function AdminInvoicesPage() {
 
   const bulkActions: BulkAction[] = [
     {
-      key: 'delete',
-      label: 'Eliminar seleccionados',
+      key: "delete",
+      label: "Eliminar seleccionados",
       icon: <Trash2 className="h-4 w-4" />,
-      variant: 'danger',
+      variant: "danger",
       onClick: handleDeleteInvoices,
     },
   ];
 
-  if (status === 'loading' || loading) {
+  if (status === "loading" || loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -320,7 +335,9 @@ export default function AdminInvoicesPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <FileText className="h-8 w-8 text-indigo-600" />
-              <h1 className="text-2xl font-bold text-gray-900">Gestión de Facturas</h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Gestión de Facturas
+              </h1>
             </div>
             <div className="flex items-center gap-4">
               <Link
@@ -353,7 +370,10 @@ export default function AdminInvoicesPage() {
 
         {/* Success */}
         {successMessage && (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3" data-testid="invoice-generated-message">
+          <div
+            className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3"
+            data-testid="invoice-generated-message"
+          >
             <CheckCircle2 className="h-5 w-5 text-green-600" />
             <p className="text-green-700">{successMessage}</p>
           </div>
@@ -380,7 +400,11 @@ export default function AdminInvoicesPage() {
           columns={columns}
           rowKey="id"
           searchable
-          searchKeys={['invoiceNumber', 'pedido.usuario.nombre', 'pedido.orderNumber']}
+          searchKeys={[
+            "invoiceNumber",
+            "pedido.usuario.nombre",
+            "pedido.orderNumber",
+          ]}
           searchPlaceholder="Buscar por número de factura..."
           pagination
           selectable
@@ -396,12 +420,17 @@ export default function AdminInvoicesPage() {
       {showGenerateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Generar Nueva Factura</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">
+              Generar Nueva Factura
+            </h2>
             <p className="text-sm text-gray-600 mb-4">
               Introduce el ID del pedido entregado para generar una factura.
             </p>
             <div className="mb-4">
-              <label htmlFor="orderIdInput" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="orderIdInput"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Número de Pedido
               </label>
               <input
@@ -423,7 +452,7 @@ export default function AdminInvoicesPage() {
               <button
                 onClick={() => {
                   setShowGenerateModal(false);
-                  setOrderIdInput('');
+                  setOrderIdInput("");
                   setError(null);
                 }}
                 className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-300 transition-colors"

@@ -3,27 +3,27 @@
  * GET /api/admin/inventory/[id]/history
  * Returns inventory movement history for a specific product
  */
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
-import { prisma } from '@/lib/db/prisma';
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/auth-options";
+import { prisma } from "@/lib/db/prisma";
 import {
   translateMovementType,
   translateErrorMessage,
   translateProductName,
-} from '@/lib/i18n';
+} from "@/lib/i18n";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 }
+        { success: false, error: "No autenticado" },
+        { status: 401 },
       );
     }
 
@@ -33,10 +33,10 @@ export async function GET(
       select: { id: true, role: true },
     });
 
-    if (!adminUser || adminUser.role !== 'ADMIN') {
+    if (!adminUser || adminUser.role !== "ADMIN") {
       return NextResponse.json(
-        { success: false, error: 'Acceso denegado' },
-        { status: 403 }
+        { success: false, error: "Acceso denegado" },
+        { status: 403 },
       );
     }
 
@@ -44,8 +44,8 @@ export async function GET(
 
     // Get query parameters for pagination
     const { searchParams } = new URL(req.url);
-    const page = Number.parseInt(searchParams.get('page') || '1', 10);
-    const limit = Number.parseInt(searchParams.get('limit') || '20', 10);
+    const page = Number.parseInt(searchParams.get("page") || "1", 10);
+    const limit = Number.parseInt(searchParams.get("limit") || "20", 10);
     const skip = (page - 1) * limit;
 
     // Get product details
@@ -66,8 +66,8 @@ export async function GET(
 
     if (!product) {
       return NextResponse.json(
-        { success: false, error: 'Producto no encontrado' },
-        { status: 404 }
+        { success: false, error: "Producto no encontrado" },
+        { status: 404 },
       );
     }
 
@@ -80,7 +80,7 @@ export async function GET(
     const movements = await prisma.inventoryMovement.findMany({
       where: { productId },
       include: {
-        user: {
+        createdByUser: {
           select: {
             name: true,
             email: true,
@@ -92,7 +92,7 @@ export async function GET(
           },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       skip,
       take: limit,
     });
@@ -107,7 +107,7 @@ export async function GET(
       razon: movement.reason,
       referencia: movement.reference,
       fecha: movement.createdAt,
-      usuario: movement.user?.name || 'Sistema',
+      usuario: movement.createdByUser?.name || "Sistema",
       pedido: movement.order?.orderNumber || null,
     }));
 
@@ -129,10 +129,13 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('Error fetching inventory history:', error);
+    console.error("Error fetching inventory history:", error);
     return NextResponse.json(
-      { success: false, error: translateErrorMessage('Error al obtener historial') },
-      { status: 500 }
+      {
+        success: false,
+        error: translateErrorMessage("Error al obtener historial"),
+      },
+      { status: 500 },
     );
   }
 }

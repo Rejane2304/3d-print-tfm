@@ -5,18 +5,18 @@
  */
 
 // Force dynamic rendering to prevent static caching
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-import Link from 'next/link';
-import Image from 'next/image';
-import { prisma } from '@/lib/db/prisma';
+import Link from "next/link";
+import Image from "next/image";
+import { prisma } from "@/lib/db/prisma";
 import {
   translateProductName,
   translateProductDescription,
   translateProductShortDescription,
   translateCategoryName,
-} from '@/lib/i18n';
+} from "@/lib/i18n";
 
 async function getFeaturedProducts() {
   // Solo productos marcados como destacados por el admin (exclusivamente)
@@ -32,7 +32,7 @@ async function getFeaturedProducts() {
       },
     },
     orderBy: {
-      updatedAt: 'desc',
+      updatedAt: "desc",
     },
     take: 3,
   });
@@ -54,7 +54,7 @@ async function getCategories() {
       isActive: true,
     },
     orderBy: {
-      displayOrder: 'asc',
+      displayOrder: "asc",
     },
   });
 
@@ -92,7 +92,9 @@ export default async function HomePage() {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 mb-6">
               <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-              <span className="text-sm font-medium text-white/90">Impresión 3D Profesional</span>
+              <span className="text-sm font-medium text-white/90">
+                Impresión 3D Profesional
+              </span>
             </div>
 
             {/* Title */}
@@ -106,8 +108,9 @@ export default async function HomePage() {
 
             {/* Description */}
             <p className="text-lg sm:text-xl lg:text-2xl text-white/80 mb-8 max-w-2xl leading-relaxed">
-              Descubre nuestra colección de productos impresos en 3D con los mejores materiales PLA y PETG. 
-              Calidad profesional, precios competitivos.
+              Descubre nuestra colección de productos impresos en 3D con los
+              mejores materiales PLA y PETG. Calidad profesional, precios
+              competitivos.
             </p>
 
             {/* CTA Button */}
@@ -116,8 +119,18 @@ export default async function HomePage() {
                 href="/products"
                 className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold rounded-lg text-indigo-900 bg-white hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                <svg
+                  className="w-5 h-5 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                  />
                 </svg>
                 Explorar Productos
               </Link>
@@ -128,8 +141,18 @@ export default async function HomePage() {
         {/* Scroll indicator */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10 hidden lg:block">
           <div className="animate-bounce">
-            <svg className="w-6 h-6 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            <svg
+              className="w-6 h-6 text-white/60"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 14l-7 7m0 0l-7-7m7 7V3"
+              />
             </svg>
           </div>
         </div>
@@ -161,7 +184,9 @@ export default async function HomePage() {
                 )}
                 <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors" />
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-2">
-                  <span className="text-base sm:text-lg lg:text-2xl font-bold text-center px-2 sm:px-4">{category.name}</span>
+                  <span className="text-base sm:text-lg lg:text-2xl font-bold text-center px-2 sm:px-4">
+                    {category.name}
+                  </span>
                 </div>
               </Link>
             ))}
@@ -177,12 +202,14 @@ export default async function HomePage() {
             <span className="inline-block px-3 sm:px-4 py-1.5 bg-indigo-100 text-indigo-700 rounded-full text-xs sm:text-sm font-medium mb-3 sm:mb-4">
               Más Populares
             </span>
-            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4">Productos Destacados</h2>
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4">
+              Productos Destacados
+            </h2>
             <p className="text-sm sm:text-lg text-gray-600 max-w-2xl mx-auto px-4 sm:px-0">
               Los favoritos de nuestros clientes, impresos con la mejor calidad
             </p>
           </div>
-          
+
           {featuredProducts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
               {featuredProducts.map((product) => (
@@ -204,16 +231,26 @@ export default async function HomePage() {
                         />
                       ) : (
                         <div className="flex items-center justify-center h-full text-gray-400">
-                          <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          <svg
+                            className="w-16 h-16"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={1}
+                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                            />
                           </svg>
                         </div>
                       )}
-                      
+
                       {/* Hover Overlay */}
                       <div className="absolute inset-0 bg-indigo-600/0 group-hover:bg-indigo-600/10 transition-all duration-500" />
                     </div>
-                    
+
                     {/* Content */}
                     <div className="p-6 flex flex-col flex-grow">
                       <div className="flex-grow">
@@ -221,7 +258,7 @@ export default async function HomePage() {
                           {product.name}
                         </h3>
                       </div>
-                      
+
                       {/* Price and Action */}
                       <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                         <div>
@@ -229,12 +266,24 @@ export default async function HomePage() {
                             {(Number(product.price) * 1.21).toFixed(2)}
                             <span className="text-lg text-indigo-400">€</span>
                           </span>
-                          <span className="block text-xs text-gray-400">IVA incluido</span>
+                          <span className="block text-xs text-gray-400">
+                            IVA incluido
+                          </span>
                         </div>
 
                         <span className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-50 text-green-600 group-hover:bg-green-600 group-hover:text-white transition-all duration-300">
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M14 5l7 7m0 0l-7 7m7-7H3"
+                            />
                           </svg>
                         </span>
                       </div>
@@ -246,15 +295,29 @@ export default async function HomePage() {
           ) : (
             <div className="text-center py-16 bg-white rounded-2xl">
               <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                <svg
+                  className="w-10 h-10 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                  />
                 </svg>
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No hay productos destacados</h3>
-              <p className="text-gray-500">Los productos más vendidos aparecerán aquí</p>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No hay productos destacados
+              </h3>
+              <p className="text-gray-500">
+                Los productos más vendidos aparecerán aquí
+              </p>
             </div>
           )}
-          
+
           {/* View All Button */}
           <div className="text-center mt-12">
             <Link
@@ -262,8 +325,18 @@ export default async function HomePage() {
               className="inline-flex items-center justify-center px-8 py-4 text-base font-semibold rounded-full text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors"
             >
               Ver todos los productos
-              <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              <svg
+                className="w-5 h-5 ml-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 8l4 4m0 0l-4 4m4-4H3"
+                />
               </svg>
             </Link>
           </div>
@@ -276,25 +349,34 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 lg:gap-12">
             {[
               {
-                icon: '🏆',
-                title: 'Calidad Premium',
-                description: 'Productos impresos con los mejores materiales PLA y PETG de alta calidad.',
+                icon: "🏆",
+                title: "Calidad Premium",
+                description:
+                  "Productos impresos con los mejores materiales PLA y PETG de alta calidad.",
               },
               {
-                icon: '📦',
-                title: 'Envío Rápido',
-                description: 'Entrega en 3-5 días laborables. Envío gratis en pedidos superiores a 50€.',
+                icon: "📦",
+                title: "Envío Rápido",
+                description:
+                  "Entrega en 3-5 días laborables. Envío gratis en pedidos superiores a 50€.",
               },
               {
-                icon: '💬',
-                title: 'Soporte Personalizado',
-                description: 'Atención al cliente especializada. Resolvemos tus dudas en 24 horas.',
+                icon: "💬",
+                title: "Soporte Personalizado",
+                description:
+                  "Atención al cliente especializada. Resolvemos tus dudas en 24 horas.",
               },
             ].map((feature) => (
               <div key={feature.title} className="text-center px-2 sm:px-0">
-                <span className="text-3xl sm:text-4xl lg:text-5xl mb-3 sm:mb-4 block">{feature.icon}</span>
-                <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900 mb-2 sm:mb-3">{feature.title}</h3>
-                <p className="text-sm sm:text-base text-gray-600">{feature.description}</p>
+                <span className="text-3xl sm:text-4xl lg:text-5xl mb-3 sm:mb-4 block">
+                  {feature.icon}
+                </span>
+                <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900 mb-2 sm:mb-3">
+                  {feature.title}
+                </h3>
+                <p className="text-sm sm:text-base text-gray-600">
+                  {feature.description}
+                </p>
               </div>
             ))}
           </div>

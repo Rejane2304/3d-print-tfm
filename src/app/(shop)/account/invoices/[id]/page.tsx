@@ -3,12 +3,12 @@
  * Vista de factura para usuarios autenticados
  * Usa InvoiceViewer component para visualización unificada
  */
-'use client';
+"use client";
 
-import { useEffect, useState, useCallback } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter, useParams } from 'next/navigation';
-import Link from 'next/link';
+import { useEffect, useState, useCallback } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter, useParams } from "next/navigation";
+import Link from "next/link";
 import {
   ArrowLeft,
   Download,
@@ -16,9 +16,12 @@ import {
   Loader2,
   AlertCircle,
   XCircle,
-  FileText
-} from 'lucide-react';
-import { InvoiceViewer, useInvoiceData } from '@/components/invoices/InvoiceViewer';
+  FileText,
+} from "lucide-react";
+import {
+  InvoiceViewer,
+  useInvoiceData,
+} from "@/components/invoices/InvoiceViewer";
 
 interface InvoiceDetail {
   id: string;
@@ -86,24 +89,24 @@ export default function UserInvoiceDetailPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error al cargar factura');
+        throw new Error(data.error || "Error al cargar factura");
       }
 
       setInvoice(data.factura);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : "Error desconocido");
     } finally {
       setLoading(false);
     }
   }, [params.id]);
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth?callbackUrl=/account/invoices');
+    if (status === "unauthenticated") {
+      router.push("/auth?callbackUrl=/account/invoices");
       return;
     }
 
-    if (status === 'authenticated' && params.id) {
+    if (status === "authenticated" && params.id) {
       loadInvoice();
     }
   }, [status, router, params.id, loadInvoice]);
@@ -114,10 +117,10 @@ export default function UserInvoiceDetailPage() {
 
   const downloadPDF = () => {
     if (invoice) {
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = `/api/account/invoices/${params.id}/pdf`;
       link.download = `factura-${invoice.invoiceNumber || params.id}.pdf`;
-      link.target = '_blank';
+      link.target = "_blank";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -128,7 +131,7 @@ export default function UserInvoiceDetailPage() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const invoiceData = invoice ? useInvoiceData(invoice) : null;
 
-  if (status === 'loading' || loading) {
+  if (status === "loading" || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -177,12 +180,12 @@ export default function UserInvoiceDetailPage() {
                   </h1>
                 </div>
                 <p className="text-sm text-gray-500 mt-1">
-                  Emitida el{' '}
-                  {new Date(invoice.issuedAt).toLocaleDateString('es-ES', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
+                  Emitida el{" "}
+                  {new Date(invoice.issuedAt).toLocaleDateString("es-ES", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
                   })}
                 </p>
               </div>
@@ -203,8 +206,8 @@ export default function UserInvoiceDetailPage() {
                 className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 title={
                   invoice.isCancelled
-                    ? 'Factura anulada - no disponible'
-                    : 'Descargar factura PDF'
+                    ? "Factura anulada - no disponible"
+                    : "Descargar factura PDF"
                 }
               >
                 <Download className="h-4 w-4" />
@@ -222,9 +225,9 @@ export default function UserInvoiceDetailPage() {
             <XCircle className="h-5 w-5 text-red-400" />
             <div className="ml-3">
               <p className="text-sm text-red-700">
-                <strong>FACTURA ANULADA</strong> - Esta factura fue anulada el{' '}
+                <strong>FACTURA ANULADA</strong> - Esta factura fue anulada el{" "}
                 {invoice.cancelledAt &&
-                  new Date(invoice.cancelledAt).toLocaleDateString('es-ES')}
+                  new Date(invoice.cancelledAt).toLocaleDateString("es-ES")}
               </p>
             </div>
           </div>

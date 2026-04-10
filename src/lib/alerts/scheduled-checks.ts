@@ -34,8 +34,9 @@ export async function checkExpiringCoupons() {
     
     if (!existing) {
       await prisma.alert.create({
-        data: {
-          type: 'COUPON_EXPIRING',
+          data: {
+            id: crypto.randomUUID(),
+            type: 'COUPON_EXPIRING',
           severity: daysUntil <= 1 ? 'HIGH' : 'MEDIUM',
           title: 'Cupón por Expirar',
           message: `Cupón ${coupon.code} expira en ${daysUntil} día(s)`,
@@ -69,8 +70,9 @@ export async function checkLongPreparationOrders() {
     
     if (!existing) {
       await prisma.alert.create({
-        data: {
-          type: 'PREPARING_ORDER',
+          data: {
+            id: crypto.randomUUID(),
+            type: 'PREPARING_ORDER',
           severity: 'MEDIUM',
           title: 'Preparación Prolongada',
           message: `Pedido ${order.orderNumber} lleva >48h en preparación`,
@@ -105,8 +107,9 @@ export async function checkDelayedOrders() {
     
     if (!existing) {
       await prisma.alert.create({
-        data: {
-          type: 'ORDER_DELAYED',
+          data: {
+            id: crypto.randomUUID(),
+            type: 'ORDER_DELAYED',
           severity: 'HIGH',
           title: 'Pedido Atrasado',
           message: `Pedido ${order.orderNumber} lleva >3 días en preparación`,
@@ -147,8 +150,9 @@ export async function checkUnpaidOrders() {
     
     if (!existing) {
       await prisma.alert.create({
-        data: {
-          type: 'PAYMENT_FAILED',
+          data: {
+            id: crypto.randomUUID(),
+            type: 'PAYMENT_FAILED',
           severity: 'HIGH',
           title: 'Pedido sin Pagar',
           message: `Pedido ${order.orderNumber} de ${order.user?.name || order.user?.email} >24h sin pagar`,

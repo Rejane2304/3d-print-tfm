@@ -82,11 +82,12 @@ export async function createStockAlert(productId: string, currentStock: number, 
   // Create new alert
   const alert = await prisma.alert.create({
     data: {
+      id: crypto.randomUUID(),
       type,
       severity,
       title: type === 'OUT_OF_STOCK' ? 'Stock Agotado' : 'Stock Bajo',
       message: `${product.name} tiene ${type === 'OUT_OF_STOCK' ? 'stock agotado' : 'stock bajo'} (${currentStock} unidades)`,
-      productId,
+      product: { connect: { id: productId } },
       status: 'PENDING',
     },
   });
@@ -182,8 +183,9 @@ export async function createUnpaidOrderAlerts(hoursThreshold: number = 24) {
 
     if (!existingAlert) {
       const alert = await prisma.alert.create({
-        data: {
-          type: 'PAYMENT_FAILED',
+      data: {
+        id: crypto.randomUUID(),
+        type: 'PAYMENT_FAILED',
           severity: 'MEDIUM',
           title: 'Pedido sin Pagar',
           message: `Pedido ${order.orderNumber} de ${order.user.name || order.user.email} lleva sin pagar más de ${hoursThreshold} horas`,
@@ -229,8 +231,9 @@ export async function createDelayedOrderAlerts(daysThreshold: number = 3) {
 
     if (!existingAlert) {
       const alert = await prisma.alert.create({
-        data: {
-          type: 'ORDER_DELAYED',
+      data: {
+        id: crypto.randomUUID(),
+        type: 'ORDER_DELAYED',
           severity: 'HIGH',
           title: 'Pedido Atrasado',
           message: `Pedido ${order.orderNumber} lleva más de ${daysThreshold} días en procesamiento`,
@@ -271,6 +274,7 @@ export async function createHighValueOrderAlert(orderId: string, threshold: numb
   if (!existingAlert) {
     return await prisma.alert.create({
       data: {
+        id: crypto.randomUUID(),
         type: 'HIGH_VALUE_ORDER',
         severity: 'MEDIUM',
         title: 'Pedido de Alto Valor',
@@ -312,6 +316,7 @@ export async function createNewUserAlert(userId: string) {
   if (!existingAlert) {
     return await prisma.alert.create({
       data: {
+        id: crypto.randomUUID(),
         type: 'NEW_USER',
         severity: 'LOW',
         title: 'Nuevo Usuario',
@@ -360,6 +365,7 @@ export async function createCouponExpiringAlert(couponId: string, daysThreshold:
       : '';
     return await prisma.alert.create({
       data: {
+        id: crypto.randomUUID(),
         type: 'COUPON_EXPIRING',
         severity: daysUntilExpiry <= 1 ? 'HIGH' : 'MEDIUM',
         title: 'Cupón por Expirar',
@@ -418,6 +424,7 @@ export async function createNewOrderAlert(orderId: string, orderNumber: string, 
     // Crear alerta
     const alert = await prisma.alert.create({
       data: {
+        id: crypto.randomUUID(),
         type: 'NEW_ORDER',
         severity: 'LOW',
         title: `Nuevo Pedido #${orderNumber}`,
@@ -455,6 +462,7 @@ export async function createOrderCancelledAlert(orderId: string, orderNumber: st
     // Crear alerta
     const alert = await prisma.alert.create({
       data: {
+        id: crypto.randomUUID(),
         type: 'ORDER_CANCELLED',
         severity: 'MEDIUM',
         title: `Pedido Cancelado #${orderNumber}`,
@@ -487,6 +495,7 @@ export async function createOrderStatusChangedAlert(
     // Crear alerta
     const alert = await prisma.alert.create({
       data: {
+        id: crypto.randomUUID(),
         type: 'ORDER_STATUS_CHANGED',
         severity: 'LOW',
         title: `Estado Actualizado #${orderNumber}`,
@@ -528,6 +537,7 @@ export async function createPaymentFailedAlert(
     // Crear alerta
     const alert = await prisma.alert.create({
       data: {
+        id: crypto.randomUUID(),
         type: 'PAYMENT_FAILED',
         severity: 'HIGH',
         title: `Pago Fallido #${orderNumber}`,
@@ -572,6 +582,7 @@ export async function createNewReviewAlert(
     // Crear alerta
     const alert = await prisma.alert.create({
       data: {
+        id: crypto.randomUUID(),
         type: 'NEW_REVIEW',
         severity,
         title: `Nueva Reseña ${rating}★ - ${productName}`,
@@ -619,6 +630,7 @@ export async function createNewMessageAlert(
     // Crear alerta
     const alert = await prisma.alert.create({
       data: {
+        id: crypto.randomUUID(),
         type: 'NEW_MESSAGE',
         severity: 'MEDIUM',
         title: `Nuevo Mensaje de ${userName}`,

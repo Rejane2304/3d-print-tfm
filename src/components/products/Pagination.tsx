@@ -2,10 +2,10 @@
  * Pagination Component
  * Componente de paginación para el catálogo
  */
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 interface PaginationProps {
   currentPage: number;
@@ -13,20 +13,23 @@ interface PaginationProps {
   searchParams: Record<string, string | undefined>;
 }
 
-export default function Pagination({ currentPage, totalPages }: PaginationProps) {
+export default function Pagination({
+  currentPage,
+  totalPages,
+}: PaginationProps) {
   const currentSearchParams = useSearchParams();
-  
+
   const buildPageUrl = (page: number) => {
     const params = new URLSearchParams(currentSearchParams.toString());
-    params.set('page', page.toString());
+    params.set("page", page.toString());
     return `/products?${params.toString()}`;
   };
-  
+
   // Generar array de páginas a mostrar
   const getPageNumbers = () => {
     const pages: (number | string)[] = [];
     const maxVisible = 5;
-    
+
     if (totalPages <= maxVisible) {
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
@@ -34,40 +37,43 @@ export default function Pagination({ currentPage, totalPages }: PaginationProps)
     } else {
       // Siempre mostrar primera página
       pages.push(1);
-      
+
       if (currentPage > 3) {
-        pages.push('...');
+        pages.push("...");
       }
-      
+
       // Páginas alrededor de la actual
       const start = Math.max(2, currentPage - 1);
       const end = Math.min(totalPages - 1, currentPage + 1);
-      
+
       for (let i = start; i <= end; i++) {
         if (!pages.includes(i)) {
           pages.push(i);
         }
       }
-      
+
       if (currentPage < totalPages - 2) {
-        pages.push('...');
+        pages.push("...");
       }
-      
+
       // Siempre mostrar última página
       if (!pages.includes(totalPages)) {
         pages.push(totalPages);
       }
     }
-    
+
     return pages;
   };
-  
+
   const pageNumbers = getPageNumbers();
-  
+
   if (totalPages <= 1) return null;
-  
+
   return (
-    <nav className="flex items-center justify-center gap-2" aria-label="Paginación">
+    <nav
+      className="flex items-center justify-center gap-2"
+      aria-label="Paginación"
+    >
       {/* Botón Anterior */}
       {currentPage > 1 ? (
         <Link
@@ -81,28 +87,31 @@ export default function Pagination({ currentPage, totalPages }: PaginationProps)
           ← Anterior
         </span>
       )}
-      
+
       {/* Números de página */}
       <div className="flex gap-1">
         {pageNumbers.map((page, index) => {
-          if (page === '...') {
+          if (page === "...") {
             return (
-              <span key={`ellipsis-${index}`} className="px-3 py-2 text-gray-500">
+              <span
+                key={`ellipsis-${index}`}
+                className="px-3 py-2 text-gray-500"
+              >
                 ...
               </span>
             );
           }
-          
+
           const isCurrent = page === currentPage;
-          
+
           return (
             <Link
               key={page}
               href={buildPageUrl(page as number)}
               className={`px-3 py-2 rounded-md transition-colors ${
                 isCurrent
-                  ? 'bg-indigo-600 text-white'
-                  : 'border border-gray-300 hover:bg-gray-50 text-gray-700'
+                  ? "bg-indigo-600 text-white"
+                  : "border border-gray-300 hover:bg-gray-50 text-gray-700"
               }`}
             >
               {page}
@@ -110,7 +119,7 @@ export default function Pagination({ currentPage, totalPages }: PaginationProps)
           );
         })}
       </div>
-      
+
       {/* Botón Siguiente */}
       {currentPage < totalPages ? (
         <Link

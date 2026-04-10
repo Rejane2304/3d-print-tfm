@@ -1,42 +1,42 @@
-import { getServerSession } from 'next-auth/next';
-import { redirect } from 'next/navigation';
-import { Role } from '@prisma/client';
+import { getServerSession } from "next-auth/next";
+import { redirect } from "next/navigation";
+import { Role } from "@prisma/client";
 
 export async function requireAuth() {
   const session = await getServerSession();
-  
+
   if (!session) {
-    redirect('/login');
+    redirect("/login");
   }
-  
+
   return session;
 }
 
 export async function requireAdmin() {
   const session = await getServerSession();
-  
+
   if (!session) {
-    redirect('/login');
+    redirect("/login");
   }
-  
+
   if ((session.user as { role?: string }).role !== Role.ADMIN) {
-    redirect('/');
+    redirect("/");
   }
-  
+
   return session;
 }
 
 export async function requireClient() {
   const session = await getServerSession();
-  
+
   if (!session) {
-    redirect('/login');
+    redirect("/login");
   }
-  
+
   if ((session.user as { role?: string }).role === Role.ADMIN) {
-    redirect('/admin/dashboard');
+    redirect("/admin/dashboard");
   }
-  
+
   return session;
 }
 

@@ -2,18 +2,18 @@
  * Admin Site Config API Route
  * GET /api/admin/site-config - Get current config
  * PUT /api/admin/site-config - Update config
- * 
+ *
  * Requiere: Rol ADMIN
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
-import { siteConfigSchema } from '@/lib/validators';
-import { z } from 'zod';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/auth-options";
+import { siteConfigSchema } from "@/lib/validators";
+import { z } from "zod";
 
-const SITE_CONFIG_ID = 'site-config';
+const SITE_CONFIG_ID = "site-config";
 
 // GET - Get current site configuration
 export async function GET() {
@@ -26,8 +26,8 @@ export async function GET() {
     }
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 }
+        { success: false, error: "No autenticado" },
+        { status: 401 },
       );
     }
 
@@ -35,10 +35,10 @@ export async function GET() {
       where: { email: session.user.email },
     });
 
-    if (!user || user.role !== 'ADMIN') {
+    if (!user || user.role !== "ADMIN") {
       return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 401 }
+        { success: false, error: "No autorizado" },
+        { status: 401 },
       );
     }
 
@@ -51,16 +51,17 @@ export async function GET() {
       config = await prisma.siteConfig.create({
         data: {
           id: SITE_CONFIG_ID,
-          companyName: '3D Print',
-          companyTaxId: 'B12345678',
-          companyAddress: 'Calle Admin 123',
-          companyCity: 'Barcelona',
-          companyProvince: 'Barcelona',
-          companyPostalCode: '08001',
-          companyPhone: '+34930000001',
-          companyEmail: 'info@3dprint.com',
+          companyName: "3D Print",
+          companyTaxId: "B12345678",
+          companyAddress: "Calle Admin 123",
+          companyCity: "Barcelona",
+          companyProvince: "Barcelona",
+          companyPostalCode: "08001",
+          companyPhone: "+34930000001",
+          companyEmail: "info@3dprint.com",
           defaultVatRate: 21,
           lowStockThreshold: 5,
+          updatedAt: new Date(),
         },
       });
     }
@@ -83,10 +84,10 @@ export async function GET() {
 
     return NextResponse.json({ success: true, config: configFormateada });
   } catch (error) {
-    console.error('Error getting site config:', error);
+    console.error("Error getting site config:", error);
     return NextResponse.json(
-      { success: false, error: 'Error interno' },
-      { status: 500 }
+      { success: false, error: "Error interno" },
+      { status: 500 },
     );
   }
 }
@@ -102,8 +103,8 @@ export async function PUT(req: NextRequest) {
     }
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 }
+        { success: false, error: "No autenticado" },
+        { status: 401 },
       );
     }
 
@@ -111,10 +112,10 @@ export async function PUT(req: NextRequest) {
       where: { email: session.user.email },
     });
 
-    if (!user || user.role !== 'ADMIN') {
+    if (!user || user.role !== "ADMIN") {
       return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 401 }
+        { success: false, error: "No autorizado" },
+        { status: 401 },
       );
     }
 
@@ -146,7 +147,17 @@ export async function PUT(req: NextRequest) {
       },
       create: {
         id: SITE_CONFIG_ID,
-        ...validatedData,
+        companyName: validatedData.companyName,
+        companyTaxId: validatedData.companyTaxId,
+        companyAddress: validatedData.companyAddress,
+        companyCity: validatedData.companyCity,
+        companyProvince: validatedData.companyProvince,
+        companyPostalCode: validatedData.companyPostalCode,
+        companyPhone: validatedData.companyPhone,
+        companyEmail: validatedData.companyEmail,
+        defaultVatRate: validatedData.defaultVatRate,
+        lowStockThreshold: validatedData.lowStockThreshold,
+        updatedAt: new Date(),
         updatedBy: user.id,
       },
     });
@@ -172,13 +183,13 @@ export async function PUT(req: NextRequest) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { success: false, error: error.errors[0].message },
-        { status: 400 }
+        { status: 400 },
       );
     }
-    console.error('Error updating site config:', error);
+    console.error("Error updating site config:", error);
     return NextResponse.json(
-      { success: false, error: 'Error interno' },
-      { status: 500 }
+      { success: false, error: "Error interno" },
+      { status: 500 },
     );
   }
 }

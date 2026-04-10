@@ -1,21 +1,21 @@
 /**
  * API Route - Create Stripe Checkout Session
  * POST /api/payments/stripe/create
- * 
+ *
  * Creates a Stripe Checkout session for order payment
  * Requires authentication
  */
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
-import { prisma } from '@/lib/db/prisma';
-import { translateErrorMessage, translateProductName } from '@/lib/i18n';
-import { createPaymentFailedAlert } from '@/lib/alerts/alert-service';
-import Stripe from 'stripe';
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/auth-options";
+import { prisma } from "@/lib/db/prisma";
+import { translateErrorMessage, translateProductName } from "@/lib/i18n";
+import { createPaymentFailedAlert } from "@/lib/alerts/alert-service";
+import Stripe from "stripe";
 
 // Initialize Stripe with TEST mode
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2024-04-10' as Stripe.LatestApiVersion,
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
+  apiVersion: "2024-04-10" as Stripe.LatestApiVersion,
 });
 
 export async function POST(req: NextRequest) {
@@ -25,8 +25,8 @@ export async function POST(req: NextRequest) {
 
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 }
+        { success: false, error: "No autenticado" },
+        { status: 401 },
       );
     }
 
@@ -36,8 +36,8 @@ export async function POST(req: NextRequest) {
 
     if (!orderId) {
       return NextResponse.json(
-        { success: false, error: 'El ID de pedido es requerido' },
-        { status: 400 }
+        { success: false, error: "El ID de pedido es requerido" },
+        { status: 400 },
       );
     }
 
@@ -49,8 +49,8 @@ export async function POST(req: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage('Usuario not found') },
-        { status: 404 }
+        { success: false, error: translateErrorMessage("Usuario not found") },
+        { status: 404 },
       );
     }
 
@@ -82,72 +82,120 @@ export async function POST(req: NextRequest) {
 
     if (!order) {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage('Pedido no encontrado') },
-        { status: 404 }
+        {
+          success: false,
+          error: translateErrorMessage("Pedido no encontrado"),
+        },
+        { status: 404 },
       );
     }
 
     // Check if order can be paid
-    if (order.status !== 'PENDING') {
+    if (order.status !== "PENDING") {
       return NextResponse.json(
-        { success: false, error: 'El pedido no está pendiente de pago' },
-        { status: 400 }
+        { success: false, error: "El pedido no está pendiente de pago" },
+        { status: 400 },
       );
     }
 
-    // 5. Build line items for Stripe
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    
-    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = order.items.map((item) => {
-      // Translate product name to Spanish
-      const translatedName = item.product
-        ? translateProductName(item.product.slug) || item.name
-        : item.name;
+    // 5. Build line items for Stripe with VAT separated (transparent)
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
-      // Stripe requires absolute URLs for images - convert relative to absolute
-      let imageUrl: string | undefined = item.product?.images?.[0]?.url;
-      if (imageUrl && imageUrl.startsWith('/')) {
-        imageUrl = `${baseUrl}${imageUrl}`;
-      }
+    // Calculate totals - BASE IMPONIBLE INCLUYE ENVÍO
+    const itemsTotal = order.items.reduce(
+      (sum, item) => sum + Number(item.price) * item.quantity,
+      0,
+    );
+    const discount = Number(order.discount || 0);
+    const discountedItems = Math.max(0, itemsTotal - discount);
+    const shipping = Number(order.shipping || 0);
+    const taxableBase = discountedItems + shipping; // Envío lleva IVA
+    const vatRate = 0.21;
+    const vatAmount = taxableBase * vatRate;
 
-      return {
-        price_data: {
-          currency: 'eur',
-          product_data: {
-            name: translatedName,
-            description: item.description || undefined,
-            images: imageUrl ? [imageUrl] : undefined,
+    // Calculate discount ratio for proportional distribution
+    const discountRatio = itemsTotal > 0 ? discount / itemsTotal : 0;
+
+    // Build line items WITH discount applied proportionally
+    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] =
+      order.items.map((item) => {
+        // Translate product name to Spanish
+        const translatedName = item.product
+          ? translateProductName(item.product.slug) || item.name
+          : item.name;
+
+        // Stripe requires absolute URLs for images - convert relative to absolute
+        let imageUrl: string | undefined = item.product?.images?.[0]?.url;
+        if (imageUrl && imageUrl.startsWith("/")) {
+          imageUrl = `${baseUrl}${imageUrl}`;
+        }
+
+        // Apply discount proportionally to unit price
+        const originalPrice = Number(item.price);
+        const discountedPrice =
+          Math.round(originalPrice * (1 - discountRatio) * 100) / 100;
+
+        return {
+          price_data: {
+            currency: "eur",
+            product_data: {
+              name: translatedName + (discount > 0 ? " (con descuento)" : ""),
+              description: item.description || undefined,
+              images: imageUrl ? [imageUrl] : undefined,
+            },
+            unit_amount: Math.round(discountedPrice * 100), // Convert to cents with discount
           },
-          unit_amount: Math.round(Number(item.price) * 100), // Convert to cents
-        },
-        quantity: item.quantity,
-      };
-    });
+          quantity: item.quantity,
+        };
+      });
 
-    // Add shipping as a line item if exists
-    if (Number(order.shipping) > 0) {
+    // Add shipping as a line item first (before VAT calculation)
+    if (shipping > 0) {
       lineItems.push({
         price_data: {
-          currency: 'eur',
+          currency: "eur",
           product_data: {
-            name: 'Envío',
-            description: 'Gastos de envío',
+            name: "Envío",
+            description: "Gastos de envío",
           },
-          unit_amount: Math.round(Number(order.shipping) * 100),
+          unit_amount: Math.round(shipping * 100),
         },
         quantity: 1,
       });
     }
 
+    // VALIDACIÓN CRÍTICA: Verificar que el total calculado coincida con order.total
+    const calculatedTotal = discountedItems + shipping + vatAmount;
+    const orderTotal = Number(order.total);
+    if (Math.abs(calculatedTotal - orderTotal) > 0.01) {
+      console.error(
+        `Total mismatch: calculated ${calculatedTotal}, order ${orderTotal}`,
+      );
+      throw new Error("El total calculado no coincide con el pedido");
+    }
+
+    // Add VAT as separate line item (transparency) - CALCULADO SOBRE (productos + envío)
+    lineItems.push({
+      price_data: {
+        currency: "eur",
+        product_data: {
+          name: "IVA (21%)",
+          description: "Impuesto sobre el Valor Añadido",
+        },
+        unit_amount: Math.round(vatAmount * 100), // Convert to cents
+      },
+      quantity: 1,
+    });
+
     // 6. Create Stripe Checkout session
     const stripeSession = await stripe.checkout.sessions.create({
-      mode: 'payment',
+      mode: "payment",
       success_url: `${baseUrl}/checkout/success?orderId=${order.id}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/checkout?orderId=${order.id}&cancelled=true`,
       line_items: lineItems,
       metadata: {
         orderId: order.id,
-        paymentId: paymentId || '',
+        paymentId: paymentId || "",
         userId: user.id,
         userEmail: user.email,
       },
@@ -159,7 +207,7 @@ export async function POST(req: NextRequest) {
         },
       },
       // Add order number to the description
-      submit_type: 'pay',
+      submit_type: "pay",
     });
 
     // 7. Update order with stripeSessionId
@@ -167,7 +215,7 @@ export async function POST(req: NextRequest) {
       where: { id: order.id },
       data: {
         stripeSessionId: stripeSession.id,
-        paymentMethod: 'CARD',
+        paymentMethod: "CARD",
       },
     });
 
@@ -177,7 +225,7 @@ export async function POST(req: NextRequest) {
         where: { id: paymentId },
         data: {
           stripeSessionId: stripeSession.id,
-          status: 'PROCESSING',
+          status: "PROCESSING",
         },
       });
     }
@@ -189,7 +237,7 @@ export async function POST(req: NextRequest) {
       sessionId: stripeSession.id,
     });
   } catch (error) {
-    console.error('Error creating Stripe checkout session:', error);
+    console.error("Error creating Stripe checkout session:", error);
 
     // Create alert for failed payment
     try {
@@ -201,11 +249,15 @@ export async function POST(req: NextRequest) {
           select: { orderNumber: true },
         });
         if (order) {
-          await createPaymentFailedAlert(orderId, order.orderNumber, error instanceof Error ? error.message : 'Error desconocido');
+          await createPaymentFailedAlert(
+            orderId,
+            order.orderNumber,
+            error instanceof Error ? error.message : "Error desconocido",
+          );
         }
       }
     } catch (alertError) {
-      console.error('Error creating payment failed alert:', alertError);
+      console.error("Error creating payment failed alert:", alertError);
     }
 
     // Handle Stripe-specific errors
@@ -215,13 +267,16 @@ export async function POST(req: NextRequest) {
           success: false,
           error: `Error de Stripe: ${error.message}`,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     return NextResponse.json(
-      { success: false, error: translateErrorMessage('Error al crear sesión de pago') },
-      { status: 500 }
+      {
+        success: false,
+        error: translateErrorMessage("Error al crear sesión de pago"),
+      },
+      { status: 500 },
     );
   }
 }

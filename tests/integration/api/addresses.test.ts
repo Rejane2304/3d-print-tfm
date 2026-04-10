@@ -13,6 +13,7 @@ import { NextRequest } from 'next/server';
 import { GET, POST, PATCH, DELETE } from '@/app/api/account/addresses/route';
 import { prisma } from '@/lib/db/prisma';
 import bcrypt from 'bcrypt';
+import { randomUUID } from 'crypto';
 
 // Mock next-auth
 vi.mock('next-auth', () => ({
@@ -37,11 +38,13 @@ describe('Addresses API', () => {
     const hashedPassword = await bcrypt.hash('TestPass123!', 10);
     customerUser = await prisma.user.create({
       data: {
+        id: randomUUID(),
         email: `address-test-${Date.now()}@test.com`,
         password: hashedPassword,
         name: 'Address Test User',
         role: 'CUSTOMER',
         isActive: true,
+        updatedAt: new Date(),
       },
     });
 
@@ -84,6 +87,7 @@ describe('Addresses API', () => {
       // Create addresses
       await prisma.address.create({
         data: {
+          id: randomUUID(),
           userId: customerUser.id,
           name: 'Home',
           recipient: 'Test User',
@@ -94,11 +98,13 @@ describe('Addresses API', () => {
           postalCode: '28001',
           country: 'Spain',
           isDefault: true,
+          updatedAt: new Date(),
         },
       });
 
       await prisma.address.create({
         data: {
+          id: randomUUID(),
           userId: customerUser.id,
           name: 'Work',
           recipient: 'Test User Work',
@@ -109,6 +115,7 @@ describe('Addresses API', () => {
           postalCode: '08001',
           country: 'Spain',
           isDefault: false,
+          updatedAt: new Date(),
         },
       });
 
@@ -255,6 +262,7 @@ describe('Addresses API', () => {
     beforeEach(async () => {
       testAddress = await prisma.address.create({
         data: {
+          id: randomUUID(),
           userId: customerUser.id,
           name: 'Home',
           recipient: 'Test User',
@@ -265,6 +273,7 @@ describe('Addresses API', () => {
           postalCode: '28001',
           country: 'Spain',
           isDefault: true,
+          updatedAt: new Date(),
         },
       });
     });
@@ -313,16 +322,19 @@ describe('Addresses API', () => {
       // Create another user with address
       const otherUser = await prisma.user.create({
         data: {
+          id: randomUUID(),
           email: `address-test-other-${Date.now()}@test.com`,
           password: await bcrypt.hash('Pass123!', 10),
           name: 'Other User',
           role: 'CUSTOMER',
           isActive: true,
+          updatedAt: new Date(),
         },
       });
 
       const otherAddress = await prisma.address.create({
         data: {
+          id: randomUUID(),
           userId: otherUser.id,
           name: 'Other Home',
           recipient: 'Other User',
@@ -333,6 +345,7 @@ describe('Addresses API', () => {
           postalCode: '46001',
           country: 'Spain',
           isDefault: true,
+          updatedAt: new Date(),
         },
       });
 
@@ -360,6 +373,7 @@ describe('Addresses API', () => {
       // Create second address
       const secondAddress = await prisma.address.create({
         data: {
+          id: randomUUID(),
           userId: customerUser.id,
           name: 'Work',
           recipient: 'Work User',
@@ -370,6 +384,7 @@ describe('Addresses API', () => {
           postalCode: '08001',
           country: 'Spain',
           isDefault: false,
+          updatedAt: new Date(),
         },
       });
 
@@ -409,6 +424,7 @@ describe('Addresses API', () => {
     beforeEach(async () => {
       testAddress = await prisma.address.create({
         data: {
+          id: randomUUID(),
           userId: customerUser.id,
           name: 'Home',
           recipient: 'Test User',
@@ -419,6 +435,7 @@ describe('Addresses API', () => {
           postalCode: '28001',
           country: 'Spain',
           isDefault: true,
+          updatedAt: new Date(),
         },
       });
     });
@@ -460,16 +477,19 @@ describe('Addresses API', () => {
       // Create another user with address
       const otherUser = await prisma.user.create({
         data: {
-          email: `address-test-other-${Date.now()}@test.com`,
+          id: randomUUID(),
+        email: `address-test-other-${Date.now()}@test.com`,
           password: await bcrypt.hash('Pass123!', 10),
           name: 'Other User',
           role: 'CUSTOMER',
           isActive: true,
+          updatedAt: new Date(),
         },
       });
 
       const otherAddress = await prisma.address.create({
         data: {
+          id: randomUUID(),
           userId: otherUser.id,
           name: 'Other Home',
           recipient: 'Other User',
@@ -480,6 +500,7 @@ describe('Addresses API', () => {
           postalCode: '46001',
           country: 'Spain',
           isDefault: true,
+          updatedAt: new Date(),
         },
       });
 
@@ -502,6 +523,7 @@ describe('Addresses API', () => {
       // Create second address
       const secondAddress = await prisma.address.create({
         data: {
+          id: randomUUID(),
           userId: customerUser.id,
           name: 'Work',
           recipient: 'Work User',
@@ -512,6 +534,7 @@ describe('Addresses API', () => {
           postalCode: '08001',
           country: 'Spain',
           isDefault: false,
+          updatedAt: new Date(),
         },
       });
 

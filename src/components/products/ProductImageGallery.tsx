@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useCallback, useEffect } from 'react';
-import Image from 'next/image';
-import { X, ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react';
+import { useState, useCallback, useEffect } from "react";
+import Image from "next/image";
+import { X, ChevronLeft, ChevronRight, ZoomIn } from "lucide-react";
 
 interface ProductImage {
   id: string;
@@ -15,7 +15,10 @@ interface ProductImageGalleryProps {
   productName: string;
 }
 
-export default function ProductImageGallery({ images, productName }: ProductImageGalleryProps) {
+export default function ProductImageGallery({
+  images,
+  productName,
+}: ProductImageGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -41,25 +44,25 @@ export default function ProductImageGallery({ images, productName }: ProductImag
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isModalOpen) return;
-      
-      if (e.key === 'Escape') closeModal();
-      if (e.key === 'ArrowRight') nextImage();
-      if (e.key === 'ArrowLeft') prevImage();
+
+      if (e.key === "Escape") closeModal();
+      if (e.key === "ArrowRight") nextImage();
+      if (e.key === "ArrowLeft") prevImage();
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isModalOpen, nextImage, prevImage]);
 
   // Prevent body scroll when modal is open
   useEffect(() => {
     if (isModalOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     }
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     };
   }, [isModalOpen]);
 
@@ -95,39 +98,41 @@ export default function ProductImageGallery({ images, productName }: ProductImag
           </div>
         </div>
 
-      {/* Thumbnails - Horizontal scroll on mobile */}
-      {images.length > 1 && (
-        <div className="overflow-x-auto pb-3 pt-2 -mx-2 px-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-          <div className="flex gap-4 sm:grid sm:grid-cols-4 sm:gap-5 min-w-min">
-            {images.map((image, index) => (
-              <button
-                key={image.id}
-                onClick={() => setSelectedIndex(index)}
-                className={`relative flex-shrink-0 w-28 h-24 sm:w-full sm:aspect-[4/3] bg-gray-100 overflow-hidden transition-all rounded-lg ${
-                  selectedIndex === index
-                    ? 'ring-2 ring-indigo-600 ring-offset-2'
-                    : 'hover:ring-2 hover:ring-indigo-400 hover:ring-offset-2'
-                }`}
-                aria-label={`Ver imagen ${index + 1}`}
-                aria-current={selectedIndex === index ? 'true' : undefined}
-              >
-                <Image
-                  src={image.url}
-                  alt={image.altText || `${productName} - imagen ${index + 1}`}
-                  fill
-                  sizes="(max-width: 640px) 112px, (max-width: 768px) 25vw, (max-width: 1200px) 15vw, 12vw"
-                  className="object-contain bg-gray-50"
-                />
-              </button>
-            ))}
+        {/* Thumbnails - Horizontal scroll on mobile */}
+        {images.length > 1 && (
+          <div className="overflow-x-auto pb-3 pt-2 -mx-2 px-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+            <div className="flex gap-4 sm:grid sm:grid-cols-4 sm:gap-5 min-w-min">
+              {images.map((image, index) => (
+                <button
+                  key={image.id}
+                  onClick={() => setSelectedIndex(index)}
+                  className={`relative flex-shrink-0 w-28 h-24 sm:w-full sm:aspect-[4/3] bg-gray-100 overflow-hidden transition-all rounded-lg ${
+                    selectedIndex === index
+                      ? "ring-2 ring-indigo-600 ring-offset-2"
+                      : "hover:ring-2 hover:ring-indigo-400 hover:ring-offset-2"
+                  }`}
+                  aria-label={`Ver imagen ${index + 1}`}
+                  aria-current={selectedIndex === index ? "true" : undefined}
+                >
+                  <Image
+                    src={image.url}
+                    alt={
+                      image.altText || `${productName} - imagen ${index + 1}`
+                    }
+                    fill
+                    sizes="(max-width: 640px) 112px, (max-width: 768px) 25vw, (max-width: 1200px) 15vw, 12vw"
+                    className="object-contain bg-gray-50"
+                  />
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
       </div>
 
       {/* Fullscreen Modal/Lightbox */}
       {isModalOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
           onClick={closeModal}
         >
@@ -148,7 +153,10 @@ export default function ProductImageGallery({ images, productName }: ProductImag
           {/* Navigation - Previous */}
           {images.length > 1 && (
             <button
-              onClick={(e) => { e.stopPropagation(); prevImage(); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                prevImage();
+              }}
               className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 transition-colors p-2 sm:p-3 hover:bg-white/10 rounded-full min-w-[44px] min-h-[44px] flex items-center justify-center"
               aria-label="Imagen anterior"
             >
@@ -157,7 +165,7 @@ export default function ProductImageGallery({ images, productName }: ProductImag
           )}
 
           {/* Main image in modal */}
-          <div 
+          <div
             className="relative w-full h-full max-w-7xl max-h-screen mx-4 flex items-center justify-center px-12 sm:px-16"
             onClick={(e) => e.stopPropagation()}
           >
@@ -176,7 +184,10 @@ export default function ProductImageGallery({ images, productName }: ProductImag
           {/* Navigation - Next */}
           {images.length > 1 && (
             <button
-              onClick={(e) => { e.stopPropagation(); nextImage(); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                nextImage();
+              }}
               className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 transition-colors p-2 sm:p-3 hover:bg-white/10 rounded-full min-w-[44px] min-h-[44px] flex items-center justify-center"
               aria-label="Imagen siguiente"
             >
@@ -186,7 +197,7 @@ export default function ProductImageGallery({ images, productName }: ProductImag
 
           {/* Thumbnails at bottom */}
           {images.length > 1 && (
-            <div 
+            <div
               className="absolute bottom-16 sm:bottom-4 left-1/2 -translate-x-1/2 flex gap-2 px-4 py-2 bg-black/50 rounded-lg overflow-x-auto max-w-[calc(100vw-32px)] scrollbar-thin scrollbar-thumb-white/30 scrollbar-track-transparent"
               onClick={(e) => e.stopPropagation()}
             >
@@ -195,12 +206,12 @@ export default function ProductImageGallery({ images, productName }: ProductImag
                   key={image.id}
                   onClick={() => setSelectedIndex(index)}
                   className={`relative w-12 h-12 sm:w-16 sm:h-16 flex-shrink-0 bg-gray-800 rounded overflow-hidden transition-all ${
-                    selectedIndex === index 
-                      ? 'ring-2 ring-white' 
-                      : 'opacity-60 hover:opacity-100'
+                    selectedIndex === index
+                      ? "ring-2 ring-white"
+                      : "opacity-60 hover:opacity-100"
                   }`}
                   aria-label={`Ir a imagen ${index + 1}`}
-                  aria-current={selectedIndex === index ? 'true' : undefined}
+                  aria-current={selectedIndex === index ? "true" : undefined}
                 >
                   <Image
                     src={image.url}

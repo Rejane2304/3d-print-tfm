@@ -3,35 +3,31 @@
  * Displays cart items and allows managing them including coupon application
  * Responsive: mobile → 4K
  */
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useCart } from '@/hooks/useCart';
-import CartItem from '@/components/cart/CartItem';
-import CartSummary from '@/components/cart/CartSummary';
-import { useCoupon } from '@/hooks/useCoupon';
-import { Loader2, AlertCircle, Info } from 'lucide-react';
-import Link from 'next/link';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCart } from "@/hooks/useCart";
+import CartItem from "@/components/cart/CartItem";
+import CartSummary from "@/components/cart/CartSummary";
+import { useCoupon } from "@/hooks/useCoupon";
+import { Loader2, AlertCircle, Info } from "lucide-react";
+import Link from "next/link";
 
 export default function CarritoPage() {
   const router = useRouter();
-  const { 
-    cart, 
-    loading, 
-    error, 
-    setError, 
+  const {
+    cart,
+    loading,
+    error,
+    setError,
     isAuthenticated,
-    updateQuantity, 
-    removeItem
+    updateQuantity,
+    removeItem,
   } = useCart();
-  
-  const { 
-    appliedCoupon, 
-    applyCoupon, 
-    removeCoupon 
-  } = useCoupon();
-  
+
+  const { appliedCoupon, applyCoupon, removeCoupon } = useCoupon();
+
   const [updatingItem, setUpdatingItem] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -40,10 +36,10 @@ export default function CarritoPage() {
       setUpdatingItem(itemId);
       const result = await updateQuantity(itemId, quantity);
       if (!result.success) {
-        throw new Error(result.error || 'Error al actualizar');
+        throw new Error(result.error || "Error al actualizar");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : "Error desconocido");
     } finally {
       setUpdatingItem(null);
     }
@@ -54,10 +50,10 @@ export default function CarritoPage() {
       setUpdatingItem(itemId);
       const result = await removeItem(itemId);
       if (!result.success) {
-        throw new Error(result.error || 'Error al eliminar item');
+        throw new Error(result.error || "Error al eliminar item");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : "Error desconocido");
     } finally {
       setUpdatingItem(null);
     }
@@ -78,23 +74,23 @@ export default function CarritoPage() {
 
   const handleCheckout = () => {
     if (!isAuthenticated) {
-      router.push('/auth?callbackUrl=/checkout');
+      router.push("/auth?callbackUrl=/checkout");
       return;
     }
-    
+
     // Guardar el cupón aplicado en localStorage para usarlo en checkout
     if (appliedCoupon) {
-      localStorage.setItem('appliedCoupon', JSON.stringify(appliedCoupon));
+      localStorage.setItem("appliedCoupon", JSON.stringify(appliedCoupon));
     } else {
-      localStorage.removeItem('appliedCoupon');
+      localStorage.removeItem("appliedCoupon");
     }
-    
+
     setIsProcessing(true);
-    router.push('/checkout');
+    router.push("/checkout");
   };
 
   const handleContinueShopping = () => {
-    router.push('/products');
+    router.push("/products");
   };
 
   // Show loading while loading
@@ -103,7 +99,9 @@ export default function CarritoPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="text-center">
           <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin text-indigo-600 mx-auto mb-4" />
-          <p className="text-gray-600 text-sm sm:text-base">Cargando carrito...</p>
+          <p className="text-gray-600 text-sm sm:text-base">
+            Cargando carrito...
+          </p>
         </div>
       </div>
     );
@@ -142,7 +140,8 @@ export default function CarritoPage() {
             <Info className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 flex-shrink-0 mt-0.5 sm:mt-0" />
             <div className="flex-1">
               <p className="text-blue-700 text-sm">
-                Estás comprando como invitado. Para finalizar tu compra, necesitarás iniciar sesión o registrarte.
+                Estás comprando como invitado. Para finalizar tu compra,
+                necesitarás iniciar sesión o registrarte.
               </p>
             </div>
             <Link
@@ -170,7 +169,10 @@ export default function CarritoPage() {
                 ))}
               </div>
             ) : (
-              <div data-testid="empty-cart" className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 sm:p-12 text-center">
+              <div
+                data-testid="empty-cart"
+                className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 sm:p-12 text-center"
+              >
                 <div className="text-gray-400 mb-4">
                   <svg
                     className="h-16 w-16 sm:h-24 sm:w-24 mx-auto"
@@ -210,7 +212,11 @@ export default function CarritoPage() {
               isProcessing={isProcessing}
               onCheckout={handleCheckout}
               onContinueShopping={handleContinueShopping}
-              onApplyCoupon={isAuthenticated && (cart?.items?.length || 0) > 0 ? handleApplyCoupon : undefined}
+              onApplyCoupon={
+                isAuthenticated && (cart?.items?.length || 0) > 0
+                  ? handleApplyCoupon
+                  : undefined
+              }
               onRemoveCoupon={handleRemoveCoupon}
               appliedCoupon={appliedCoupon}
             />

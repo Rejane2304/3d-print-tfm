@@ -32,9 +32,13 @@ async function main() {
     
     console.log('🎉 All validations passed! Database is safe for testing.');
     process.exit(0);
-  } catch (error: any) {
+  } catch (error) {
     console.error('❌ Validation failed:');
-    console.error(error.message);
+    if (error instanceof Error) {
+      console.error(error.message);
+    } else {
+      console.error(String(error));
+    }
     process.exit(1);
   }
 }

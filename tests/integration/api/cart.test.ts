@@ -14,6 +14,7 @@ import { GET as getCart, POST as addToCart } from '@/app/api/cart/route';
 import { PATCH as updateCartItem, DELETE as deleteCartItem } from '@/app/api/cart/[itemId]/route';
 import { prisma } from '@/lib/db/prisma';
 import bcrypt from 'bcrypt';
+import { randomUUID } from 'crypto';
 
 // Mock next-auth
 vi.mock('next-auth', () => ({
@@ -49,25 +50,30 @@ describe('Cart API', () => {
     const hashedPassword = await bcrypt.hash('TestPass123!', 10);
     customerUser = await prisma.user.create({
       data: {
+        id: randomUUID(),
         email: `cart-test-${Date.now()}@test.com`,
         password: hashedPassword,
         name: 'Cart Test User',
         role: 'CUSTOMER',
         isActive: true,
+        updatedAt: new Date(),
       },
     });
 
     // Create test category and product
     testCategory = await prisma.category.create({
       data: {
+        id: randomUUID(),
         name: 'Test Category',
         slug: `cart-test-category-${Date.now()}`,
         isActive: true,
+        updatedAt: new Date(),
       },
     });
 
     testProduct = await prisma.product.create({
       data: {
+        id: randomUUID(),
         name: 'Test Product',
         slug: `cart-test-product-${Date.now()}`,
         description: 'Test product for cart',
@@ -76,6 +82,7 @@ describe('Cart API', () => {
         categoryId: testCategory.id,
         material: 'PLA',
         isActive: true,
+        updatedAt: new Date(),
       },
     }) as unknown as { id: string; name: string; slug: string; stock: number; price: number };
 
@@ -132,17 +139,21 @@ describe('Cart API', () => {
       // Create cart with items
       const newCart = await prisma.cart.create({
         data: {
+          id: randomUUID(),
           userId: customerUser.id,
           subtotal: 59.98,
+          updatedAt: new Date(),
         },
       });
 
       await prisma.cartItem.create({
         data: {
+          id: randomUUID(),
           cartId: newCart.id,
           productId: testProduct.id,
           quantity: 2,
           unitPrice: 29.99,
+          updatedAt: new Date(),
         },
       });
 
@@ -257,6 +268,7 @@ describe('Cart API', () => {
       // Create inactive product
       const inactiveProduct = await prisma.product.create({
         data: {
+          id: randomUUID(),
           name: 'Inactive Product',
           slug: `cart-test-inactive-${Date.now()}`,
           description: 'Inactive product',
@@ -265,6 +277,7 @@ describe('Cart API', () => {
           categoryId: testCategory.id,
           material: 'PLA',
           isActive: false,
+          updatedAt: new Date(),
         },
       });
 
@@ -319,6 +332,7 @@ describe('Cart API', () => {
       // Create a dedicated product for this test
       patchTestProduct = await prisma.product.create({
         data: {
+          id: randomUUID(),
           name: 'Patch Test Product',
           slug: `cart-test-patch-${Date.now()}`,
           description: 'Test product for cart patch',
@@ -327,23 +341,28 @@ describe('Cart API', () => {
           categoryId: testCategory.id,
           material: 'PLA',
           isActive: true,
+          updatedAt: new Date(),
         },
       });
 
       // Create cart and item
       const newCart = await prisma.cart.create({
         data: {
+          id: randomUUID(),
           userId: customerUser.id,
           subtotal: 29.99,
+          updatedAt: new Date(),
         },
       });
 
       cartItem = await prisma.cartItem.create({
         data: {
+          id: randomUUID(),
           cartId: newCart.id,
           productId: patchTestProduct.id,
           quantity: 1,
           unitPrice: 29.99,
+          updatedAt: new Date(),
         },
       });
     });
@@ -430,6 +449,7 @@ describe('Cart API', () => {
       // Create a dedicated product for this test
       deleteTestProduct = await prisma.product.create({
         data: {
+          id: randomUUID(),
           name: 'Delete Test Product',
           slug: `cart-test-delete-${Date.now()}`,
           description: 'Test product for cart delete',
@@ -438,23 +458,28 @@ describe('Cart API', () => {
           categoryId: testCategory.id,
           material: 'PLA',
           isActive: true,
+          updatedAt: new Date(),
         },
       });
 
       // Create cart and item
       const newCart = await prisma.cart.create({
         data: {
+          id: randomUUID(),
           userId: customerUser.id,
           subtotal: 29.99,
+          updatedAt: new Date(),
         },
       });
 
       cartItem = await prisma.cartItem.create({
         data: {
+          id: randomUUID(),
           cartId: newCart.id,
           productId: deleteTestProduct.id,
           quantity: 1,
           unitPrice: 29.99,
+          updatedAt: new Date(),
         },
       });
     });

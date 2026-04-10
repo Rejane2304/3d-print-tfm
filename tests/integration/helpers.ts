@@ -7,6 +7,8 @@
 import { prisma } from '../helpers';
 import bcrypt from 'bcrypt';
 import { Material, OrderStatus } from '@/types/prisma-enums';
+import { randomUUID } from 'crypto';
+import { Decimal } from '@prisma/client/runtime/library';
 
 // Test data interfaces
 export interface TestUser {
@@ -99,11 +101,13 @@ export async function createTestUser(options: {
 
   const user = await prisma.user.create({
     data: {
+      id: randomUUID(),
       email,
       password: hashedPassword,
       name: `Test ${role}`,
       role,
       isActive,
+      updatedAt: new Date(),
     },
   });
 
@@ -126,9 +130,11 @@ export async function createTestCategory(name?: string): Promise<{ id: string; n
 
   const category = await prisma.category.create({
     data: {
+      id: randomUUID(),
       name: categoryName,
       slug: `${slug}-${Date.now()}`,
       isActive: true,
+      updatedAt: new Date(),
     },
   });
 
@@ -147,6 +153,7 @@ export async function createTestProduct(categoryId: string, options?: Partial<Te
   const timestamp = Date.now();
   const product = await prisma.product.create({
     data: {
+      id: randomUUID(),
       name: options?.name || `Test Product ${timestamp}`,
       slug: options?.slug || `test-product-${timestamp}`,
       description: options?.description || 'Test product description',
@@ -155,6 +162,7 @@ export async function createTestProduct(categoryId: string, options?: Partial<Te
       categoryId,
       material: options?.material || 'PLA',
       isActive: options?.isActive ?? true,
+      updatedAt: new Date(),
     },
   });
 
@@ -178,8 +186,10 @@ export async function createTestProduct(categoryId: string, options?: Partial<Te
 export async function createTestCart(userId: string): Promise<TestCart> {
   const cart = await prisma.cart.create({
     data: {
+      id: randomUUID(),
       userId,
       subtotal: 0,
+      updatedAt: new Date(),
     },
   });
 
@@ -201,10 +211,12 @@ export async function addCartItem(
 ): Promise<TestCartItem> {
   const item = await prisma.cartItem.create({
     data: {
+      id: randomUUID(),
       cartId,
       productId,
       quantity,
       unitPrice,
+      updatedAt: new Date(),
     },
   });
 
@@ -242,6 +254,7 @@ export async function addCartItem(
 export async function createTestAddress(userId: string, options?: Partial<TestAddress>): Promise<TestAddress> {
   const address = await prisma.address.create({
     data: {
+      id: randomUUID(),
       userId,
       name: options?.name || 'Principal',
       recipient: options?.recipient || 'Test Recipient',
@@ -252,6 +265,7 @@ export async function createTestAddress(userId: string, options?: Partial<TestAd
       postalCode: options?.postalCode || '28001',
       country: options?.country || 'Spain',
       isDefault: options?.isDefault ?? true,
+      updatedAt: new Date(),
     },
   });
 
@@ -293,6 +307,7 @@ export async function createTestOrder(userId: string, options?: {
 
   const order = await prisma.order.create({
     data: {
+      id: randomUUID(),
       orderNumber,
       userId,
       status: options?.status ?? OrderStatus.PENDING,
@@ -307,6 +322,7 @@ export async function createTestOrder(userId: string, options?: {
       shippingCity: 'Madrid',
       shippingProvince: 'Madrid',
       shippingCountry: 'Spain',
+      updatedAt: new Date(),
     },
   });
 
@@ -347,6 +363,7 @@ export async function createTestInvoice(orderId: string): Promise<{ id: string; 
 
   const invoice = await prisma.invoice.create({
     data: {
+      id: randomUUID(),
       invoiceNumber,
       series: 'F',
       number,
@@ -367,9 +384,9 @@ export async function createTestInvoice(orderId: string): Promise<{ id: string; 
       subtotal: order.subtotal,
       shipping: order.shipping,
       taxableAmount,
-      vatRate,
-      vatAmount,
-      total,
+      vatRate: new Decimal(vatRate),
+      vatAmount: new Decimal(vatAmount),
+      total: new Decimal(total),
     },
   });
 

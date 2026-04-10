@@ -3,35 +3,32 @@
  * GET /api/account/invoices/[id]
  * Devuelve el detalle completo de una factura específica del usuario
  */
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
-import { prisma } from '@/lib/db/prisma';
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/auth-options";
+import { prisma } from "@/lib/db/prisma";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
 
     // Obtener usuario
     const usuario = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { id: true }
+      select: { id: true },
     });
 
     if (!usuario) {
       return NextResponse.json(
-        { error: 'Usuario no encontrado' },
-        { status: 404 }
+        { error: "Usuario no encontrado" },
+        { status: 404 },
       );
     }
 
@@ -40,8 +37,8 @@ export async function GET(
       where: {
         id: params.id,
         order: {
-          userId: usuario.id
-        }
+          userId: usuario.id,
+        },
       },
       include: {
         order: {
@@ -61,21 +58,21 @@ export async function GET(
                   include: {
                     images: {
                       take: 1,
-                      select: { url: true }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+                      select: { url: true },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!factura) {
       return NextResponse.json(
-        { error: 'Factura no encontrada' },
-        { status: 404 }
+        { error: "Factura no encontrada" },
+        { status: 404 },
       );
     }
 
@@ -99,8 +96,8 @@ export async function GET(
       empresaCiudad: factura.companyCity,
       empresaProvincia: factura.companyProvince,
       empresaCodigoPostal: factura.companyPostalCode,
-      empresaEmail: 'info@3dprint.com',
-      empresaTelefono: '+34 930 000 001',
+      empresaEmail: "info@3dprint.com",
+      empresaTelefono: "+34 930 000 001",
       // Datos del cliente
       clienteNombre: factura.clientName,
       clienteNif: factura.clientTaxId,
@@ -108,25 +105,26 @@ export async function GET(
       clienteCiudad: factura.clientCity,
       clienteProvincia: factura.clientProvince,
       clienteCodigoPostal: factura.clientPostalCode,
-      clientePais: factura.clientCountry || 'España',
+      clientePais: factura.clientCountry || "España",
       clienteEmail: factura.order?.user?.email || undefined,
       clienteTelefono: factura.order?.user?.phone || undefined,
       // Items con imágenes
       order: {
-        numeroPedido: factura.order?.orderNumber || '',
-        metodoPago: factura.order?.paymentMethod || 'CARD',
-        items: factura.order?.items.map(item => ({
-          id: item.id,
-          name: item.name,
-          quantity: item.quantity,
-          price: Number(item.price),
-          subtotal: Number(item.subtotal),
-          image: item.product?.images?.[0]?.url || undefined,
-          description: item.product?.description || undefined,
-        })) || [],
+        numeroPedido: factura.order?.orderNumber || "",
+        metodoPago: factura.order?.paymentMethod || "CARD",
+        items:
+          factura.order?.items.map((item) => ({
+            id: item.id,
+            name: item.name,
+            quantity: item.quantity,
+            price: Number(item.price),
+            subtotal: Number(item.subtotal),
+            image: item.product?.images?.[0]?.url || undefined,
+            description: item.product?.description || undefined,
+          })) || [],
         usuario: {
-          nombre: factura.order?.user?.name || '',
-          email: factura.order?.user?.email || '',
+          nombre: factura.order?.user?.name || "",
+          email: factura.order?.user?.email || "",
           telefono: factura.order?.user?.phone || undefined,
         },
       },
@@ -134,10 +132,10 @@ export async function GET(
 
     return NextResponse.json({ factura: facturaFormateada });
   } catch (error) {
-    console.error('Error al obtener factura:', error);
+    console.error("Error al obtener factura:", error);
     return NextResponse.json(
-      { error: 'Error al obtener factura' },
-      { status: 500 }
+      { error: "Error al obtener factura" },
+      { status: 500 },
     );
   }
 }

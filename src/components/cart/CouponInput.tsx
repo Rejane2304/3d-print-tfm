@@ -3,10 +3,10 @@
  * Input para aplicar cupones en el carrito
  * Con validación en tiempo real y estado de carga
  */
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Ticket, Loader2, CheckCircle2, XCircle, X } from 'lucide-react';
+import { useState } from "react";
+import { Ticket, Loader2, CheckCircle2, XCircle, X } from "lucide-react";
 
 interface CouponInputProps {
   onApply: (code: string) => Promise<void>;
@@ -20,44 +20,44 @@ interface CouponInputProps {
   disabled?: boolean;
 }
 
-export function CouponInput({ 
-  onApply, 
-  onRemove, 
-  appliedCoupon, 
+export function CouponInput({
+  onApply,
+  onRemove,
+  appliedCoupon,
   subtotal,
-  disabled = false 
+  disabled = false,
 }: CouponInputProps) {
-  const [code, setCode] = useState('');
+  const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [validating, setValidating] = useState(false);
 
   const handleValidate = async () => {
     if (!code.trim()) return;
-    
+
     setValidating(true);
     setError(null);
-    
+
     try {
-      const response = await fetch('/api/coupons/validate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+      const response = await fetch("/api/coupons/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           code: code.trim(),
-          orderAmount: subtotal 
+          orderAmount: subtotal,
         }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || 'Cupón inválido');
+        setError(data.error || "Cupón inválido");
       } else {
         // Cupón válido, no mostramos nada aún
         setError(null);
       }
     } catch {
-      setError('Error validando cupón');
+      setError("Error validando cupón");
     } finally {
       setValidating(false);
     }
@@ -68,7 +68,7 @@ export function CouponInput({
     const newCode = e.target.value.toUpperCase();
     setCode(newCode);
     setError(null);
-    
+
     if (newCode.trim()) {
       // Debounce validation
       setTimeout(() => {
@@ -88,16 +88,16 @@ export function CouponInput({
 
     try {
       await onApply(code.trim().toUpperCase());
-      setCode('');
+      setCode("");
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error aplicando cupón');
+      setError(err instanceof Error ? err.message : "Error aplicando cupón");
     } finally {
       setLoading(false);
     }
   };
 
   const handleRemove = () => {
-    setCode('');
+    setCode("");
     setError(null);
     onRemove();
   };
@@ -186,9 +186,7 @@ export function CouponInput({
         </div>
       )}
 
-      <p className="text-xs text-gray-500">
-        Ejemplos: WELCOME10, VERANO2024
-      </p>
+      <p className="text-xs text-gray-500">Ejemplos: WELCOME10, VERANO2024</p>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitest/config';
-import path from 'path';
+import path from 'node:path';
 import dotenv from 'dotenv';
-import fs from 'fs';
+import fs from 'node:fs';
 
 // Load .env.test first for tests to ensure test environment variables take priority
 // This prevents accidentally using production database URLs during tests

@@ -2,23 +2,23 @@
  * Admin Products Page
  * Product management with DataTable
  */
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import Image from 'next/image';
-import { 
-  Plus, 
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
+import {
+  Plus,
   Package,
   Loader2,
   AlertCircle,
   Edit,
   Trash2,
-} from 'lucide-react';
-import { DataTable, Column, BulkAction } from '@/components/ui/DataTable';
-import { ConfirmModal } from '@/components/ui/ConfirmModal';
+} from "lucide-react";
+import { DataTable, Column, BulkAction } from "@/components/ui/DataTable";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 interface Product extends Record<string, unknown> {
   id: string;
@@ -42,15 +42,15 @@ export default function AdminProductsPage() {
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login?callbackUrl=/admin/products');
+    if (status === "unauthenticated") {
+      router.push("/login?callbackUrl=/admin/products");
       return;
     }
 
-    if (status === 'authenticated') {
+    if (status === "authenticated") {
       const user = session?.user as { rol?: string } | undefined;
-      if (user?.rol !== 'ADMIN') {
-        router.push('/');
+      if (user?.rol !== "ADMIN") {
+        router.push("/");
         return;
       }
       loadProducts();
@@ -62,16 +62,16 @@ export default function AdminProductsPage() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('/api/admin/products');
+      const response = await fetch("/api/admin/products");
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error al cargar productos');
+        throw new Error(data.error || "Error al cargar productos");
       }
 
       setProducts(data.productos || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : "Error desconocido");
     } finally {
       setLoading(false);
     }
@@ -87,14 +87,14 @@ export default function AdminProductsPage() {
 
     try {
       const response = await fetch(`/api/admin/products/${productToDelete}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (response.ok) {
-        setProducts(products.filter(p => p.id !== productToDelete));
+        setProducts(products.filter((p) => p.id !== productToDelete));
       }
     } catch {
-      setError('Error al eliminar producto');
+      setError("Error al eliminar producto");
     } finally {
       setModalOpen(false);
       setProductToDelete(null);
@@ -104,22 +104,22 @@ export default function AdminProductsPage() {
   const handleBulkDelete = async (selectedIds: string[]) => {
     try {
       await Promise.all(
-        selectedIds.map(id => 
-          fetch(`/api/admin/products/${id}`, { method: 'DELETE' })
-        )
+        selectedIds.map((id) =>
+          fetch(`/api/admin/products/${id}`, { method: "DELETE" }),
+        ),
       );
-      setProducts(products.filter(p => !selectedIds.includes(p.id)));
+      setProducts(products.filter((p) => !selectedIds.includes(p.id)));
     } catch {
-      setError('Error al eliminar productos');
+      setError("Error al eliminar productos");
     }
   };
 
   const columns: Column<Product>[] = [
     {
-      key: 'nombre',
-      header: 'Producto',
+      key: "nombre",
+      header: "Producto",
       sortable: true,
-      className: '',
+      className: "",
       render: (_, product) => (
         <div className="flex items-center">
           <div className="flex-shrink-0 h-10 w-10">
@@ -139,55 +139,57 @@ export default function AdminProductsPage() {
             )}
           </div>
           <div className="ml-4 min-w-0">
-            <div className="text-sm font-medium text-gray-900 truncate">{product.nombre}</div>
+            <div className="text-sm font-medium text-gray-900 truncate">
+              {product.nombre}
+            </div>
             <div className="text-xs text-gray-500">{product.material}</div>
           </div>
         </div>
       ),
     },
     {
-      key: 'categoria',
-      header: 'Categoría',
+      key: "categoria",
+      header: "Categoría",
       sortable: true,
-      className: 'hidden sm:table-cell',
+      className: "hidden sm:table-cell",
     },
     {
-      key: 'precio',
-      header: 'Precio',
+      key: "precio",
+      header: "Precio",
       sortable: true,
-      className: '',
+      className: "",
       render: (value) => `${Number(value).toFixed(2)} €`,
     },
     {
-      key: 'stock',
-      header: 'Stock',
+      key: "stock",
+      header: "Stock",
       sortable: true,
-      className: 'hidden md:table-cell',
+      className: "hidden md:table-cell",
       render: (value) => (
-        <span className={Number(value) <= 5 ? 'text-red-600 font-medium' : ''}>
+        <span className={Number(value) <= 5 ? "text-red-600 font-medium" : ""}>
           {String(value)}
         </span>
       ),
     },
     {
-      key: 'activo',
-      header: 'Estado',
+      key: "activo",
+      header: "Estado",
       sortable: true,
-      className: 'hidden lg:table-cell',
+      className: "hidden lg:table-cell",
       render: (value) => (
-        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-          value 
-            ? 'bg-green-100 text-green-800' 
-            : 'bg-gray-100 text-gray-800'
-        }`}>
-          {value ? 'Activo' : 'Inactivo'}
+        <span
+          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+            value ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+          }`}
+        >
+          {value ? "Activo" : "Inactivo"}
         </span>
       ),
     },
     {
-      key: 'acciones',
-      header: 'Acciones',
-      className: '',
+      key: "acciones",
+      header: "Acciones",
+      className: "",
       render: (_, product) => (
         <div className="flex items-center gap-1">
           <Link
@@ -215,15 +217,15 @@ export default function AdminProductsPage() {
 
   const bulkActions: BulkAction[] = [
     {
-      key: 'delete',
-      label: 'Eliminar seleccionados',
+      key: "delete",
+      label: "Eliminar seleccionados",
       icon: <Trash2 className="h-4 w-4" />,
-      variant: 'danger',
+      variant: "danger",
       onClick: handleBulkDelete,
     },
   ];
 
-  if (status === 'loading' || loading) {
+  if (status === "loading" || loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -242,7 +244,9 @@ export default function AdminProductsPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Package className="h-8 w-8 text-indigo-600" />
-              <h1 className="text-2xl font-bold text-gray-900">Gestión de Productos</h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Gestión de Productos
+              </h1>
             </div>
             <div className="flex items-center gap-4">
               <Link
@@ -278,7 +282,7 @@ export default function AdminProductsPage() {
           columns={columns}
           rowKey="id"
           searchable={true}
-          searchKeys={['nombre', 'categoria', 'material']}
+          searchKeys={["nombre", "categoria", "material"]}
           searchPlaceholder="Buscar productos..."
           pagination={true}
           pageSizeOptions={[10, 25, 50, 100]}
@@ -290,7 +294,9 @@ export default function AdminProductsPage() {
           loading={loading}
           emptyMessage="No se encontraron productos"
           noResultsMessage="Ningún producto coincide con tu búsqueda"
-          onRowClick={(product) => router.push(`/admin/products/${product.slug}/editar`)}
+          onRowClick={(product) =>
+            router.push(`/admin/products/${product.slug}/editar`)
+          }
         />
       </div>
 

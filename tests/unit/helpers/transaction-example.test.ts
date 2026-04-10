@@ -18,6 +18,7 @@ import {
   prisma,
   getDBInfo 
 } from '../../helpers';
+import { randomUUID } from 'crypto';
 
 describe('Example: Transaction Safety Demo', () => {
   // Reset database before the test suite
@@ -33,10 +34,12 @@ describe('Example: Transaction Safety Demo', () => {
     // Create a user inside the transaction
     const user = await tx.user.create({
       data: {
+        id: randomUUID(),
         email: 'temp@example.com',
         name: 'Temp User',
         password: 'hashedpassword',
         role: 'CUSTOMER',
+        updatedAt: new Date(),
       },
     });
 
@@ -72,15 +75,18 @@ describe('Example: Transaction Safety Demo', () => {
     // Create category
     const category = await tx.category.create({
       data: {
+        id: randomUUID(),
         name: 'Test Category',
         slug: 'test-category-temp',
         isActive: true,
+        updatedAt: new Date(),
       },
     });
 
     // Create product in that category
     const product = await tx.product.create({
       data: {
+        id: randomUUID(),
         slug: 'test-product-temp',
         name: 'Test Product',
         description: 'A test product',
@@ -89,6 +95,7 @@ describe('Example: Transaction Safety Demo', () => {
         categoryId: category.id,
         material: 'PLA',
         isActive: true,
+        updatedAt: new Date(),
       },
     });
 
@@ -118,10 +125,12 @@ describe('Example: Transaction Safety Demo', () => {
     // Create additional test-specific data in transaction
     const newUser = await tx.user.create({
       data: {
+        id: randomUUID(),
         email: 'new@example.com',
         name: 'New User',
         password: 'hashedpassword',
         role: 'CUSTOMER',
+        updatedAt: new Date(),
       },
     });
 
@@ -135,10 +144,12 @@ describe('Example: Transaction Safety Demo', () => {
     // Try to create a user with duplicate email
     await tx.user.create({
       data: {
+        id: randomUUID(),
         email: 'unique@example.com',
         name: 'Unique User',
         password: 'hashedpassword',
         role: 'CUSTOMER',
+        updatedAt: new Date(),
       },
     });
 
@@ -149,10 +160,12 @@ describe('Example: Transaction Safety Demo', () => {
     try {
       await tx.user.create({
         data: {
-          email: 'unique@example.com', // Duplicate
+          id: randomUUID(),
+        email: 'unique@example.com', // Duplicate
           name: 'Another User',
           password: 'hashedpassword',
           role: 'CUSTOMER',
+          updatedAt: new Date(),
         },
       });
     } catch (error) {

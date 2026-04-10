@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useEffect, useState, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import { XCircle, ShoppingCart, ArrowLeft, Loader2 } from 'lucide-react';
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { XCircle, ShoppingCart, ArrowLeft, Loader2 } from "lucide-react";
 
 /**
  * Checkout Cancel Page
@@ -12,7 +12,7 @@ import { XCircle, ShoppingCart, ArrowLeft, Loader2 } from 'lucide-react';
  */
 function CheckoutCancelContent() {
   const searchParams = useSearchParams();
-  const orderId = searchParams.get('orderId');
+  const orderId = searchParams.get("orderId");
   const [cancelling, setCancelling] = useState(false);
   const [cancelled, setCancelled] = useState(false);
 
@@ -22,17 +22,17 @@ function CheckoutCancelContent() {
       const cancelOrder = async () => {
         setCancelling(true);
         try {
-          const response = await fetch('/api/orders/cancel', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+          const response = await fetch("/api/orders/cancel", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ orderId }),
           });
-          
+
           if (response.ok) {
             setCancelled(true);
           }
         } catch (error) {
-          console.error('Error cancelando pedido:', error);
+          console.error("Error cancelando pedido:", error);
         } finally {
           setCancelling(false);
         }
@@ -64,7 +64,9 @@ function CheckoutCancelContent() {
             </div>
           ) : (
             <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8">
-              Has cancelado el proceso de pago. {cancelled && 'El pedido ha sido cancelado.'} Tu carrito sigue guardado y puedes intentarlo de nuevo cuando quieras.
+              Has cancelado el proceso de pago.{" "}
+              {cancelled && "El pedido ha sido cancelado."} Tu carrito sigue
+              guardado y puedes intentarlo de nuevo cuando quieras.
             </p>
           )}
 
@@ -87,8 +89,11 @@ function CheckoutCancelContent() {
           </div>
 
           <p className="text-sm text-gray-500 mt-6">
-            ¿Tienes alguna pregunta?{' '}
-            <a href="mailto:soporte@3dprint.com" className="text-indigo-600 hover:underline">
+            ¿Tienes alguna pregunta?{" "}
+            <a
+              href="mailto:soporte@3dprint.com"
+              className="text-indigo-600 hover:underline"
+            >
               Contacta con soporte
             </a>
           </p>
@@ -100,16 +105,18 @@ function CheckoutCancelContent() {
 
 export default function CheckoutCancelPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
-            <Loader2 className="h-12 w-12 animate-spin text-indigo-600 mx-auto mb-4" />
-            <p className="text-gray-600">Cargando...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 py-12">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
+              <Loader2 className="h-12 w-12 animate-spin text-indigo-600 mx-auto mb-4" />
+              <p className="text-gray-600">Cargando...</p>
+            </div>
           </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <CheckoutCancelContent />
     </Suspense>
   );

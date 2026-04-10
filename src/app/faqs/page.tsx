@@ -2,21 +2,21 @@
  * FAQs Page - Frontend
  * Public FAQ page with accordion display and search
  */
-'use client';
+"use client";
 
-import { useEffect, useState, useMemo } from 'react';
-import Link from 'next/link';
-import Head from 'next/head';
-import { 
-  Search, 
-  ChevronDown, 
-  ChevronUp, 
+import { useEffect, useState, useMemo } from "react";
+import Link from "next/link";
+import Head from "next/head";
+import {
+  Search,
+  ChevronDown,
+  ChevronUp,
   HelpCircle,
   Loader2,
   AlertCircle,
   MessageCircle,
-  ArrowRight
-} from 'lucide-react';
+  ArrowRight,
+} from "lucide-react";
 
 interface FAQ {
   id: string;
@@ -35,7 +35,7 @@ export default function FAQsPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
@@ -48,16 +48,16 @@ export default function FAQsPage() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('/api/faqs');
+      const response = await fetch("/api/faqs");
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error cargando FAQs');
+        throw new Error(data.error || "Error cargando FAQs");
       }
 
       setCategories(data.categorias || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : "Error desconocido");
     } finally {
       setLoading(false);
     }
@@ -70,21 +70,22 @@ export default function FAQsPage() {
     }
 
     const query = searchQuery.toLowerCase().trim();
-    
+
     return categories
-      .map(category => ({
+      .map((category) => ({
         ...category,
-        faqs: category.faqs.filter(faq => 
-          faq.pregunta.toLowerCase().includes(query) ||
-          faq.respuesta.toLowerCase().includes(query)
-        )
+        faqs: category.faqs.filter(
+          (faq) =>
+            faq.pregunta.toLowerCase().includes(query) ||
+            faq.respuesta.toLowerCase().includes(query),
+        ),
       }))
-      .filter(category => category.faqs.length > 0);
+      .filter((category) => category.faqs.length > 0);
   }, [categories, searchQuery]);
 
   // Expandir/colapsar item
   const toggleItem = (id: string) => {
-    setExpandedItems(prev => {
+    setExpandedItems((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(id)) {
         newSet.delete(id);
@@ -97,11 +98,11 @@ export default function FAQsPage() {
 
   // Expandir todos de una categoría
   const expandCategory = (categoryName: string) => {
-    const category = categories.find(c => c.nombre === categoryName);
+    const category = categories.find((c) => c.nombre === categoryName);
     if (category) {
-      setExpandedItems(prev => {
+      setExpandedItems((prev) => {
         const newSet = new Set(prev);
-        category.faqs.forEach(faq => newSet.add(faq.id));
+        category.faqs.forEach((faq) => newSet.add(faq.id));
         return newSet;
       });
     }
@@ -115,8 +116,8 @@ export default function FAQsPage() {
   // Expandir todos
   const expandAll = () => {
     const allIds = new Set<string>();
-    filteredCategories.forEach(cat => {
-      cat.faqs.forEach(faq => allIds.add(faq.id));
+    filteredCategories.forEach((cat) => {
+      cat.faqs.forEach((faq) => allIds.add(faq.id));
     });
     setExpandedItems(allIds);
   };
@@ -126,7 +127,7 @@ export default function FAQsPage() {
     setActiveCategory(categoryName);
     const element = document.getElementById(`category-${categoryName}`);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
 
@@ -145,7 +146,10 @@ export default function FAQsPage() {
     <>
       <Head>
         <title>Preguntas Frecuentes | 3D Print</title>
-        <meta name="description" content="Encuentra respuestas a las preguntas más comunes sobre nuestros productos impresos en 3D, envíos, devoluciones y más." />
+        <meta
+          name="description"
+          content="Encuentra respuestas a las preguntas más comunes sobre nuestros productos impresos en 3D, envíos, devoluciones y más."
+        />
       </Head>
 
       <div className="min-h-screen bg-gray-50">
@@ -158,9 +162,10 @@ export default function FAQsPage() {
                 Preguntas Frecuentes
               </h1>
               <p className="text-xl text-indigo-100 mb-8">
-                Encuentra respuestas a tus dudas sobre nuestros productos, envíos y más
+                Encuentra respuestas a tus dudas sobre nuestros productos,
+                envíos y más
               </p>
-              
+
               {/* Search Box */}
               <div className="relative max-w-xl mx-auto">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -173,7 +178,7 @@ export default function FAQsPage() {
                 />
                 {searchQuery && (
                   <button
-                    onClick={() => setSearchQuery('')}
+                    onClick={() => setSearchQuery("")}
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
                     ×
@@ -205,7 +210,7 @@ export default function FAQsPage() {
               </p>
               {searchQuery && (
                 <button
-                  onClick={() => setSearchQuery('')}
+                  onClick={() => setSearchQuery("")}
                   className="text-indigo-600 hover:text-indigo-800 font-medium"
                 >
                   Limpiar búsqueda
@@ -229,8 +234,8 @@ export default function FAQsPage() {
                         onClick={() => scrollToCategory(category.nombre)}
                         className={`w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center justify-between ${
                           activeCategory === category.nombre
-                            ? 'bg-indigo-50 text-indigo-700'
-                            : 'hover:bg-gray-100 text-gray-700'
+                            ? "bg-indigo-50 text-indigo-700"
+                            : "hover:bg-gray-100 text-gray-700"
                         }`}
                       >
                         <span>{category.nombre}</span>
@@ -266,7 +271,11 @@ export default function FAQsPage() {
                 {/* Controls */}
                 <div className="flex items-center justify-between mb-6">
                   <p className="text-sm text-gray-600">
-                    {filteredCategories.reduce((acc, cat) => acc + cat.faqs.length, 0)} preguntas encontradas
+                    {filteredCategories.reduce(
+                      (acc, cat) => acc + cat.faqs.length,
+                      0,
+                    )}{" "}
+                    preguntas encontradas
                   </p>
                   <div className="flex gap-2">
                     <button
@@ -311,7 +320,10 @@ export default function FAQsPage() {
                       {/* FAQs Accordion */}
                       <div className="divide-y divide-gray-200">
                         {category.faqs.map((faq) => (
-                          <div key={faq.id} className="border-b border-gray-100 last:border-b-0">
+                          <div
+                            key={faq.id}
+                            className="border-b border-gray-100 last:border-b-0"
+                          >
                             <button
                               onClick={() => toggleItem(faq.id)}
                               className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors text-left"
@@ -325,16 +337,18 @@ export default function FAQsPage() {
                                 <ChevronDown className="h-5 w-5 text-gray-400 flex-shrink-0" />
                               )}
                             </button>
-                            
+
                             {/* Answer */}
                             {expandedItems.has(faq.id) && (
                               <div className="px-6 pb-4">
                                 <div className="prose prose-indigo max-w-none text-gray-600">
-                                  {faq.respuesta.split('\n').map((paragraph, idx) => (
-                                    <p key={idx} className="mb-2 last:mb-0">
-                                      {paragraph}
-                                    </p>
-                                  ))}
+                                  {faq.respuesta
+                                    .split("\n")
+                                    .map((paragraph, idx) => (
+                                      <p key={idx} className="mb-2 last:mb-0">
+                                        {paragraph}
+                                      </p>
+                                    ))}
                                 </div>
                               </div>
                             )}

@@ -12,4 +12,4 @@ export {
   AlertSeverity,
   AlertStatus,
   CouponType,
-} from '@prisma/client';
+} from "@prisma/client";

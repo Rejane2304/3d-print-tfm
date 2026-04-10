@@ -13,6 +13,7 @@ import { POST as createCheckout } from '@/app/api/checkout/route';
 import { POST as stripeWebhook } from '@/app/api/webhooks/stripe/route';
 import { prisma } from '@/lib/db/prisma';
 import bcrypt from 'bcrypt';
+import { randomUUID } from 'crypto';
 
 // Mock next-auth
 vi.mock('next-auth', () => ({
@@ -64,22 +65,24 @@ describe('Checkout API', () => {
   let testAddress: { id: string };
 
   beforeEach(async () => {
-    // Clean up
+    // Clean up - IMPORTANT: Delete inventory movements first due to foreign key constraints
+    await prisma.inventoryMovement.deleteMany({
+      where: { 
+        OR: [
+          { product: { slug: { startsWith: 'checkout-test-' } } },
+          { order: { user: { email: { startsWith: 'checkout-test-' } } } }
+        ]
+      },
+    });
     await prisma.orderItem.deleteMany({
-      where: { order: { user: { email: { startsWith: 'checkout-test-' } } } },
+      where: { order: { user: { email: { startsWith: 'checkout-test-' } } } }
     });
     await prisma.order.deleteMany({
       where: { user: { email: { startsWith: 'checkout-test-' } } },
     });
     await prisma.cartItem.deleteMany({
-      where: { cart: { user: { email: { startsWith: 'checkout-test-' } } } },
+      where: { cart: { user: { email: { startsWith: 'checkout-test-' } } } }
     });
-    await prisma.cart.deleteMany({
-      where: { user: { email: { startsWith: 'checkout-test-' } } },
-    });
-    await prisma.address.deleteMany({
-      where: { user: { email: { startsWith: 'checkout-test-' } } } },
-    );
     await prisma.product.deleteMany({
       where: { slug: { startsWith: 'checkout-test-' } } },
     );
@@ -94,25 +97,30 @@ describe('Checkout API', () => {
     const hashedPassword = await bcrypt.hash('TestPass123!', 10);
     customerUser = await prisma.user.create({
       data: {
+        id: randomUUID(),
         email: `checkout-test-${Date.now()}@test.com`,
         password: hashedPassword,
         name: 'Checkout Test User',
         role: 'CUSTOMER',
         isActive: true,
+        updatedAt: new Date(),
       },
     });
 
     // Create test category and product
     testCategory = await prisma.category.create({
       data: {
+        id: randomUUID(),
         name: 'Test Category',
         slug: `checkout-test-category-${Date.now()}`,
         isActive: true,
+        updatedAt: new Date(),
       },
     });
 
     testProduct = await prisma.product.create({
       data: {
+        id: randomUUID(),
         name: 'Test Product',
         slug: `checkout-test-product-${Date.now()}`,
         description: 'Test product for checkout',
@@ -121,12 +129,14 @@ describe('Checkout API', () => {
         categoryId: testCategory.id,
         material: 'PLA',
         isActive: true,
+        updatedAt: new Date(),
       },
     }) as unknown as { id: string; name: string; stock: number; price: number };
 
     // Create test address
     testAddress = await prisma.address.create({
       data: {
+        id: randomUUID(),
         userId: customerUser.id,
         name: 'Home',
         recipient: 'Test User',
@@ -137,6 +147,7 @@ describe('Checkout API', () => {
         postalCode: '28001',
         country: 'Spain',
         isDefault: true,
+        updatedAt: new Date(),
       },
     });
 
@@ -145,21 +156,29 @@ describe('Checkout API', () => {
   });
 
   afterEach(async () => {
-    // Clean up
+    // Clean up - IMPORTANT: Delete inventory movements FIRST due to foreign key constraints
+    await prisma.inventoryMovement.deleteMany({
+      where: {
+        OR: [
+          { product: { slug: { startsWith: 'checkout-test-' } } },
+          { order: { user: { email: { startsWith: 'checkout-test-' } } } },
+        ]
+      },
+    });
     await prisma.orderItem.deleteMany({
-      where: { order: { user: { email: { startsWith: 'checkout-test-' } } } },
+      where: { order: { user: { email: { startsWith: 'checkout-test-' } } } }
     });
     await prisma.order.deleteMany({
       where: { user: { email: { startsWith: 'checkout-test-' } } },
     });
     await prisma.cartItem.deleteMany({
-      where: { cart: { user: { email: { startsWith: 'checkout-test-' } } } },
+      where: { cart: { user: { email: { startsWith: 'checkout-test-' } } } }
     });
     await prisma.cart.deleteMany({
-      where: { user: { email: { startsWith: 'checkout-test-' } } },
-    });
+      where: { user: { email: { startsWith: 'checkout-test-' } } } }
+    );
     await prisma.address.deleteMany({
-      where: { user: { email: { startsWith: 'checkout-test-' } } } },
+      where: { user: { email: { startsWith: 'checkout-test-' } } } }
     );
     await prisma.product.deleteMany({
       where: { slug: { startsWith: 'checkout-test-' } } },
@@ -226,17 +245,21 @@ describe('Checkout API', () => {
       // Create cart with items
       const cart = await prisma.cart.create({
         data: {
+          id: randomUUID(),
           userId: customerUser.id,
           subtotal: 29.99,
+          updatedAt: new Date(),
         },
       });
 
       await prisma.cartItem.create({
         data: {
+          id: randomUUID(),
           cartId: cart.id,
           productId: testProduct.id,
           quantity: 1,
           unitPrice: 29.99,
+          updatedAt: new Date(),
         },
       });
 
@@ -262,17 +285,21 @@ describe('Checkout API', () => {
       // Create cart with more items than stock
       const cart = await prisma.cart.create({
         data: {
+          id: randomUUID(),
           userId: customerUser.id,
           subtotal: 299.90,
+          updatedAt: new Date(),
         },
       });
 
       await prisma.cartItem.create({
         data: {
+          id: randomUUID(),
           cartId: cart.id,
           productId: testProduct.id,
           quantity: 20, // More than stock (10)
           unitPrice: 29.99,
+          updatedAt: new Date(),
         },
       });
 
@@ -340,6 +367,7 @@ describe('Checkout API', () => {
       // We verify the database structure supports it
       const order = await prisma.order.create({
         data: {
+          id: randomUUID(),
           orderNumber: 'P-2024-000001',
           userId: customerUser.id,
           status: 'PENDING',
@@ -354,18 +382,21 @@ describe('Checkout API', () => {
           shippingProvince: 'Madrid',
           shippingCountry: 'Spain',
           stripeSessionId: 'cs_test_session123',
+          updatedAt: new Date(),
         },
       });
 
       // Create payment record
       const payment = await prisma.payment.create({
         data: {
+          id: randomUUID(),
           orderId: order.id,
           userId: customerUser.id,
           amount: 35.98,
           method: 'CARD',
           status: 'COMPLETED',
           stripeSessionId: 'cs_test_session123',
+          updatedAt: new Date(),
         },
       });
 
@@ -376,6 +407,7 @@ describe('Checkout API', () => {
     it('should update order status on payment completion', async () => {
       const order = await prisma.order.create({
         data: {
+          id: randomUUID(),
           orderNumber: 'P-2024-000002',
           userId: customerUser.id,
           status: 'PENDING',
@@ -389,6 +421,7 @@ describe('Checkout API', () => {
           shippingCity: 'Madrid',
           shippingProvince: 'Madrid',
           shippingCountry: 'Spain',
+          updatedAt: new Date(),
         },
       });
 

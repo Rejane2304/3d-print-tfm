@@ -7,9 +7,9 @@
  * - Multi-selection with bulk actions
  * - CSV export
  */
-'use client';
+"use client";
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from "react";
 import {
   Search,
   ChevronLeft,
@@ -18,10 +18,10 @@ import {
   ChevronDown,
   Download,
   Loader2,
-} from 'lucide-react';
+} from "lucide-react";
 
 // Types
-export type SortDirection = 'asc' | 'desc' | null;
+export type SortDirection = "asc" | "desc" | null;
 
 export interface Column<T> {
   key: keyof T | string;
@@ -41,7 +41,7 @@ export interface BulkAction {
   key: string;
   label: string;
   icon?: React.ReactNode;
-  variant?: 'primary' | 'danger' | 'secondary';
+  variant?: "primary" | "danger" | "secondary";
   onClick: (selectedIds: string[]) => void | Promise<void>;
 }
 
@@ -57,7 +57,10 @@ export interface DataTableProps<T> {
   defaultPageSize?: number;
   selectable?: boolean;
   bulkActions?: BulkAction[];
-  onBulkAction?: (actionKey: string, selectedIds: string[]) => void | Promise<void>;
+  onBulkAction?: (
+    actionKey: string,
+    selectedIds: string[],
+  ) => void | Promise<void>;
   exportable?: boolean;
   exportFilename?: string;
   loading?: boolean;
@@ -74,7 +77,7 @@ export function DataTable<T extends object>({
   rowKey,
   searchable = false,
   searchKeys,
-  searchPlaceholder = 'Search...',
+  searchPlaceholder = "Search...",
   pagination = true,
   pageSizeOptions = [10, 25, 50, 100],
   defaultPageSize = 25,
@@ -82,23 +85,25 @@ export function DataTable<T extends object>({
   bulkActions = [],
   onBulkAction,
   exportable = false,
-  exportFilename = 'export.csv',
+  exportFilename = "export.csv",
   loading = false,
-  emptyMessage = 'No data available',
-  noResultsMessage = 'No results found',
-  className = '',
+  emptyMessage = "No data available",
+  noResultsMessage = "No results found",
+  className = "",
   onRowClick,
-  selectedRowClassName = 'bg-indigo-50',
+  selectedRowClassName = "bg-indigo-50",
 }: DataTableProps<T>) {
   // States
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [sortColumn, setSortColumn] = useState<keyof T | string | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(defaultPageSize);
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [isExporting, setIsExporting] = useState(false);
-  const [bulkActionLoading, setBulkActionLoading] = useState<string | null>(null);
+  const [bulkActionLoading, setBulkActionLoading] = useState<string | null>(
+    null,
+  );
 
   // Reset page when search changes
   React.useEffect(() => {
@@ -130,11 +135,11 @@ export function DataTable<T extends object>({
       const bValue = b[sortColumn as keyof T];
 
       if (aValue == null && bValue == null) return 0;
-      if (aValue == null) return sortDirection === 'asc' ? -1 : 1;
-      if (bValue == null) return sortDirection === 'asc' ? 1 : -1;
+      if (aValue == null) return sortDirection === "asc" ? -1 : 1;
+      if (bValue == null) return sortDirection === "asc" ? 1 : -1;
 
       const comparison = String(aValue).localeCompare(String(bValue));
-      return sortDirection === 'asc' ? comparison : -comparison;
+      return sortDirection === "asc" ? comparison : -comparison;
     });
   }, [filteredData, sortColumn, sortDirection]);
 
@@ -147,21 +152,24 @@ export function DataTable<T extends object>({
   }, [sortedData, currentPage, pageSize, pagination]);
 
   // Handlers
-  const handleSort = useCallback((columnKey: keyof T | string) => {
-    if (sortColumn === columnKey) {
-      setSortDirection((prev) => {
-        if (prev === 'asc') return 'desc';
-        if (prev === 'desc') return null;
-        return 'asc';
-      });
-      if (sortDirection === 'desc') {
-        setSortColumn(null);
+  const handleSort = useCallback(
+    (columnKey: keyof T | string) => {
+      if (sortColumn === columnKey) {
+        setSortDirection((prev) => {
+          if (prev === "asc") return "desc";
+          if (prev === "desc") return null;
+          return "asc";
+        });
+        if (sortDirection === "desc") {
+          setSortColumn(null);
+        }
+      } else {
+        setSortColumn(columnKey);
+        setSortDirection("asc");
       }
-    } else {
-      setSortColumn(columnKey);
-      setSortDirection('asc');
-    }
-  }, [sortColumn, sortDirection]);
+    },
+    [sortColumn, sortDirection],
+  );
 
   const toggleRowSelection = useCallback((rowId: string) => {
     setSelectedRows((prev) => {
@@ -180,49 +188,54 @@ export function DataTable<T extends object>({
       if (prev.size === paginatedData.length) {
         return new Set();
       }
-      return new Set(paginatedData.map((row) => String(row[rowKey as keyof T])));
+      return new Set(
+        paginatedData.map((row) => String(row[rowKey as keyof T])),
+      );
     });
   }, [paginatedData, rowKey]);
 
-  const handleBulkAction = useCallback(async (action: BulkAction) => {
-    if (selectedRows.size === 0) return;
-    
-    setBulkActionLoading(action.key);
-    try {
-      await action.onClick(Array.from(selectedRows));
-      if (onBulkAction) {
-        await onBulkAction(action.key, Array.from(selectedRows));
+  const handleBulkAction = useCallback(
+    async (action: BulkAction) => {
+      if (selectedRows.size === 0) return;
+
+      setBulkActionLoading(action.key);
+      try {
+        await action.onClick(Array.from(selectedRows));
+        if (onBulkAction) {
+          await onBulkAction(action.key, Array.from(selectedRows));
+        }
+        setSelectedRows(new Set());
+      } catch (error) {
+        console.error("Bulk action failed:", error);
+      } finally {
+        setBulkActionLoading(null);
       }
-      setSelectedRows(new Set());
-    } catch (error) {
-      console.error('Bulk action failed:', error);
-    } finally {
-      setBulkActionLoading(null);
-    }
-  }, [selectedRows, onBulkAction]);
+    },
+    [selectedRows, onBulkAction],
+  );
 
   const exportToCSV = useCallback(async () => {
     setIsExporting(true);
     try {
-      const headers = columns.map((col) => col.header).join(',');
+      const headers = columns.map((col) => col.header).join(",");
       const rows = filteredData.map((row) => {
         return columns
           .map((col) => {
             const value = row[col.key as keyof T];
-            const cellValue = value == null ? '' : String(value);
+            const cellValue = value == null ? "" : String(value);
             // Escape quotes and wrap in quotes if contains comma
-            if (cellValue.includes(',') || cellValue.includes('"')) {
+            if (cellValue.includes(",") || cellValue.includes('"')) {
               return `"${cellValue.replace(/"/g, '""')}"`;
             }
             return cellValue;
           })
-          .join(',');
+          .join(",");
       });
-      
-      const csv = [headers, ...rows].join('\n');
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+
+      const csv = [headers, ...rows].join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
       link.download = exportFilename;
       document.body.appendChild(link);
@@ -239,11 +252,13 @@ export function DataTable<T extends object>({
     if (column.render) {
       return column.render(value, row);
     }
-    return value == null ? '-' : String(value);
+    return value == null ? "-" : String(value);
   };
 
   return (
-    <div className={`bg-white rounded-xl shadow-sm border border-gray-200 ${className}`}>
+    <div
+      className={`bg-white rounded-xl shadow-sm border border-gray-200 ${className}`}
+    >
       {/* Toolbar */}
       <div className="p-4 border-b border-gray-200">
         <div className="flex flex-col sm:flex-row gap-4 justify-between">
@@ -283,9 +298,9 @@ export function DataTable<T extends object>({
         {/* Bulk Actions */}
         {selectable && selectedRows.size > 0 && (
           <div className="mt-4 flex items-center gap-3 p-3 bg-indigo-50 rounded-lg">
-              <span className="text-sm font-medium text-indigo-900">
-                {selectedRows.size} selected
-              </span>
+            <span className="text-sm font-medium text-indigo-900">
+              {selectedRows.size} selected
+            </span>
             <div className="flex gap-2">
               {bulkActions.map((action) => (
                 <button
@@ -293,11 +308,11 @@ export function DataTable<T extends object>({
                   onClick={() => handleBulkAction(action)}
                   disabled={bulkActionLoading === action.key}
                   className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium ${
-                    action.variant === 'danger'
-                      ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                      : action.variant === 'primary'
-                      ? 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    action.variant === "danger"
+                      ? "bg-red-100 text-red-700 hover:bg-red-200"
+                      : action.variant === "primary"
+                        ? "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   } disabled:opacity-50`}
                 >
                   {bulkActionLoading === action.key ? (
@@ -335,7 +350,7 @@ export function DataTable<T extends object>({
                       checked={
                         paginatedData.length > 0 &&
                         paginatedData.every((row) =>
-                          selectedRows.has(String(row[rowKey as keyof T]))
+                          selectedRows.has(String(row[rowKey as keyof T])),
                         )
                       }
                       onChange={toggleAllSelection}
@@ -347,20 +362,20 @@ export function DataTable<T extends object>({
                   <th
                     key={String(column.key)}
                     className={`px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
-                      column.sortable ? 'cursor-pointer hover:bg-gray-100' : ''
-                    } ${column.className || ''}`}
+                      column.sortable ? "cursor-pointer hover:bg-gray-100" : ""
+                    } ${column.className || ""}`}
                     style={{ width: column.width }}
                     onClick={() => column.sortable && handleSort(column.key)}
                   >
                     <div className="flex items-center gap-1">
                       {column.header}
-                      {column.sortable && sortColumn === column.key && (
-                        sortDirection === 'asc' ? (
+                      {column.sortable &&
+                        sortColumn === column.key &&
+                        (sortDirection === "asc" ? (
                           <ChevronUp className="h-4 w-4" />
-                        ) : sortDirection === 'desc' ? (
+                        ) : sortDirection === "desc" ? (
                           <ChevronDown className="h-4 w-4" />
-                        ) : null
-                      )}
+                        ) : null)}
                     </div>
                   </th>
                 ))}
@@ -375,8 +390,8 @@ export function DataTable<T extends object>({
                   <tr
                     key={rowId}
                     className={`hover:bg-gray-50 ${
-                      isSelected ? selectedRowClassName : ''
-                    } ${onRowClick ? 'cursor-pointer' : ''}`}
+                      isSelected ? selectedRowClassName : ""
+                    } ${onRowClick ? "cursor-pointer" : ""}`}
                     onClick={() => onRowClick?.(row)}
                   >
                     {selectable && (
@@ -396,8 +411,8 @@ export function DataTable<T extends object>({
                       <td
                         key={String(column.key)}
                         className={`px-4 py-3 text-sm text-gray-900 ${
-                          column.width ? '' : 'whitespace-nowrap'
-                        } ${column.className || ''}`}
+                          column.width ? "" : "whitespace-nowrap"
+                        } ${column.className || ""}`}
                         style={{ width: column.width }}
                       >
                         {getCellValue(row, column)}
@@ -417,8 +432,8 @@ export function DataTable<T extends object>({
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-4 text-xs sm:text-sm">
               <span className="text-gray-700 whitespace-nowrap">
-                Mostrando {((currentPage - 1) * pageSize) + 1} a{' '}
-                {Math.min(currentPage * pageSize, sortedData.length)} de{' '}
+                Mostrando {(currentPage - 1) * pageSize + 1} a{" "}
+                {Math.min(currentPage * pageSize, sortedData.length)} de{" "}
                 {sortedData.length} resultados
               </span>
               <select
@@ -450,7 +465,9 @@ export function DataTable<T extends object>({
                 Pág. {currentPage} de {totalPages}
               </span>
               <button
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(totalPages, p + 1))
+                }
                 disabled={currentPage === totalPages}
                 className="p-1.5 sm:p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="Página siguiente"

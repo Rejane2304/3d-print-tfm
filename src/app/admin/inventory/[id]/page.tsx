@@ -2,13 +2,13 @@
  * Página de Historial de Inventario - Admin
  * Muestra el historial de movimientos de un producto específico
  */
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter, useParams } from 'next/navigation';
-import Link from 'next/link';
-import Image from 'next/image';
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter, useParams } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
 import {
   Loader2,
   ArrowLeft,
@@ -20,7 +20,7 @@ import {
   ChevronLeft,
   ChevronRight,
   History,
-} from 'lucide-react';
+} from "lucide-react";
 
 interface Producto {
   id: string;
@@ -31,7 +31,7 @@ interface Producto {
 
 interface Movimiento {
   id: string;
-  tipo: 'IN' | 'OUT' | 'ADJUST';
+  tipo: "IN" | "OUT" | "ADJUST";
   cantidad: number;
   stockAnterior: number;
   stockNuevo: number;
@@ -59,22 +59,22 @@ const tipoMovimientoConfig: Record<
   { color: string; bgColor: string; icon: React.ElementType; label: string }
 > = {
   IN: {
-    color: 'text-green-700',
-    bgColor: 'bg-green-100',
+    color: "text-green-700",
+    bgColor: "bg-green-100",
     icon: Plus,
-    label: 'Entrada',
+    label: "Entrada",
   },
   OUT: {
-    color: 'text-red-700',
-    bgColor: 'bg-red-100',
+    color: "text-red-700",
+    bgColor: "bg-red-100",
     icon: Minus,
-    label: 'Salida',
+    label: "Salida",
   },
   ADJUST: {
-    color: 'text-blue-700',
-    bgColor: 'bg-blue-100',
+    color: "text-blue-700",
+    bgColor: "bg-blue-100",
     icon: RotateCcw,
-    label: 'Ajuste',
+    label: "Ajuste",
   },
 };
 
@@ -95,18 +95,18 @@ export default function InventoryHistoryPage() {
   const productId = params.id as string;
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login?callbackUrl=/admin/inventory');
+    if (status === "unauthenticated") {
+      router.push("/login?callbackUrl=/admin/inventory");
       return;
     }
 
     const user = session?.user as { rol?: string } | undefined;
-    if (status === 'authenticated' && user?.rol !== 'ADMIN') {
-      router.push('/');
+    if (status === "authenticated" && user?.rol !== "ADMIN") {
+      router.push("/");
       return;
     }
 
-    if (status === 'authenticated' && productId) {
+    if (status === "authenticated" && productId) {
       fetchHistory();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -123,18 +123,18 @@ export default function InventoryHistoryPage() {
       });
 
       const response = await fetch(
-        `/api/admin/inventory/${productId}/history?${params}`
+        `/api/admin/inventory/${productId}/history?${params}`,
       );
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || 'Error al cargar historial');
+        throw new Error(result.error || "Error al cargar historial");
       }
 
       setData(result);
       setPagination(result.pagination);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : "Error desconocido");
     } finally {
       setLoading(false);
     }
@@ -142,28 +142,28 @@ export default function InventoryHistoryPage() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
+    return date.toLocaleDateString("es-ES", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
     });
   };
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleTimeString('es-ES', {
-      hour: '2-digit',
-      minute: '2-digit',
+    return date.toLocaleTimeString("es-ES", {
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
   const getStockStatusColor = (stock: number) => {
-    if (stock <= 0) return 'text-red-600';
-    if (stock <= 5) return 'text-yellow-600';
-    return 'text-green-600';
+    if (stock <= 0) return "text-red-600";
+    if (stock <= 5) return "text-yellow-600";
+    return "text-green-600";
   };
 
-  if (status === 'loading' || loading) {
+  if (status === "loading" || loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -180,7 +180,7 @@ export default function InventoryHistoryPage() {
         <div className="text-center">
           <AlertCircle className="h-12 w-12 text-red-600 mx-auto mb-4" />
           <p className="text-gray-900 font-medium">
-            {error || 'Producto no encontrado'}
+            {error || "Producto no encontrado"}
           </p>
           <Link
             href="/admin/inventory"
@@ -203,11 +203,16 @@ export default function InventoryHistoryPage() {
         <div className="max-w-[1920px] 3xl:max-w-[2200px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Link href="/admin/inventory" className="text-gray-500 hover:text-gray-700">
+              <Link
+                href="/admin/inventory"
+                className="text-gray-500 hover:text-gray-700"
+              >
                 <ArrowLeft className="h-6 w-6" />
               </Link>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Historial de Inventario</h1>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  Historial de Inventario
+                </h1>
                 <p className="text-sm text-gray-500">{producto.nombre}</p>
               </div>
             </div>
@@ -252,7 +257,7 @@ export default function InventoryHistoryPage() {
                   <span className="text-gray-600">Stock actual:</span>
                   <span
                     className={`text-2xl font-bold ${getStockStatusColor(
-                      producto.stockActual
+                      producto.stockActual,
                     )}`}
                   >
                     {producto.stockActual}
@@ -337,17 +342,17 @@ export default function InventoryHistoryPage() {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span
                             className={`text-sm font-medium ${
-                              movimiento.tipo === 'IN'
-                                ? 'text-green-600'
-                                : movimiento.tipo === 'OUT'
-                                ? 'text-red-600'
-                                : 'text-blue-600'
+                              movimiento.tipo === "IN"
+                                ? "text-green-600"
+                                : movimiento.tipo === "OUT"
+                                  ? "text-red-600"
+                                  : "text-blue-600"
                             }`}
                           >
-                            {movimiento.tipo === 'IN' && '+'}
-                            {movimiento.tipo === 'OUT' && '-'}
-                            {movimiento.tipo === 'ADJUST' &&
-                              (movimiento.cantidad >= 0 ? '+' : '')}
+                            {movimiento.tipo === "IN" && "+"}
+                            {movimiento.tipo === "OUT" && "-"}
+                            {movimiento.tipo === "ADJUST" &&
+                              (movimiento.cantidad >= 0 ? "+" : "")}
                             {movimiento.cantidad}
                           </span>
                         </td>
@@ -359,7 +364,7 @@ export default function InventoryHistoryPage() {
                             <span className="mx-2">→</span>
                             <span
                               className={`font-medium ${getStockStatusColor(
-                                movimiento.stockNuevo
+                                movimiento.stockNuevo,
                               )}`}
                             >
                               {movimiento.stockNuevo}
@@ -389,12 +394,8 @@ export default function InventoryHistoryPage() {
         {pagination.totalPages > 1 && (
           <div className="mt-6 flex items-center justify-between">
             <p className="text-sm text-gray-700">
-              Mostrando{' '}
-              {(pagination.page - 1) * pagination.limit + 1} a{' '}
-              {Math.min(
-                pagination.page * pagination.limit,
-                pagination.total
-              )}{' '}
+              Mostrando {(pagination.page - 1) * pagination.limit + 1} a{" "}
+              {Math.min(pagination.page * pagination.limit, pagination.total)}{" "}
               de {pagination.total} movimientos
             </p>
             <div className="flex gap-2">

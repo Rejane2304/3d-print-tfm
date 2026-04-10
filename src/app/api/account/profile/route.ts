@@ -2,21 +2,21 @@
  * API de Perfil de Usuario
  * Gestión de datos personales del usuario autenticado
  */
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
-import { z } from 'zod';
-import bcrypt from 'bcrypt';
-import { checkRateLimit } from '@/lib/rate-limit';
-import { changePasswordSchema } from '@/lib/validators';
-import { translateErrorMessage } from '@/lib/i18n';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/auth-options";
+import { z } from "zod";
+import bcrypt from "bcrypt";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { changePasswordSchema } from "@/lib/validators";
+import { translateErrorMessage } from "@/lib/i18n";
 
 // Schema de validación para actualizar perfil - más permisivo
 const profileSchema = z.object({
   name: z.string().min(1).max(100).optional(),
-  phone: z.string().max(20).optional().or(z.literal('')),
-  taxId: z.string().max(20).optional().or(z.literal('')),
+  phone: z.string().max(20).optional().or(z.literal("")),
+  taxId: z.string().max(20).optional().or(z.literal("")),
 });
 
 /**
@@ -24,11 +24,11 @@ const profileSchema = z.object({
  */
 async function checkPasswordHistory(
   userId: string,
-  newPassword: string
+  newPassword: string,
 ): Promise<boolean> {
   const passwordHistory = await prisma.passwordHistory.findMany({
     where: { userId },
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: "desc" },
     take: 5,
   });
 
@@ -47,10 +47,11 @@ async function checkPasswordHistory(
  */
 async function savePasswordToHistory(
   userId: string,
-  passwordHash: string
+  passwordHash: string,
 ): Promise<void> {
   await prisma.passwordHistory.create({
     data: {
+      id: crypto.randomUUID(),
       userId,
       hash: passwordHash,
     },
@@ -63,8 +64,8 @@ export async function GET() {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage('No autenticado') },
-        { status: 401 }
+        { success: false, error: translateErrorMessage("No autenticado") },
+        { status: 401 },
       );
     }
 
@@ -83,17 +84,17 @@ export async function GET() {
 
     if (!usuario) {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage('Usuario not found') },
-        { status: 404 }
+        { success: false, error: translateErrorMessage("Usuario not found") },
+        { status: 404 },
       );
     }
 
     return NextResponse.json({ success: true, usuario });
   } catch (error) {
-    console.error('Error obteniendo perfil:', error);
+    console.error("Error obteniendo perfil:", error);
     return NextResponse.json(
-      { success: false, error: translateErrorMessage('Internal error') },
-      { status: 500 }
+      { success: false, error: translateErrorMessage("Internal error") },
+      { status: 500 },
     );
   }
 }
@@ -104,8 +105,8 @@ export async function PATCH(req: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage('No autenticado') },
-        { status: 401 }
+        { success: false, error: translateErrorMessage("No autenticado") },
+        { status: 401 },
       );
     }
 
@@ -114,7 +115,7 @@ export async function PATCH(req: NextRequest) {
     // Si hay datos de contraseña, aplicar rate limiting y procesar cambio
     if (body.passwordActual && body.passwordNuevo) {
       // Check rate limiting for password change
-      const rateLimitResponse = checkRateLimit(req, 'passwordChange');
+      const rateLimitResponse = checkRateLimit(req, "passwordChange");
       if (rateLimitResponse) {
         return rateLimitResponse;
       }
@@ -125,8 +126,8 @@ export async function PATCH(req: NextRequest) {
 
       if (!usuario) {
         return NextResponse.json(
-          { success: false, error: translateErrorMessage('Usuario not found') },
-          { status: 404 }
+          { success: false, error: translateErrorMessage("Usuario not found") },
+          { status: 404 },
         );
       }
 
@@ -140,25 +141,29 @@ export async function PATCH(req: NextRequest) {
       // Verificar contraseña actual
       const passwordValido = await bcrypt.compare(
         passwordData.currentPassword,
-        usuario.password
+        usuario.password,
       );
 
       if (!passwordValido) {
         return NextResponse.json(
-          { success: false, error: 'Contraseña actual incorrecta' },
-          { status: 400 }
+          { success: false, error: "Contraseña actual incorrecta" },
+          { status: 400 },
         );
       }
 
       // Verificar que la nueva contraseña no coincida con las últimas 5
       const isReused = await checkPasswordHistory(
         usuario.id,
-        passwordData.newPassword
+        passwordData.newPassword,
       );
       if (isReused) {
         return NextResponse.json(
-          { success: false, error: 'La nueva contraseña no puede coincidir con ninguna de tus últimas 5 contraseñas' },
-          { status: 400 }
+          {
+            success: false,
+            error:
+              "La nueva contraseña no puede coincidir con ninguna de tus últimas 5 contraseñas",
+          },
+          { status: 400 },
         );
       }
 
@@ -174,7 +179,7 @@ export async function PATCH(req: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        message: 'Contraseña actualizada correctamente',
+        message: "Contraseña actualizada correctamente",
       });
     }
 
@@ -185,8 +190,8 @@ export async function PATCH(req: NextRequest) {
 
     if (!usuario) {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage('Usuario not found') },
-        { status: 404 }
+        { success: false, error: translateErrorMessage("Usuario not found") },
+        { status: 404 },
       );
     }
 
@@ -213,13 +218,13 @@ export async function PATCH(req: NextRequest) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { success: false, error: error.errors[0].message },
-        { status: 400 }
+        { status: 400 },
       );
     }
-    console.error('Error actualizando perfil:', error);
+    console.error("Error actualizando perfil:", error);
     return NextResponse.json(
-      { success: false, error: translateErrorMessage('Internal error') },
-      { status: 500 }
+      { success: false, error: translateErrorMessage("Internal error") },
+      { status: 500 },
     );
   }
 }

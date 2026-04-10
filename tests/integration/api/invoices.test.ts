@@ -13,6 +13,7 @@ import { GET as listInvoices, POST as createInvoice } from '@/app/api/admin/invo
 import { GET as generateInvoicePDF } from '@/app/api/admin/invoices/[id]/pdf/route';
 import { prisma } from '@/lib/db/prisma';
 import bcrypt from 'bcrypt';
+import { randomUUID } from 'crypto';
 
 // Mock next-auth
 vi.mock('next-auth', () => ({
@@ -48,11 +49,13 @@ describe('Invoices API', () => {
     const adminPassword = await bcrypt.hash('AdminPass123!', 10);
     adminUser = await prisma.user.create({
       data: {
+        id: randomUUID(),
         email: `invoice-test-admin-${Date.now()}@test.com`,
         password: adminPassword,
         name: 'Admin User',
         role: 'ADMIN',
         isActive: true,
+        updatedAt: new Date(),
       },
     });
 
@@ -60,12 +63,14 @@ describe('Invoices API', () => {
     const customerPassword = await bcrypt.hash('CustomerPass123!', 10);
     customerUser = await prisma.user.create({
       data: {
+        id: randomUUID(),
         email: `invoice-test-customer-${Date.now()}@test.com`,
         password: customerPassword,
         name: 'Customer User',
         role: 'CUSTOMER',
         isActive: true,
         taxId: '12345678A',
+        updatedAt: new Date(),
       },
     });
 
@@ -73,6 +78,7 @@ describe('Invoices API', () => {
     const timestamp = Date.now().toString().slice(-6);
     testOrder = await prisma.order.create({
       data: {
+        id: randomUUID(),
         orderNumber: `P-2024-${timestamp}`,
         userId: customerUser.id,
         status: 'DELIVERED',
@@ -86,9 +92,11 @@ describe('Invoices API', () => {
         shippingCity: 'Madrid',
         shippingProvince: 'Madrid',
         shippingCountry: 'Spain',
+        updatedAt: new Date(),
         items: {
           create: [
             {
+              id: randomUUID(),
               name: 'Test Product',
               price: 29.99,
               quantity: 1,
@@ -218,6 +226,7 @@ describe('Invoices API', () => {
       // Create a fresh order for this test to avoid cleanup issues
       const freshOrder = await prisma.order.create({
         data: {
+          id: randomUUID(),
           orderNumber: `P-2024-${Date.now().toString().slice(-6)}`,
           userId: customerUser.id,
           status: 'DELIVERED',
@@ -231,6 +240,7 @@ describe('Invoices API', () => {
           shippingCity: 'Madrid',
           shippingProvince: 'Madrid',
           shippingCountry: 'Spain',
+          updatedAt: new Date(),
         },
       });
 
@@ -259,6 +269,7 @@ describe('Invoices API', () => {
       // Create pending order
       const pendingOrder = await prisma.order.create({
         data: {
+          id: randomUUID(),
           orderNumber: `P-PEND-${Date.now().toString().slice(-8)}`,
           userId: customerUser.id,
           status: 'PENDING',
@@ -272,6 +283,7 @@ describe('Invoices API', () => {
           shippingCity: 'Madrid',
           shippingProvince: 'Madrid',
           shippingCountry: 'Spain',
+          updatedAt: new Date(),
         },
       });
 

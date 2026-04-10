@@ -4,10 +4,10 @@
  * All messages in Spanish as per project conventions
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
 
 // Rate limit types with their configurations
-export type RateLimitType = 'login' | 'register' | 'passwordChange';
+export type RateLimitType = "login" | "register" | "passwordChange";
 
 interface RateLimitConfig {
   maxAttempts: number;
@@ -37,7 +37,10 @@ const RATE_LIMITS: Record<RateLimitType, RateLimitConfig> = {
 
 // In-memory store for rate limiting
 // Structure: { [ip]: { [type]: RateLimitEntry } }
-const rateLimitStore: Record<string, Record<RateLimitType, RateLimitEntry>> = {};
+const rateLimitStore: Record<
+  string,
+  Record<RateLimitType, RateLimitEntry>
+> = {};
 
 /**
  * Get client IP address from request
@@ -45,22 +48,22 @@ const rateLimitStore: Record<string, Record<RateLimitType, RateLimitEntry>> = {}
  */
 function getClientIp(request: NextRequest): string {
   // Check for forwarded headers (common in production with proxies)
-  const forwardedFor = request.headers.get('x-forwarded-for');
+  const forwardedFor = request.headers.get("x-forwarded-for");
   if (forwardedFor) {
     // Get the first IP in the chain (original client)
-    const ips = forwardedFor.split(',').map(ip => ip.trim());
-    return ips[0] || 'unknown';
+    const ips = forwardedFor.split(",").map((ip) => ip.trim());
+    return ips[0] || "unknown";
   }
 
   // Check for other common headers
-  const realIp = request.headers.get('x-real-ip');
+  const realIp = request.headers.get("x-real-ip");
   if (realIp) {
     return realIp;
   }
 
   // Fallback to socket remote address
   // Note: In Next.js edge runtime, this might not be available
-  return 'unknown';
+  return "unknown";
 }
 
 /**
@@ -88,7 +91,7 @@ export function cleanupExpiredEntries(): void {
  */
 export function isRateLimited(
   ip: string,
-  type: RateLimitType
+  type: RateLimitType,
 ): { limited: boolean; remaining: number; resetTime: number } {
   const config = RATE_LIMITS[type];
   const now = Date.now();
@@ -153,10 +156,13 @@ function getTimeRemaining(resetTime: number): string {
  */
 export function checkRateLimit(
   request: NextRequest,
-  type: RateLimitType
+  type: RateLimitType,
 ): NextResponse | null {
   // Skip rate limiting in test environment
-  if (process.env.NODE_ENV === 'test' || process.env.VITEST_ENV === 'integration') {
+  if (
+    process.env.NODE_ENV === "test" ||
+    process.env.VITEST_ENV === "integration"
+  ) {
     return null;
   }
 
@@ -180,12 +186,14 @@ export function checkRateLimit(
       {
         status: 429,
         headers: {
-          'X-RateLimit-Limit': String(RATE_LIMITS[type].maxAttempts),
-          'X-RateLimit-Remaining': '0',
-          'X-RateLimit-Reset': String(Math.ceil(result.resetTime / 1000)),
-          'Retry-After': String(Math.ceil((result.resetTime - Date.now()) / 1000)),
+          "X-RateLimit-Limit": String(RATE_LIMITS[type].maxAttempts),
+          "X-RateLimit-Remaining": "0",
+          "X-RateLimit-Reset": String(Math.ceil(result.resetTime / 1000)),
+          "Retry-After": String(
+            Math.ceil((result.resetTime - Date.now()) / 1000),
+          ),
         },
-      }
+      },
     );
   }
 
@@ -211,7 +219,7 @@ export function resetRateLimit(ip: string, type: RateLimitType): void {
  */
 export function getRateLimitStatus(
   ip: string,
-  type: RateLimitType
+  type: RateLimitType,
 ): { remaining: number; resetTime: number | null } {
   const config = RATE_LIMITS[type];
   const entry = rateLimitStore[ip]?.[type];
@@ -230,6 +238,6 @@ export function getRateLimitStatus(
 }
 
 // Schedule cleanup every 5 minutes to prevent memory leaks
-if (typeof setInterval !== 'undefined') {
+if (typeof setInterval !== "undefined") {
   setInterval(cleanupExpiredEntries, 5 * 60 * 1000);
 }

@@ -3,13 +3,13 @@
  * Item individual del carrito de compras
  * Responsive: mobile → desktop
  */
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { Trash2, Minus, Plus, Loader2 } from 'lucide-react';
-import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { Trash2, Minus, Plus, Loader2 } from "lucide-react";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 interface CartItemProps {
   item: {
@@ -48,7 +48,9 @@ export default function CartItem({
         <div className="flex items-center justify-between">
           <div>
             <p className="text-gray-500">Producto no disponible</p>
-            <p className="text-sm text-gray-400">Este producto ya no está en catálogo</p>
+            <p className="text-sm text-gray-400">
+              Este producto ya no está en catálogo
+            </p>
           </div>
           <button
             type="button"
@@ -84,7 +86,7 @@ export default function CartItem({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number.parseInt(e.target.value, 10);
     if (isNaN(value)) return;
-    
+
     // Limitar entre 1 y stock disponible
     const clampedValue = Math.max(1, Math.min(value, product.stock));
     setQuantity(clampedValue);
@@ -102,7 +104,7 @@ export default function CartItem({
         className="relative w-full sm:w-32 h-32 flex-shrink-0"
       >
         <Image
-          src={product.image || '/images/placeholder.jpg'}
+          src={product.image || "/images/placeholder.jpg"}
           alt={product.name}
           fill
           className="object-cover"
@@ -165,9 +167,7 @@ export default function CartItem({
 
             {/* Indicador de stock */}
             {quantity >= product.stock && (
-              <span className="text-xs text-orange-600 ml-2">
-                Stock máximo
-              </span>
+              <span className="text-xs text-orange-600 ml-2">Stock máximo</span>
             )}
           </div>
 

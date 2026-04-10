@@ -1,24 +1,24 @@
 /**
  * Admin Individual Alert API
  * Delete specific alert
- * 
+ *
  * Requires: ADMIN Role
  */
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/auth-options";
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 }
+        { success: false, error: "No autenticado" },
+        { status: 401 },
       );
     }
 
@@ -26,10 +26,10 @@ export async function DELETE(
       where: { email: session.user.email },
     });
 
-    if (!usuario || usuario.role !== 'ADMIN') {
+    if (!usuario || usuario.role !== "ADMIN") {
       return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 403 }
+        { success: false, error: "No autorizado" },
+        { status: 403 },
       );
     }
 
@@ -40,8 +40,8 @@ export async function DELETE(
 
     if (!alerta) {
       return NextResponse.json(
-        { success: false, error: 'Alerta no encontrada' },
-        { status: 404 }
+        { success: false, error: "Alerta no encontrada" },
+        { status: 404 },
       );
     }
 
@@ -52,10 +52,10 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error eliminando alerta:', error);
+    console.error("Error eliminando alerta:", error);
     return NextResponse.json(
-      { success: false, error: 'Error interno del servidor' },
-      { status: 500 }
+      { success: false, error: "Error interno del servidor" },
+      { status: 500 },
     );
   }
 }

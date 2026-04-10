@@ -127,9 +127,9 @@ describe('CartSummary', () => {
   });
 
   it('debe mostrar información de impuestos incluidos', () => {
-    render(<CartSummary items={mockItems} subtotal={109.97} taxIncluded {...mockHandlers} />);
+    render(<CartSummary items={mockItems} subtotal={109.97} {...mockHandlers} />);
 
-    expect(screen.getByText(/impuestos incluidos/i)).toBeInTheDocument();
+    expect(screen.getByText(/IVA/i)).toBeInTheDocument();
   });
 
   it('debe mostrar loader durante procesamiento', () => {

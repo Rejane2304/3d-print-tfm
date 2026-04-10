@@ -19,7 +19,8 @@ import {
 
 export const metadata: Metadata = {
   title: "Aviso Legal | 3D Print",
-  description: "Información legal, datos de la empresa, propiedad intelectual y condiciones de uso del sitio web 3D Print.",
+  description:
+    "Información legal, datos de la empresa, propiedad intelectual y condiciones de uso del sitio web 3D Print.",
 };
 
 interface LegalSectionProps {
@@ -54,9 +55,7 @@ export default function LegalPage() {
         <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-16 md:py-20">
           <div className="text-center max-w-3xl mx-auto">
             <Scale className="h-16 w-16 mx-auto mb-6 text-indigo-400" />
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Aviso Legal
-            </h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">Aviso Legal</h1>
             <p className="text-xl text-gray-300">
               Información legal y condiciones de uso del sitio web
             </p>
@@ -76,28 +75,43 @@ export default function LegalPage() {
             >
               <div className="space-y-4">
                 <p className="text-gray-700 leading-relaxed">
-                  En cumplimiento del artículo 10 de la Ley 34/2002, de 11 de julio, de Servicios de la Sociedad de la Información y del Comercio Electrónico, se informa que el titular de este sitio web es:
+                  En cumplimiento del artículo 10 de la Ley 34/2002, de 11 de
+                  julio, de Servicios de la Sociedad de la Información y del
+                  Comercio Electrónico, se informa que el titular de este sitio
+                  web es:
                 </p>
                 <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
                   <ul className="space-y-3 text-gray-700">
                     <li className="flex items-start gap-3">
-                      <span className="font-semibold text-gray-900 min-w-[140px]">Razón social:</span>
+                      <span className="font-semibold text-gray-900 min-w-[140px]">
+                        Razón social:
+                      </span>
                       <span>3D Print</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="font-semibold text-gray-900 min-w-[140px]">CIF:</span>
+                      <span className="font-semibold text-gray-900 min-w-[140px]">
+                        CIF:
+                      </span>
                       <span>B12345678</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="font-semibold text-gray-900 min-w-[140px]">Domicilio social:</span>
-                      <span>Calle Admin 123, 08001 Barcelona, Barcelona, España</span>
+                      <span className="font-semibold text-gray-900 min-w-[140px]">
+                        Domicilio social:
+                      </span>
+                      <span>
+                        Calle Admin 123, 08001 Barcelona, Barcelona, España
+                      </span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="font-semibold text-gray-900 min-w-[140px]">Teléfono:</span>
+                      <span className="font-semibold text-gray-900 min-w-[140px]">
+                        Teléfono:
+                      </span>
                       <span>+34 930 000 001</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="font-semibold text-gray-900 min-w-[140px]">Email:</span>
+                      <span className="font-semibold text-gray-900 min-w-[140px]">
+                        Email:
+                      </span>
                       <span>info@3dprint.com</span>
                     </li>
                   </ul>
@@ -112,20 +126,28 @@ export default function LegalPage() {
             >
               <div className="space-y-4">
                 <p className="text-gray-700 leading-relaxed">
-                  Esta empresa está registrada en el Registro Mercantil de Barcelona, Tomo 12345, Folio 67, Hoja B-890123, Inscripción 1ª.
+                  Esta empresa está registrada en el Registro Mercantil de
+                  Barcelona, Tomo 12345, Folio 67, Hoja B-890123, Inscripción
+                  1ª.
                 </p>
                 <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
                   <ul className="space-y-3 text-gray-700">
                     <li className="flex items-start gap-3">
-                      <span className="font-semibold text-gray-900 min-w-[180px]">Registro Mercantil:</span>
+                      <span className="font-semibold text-gray-900 min-w-[180px]">
+                        Registro Mercantil:
+                      </span>
                       <span>Registro Mercantil de Barcelona</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="font-semibold text-gray-900 min-w-[180px]">Número de registro:</span>
+                      <span className="font-semibold text-gray-900 min-w-[180px]">
+                        Número de registro:
+                      </span>
                       <span>Tomo 12345, Folio 67, Hoja B-890123</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="font-semibold text-gray-900 min-w-[180px]">Fecha de inscripción:</span>
+                      <span className="font-semibold text-gray-900 min-w-[180px]">
+                        Fecha de inscripción:
+                      </span>
                       <span>15 de marzo de 2020</span>
                     </li>
                   </ul>
@@ -140,13 +162,24 @@ export default function LegalPage() {
             >
               <div className="space-y-4 text-gray-700">
                 <p className="leading-relaxed">
-                  Todos los contenidos de este sitio web, incluyendo pero no limitado a: textos, fotografías, gráficos, imágenes, iconos, tecnología, software, enlaces y demás contenidos audiovisuales o sonoros, así como su diseño gráfico y códigos fuente, son propiedad intelectual de 3D Print o de terceros que han autorizado su uso.
+                  Todos los contenidos de este sitio web, incluyendo pero no
+                  limitado a: textos, fotografías, gráficos, imágenes, iconos,
+                  tecnología, software, enlaces y demás contenidos audiovisuales
+                  o sonoros, así como su diseño gráfico y códigos fuente, son
+                  propiedad intelectual de 3D Print o de terceros que han
+                  autorizado su uso.
                 </p>
                 <p className="leading-relaxed">
-                  Queda prohibida la reproducción, distribución, comunicación pública, transformación o cualquier otro uso de los contenidos de este sitio web sin el previo consentimiento expreso y por escrito de 3D Print.
+                  Queda prohibida la reproducción, distribución, comunicación
+                  pública, transformación o cualquier otro uso de los contenidos
+                  de este sitio web sin el previo consentimiento expreso y por
+                  escrito de 3D Print.
                 </p>
                 <p className="leading-relaxed">
-                  Las marcas, nombres comerciales o signos distintivos que aparecen en este sitio web son propiedad de 3D Print o de terceros, sin que pueda entenderse que el acceso al sitio web atribuya derecho alguno sobre dichas marcas.
+                  Las marcas, nombres comerciales o signos distintivos que
+                  aparecen en este sitio web son propiedad de 3D Print o de
+                  terceros, sin que pueda entenderse que el acceso al sitio web
+                  atribuya derecho alguno sobre dichas marcas.
                 </p>
               </div>
             </LegalSection>
@@ -158,16 +191,31 @@ export default function LegalPage() {
             >
               <div className="space-y-4 text-gray-700">
                 <p className="leading-relaxed">
-                  3D Print no se hace responsable de los daños y perjuicios que pudieran derivarse de:
+                  3D Print no se hace responsable de los daños y perjuicios que
+                  pudieran derivarse de:
                 </p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
-                  <li>La utilización de los contenidos de este sitio web por parte de los usuarios.</li>
-                  <li>La falta de disponibilidad, acceso o continuidad del funcionamiento del sitio web.</li>
-                  <li>La presencia de virus o cualquier otro elemento informático dañino.</li>
-                  <li>La recepción, obtención, almacenamiento o difusión de contenidos por parte de terceros.</li>
+                  <li>
+                    La utilización de los contenidos de este sitio web por parte
+                    de los usuarios.
+                  </li>
+                  <li>
+                    La falta de disponibilidad, acceso o continuidad del
+                    funcionamiento del sitio web.
+                  </li>
+                  <li>
+                    La presencia de virus o cualquier otro elemento informático
+                    dañino.
+                  </li>
+                  <li>
+                    La recepción, obtención, almacenamiento o difusión de
+                    contenidos por parte de terceros.
+                  </li>
                 </ul>
                 <p className="leading-relaxed">
-                  Los precios y disponibilidad de los productos pueden variar sin previo aviso. Nos esforzamos por mantener la información actualizada, pero no garantizamos la ausencia de errores.
+                  Los precios y disponibilidad de los productos pueden variar
+                  sin previo aviso. Nos esforzamos por mantener la información
+                  actualizada, pero no garantizamos la ausencia de errores.
                 </p>
               </div>
             </LegalSection>
@@ -179,15 +227,30 @@ export default function LegalPage() {
             >
               <div className="space-y-4 text-gray-700">
                 <p className="leading-relaxed">
-                  El presente aviso legal se rige por la legislación española. Para la resolución de cualquier controversia que pudiera derivarse del acceso o uso del sitio web, el usuario y 3D Print se someten expresamente a los juzgados y tribunales de Barcelona, renunciando a cualquier otro fuero que pudiera corresponderles.
+                  El presente aviso legal se rige por la legislación española.
+                  Para la resolución de cualquier controversia que pudiera
+                  derivarse del acceso o uso del sitio web, el usuario y 3D
+                  Print se someten expresamente a los juzgados y tribunales de
+                  Barcelona, renunciando a cualquier otro fuero que pudiera
+                  corresponderles.
                 </p>
                 <p className="leading-relaxed">
-                  En cumplimiento de la normativa vigente, ponemos a disposición de los usuarios los siguientes textos legales:
+                  En cumplimiento de la normativa vigente, ponemos a disposición
+                  de los usuarios los siguientes textos legales:
                 </p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
-                  <li>Ley 34/2002, de 11 de julio, de Servicios de la Sociedad de la Información y del Comercio Electrónico.</li>
-                  <li>Ley Orgánica 3/2018, de 5 de diciembre, de Protección de Datos Personales y garantía de los derechos digitales.</li>
-                  <li>Reglamento (UE) 2016/679 del Parlamento Europeo y del Consejo, de 27 de abril de 2016 (RGPD).</li>
+                  <li>
+                    Ley 34/2002, de 11 de julio, de Servicios de la Sociedad de
+                    la Información y del Comercio Electrónico.
+                  </li>
+                  <li>
+                    Ley Orgánica 3/2018, de 5 de diciembre, de Protección de
+                    Datos Personales y garantía de los derechos digitales.
+                  </li>
+                  <li>
+                    Reglamento (UE) 2016/679 del Parlamento Europeo y del
+                    Consejo, de 27 de abril de 2016 (RGPD).
+                  </li>
                 </ul>
               </div>
             </LegalSection>
@@ -199,13 +262,37 @@ export default function LegalPage() {
             >
               <div className="space-y-4 text-gray-700">
                 <p className="leading-relaxed">
-                  En cumplimiento del Reglamento (UE) 2016/679 del Parlamento Europeo y del Consejo, de 27 de abril de 2016, relativo a la protección de las personas físicas en lo que respecta al tratamiento de datos personales, le informamos que los datos personales que nos proporcione serán tratados de forma confidencial y no serán cedidos a terceros, salvo en los casos previstos por ley.
+                  En cumplimiento del Reglamento (UE) 2016/679 del Parlamento
+                  Europeo y del Consejo, de 27 de abril de 2016, relativo a la
+                  protección de las personas físicas en lo que respecta al
+                  tratamiento de datos personales, le informamos que los datos
+                  personales que nos proporcione serán tratados de forma
+                  confidencial y no serán cedidos a terceros, salvo en los casos
+                  previstos por ley.
                 </p>
                 <p className="leading-relaxed">
-                  Puede ejercer sus derechos de acceso, rectificación, supresión, oposición, limitación del tratamiento y portabilidad de los datos dirigiéndose a través del email: privacidad@3dprint.com o por correo postal a nuestra dirección fiscal.
+                  Puede ejercer sus derechos de acceso, rectificación,
+                  supresión, oposición, limitación del tratamiento y
+                  portabilidad de los datos dirigiéndose a través del email:
+                  privacidad@3dprint.com o por correo postal a nuestra dirección
+                  fiscal.
                 </p>
                 <p className="leading-relaxed">
-                  Para más información, consulte nuestra <a href="#" className="text-indigo-600 hover:text-indigo-800 font-medium">Política de Privacidad</a> y nuestra <a href="#" className="text-indigo-600 hover:text-indigo-800 font-medium">Política de Cookies</a>.
+                  Para más información, consulte nuestra{" "}
+                  <a
+                    href="#"
+                    className="text-indigo-600 hover:text-indigo-800 font-medium"
+                  >
+                    Política de Privacidad
+                  </a>{" "}
+                  y nuestra{" "}
+                  <a
+                    href="#"
+                    className="text-indigo-600 hover:text-indigo-800 font-medium"
+                  >
+                    Política de Cookies
+                  </a>
+                  .
                 </p>
               </div>
             </LegalSection>
@@ -228,7 +315,9 @@ export default function LegalPage() {
                       <Mail className="h-4 w-4 text-indigo-600" />
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 mb-0.5">Email legal</p>
+                      <p className="text-xs text-gray-500 mb-0.5">
+                        Email legal
+                      </p>
                       <a
                         href="mailto:legal@3dprint.com"
                         className="text-sm text-gray-700 hover:text-indigo-600 transition-colors"
@@ -260,7 +349,8 @@ export default function LegalPage() {
                     <div>
                       <p className="text-xs text-gray-500 mb-0.5">Dirección</p>
                       <p className="text-sm text-gray-700">
-                        Calle Admin 123<br />
+                        Calle Admin 123
+                        <br />
                         08001 Barcelona, Barcelona, España
                       </p>
                     </div>
@@ -275,7 +365,8 @@ export default function LegalPage() {
                   Última actualización
                 </h4>
                 <p className="text-sm text-indigo-700">
-                  Este aviso legal fue actualizado el 8 de abril de {currentYear}.
+                  Este aviso legal fue actualizado el 8 de abril de{" "}
+                  {currentYear}.
                 </p>
               </div>
 

@@ -3,13 +3,13 @@
  * Historial completo de pedidos del usuario autenticado
  * Responsive: mobile → 4K
  */
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import Image from 'next/image';
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
 import {
   Package,
   Clock,
@@ -23,9 +23,9 @@ import {
   Eye,
   Filter,
   Calendar,
-  ShoppingCart
-} from 'lucide-react';
-import { InvoiceNotAvailableModal } from '@/components/invoices/InvoiceNotAvailableModal';
+  ShoppingCart,
+} from "lucide-react";
+import { InvoiceNotAvailableModal } from "@/components/invoices/InvoiceNotAvailableModal";
 
 interface Order {
   id: string;
@@ -54,13 +54,40 @@ interface Order {
   };
 }
 
-const estadosConfig: Record<string, { color: string; icon: React.ElementType; label: string }> = {
-  Pendiente: { color: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: Clock, label: 'Pendiente' },
-  Confirmado: { color: 'bg-blue-100 text-blue-800 border-blue-200', icon: CheckCircle2, label: 'Confirmado' },
-  'En preparación': { color: 'bg-indigo-100 text-indigo-800 border-indigo-200', icon: Package, label: 'En preparación' },
-  Enviado: { color: 'bg-purple-100 text-purple-800 border-purple-200', icon: Truck, label: 'Enviado' },
-  Entregado: { color: 'bg-green-100 text-green-800 border-green-200', icon: CheckCircle2, label: 'Entregado' },
-  Cancelado: { color: 'bg-red-100 text-red-800 border-red-200', icon: XCircle, label: 'Cancelado' },
+const estadosConfig: Record<
+  string,
+  { color: string; icon: React.ElementType; label: string }
+> = {
+  Pendiente: {
+    color: "bg-yellow-100 text-yellow-800 border-yellow-200",
+    icon: Clock,
+    label: "Pendiente",
+  },
+  Confirmado: {
+    color: "bg-blue-100 text-blue-800 border-blue-200",
+    icon: CheckCircle2,
+    label: "Confirmado",
+  },
+  "En preparación": {
+    color: "bg-indigo-100 text-indigo-800 border-indigo-200",
+    icon: Package,
+    label: "En preparación",
+  },
+  Enviado: {
+    color: "bg-purple-100 text-purple-800 border-purple-200",
+    icon: Truck,
+    label: "Enviado",
+  },
+  Entregado: {
+    color: "bg-green-100 text-green-800 border-green-200",
+    icon: CheckCircle2,
+    label: "Entregado",
+  },
+  Cancelado: {
+    color: "bg-red-100 text-red-800 border-red-200",
+    icon: XCircle,
+    label: "Cancelado",
+  },
 };
 
 export default function MyOrdersPage() {
@@ -69,17 +96,21 @@ export default function MyOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState("");
   const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
-  const [invoiceModalReason, setInvoiceModalReason] = useState<'not_completed' | 'not_generated' | 'payment_pending' | 'cancelled'>('not_generated');
-  const [selectedOrderNumber, setSelectedOrderNumber] = useState<string | undefined>(undefined);
+  const [invoiceModalReason, setInvoiceModalReason] = useState<
+    "not_completed" | "not_generated" | "payment_pending" | "cancelled"
+  >("not_generated");
+  const [selectedOrderNumber, setSelectedOrderNumber] = useState<
+    string | undefined
+  >(undefined);
   const [restoringOrder, setRestoringOrder] = useState<string | null>(null);
   const [restoredMessage, setRestoredMessage] = useState<string | null>(null);
   const [hiddenOrders, setHiddenOrders] = useState<Set<string>>(new Set());
 
   // Cargar pedidos al montar el componente
   useEffect(() => {
-    if (status === 'authenticated') {
+    if (status === "authenticated") {
       loadOrders();
     }
   }, [status]);
@@ -89,49 +120,53 @@ export default function MyOrdersPage() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('/api/account/orders');
+      const response = await fetch("/api/account/orders");
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error al cargar pedidos');
+        throw new Error(data.error || "Error al cargar pedidos");
       }
 
       setOrders(data.pedidos || []);
     } catch (err) {
-      console.error('Error loading orders:', err);
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      console.error("Error loading orders:", err);
+      setError(err instanceof Error ? err.message : "Error desconocido");
     } finally {
       setLoading(false);
     }
   };
 
   // Recalcular pedidos cancelados
-  const cancelledOrders = orders.filter(o => o.estado === 'Cancelado');
+  const cancelledOrders = orders.filter((o) => o.estado === "Cancelado");
 
   const handleRestoreCart = async (orderId: string) => {
     try {
       setRestoringOrder(orderId);
-      const response = await fetch('/api/cart/restore-from-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/cart/restore-from-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ orderId }),
       });
 
       if (!response.ok) {
-        throw new Error('Error al restaurar carrito');
+        throw new Error("Error al restaurar carrito");
       }
 
-      setRestoredMessage('Carrito restaurado correctamente');
-      
+      setRestoredMessage("Carrito restaurado correctamente");
+
       // Ocultar el pedido inmediatamente
-      setHiddenOrders(prev => new Set([...prev, orderId]));
-      
+      setHiddenOrders((prev) => {
+        const newSet = new Set(prev);
+        newSet.add(orderId);
+        return newSet;
+      });
+
       setTimeout(() => {
-        router.push('/checkout');
+        router.push("/checkout");
       }, 1500);
     } catch (err) {
-      console.error('Error restoring cart:', err);
-      setRestoredMessage('Error al restaurar carrito');
+      console.error("Error restoring cart:", err);
+      setRestoredMessage("Error al restaurar carrito");
     } finally {
       setRestoringOrder(null);
       setTimeout(() => setRestoredMessage(null), 3000);
@@ -141,15 +176,19 @@ export default function MyOrdersPage() {
   // Convert hiddenOrders Set to Array for compatibility
   const hiddenOrdersArray = Array.from(hiddenOrders);
   const filteredOrders = statusFilter
-    ? orders.filter(o => o.estado === statusFilter && !hiddenOrdersArray.includes(o.id))
-    : orders.filter(o => !hiddenOrdersArray.includes(o.id));
+    ? orders.filter(
+        (o) => o.estado === statusFilter && !hiddenOrdersArray.includes(o.id),
+      )
+    : orders.filter((o) => !hiddenOrdersArray.includes(o.id));
 
-  if (status === 'loading' || loading) {
+  if (status === "loading" || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="text-center">
           <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin text-indigo-600 mx-auto mb-4" />
-          <p className="text-gray-600 text-sm sm:text-base">Cargando pedidos...</p>
+          <p className="text-gray-600 text-sm sm:text-base">
+            Cargando pedidos...
+          </p>
         </div>
       </div>
     );
@@ -162,9 +201,12 @@ export default function MyOrdersPage() {
         <div className="max-w-[1920px] 3xl:max-w-[2200px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Mis Pedidos</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                Mis Pedidos
+              </h1>
               <p className="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">
-                {orders.length} {orders.length === 1 ? 'pedido' : 'pedidos'} en total
+                {orders.length} {orders.length === 1 ? "pedido" : "pedidos"} en
+                total
               </p>
             </div>
           </div>
@@ -184,38 +226,44 @@ export default function MyOrdersPage() {
         <div className="bg-white rounded-lg shadow-sm border p-3 sm:p-4 mb-4 sm:mb-6 overflow-x-auto">
           <div className="flex items-center gap-2 mb-3">
             <Filter className="h-4 w-4 text-gray-500 flex-shrink-0" />
-            <span className="font-medium text-gray-700 text-sm whitespace-nowrap">Filtrar por estado:</span>
+            <span className="font-medium text-gray-700 text-sm whitespace-nowrap">
+              Filtrar por estado:
+            </span>
           </div>
           <div className="flex flex-wrap gap-2">
             <button
-              onClick={() => setStatusFilter('')}
+              onClick={() => setStatusFilter("")}
               className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
-                statusFilter === ''
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                statusFilter === ""
+                  ? "bg-indigo-600 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
             >
               Todos
             </button>
             {Object.entries(estadosConfig).map(([estado, config]) => {
               const Icon = config.icon;
-              const count = orders.filter(o => o.estado === estado).length;
+              const count = orders.filter((o) => o.estado === estado).length;
               return (
                 <button
                   key={estado}
                   onClick={() => setStatusFilter(estado)}
                   className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-colors flex items-center gap-1.5 sm:gap-2 whitespace-nowrap ${
                     statusFilter === estado
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? "bg-indigo-600 text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
                   <Icon className="h-3 w-3 sm:h-4 sm:w-4" />
                   <span>{config.label}</span>
                   {count > 0 && (
-                    <span className={`ml-0.5 sm:ml-1 px-1.5 sm:px-2 py-0.5 rounded-full text-xs ${
-                      statusFilter === estado ? 'bg-indigo-500 text-white' : 'bg-gray-300 text-gray-700'
-                    }`}>
+                    <span
+                      className={`ml-0.5 sm:ml-1 px-1.5 sm:px-2 py-0.5 rounded-full text-xs ${
+                        statusFilter === estado
+                          ? "bg-indigo-500 text-white"
+                          : "bg-gray-300 text-gray-700"
+                      }`}
+                    >
                       {count}
                     </span>
                   )}
@@ -236,10 +284,14 @@ export default function MyOrdersPage() {
               </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-orange-900 text-sm sm:text-base">
-                  Tienes {cancelledOrders.length} {cancelledOrders.length === 1 ? 'pedido cancelado' : 'pedidos cancelados'}
+                  Tienes {cancelledOrders.length}{" "}
+                  {cancelledOrders.length === 1
+                    ? "pedido cancelado"
+                    : "pedidos cancelados"}
                 </h3>
                 <p className="text-orange-700 text-xs sm:text-sm mt-0.5">
-                  Puedes restaurar el carrito de cualquier pedido cancelado para volver a intentar la compra.
+                  Puedes restaurar el carrito de cualquier pedido cancelado para
+                  volver a intentar la compra.
                 </p>
               </div>
             </div>
@@ -248,17 +300,21 @@ export default function MyOrdersPage() {
 
         {/* Mensaje de restauración */}
         {restoredMessage && (
-          <div className={`mb-4 sm:mb-6 p-3 sm:p-4 rounded-lg flex items-center gap-2 sm:gap-3 ${
-            restoredMessage.includes('Error') 
-              ? 'bg-red-50 border border-red-200' 
-              : 'bg-green-50 border border-green-200'
-          }`}>
-            {restoredMessage.includes('Error') ? (
+          <div
+            className={`mb-4 sm:mb-6 p-3 sm:p-4 rounded-lg flex items-center gap-2 sm:gap-3 ${
+              restoredMessage.includes("Error")
+                ? "bg-red-50 border border-red-200"
+                : "bg-green-50 border border-green-200"
+            }`}
+          >
+            {restoredMessage.includes("Error") ? (
               <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-600 flex-shrink-0" />
             ) : (
               <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 flex-shrink-0" />
             )}
-            <p className={`text-sm ${restoredMessage.includes('Error') ? 'text-red-700' : 'text-green-700'}`}>
+            <p
+              className={`text-sm ${restoredMessage.includes("Error") ? "text-red-700" : "text-green-700"}`}
+            >
               {restoredMessage}
             </p>
           </div>
@@ -269,12 +325,14 @@ export default function MyOrdersPage() {
           <div className="bg-white rounded-lg shadow-sm border p-8 sm:p-12 text-center">
             <Package className="h-12 w-12 sm:h-16 sm:w-16 text-gray-300 mx-auto mb-3 sm:mb-4" />
             <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">
-              {statusFilter ? 'No hay pedidos con este estado' : 'No tienes pedidos'}
+              {statusFilter
+                ? "No hay pedidos con este estado"
+                : "No tienes pedidos"}
             </h3>
             <p className="text-sm text-gray-500 mb-4 sm:mb-6">
               {statusFilter
-                ? 'Prueba con otro filtro o espera a que se actualicen tus pedidos'
-                : 'Aún no has realizado ningún pedido. ¡Explora nuestro catálogo!'}
+                ? "Prueba con otro filtro o espera a que se actualicen tus pedidos"
+                : "Aún no has realizado ningún pedido. ¡Explora nuestro catálogo!"}
             </p>
             <Link
               href="/products"
@@ -287,7 +345,8 @@ export default function MyOrdersPage() {
         ) : (
           <div className="space-y-3 sm:space-y-4">
             {filteredOrders.map((order) => {
-              const statusConfig = estadosConfig[order.estado] || estadosConfig.PENDING;
+              const statusConfig =
+                estadosConfig[order.estado] || estadosConfig.PENDING;
               const StatusIcon = statusConfig.icon;
               const firstItem = order.items?.[0];
               const firstImage = firstItem?.producto?.images?.[0]?.url;
@@ -306,7 +365,7 @@ export default function MyOrdersPage() {
                           {firstImage ? (
                             <Image
                               src={firstImage}
-                              alt={firstItem?.producto?.nombre || 'Producto'}
+                              alt={firstItem?.producto?.nombre || "Producto"}
                               fill
                               sizes="80px"
                               className="object-cover"
@@ -323,19 +382,28 @@ export default function MyOrdersPage() {
                             <span className="text-base sm:text-lg font-semibold text-gray-900">
                               {order.numeroPedido}
                             </span>
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium border flex items-center gap-1 ${statusConfig.color}`}>
+                            <span
+                              className={`px-2 py-0.5 rounded-full text-xs font-medium border flex items-center gap-1 ${statusConfig.color}`}
+                            >
                               <StatusIcon className="h-3 w-3" />
-                              <span className="whitespace-nowrap">{statusConfig.label}</span>
+                              <span className="whitespace-nowrap">
+                                {statusConfig.label}
+                              </span>
                             </span>
                           </div>
                           <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-500">
                             <span className="flex items-center gap-1">
                               <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
-                              {new Date(order.createdAt).toLocaleDateString('es-ES')}
+                              {new Date(order.createdAt).toLocaleDateString(
+                                "es-ES",
+                              )}
                             </span>
                             <span className="flex items-center gap-1">
                               <Package className="h-3 w-3 sm:h-4 sm:w-4" />
-                              {order.items?.length || 0} {order.items?.length === 1 ? 'producto' : 'productos'}
+                              {order.items?.length || 0}{" "}
+                              {order.items?.length === 1
+                                ? "producto"
+                                : "productos"}
                             </span>
                           </div>
                         </div>
@@ -362,20 +430,26 @@ export default function MyOrdersPage() {
                   <div className="p-4 sm:p-6 bg-gray-50">
                     <div className="space-y-2 sm:space-y-3">
                       {order.items?.slice(0, 3).map((item) => (
-                        <div key={item.id} className="flex items-center justify-between text-xs sm:text-sm">
+                        <div
+                          key={item.id}
+                          className="flex items-center justify-between text-xs sm:text-sm"
+                        >
                           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                             <span className="font-medium text-gray-900">
                               {item.quantity}x
                             </span>
                             <Link
-                              href={`/products/${item.producto?.slug || '#'}`}
+                              href={`/products/${item.producto?.slug || "#"}`}
                               className="text-gray-700 hover:text-indigo-600 truncate"
                             >
-                              {item.producto?.nombre || 'Producto'}
+                              {item.producto?.nombre || "Producto"}
                             </Link>
                           </div>
                           <span className="text-gray-600 whitespace-nowrap ml-2">
-                            {(item.quantity * Number(item.unitPrice)).toFixed(2)} €
+                            {(item.quantity * Number(item.unitPrice)).toFixed(
+                              2,
+                            )}{" "}
+                            €
                           </span>
                         </div>
                       ))}
@@ -402,12 +476,12 @@ export default function MyOrdersPage() {
                         <button
                           onClick={() => {
                             setSelectedOrderNumber(order.numeroPedido);
-                            if (order.estado === 'Cancelado') {
-                              setInvoiceModalReason('cancelled');
-                            } else if (order.estado !== 'Entregado') {
-                              setInvoiceModalReason('not_completed');
+                            if (order.estado === "Cancelado") {
+                              setInvoiceModalReason("cancelled");
+                            } else if (order.estado !== "Entregado") {
+                              setInvoiceModalReason("not_completed");
                             } else {
-                              setInvoiceModalReason('not_generated');
+                              setInvoiceModalReason("not_generated");
                             }
                             setInvoiceModalOpen(true);
                           }}
@@ -418,13 +492,13 @@ export default function MyOrdersPage() {
                         </button>
                       )}
 
-                      {order.estado === 'SHIPPED' && (
+                      {order.estado === "SHIPPED" && (
                         <span className="text-xs sm:text-sm text-purple-600">
                           Pedido en camino
                         </span>
                       )}
 
-                      {order.estado === 'DELIVERED' && (
+                      {order.estado === "DELIVERED" && (
                         <span className="text-xs sm:text-sm text-green-600 flex items-center gap-1">
                           <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />
                           Entregado
@@ -432,7 +506,7 @@ export default function MyOrdersPage() {
                       )}
 
                       {/* Botón de restaurar carrito para pedidos cancelados */}
-                      {order.estado === 'Cancelado' && (
+                      {order.estado === "Cancelado" && (
                         <button
                           onClick={() => handleRestoreCart(order.id)}
                           disabled={restoringOrder === order.id}

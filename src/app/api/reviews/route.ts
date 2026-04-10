@@ -1,22 +1,32 @@
 /**
  * API de Reseñas Públicas
  * Crear reseña (usuarios autenticados)
- * 
+ *
  * Requiere: Autenticación
  */
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
-import { z } from 'zod';
-import { createNewReviewAlert } from '@/lib/alerts/alert-service';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/auth-options";
+import { z } from "zod";
+import { createNewReviewAlert } from "@/lib/alerts/alert-service";
 
 // Schema de validación
 const reviewCreateSchema = z.object({
-  productId: z.string().uuid('ID de producto inválido'),
-  rating: z.number().int().min(1).max(5, 'La puntuación debe estar entre 1 y 5'),
-  title: z.string().min(1, 'El título es obligatorio').max(200, 'Máximo 200 caracteres'),
-  comment: z.string().min(1, 'El comentario es obligatorio').max(2000, 'Máximo 2000 caracteres'),
+  productId: z.string().uuid("ID de producto inválido"),
+  rating: z
+    .number()
+    .int()
+    .min(1)
+    .max(5, "La puntuación debe estar entre 1 y 5"),
+  title: z
+    .string()
+    .min(1, "El título es obligatorio")
+    .max(200, "Máximo 200 caracteres"),
+  comment: z
+    .string()
+    .min(1, "El comentario es obligatorio")
+    .max(2000, "Máximo 2000 caracteres"),
 });
 
 // GET - Obtener reseñas del usuario autenticado
@@ -25,8 +35,8 @@ export async function GET() {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 }
+        { success: false, error: "No autenticado" },
+        { status: 401 },
       );
     }
 
@@ -36,8 +46,8 @@ export async function GET() {
 
     if (!user) {
       return NextResponse.json(
-        { success: false, error: 'Usuario no encontrado' },
-        { status: 404 }
+        { success: false, error: "Usuario no encontrado" },
+        { status: 404 },
       );
     }
 
@@ -57,7 +67,7 @@ export async function GET() {
           },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
 
     return NextResponse.json({
@@ -65,10 +75,10 @@ export async function GET() {
       data: reviews,
     });
   } catch (error) {
-    console.error('Error obteniendo reseñas:', error);
+    console.error("Error obteniendo reseñas:", error);
     return NextResponse.json(
-      { success: false, error: 'Error interno' },
-      { status: 500 }
+      { success: false, error: "Error interno" },
+      { status: 500 },
     );
   }
 }
@@ -84,8 +94,8 @@ export async function POST(req: NextRequest) {
     }
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 }
+        { success: false, error: "No autenticado" },
+        { status: 401 },
       );
     }
 
@@ -95,8 +105,8 @@ export async function POST(req: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { success: false, error: 'Usuario no encontrado' },
-        { status: 404 }
+        { success: false, error: "Usuario no encontrado" },
+        { status: 404 },
       );
     }
 
@@ -110,8 +120,8 @@ export async function POST(req: NextRequest) {
 
     if (!product) {
       return NextResponse.json(
-        { success: false, error: 'Producto no encontrado' },
-        { status: 404 }
+        { success: false, error: "Producto no encontrado" },
+        { status: 404 },
       );
     }
 
@@ -127,8 +137,11 @@ export async function POST(req: NextRequest) {
 
     if (existingReview) {
       return NextResponse.json(
-        { success: false, error: 'Ya has dejado una reseña para este producto' },
-        { status: 400 }
+        {
+          success: false,
+          error: "Ya has dejado una reseña para este producto",
+        },
+        { status: 400 },
       );
     }
 
@@ -137,7 +150,7 @@ export async function POST(req: NextRequest) {
     const hasOrdered = await prisma.order.findFirst({
       where: {
         userId: user.id,
-        status: 'DELIVERED',
+        status: "DELIVERED",
         items: {
           some: {
             productId: data.productId,
@@ -149,13 +162,15 @@ export async function POST(req: NextRequest) {
     // Crear reseña
     const review = await prisma.review.create({
       data: {
-        productId: data.productId,
-        userId: user.id,
+        id: crypto.randomUUID(),
+        product: { connect: { id: data.productId } },
+        user: { connect: { id: user.id } },
         rating: data.rating,
         title: data.title,
         comment: data.comment,
         isVerified: !!hasOrdered,
         isApproved: true, // Auto-aprobar por defecto
+        updatedAt: new Date(),
       },
       include: {
         user: {
@@ -171,13 +186,13 @@ export async function POST(req: NextRequest) {
     try {
       await createNewReviewAlert(review.id, data.rating, product.name);
     } catch (alertError) {
-      console.error('Error creating new review alert:', alertError);
+      console.error("Error creating new review alert:", alertError);
     }
 
     // Formatear reseña para el frontend (español)
     const resenaFormateada = {
       id: review.id,
-      usuarioNombre: review.user.name,
+      usuarioNombre: review.user?.name,
       puntuacion: review.rating,
       titulo: review.title,
       comentario: review.comment,
@@ -187,19 +202,19 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(
       { success: true, resena: resenaFormateada },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { success: false, error: error.errors[0].message },
-        { status: 400 }
+        { status: 400 },
       );
     }
-    console.error('Error creando reseña:', error);
+    console.error("Error creando reseña:", error);
     return NextResponse.json(
-      { success: false, error: 'Error interno' },
-      { status: 500 }
+      { success: false, error: "Error interno" },
+      { status: 500 },
     );
   }
 }

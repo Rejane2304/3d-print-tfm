@@ -1,5 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
-import path from 'path';
+import path from 'node:path';
 
 // Load test environment variables if not already loaded
 if (!process.env.NODE_ENV) {

@@ -1,15 +1,15 @@
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 /**
  * API Route - Admin Analytics Dashboard
  * GET /api/admin/analytics
  * Returns sales, orders, customer statistics
  */
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
-import { prisma } from '@/lib/db/prisma';
-import { translateProductName, translateOrderStatus } from '@/lib/i18n';
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/auth-options";
+import { prisma } from "@/lib/db/prisma";
+import { translateProductName, translateOrderStatus } from "@/lib/i18n";
 
 export async function GET(req: NextRequest) {
   try {
@@ -17,8 +17,8 @@ export async function GET(req: NextRequest) {
 
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 }
+        { success: false, error: "No autenticado" },
+        { status: 401 },
       );
     }
 
@@ -28,16 +28,16 @@ export async function GET(req: NextRequest) {
       select: { id: true, role: true },
     });
 
-    if (!adminUser || adminUser.role !== 'ADMIN') {
+    if (!adminUser || adminUser.role !== "ADMIN") {
       return NextResponse.json(
-        { success: false, error: 'Acceso denegado' },
-        { status: 403 }
+        { success: false, error: "Acceso denegado" },
+        { status: 403 },
       );
     }
 
     // Get date range from query
     const { searchParams } = new URL(req.url);
-    const range = searchParams.get('range') || 'month';
+    const range = searchParams.get("range") || "month";
 
     // Calculate date ranges
     const now = new Date();
@@ -46,83 +46,102 @@ export async function GET(req: NextRequest) {
     weekAgo.setDate(weekAgo.getDate() - 7);
     const monthAgo = new Date(today);
     monthAgo.setMonth(monthAgo.getMonth() - 1);
-    const lastMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const lastMonthStart = new Date(
+      today.getFullYear(),
+      today.getMonth() - 1,
+      1,
+    );
     const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
     const yearStart = new Date(today.getFullYear(), 0, 1);
 
     // Build date filters
     let dateFilter: Date;
     switch (range) {
-      case 'today':
+      case "today":
         dateFilter = today;
         break;
-      case 'week':
+      case "week":
         dateFilter = weekAgo;
         break;
-      case 'lastMonth':
+      case "lastMonth":
         dateFilter = lastMonthStart;
         break;
-      case 'year':
+      case "year":
         dateFilter = yearStart;
         break;
       default:
         dateFilter = monthAgo;
     }
 
-    // Sales Summary
+    // Sales Summary - SOLO pedidos DELIVERED (ventas confirmadas y pagadas)
     const salesSummary = await Promise.all([
       // Today
       prisma.order.aggregate({
         where: {
-          status: { not: 'CANCELLED' },
-          createdAt: { gte: today },
+          status: "DELIVERED", // Solo pedidos entregados = ventas reales
+          deliveredAt: { gte: today },
         },
         _sum: { total: true },
       }),
       // This week
       prisma.order.aggregate({
         where: {
-          status: { not: 'CANCELLED' },
-          createdAt: { gte: weekAgo },
+          status: "DELIVERED",
+          deliveredAt: { gte: weekAgo },
         },
         _sum: { total: true },
       }),
       // This month
       prisma.order.aggregate({
         where: {
-          status: { not: 'CANCELLED' },
-          createdAt: { gte: monthAgo },
+          status: "DELIVERED",
+          deliveredAt: { gte: monthAgo },
         },
         _sum: { total: true },
       }),
       // Last month
       prisma.order.aggregate({
         where: {
-          status: { not: 'CANCELLED' },
-          createdAt: { gte: lastMonthStart, lte: lastMonthEnd },
+          status: "DELIVERED",
+          deliveredAt: { gte: lastMonthStart, lte: lastMonthEnd },
         },
         _sum: { total: true },
       }),
-      // Total
+      // Total (histórico)
       prisma.order.aggregate({
-        where: { status: { not: 'CANCELLED' } },
+        where: { status: "DELIVERED" },
         _sum: { total: true },
       }),
     ]);
 
-    // Order Stats
+    // Order Stats - Excluir CANCELLED de totales
     const orderStats = await Promise.all([
-      // Total orders
-      prisma.order.count(),
-      // Today
-      prisma.order.count({ where: { createdAt: { gte: today } } }),
-      // This week
-      prisma.order.count({ where: { createdAt: { gte: weekAgo } } }),
-      // This month
-      prisma.order.count({ where: { createdAt: { gte: monthAgo } } }),
-      // By status
+      // Total orders (excluyendo cancelados)
+      prisma.order.count({ where: { status: { not: "CANCELLED" } } }),
+      // Today (excluyendo cancelados)
+      prisma.order.count({
+        where: {
+          createdAt: { gte: today },
+          status: { not: "CANCELLED" },
+        },
+      }),
+      // This week (excluyendo cancelados)
+      prisma.order.count({
+        where: {
+          createdAt: { gte: weekAgo },
+          status: { not: "CANCELLED" },
+        },
+      }),
+      // This month (excluyendo cancelados)
+      prisma.order.count({
+        where: {
+          createdAt: { gte: monthAgo },
+          status: { not: "CANCELLED" },
+        },
+      }),
+      // By status (todos los estados para desglose)
       prisma.order.groupBy({
-        by: ['status'],
+        by: ["status"],
         _count: { status: true },
       }),
     ]);
@@ -130,30 +149,30 @@ export async function GET(req: NextRequest) {
     // Customer Stats
     const customerStats = await Promise.all([
       // Total customers
-      prisma.user.count({ where: { role: 'CUSTOMER' } }),
+      prisma.user.count({ where: { role: "CUSTOMER" } }),
       // New this month
       prisma.user.count({
         where: {
-          role: 'CUSTOMER',
+          role: "CUSTOMER",
           createdAt: { gte: monthAgo },
         },
       }),
       // Active (have placed orders)
       prisma.user.count({
         where: {
-          role: 'CUSTOMER',
+          role: "CUSTOMER",
           orders: { some: {} },
         },
       }),
     ]);
 
-    // Top Products
+    // Top Products - Solo pedidos DELIVERED (ventas reales)
     const topProducts = await prisma.orderItem.groupBy({
-      by: ['productId'],
+      by: ["productId"],
       where: {
         order: {
-          status: { not: 'CANCELLED' },
-          createdAt: { gte: dateFilter },
+          status: "DELIVERED",
+          deliveredAt: { gte: dateFilter },
         },
       },
       _sum: {
@@ -161,7 +180,7 @@ export async function GET(req: NextRequest) {
         subtotal: true,
       },
       orderBy: {
-        _sum: { quantity: 'desc' },
+        _sum: { quantity: "desc" },
       },
       take: 5,
     });
@@ -170,30 +189,32 @@ export async function GET(req: NextRequest) {
     const topProductsWithDetails = await Promise.all(
       topProducts.map(async (item) => {
         const product = await prisma.product.findUnique({
-          where: { id: item.productId || '' },
+          where: { id: item.productId || "" },
           select: { name: true, stock: true, slug: true },
         });
         return {
           id: item.productId,
-          nombre: product?.slug ? translateProductName(product.slug) : 'Producto eliminado',
+          nombre: product?.slug
+            ? translateProductName(product.slug)
+            : "Producto eliminado",
           vendido: item._sum.quantity || 0,
           ingresos: Number(item._sum.subtotal || 0),
           stock: product?.stock || 0,
         };
-      })
+      }),
     );
 
-    // Top Customers
+    // Top Customers - Solo pedidos DELIVERED
     const topCustomers = await prisma.order.groupBy({
-      by: ['userId'],
+      by: ["userId"],
       where: {
-        status: { not: 'CANCELLED' },
-        createdAt: { gte: dateFilter },
+        status: "DELIVERED",
+        deliveredAt: { gte: dateFilter },
       },
       _count: { id: true },
       _sum: { total: true },
       orderBy: {
-        _sum: { total: 'desc' },
+        _sum: { total: "desc" },
       },
       take: 5,
     });
@@ -207,17 +228,17 @@ export async function GET(req: NextRequest) {
         });
         return {
           id: customer.userId,
-          nombre: user?.name || 'Cliente eliminado',
+          nombre: user?.name || "Cliente eliminado",
           pedidos: customer._count.id,
           gastado: Number(customer._sum.total || 0),
         };
-      })
+      }),
     );
 
     // Recent Orders
     const recentOrders = await prisma.order.findMany({
       where: { createdAt: { gte: dateFilter } },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       take: 10,
       select: {
         id: true,
@@ -264,7 +285,7 @@ export async function GET(req: NextRequest) {
         recentOrders: recentOrders.map((o) => ({
           id: o.id,
           numeroPedido: o.orderNumber,
-          clienteNombre: o.user?.name || 'N/A',
+          clienteNombre: o.user?.name || "N/A",
           total: Number(o.total),
           estado: translateOrderStatus(o.status),
           creadoEn: o.createdAt,
@@ -272,10 +293,10 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error fetching analytics:', error);
+    console.error("Error fetching analytics:", error);
     return NextResponse.json(
-      { success: false, error: 'Error al obtener analytics' },
-      { status: 500 }
+      { success: false, error: "Error al obtener analytics" },
+      { status: 500 },
     );
   }
 }

@@ -2,13 +2,13 @@
  * New Product Page - Admin
  * Complete form for creating a product according to Prisma schema
  */
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import Image from 'next/image';
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowLeft,
   Package,
@@ -17,8 +17,8 @@ import {
   X,
   AlertCircle,
   CheckCircle2,
-  Save
-} from 'lucide-react';
+  Save,
+} from "lucide-react";
 
 interface Category {
   id: string;
@@ -26,15 +26,15 @@ interface Category {
 }
 
 const MATERIALES = [
-  'PLA',
-  'PETG', 
-  'ABS',
-  'TPU',
-  'RESINA',
-  'NYLON',
-  'FIBRA_CARBONO',
-  'PC',
-  'ASA'
+  "PLA",
+  "PETG",
+  "ABS",
+  "TPU",
+  "RESINA",
+  "NYLON",
+  "FIBRA_CARBONO",
+  "PC",
+  "ASA",
 ];
 
 export default function NuevoProductoPage() {
@@ -45,77 +45,84 @@ export default function NuevoProductoPage() {
   const [success, setSuccess] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   // Almacena tanto la URL de preview como el archivo para subir luego
-  const [images, setImages] = useState<{ url: string; isMain: boolean; file?: File }[]>([]);
+  const [images, setImages] = useState<
+    { url: string; isMain: boolean; file?: File }[]
+  >([]);
   const [uploadingImage, setUploadingImage] = useState(false);
 
   // Form state - all fields from Product schema
   const [formData, setFormData] = useState({
-    name: '',
-    slug: '',
-    description: '',
-    shortDescription: '',
-    price: '',
-    previousPrice: '',
-    stock: '',
-    minStock: '5',
-    categoryId: '',
-    material: 'PLA',
-    widthCm: '',
-    heightCm: '',
-    depthCm: '',
-    weight: '',
-    printTime: '',
+    name: "",
+    slug: "",
+    description: "",
+    shortDescription: "",
+    price: "",
+    previousPrice: "",
+    stock: "",
+    minStock: "5",
+    categoryId: "",
+    material: "PLA",
+    widthCm: "",
+    heightCm: "",
+    depthCm: "",
+    weight: "",
+    printTime: "",
     isActive: true,
     isFeatured: false,
   });
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth?callbackUrl=/admin/products/new');
+    if (status === "unauthenticated") {
+      router.push("/auth?callbackUrl=/admin/products/new");
       return;
     }
 
     const user = session?.user as { rol?: string } | undefined;
-    if (status === 'authenticated' && user?.rol !== 'ADMIN') {
-      router.push('/');
+    if (status === "authenticated" && user?.rol !== "ADMIN") {
+      router.push("/");
       return;
     }
 
-    if (status === 'authenticated') {
+    if (status === "authenticated") {
       loadCategories();
     }
   }, [status, session, router]);
 
   const loadCategories = async () => {
     try {
-      const response = await fetch('/api/categories');
+      const response = await fetch("/api/categories");
       if (response.ok) {
         const data = await response.json();
         setCategories(data.categories || []);
       }
     } catch (err) {
-      console.error('Error al cargar categorías:', err);
+      console.error("Error al cargar categorías:", err);
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
     const { name, value, type } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
+      [name]:
+        type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
     }));
   };
 
   const generateSlug = (name: string) => {
     return name
       .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
   };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const name = e.target.value;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       name,
       slug: generateSlug(name),
@@ -130,26 +137,29 @@ export default function NuevoProductoPage() {
     try {
       // Crear URL temporal para preview
       const tempUrl = URL.createObjectURL(file);
-      setImages(prev => [...prev, { url: tempUrl, isMain: prev.length === 0, file }]);
+      setImages((prev) => [
+        ...prev,
+        { url: tempUrl, isMain: prev.length === 0, file },
+      ]);
     } catch (err) {
-      console.error('Error uploading image:', err);
-      alert('Error al preparar imagen. Intente nuevamente.');
+      console.error("Error uploading image:", err);
+      alert("Error al preparar imagen. Intente nuevamente.");
     } finally {
       setUploadingImage(false);
     }
   };
 
   const handleImageUrlAdd = () => {
-    const url = prompt('Ingrese la URL de la imagen:');
+    const url = prompt("Ingrese la URL de la imagen:");
     if (url) {
-      setImages(prev => [...prev, { url, isMain: prev.length === 0 }]);
+      setImages((prev) => [...prev, { url, isMain: prev.length === 0 }]);
     }
   };
 
   const removeImage = (index: number) => {
-    setImages(prev => {
+    setImages((prev) => {
       const newImages = prev.filter((_, i) => i !== index);
-      if (newImages.length > 0 && !newImages.some(img => img.isMain)) {
+      if (newImages.length > 0 && !newImages.some((img) => img.isMain)) {
         newImages[0].isMain = true;
       }
       return newImages;
@@ -157,22 +167,25 @@ export default function NuevoProductoPage() {
   };
 
   const setMainImage = (index: number) => {
-    setImages(prev => prev.map((img, i) => ({ ...img, isMain: i === index })));
+    setImages((prev) =>
+      prev.map((img, i) => ({ ...img, isMain: i === index })),
+    );
   };
 
   const validateForm = () => {
-    if (!formData.name.trim()) return 'El nombre es obligatorio';
-    if (!formData.slug.trim()) return 'El slug es obligatorio';
-    if (!formData.description.trim()) return 'La descripción es obligatoria';
-    if (!formData.price || parseFloat(formData.price) <= 0) return 'El precio debe ser mayor a 0';
-    if (!formData.categoryId) return 'Debe seleccionar una categoría';
-    if (images.length === 0) return 'Debe agregar al menos una imagen';
+    if (!formData.name.trim()) return "El nombre es obligatorio";
+    if (!formData.slug.trim()) return "El slug es obligatorio";
+    if (!formData.description.trim()) return "La descripción es obligatoria";
+    if (!formData.price || parseFloat(formData.price) <= 0)
+      return "El precio debe ser mayor a 0";
+    if (!formData.categoryId) return "Debe seleccionar una categoría";
+    if (images.length === 0) return "Debe agregar al menos una imagen";
     return null;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const validationError = validateForm();
     if (validationError) {
       setError(validationError);
@@ -185,7 +198,7 @@ export default function NuevoProductoPage() {
     try {
       // Primero: subir las imágenes que tienen archivo
       const uploadedImages: { url: string; isMain: boolean }[] = [];
-      
+
       for (const img of images) {
         if (img.file) {
           // Subir archivo a la API
@@ -196,9 +209,9 @@ export default function NuevoProductoPage() {
           });
           const base64 = await base64Promise;
 
-          const uploadResponse = await fetch('/api/admin/upload', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+          const uploadResponse = await fetch("/api/admin/upload", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               image: base64,
               filename: img.file.name,
@@ -208,7 +221,7 @@ export default function NuevoProductoPage() {
 
           if (!uploadResponse.ok) {
             const uploadData = await uploadResponse.json();
-            throw new Error(uploadData.error || 'Error al subir imagen');
+            throw new Error(uploadData.error || "Error al subir imagen");
           }
 
           const uploadData = await uploadResponse.json();
@@ -220,7 +233,13 @@ export default function NuevoProductoPage() {
       }
 
       // Preparar datos del producto
-      const optionalNumberFields = ['widthCm', 'heightCm', 'depthCm', 'weight', 'previousPrice'];
+      const optionalNumberFields = [
+        "widthCm",
+        "heightCm",
+        "depthCm",
+        "weight",
+        "previousPrice",
+      ];
       const payload: Record<string, unknown> = {
         ...formData,
         price: parseFloat(formData.price),
@@ -232,7 +251,7 @@ export default function NuevoProductoPage() {
       // Convertir campos opcionales vacíos a undefined
       optionalNumberFields.forEach((field) => {
         const value = formData[field as keyof typeof formData];
-        if (value === '' || value === null || value === undefined) {
+        if (value === "" || value === null || value === undefined) {
           payload[field] = undefined;
         } else {
           payload[field] = parseFloat(value as string);
@@ -246,30 +265,30 @@ export default function NuevoProductoPage() {
         payload.printTime = undefined;
       }
 
-      const response = await fetch('/api/admin/products', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/admin/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error al crear producto');
+        throw new Error(data.error || "Error al crear producto");
       }
 
       setSuccess(true);
       setTimeout(() => {
-        router.push('/admin/products');
+        router.push("/admin/products");
       }, 1500);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al crear producto');
+      setError(err instanceof Error ? err.message : "Error al crear producto");
     } finally {
       setLoading(false);
     }
   };
 
-  if (status === 'loading') {
+  if (status === "loading") {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -294,8 +313,12 @@ export default function NuevoProductoPage() {
                 <ArrowLeft className="h-6 w-6" />
               </Link>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Nuevo Producto</h1>
-                <p className="text-gray-600 mt-1">Crear un nuevo producto en el catálogo</p>
+                <h1 className="text-3xl font-bold text-gray-900">
+                  Nuevo Producto
+                </h1>
+                <p className="text-gray-600 mt-1">
+                  Crear un nuevo producto en el catálogo
+                </p>
               </div>
             </div>
             <Link
@@ -319,7 +342,9 @@ export default function NuevoProductoPage() {
         {success && (
           <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
             <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
-            <p className="text-green-700">Producto creado exitosamente. Redirigiendo...</p>
+            <p className="text-green-700">
+              Producto creado exitosamente. Redirigiendo...
+            </p>
           </div>
         )}
 
@@ -336,7 +361,10 @@ export default function NuevoProductoPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="md:col-span-2">
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="name"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       Nombre del producto *
                     </label>
                     <input
@@ -352,7 +380,10 @@ export default function NuevoProductoPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="slug"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       Slug *
                     </label>
                     <input
@@ -368,7 +399,10 @@ export default function NuevoProductoPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="categoryId"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       Categoría *
                     </label>
                     <select
@@ -380,14 +414,19 @@ export default function NuevoProductoPage() {
                       required
                     >
                       <option value="">Seleccionar categoría</option>
-                      {categories.map(cat => (
-                        <option key={cat.id} value={cat.id}>{cat.nombre}</option>
+                      {categories.map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.nombre}
+                        </option>
                       ))}
                     </select>
                   </div>
 
                   <div className="md:col-span-2">
-                    <label htmlFor="shortDescription" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="shortDescription"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       Descripción corta
                     </label>
                     <input
@@ -403,7 +442,10 @@ export default function NuevoProductoPage() {
                   </div>
 
                   <div className="md:col-span-2">
-                    <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="description"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       Descripción completa *
                     </label>
                     <textarea
@@ -422,11 +464,16 @@ export default function NuevoProductoPage() {
 
               {/* Precios y Stock */}
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Precios y Stock</h2>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                  Precios y Stock
+                </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="price"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       Precio actual (€) *
                     </label>
                     <input
@@ -444,7 +491,10 @@ export default function NuevoProductoPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="previousPrice" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="previousPrice"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       Precio anterior (€)
                     </label>
                     <input
@@ -461,7 +511,10 @@ export default function NuevoProductoPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="material" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="material"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       Material
                     </label>
                     <select
@@ -471,14 +524,19 @@ export default function NuevoProductoPage() {
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     >
-                      {MATERIALES.map(mat => (
-                        <option key={mat} value={mat}>{mat}</option>
+                      {MATERIALES.map((mat) => (
+                        <option key={mat} value={mat}>
+                          {mat}
+                        </option>
                       ))}
                     </select>
                   </div>
 
                   <div>
-                    <label htmlFor="stock" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="stock"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       Stock actual *
                     </label>
                     <input
@@ -495,7 +553,10 @@ export default function NuevoProductoPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="minStock" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="minStock"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       Stock mínimo
                     </label>
                     <input
@@ -514,11 +575,16 @@ export default function NuevoProductoPage() {
 
               {/* Dimensiones */}
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Dimensiones y Especificaciones</h2>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                  Dimensiones y Especificaciones
+                </h2>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
-                    <label htmlFor="widthCm" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="widthCm"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       Ancho (cm)
                     </label>
                     <input
@@ -535,7 +601,10 @@ export default function NuevoProductoPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="heightCm" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="heightCm"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       Alto (cm)
                     </label>
                     <input
@@ -552,7 +621,10 @@ export default function NuevoProductoPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="depthCm" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="depthCm"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       Profundidad (cm)
                     </label>
                     <input
@@ -569,7 +641,10 @@ export default function NuevoProductoPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="weight" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="weight"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       Peso (g)
                     </label>
                     <input
@@ -587,7 +662,10 @@ export default function NuevoProductoPage() {
                 </div>
 
                 <div className="mt-4">
-                  <label htmlFor="printTime" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="printTime"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Tiempo de impresión (min)
                   </label>
                   <input
@@ -608,11 +686,16 @@ export default function NuevoProductoPage() {
             <div className="space-y-6">
               {/* Imágenes */}
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Imágenes del Producto *</h2>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                  Imágenes del Producto *
+                </h2>
 
                 <div className="space-y-4">
                   <div className="flex gap-2">
-                    <label htmlFor="imageUpload" className="flex-1 cursor-pointer">
+                    <label
+                      htmlFor="imageUpload"
+                      className="flex-1 cursor-pointer"
+                    >
                       <input
                         type="file"
                         id="imageUpload"
@@ -623,7 +706,7 @@ export default function NuevoProductoPage() {
                       <div className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-colors">
                         <Upload className="h-5 w-5 text-gray-500" />
                         <span className="text-sm text-gray-600">
-                          {uploadingImage ? 'Subiendo...' : 'Subir imagen'}
+                          {uploadingImage ? "Subiendo..." : "Subir imagen"}
                         </span>
                       </div>
                     </label>
@@ -643,7 +726,7 @@ export default function NuevoProductoPage() {
                         <div
                           key={index}
                           className={`relative aspect-square border-2 ${
-                            img.isMain ? 'border-indigo-500' : 'border-gray-200'
+                            img.isMain ? "border-indigo-500" : "border-gray-200"
                           }`}
                         >
                           <Image
@@ -690,7 +773,9 @@ export default function NuevoProductoPage() {
 
               {/* Configuración */}
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Configuración</h2>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                  Configuración
+                </h2>
 
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
@@ -702,7 +787,10 @@ export default function NuevoProductoPage() {
                       onChange={handleInputChange}
                       className="h-4 w-4 text-indigo-600 rounded focus:ring-indigo-500"
                     />
-                    <label htmlFor="isActive" className="text-sm text-gray-700 cursor-pointer">
+                    <label
+                      htmlFor="isActive"
+                      className="text-sm text-gray-700 cursor-pointer"
+                    >
                       Producto activo
                     </label>
                   </div>
@@ -716,7 +804,10 @@ export default function NuevoProductoPage() {
                       onChange={handleInputChange}
                       className="h-4 w-4 text-indigo-600 rounded focus:ring-indigo-500"
                     />
-                    <label htmlFor="isFeatured" className="text-sm text-gray-700 cursor-pointer">
+                    <label
+                      htmlFor="isFeatured"
+                      className="text-sm text-gray-700 cursor-pointer"
+                    >
                       Producto destacado
                     </label>
                   </div>

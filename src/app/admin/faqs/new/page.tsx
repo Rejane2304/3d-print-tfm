@@ -2,12 +2,12 @@
  * New FAQ Page - Admin
  * Form for creating a new FAQ
  */
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   ArrowLeft,
   HelpCircle,
@@ -15,18 +15,18 @@ import {
   AlertCircle,
   CheckCircle2,
   Save,
-} from 'lucide-react';
+} from "lucide-react";
 
 // Categorías predefinidas comunes
 const PREDEFINED_CATEGORIES = [
-  'Materiales',
-  'Envío',
-  'Devoluciones',
-  'Pedidos',
-  'Cuidado',
-  'Pagos',
-  'Seguridad',
-  'General',
+  "Materiales",
+  "Envío",
+  "Devoluciones",
+  "Pedidos",
+  "Cuidado",
+  "Pagos",
+  "Seguridad",
+  "General",
 ];
 
 export default function NuevaFAQPage() {
@@ -39,57 +39,64 @@ export default function NuevaFAQPage() {
 
   // Form state
   const [formData, setFormData] = useState({
-    question: '',
-    answer: '',
-    category: '',
+    question: "",
+    answer: "",
+    category: "",
     displayOrder: 0,
     isActive: true,
   });
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth?callbackUrl=/admin/faqs/new');
+    if (status === "unauthenticated") {
+      router.push("/auth?callbackUrl=/admin/faqs/new");
       return;
     }
 
     const user = session?.user as { rol?: string } | undefined;
-    if (status === 'authenticated' && user?.rol !== 'ADMIN') {
-      router.push('/');
+    if (status === "authenticated" && user?.rol !== "ADMIN") {
+      router.push("/");
       return;
     }
   }, [status, session, router]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
     const { name, value, type } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
+      [name]:
+        type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
     }));
   };
 
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
-    if (value === 'custom') {
+    if (value === "custom") {
       setCustomCategory(true);
-      setFormData(prev => ({ ...prev, category: '' }));
+      setFormData((prev) => ({ ...prev, category: "" }));
     } else {
       setCustomCategory(false);
-      setFormData(prev => ({ ...prev, category: value }));
+      setFormData((prev) => ({ ...prev, category: value }));
     }
   };
 
   const validateForm = () => {
-    if (!formData.question.trim()) return 'La pregunta es obligatoria';
-    if (formData.question.length < 10) return 'La pregunta debe tener al menos 10 caracteres';
-    if (!formData.answer.trim()) return 'La respuesta es obligatoria';
-    if (formData.answer.length < 20) return 'La respuesta debe tener al menos 20 caracteres';
-    if (!formData.category.trim()) return 'La categoría es obligatoria';
+    if (!formData.question.trim()) return "La pregunta es obligatoria";
+    if (formData.question.length < 10)
+      return "La pregunta debe tener al menos 10 caracteres";
+    if (!formData.answer.trim()) return "La respuesta es obligatoria";
+    if (formData.answer.length < 20)
+      return "La respuesta debe tener al menos 20 caracteres";
+    if (!formData.category.trim()) return "La categoría es obligatoria";
     return null;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const validationError = validateForm();
     if (validationError) {
       setError(validationError);
@@ -100,9 +107,9 @@ export default function NuevaFAQPage() {
     setError(null);
 
     try {
-      const response = await fetch('/api/admin/faqs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/admin/faqs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           question: formData.question,
           answer: formData.answer,
@@ -115,21 +122,21 @@ export default function NuevaFAQPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error al crear FAQ');
+        throw new Error(data.error || "Error al crear FAQ");
       }
 
       setSuccess(true);
       setTimeout(() => {
-        router.push('/admin/faqs');
+        router.push("/admin/faqs");
       }, 1500);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al crear FAQ');
+      setError(err instanceof Error ? err.message : "Error al crear FAQ");
     } finally {
       setLoading(false);
     }
   };
 
-  if (status === 'loading') {
+  if (status === "loading") {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -158,13 +165,19 @@ export default function NuevaFAQPage() {
                 <nav className="flex mt-1" aria-label="Breadcrumb">
                   <ol className="flex items-center space-x-2 text-sm">
                     <li>
-                      <Link href="/admin/dashboard" className="text-gray-500 hover:text-gray-700">
+                      <Link
+                        href="/admin/dashboard"
+                        className="text-gray-500 hover:text-gray-700"
+                      >
                         Panel
                       </Link>
                     </li>
                     <li className="text-gray-400">/</li>
                     <li>
-                      <Link href="/admin/faqs" className="text-gray-500 hover:text-gray-700">
+                      <Link
+                        href="/admin/faqs"
+                        className="text-gray-500 hover:text-gray-700"
+                      >
                         FAQs
                       </Link>
                     </li>
@@ -197,7 +210,9 @@ export default function NuevaFAQPage() {
         {success && (
           <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
             <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
-            <p className="text-green-700">FAQ creada exitosamente. Redirigiendo...</p>
+            <p className="text-green-700">
+              FAQ creada exitosamente. Redirigiendo...
+            </p>
           </div>
         )}
 
@@ -212,7 +227,10 @@ export default function NuevaFAQPage() {
 
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="question" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="question"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Pregunta *
                   </label>
                   <input
@@ -231,7 +249,10 @@ export default function NuevaFAQPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="answer" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="answer"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Respuesta *
                   </label>
                   <textarea
@@ -245,13 +266,17 @@ export default function NuevaFAQPage() {
                     required
                   />
                   <p className="mt-1 text-xs text-gray-500">
-                    Máximo 5000 caracteres. Puedes usar texto simple o formato HTML básico.
+                    Máximo 5000 caracteres. Puedes usar texto simple o formato
+                    HTML básico.
                   </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="category"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       Categoría *
                     </label>
                     {!customCategory ? (
@@ -265,7 +290,9 @@ export default function NuevaFAQPage() {
                       >
                         <option value="">Selecciona una categoría</option>
                         {PREDEFINED_CATEGORIES.map((cat) => (
-                          <option key={cat} value={cat}>{cat}</option>
+                          <option key={cat} value={cat}>
+                            {cat}
+                          </option>
                         ))}
                         <option value="custom">+ Nueva categoría</option>
                       </select>
@@ -284,7 +311,7 @@ export default function NuevaFAQPage() {
                           type="button"
                           onClick={() => {
                             setCustomCategory(false);
-                            setFormData(prev => ({ ...prev, category: '' }));
+                            setFormData((prev) => ({ ...prev, category: "" }));
                           }}
                           className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
                         >
@@ -295,7 +322,10 @@ export default function NuevaFAQPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="displayOrder" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="displayOrder"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       Orden de visualización
                     </label>
                     <input
@@ -318,7 +348,9 @@ export default function NuevaFAQPage() {
 
             {/* Configuración */}
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Configuración</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                Configuración
+              </h2>
 
               <div className="flex items-center gap-3">
                 <input
@@ -329,7 +361,10 @@ export default function NuevaFAQPage() {
                   onChange={handleInputChange}
                   className="h-4 w-4 text-indigo-600 rounded focus:ring-indigo-500"
                 />
-                <label htmlFor="isActive" className="text-sm text-gray-700 cursor-pointer">
+                <label
+                  htmlFor="isActive"
+                  className="text-sm text-gray-700 cursor-pointer"
+                >
                   FAQ activa (visible en la página de ayuda)
                 </label>
               </div>

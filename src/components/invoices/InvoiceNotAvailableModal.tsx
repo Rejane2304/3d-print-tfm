@@ -2,42 +2,44 @@
  * InvoiceNotAvailableModal Component
  * Shows when an invoice is not yet available for an order
  */
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { FileText, Clock, AlertCircle, X } from 'lucide-react';
+import { useEffect } from "react";
+import { FileText, Clock, AlertCircle, X } from "lucide-react";
 
 interface InvoiceNotAvailableModalProps {
   isOpen: boolean;
   onClose: () => void;
   orderNumber?: string;
-  reason?: 'not_completed' | 'not_generated' | 'payment_pending' | 'cancelled';
+  reason?: "not_completed" | "not_generated" | "payment_pending" | "cancelled";
 }
 
 const reasonConfig = {
   not_completed: {
     icon: Clock,
-    title: 'Factura Pendiente',
-    message: 'Tu factura se generará automáticamente cuando el pedido sea entregado.',
-    action: 'Estado actual: En proceso de envío o preparación.',
+    title: "Factura Pendiente",
+    message:
+      "Tu factura se generará automáticamente cuando el pedido sea entregado.",
+    action: "Estado actual: En proceso de envío o preparación.",
   },
   not_generated: {
     icon: FileText,
-    title: 'Factura en Proceso',
-    message: 'Tu pedido ha sido entregado y la factura está siendo generada.',
-    action: 'Esto suele tardar unos minutos. Por favor, inténtalo de nuevo en breve.',
+    title: "Factura en Proceso",
+    message: "Tu pedido ha sido entregado y la factura está siendo generada.",
+    action:
+      "Esto suele tardar unos minutos. Por favor, inténtalo de nuevo en breve.",
   },
   payment_pending: {
     icon: AlertCircle,
-    title: 'Pago Pendiente',
-    message: 'La factura se generará una vez que completes el pago del pedido.',
-    action: 'Por favor, finaliza el pago para poder descargar tu factura.',
+    title: "Pago Pendiente",
+    message: "La factura se generará una vez que completes el pago del pedido.",
+    action: "Por favor, finaliza el pago para poder descargar tu factura.",
   },
   cancelled: {
     icon: X,
-    title: 'Pedido Cancelado',
-    message: 'Este pedido ha sido cancelado y no se generará factura.',
-    action: 'Si tienes alguna duda sobre la cancelación, contacta con soporte.',
+    title: "Pedido Cancelado",
+    message: "Este pedido ha sido cancelado y no se generará factura.",
+    action: "Si tienes alguna duda sobre la cancelación, contacta con soporte.",
   },
 };
 
@@ -45,16 +47,16 @@ export function InvoiceNotAvailableModal({
   isOpen,
   onClose,
   orderNumber,
-  reason = 'not_completed',
+  reason = "not_completed",
 }: InvoiceNotAvailableModalProps) {
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     }
     return () => {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     };
   }, [isOpen]);
 
@@ -83,7 +85,9 @@ export function InvoiceNotAvailableModal({
           {orderNumber && (
             <div className="mb-4 text-center">
               <span className="text-sm text-gray-500">Pedido</span>
-              <p className="text-lg font-semibold text-indigo-600">{orderNumber}</p>
+              <p className="text-lg font-semibold text-indigo-600">
+                {orderNumber}
+              </p>
             </div>
           )}
 
@@ -94,13 +98,12 @@ export function InvoiceNotAvailableModal({
           </div>
 
           <div className="bg-gray-50 rounded-xl p-4 mb-4">
-            <p className="text-gray-600 text-center">
-              {config.action}
-            </p>
+            <p className="text-gray-600 text-center">{config.action}</p>
           </div>
 
           <p className="text-sm text-gray-500 text-center mb-6">
-            Una vez entregado el pedido, podrás descargar tu factura desde esta página.
+            Una vez entregado el pedido, podrás descargar tu factura desde esta
+            página.
           </p>
 
           {/* Actions */}
@@ -117,8 +120,11 @@ export function InvoiceNotAvailableModal({
         {/* Footer */}
         <div className="bg-gray-50 px-6 py-4 border-t border-gray-100">
           <p className="text-xs text-gray-400 text-center">
-            ¿Necesitas ayuda? Contacta a nuestro equipo de soporte en{' '}
-            <a href="mailto:support@3dprint.com" className="text-indigo-600 hover:underline">
+            ¿Necesitas ayuda? Contacta a nuestro equipo de soporte en{" "}
+            <a
+              href="mailto:support@3dprint.com"
+              className="text-indigo-600 hover:underline"
+            >
               support@3dprint.com
             </a>
           </p>

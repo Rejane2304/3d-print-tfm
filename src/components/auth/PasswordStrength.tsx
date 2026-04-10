@@ -2,10 +2,10 @@
  * Password Strength Component
  * Displays real-time password strength with visual indicators
  */
-'use client';
+"use client";
 
-import { useMemo } from 'react';
-import { Check, X, Shield, ShieldAlert, ShieldCheck } from 'lucide-react';
+import { useMemo } from "react";
+import { Check, X, Shield, ShieldAlert, ShieldCheck } from "lucide-react";
 
 interface PasswordStrengthProps {
   password: string;
@@ -13,34 +13,34 @@ interface PasswordStrengthProps {
 
 // Common passwords to check against
 const commonPasswords = [
-  'password',
-  '123456',
-  '12345678',
-  '1234567890',
-  'qwerty',
-  'qwerty123',
-  'admin',
-  'admin123',
-  'letmein',
-  'welcome',
-  'monkey',
-  'dragon',
-  'baseball',
-  'football',
-  'superman',
-  'batman',
-  'master',
-  'login',
-  'abc123',
-  'password123',
-  '123123',
-  '111111',
-  '000000',
-  'iloveyou',
-  'trustno1',
-  'sunshine',
-  'princess',
-  'starwars',
+  "password",
+  "123456",
+  "12345678",
+  "1234567890",
+  "qwerty",
+  "qwerty123",
+  "admin",
+  "admin123",
+  "letmein",
+  "welcome",
+  "monkey",
+  "dragon",
+  "baseball",
+  "football",
+  "superman",
+  "batman",
+  "master",
+  "login",
+  "abc123",
+  "password123",
+  "123123",
+  "111111",
+  "000000",
+  "iloveyou",
+  "trustno1",
+  "sunshine",
+  "princess",
+  "starwars",
 ];
 
 interface Requirement {
@@ -66,48 +66,48 @@ export function calculatePasswordStrength(password: string): PasswordAnalysis {
   // Check minimum 10 characters
   const hasMinLength = password.length >= 10;
   requirements.push({
-    id: 'minLength',
-    label: 'Mínimo 10 caracteres',
+    id: "minLength",
+    label: "Mínimo 10 caracteres",
     met: hasMinLength,
   });
 
   // Check uppercase
   const hasUppercase = /[A-Z]/.test(password);
   requirements.push({
-    id: 'uppercase',
-    label: 'Al menos 1 mayúscula',
+    id: "uppercase",
+    label: "Al menos 1 mayúscula",
     met: hasUppercase,
   });
 
   // Check lowercase
   const hasLowercase = /[a-z]/.test(password);
   requirements.push({
-    id: 'lowercase',
-    label: 'Al menos 1 minúscula',
+    id: "lowercase",
+    label: "Al menos 1 minúscula",
     met: hasLowercase,
   });
 
   // Check number
   const hasNumber = /[0-9]/.test(password);
   requirements.push({
-    id: 'number',
-    label: 'Al menos 1 número',
+    id: "number",
+    label: "Al menos 1 número",
     met: hasNumber,
   });
 
   // Check special symbol
   const hasSymbol = /[!@#$%^&*()_+\-=\[\]{};':"\\|,./<>?]/.test(password);
   requirements.push({
-    id: 'symbol',
-    label: 'Al menos 1 símbolo especial',
+    id: "symbol",
+    label: "Al menos 1 símbolo especial",
     met: hasSymbol,
   });
 
   // Check common passwords
   const isCommon = commonPasswords.includes(password.toLowerCase());
   requirements.push({
-    id: 'notCommon',
-    label: 'No es una contraseña común',
+    id: "notCommon",
+    label: "No es una contraseña común",
     met: !isCommon,
   });
 
@@ -145,32 +145,36 @@ export function calculatePasswordStrength(password: string): PasswordAnalysis {
   };
 }
 
-function getStrengthColor(strength: number): { bg: string; text: string; bar: string } {
+function getStrengthColor(strength: number): {
+  bg: string;
+  text: string;
+  bar: string;
+} {
   if (strength <= 40) {
     return {
-      bg: 'bg-red-50 dark:bg-red-900/20',
-      text: 'text-red-600 dark:text-red-400',
-      bar: 'bg-red-500',
+      bg: "bg-red-50 dark:bg-red-900/20",
+      text: "text-red-600 dark:text-red-400",
+      bar: "bg-red-500",
     };
   }
   if (strength <= 70) {
     return {
-      bg: 'bg-yellow-50 dark:bg-yellow-900/20',
-      text: 'text-yellow-600 dark:text-yellow-400',
-      bar: 'bg-yellow-500',
+      bg: "bg-yellow-50 dark:bg-yellow-900/20",
+      text: "text-yellow-600 dark:text-yellow-400",
+      bar: "bg-yellow-500",
     };
   }
   return {
-    bg: 'bg-green-50 dark:bg-green-900/20',
-    text: 'text-green-600 dark:text-green-400',
-    bar: 'bg-green-500',
+    bg: "bg-green-50 dark:bg-green-900/20",
+    text: "text-green-600 dark:text-green-400",
+    bar: "bg-green-500",
   };
 }
 
 function getStrengthLabel(strength: number): string {
-  if (strength <= 40) return 'Débil';
-  if (strength <= 70) return 'Media';
-  return 'Fuerte';
+  if (strength <= 40) return "Débil";
+  if (strength <= 70) return "Media";
+  return "Fuerte";
 }
 
 function getStrengthIcon(strength: number) {
@@ -184,7 +188,10 @@ function getStrengthIcon(strength: number) {
 }
 
 export default function PasswordStrength({ password }: PasswordStrengthProps) {
-  const analysis = useMemo(() => calculatePasswordStrength(password), [password]);
+  const analysis = useMemo(
+    () => calculatePasswordStrength(password),
+    [password],
+  );
   const colors = getStrengthColor(analysis.strength);
 
   // Don't render if password is empty
@@ -195,7 +202,9 @@ export default function PasswordStrength({ password }: PasswordStrengthProps) {
   return (
     <div className="mt-3 space-y-3">
       {/* Progress bar section */}
-      <div className={`p-3 rounded-lg ${colors.bg} transition-colors duration-300`}>
+      <div
+        className={`p-3 rounded-lg ${colors.bg} transition-colors duration-300`}
+      >
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             {getStrengthIcon(analysis.strength)}
@@ -207,7 +216,7 @@ export default function PasswordStrength({ password }: PasswordStrengthProps) {
             {analysis.strength}%
           </span>
         </div>
-        
+
         {/* Progress bar */}
         <div className="h-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
           <div
@@ -229,15 +238,15 @@ export default function PasswordStrength({ password }: PasswordStrengthProps) {
             key={req.id}
             className={`flex items-center gap-2 text-sm transition-colors duration-200 ${
               req.met
-                ? 'text-green-600 dark:text-green-400'
-                : 'text-gray-500 dark:text-gray-400'
+                ? "text-green-600 dark:text-green-400"
+                : "text-gray-500 dark:text-gray-400"
             }`}
           >
             <span
               className={`flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center transition-all duration-200 ${
                 req.met
-                  ? 'bg-green-500 text-white'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-400'
+                  ? "bg-green-500 text-white"
+                  : "bg-gray-200 dark:bg-gray-700 text-gray-400"
               }`}
             >
               {req.met ? (
@@ -246,7 +255,7 @@ export default function PasswordStrength({ password }: PasswordStrengthProps) {
                 <X className="h-3 w-3" strokeWidth={3} />
               )}
             </span>
-            <span className={req.met ? 'font-medium' : ''}>{req.label}</span>
+            <span className={req.met ? "font-medium" : ""}>{req.label}</span>
           </div>
         ))}
       </div>

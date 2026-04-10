@@ -2,23 +2,27 @@
  * API Route - Client Detail (Admin)
  * GET /api/admin/clients/[id]
  */
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
-import { prisma } from '@/lib/db/prisma';
-import { translateOrderStatus, translatePaymentStatus, translatePaymentMethod } from '@/lib/i18n';
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/auth-options";
+import { prisma } from "@/lib/db/prisma";
+import {
+  translateOrderStatus,
+  translatePaymentStatus,
+  translatePaymentMethod,
+} from "@/lib/i18n";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 }
+        { success: false, error: "No autenticado" },
+        { status: 401 },
       );
     }
 
@@ -28,10 +32,10 @@ export async function GET(
       select: { id: true, role: true },
     });
 
-    if (!adminUser || adminUser.role !== 'ADMIN') {
+    if (!adminUser || adminUser.role !== "ADMIN") {
       return NextResponse.json(
-        { success: false, error: 'Acceso denegado' },
-        { status: 403 }
+        { success: false, error: "Acceso denegado" },
+        { status: 403 },
       );
     }
 
@@ -39,13 +43,13 @@ export async function GET(
 
     // Get client with all related data
     const client = await prisma.user.findUnique({
-      where: { id, role: 'CUSTOMER' },
+      where: { id, role: "CUSTOMER" },
       include: {
         addresses: {
-          orderBy: { isDefault: 'desc' },
+          orderBy: { isDefault: "desc" },
         },
         orders: {
-          orderBy: { createdAt: 'desc' },
+          orderBy: { createdAt: "desc" },
           take: 10,
           include: {
             items: {
@@ -70,23 +74,23 @@ export async function GET(
 
     if (!client) {
       return NextResponse.json(
-        { success: false, error: 'Cliente no encontrado' },
-        { status: 404 }
+        { success: false, error: "Cliente no encontrado" },
+        { status: 404 },
       );
     }
 
     // Calculate statistics
     const totalOrders = client.orders.length;
     const totalSpent = client.orders
-      .filter((o) => o.status !== 'CANCELLED')
+      .filter((o) => o.status !== "CANCELLED")
       .reduce((sum, o) => sum + Number(o.total), 0);
 
     const completedOrders = client.orders.filter(
-      (o) => o.status === 'DELIVERED'
+      (o) => o.status === "DELIVERED",
     ).length;
 
-    const pendingOrders = client.orders.filter(
-      (o) => ['PENDING', 'CONFIRMED', 'PREPARING'].includes(o.status)
+    const pendingOrders = client.orders.filter((o) =>
+      ["PENDING", "CONFIRMED", "PREPARING"].includes(o.status),
     ).length;
 
     return NextResponse.json({
@@ -117,23 +121,26 @@ export async function GET(
           total: order.total,
           createdAt: order.createdAt,
           itemCount: order.items.length,
-          pagoEstado: translatePaymentStatus(order.payment?.status || 'PENDING'),
-          pagoMetodo: translatePaymentMethod(order.payment?.method || 'CARD'),
+          pagoEstado: translatePaymentStatus(
+            order.payment?.status || "PENDING",
+          ),
+          pagoMetodo: translatePaymentMethod(order.payment?.method || "CARD"),
         })),
         estadisticas: {
           totalPedidos: totalOrders,
           totalGastado: totalSpent.toFixed(2),
           pedidosCompletados: completedOrders,
           pedidosPendientes: pendingOrders,
-          valorPromedio: totalOrders > 0 ? (totalSpent / totalOrders).toFixed(2) : '0.00',
+          valorPromedio:
+            totalOrders > 0 ? (totalSpent / totalOrders).toFixed(2) : "0.00",
         },
       },
     });
   } catch (error) {
-    console.error('Error fetching client detail:', error);
+    console.error("Error fetching client detail:", error);
     return NextResponse.json(
-      { success: false, error: 'Error al obtener detalle del cliente' },
-      { status: 500 }
+      { success: false, error: "Error al obtener detalle del cliente" },
+      { status: 500 },
     );
   }
 }

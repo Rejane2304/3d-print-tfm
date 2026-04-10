@@ -2,11 +2,10 @@
  * Updated CartSummary Component with Coupon Support
  * Resumen del carrito con integración de cupones
  */
-'use client';
+"use client";
 
-
-import { ShoppingCart, ArrowRight, Loader2, Tag } from 'lucide-react';
-import { CouponSelector } from './CouponSelector';
+import { ShoppingCart, ArrowRight, Loader2, Tag } from "lucide-react";
+import { CouponSelector } from "./CouponSelector";
 
 interface CartSummaryProps {
   items: Array<{
@@ -21,7 +20,7 @@ interface CartSummaryProps {
   subtotal: number;
   shippingCost?: number;
   freeShippingFrom?: number;
-  taxIncluded?: boolean;
+  taxRate?: number; // IVA (porcentaje, ej: 21 para 21%)
   isProcessing?: boolean;
   onCheckout: () => void;
   onContinueShopping: () => void;
@@ -31,6 +30,7 @@ interface CartSummaryProps {
     code: string;
     discount: number;
     type: string;
+    freeShipping?: boolean;
   } | null;
 }
 
@@ -39,7 +39,7 @@ export default function CartSummary({
   subtotal,
   shippingCost = 5.99,
   freeShippingFrom = 50,
-  taxIncluded = true,
+  taxRate = 21, // IVA 21% por defecto
   isProcessing = false,
   onCheckout,
   onContinueShopping,
@@ -48,16 +48,23 @@ export default function CartSummary({
   appliedCoupon,
 }: CartSummaryProps) {
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-  
-  // Calcular envío gratis
-  const hasFreeShippingCoupon = appliedCoupon?.type === 'Envío Gratis';
+
+  // Calcular envío gratis (usar freeShipping booleano del cupón)
+  const hasFreeShippingCoupon = appliedCoupon?.freeShipping === true;
   const isFreeShipping = subtotal >= freeShippingFrom || hasFreeShippingCoupon;
   const shipping = isFreeShipping ? 0 : shippingCost;
-  
-  // Calcular totales con cupón
+
+  // Calcular descuento del cupón
   const couponDiscount = appliedCoupon?.discount || 0;
-  const finalSubtotal = Math.max(0, subtotal - couponDiscount);
-  const total = finalSubtotal + shipping;
+
+  // Cálculos con IVA separado (transparente) - BASE IMPONIBLE INCLUYE ENVÍO
+  const discountedSubtotal = Math.max(0, subtotal - couponDiscount);
+  const taxableBase = discountedSubtotal + shipping; // Envío lleva IVA
+  const taxMultiplier = taxRate / 100;
+  const taxAmount = taxableBase * taxMultiplier;
+
+  // Total final (subtotal con descuento + envío + IVA)
+  const total = discountedSubtotal + shipping + taxAmount;
   const hasItems = items.length > 0;
 
   return (
@@ -71,7 +78,7 @@ export default function CartSummary({
         <>
           {/* Items count */}
           <div className="mb-4 text-sm text-gray-600">
-            {totalItems} {totalItems === 1 ? 'artículo' : 'artículos'}
+            {totalItems} {totalItems === 1 ? "artículo" : "artículos"}
           </div>
 
           {/* Sección de Cupón */}
@@ -79,7 +86,9 @@ export default function CartSummary({
             <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-gray-50 rounded-lg">
               <div className="flex items-center gap-2 mb-2 sm:mb-3">
                 <Tag className="h-4 w-4 text-indigo-600 flex-shrink-0" />
-                <span className="text-sm font-medium text-gray-700">Código de descuento</span>
+                <span className="text-sm font-medium text-gray-700">
+                  Código de descuento
+                </span>
               </div>
               <CouponSelector
                 onApply={onApplyCoupon}
@@ -91,49 +100,61 @@ export default function CartSummary({
             </div>
           )}
 
-          {/* Subtotal */}
+          {/* Desglose completo con IVA separado (Transparente) */}
+
+          {/* Subtotal (sin IVA) */}
           <div className="flex justify-between py-2 border-b border-gray-100 text-sm sm:text-base">
-            <span className="text-gray-600">Subtotal</span>
+            <span className="text-gray-600">Subtotal (sin IVA)</span>
             <span className="font-medium">{subtotal.toFixed(2)} €</span>
           </div>
 
           {/* Descuento por cupón */}
           {couponDiscount > 0 && (
             <div className="flex justify-between py-2 border-b border-gray-100 text-sm sm:text-base">
-              <span className="text-green-600">Descuento</span>
-              <span className="font-medium text-green-600">-{couponDiscount.toFixed(2)} €</span>
+              <span className="text-green-600">
+                Descuento {appliedCoupon?.code && `(${appliedCoupon.code})`}
+              </span>
+              <span className="font-medium text-green-600">
+                -{couponDiscount.toFixed(2)} €
+              </span>
             </div>
           )}
 
           {/* Envío */}
           <div className="flex justify-between py-2 border-b border-gray-100 text-sm sm:text-base">
             <span className="text-gray-600">Envío</span>
-            <span className={isFreeShipping ? 'text-green-600 font-medium' : 'font-medium'}>
-              {isFreeShipping ? 'Gratis' : `${shipping.toFixed(2)} €`}
+            <span
+              className={
+                isFreeShipping ? "text-green-600 font-medium" : "font-medium"
+              }
+            >
+              {isFreeShipping ? "Gratis" : `${shipping.toFixed(2)} €`}
             </span>
           </div>
 
           {/* Info envío gratis */}
           {!isFreeShipping && subtotal > 0 && (
             <div className="text-xs sm:text-sm text-blue-600 mt-2">
-              Te falta {(freeShippingFrom - subtotal).toFixed(2)} € para envío gratis
+              Te falta {(freeShippingFrom - subtotal).toFixed(2)} € para envío
+              gratis
             </div>
           )}
 
-          {/* Total */}
+          {/* IVA (separado y transparente) */}
+          <div className="flex justify-between py-2 border-b border-gray-100 text-sm sm:text-base">
+            <span className="text-gray-600">IVA ({taxRate}%)</span>
+            <span className="font-medium">{taxAmount.toFixed(2)} €</span>
+          </div>
+
+          {/* Total Final */}
           <div className="flex justify-between py-3 sm:py-4 mt-3 sm:mt-4 border-t-2 border-gray-200">
-            <span className="text-base sm:text-lg font-bold text-gray-900">Total</span>
+            <span className="text-base sm:text-lg font-bold text-gray-900">
+              Total a pagar
+            </span>
             <span className="text-xl sm:text-2xl font-bold text-indigo-600">
               {total.toFixed(2)} €
             </span>
           </div>
-
-          {/* Impuestos incluidos */}
-          {taxIncluded && (
-            <p className="text-xs text-gray-500 mt-1 text-right">
-              Impuestos incluidos
-            </p>
-          )}
 
           {/* Botones de acción */}
           <div className="space-y-2 sm:space-y-3 mt-4 sm:mt-6">

@@ -1,20 +1,20 @@
 /**
  * API Route for Checkout with Coupon Support
- * 
+ *
  * POST /api/checkout - Create order with optional coupon discount
- * 
+ *
  * Now supports: couponCode in request body
  */
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
-import { withErrorHandler } from '@/lib/errors/api-wrapper';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
-import { Prisma } from '@prisma/client';
-import { translatePaymentMethod, translateErrorMessage } from '@/lib/i18n';
-import { getDefaultVatRate } from '@/lib/site-config';
-import { emitNewOrder } from '@/lib/realtime/event-service';
-import { createNewOrderAlert } from '@/lib/alerts/alert-service';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db/prisma";
+import { withErrorHandler } from "@/lib/errors/api-wrapper";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/auth-options";
+import { Prisma } from "@prisma/client";
+import { translatePaymentMethod, translateErrorMessage } from "@/lib/i18n";
+import { emitNewOrder } from "@/lib/realtime/event-service";
+import { createNewOrderAlert } from "@/lib/alerts/alert-service";
+import { DEFAULT_VAT_RATE, roundToCents } from "@/lib/constants/tax";
 
 // Type for cart items with product included
 type CartItemWithProduct = Prisma.CartItemGetPayload<{
@@ -34,28 +34,32 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   if (!session?.user?.email) {
     return NextResponse.json(
-      { success: false, error: 'No autenticado' },
-      { status: 401 }
+      { success: false, error: "No autenticado" },
+      { status: 401 },
     );
   }
 
   // Get data from request body
   const body = await req.json();
-  const { shippingAddressId, paymentMethod = 'CARD', couponCode, cartItems: clientCartItems } = body;
+  const {
+    shippingAddressId,
+    paymentMethod = "CARD",
+    couponCode,
+  } = body;
 
   if (!shippingAddressId) {
     return NextResponse.json(
-      { success: false, error: 'Dirección de envío requerida' },
-      { status: 400 }
+      { success: false, error: "Dirección de envío requerida" },
+      { status: 400 },
     );
   }
 
   // Validate payment method
-  const validPaymentMethods = ['CARD', 'PAYPAL', 'BIZUM', 'TRANSFER'];
+  const validPaymentMethods = ["CARD", "PAYPAL", "BIZUM", "TRANSFER"];
   if (!validPaymentMethods.includes(paymentMethod)) {
     return NextResponse.json(
-      { success: false, error: 'Método de pago no válido' },
-      { status: 400 }
+      { success: false, error: "Método de pago no válido" },
+      { status: 400 },
     );
   }
 
@@ -81,16 +85,16 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   if (!user) {
     return NextResponse.json(
-      { success: false, error: translateErrorMessage('Usuario not found') },
-      { status: 404 }
+      { success: false, error: translateErrorMessage("Usuario not found") },
+      { status: 404 },
     );
   }
 
   // Verify user has cart with items
   if (!user.cart || user.cart.items.length === 0) {
     return NextResponse.json(
-      { success: false, error: 'El carrito está vacío' },
-      { status: 400 }
+      { success: false, error: "El carrito está vacío" },
+      { status: 400 },
     );
   }
 
@@ -98,8 +102,11 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   for (const item of user.cart.items as CartItemWithProduct[]) {
     if (item.product.stock < item.quantity) {
       return NextResponse.json(
-        { success: false, error: `Stock insuficiente para ${item.product.name}` },
-        { status: 400 }
+        {
+          success: false,
+          error: `Stock insuficiente para ${item.product.name}`,
+        },
+        { status: 400 },
       );
     }
   }
@@ -118,20 +125,22 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
     if (coupon) {
       const now = new Date();
-      const isValid = coupon.isActive && 
-        coupon.validFrom <= now && 
+      const isValid =
+        coupon.isActive &&
+        coupon.validFrom <= now &&
         coupon.validUntil >= now &&
         (coupon.maxUses === null || coupon.usedCount < coupon.maxUses) &&
-        (coupon.minOrderAmount === null || subtotal >= Number(coupon.minOrderAmount));
+        (coupon.minOrderAmount === null ||
+          subtotal >= Number(coupon.minOrderAmount));
 
       if (isValid) {
         couponId = coupon.id;
-        
-        if (coupon.type === 'PERCENTAGE') {
+
+        if (coupon.type === "PERCENTAGE") {
           couponDiscount = subtotal * (Number(coupon.value) / 100);
-        } else if (coupon.type === 'FIXED') {
+        } else if (coupon.type === "FIXED") {
           couponDiscount = Math.min(Number(coupon.value), subtotal);
-        } else if (coupon.type === 'FREE_SHIPPING') {
+        } else if (coupon.type === "FREE_SHIPPING") {
           hasFreeShipping = true;
         }
 
@@ -141,14 +150,16 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     }
   }
 
-  // Get VAT rate from site config
-  const vatRatePercent = await getDefaultVatRate();
-  const taxRate = vatRatePercent / 100;
+  // Usar tasa de IVA constante para garantizar consistencia en todos los cálculos
+  const taxRate = DEFAULT_VAT_RATE;
 
   const shippingCost = subtotal >= 50 || hasFreeShipping ? 0 : 5.99;
   const discountedSubtotal = Math.max(0, subtotal - couponDiscount);
-  const taxAmount = discountedSubtotal * taxRate;
-  const total = discountedSubtotal + shippingCost + taxAmount;
+
+  // BASE IMPONIBLE: subtotal con descuento + envío (el envío lleva IVA)
+  const taxableBase = discountedSubtotal + shippingCost;
+  const taxAmount = roundToCents(taxableBase * taxRate);
+  const total = roundToCents(discountedSubtotal + shippingCost + taxAmount);
 
   try {
     // Get shipping address
@@ -158,15 +169,18 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
     if (!address) {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage('Dirección de envío no encontrada') },
-        { status: 404 }
+        {
+          success: false,
+          error: translateErrorMessage("Dirección de envío no encontrada"),
+        },
+        { status: 404 },
       );
     }
 
     // Generate order number
     const year = new Date().getFullYear();
     const count = await prisma.order.count();
-    const orderNumber = `P-${year}${String(count + 1).padStart(6, '0')}`;
+    const orderNumber = `P-${year}${String(count + 1).padStart(6, "0")}`;
 
     // Save cart reference
     const cart = user.cart;
@@ -177,14 +191,15 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       // 1. Create the order as PENDING (payment will be processed separately)
       const order = await tx.order.create({
         data: {
-          userId: user.id,
-          status: 'PENDING',
+          id: crypto.randomUUID(),
+          user: { connect: { id: user.id } },
+          status: "PENDING",
           orderNumber,
           subtotal,
           shipping: shippingCost,
           discount: couponDiscount > 0 ? couponDiscount : undefined,
           total,
-          shippingAddressId,
+          shippingAddressData: shippingAddressId ? { connect: { id: shippingAddressId } } : undefined,
           shippingName: address.recipient,
           shippingPhone: address.phone,
           shippingAddress: address.address,
@@ -193,16 +208,24 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
           shippingCity: address.city,
           shippingProvince: address.province,
           shippingCountry: address.country,
-          paymentMethod: paymentMethod as 'CARD' | 'PAYPAL' | 'BIZUM' | 'TRANSFER',
+          paymentMethod: paymentMethod as
+            | "CARD"
+            | "PAYPAL"
+            | "BIZUM"
+            | "TRANSFER",
+          updatedAt: new Date(),
           // Create order items from cart items
           items: {
             create: cartItems.map((item: CartItemWithProduct) => ({
-              productId: item.product.id,
+              id: crypto.randomUUID(),
+              product: { connect: { id: item.product.id } },
               name: item.product.name,
               quantity: item.quantity,
               price: item.product.price,
-              subtotal: new Prisma.Decimal(item.product.price).mul(item.quantity),
-              category: item.product.category?.name || 'Uncategorized',
+              subtotal: new Prisma.Decimal(item.product.price).mul(
+                item.quantity,
+              ),
+              category: item.product.category?.name || "Uncategorized",
               material: item.product.material,
             })),
           },
@@ -215,11 +238,13 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       // 2. Create the payment as PENDING (will be processed by frontend)
       const payment = await tx.payment.create({
         data: {
-          orderId: order.id,
-          userId: user.id,
+          id: crypto.randomUUID(),
+          order: { connect: { id: order.id } },
+          user: { connect: { id: user.id } },
           amount: total,
-          method: paymentMethod as 'CARD' | 'PAYPAL' | 'BIZUM' | 'TRANSFER',
-          status: 'PENDING',
+          method: paymentMethod as "CARD" | "PAYPAL" | "BIZUM" | "TRANSFER",
+          status: "PENDING",
+          updatedAt: new Date(),
           // processedAt will be set when payment is completed
         },
       });
@@ -232,14 +257,31 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         });
       }
 
-      // 4. Deduct stock from products (reserve stock)
+      // 4. Deduct stock from products (reserve stock) - CON MOVIMIENTOS DE INVENTARIO
       for (const item of cartItems) {
-        await tx.product.update({
+        // Actualizar stock
+        const product = await tx.product.update({
           where: { id: item.productId },
           data: {
             stock: {
               decrement: item.quantity,
             },
+          },
+        });
+
+        // Registrar movimiento de inventario
+        await tx.inventoryMovement.create({
+          data: {
+            id: crypto.randomUUID(),
+            productId: item.productId,
+            orderId: order.id,
+            createdBy: user.id,
+            type: "OUT",
+            quantity: item.quantity,
+            previousStock: product.stock + item.quantity,
+            newStock: product.stock,
+            reason: `Venta - Pedido ${order.orderNumber}`,
+            reference: order.id,
           },
         });
       }
@@ -263,9 +305,13 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
     // Create alert for new order
     try {
-      await createNewOrderAlert(result.order.id, result.order.orderNumber, Number(result.order.total));
+      await createNewOrderAlert(
+        result.order.id,
+        result.order.orderNumber,
+        Number(result.order.total),
+      );
     } catch (alertError) {
-      console.error('Error creating new order alert:', alertError);
+      console.error("Error creating new order alert:", alertError);
     }
 
     // Return order and payment IDs for frontend to handle payment processing
@@ -274,16 +320,19 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       orderId: result.order.id,
       paymentId: result.payment.id,
       orderNumber: result.order.orderNumber,
-      status: 'PENDING',
+      status: "PENDING",
       paymentMethod: translatePaymentMethod(paymentMethod),
       discount: couponDiscount > 0 ? couponDiscount : undefined,
-      message: 'Pedido creado. Proceda al pago.',
+      message: "Pedido creado. Proceda al pago.",
     });
   } catch (error) {
-    console.error('Error in checkout:', error);
+    console.error("Error in checkout:", error);
     return NextResponse.json(
-      { success: false, error: translateErrorMessage('Error al procesar el pedido') },
-      { status: 500 }
+      {
+        success: false,
+        error: translateErrorMessage("Error al procesar el pedido"),
+      },
+      { status: 500 },
     );
   }
 });

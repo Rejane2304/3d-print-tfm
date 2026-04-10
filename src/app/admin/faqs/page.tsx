@@ -2,22 +2,22 @@
  * Admin FAQs Page
  * FAQ management with DataTable
  */
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { 
-  Plus, 
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import {
+  Plus,
   HelpCircle,
   Loader2,
   AlertCircle,
   Edit,
   Trash2,
-} from 'lucide-react';
-import { DataTable, Column, BulkAction } from '@/components/ui/DataTable';
-import { ConfirmModal } from '@/components/ui/ConfirmModal';
+} from "lucide-react";
+import { DataTable, Column, BulkAction } from "@/components/ui/DataTable";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 interface FAQ extends Record<string, unknown> {
   id: string;
@@ -41,15 +41,15 @@ export default function AdminFAQsPage() {
   const [faqToDelete, setFaqToDelete] = useState<FAQ | null>(null);
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login?callbackUrl=/admin/faqs');
+    if (status === "unauthenticated") {
+      router.push("/login?callbackUrl=/admin/faqs");
       return;
     }
 
-    if (status === 'authenticated') {
+    if (status === "authenticated") {
       const user = session?.user as { rol?: string } | undefined;
-      if (user?.rol !== 'ADMIN') {
-        router.push('/');
+      if (user?.rol !== "ADMIN") {
+        router.push("/");
         return;
       }
       loadFAQs();
@@ -61,16 +61,16 @@ export default function AdminFAQsPage() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('/api/admin/faqs');
+      const response = await fetch("/api/admin/faqs");
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error cargando FAQs');
+        throw new Error(data.error || "Error cargando FAQs");
       }
 
       setFaqs(data.faqs || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : "Error desconocido");
     } finally {
       setLoading(false);
     }
@@ -86,18 +86,18 @@ export default function AdminFAQsPage() {
 
     try {
       const response = await fetch(`/api/admin/faqs/${faqToDelete.id}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        setFaqs(faqs.filter(f => f.id !== faqToDelete.id));
+        setFaqs(faqs.filter((f) => f.id !== faqToDelete.id));
       } else {
-        throw new Error(data.error || 'Error eliminando FAQ');
+        throw new Error(data.error || "Error eliminando FAQ");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error eliminando FAQ');
+      setError(err instanceof Error ? err.message : "Error eliminando FAQ");
     } finally {
       setModalOpen(false);
       setFaqToDelete(null);
@@ -107,37 +107,37 @@ export default function AdminFAQsPage() {
   const handleBulkDelete = async (selectedIds: string[]) => {
     try {
       let hasError = false;
-      
+
       await Promise.all(
         selectedIds.map(async (id) => {
-          const response = await fetch(`/api/admin/faqs/${id}`, { 
-            method: 'DELETE' 
+          const response = await fetch(`/api/admin/faqs/${id}`, {
+            method: "DELETE",
           });
           if (!response.ok) {
             hasError = true;
           }
-        })
+        }),
       );
-      
+
       if (hasError) {
-        setError('Algunas FAQs no pudieron ser eliminadas');
+        setError("Algunas FAQs no pudieron ser eliminadas");
       }
-      
-      setFaqs(faqs.filter(f => !selectedIds.includes(f.id)));
+
+      setFaqs(faqs.filter((f) => !selectedIds.includes(f.id)));
     } catch {
-      setError('Error eliminando FAQs');
+      setError("Error eliminando FAQs");
     }
   };
 
   // Extraer categorías únicas para estadísticas
-  const categories = Array.from(new Set(faqs.map(f => f.categoria)));
+  const categories = Array.from(new Set(faqs.map((f) => f.categoria)));
 
   const columns: Column<FAQ>[] = [
     {
-      key: 'pregunta',
-      header: 'Pregunta',
+      key: "pregunta",
+      header: "Pregunta",
       sortable: true,
-      className: '',
+      className: "",
       render: (_, faq) => (
         <div className="flex flex-col min-w-0">
           <span className="text-sm font-medium text-gray-900 line-clamp-2 max-w-md">
@@ -150,10 +150,10 @@ export default function AdminFAQsPage() {
       ),
     },
     {
-      key: 'categoria',
-      header: 'Categoría',
+      key: "categoria",
+      header: "Categoría",
       sortable: true,
-      className: 'hidden sm:table-cell',
+      className: "hidden sm:table-cell",
       render: (value) => (
         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
           {value as string}
@@ -161,10 +161,10 @@ export default function AdminFAQsPage() {
       ),
     },
     {
-      key: 'ordenVisualizacion',
-      header: 'Orden',
+      key: "ordenVisualizacion",
+      header: "Orden",
       sortable: true,
-      className: 'hidden md:table-cell',
+      className: "hidden md:table-cell",
       render: (value) => (
         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
           {value as number}
@@ -172,24 +172,24 @@ export default function AdminFAQsPage() {
       ),
     },
     {
-      key: 'activo',
-      header: 'Estado',
+      key: "activo",
+      header: "Estado",
       sortable: true,
-      className: 'hidden lg:table-cell',
+      className: "hidden lg:table-cell",
       render: (value) => (
-        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-          value 
-            ? 'bg-green-100 text-green-800' 
-            : 'bg-gray-100 text-gray-800'
-        }`}>
-          {value ? 'Activa' : 'Inactiva'}
+        <span
+          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+            value ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+          }`}
+        >
+          {value ? "Activa" : "Inactiva"}
         </span>
       ),
     },
     {
-      key: 'actions',
-      header: 'Acciones',
-      className: '',
+      key: "actions",
+      header: "Acciones",
+      className: "",
       render: (_, faq) => (
         <div className="flex items-center gap-1">
           <Link
@@ -216,15 +216,15 @@ export default function AdminFAQsPage() {
 
   const bulkActions: BulkAction[] = [
     {
-      key: 'delete',
-      label: 'Eliminar seleccionadas',
+      key: "delete",
+      label: "Eliminar seleccionadas",
       icon: <Trash2 className="h-4 w-4" />,
-      variant: 'danger',
+      variant: "danger",
       onClick: handleBulkDelete,
     },
   ];
 
-  if (status === 'loading' || loading) {
+  if (status === "loading" || loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -243,7 +243,9 @@ export default function AdminFAQsPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <HelpCircle className="h-8 w-8 text-indigo-600" />
-              <h1 className="text-2xl font-bold text-gray-900">Gestión de FAQs</h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Gestión de FAQs
+              </h1>
             </div>
             <div className="flex items-center gap-4">
               <Link
@@ -269,7 +271,10 @@ export default function AdminFAQsPage() {
         <nav className="flex mb-6" aria-label="Breadcrumb">
           <ol className="flex items-center space-x-2">
             <li>
-              <Link href="/admin/dashboard" className="text-gray-500 hover:text-gray-700">
+              <Link
+                href="/admin/dashboard"
+                className="text-gray-500 hover:text-gray-700"
+              >
                 Panel
               </Link>
             </li>
@@ -297,13 +302,13 @@ export default function AdminFAQsPage() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <p className="text-sm text-gray-500">Activas</p>
             <p className="text-2xl font-bold text-green-600">
-              {faqs.filter(f => f.activo).length}
+              {faqs.filter((f) => f.activo).length}
             </p>
           </div>
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <p className="text-sm text-gray-500">Inactivas</p>
             <p className="text-2xl font-bold text-gray-600">
-              {faqs.filter(f => !f.activo).length}
+              {faqs.filter((f) => !f.activo).length}
             </p>
           </div>
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
@@ -320,7 +325,7 @@ export default function AdminFAQsPage() {
           columns={columns}
           rowKey="id"
           searchable={true}
-          searchKeys={['pregunta', 'respuesta', 'categoria']}
+          searchKeys={["pregunta", "respuesta", "categoria"]}
           searchPlaceholder="Buscar FAQs..."
           pagination={true}
           pageSizeOptions={[10, 25, 50, 100]}

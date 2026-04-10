@@ -2,12 +2,12 @@
  * Edit Coupon Page - Admin
  * Form for editing an existing coupon
  */
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter, useParams } from 'next/navigation';
-import Link from 'next/link';
+import { useState, useEffect, useCallback } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter, useParams } from "next/navigation";
+import Link from "next/link";
 import {
   ArrowLeft,
   Ticket,
@@ -19,8 +19,8 @@ import {
   Percent,
   Euro,
   Truck,
-} from 'lucide-react';
-import { ConfirmModal } from '@/components/ui/ConfirmModal';
+} from "lucide-react";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 interface Coupon {
   id: string;
@@ -36,9 +36,9 @@ interface Coupon {
 }
 
 const COUPON_TYPES = [
-  { value: 'PERCENTAGE', label: 'Porcentaje', icon: Percent },
-  { value: 'FIXED', label: 'Monto Fijo', icon: Euro },
-  { value: 'FREE_SHIPPING', label: 'Envío Gratis', icon: Truck },
+  { value: "PERCENTAGE", label: "Porcentaje", icon: Percent },
+  { value: "FIXED", label: "Monto Fijo", icon: Euro },
+  { value: "FREE_SHIPPING", label: "Envío Gratis", icon: Truck },
 ];
 
 export default function EditarCuponPage() {
@@ -46,7 +46,7 @@ export default function EditarCuponPage() {
   const router = useRouter();
   const params = useParams();
   const couponId = params?.id as string;
-  
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,100 +56,111 @@ export default function EditarCuponPage() {
 
   // Form state
   const [formData, setFormData] = useState({
-    code: '',
-    type: 'PERCENTAGE',
+    code: "",
+    type: "PERCENTAGE",
     value: 10,
-    minOrderAmount: '',
-    maxUses: '',
-    validFrom: '',
-    validUntil: '',
+    minOrderAmount: "",
+    maxUses: "",
+    validFrom: "",
+    validUntil: "",
     isActive: true,
   });
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth?callbackUrl=/admin/coupons');
+    if (status === "unauthenticated") {
+      router.push("/auth?callbackUrl=/admin/coupons");
       return;
     }
 
     const user = session?.user as { rol?: string } | undefined;
-    if (status === 'authenticated' && user?.rol !== 'ADMIN') {
-      router.push('/');
+    if (status === "authenticated" && user?.rol !== "ADMIN") {
+      router.push("/");
       return;
     }
 
-    if (status === 'authenticated' && couponId) {
+    if (status === "authenticated" && couponId) {
       loadCoupon();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, session, router, couponId]);
 
   const loadCoupon = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await fetch(`/api/admin/coupons/${couponId}`);
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error al cargar cupón');
+        throw new Error(data.error || "Error al cargar cupón");
       }
 
       const loadedCoupon = data.coupon;
       setCoupon(loadedCoupon);
       setFormData({
-        code: loadedCoupon.codigo || '',
-        type: loadedCoupon.tipoRaw || 'PERCENTAGE',
+        code: loadedCoupon.codigo || "",
+        type: loadedCoupon.tipoRaw || "PERCENTAGE",
         value: loadedCoupon.valorRaw || 0,
-        minOrderAmount: loadedCoupon.minimoCompra ? String(loadedCoupon.minimoCompra) : '',
-        maxUses: loadedCoupon.usosMaximos ? String(loadedCoupon.usosMaximos) : '',
-        validFrom: loadedCoupon.validoDesde 
-          ? new Date(loadedCoupon.validoDesde).toISOString().split('T')[0]
-          : '',
+        minOrderAmount: loadedCoupon.minimoCompra
+          ? String(loadedCoupon.minimoCompra)
+          : "",
+        maxUses: loadedCoupon.usosMaximos
+          ? String(loadedCoupon.usosMaximos)
+          : "",
+        validFrom: loadedCoupon.validoDesde
+          ? new Date(loadedCoupon.validoDesde).toISOString().split("T")[0]
+          : "",
         validUntil: loadedCoupon.validoHasta
-          ? new Date(loadedCoupon.validoHasta).toISOString().split('T')[0]
-          : '',
+          ? new Date(loadedCoupon.validoHasta).toISOString().split("T")[0]
+          : "",
         isActive: loadedCoupon.activo,
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al cargar el cupón');
+      setError(err instanceof Error ? err.message : "Error al cargar el cupón");
     } finally {
       setLoading(false);
     }
   }, [couponId]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
     const { name, value, type } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
+      [name]:
+        type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
     }));
   };
 
   const validateForm = () => {
-    if (!formData.code.trim()) return 'El código del cupón es obligatorio';
-    if (formData.code.length < 3) return 'El código debe tener al menos 3 caracteres';
-    if (!/^[A-Z0-9_-]+$/i.test(formData.code)) return 'El código solo puede contener letras, números, guiones y guiones bajos';
-    
-    if (formData.type !== 'FREE_SHIPPING') {
-      if (formData.value <= 0) return 'El valor debe ser mayor a 0';
-      if (formData.type === 'PERCENTAGE' && formData.value > 100) return 'El porcentaje no puede ser mayor a 100';
+    if (!formData.code.trim()) return "El código del cupón es obligatorio";
+    if (formData.code.length < 3)
+      return "El código debe tener al menos 3 caracteres";
+    if (!/^[A-Z0-9_-]+$/i.test(formData.code))
+      return "El código solo puede contener letras, números, guiones y guiones bajos";
+
+    if (formData.type !== "FREE_SHIPPING") {
+      if (formData.value <= 0) return "El valor debe ser mayor a 0";
+      if (formData.type === "PERCENTAGE" && formData.value > 100)
+        return "El porcentaje no puede ser mayor a 100";
     }
-    
-    if (!formData.validUntil) return 'La fecha de expiración es obligatoria';
-    
+
+    if (!formData.validUntil) return "La fecha de expiración es obligatoria";
+
     const validFrom = new Date(formData.validFrom);
     const validUntil = new Date(formData.validUntil);
-    
-    if (validUntil <= validFrom) return 'La fecha de fin debe ser posterior a la fecha de inicio';
-    
+
+    if (validUntil <= validFrom)
+      return "La fecha de fin debe ser posterior a la fecha de inicio";
+
     return null;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const validationError = validateForm();
     if (validationError) {
       setError(validationError);
@@ -161,16 +172,18 @@ export default function EditarCuponPage() {
 
     try {
       const response = await fetch(`/api/admin/coupons/${couponId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           // NO se envía el código - no es editable
           type: formData.type,
-          value: formData.type === 'FREE_SHIPPING' ? 0 : Number(formData.value),
-          minOrderAmount: formData.minOrderAmount ? Number(formData.minOrderAmount) : null,
+          value: formData.type === "FREE_SHIPPING" ? 0 : Number(formData.value),
+          minOrderAmount: formData.minOrderAmount
+            ? Number(formData.minOrderAmount)
+            : null,
           maxUses: formData.maxUses ? Number(formData.maxUses) : null,
           validFrom: new Date(formData.validFrom).toISOString(),
-          validUntil: new Date(formData.validUntil + 'T23:59:59').toISOString(),
+          validUntil: new Date(formData.validUntil + "T23:59:59").toISOString(),
           isActive: formData.isActive,
         }),
       });
@@ -178,7 +191,7 @@ export default function EditarCuponPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error al actualizar cupón');
+        throw new Error(data.error || "Error al actualizar cupón");
       }
 
       setSuccess(true);
@@ -186,7 +199,9 @@ export default function EditarCuponPage() {
         setSuccess(false);
       }, 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al actualizar cupón');
+      setError(
+        err instanceof Error ? err.message : "Error al actualizar cupón",
+      );
     } finally {
       setSaving(false);
     }
@@ -195,36 +210,36 @@ export default function EditarCuponPage() {
   const handleDelete = async () => {
     try {
       const response = await fetch(`/api/admin/coupons/${couponId}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error al eliminar cupón');
+        throw new Error(data.error || "Error al eliminar cupón");
       }
 
-      router.push('/admin/coupons');
+      router.push("/admin/coupons");
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al eliminar cupón');
+      setError(err instanceof Error ? err.message : "Error al eliminar cupón");
       setDeleteModalOpen(false);
     }
   };
 
   const getValueLabel = () => {
     switch (formData.type) {
-      case 'PERCENTAGE':
-        return 'Porcentaje de descuento (%)';
-      case 'FIXED':
-        return 'Monto de descuento (€)';
-      case 'FREE_SHIPPING':
-        return 'N/A';
+      case "PERCENTAGE":
+        return "Porcentaje de descuento (%)";
+      case "FIXED":
+        return "Monto de descuento (€)";
+      case "FREE_SHIPPING":
+        return "N/A";
       default:
-        return 'Valor';
+        return "Valor";
     }
   };
 
-  if (loading || status === 'loading') {
+  if (loading || status === "loading") {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -266,23 +281,33 @@ export default function EditarCuponPage() {
                 <ArrowLeft className="h-6 w-6" />
               </Link>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Editar Cupón</h1>
+                <h1 className="text-3xl font-bold text-gray-900">
+                  Editar Cupón
+                </h1>
                 <nav className="flex mt-1" aria-label="Breadcrumb">
                   <ol className="flex items-center space-x-2 text-sm">
                     <li>
-                      <Link href="/admin/dashboard" className="text-gray-500 hover:text-gray-700">
+                      <Link
+                        href="/admin/dashboard"
+                        className="text-gray-500 hover:text-gray-700"
+                      >
                         Panel
                       </Link>
                     </li>
                     <li className="text-gray-400">/</li>
                     <li>
-                      <Link href="/admin/coupons" className="text-gray-500 hover:text-gray-700">
+                      <Link
+                        href="/admin/coupons"
+                        className="text-gray-500 hover:text-gray-700"
+                      >
                         Cupones
                       </Link>
                     </li>
                     <li className="text-gray-400">/</li>
                     <li>
-                      <span className="text-gray-900 truncate max-w-xs">{coupon?.codigo}</span>
+                      <span className="text-gray-900 truncate max-w-xs">
+                        {coupon?.codigo}
+                      </span>
                     </li>
                   </ol>
                 </nav>
@@ -337,7 +362,10 @@ export default function EditarCuponPage() {
 
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="code" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label
+                        htmlFor="code"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
                         Código del Cupón
                       </label>
                       <input
@@ -350,7 +378,8 @@ export default function EditarCuponPage() {
                         title="El código del cupón no puede modificarse. Para cambiar el código, cree un nuevo cupón."
                       />
                       <p className="text-xs text-gray-500 mt-1">
-                        El código no puede modificarse. Cree un nuevo cupón si necesita un código diferente.
+                        El código no puede modificarse. Cree un nuevo cupón si
+                        necesita un código diferente.
                       </p>
                     </div>
 
@@ -365,16 +394,27 @@ export default function EditarCuponPage() {
                             <button
                               key={type.value}
                               type="button"
-                              onClick={() => setFormData(prev => ({ ...prev, type: type.value, value: type.value === 'FREE_SHIPPING' ? 0 : prev.value }))}
+                              onClick={() =>
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  type: type.value,
+                                  value:
+                                    type.value === "FREE_SHIPPING"
+                                      ? 0
+                                      : prev.value,
+                                }))
+                              }
                               className={`p-3 border rounded-lg text-left transition-colors ${
                                 formData.type === type.value
-                                  ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                                  : 'border-gray-200 hover:border-gray-300'
+                                  ? "border-indigo-500 bg-indigo-50 text-indigo-700"
+                                  : "border-gray-200 hover:border-gray-300"
                               }`}
                             >
                               <div className="flex items-center gap-2">
                                 <Icon className="h-4 w-4" />
-                                <span className="font-medium">{type.label}</span>
+                                <span className="font-medium">
+                                  {type.label}
+                                </span>
                               </div>
                             </button>
                           );
@@ -384,8 +424,12 @@ export default function EditarCuponPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label htmlFor="value" className="block text-sm font-medium text-gray-700 mb-1">
-                          {getValueLabel()} {formData.type !== 'FREE_SHIPPING' && '*'}
+                        <label
+                          htmlFor="value"
+                          className="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                          {getValueLabel()}{" "}
+                          {formData.type !== "FREE_SHIPPING" && "*"}
                         </label>
                         <input
                           type="number"
@@ -393,17 +437,20 @@ export default function EditarCuponPage() {
                           name="value"
                           value={formData.value}
                           onChange={handleInputChange}
-                          disabled={formData.type === 'FREE_SHIPPING'}
+                          disabled={formData.type === "FREE_SHIPPING"}
                           min="0"
-                          max={formData.type === 'PERCENTAGE' ? 100 : undefined}
-                          step={formData.type === 'PERCENTAGE' ? 1 : 0.01}
+                          max={formData.type === "PERCENTAGE" ? 100 : undefined}
+                          step={formData.type === "PERCENTAGE" ? 1 : 0.01}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-                          required={formData.type !== 'FREE_SHIPPING'}
+                          required={formData.type !== "FREE_SHIPPING"}
                         />
                       </div>
 
                       <div>
-                        <label htmlFor="minOrderAmount" className="block text-sm font-medium text-gray-700 mb-1">
+                        <label
+                          htmlFor="minOrderAmount"
+                          className="block text-sm font-medium text-gray-700 mb-1"
+                        >
                           Compra Mínima (€)
                         </label>
                         <input
@@ -430,7 +477,10 @@ export default function EditarCuponPage() {
 
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="maxUses" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label
+                        htmlFor="maxUses"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
                         Usos Máximos
                       </label>
                       <input
@@ -447,7 +497,10 @@ export default function EditarCuponPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label htmlFor="validFrom" className="block text-sm font-medium text-gray-700 mb-1">
+                        <label
+                          htmlFor="validFrom"
+                          className="block text-sm font-medium text-gray-700 mb-1"
+                        >
                           Válido desde *
                         </label>
                         <input
@@ -462,7 +515,10 @@ export default function EditarCuponPage() {
                       </div>
 
                       <div>
-                        <label htmlFor="validUntil" className="block text-sm font-medium text-gray-700 mb-1">
+                        <label
+                          htmlFor="validUntil"
+                          className="block text-sm font-medium text-gray-700 mb-1"
+                        >
                           Válido hasta *
                         </label>
                         <input
@@ -481,7 +537,9 @@ export default function EditarCuponPage() {
 
                 {/* Configuración */}
                 <div className="pt-6 border-t border-gray-200">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Configuración</h2>
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                    Configuración
+                  </h2>
 
                   <div className="flex items-center gap-3">
                     <input
@@ -492,7 +550,10 @@ export default function EditarCuponPage() {
                       onChange={handleInputChange}
                       className="h-4 w-4 text-indigo-600 rounded focus:ring-indigo-500"
                     />
-                    <label htmlFor="isActive" className="text-sm text-gray-700 cursor-pointer">
+                    <label
+                      htmlFor="isActive"
+                      className="text-sm text-gray-700 cursor-pointer"
+                    >
                       Cupón activo (disponible para usar)
                     </label>
                   </div>
@@ -523,15 +584,19 @@ export default function EditarCuponPage() {
           {/* Sidebar con estadísticas */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-8">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Estadísticas</h3>
-              
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Estadísticas
+              </h3>
+
               {coupon && (
                 <div className="space-y-4">
                   <div>
                     <p className="text-sm text-gray-500">Usos Actuales</p>
-                    <p className="text-2xl font-bold text-indigo-600">{coupon.usosActuales}</p>
+                    <p className="text-2xl font-bold text-indigo-600">
+                      {coupon.usosActuales}
+                    </p>
                   </div>
-                  
+
                   {coupon.usosMaximos && (
                     <div>
                       <p className="text-sm text-gray-500">Usos Restantes</p>
@@ -540,12 +605,13 @@ export default function EditarCuponPage() {
                       </p>
                     </div>
                   )}
-                  
+
                   <div className="pt-4 border-t border-gray-200">
                     <p className="text-sm text-gray-500">Vigencia</p>
                     <p className="text-sm text-gray-900">
-                      {new Date(coupon.validoDesde).toLocaleDateString('es-ES')} - {' '}
-                      {new Date(coupon.validoHasta).toLocaleDateString('es-ES')}
+                      {new Date(coupon.validoDesde).toLocaleDateString("es-ES")}{" "}
+                      -{" "}
+                      {new Date(coupon.validoHasta).toLocaleDateString("es-ES")}
                     </p>
                   </div>
                 </div>

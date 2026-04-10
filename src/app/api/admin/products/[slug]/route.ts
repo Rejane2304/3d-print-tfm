@@ -1,26 +1,26 @@
 /**
  * Admin Product Detail API
  * GET, PUT, DELETE /api/admin/products/[identifier]
- * 
+ *
  * Soporta tanto ID (UUID) como SLUG
  * Requires: ADMIN role
  */
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
-import { z } from 'zod';
-import { Material } from '@prisma/client';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/auth-options";
+import { z } from "zod";
+import { Material } from "@prisma/client";
 import {
   translateProductName,
   translateProductDescription,
   translateProductShortDescription,
   translateCategoryName,
   translateErrorMessage,
-} from '@/lib/i18n';
-import { unlink } from 'fs/promises';
-import { existsSync } from 'fs';
-import path from 'path';
+} from "@/lib/i18n";
+import { unlink } from "fs/promises";
+import { existsSync } from "fs";
+import path from "path";
 
 // Schema for image updates
 const imageUpdateSchema = z.object({
@@ -53,15 +53,15 @@ const updateProductSchema = z.object({
 async function verifyAdminAuth() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
-    return { error: 'No autenticado', status: 401 };
+    return { error: "No autenticado", status: 401 };
   }
 
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
   });
 
-  if (!user || user.role !== 'ADMIN') {
-    return { error: 'No autorizado', status: 403 };
+  if (!user || user.role !== "ADMIN") {
+    return { error: "No autorizado", status: 403 };
   }
 
   return { user };
@@ -70,8 +70,11 @@ async function verifyAdminAuth() {
 // Helper to find product by ID or slug
 async function findProduct(identifier: string) {
   // Check if it looks like a UUID
-  const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier);
-  
+  const isUUID =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      identifier,
+    );
+
   if (isUUID) {
     return await prisma.product.findUnique({
       where: { id: identifier },
@@ -88,14 +91,14 @@ async function findProduct(identifier: string) {
 // GET - Get product by ID or slug
 export async function GET(
   req: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: { slug: string } },
 ) {
   try {
     const auth = await verifyAdminAuth();
-    if ('error' in auth) {
+    if ("error" in auth) {
       return NextResponse.json(
         { success: false, error: auth.error },
-        { status: auth.status }
+        { status: auth.status },
       );
     }
 
@@ -104,8 +107,8 @@ export async function GET(
 
     if (!product) {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage('Producto not found') },
-        { status: 404 }
+        { success: false, error: translateErrorMessage("Producto not found") },
+        { status: 404 },
       );
     }
 
@@ -115,14 +118,21 @@ export async function GET(
       id: product.id,
       slug: product.slug,
       nombre: translateProductName(product.slug) || product.name,
-      descripcion: translateProductDescription(product.slug) || product.description,
-      descripcionCorta: translateProductShortDescription(product.slug) || product.shortDescription,
+      descripcion:
+        translateProductDescription(product.slug) || product.description,
+      descripcionCorta:
+        translateProductShortDescription(product.slug) ||
+        product.shortDescription,
       precio: Number(product.price),
-      precioAnterior: product.previousPrice ? Number(product.previousPrice) : null,
+      precioAnterior: product.previousPrice
+        ? Number(product.previousPrice)
+        : null,
       stock: product.stock,
       minStock: product.minStock,
       categoryId: product.categoryId,
-      categoria: product.category ? translateCategoryName(product.category.slug) : 'Sin categoría',
+      categoria: product.category
+        ? translateCategoryName(product.category.slug)
+        : "Sin categoría",
       material: product.material,
       anchoCm: product.widthCm,
       altoCm: product.heightCm,
@@ -143,10 +153,10 @@ export async function GET(
 
     return NextResponse.json({ success: true, producto: transformedProduct });
   } catch (error) {
-    console.error('Error getting product:', error);
+    console.error("Error getting product:", error);
     return NextResponse.json(
-      { success: false, error: translateErrorMessage('Internal error') },
-      { status: 500 }
+      { success: false, error: translateErrorMessage("Internal error") },
+      { status: 500 },
     );
   }
 }
@@ -154,14 +164,14 @@ export async function GET(
 // PUT - Update product
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: { slug: string } },
 ) {
   try {
     const auth = await verifyAdminAuth();
-    if ('error' in auth) {
+    if ("error" in auth) {
       return NextResponse.json(
         { success: false, error: auth.error },
-        { status: auth.status }
+        { status: auth.status },
       );
     }
 
@@ -170,8 +180,8 @@ export async function PUT(
 
     if (!existingProduct) {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage('Producto not found') },
-        { status: 404 }
+        { success: false, error: translateErrorMessage("Producto not found") },
+        { status: 404 },
       );
     }
 
@@ -181,17 +191,17 @@ export async function PUT(
     // Generate new slug if name changed
     const newSlug = data.name
       ? data.name
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
           .toLowerCase()
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/(^-|-$)/g, '')
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)/g, "")
       : existingProduct.slug;
 
     // Update product and images in a transaction
     const updated = await prisma.$transaction(async (tx) => {
       // Update product data
-      const productUpdateData: any = {
+      const productUpdateData: Record<string, unknown> = {
         name: data.name,
         description: data.description,
         shortDescription: data.shortDescription,
@@ -223,20 +233,22 @@ export async function PUT(
         });
 
         // Find images to delete (not in new list)
-        const newImageUrls = new Set(data.images.map((img: { url: string }) => img.url));
+        const newImageUrls = new Set(
+          data.images.map((img: { url: string }) => img.url),
+        );
         const imagesToDelete = currentImages.filter(
-          (img) => !newImageUrls.has(img.url)
+          (img) => !newImageUrls.has(img.url),
         );
 
         // Delete removed images from filesystem
         for (const img of imagesToDelete) {
           try {
-            const filePath = path.join(process.cwd(), 'public', img.url);
+            const filePath = path.join(process.cwd(), "public", img.url);
             if (existsSync(filePath)) {
               await unlink(filePath);
             }
           } catch (err) {
-            console.warn('Error deleting old image file:', err);
+            console.warn("Error deleting old image file:", err);
           }
         }
 
@@ -250,10 +262,11 @@ export async function PUT(
           const img = data.images[i];
           await tx.productImage.create({
             data: {
-              productId: updatedProduct.id,
+              id: crypto.randomUUID(),
+              product: { connect: { id: updatedProduct.id } },
               url: img.url,
-              filename: img.url.split('/').pop() || 'image.jpg',
-              isMain: img.isMain ?? (i === 0),
+              filename: img.url.split("/").pop() || "image.jpg",
+              isMain: img.isMain ?? i === 0,
               displayOrder: i,
               altText: data.name || existingProduct.name,
             },
@@ -273,13 +286,13 @@ export async function PUT(
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { success: false, error: error.errors[0].message },
-        { status: 400 }
+        { status: 400 },
       );
     }
-    console.error('Error updating product:', error);
+    console.error("Error updating product:", error);
     return NextResponse.json(
-      { success: false, error: translateErrorMessage('Internal error') },
-      { status: 500 }
+      { success: false, error: translateErrorMessage("Internal error") },
+      { status: 500 },
     );
   }
 }
@@ -287,14 +300,14 @@ export async function PUT(
 // DELETE - Delete product
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: { slug: string } },
 ) {
   try {
     const auth = await verifyAdminAuth();
-    if ('error' in auth) {
+    if ("error" in auth) {
       return NextResponse.json(
         { success: false, error: auth.error },
-        { status: auth.status }
+        { status: auth.status },
       );
     }
 
@@ -303,32 +316,38 @@ export async function DELETE(
 
     if (!existingProduct) {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage('Producto not found') },
-        { status: 404 }
+        { success: false, error: translateErrorMessage("Producto not found") },
+        { status: 404 },
       );
     }
 
     // Delete images from filesystem
     for (const image of existingProduct.images) {
       try {
-        const filePath = path.join(process.cwd(), 'public', image.url);
+        const filePath = path.join(process.cwd(), "public", image.url);
         if (existsSync(filePath)) {
           await unlink(filePath);
         }
       } catch (err) {
-        console.warn('Error deleting image file:', err);
+        console.warn("Error deleting image file:", err);
       }
     }
 
     // Delete product directory if exists
     try {
-      const dirPath = path.join(process.cwd(), 'public', 'images', 'products', existingProduct.slug);
+      const dirPath = path.join(
+        process.cwd(),
+        "public",
+        "images",
+        "products",
+        existingProduct.slug,
+      );
       if (existsSync(dirPath)) {
-        const { rmdir } = await import('fs/promises');
+        const { rmdir } = await import("fs/promises");
         await rmdir(dirPath, { recursive: true });
       }
     } catch (err) {
-      console.warn('Error deleting product directory:', err);
+      console.warn("Error deleting product directory:", err);
     }
 
     // Delete product (cascades delete images from DB)
@@ -338,10 +357,10 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting product:', error);
+    console.error("Error deleting product:", error);
     return NextResponse.json(
-      { success: false, error: translateErrorMessage('Internal error') },
-      { status: 500 }
+      { success: false, error: translateErrorMessage("Internal error") },
+      { status: 500 },
     );
   }
 }

@@ -1,14 +1,14 @@
 /**
  * API de Mensajería Admin
  * System for mensajes en pedidos
- * 
+ *
  * Requiere: Rol ADMIN o ser dueño del pedido
  */
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
-import { z } from 'zod';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/auth-options";
+import { z } from "zod";
 
 // Schema de validación
 const crearMensajeSchema = z.object({
@@ -22,8 +22,8 @@ export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 }
+        { success: false, error: "No autenticado" },
+        { status: 401 },
       );
     }
 
@@ -33,18 +33,18 @@ export async function GET(req: NextRequest) {
 
     if (!usuario) {
       return NextResponse.json(
-        { success: false, error: 'Usuario no encontrado' },
-        { status: 401 }
+        { success: false, error: "Usuario no encontrado" },
+        { status: 401 },
       );
     }
 
     const { searchParams } = new URL(req.url);
-    const orderId = searchParams.get('orderId');
+    const orderId = searchParams.get("orderId");
 
     if (!orderId) {
       return NextResponse.json(
-        { success: false, error: 'El ID de pedido es requerido' },
-        { status: 400 }
+        { success: false, error: "El ID de pedido es requerido" },
+        { status: 400 },
       );
     }
 
@@ -55,16 +55,16 @@ export async function GET(req: NextRequest) {
 
     if (!pedido) {
       return NextResponse.json(
-        { success: false, error: 'Pedido no encontrado' },
-        { status: 404 }
+        { success: false, error: "Pedido no encontrado" },
+        { status: 404 },
       );
     }
 
     // Solo admin o el dueño del pedido puede ver mensajes
-    if (usuario.role !== 'ADMIN' && pedido.userId !== usuario.id) {
+    if (usuario.role !== "ADMIN" && pedido.userId !== usuario.id) {
       return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 403 }
+        { success: false, error: "No autorizado" },
+        { status: 403 },
       );
     }
 
@@ -79,18 +79,18 @@ export async function GET(req: NextRequest) {
           },
         },
       },
-      orderBy: { createdAt: 'asc' },
+      orderBy: { createdAt: "asc" },
     });
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       mensajes,
     });
   } catch (error) {
-    console.error('Error listando mensajes:', error);
+    console.error("Error listando mensajes:", error);
     return NextResponse.json(
-      { success: false, error: 'Error interno del servidor' },
-      { status: 500 }
+      { success: false, error: "Error interno del servidor" },
+      { status: 500 },
     );
   }
 }
@@ -101,8 +101,8 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 }
+        { success: false, error: "No autenticado" },
+        { status: 401 },
       );
     }
 
@@ -112,8 +112,8 @@ export async function POST(req: NextRequest) {
 
     if (!usuario) {
       return NextResponse.json(
-        { success: false, error: 'Usuario no encontrado' },
-        { status: 401 }
+        { success: false, error: "Usuario no encontrado" },
+        { status: 401 },
       );
     }
 
@@ -127,26 +127,27 @@ export async function POST(req: NextRequest) {
 
     if (!pedido) {
       return NextResponse.json(
-        { success: false, error: 'Pedido no encontrado' },
-        { status: 404 }
+        { success: false, error: "Pedido no encontrado" },
+        { status: 404 },
       );
     }
 
     // Solo admin o el dueño del pedido puede enviar mensajes
-    if (usuario.role !== 'ADMIN' && pedido.userId !== usuario.id) {
+    if (usuario.role !== "ADMIN" && pedido.userId !== usuario.id) {
       return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 403 }
+        { success: false, error: "No autorizado" },
+        { status: 403 },
       );
     }
 
     // Crear mensaje
     const newMessage = await prisma.orderMessage.create({
       data: {
-        orderId: validatedData.orderId,
-        userId: usuario.id,
+        id: crypto.randomUUID(),
+        order: { connect: { id: validatedData.orderId } },
+        user: { connect: { id: usuario.id } },
         message: validatedData.message,
-        isFromCustomer: usuario.role !== 'ADMIN',
+        isFromCustomer: usuario.role !== "ADMIN",
       },
       include: {
         user: {
@@ -161,19 +162,19 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(
       { success: true, message: newMessage },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { success: false, error: error.errors[0].message },
-        { status: 400 }
+        { status: 400 },
       );
     }
-    console.error('Error creando mensaje:', error);
+    console.error("Error creando mensaje:", error);
     return NextResponse.json(
-      { success: false, error: 'Error interno del servidor' },
-      { status: 500 }
+      { success: false, error: "Error interno del servidor" },
+      { status: 500 },
     );
   }
 }

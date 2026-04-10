@@ -3,20 +3,17 @@
  * POST /api/checkout/confirm-payment
  * Immediately confirms payment for demo purposes
  */
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
-import { prisma } from '@/lib/db/prisma';
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/auth-options";
+import { prisma } from "@/lib/db/prisma";
 
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
 
     const body = await req.json();
@@ -24,8 +21,8 @@ export async function POST(req: NextRequest) {
 
     if (!orderId) {
       return NextResponse.json(
-        { error: 'El ID de pedido es requerido' },
-        { status: 400 }
+        { error: "El ID de pedido es requerido" },
+        { status: 400 },
       );
     }
 
@@ -37,8 +34,8 @@ export async function POST(req: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { error: 'Usuario no encontrado' },
-        { status: 404 }
+        { error: "Usuario no encontrado" },
+        { status: 404 },
       );
     }
 
@@ -49,8 +46,8 @@ export async function POST(req: NextRequest) {
 
     if (!order) {
       return NextResponse.json(
-        { error: 'Pedido no encontrado' },
-        { status: 404 }
+        { error: "Pedido no encontrado" },
+        { status: 404 },
       );
     }
 
@@ -58,7 +55,7 @@ export async function POST(req: NextRequest) {
     await prisma.order.update({
       where: { id: orderId },
       data: {
-        status: 'CONFIRMED',
+        status: "CONFIRMED",
         confirmedAt: new Date(),
       },
     });
@@ -66,12 +63,14 @@ export async function POST(req: NextRequest) {
     // Create payment record
     await prisma.payment.create({
       data: {
-        orderId: orderId,
-        userId: user.id,
+        id: crypto.randomUUID(),
+        order: { connect: { id: orderId } },
+        user: { connect: { id: user.id } },
         amount: order.total,
-        status: 'COMPLETED',
-        method: paymentMethod || 'STRIPE',
+        status: "COMPLETED",
+        method: paymentMethod || "STRIPE",
         processedAt: new Date(),
+        updatedAt: new Date(),
       },
     });
 
@@ -89,14 +88,14 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Pago confirmado',
+      message: "Pago confirmado",
       orderId,
     });
   } catch (error) {
-    console.error('Error confirming payment:', error);
+    console.error("Error confirming payment:", error);
     return NextResponse.json(
-      { error: 'Error al confirmar el pago' },
-      { status: 500 }
+      { error: "Error al confirmar el pago" },
+      { status: 500 },
     );
   }
 }

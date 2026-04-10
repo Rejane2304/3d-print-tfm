@@ -2,13 +2,13 @@
  * New Category Page - Admin
  * Form for creating a new category
  */
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import Image from 'next/image';
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowLeft,
   FolderTree,
@@ -19,7 +19,7 @@ import {
   CheckCircle2,
   Save,
   ImageIcon,
-} from 'lucide-react';
+} from "lucide-react";
 
 export default function NuevaCategoriaPage() {
   const { data: session, status } = useSession();
@@ -32,23 +32,23 @@ export default function NuevaCategoriaPage() {
 
   // Form state
   const [formData, setFormData] = useState({
-    name: '',
-    slug: '',
-    description: '',
-    image: '',
+    name: "",
+    slug: "",
+    description: "",
+    image: "",
     displayOrder: 0,
     isActive: true,
   });
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth?callbackUrl=/admin/categories/new');
+    if (status === "unauthenticated") {
+      router.push("/auth?callbackUrl=/admin/categories/new");
       return;
     }
 
     const user = session?.user as { rol?: string } | undefined;
-    if (status === 'authenticated' && user?.rol !== 'ADMIN') {
-      router.push('/');
+    if (status === "authenticated" && user?.rol !== "ADMIN") {
+      router.push("/");
       return;
     }
   }, [status, session, router]);
@@ -56,23 +56,28 @@ export default function NuevaCategoriaPage() {
   const generateSlug = (name: string) => {
     return name
       .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
     const { name, value, type } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
+      [name]:
+        type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
     }));
   };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const name = e.target.value;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       name,
       slug: generateSlug(name),
@@ -88,41 +93,42 @@ export default function NuevaCategoriaPage() {
       // Create temporary URL for preview
       const tempUrl = URL.createObjectURL(file);
       setImagePreview(tempUrl);
-      
+
       // In production, upload to server and get the URL
       // For now, we'll use the temp URL
-      setFormData(prev => ({ ...prev, image: tempUrl }));
+      setFormData((prev) => ({ ...prev, image: tempUrl }));
     } catch (err) {
-      console.error('Error uploading image:', err);
-      setError('Error al subir imagen. Intente nuevamente.');
+      console.error("Error uploading image:", err);
+      setError("Error al subir imagen. Intente nuevamente.");
     } finally {
       setUploadingImage(false);
     }
   };
 
   const handleImageUrlAdd = () => {
-    const url = prompt('Ingrese la URL de la imagen:');
+    const url = prompt("Ingrese la URL de la imagen:");
     if (url) {
       setImagePreview(url);
-      setFormData(prev => ({ ...prev, image: url }));
+      setFormData((prev) => ({ ...prev, image: url }));
     }
   };
 
   const removeImage = () => {
     setImagePreview(null);
-    setFormData(prev => ({ ...prev, image: '' }));
+    setFormData((prev) => ({ ...prev, image: "" }));
   };
 
   const validateForm = () => {
-    if (!formData.name.trim()) return 'El nombre es obligatorio';
-    if (!formData.slug.trim()) return 'El slug es obligatorio';
-    if (formData.slug.length < 2) return 'El slug debe tener al menos 2 caracteres';
+    if (!formData.name.trim()) return "El nombre es obligatorio";
+    if (!formData.slug.trim()) return "El slug es obligatorio";
+    if (formData.slug.length < 2)
+      return "El slug debe tener al menos 2 caracteres";
     return null;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const validationError = validateForm();
     if (validationError) {
       setError(validationError);
@@ -133,9 +139,9 @@ export default function NuevaCategoriaPage() {
     setError(null);
 
     try {
-      const response = await fetch('/api/admin/categories', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/admin/categories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: formData.name,
           slug: formData.slug,
@@ -149,21 +155,21 @@ export default function NuevaCategoriaPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error al crear categoría');
+        throw new Error(data.error || "Error al crear categoría");
       }
 
       setSuccess(true);
       setTimeout(() => {
-        router.push('/admin/categories');
+        router.push("/admin/categories");
       }, 1500);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al crear categoría');
+      setError(err instanceof Error ? err.message : "Error al crear categoría");
     } finally {
       setLoading(false);
     }
   };
 
-  if (status === 'loading') {
+  if (status === "loading") {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -188,17 +194,25 @@ export default function NuevaCategoriaPage() {
                 <ArrowLeft className="h-6 w-6" />
               </Link>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Nueva Categoría</h1>
+                <h1 className="text-3xl font-bold text-gray-900">
+                  Nueva Categoría
+                </h1>
                 <nav className="flex mt-1" aria-label="Breadcrumb">
                   <ol className="flex items-center space-x-2 text-sm">
                     <li>
-                      <Link href="/admin/dashboard" className="text-gray-500 hover:text-gray-700">
+                      <Link
+                        href="/admin/dashboard"
+                        className="text-gray-500 hover:text-gray-700"
+                      >
                         Panel
                       </Link>
                     </li>
                     <li className="text-gray-400">/</li>
                     <li>
-                      <Link href="/admin/categories" className="text-gray-500 hover:text-gray-700">
+                      <Link
+                        href="/admin/categories"
+                        className="text-gray-500 hover:text-gray-700"
+                      >
                         Categorías
                       </Link>
                     </li>
@@ -231,7 +245,9 @@ export default function NuevaCategoriaPage() {
         {success && (
           <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
             <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
-            <p className="text-green-700">Categoría creada exitosamente. Redirigiendo...</p>
+            <p className="text-green-700">
+              Categoría creada exitosamente. Redirigiendo...
+            </p>
           </div>
         )}
 
@@ -246,7 +262,10 @@ export default function NuevaCategoriaPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="name"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Nombre de la categoría *
                   </label>
                   <input
@@ -262,7 +281,10 @@ export default function NuevaCategoriaPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="slug"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Slug *
                   </label>
                   <input
@@ -276,12 +298,15 @@ export default function NuevaCategoriaPage() {
                     required
                   />
                   <p className="mt-1 text-xs text-gray-500">
-                    Usado en URLs: /categoria/{'{slug}'}
+                    Usado en URLs: /categoria/{"{slug}"}
                   </p>
                 </div>
 
                 <div>
-                  <label htmlFor="displayOrder" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="displayOrder"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Orden de visualización
                   </label>
                   <input
@@ -300,7 +325,10 @@ export default function NuevaCategoriaPage() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="description"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Descripción
                   </label>
                   <textarea
@@ -322,11 +350,16 @@ export default function NuevaCategoriaPage() {
 
             {/* Imagen */}
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Imagen de la Categoría</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                Imagen de la Categoría
+              </h2>
 
               <div className="space-y-4">
                 <div className="flex gap-2">
-                  <label htmlFor="imageUpload" className="flex-1 cursor-pointer">
+                  <label
+                    htmlFor="imageUpload"
+                    className="flex-1 cursor-pointer"
+                  >
                     <input
                       type="file"
                       id="imageUpload"
@@ -337,7 +370,7 @@ export default function NuevaCategoriaPage() {
                     <div className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-colors">
                       <Upload className="h-5 w-5 text-gray-500" />
                       <span className="text-sm text-gray-600">
-                        {uploadingImage ? 'Subiendo...' : 'Subir imagen'}
+                        {uploadingImage ? "Subiendo..." : "Subir imagen"}
                       </span>
                     </div>
                   </label>
@@ -382,7 +415,9 @@ export default function NuevaCategoriaPage() {
 
             {/* Configuración */}
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Configuración</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                Configuración
+              </h2>
 
               <div className="flex items-center gap-3">
                 <input
@@ -393,7 +428,10 @@ export default function NuevaCategoriaPage() {
                   onChange={handleInputChange}
                   className="h-4 w-4 text-indigo-600 rounded focus:ring-indigo-500"
                 />
-                <label htmlFor="isActive" className="text-sm text-gray-700 cursor-pointer">
+                <label
+                  htmlFor="isActive"
+                  className="text-sm text-gray-700 cursor-pointer"
+                >
                   Categoría activa (visible en la tienda)
                 </label>
               </div>

@@ -4,25 +4,25 @@
  * Mobile: Collapsible drawer
  * Desktop: Sticky sidebar
  */
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { SlidersHorizontal, X, ChevronDown } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { SlidersHorizontal, X, ChevronDown } from "lucide-react";
 
 const CATEGORIAS = [
-  { value: '', label: 'All categories' },
-  { value: 'DECORATION', label: 'Decoration' },
-  { value: 'ACCESSORIES', label: 'Accessories' },
-  { value: 'FUNCTIONAL', label: 'Functional' },
-  { value: 'ARTICULATED', label: 'Articulated' },
-  { value: 'TOYS', label: 'Toys' },
+  { value: "", label: "All categories" },
+  { value: "DECORATION", label: "Decoration" },
+  { value: "ACCESSORIES", label: "Accessories" },
+  { value: "FUNCTIONAL", label: "Functional" },
+  { value: "ARTICULATED", label: "Articulated" },
+  { value: "TOYS", label: "Toys" },
 ];
 
 const MATERIALES = [
-  { value: '', label: 'All materials' },
-  { value: 'PLA', label: 'PLA' },
-  { value: 'PETG', label: 'PETG' },
+  { value: "", label: "All materials" },
+  { value: "PLA", label: "PLA" },
+  { value: "PETG", label: "PETG" },
 ];
 
 interface FilterSidebarProps {
@@ -49,24 +49,24 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
   // Prevent body scroll when mobile drawer is open
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     }
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     };
   }, [isOpen]);
 
   // Close on escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         setIsOpen(false);
       }
     };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   const updateFilter = (key: string, value: string) => {
@@ -79,20 +79,20 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
     }
 
     // Reset page when changing filters
-    params.delete('page');
+    params.delete("page");
 
     router.push(`/products?${params.toString()}`);
   };
 
   const clearFilters = () => {
-    router.push('/products');
+    router.push("/products");
     setIsOpen(false);
   };
 
   const toggleSection = (section: keyof typeof expandedSections) => {
-    setExpandedSections(prev => ({
+    setExpandedSections((prev) => ({
       ...prev,
-      [section]: !prev[section]
+      [section]: !prev[section],
     }));
   };
 
@@ -128,18 +128,20 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
       {/* Category - Collapsible on mobile */}
       <div className="mb-6 border-b border-gray-100 pb-6 lg:border-0 lg:pb-0">
         <button
-          onClick={() => toggleSection('category')}
+          onClick={() => toggleSection("category")}
           className="flex items-center justify-between w-full mb-3 text-left lg:cursor-default lg:pointer-events-none"
         >
           <span className="text-sm font-medium text-gray-700">Category</span>
           <ChevronDown
-            className={`h-4 w-4 text-gray-400 transition-transform lg:hidden ${expandedSections.category ? 'rotate-180' : ''}`}
+            className={`h-4 w-4 text-gray-400 transition-transform lg:hidden ${expandedSections.category ? "rotate-180" : ""}`}
           />
         </button>
-        <div className={`${expandedSections.category ? 'block' : 'hidden lg:block'}`}>
+        <div
+          className={`${expandedSections.category ? "block" : "hidden lg:block"}`}
+        >
           <select
-            value={searchParams.category || ''}
-            onChange={(e) => updateFilter('category', e.target.value)}
+            value={searchParams.category || ""}
+            onChange={(e) => updateFilter("category", e.target.value)}
             className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white min-h-[44px]"
           >
             {CATEGORIAS.map((cat) => (
@@ -154,18 +156,20 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
       {/* Material */}
       <div className="mb-6 border-b border-gray-100 pb-6 lg:border-0 lg:pb-0">
         <button
-          onClick={() => toggleSection('material')}
+          onClick={() => toggleSection("material")}
           className="flex items-center justify-between w-full mb-3 text-left lg:cursor-default lg:pointer-events-none"
         >
           <span className="text-sm font-medium text-gray-700">Material</span>
           <ChevronDown
-            className={`h-4 w-4 text-gray-400 transition-transform lg:hidden ${expandedSections.material ? 'rotate-180' : ''}`}
+            className={`h-4 w-4 text-gray-400 transition-transform lg:hidden ${expandedSections.material ? "rotate-180" : ""}`}
           />
         </button>
-        <div className={`${expandedSections.material ? 'block' : 'hidden lg:block'}`}>
+        <div
+          className={`${expandedSections.material ? "block" : "hidden lg:block"}`}
+        >
           <select
-            value={searchParams.material || ''}
-            onChange={(e) => updateFilter('material', e.target.value)}
+            value={searchParams.material || ""}
+            onChange={(e) => updateFilter("material", e.target.value)}
             className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white min-h-[44px]"
           >
             {MATERIALES.map((mat) => (
@@ -180,23 +184,25 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
       {/* Price range */}
       <div className="mb-6 border-b border-gray-100 pb-6 lg:border-0 lg:pb-0">
         <button
-          onClick={() => toggleSection('price')}
+          onClick={() => toggleSection("price")}
           className="flex items-center justify-between w-full mb-3 text-left lg:cursor-default lg:pointer-events-none"
         >
           <span className="text-sm font-medium text-gray-700">Price</span>
           <ChevronDown
-            className={`h-4 w-4 text-gray-400 transition-transform lg:hidden ${expandedSections.price ? 'rotate-180' : ''}`}
+            className={`h-4 w-4 text-gray-400 transition-transform lg:hidden ${expandedSections.price ? "rotate-180" : ""}`}
           />
         </button>
-        <div className={`${expandedSections.price ? 'block' : 'hidden lg:block'}`}>
+        <div
+          className={`${expandedSections.price ? "block" : "hidden lg:block"}`}
+        >
           <div className="flex gap-3">
             <div className="flex-1">
               <label className="text-xs text-gray-500 mb-1.5 block">Min</label>
               <input
                 type="number"
                 placeholder="0"
-                value={searchParams.minPrice || ''}
-                onChange={(e) => updateFilter('minPrice', e.target.value)}
+                value={searchParams.minPrice || ""}
+                onChange={(e) => updateFilter("minPrice", e.target.value)}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 min-h-[44px]"
                 min="0"
               />
@@ -206,8 +212,8 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
               <input
                 type="number"
                 placeholder="∞"
-                value={searchParams.maxPrice || ''}
-                onChange={(e) => updateFilter('maxPrice', e.target.value)}
+                value={searchParams.maxPrice || ""}
+                onChange={(e) => updateFilter("maxPrice", e.target.value)}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 min-h-[44px]"
                 min="0"
               />
@@ -219,21 +225,27 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
       {/* In stock */}
       <div className="mb-2">
         <button
-          onClick={() => toggleSection('stock')}
+          onClick={() => toggleSection("stock")}
           className="flex items-center justify-between w-full mb-3 text-left lg:hidden"
         >
-          <span className="text-sm font-medium text-gray-700">Availability</span>
+          <span className="text-sm font-medium text-gray-700">
+            Availability
+          </span>
           <ChevronDown
-            className={`h-4 w-4 text-gray-400 transition-transform ${expandedSections.stock ? 'rotate-180' : ''}`}
+            className={`h-4 w-4 text-gray-400 transition-transform ${expandedSections.stock ? "rotate-180" : ""}`}
           />
         </button>
-        <div className={`${expandedSections.stock ? 'block' : 'hidden lg:block'}`}>
+        <div
+          className={`${expandedSections.stock ? "block" : "hidden lg:block"}`}
+        >
           <label className="flex items-center gap-3 cursor-pointer p-2 -mx-2 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]">
             <input
               type="checkbox"
               id="inStockFilter"
-              checked={searchParams.inStock === 'true'}
-              onChange={(e) => updateFilter('inStock', e.target.checked ? 'true' : '')}
+              checked={searchParams.inStock === "true"}
+              onChange={(e) =>
+                updateFilter("inStock", e.target.checked ? "true" : "")
+              }
               className="w-5 h-5 rounded text-indigo-600 focus:ring-indigo-500 border-gray-300"
             />
             <span className="text-sm text-gray-700">In stock only</span>
@@ -246,7 +258,7 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
         onClick={() => setIsOpen(false)}
         className="lg:hidden w-full bg-indigo-600 text-white py-3.5 rounded-lg font-medium hover:bg-indigo-700 transition-colors mt-6 min-h-[48px]"
       >
-        View {activeFiltersCount > 0 ? `${activeFiltersCount} ` : ''}results
+        View {activeFiltersCount > 0 ? `${activeFiltersCount} ` : ""}results
       </button>
     </>
   );

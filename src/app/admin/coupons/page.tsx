@@ -2,14 +2,14 @@
  * Admin Coupons Page
  * Coupon management with DataTable
  */
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { 
-  Plus, 
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import {
+  Plus,
   Ticket,
   Loader2,
   AlertCircle,
@@ -19,9 +19,9 @@ import {
   Euro,
   Truck,
   Activity,
-} from 'lucide-react';
-import { DataTable, Column, BulkAction } from '@/components/ui/DataTable';
-import { ConfirmModal } from '@/components/ui/ConfirmModal';
+} from "lucide-react";
+import { DataTable, Column, BulkAction } from "@/components/ui/DataTable";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 interface Coupon extends Record<string, unknown> {
   id: string;
@@ -53,15 +53,15 @@ export default function AdminCouponsPage() {
   const [couponToDelete, setCouponToDelete] = useState<Coupon | null>(null);
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login?callbackUrl=/admin/coupons');
+    if (status === "unauthenticated") {
+      router.push("/login?callbackUrl=/admin/coupons");
       return;
     }
 
-    if (status === 'authenticated') {
+    if (status === "authenticated") {
       const user = session?.user as { rol?: string } | undefined;
-      if (user?.rol !== 'ADMIN') {
-        router.push('/');
+      if (user?.rol !== "ADMIN") {
+        router.push("/");
         return;
       }
       loadCoupons();
@@ -74,16 +74,16 @@ export default function AdminCouponsPage() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('/api/admin/coupons');
+      const response = await fetch("/api/admin/coupons");
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error cargando cupones');
+        throw new Error(data.error || "Error cargando cupones");
       }
 
       setCoupons(data.coupons || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : "Error desconocido");
     } finally {
       setLoading(false);
     }
@@ -99,18 +99,18 @@ export default function AdminCouponsPage() {
 
     try {
       const response = await fetch(`/api/admin/coupons/${couponToDelete.id}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        setCoupons(coupons.filter(c => c.id !== couponToDelete.id));
+        setCoupons(coupons.filter((c) => c.id !== couponToDelete.id));
       } else {
-        throw new Error(data.error || 'Error eliminando cupón');
+        throw new Error(data.error || "Error eliminando cupón");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error eliminando cupón');
+      setError(err instanceof Error ? err.message : "Error eliminando cupón");
     } finally {
       setModalOpen(false);
       setCouponToDelete(null);
@@ -120,40 +120,42 @@ export default function AdminCouponsPage() {
   const handleBulkDelete = async (selectedIds: string[]) => {
     try {
       let hasError = false;
-      
+
       await Promise.all(
         selectedIds.map(async (id) => {
-          const response = await fetch(`/api/admin/coupons/${id}`, { 
-            method: 'DELETE' 
+          const response = await fetch(`/api/admin/coupons/${id}`, {
+            method: "DELETE",
           });
           if (!response.ok) {
             hasError = true;
           }
-        })
+        }),
       );
-      
+
       if (hasError) {
-        setError('Algunos cupones no pudieron ser eliminados');
+        setError("Algunos cupones no pudieron ser eliminados");
       }
-      
-      setCoupons(coupons.filter(c => !selectedIds.includes(c.id)));
+
+      setCoupons(coupons.filter((c) => !selectedIds.includes(c.id)));
     } catch {
-      setError('Error eliminando cupones');
+      setError("Error eliminando cupones");
     }
   };
 
   // Estadísticas
-  const activeCoupons = coupons.filter(c => c.estado === 'Activo').length;
+  const activeCoupons = coupons.filter((c) => c.estado === "Activo").length;
   const totalUses = coupons.reduce((sum, c) => sum + c.usosActuales, 0);
-  const percentageCoupons = coupons.filter(c => c.tipoRaw === 'PERCENTAGE').length;
+  const percentageCoupons = coupons.filter(
+    (c) => c.tipoRaw === "PERCENTAGE",
+  ).length;
 
   const getTypeIcon = (tipoRaw: string) => {
     switch (tipoRaw) {
-      case 'PERCENTAGE':
+      case "PERCENTAGE":
         return <Percent className="h-4 w-4" />;
-      case 'FIXED':
+      case "FIXED":
         return <Euro className="h-4 w-4" />;
-      case 'FREE_SHIPPING':
+      case "FREE_SHIPPING":
         return <Truck className="h-4 w-4" />;
       default:
         return <Ticket className="h-4 w-4" />;
@@ -162,107 +164,125 @@ export default function AdminCouponsPage() {
 
   const getStatusColor = (estado: string) => {
     switch (estado) {
-      case 'Activo':
-        return 'bg-green-100 text-green-800';
-      case 'Inactivo':
-        return 'bg-gray-100 text-gray-800';
-      case 'Expirado':
-        return 'bg-red-100 text-red-800';
-      case 'Pendiente':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'Agotado':
-        return 'bg-orange-100 text-orange-800';
+      case "Activo":
+        return "bg-green-100 text-green-800";
+      case "Inactivo":
+        return "bg-gray-100 text-gray-800";
+      case "Expirado":
+        return "bg-red-100 text-red-800";
+      case "Pendiente":
+        return "bg-yellow-100 text-yellow-800";
+      case "Agotado":
+        return "bg-orange-100 text-orange-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const columns: Column<Coupon>[] = [
     {
-      key: 'codigo',
-      header: 'Código',
+      key: "codigo",
+      header: "Código",
       sortable: true,
-      className: '',
+      className: "",
       render: (_, coupon) => (
         <div className="flex items-center gap-2">
           {getTypeIcon(coupon.tipoRaw)}
-          <span className="font-mono font-medium text-gray-900 text-sm">{coupon.codigo}</span>
+          <span className="font-mono font-medium text-gray-900 text-sm">
+            {coupon.codigo}
+          </span>
         </div>
       ),
     },
     {
-      key: 'tipoValor',
-      header: 'Tipo/Valor',
+      key: "tipoValor",
+      header: "Tipo/Valor",
       sortable: true,
-      className: '',
+      className: "",
       render: (_, coupon) => (
         <div className="flex flex-col">
           <span className="text-xs text-gray-500">{coupon.tipo}</span>
-          <span className="font-medium text-indigo-600 text-sm">{coupon.valor}</span>
+          <span className="font-medium text-indigo-600 text-sm">
+            {coupon.valor}
+          </span>
         </div>
       ),
     },
     {
-      key: 'minimoCompra',
-      header: 'Mín.',
+      key: "minimoCompra",
+      header: "Mín.",
       sortable: true,
-      className: 'hidden sm:table-cell',
-      render: (value) => (
-        value 
-          ? <span className="text-sm text-gray-600">{Number(value).toFixed(0)}€</span>
-          : <span className="text-xs text-gray-400">-</span>
-      ),
+      className: "hidden sm:table-cell",
+      render: (value) =>
+        value ? (
+          <span className="text-sm text-gray-600">
+            {Number(value).toFixed(0)}€
+          </span>
+        ) : (
+          <span className="text-xs text-gray-400">-</span>
+        ),
     },
     {
-      key: 'usos',
-      header: 'Usos',
+      key: "usos",
+      header: "Usos",
       sortable: true,
-      className: 'hidden md:table-cell',
+      className: "hidden md:table-cell",
       render: (_, coupon) => (
         <div className="flex flex-col">
           <span className="text-sm text-gray-900">
             {coupon.usosActuales}
-            {coupon.usosMaximos !== null && <span className="text-gray-400">/{coupon.usosMaximos}</span>}
+            {coupon.usosMaximos !== null && (
+              <span className="text-gray-400">/{coupon.usosMaximos}</span>
+            )}
           </span>
           {coupon.usosRestantes !== null && coupon.usosRestantes > 0 && (
-            <span className="text-[10px] text-gray-500">{coupon.usosRestantes} rest.</span>
+            <span className="text-[10px] text-gray-500">
+              {coupon.usosRestantes} rest.
+            </span>
           )}
         </div>
       ),
     },
     {
-      key: 'validoHasta',
-      header: 'Expira',
+      key: "validoHasta",
+      header: "Expira",
       sortable: true,
-      className: 'hidden lg:table-cell',
+      className: "hidden lg:table-cell",
       render: (value) => {
         const date = new Date(value as string);
         const now = new Date();
         const isExpired = date < now;
         return (
           <div className="flex items-center gap-1">
-            <span className={`text-xs ${isExpired ? 'text-red-600' : 'text-gray-600'}`}>
-              {date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' })}
+            <span
+              className={`text-xs ${isExpired ? "text-red-600" : "text-gray-600"}`}
+            >
+              {date.toLocaleDateString("es-ES", {
+                day: "2-digit",
+                month: "2-digit",
+              })}
             </span>
           </div>
         );
       },
     },
     {
-      key: 'estado',
-      header: 'Estado',
+      key: "estado",
+      header: "Estado",
       sortable: true,
-      className: 'hidden xl:table-cell',
+      className: "hidden xl:table-cell",
       render: (value) => (
-        <span className={`px-2 py-0.5 inline-flex text-[10px] leading-4 font-semibold rounded-full ${getStatusColor(value as string)}`}>
+        <span
+          className={`px-2 py-0.5 inline-flex text-[10px] leading-4 font-semibold rounded-full ${getStatusColor(value as string)}`}
+        >
           {value as string}
         </span>
       ),
     },
     {
-      key: 'actions',
-      header: 'Acciones',
-      className: '',
+      key: "actions",
+      header: "Acciones",
+      className: "",
       render: (_, coupon) => (
         <div className="flex items-center gap-1">
           <Link
@@ -289,15 +309,15 @@ export default function AdminCouponsPage() {
 
   const bulkActions: BulkAction[] = [
     {
-      key: 'delete',
-      label: 'Eliminar seleccionados',
+      key: "delete",
+      label: "Eliminar seleccionados",
       icon: <Trash2 className="h-4 w-4" />,
-      variant: 'danger',
+      variant: "danger",
       onClick: handleBulkDelete,
     },
   ];
 
-  if (status === 'loading' || loading) {
+  if (status === "loading" || loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -316,7 +336,9 @@ export default function AdminCouponsPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Ticket className="h-8 w-8 text-indigo-600" />
-              <h1 className="text-2xl font-bold text-gray-900">Gestión de Cupones</h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Gestión de Cupones
+              </h1>
             </div>
             <div className="flex items-center gap-4">
               <Link
@@ -342,7 +364,10 @@ export default function AdminCouponsPage() {
         <nav className="flex mb-6" aria-label="Breadcrumb">
           <ol className="flex items-center space-x-2">
             <li>
-              <Link href="/admin/dashboard" className="text-gray-500 hover:text-gray-700">
+              <Link
+                href="/admin/dashboard"
+                className="text-gray-500 hover:text-gray-700"
+              >
                 Panel
               </Link>
             </li>
@@ -370,7 +395,9 @@ export default function AdminCouponsPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-500">Total Cupones</p>
-                <p className="text-2xl font-bold text-gray-900">{coupons.length}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {coupons.length}
+                </p>
               </div>
             </div>
           </div>
@@ -381,7 +408,9 @@ export default function AdminCouponsPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-500">Activos</p>
-                <p className="text-2xl font-bold text-green-600">{activeCoupons}</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {activeCoupons}
+                </p>
               </div>
             </div>
           </div>
@@ -392,7 +421,9 @@ export default function AdminCouponsPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-500">De Porcentaje</p>
-                <p className="text-2xl font-bold text-blue-600">{percentageCoupons}</p>
+                <p className="text-2xl font-bold text-blue-600">
+                  {percentageCoupons}
+                </p>
               </div>
             </div>
           </div>
@@ -403,7 +434,9 @@ export default function AdminCouponsPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-500">Usos Totales</p>
-                <p className="text-2xl font-bold text-purple-600">{totalUses}</p>
+                <p className="text-2xl font-bold text-purple-600">
+                  {totalUses}
+                </p>
               </div>
             </div>
           </div>
@@ -415,7 +448,7 @@ export default function AdminCouponsPage() {
           columns={columns}
           rowKey="id"
           searchable={true}
-          searchKeys={['codigo', 'tipo']}
+          searchKeys={["codigo", "tipo"]}
           searchPlaceholder="Buscar cupones..."
           pagination={true}
           pageSizeOptions={[10, 25, 50, 100]}

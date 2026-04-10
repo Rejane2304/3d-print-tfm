@@ -3,10 +3,10 @@
  * Para acciones destructivas (eliminar, anular, etc.)
  * Diseño consistente con Tailwind CSS y animaciones suaves
  */
-'use client';
+"use client";
 
-import { useEffect, useCallback } from 'react';
-import { AlertTriangle, X, Trash2, AlertCircle } from 'lucide-react';
+import { useEffect, useCallback } from "react";
+import { AlertTriangle, X, Trash2, AlertCircle } from "lucide-react";
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -16,7 +16,7 @@ interface ConfirmModalProps {
   description: string;
   confirmText?: string;
   cancelText?: string;
-  type?: 'danger' | 'warning' | 'info';
+  type?: "danger" | "warning" | "info";
   isLoading?: boolean;
   confirmDisabled?: boolean;
 }
@@ -27,31 +27,31 @@ export function ConfirmModal({
   onConfirm,
   title,
   description,
-  confirmText = 'Confirmar',
-  cancelText = 'Cancelar',
-  type = 'danger',
+  confirmText = "Confirmar",
+  cancelText = "Cancelar",
+  type = "danger",
   isLoading = false,
   confirmDisabled = false,
 }: ConfirmModalProps) {
   // Cerrar con ESC
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         onClose();
       }
     },
-    [onClose]
+    [onClose],
   );
 
   useEffect(() => {
     if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'hidden';
+      document.addEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "hidden";
     }
 
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'unset';
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "unset";
     };
   }, [isOpen, handleKeyDown]);
 
@@ -60,24 +60,24 @@ export function ConfirmModal({
   const typeConfig = {
     danger: {
       icon: Trash2,
-      iconBg: 'bg-red-100',
-      iconColor: 'text-red-600',
-      buttonBg: 'bg-red-600 hover:bg-red-700',
-      buttonFocus: 'focus:ring-red-500',
+      iconBg: "bg-red-100",
+      iconColor: "text-red-600",
+      buttonBg: "bg-red-600 hover:bg-red-700",
+      buttonFocus: "focus:ring-red-500",
     },
     warning: {
       icon: AlertTriangle,
-      iconBg: 'bg-yellow-100',
-      iconColor: 'text-yellow-600',
-      buttonBg: 'bg-yellow-600 hover:bg-yellow-700',
-      buttonFocus: 'focus:ring-yellow-500',
+      iconBg: "bg-yellow-100",
+      iconColor: "text-yellow-600",
+      buttonBg: "bg-yellow-600 hover:bg-yellow-700",
+      buttonFocus: "focus:ring-yellow-500",
     },
     info: {
       icon: AlertCircle,
-      iconBg: 'bg-blue-100',
-      iconColor: 'text-blue-600',
-      buttonBg: 'bg-blue-600 hover:bg-blue-700',
-      buttonFocus: 'focus:ring-blue-500',
+      iconBg: "bg-blue-100",
+      iconColor: "text-blue-600",
+      buttonBg: "bg-blue-600 hover:bg-blue-700",
+      buttonFocus: "focus:ring-blue-500",
     },
   };
 
@@ -119,7 +119,10 @@ export function ConfirmModal({
               <div
                 className={`mx-auto sm:mx-0 flex-shrink-0 h-12 w-12 sm:h-14 sm:w-14 flex items-center justify-center rounded-full ${config.iconBg}`}
               >
-                <Icon className={`h-6 w-6 sm:h-7 sm:w-7 ${config.iconColor}`} aria-hidden="true" />
+                <Icon
+                  className={`h-6 w-6 sm:h-7 sm:w-7 ${config.iconColor}`}
+                  aria-hidden="true"
+                />
               </div>
 
               {/* Text */}
@@ -139,7 +142,7 @@ export function ConfirmModal({
             </div>
 
             {/* Actions */}
-            <div className="mt-6 sm:mt-8 flex flex-col-reverse sm:flex-row sm:flex-row-reverse sm:gap-3 gap-2">
+            <div className="mt-6 sm:mt-8 flex flex-col-reverse sm:flex-row-reverse sm:gap-3 gap-2">
               <button
                 type="button"
                 onClick={onConfirm}

@@ -3,15 +3,15 @@
  * GET /api/categories
  * Returns all active categories for dropdowns
  */
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
-import { translateCategoryName } from '@/lib/i18n';
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/db/prisma";
+import { translateCategoryName } from "@/lib/i18n";
 
 export async function GET() {
   try {
     const categories = await prisma.category.findMany({
       where: { isActive: true },
-      orderBy: { displayOrder: 'asc' },
+      orderBy: { displayOrder: "asc" },
       select: {
         id: true,
         name: true,
@@ -33,10 +33,10 @@ export async function GET() {
       categories: categoriesTranslated,
     });
   } catch (error) {
-    console.error('Error fetching categories:', error);
+    console.error("Error fetching categories:", error);
     return NextResponse.json(
-      { success: false, error: 'Error al cargar categorías' },
-      { status: 500 }
+      { success: false, error: "Error al cargar categorías" },
+      { status: 500 },
     );
   }
 }

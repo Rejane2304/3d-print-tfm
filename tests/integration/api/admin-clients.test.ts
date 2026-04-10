@@ -9,6 +9,7 @@ import { GET as getClients } from '@/app/api/admin/clients/route';
 import { GET as getClientDetail } from '@/app/api/admin/clients/[id]/route';
 import { withTestTransaction } from '../../helpers';
 import { prisma } from '@/lib/db/prisma';
+import { randomUUID } from 'crypto';
 
 // Mock next-auth
 vi.mock('next-auth', () => ({
@@ -42,20 +43,24 @@ describe('Admin Clients API', () => {
         // Create admin user
         const admin = await prisma.user.create({
           data: {
+            id: randomUUID(),
             email: 'admin.test@example.com',
             name: 'Admin Test',
             password: 'password',
             role: 'ADMIN',
+            updatedAt: new Date(),
           },
         });
 
         // Create customer
         await prisma.user.create({
           data: {
+            id: randomUUID(),
             email: 'customer.test@example.com',
             name: 'Customer Test',
             password: 'password',
             role: 'CUSTOMER',
+            updatedAt: new Date(),
           },
         });
 
@@ -78,10 +83,12 @@ describe('Admin Clients API', () => {
         // Create customer user
         await prisma.user.create({
           data: {
+            id: randomUUID(),
             email: 'customer2.test@example.com',
             name: 'Customer2 Test',
             password: 'password',
             role: 'CUSTOMER',
+            updatedAt: new Date(),
           },
         });
 
@@ -114,19 +121,23 @@ describe('Admin Clients API', () => {
         // Create customers
         await prisma.user.create({
           data: {
+            id: randomUUID(),
             email: 'searchable@example.com',
             name: 'Searchable Customer',
             password: 'password',
             role: 'CUSTOMER',
+            updatedAt: new Date(),
           },
         });
 
         await prisma.user.create({
           data: {
+            id: randomUUID(),
             email: 'other@example.com',
             name: 'Other Customer',
             password: 'password',
             role: 'CUSTOMER',
+            updatedAt: new Date(),
           },
         });
 
@@ -149,10 +160,12 @@ describe('Admin Clients API', () => {
         for (let i = 1; i <= 10; i++) {
           await prisma.user.create({
             data: {
+              id: randomUUID(),
               email: `customer${i}@example.com`,
               name: `Customer ${i}`,
               password: 'password',
               role: 'CUSTOMER',
+              updatedAt: new Date(),
             },
           });
         }
@@ -178,19 +191,23 @@ describe('Admin Clients API', () => {
         // Create admin and customer
         const admin = await prisma.user.create({
           data: {
+            id: randomUUID(),
             email: 'admin2@example.com',
             name: 'Admin2',
             password: 'password',
             role: 'ADMIN',
+            updatedAt: new Date(),
           },
         });
 
         const customer = await prisma.user.create({
           data: {
+            id: randomUUID(),
             email: 'customer3@example.com',
             name: 'Customer3',
             password: 'password',
             role: 'CUSTOMER',
+            updatedAt: new Date(),
           },
         });
 
@@ -213,10 +230,12 @@ describe('Admin Clients API', () => {
         // Create admin
         await prisma.user.create({
           data: {
+            id: randomUUID(),
             email: 'admin3@example.com',
             name: 'Admin3',
             password: 'password',
             role: 'ADMIN',
+            updatedAt: new Date(),
           },
         });
 

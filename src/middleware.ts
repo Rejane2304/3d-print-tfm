@@ -3,15 +3,15 @@
  * Protects routes based on user role
  * Automatic redirects according to implementation plan
  */
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-import { getToken } from 'next-auth/jwt';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
+import { checkRateLimit } from "@/lib/rate-limit";
 
-  // Role-protected routes
+// Role-protected routes
 // NOTE: /cart is NOT protected, works with localStorage for guests
-const PROTECTED_CLIENT_ROUTES = ['/checkout', '/account'];
-const AUTH_ROUTES = ['/login', '/auth'];
+const PROTECTED_CLIENT_ROUTES = ["/checkout", "/account"];
+const AUTH_ROUTES = ["/login", "/auth"];
 
 export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
@@ -20,8 +20,8 @@ export async function middleware(request: NextRequest) {
   // RATE LIMITING for Authentication Endpoints
   // ============================================
   // Apply rate limiting to API auth endpoints
-  if (pathname === '/api/auth/callback/credentials') {
-    const rateLimitResponse = checkRateLimit(request, 'login');
+  if (pathname === "/api/auth/callback/credentials") {
+    const rateLimitResponse = checkRateLimit(request, "login");
     if (rateLimitResponse) {
       return rateLimitResponse;
     }
@@ -32,43 +32,44 @@ export async function middleware(request: NextRequest) {
   // Handle /login and /register before auth checks
   // ============================================
   // Redirect /login to /auth
-  if (pathname === '/login') {
+  if (pathname === "/login") {
     return NextResponse.redirect(new URL(`/auth${search}`, request.url));
   }
 
   // Redirect /register to /auth with tab=register
-  if (pathname === '/register') {
-    const url = new URL('/auth', request.url);
+  if (pathname === "/register") {
+    const url = new URL("/auth", request.url);
     // Preserve existing query params
     if (search) {
       url.search = search;
     }
     // Add parameter to open register tab
-    url.searchParams.set('tab', 'register');
+    url.searchParams.set("tab", "register");
     return NextResponse.redirect(url);
   }
 
   // Get JWT token from session
   const token = await getToken({
     req: request,
-    secret: process.env.NEXTAUTH_SECRET
+    secret: process.env.NEXTAUTH_SECRET,
   });
-  
+
   const isAuthenticated = !!token;
   const userRole = token?.rol as string;
-  
+
   // ============================================
   // RULE 1: Admin cannot shop (but can access their profile)
   // ============================================
-  if (userRole === 'ADMIN') {
+  if (userRole === "ADMIN") {
     // First check if admin is accessing their profile/account pages
-    const isProfileRoute = pathname === '/account' ||
-                          pathname.startsWith('/account/profile') ||
-                          pathname.startsWith('/account/perfil') ||
-                          pathname.startsWith('/account/direcciones') ||
-                          pathname.startsWith('/account/addresses') ||
-                          pathname.startsWith('/account/orders') ||
-                          pathname.startsWith('/account/pedidos');
+    const isProfileRoute =
+      pathname === "/account" ||
+      pathname.startsWith("/account/profile") ||
+      pathname.startsWith("/account/perfil") ||
+      pathname.startsWith("/account/direcciones") ||
+      pathname.startsWith("/account/addresses") ||
+      pathname.startsWith("/account/orders") ||
+      pathname.startsWith("/account/pedidos");
 
     // Allow profile routes
     if (isProfileRoute) {
@@ -76,40 +77,40 @@ export async function middleware(request: NextRequest) {
     }
 
     // Check shop-only routes (cart, checkout)
-    const isShopOnlyRoute = pathname === '/cart' ||
-                           pathname.startsWith('/checkout');
+    const isShopOnlyRoute =
+      pathname === "/cart" || pathname.startsWith("/checkout");
 
     // Redirect admin away from shop-only routes
     if (isShopOnlyRoute) {
-      return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
     }
   }
 
   // ============================================
   // RULE 2: Admin routes only for ADMIN
   // ============================================
-  if (pathname.startsWith('/admin')) {
+  if (pathname.startsWith("/admin")) {
     if (!isAuthenticated) {
       // Not authenticated, redirect to auth
-      return NextResponse.redirect(new URL('/auth', request.url));
+      return NextResponse.redirect(new URL("/auth", request.url));
     }
 
-    if (userRole !== 'ADMIN') {
+    if (userRole !== "ADMIN") {
       // Authenticated but not admin, redirect to home
-      return NextResponse.redirect(new URL('/', request.url));
+      return NextResponse.redirect(new URL("/", request.url));
     }
 
     // Is admin, allow access
     return NextResponse.next();
   }
-  
+
   // ============================================
   // RULE 3: Client routes (protected)
   // NOTE: /cart is NOT protected, works with localStorage for guests
   // Only /checkout and /account require authentication
   // ============================================
   const isProtectedClientRoute = PROTECTED_CLIENT_ROUTES.some((route: string) =>
-    pathname.startsWith(route)
+    pathname.startsWith(route),
   );
 
   if (isProtectedClientRoute) {
@@ -117,41 +118,41 @@ export async function middleware(request: NextRequest) {
       // Not authenticated, redirect to auth with callback
       const callbackUrl = encodeURIComponent(pathname);
       return NextResponse.redirect(
-        new URL(`/auth?callbackUrl=${callbackUrl}`, request.url)
+        new URL(`/auth?callbackUrl=${callbackUrl}`, request.url),
       );
     }
 
-    if (userRole === 'ADMIN') {
+    if (userRole === "ADMIN") {
       // Admin tries to access client route
-      return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
     }
 
     // Is authenticated client, allow access
     return NextResponse.next();
   }
-  
+
   // ============================================
   // RULE 4: Login/Register Redirects
   // Authenticated users should not see these pages
   // Unless they have a callbackUrl (e.g., after adding to cart)
   // ============================================
-  const isAuthRoute = AUTH_ROUTES.some(route => pathname.startsWith(route));
+  const isAuthRoute = AUTH_ROUTES.some((route) => pathname.startsWith(route));
 
   if (isAuthRoute && isAuthenticated) {
     // Check if there's a callbackUrl
-    const callbackUrl = request.nextUrl.searchParams.get('callbackUrl');
+    const callbackUrl = request.nextUrl.searchParams.get("callbackUrl");
 
     if (callbackUrl) {
       // If there's a callbackUrl, redirect there instead
       return NextResponse.redirect(new URL(callbackUrl, request.url));
     }
 
-    if (userRole === 'ADMIN') {
+    if (userRole === "ADMIN") {
       // Admin authenticated on login → redirect to admin
-      return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
     } else {
       // Client authenticated on login → redirect to home
-      return NextResponse.redirect(new URL('/', request.url));
+      return NextResponse.redirect(new URL("/", request.url));
     }
   }
 
@@ -171,17 +172,17 @@ export const config = {
      * - public folder
      * - api routes (handled separately)
      */
-    '/((?!_next/static|_next/image|favicon.ico|public|api).*)',
+    "/((?!_next/static|_next/image|favicon.ico|public|api).*)",
 
     // Specific routes that need protection
-    '/admin/:path*',
+    "/admin/:path*",
     // '/cart' is not protected - works with localStorage
-    '/checkout/:path*',
-    '/account/:path*',
-    '/login',
-    '/register',
-    '/auth',
+    "/checkout/:path*",
+    "/account/:path*",
+    "/login",
+    "/register",
+    "/auth",
     // Include auth callback for rate limiting
-    '/api/auth/callback/credentials',
+    "/api/auth/callback/credentials",
   ],
 };

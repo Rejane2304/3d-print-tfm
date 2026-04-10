@@ -3,10 +3,18 @@
  * Selector de cupones con dropdown de cupones disponibles
  * Simplificado y sin errores confusos
  */
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Ticket, Loader2, CheckCircle2, XCircle, X, ChevronDown, Tag } from 'lucide-react';
+import { useState, useEffect } from "react";
+import {
+  Ticket,
+  Loader2,
+  CheckCircle2,
+  XCircle,
+  X,
+  ChevronDown,
+  Tag,
+} from "lucide-react";
 
 interface AvailableCoupon {
   id: string;
@@ -30,19 +38,20 @@ interface CouponSelectorProps {
   disabled?: boolean;
 }
 
-export function CouponSelector({ 
-  onApply, 
-  onRemove, 
-  appliedCoupon, 
+export function CouponSelector({
+  onApply,
+  onRemove,
+  appliedCoupon,
   subtotal,
-  disabled = false 
+  disabled = false,
 }: CouponSelectorProps) {
-  const [code, setCode] = useState('');
+  const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [availableCoupons, setAvailableCoupons] = useState<AvailableCoupon[]>([]);
+  const [availableCoupons, setAvailableCoupons] = useState<AvailableCoupon[]>(
+    [],
+  );
   const [showDropdown, setShowDropdown] = useState(false);
-  const [isLoadingCoupons, setIsLoadingCoupons] = useState(false);
 
   // Cargar cupones disponibles al montar el componente
   useEffect(() => {
@@ -50,23 +59,20 @@ export function CouponSelector({
   }, []);
 
   const loadAvailableCoupons = async () => {
-    setIsLoadingCoupons(true);
     try {
-      const response = await fetch('/api/coupons');
+      const response = await fetch("/api/coupons");
       const data = await response.json();
       if (data.success) {
         setAvailableCoupons(data.coupons || []);
       }
     } catch (err) {
-      console.error('Error loading coupons:', err);
-    } finally {
-      setIsLoadingCoupons(false);
+      console.error("Error loading coupons:", err);
     }
   };
 
   // Filtrar cupones válidos para el subtotal actual
-  const validCoupons = availableCoupons.filter(coupon => 
-    !coupon.minOrderAmount || subtotal >= coupon.minOrderAmount
+  const validCoupons = availableCoupons.filter(
+    (coupon) => !coupon.minOrderAmount || subtotal >= coupon.minOrderAmount,
   );
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -78,16 +84,19 @@ export function CouponSelector({
 
     try {
       await onApply(code.trim().toUpperCase());
-      setCode('');
+      setCode("");
       setShowDropdown(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error aplicando cupón');
+      setError(err instanceof Error ? err.message : "Error aplicando cupón");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSelectCoupon = async (couponCode: string, couponCodeRaw: string) => {
+  const handleSelectCoupon = async (
+    couponCode: string,
+    couponCodeRaw: string,
+  ) => {
     setLoading(true);
     setError(null);
     setShowDropdown(false);
@@ -96,14 +105,14 @@ export function CouponSelector({
       // Usar codeRaw (original en inglés) para aplicar el cupón
       await onApply(couponCodeRaw.toUpperCase());
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error aplicando cupón');
+      setError(err instanceof Error ? err.message : "Error aplicando cupón");
     } finally {
       setLoading(false);
     }
   };
 
   const handleRemove = () => {
-    setCode('');
+    setCode("");
     setError(null);
     onRemove();
   };
@@ -163,10 +172,14 @@ export function CouponSelector({
             <div className="flex items-center gap-2">
               <Tag className="h-5 w-5" />
               <span className="font-medium">
-                {validCoupons.length} cupón{validCoupons.length !== 1 ? 'es' : ''} disponible{validCoupons.length !== 1 ? 's' : ''}
+                {validCoupons.length} cupón
+                {validCoupons.length !== 1 ? "es" : ""} disponible
+                {validCoupons.length !== 1 ? "s" : ""}
               </span>
             </div>
-            <ChevronDown className={`h-5 w-5 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
+            <ChevronDown
+              className={`h-5 w-5 transition-transform ${showDropdown ? "rotate-180" : ""}`}
+            />
           </button>
 
           {showDropdown && (
@@ -175,14 +188,20 @@ export function CouponSelector({
                 <button
                   key={coupon.id}
                   type="button"
-                  onClick={() => handleSelectCoupon(coupon.code, coupon.codeRaw)}
+                  onClick={() =>
+                    handleSelectCoupon(coupon.code, coupon.codeRaw)
+                  }
                   disabled={loading}
                   className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-0 disabled:opacity-50"
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-semibold text-gray-900">{coupon.code}</p>
-                      <p className="text-sm text-gray-600">{coupon.description}</p>
+                      <p className="font-semibold text-gray-900">
+                        {coupon.code}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        {coupon.description}
+                      </p>
                     </div>
                     <Ticket className="h-5 w-5 text-indigo-600" />
                   </div>

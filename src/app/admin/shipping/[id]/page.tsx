@@ -2,12 +2,12 @@
  * Edit Shipping Zone Page - Admin
  * Form for editing an existing shipping zone
  */
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter, useParams } from 'next/navigation';
-import Link from 'next/link';
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter, useParams } from "next/navigation";
+import Link from "next/link";
 import {
   ArrowLeft,
   Truck,
@@ -20,51 +20,51 @@ import {
   Clock,
   Plus,
   X,
-} from 'lucide-react';
+} from "lucide-react";
 
 export default function EditarZonaEnvioPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const params = useParams();
   const zoneId = params?.id as string;
-  
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
   // Arrays para regiones y prefijos
-  const [regionInput, setRegionInput] = useState('');
-  const [postalCodeInput, setPostalCodeInput] = useState('');
+  const [regionInput, setRegionInput] = useState("");
+  const [postalCodeInput, setPostalCodeInput] = useState("");
 
   // Form state
   const [formData, setFormData] = useState({
-    name: '',
-    country: '',
+    name: "",
+    country: "",
     regions: [] as string[],
     postalCodePrefixes: [] as string[],
     baseCost: 0,
-    freeShippingThreshold: '',
+    freeShippingThreshold: "",
     estimatedDaysMin: 3,
     estimatedDaysMax: 5,
     isActive: true,
   });
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth?callbackUrl=/admin/shipping');
+    if (status === "unauthenticated") {
+      router.push("/auth?callbackUrl=/admin/shipping");
       return;
     }
 
     const user = session?.user as { rol?: string } | undefined;
-    if (status === 'authenticated') {
-      if (user?.rol !== 'ADMIN') {
-        router.push('/');
+    if (status === "authenticated") {
+      if (user?.rol !== "ADMIN") {
+        router.push("/");
         return;
       }
       loadZone();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, session, router, zoneId]);
 
   const loadZone = async () => {
@@ -74,7 +74,7 @@ export default function EditarZonaEnvioPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error cargando zona de envío');
+        throw new Error(data.error || "Error cargando zona de envío");
       }
 
       const zone = data.zone;
@@ -84,79 +84,97 @@ export default function EditarZonaEnvioPage() {
         regions: zone.regiones,
         postalCodePrefixes: zone.prefijosCP,
         baseCost: zone.costoBase,
-        freeShippingThreshold: zone.envioGratisDesde?.toString() || '',
+        freeShippingThreshold: zone.envioGratisDesde?.toString() || "",
         estimatedDaysMin: zone.diasEstimadosMin,
         estimatedDaysMax: zone.diasEstimadosMax,
         isActive: zone.activo,
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error cargando zona de envío');
+      setError(
+        err instanceof Error ? err.message : "Error cargando zona de envío",
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
     const { name, value, type } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : 
-              type === 'number' ? Number(value) : value,
+      [name]:
+        type === "checkbox"
+          ? (e.target as HTMLInputElement).checked
+          : type === "number"
+            ? Number(value)
+            : value,
     }));
   };
 
   const addRegion = () => {
     if (regionInput.trim() && !formData.regions.includes(regionInput.trim())) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         regions: [...prev.regions, regionInput.trim()],
       }));
-      setRegionInput('');
+      setRegionInput("");
     }
   };
 
   const removeRegion = (index: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       regions: prev.regions.filter((_, i) => i !== index),
     }));
   };
 
   const addPostalCode = () => {
-    if (postalCodeInput.trim() && !formData.postalCodePrefixes.includes(postalCodeInput.trim())) {
-      setFormData(prev => ({
+    if (
+      postalCodeInput.trim() &&
+      !formData.postalCodePrefixes.includes(postalCodeInput.trim())
+    ) {
+      setFormData((prev) => ({
         ...prev,
-        postalCodePrefixes: [...prev.postalCodePrefixes, postalCodeInput.trim()],
+        postalCodePrefixes: [
+          ...prev.postalCodePrefixes,
+          postalCodeInput.trim(),
+        ],
       }));
-      setPostalCodeInput('');
+      setPostalCodeInput("");
     }
   };
 
   const removePostalCode = (index: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       postalCodePrefixes: prev.postalCodePrefixes.filter((_, i) => i !== index),
     }));
   };
 
   const validateForm = () => {
-    if (!formData.name.trim()) return 'El nombre de la zona es obligatorio';
-    if (!formData.country.trim()) return 'El país es obligatorio';
-    if (formData.regions.length === 0) return 'Debe agregar al menos una región';
-    if (formData.postalCodePrefixes.length === 0) return 'Debe agregar al menos un prefijo de código postal';
-    if (formData.baseCost < 0) return 'El costo base no puede ser negativo';
-    if (formData.estimatedDaysMin < 1) return 'Los días estimados mínimos deben ser al menos 1';
-    if (formData.estimatedDaysMax < 1) return 'Los días estimados máximos deben ser al menos 1';
+    if (!formData.name.trim()) return "El nombre de la zona es obligatorio";
+    if (!formData.country.trim()) return "El país es obligatorio";
+    if (formData.regions.length === 0)
+      return "Debe agregar al menos una región";
+    if (formData.postalCodePrefixes.length === 0)
+      return "Debe agregar al menos un prefijo de código postal";
+    if (formData.baseCost < 0) return "El costo base no puede ser negativo";
+    if (formData.estimatedDaysMin < 1)
+      return "Los días estimados mínimos deben ser al menos 1";
+    if (formData.estimatedDaysMax < 1)
+      return "Los días estimados máximos deben ser al menos 1";
     if (formData.estimatedDaysMin > formData.estimatedDaysMax) {
-      return 'Los días estimados mínimos no pueden ser mayores que los máximos';
+      return "Los días estimados mínimos no pueden ser mayores que los máximos";
     }
-    
+
     return null;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const validationError = validateForm();
     if (validationError) {
       setError(validationError);
@@ -168,15 +186,17 @@ export default function EditarZonaEnvioPage() {
 
     try {
       const response = await fetch(`/api/admin/shipping/${zoneId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: formData.name,
           country: formData.country,
           regions: formData.regions,
           postalCodePrefixes: formData.postalCodePrefixes,
           baseCost: formData.baseCost,
-          freeShippingThreshold: formData.freeShippingThreshold ? Number(formData.freeShippingThreshold) : null,
+          freeShippingThreshold: formData.freeShippingThreshold
+            ? Number(formData.freeShippingThreshold)
+            : null,
           estimatedDaysMin: formData.estimatedDaysMin,
           estimatedDaysMax: formData.estimatedDaysMax,
           isActive: formData.isActive,
@@ -186,21 +206,25 @@ export default function EditarZonaEnvioPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error al actualizar zona de envío');
+        throw new Error(data.error || "Error al actualizar zona de envío");
       }
 
       setSuccess(true);
       setTimeout(() => {
-        router.push('/admin/shipping');
+        router.push("/admin/shipping");
       }, 1500);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al actualizar zona de envío');
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Error al actualizar zona de envío",
+      );
     } finally {
       setSaving(false);
     }
   };
 
-  if (status === 'loading' || loading) {
+  if (status === "loading" || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -225,17 +249,25 @@ export default function EditarZonaEnvioPage() {
                 <ArrowLeft className="h-6 w-6" />
               </Link>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Editar Zona de Envío</h1>
+                <h1 className="text-3xl font-bold text-gray-900">
+                  Editar Zona de Envío
+                </h1>
                 <nav className="flex mt-1" aria-label="Breadcrumb">
                   <ol className="flex items-center space-x-2 text-sm">
                     <li>
-                      <Link href="/admin/dashboard" className="text-gray-500 hover:text-gray-700">
+                      <Link
+                        href="/admin/dashboard"
+                        className="text-gray-500 hover:text-gray-700"
+                      >
                         Panel
                       </Link>
                     </li>
                     <li className="text-gray-400">/</li>
                     <li>
-                      <Link href="/admin/shipping" className="text-gray-500 hover:text-gray-700">
+                      <Link
+                        href="/admin/shipping"
+                        className="text-gray-500 hover:text-gray-700"
+                      >
                         Envío
                       </Link>
                     </li>
@@ -268,7 +300,9 @@ export default function EditarZonaEnvioPage() {
         {success && (
           <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
             <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
-            <p className="text-green-700">Zona de envío actualizada exitosamente. Redirigiendo...</p>
+            <p className="text-green-700">
+              Zona de envío actualizada exitosamente. Redirigiendo...
+            </p>
           </div>
         )}
 
@@ -283,7 +317,10 @@ export default function EditarZonaEnvioPage() {
 
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="name"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Nombre de la Zona *
                   </label>
                   <input
@@ -299,7 +336,10 @@ export default function EditarZonaEnvioPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="country"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     País *
                   </label>
                   <input
@@ -329,7 +369,9 @@ export default function EditarZonaEnvioPage() {
                     type="text"
                     value={regionInput}
                     onChange={(e) => setRegionInput(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addRegion())}
+                    onKeyPress={(e) =>
+                      e.key === "Enter" && (e.preventDefault(), addRegion())
+                    }
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     placeholder="Ej: Madrid"
                   />
@@ -378,7 +420,9 @@ export default function EditarZonaEnvioPage() {
                     type="text"
                     value={postalCodeInput}
                     onChange={(e) => setPostalCodeInput(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addPostalCode())}
+                    onKeyPress={(e) =>
+                      e.key === "Enter" && (e.preventDefault(), addPostalCode())
+                    }
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     placeholder="Ej: 28"
                   />
@@ -391,10 +435,11 @@ export default function EditarZonaEnvioPage() {
                     Agregar
                   </button>
                 </div>
-                
+
                 <p className="text-xs text-gray-500">
-                  Los prefijos se usan para determinar a qué zona pertenece un código postal. 
-                  Ejemplo: &quot;28&quot; cubre todos los códigos que empiezan con 28 (28001, 28002, etc.)
+                  Los prefijos se usan para determinar a qué zona pertenece un
+                  código postal. Ejemplo: &quot;28&quot; cubre todos los códigos
+                  que empiezan con 28 (28001, 28002, etc.)
                 </p>
 
                 {formData.postalCodePrefixes.length > 0 && (
@@ -428,7 +473,10 @@ export default function EditarZonaEnvioPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="baseCost" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="baseCost"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Costo Base (€) *
                   </label>
                   <input
@@ -445,7 +493,10 @@ export default function EditarZonaEnvioPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="freeShippingThreshold" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="freeShippingThreshold"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Envío Gratis Desde (€)
                   </label>
                   <input
@@ -475,7 +526,10 @@ export default function EditarZonaEnvioPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="estimatedDaysMin" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="estimatedDaysMin"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Días Mínimos *
                   </label>
                   <input
@@ -491,7 +545,10 @@ export default function EditarZonaEnvioPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="estimatedDaysMax" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="estimatedDaysMax"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Días Máximos *
                   </label>
                   <input
@@ -510,7 +567,9 @@ export default function EditarZonaEnvioPage() {
 
             {/* Configuración */}
             <div className="pt-6 border-t border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Configuración</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                Configuración
+              </h2>
 
               <div className="flex items-center gap-3">
                 <input
@@ -521,7 +580,10 @@ export default function EditarZonaEnvioPage() {
                   onChange={handleInputChange}
                   className="h-4 w-4 text-indigo-600 rounded focus:ring-indigo-500"
                 />
-                <label htmlFor="isActive" className="text-sm text-gray-700 cursor-pointer">
+                <label
+                  htmlFor="isActive"
+                  className="text-sm text-gray-700 cursor-pointer"
+                >
                   Zona activa (disponible para usar)
                 </label>
               </div>

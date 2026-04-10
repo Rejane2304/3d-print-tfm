@@ -3,11 +3,11 @@
  * Product card with premium style and smooth animations
  * Server Component - do not use event handlers
  */
-import Link from 'next/link';
-import Image from 'next/image';
-import { Decimal } from '@prisma/client/runtime/library';
-import { StarRating } from '@/components/ui/StarRating';
-import { formatPriceWithVat } from '@/lib/pricing';
+import Link from "next/link";
+import Image from "next/image";
+import { Decimal } from "@prisma/client/runtime/library";
+import { StarRating } from "@/components/ui/StarRating";
+import { formatPriceWithVat } from "@/lib/pricing";
 
 interface Product {
   id: string;
@@ -30,8 +30,12 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const mainImage = product.images?.find(img => img.isMain) || product.images?.[0];
-  const hasRating = product._avgRating !== undefined && product._reviewCount !== undefined && product._reviewCount > 0;
+  const mainImage =
+    product.images?.find((img) => img.isMain) || product.images?.[0];
+  const hasRating =
+    product._avgRating !== undefined &&
+    product._reviewCount !== undefined &&
+    product._reviewCount > 0;
 
   return (
     <Link
@@ -76,7 +80,9 @@ export default function ProductCard({ product }: ProductCardProps) {
         {hasRating && (
           <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full shadow-md flex items-center gap-1">
             <span className="text-yellow-500">★</span>
-            <span className="text-sm font-semibold text-gray-700">{product._avgRating?.toFixed(1)}</span>
+            <span className="text-sm font-semibold text-gray-700">
+              {product._avgRating?.toFixed(1)}
+            </span>
           </div>
         )}
       </div>
@@ -99,7 +105,9 @@ export default function ProductCard({ product }: ProductCardProps) {
         {hasRating && (
           <div className="flex items-center gap-2 mb-3">
             <StarRating rating={product._avgRating || 0} size="sm" />
-            <span className="text-xs text-gray-400">({product._reviewCount})</span>
+            <span className="text-xs text-gray-400">
+              ({product._reviewCount})
+            </span>
           </div>
         )}
 
@@ -120,14 +128,16 @@ export default function ProductCard({ product }: ProductCardProps) {
             </div>
 
             <div className="text-right">
-              <span className="text-xs text-gray-400 block mb-0.5">Disponibilidad</span>
+              <span className="text-xs text-gray-400 block mb-0.5">
+                Disponibilidad
+              </span>
               <span
                 className={`text-sm font-medium ${
-                  product.stock > 0 ? 'text-green-600' : 'text-red-500'
+                  product.stock > 0 ? "text-green-600" : "text-red-500"
                 }`}
                 data-testid="product-stock"
               >
-                {product.stock > 0 ? `${product.stock} unid.` : 'Sin stock'}
+                {product.stock > 0 ? `${product.stock} unid.` : "Sin stock"}
               </span>
             </div>
           </div>

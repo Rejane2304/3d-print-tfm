@@ -15,6 +15,7 @@ import { GET as getProductDetail } from '@/app/api/products/[slug]/route';
 import { GET as getAdminProducts, POST as createProduct } from '@/app/api/admin/products/route';
 import { prisma } from '@/lib/db/prisma';
 import bcrypt from 'bcrypt';
+import { randomUUID } from 'crypto';
 import { Material } from '@prisma/client';
 
 describe('Products API', () => {
@@ -44,9 +45,11 @@ describe('Products API', () => {
     // Create test category
     testCategory = await prisma.category.create({
       data: {
+        id: randomUUID(),
         name: 'Test Category',
         slug: `test-category-${Date.now()}`,
         isActive: true,
+        updatedAt: new Date(),
       },
     });
 
@@ -56,6 +59,7 @@ describe('Products API', () => {
     
     const product1 = await prisma.product.create({
       data: {
+        id: randomUUID(),
         name: 'Test Product PLA',
         slug: `test-product-${timestamp}-1`,
         description: 'A test product made with PLA',
@@ -64,11 +68,13 @@ describe('Products API', () => {
         categoryId: testCategory.id,
         material: 'PLA',
         isActive: true,
+        updatedAt: new Date(),
       },
     });
     
     const product2 = await prisma.product.create({
       data: {
+        id: randomUUID(),
         name: 'Test Product PETG',
         slug: `test-product-${timestamp}-2`,
         description: 'A test product made with PETG',
@@ -77,11 +83,13 @@ describe('Products API', () => {
         categoryId: testCategory.id,
         material: 'PETG',
         isActive: true,
+        updatedAt: new Date(),
       },
     });
 
     const inactiveProduct = await prisma.product.create({
       data: {
+        id: randomUUID(),
         name: 'Inactive Test Product',
         slug: `test-product-${timestamp}-3`,
         description: 'An inactive test product',
@@ -90,6 +98,7 @@ describe('Products API', () => {
         categoryId: testCategory.id,
         material: 'PLA',
         isActive: false,
+        updatedAt: new Date(),
       },
     });
 
@@ -264,12 +273,14 @@ describe('Products API', () => {
       // Add an image to the product
       await prisma.productImage.create({
         data: {
-          productId: activeProduct.id,
+          id: randomUUID(),
+        productId: activeProduct.id,
           url: 'https://example.com/image.jpg',
           filename: 'image.jpg',
           altText: 'Test Image',
           isMain: true,
           displayOrder: 0,
+          uploadedAt: new Date(),
         },
       });
 
@@ -304,11 +315,13 @@ describe('Products API', () => {
       const hashedPassword = await bcrypt.hash('AdminPass123!', 10);
       adminUser = await prisma.user.create({
         data: {
-          email: `admin-${Date.now()}@test.com`,
+          id: randomUUID(),
+        email: `admin-${Date.now()}@test.com`,
           password: hashedPassword,
           name: 'Admin User',
           role: 'ADMIN',
           isActive: true,
+          updatedAt: new Date(),
         },
       });
     });
@@ -343,11 +356,13 @@ describe('Products API', () => {
       const hashedPassword = await bcrypt.hash('CustomerPass123!', 10);
       const customer = await prisma.user.create({
         data: {
-          email: `customer-${Date.now()}@test.com`,
+          id: randomUUID(),
+        email: `customer-${Date.now()}@test.com`,
           password: hashedPassword,
           name: 'Customer User',
           role: 'CUSTOMER',
           isActive: true,
+          updatedAt: new Date(),
         },
       });
 

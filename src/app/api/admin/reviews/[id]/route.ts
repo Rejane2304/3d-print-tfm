@@ -1,14 +1,14 @@
 /**
  * API de Reseña Individual Admin
  * Actualizar o eliminar una reseña específica
- * 
+ *
  * Requiere: Rol ADMIN
  */
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
-import { z } from 'zod';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/auth-options";
+import { z } from "zod";
 
 // Schema de validación
 const reviewUpdateSchema = z.object({
@@ -19,11 +19,11 @@ const reviewUpdateSchema = z.object({
 // PATCH - Actualizar reseña
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
-    
+
     let session;
     try {
       session = await getServerSession(authOptions);
@@ -32,8 +32,8 @@ export async function PATCH(
     }
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 }
+        { success: false, error: "No autenticado" },
+        { status: 401 },
       );
     }
 
@@ -41,10 +41,10 @@ export async function PATCH(
       where: { email: session.user.email },
     });
 
-    if (!user || user.role !== 'ADMIN') {
+    if (!user || user.role !== "ADMIN") {
       return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 401 }
+        { success: false, error: "No autorizado" },
+        { status: 401 },
       );
     }
 
@@ -55,8 +55,8 @@ export async function PATCH(
 
     if (!existing) {
       return NextResponse.json(
-        { success: false, error: 'Reseña no encontrada' },
-        { status: 404 }
+        { success: false, error: "Reseña no encontrada" },
+        { status: 404 },
       );
     }
 
@@ -108,13 +108,13 @@ export async function PATCH(
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { success: false, error: error.errors[0].message },
-        { status: 400 }
+        { status: 400 },
       );
     }
-    console.error('Error actualizando reseña:', error);
+    console.error("Error actualizando reseña:", error);
     return NextResponse.json(
-      { success: false, error: 'Error interno' },
-      { status: 500 }
+      { success: false, error: "Error interno" },
+      { status: 500 },
     );
   }
 }
@@ -122,11 +122,11 @@ export async function PATCH(
 // DELETE - Eliminar reseña
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
-    
+
     let session;
     try {
       session = await getServerSession(authOptions);
@@ -135,8 +135,8 @@ export async function DELETE(
     }
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 }
+        { success: false, error: "No autenticado" },
+        { status: 401 },
       );
     }
 
@@ -144,10 +144,10 @@ export async function DELETE(
       where: { email: session.user.email },
     });
 
-    if (!user || user.role !== 'ADMIN') {
+    if (!user || user.role !== "ADMIN") {
       return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 401 }
+        { success: false, error: "No autorizado" },
+        { status: 401 },
       );
     }
 
@@ -158,8 +158,8 @@ export async function DELETE(
 
     if (!existing) {
       return NextResponse.json(
-        { success: false, error: 'Reseña no encontrada' },
-        { status: 404 }
+        { success: false, error: "Reseña no encontrada" },
+        { status: 404 },
       );
     }
 
@@ -168,15 +168,15 @@ export async function DELETE(
       where: { id },
     });
 
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Reseña eliminada correctamente' 
+    return NextResponse.json({
+      success: true,
+      message: "Reseña eliminada correctamente",
     });
   } catch (error) {
-    console.error('Error eliminando reseña:', error);
+    console.error("Error eliminando reseña:", error);
     return NextResponse.json(
-      { success: false, error: 'Error interno' },
-      { status: 500 }
+      { success: false, error: "Error interno" },
+      { status: 500 },
     );
   }
 }

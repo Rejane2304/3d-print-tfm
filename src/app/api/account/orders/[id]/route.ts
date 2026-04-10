@@ -3,44 +3,44 @@
  * GET /api/account/orders/[id]
  * Devuelve el detalle completo de un pedido específico del usuario
  */
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
-import { prisma } from '@/lib/db/prisma';
-import { translateOrderStatus, translatePaymentStatus, translatePaymentMethod, translateErrorMessage, translateProductName } from '@/lib/i18n';
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/auth-options";
+import { prisma } from "@/lib/db/prisma";
+import {
+  translateOrderStatus,
+  translatePaymentStatus,
+  translatePaymentMethod,
+  translateErrorMessage,
+  translateProductName,
+} from "@/lib/i18n";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
 
     // Obtener usuario
     const usuario = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { id: true }
+      select: { id: true },
     });
 
     if (!usuario) {
-      return NextResponse.json(
-        { error: 'Usuario not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Usuario not found" }, { status: 404 });
     }
 
     // Obtener pedido específico del usuario
     const pedido = await prisma.order.findFirst({
       where: {
         id: params.id,
-        userId: usuario.id
+        userId: usuario.id,
       },
       include: {
         items: {
@@ -52,43 +52,44 @@ export async function GET(
                 images: {
                   where: { isMain: true },
                   take: 1,
-                  select: { url: true }
-                }
-              }
-            }
-          }
+                  select: { url: true },
+                },
+              },
+            },
+          },
         },
         invoice: {
           select: {
             id: true,
             invoiceNumber: true,
             isCancelled: true,
-            issuedAt: true
-          }
+            issuedAt: true,
+          },
         },
         payment: {
           select: {
             status: true,
             method: true,
-            createdAt: true
-          }
+            createdAt: true,
+          },
         },
         messages: {
-          orderBy: { createdAt: 'asc' },
+          orderBy: { createdAt: "asc" },
           select: {
             id: true,
             message: true,
             isFromCustomer: true,
-            createdAt: true
-          }
-        }
-      }
+            createdAt: true,
+          },
+        },
+
+      },
     });
 
     if (!pedido) {
       return NextResponse.json(
-        { error: translateErrorMessage('Pedido not found') },
-        { status: 404 }
+        { error: translateErrorMessage("Pedido not found") },
+        { status: 404 },
       );
     }
 
@@ -96,20 +97,26 @@ export async function GET(
     // Translate enums from English (DB) to Spanish (UI)
     // Get coupon info if discount exists
     let couponInfo = null;
-    if (pedido.couponId) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const orderWithCoupon = pedido as any;
+    if (orderWithCoupon.couponId) {
       const coupon = await prisma.coupon.findUnique({
-        where: { id: pedido.couponId },
-        select: { code: true, type: true }
+        where: { id: orderWithCoupon.couponId },
+        select: { code: true, type: true },
       });
       if (coupon) {
         couponInfo = {
           code: coupon.code,
-          type: coupon.type === 'PERCENTAGE' ? 'Porcentaje' : 
-                coupon.type === 'FIXED' ? 'Monto Fijo' : 'Envío Gratis'
+          type:
+            coupon.type === "PERCENTAGE"
+              ? "Porcentaje"
+              : coupon.type === "FIXED"
+                ? "Monto Fijo"
+                : "Envío Gratis",
         };
       }
     }
-    
+
     const pedidoTransformado = {
       id: pedido.id,
       numeroPedido: pedido.orderNumber,
@@ -129,7 +136,9 @@ export async function GET(
       ciudadEnvio: pedido.shippingCity,
       provinciaEnvio: pedido.shippingProvince,
       paisEnvio: pedido.shippingCountry,
-      metodoPago: pedido.paymentMethod ? translatePaymentMethod(pedido.paymentMethod) : null,
+      metodoPago: pedido.paymentMethod
+        ? translatePaymentMethod(pedido.paymentMethod)
+        : null,
       numeroSeguimiento: pedido.trackingNumber,
       transportista: pedido.carrier,
       notasCliente: pedido.customerNotes,
@@ -139,36 +148,42 @@ export async function GET(
         unitPrice: Number(item.price),
         subtotal: Number(item.subtotal),
         producto: {
-          nombre: item.product?.slug ? translateProductName(item.product.slug) : '',
-          slug: item.product?.slug || '',
+          nombre: item.product?.slug
+            ? translateProductName(item.product.slug)
+            : "",
+          slug: item.product?.slug || "",
           images: item.product?.images || [],
         },
       })),
-      factura: pedido.invoice ? {
-        id: pedido.invoice.id,
-        numeroFactura: pedido.invoice.invoiceNumber,
-        anulada: pedido.invoice.isCancelled,
-        emitidaEn: pedido.invoice.issuedAt,
-      } : undefined,
-      pago: pedido.payment ? {
-        estado: translatePaymentStatus(pedido.payment.status),
-        metodo: translatePaymentMethod(pedido.payment.method),
-        createdAt: pedido.payment.createdAt,
-      } : undefined,
+      factura: pedido.invoice
+        ? {
+            id: pedido.invoice.id,
+            numeroFactura: pedido.invoice.invoiceNumber,
+            anulada: pedido.invoice.isCancelled,
+            emitidaEn: pedido.invoice.issuedAt,
+          }
+        : undefined,
+      pago: pedido.payment
+        ? {
+            estado: translatePaymentStatus(pedido.payment.status),
+            metodo: translatePaymentMethod(pedido.payment.method),
+            createdAt: pedido.payment.createdAt,
+          }
+        : undefined,
       messages: pedido.messages.map((msg) => ({
         id: msg.id,
         mensaje: msg.message,
-        tipoRemitente: msg.isFromCustomer ? 'CLIENTE' : 'ADMIN',
+        tipoRemitente: msg.isFromCustomer ? "CLIENTE" : "ADMIN",
         createdAt: msg.createdAt,
       })),
     };
 
     return NextResponse.json({ pedido: pedidoTransformado });
   } catch (error) {
-    console.error('Error al obtener pedido:', error);
+    console.error("Error al obtener pedido:", error);
     return NextResponse.json(
-      { error: 'Error al obtener pedido' },
-      { status: 500 }
+      { error: "Error al obtener pedido" },
+      { status: 500 },
     );
   }
 }

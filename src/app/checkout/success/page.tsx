@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useEffect, useState, useCallback, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import { CheckCircle, Package, ArrowRight, Loader2 } from 'lucide-react';
+import { useEffect, useState, useCallback, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { CheckCircle, Package, ArrowRight, Loader2 } from "lucide-react";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 interface OrderData {
   orderNumber?: string;
@@ -17,10 +17,10 @@ interface OrderData {
 
 function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
-  const sessionId = searchParams.get('session_id');
-  const orderId = searchParams.get('orderId'); // Para verificación directa por ID
-  const paypalToken = searchParams.get('token'); // PayPal devuelve 'token'
-  const payerId = searchParams.get('PayerID'); // PayPal devuelve 'PayerID'
+  const sessionId = searchParams.get("session_id");
+  const orderId = searchParams.get("orderId"); // Para verificación directa por ID
+  const paypalToken = searchParams.get("token"); // PayPal devuelve 'token'
+  const payerId = searchParams.get("PayerID"); // PayPal devuelve 'PayerID'
   const [pedido, setPedido] = useState<OrderData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,9 +32,9 @@ function CheckoutSuccessContent() {
         const data = await response.json();
         return data.order || data.pedido;
       }
-      throw new Error('Error verificando pago de Stripe');
+      throw new Error("Error verificando pago de Stripe");
     } catch (err) {
-      console.error('Error verificando pago Stripe:', err);
+      console.error("Error verificando pago Stripe:", err);
       throw err;
     }
   }, []);
@@ -46,34 +46,39 @@ function CheckoutSuccessContent() {
         const data = await response.json();
         return data.pedido;
       }
-      throw new Error('Error verificando pedido');
+      throw new Error("Error verificando pedido");
     } catch (err) {
-      console.error('Error verificando pedido por ID:', err);
+      console.error("Error verificando pedido por ID:", err);
       throw err;
     }
   }, []);
 
-  const verificarPagoPayPal = useCallback(async (paypalOrderId: string, payerId: string) => {
-    try {
-      // Usar la misma API que Stripe - verifica y captura en un solo paso
-      const response = await fetch(`/api/paypal/verify?token=${paypalOrderId}&PayerID=${payerId}`);
-      if (response.ok) {
-        const data = await response.json();
-        return data.order;
+  const verificarPagoPayPal = useCallback(
+    async (paypalOrderId: string, payerId: string) => {
+      try {
+        // Usar la misma API que Stripe - verifica y captura en un solo paso
+        const response = await fetch(
+          `/api/paypal/verify?token=${paypalOrderId}&PayerID=${payerId}`,
+        );
+        if (response.ok) {
+          const data = await response.json();
+          return data.order;
+        }
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Error verificando pago de PayPal");
+      } catch (err) {
+        console.error("Error verificando pago PayPal:", err);
+        throw err;
       }
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Error verificando pago de PayPal');
-    } catch (err) {
-      console.error('Error verificando pago PayPal:', err);
-      throw err;
-    }
-  }, []);
+    },
+    [],
+  );
 
   const clearCart = useCallback(() => {
-    localStorage.removeItem('cart');
-    window.dispatchEvent(new Event('cartUpdated'));
+    localStorage.removeItem("cart");
+    window.dispatchEvent(new Event("cartUpdated"));
     setTimeout(() => {
-      window.dispatchEvent(new Event('cartUpdated'));
+      window.dispatchEvent(new Event("cartUpdated"));
     }, 100);
   }, []);
 
@@ -90,13 +95,13 @@ function CheckoutSuccessContent() {
           orderData = await verificarPagoStripe(sessionId);
         } else if (paypalToken && payerId) {
           // PayPal payment - usar API similar a Stripe
-          console.log('PayPal return detected:', { paypalToken, payerId });
+          console.log("PayPal return detected:", { paypalToken, payerId });
           orderData = await verificarPagoPayPal(paypalToken, payerId);
         } else if (orderId) {
           // Verificación por ID de pedido
           orderData = await verificarPedidoPorId(orderId);
         } else {
-          setError('No se encontró información del pago');
+          setError("No se encontró información del pago");
           setLoading(false);
           return;
         }
@@ -105,16 +110,27 @@ function CheckoutSuccessContent() {
           setPedido(orderData);
           clearCart();
         }
-      } catch (err: any) {
-        console.error('Error en verificación de pago:', err);
-        setError('Tu pedido ha sido registrado. Verifica el estado en "Mis Pedidos".');
+      } catch (err: unknown) {
+        console.error("Error en verificación de pago:", err);
+        setError(
+          'Tu pedido ha sido registrado. Verifica el estado en "Mis Pedidos".',
+        );
       } finally {
         setLoading(false);
       }
     };
 
     verifyPayment();
-  }, [sessionId, orderId, paypalToken, payerId, verificarPagoStripe, verificarPedidoPorId, verificarPagoPayPal, clearCart]);
+  }, [
+    sessionId,
+    orderId,
+    paypalToken,
+    payerId,
+    verificarPagoStripe,
+    verificarPedidoPorId,
+    verificarPagoPayPal,
+    clearCart,
+  ]);
 
   if (loading) {
     return (
@@ -122,7 +138,9 @@ function CheckoutSuccessContent() {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 text-center">
             <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin text-indigo-600 mx-auto mb-4" />
-            <p className="text-gray-600 text-sm sm:text-base">Verificando tu pago...</p>
+            <p className="text-gray-600 text-sm sm:text-base">
+              Verificando tu pago...
+            </p>
           </div>
         </div>
       </div>
@@ -142,7 +160,9 @@ function CheckoutSuccessContent() {
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
               Error en la verificación
             </h1>
-            <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8">{error}</p>
+            <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8">
+              {error}
+            </p>
             <Link
               href="/account/orders"
               className="inline-flex items-center justify-center gap-2 bg-indigo-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-indigo-700 transition-colors min-h-[44px]"
@@ -172,7 +192,8 @@ function CheckoutSuccessContent() {
           </h1>
 
           <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8">
-            Tu pedido ha sido procesado correctamente. Te enviaremos un email con los detalles.
+            Tu pedido ha sido procesado correctamente. Te enviaremos un email
+            con los detalles.
           </p>
 
           {pedido && (
@@ -185,11 +206,15 @@ function CheckoutSuccessContent() {
               <div className="space-y-2 text-sm sm:text-base">
                 <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
                   <span className="text-gray-600">Número de pedido:</span>
-                  <span className="font-medium">{pedido.orderNumber || pedido.numeroPedido}</span>
+                  <span className="font-medium">
+                    {pedido.orderNumber || pedido.numeroPedido}
+                  </span>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
                   <span className="text-gray-600">Total:</span>
-                  <span className="font-medium">{Number(pedido.total).toFixed(2)} €</span>
+                  <span className="font-medium">
+                    {Number(pedido.total).toFixed(2)} €
+                  </span>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
                   <span className="text-gray-600">Estado:</span>
@@ -227,16 +252,18 @@ function CheckoutSuccessContent() {
  */
 export default function CheckoutSuccessPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
-            <Loader2 className="h-12 w-12 animate-spin text-indigo-600 mx-auto mb-4" />
-            <p className="text-gray-600">Cargando...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 py-12">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
+              <Loader2 className="h-12 w-12 animate-spin text-indigo-600 mx-auto mb-4" />
+              <p className="text-gray-600">Cargando...</p>
+            </div>
           </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <CheckoutSuccessContent />
     </Suspense>
   );

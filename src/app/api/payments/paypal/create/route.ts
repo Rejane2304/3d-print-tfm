@@ -3,17 +3,17 @@
  * POST /api/payments/paypal/create
  * Creates a PayPal order for payment and stores paypalOrderId
  */
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
-import { prisma } from '@/lib/db/prisma';
-import { translateErrorMessage } from '@/lib/i18n';
-import { createPaymentFailedAlert } from '@/lib/alerts/alert-service';
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/auth-options";
+import { prisma } from "@/lib/db/prisma";
+import { createPaymentFailedAlert } from "@/lib/alerts/alert-service";
 
 // PayPal API base URLs
-const PAYPAL_API = process.env.NODE_ENV === 'production'
-  ? 'https://api-m.paypal.com'
-  : 'https://api-m.sandbox.paypal.com';
+const PAYPAL_API =
+  process.env.NODE_ENV === "production"
+    ? "https://api-m.paypal.com"
+    : "https://api-m.sandbox.paypal.com";
 
 /**
  * Get PayPal OAuth access token
@@ -23,37 +23,40 @@ async function getPayPalAccessToken(): Promise<string> {
   const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
 
   if (!clientId || !clientSecret) {
-    throw new Error('Credenciales de PayPal no configuradas');
+    throw new Error("Credenciales de PayPal no configuradas");
   }
 
   // Log para depuración (solo en desarrollo)
-  if (process.env.NODE_ENV !== 'production') {
-    console.log('PayPal API URL:', PAYPAL_API);
-    console.log('PayPal Client ID (primeros 10 chars):', clientId.substring(0, 10) + '...');
+  if (process.env.NODE_ENV !== "production") {
+    console.log("PayPal API URL:", PAYPAL_API);
+    console.log(
+      "PayPal Client ID (primeros 10 chars):",
+      clientId.substring(0, 10) + "...",
+    );
   }
 
   const response = await fetch(`${PAYPAL_API}/v1/oauth2/token`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Authorization': `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+      Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString("base64")}`,
     },
-    body: 'grant_type=client_credentials',
+    body: "grant_type=client_credentials",
   });
 
   if (!response.ok) {
     const errorData = await response.text();
-    console.error('PayPal token error:', errorData);
-    throw new Error('Error al obtener token de acceso de PayPal');
+    console.error("PayPal token error:", errorData);
+    throw new Error("Error al obtener token de acceso de PayPal");
   }
 
   const data = await response.json();
-  
+
   // Verificar si estamos en sandbox
-  if (process.env.NODE_ENV !== 'production') {
-    console.log('PayPal token obtenido exitosamente');
+  if (process.env.NODE_ENV !== "production") {
+    console.log("PayPal token obtenido exitosamente");
   }
-  
+
   return data.access_token;
 }
 
@@ -67,6 +70,7 @@ async function createPayPalOrder(
     orderNumber: string;
     total: number;
     shipping: number;
+    discount: number;
     items: Array<{
       name: string;
       quantity: number;
@@ -79,79 +83,109 @@ async function createPayPalOrder(
       postalCode: string;
       country: string;
     };
-  }
+  },
 ): Promise<{ id: string; links: Array<{ rel: string; href: string }> }> {
-  // Calcular el total de items
-  const itemsTotal = orderData.items.reduce((sum, item) => 
-    sum + (item.unitPrice * item.quantity), 0
+  // Calcular totales con IVA separado (transparente) - BASE IMPONIBLE INCLUYE ENVÍO
+  const itemsTotal = orderData.items.reduce(
+    (sum, item) => sum + item.unitPrice * item.quantity,
+    0,
   );
-  
-  // El total debe ser exacto: items + shipping
-  const calculatedTotal = itemsTotal + orderData.shipping;
-  
+
+  // Aplicar descuento antes de calcular IVA
+  const discountedItems = Math.max(0, itemsTotal - (orderData.discount || 0));
+
+  // Calcular IVA (21% sobre items con descuento + envío, ya que el envío lleva IVA)
+  const vatRate = 0.21;
+  const taxableBase = discountedItems + orderData.shipping;
+  const vatAmount = taxableBase * vatRate;
+
+  // El total debe ser: items con descuento + envío + IVA
+  const calculatedTotal = discountedItems + orderData.shipping + vatAmount;
+
   // Asegurar que tenemos al menos 2 decimales
-  const itemTotalStr = itemsTotal.toFixed(2);
+  const vatAmountStr = vatAmount.toFixed(2);
   const shippingStr = orderData.shipping.toFixed(2);
   const totalStr = calculatedTotal.toFixed(2);
-  
+
+  // Preparar items para PayPal (productos + IVA como item separado)
+  const paypalItems = [
+    // Productos
+    ...orderData.items.map((item, index) => ({
+      name: item.name.substring(0, 127),
+      quantity: item.quantity.toString(),
+      unit_amount: {
+        currency_code: "EUR",
+        value: item.unitPrice.toFixed(2),
+      },
+      sku: `ITEM-${index + 1}`,
+      category: "PHYSICAL_GOODS" as const,
+    })),
+    // IVA como item separado (transparencia)
+    {
+      name: "IVA (21%)",
+      quantity: "1",
+      unit_amount: {
+        currency_code: "EUR",
+        value: vatAmountStr,
+      },
+      sku: "TAX-IVA-21",
+      category: "PHYSICAL_GOODS" as const,
+    },
+  ];
+
   const requestBody = {
-    intent: 'CAPTURE',
-    purchase_units: [{
-      reference_id: orderData.orderId,
-      description: `Pedido ${orderData.orderNumber}`,
-      amount: {
-        currency_code: 'EUR',
-        value: totalStr,
-        breakdown: {
-          item_total: {
-            currency_code: 'EUR',
-            value: itemTotalStr,
+    intent: "CAPTURE",
+    purchase_units: [
+      {
+        reference_id: orderData.orderId,
+        description: `Pedido ${orderData.orderNumber}`,
+        amount: {
+          currency_code: "EUR",
+          value: totalStr,
+          breakdown: {
+            item_total: {
+              currency_code: "EUR",
+              // Incluir items + IVA en el total de items (transparencia)
+              value: (itemsTotal + vatAmount).toFixed(2),
+            },
+            shipping: {
+              currency_code: "EUR",
+              value: shippingStr,
+            },
           },
-          shipping: {
-            currency_code: 'EUR',
-            value: shippingStr,
+        },
+        items: paypalItems,
+        shipping: {
+          name: {
+            full_name: orderData.shippingAddress.name,
+          },
+          address: {
+            address_line_1: orderData.shippingAddress.address.substring(0, 100),
+            admin_area_2: orderData.shippingAddress.city,
+            postal_code: orderData.shippingAddress.postalCode,
+            country_code:
+              orderData.shippingAddress.country === "Spain" ? "ES" : "ES",
           },
         },
       },
-      items: orderData.items.map((item, index) => ({
-        name: item.name.substring(0, 127),
-        quantity: item.quantity.toString(),
-        unit_amount: {
-          currency_code: 'EUR',
-          value: item.unitPrice.toFixed(2),
-        },
-        sku: `ITEM-${index + 1}`,
-        category: 'PHYSICAL_GOODS',
-      })),
-      shipping: {
-        name: {
-          full_name: orderData.shippingAddress.name,
-        },
-        address: {
-          address_line_1: orderData.shippingAddress.address.substring(0, 100),
-          admin_area_2: orderData.shippingAddress.city,
-          postal_code: orderData.shippingAddress.postalCode,
-          country_code: orderData.shippingAddress.country === 'Spain' ? 'ES' : 'ES',
-        },
-      },
-    }],
+    ],
     application_context: {
-      brand_name: '3D Print TFM',
-      landing_page: 'LOGIN',
-      shipping_preference: 'SET_PROVIDED_ADDRESS',
-      user_action: 'PAY_NOW',
+      brand_name: "3D Print TFM",
+      landing_page: "LOGIN",
+      shipping_preference: "SET_PROVIDED_ADDRESS",
+      user_action: "PAY_NOW",
       return_url: `${process.env.NEXTAUTH_URL}/checkout/success`,
       cancel_url: `${process.env.NEXTAUTH_URL}/checkout?orderId=${orderData.orderId}&cancelled=true`,
     },
   };
 
-  console.log('PayPal request:', JSON.stringify(requestBody, null, 2));
+  console.log("PayPal request:", JSON.stringify(requestBody, null, 2));
 
   const response = await fetch(`${PAYPAL_API}/v2/checkout/orders`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify(requestBody),
   });
@@ -163,29 +197,33 @@ async function createPayPalOrder(
     } catch {
       errorData = { message: await response.text() };
     }
-    
-    console.error('PayPal error response:', JSON.stringify(errorData, null, 2));
-    
+
+    console.error("PayPal error response:", JSON.stringify(errorData, null, 2));
+
     // Traducir errores comunes de PayPal
-    let errorMessage = 'Error al crear el pedido de PayPal';
-    
+    let errorMessage = "Error al crear el pedido de PayPal";
+
     if (errorData.details && errorData.details.length > 0) {
       const detail = errorData.details[0];
-      if (detail.issue === 'ITEM_TOTAL_MISMATCH') {
-        errorMessage = 'El total de los items no coincide con el importe del pedido';
-      } else if (detail.issue === 'AMOUNT_MISMATCH') {
-        errorMessage = 'El importe total no es correcto';
-      } else if (detail.issue === 'INVALID_CURRENCY_CODE') {
-        errorMessage = 'Moneda no válida';
-      } else if (detail.issue === 'MISSING_REQUIRED_PARAMETER') {
+      if (detail.issue === "ITEM_TOTAL_MISMATCH") {
+        errorMessage =
+          "El total de los items no coincide con el importe del pedido";
+      } else if (detail.issue === "AMOUNT_MISMATCH") {
+        errorMessage = "El importe total no es correcto";
+      } else if (detail.issue === "INVALID_CURRENCY_CODE") {
+        errorMessage = "Moneda no válida";
+      } else if (detail.issue === "MISSING_REQUIRED_PARAMETER") {
         errorMessage = `Falta el parámetro requerido: ${detail.field}`;
       } else {
-        errorMessage = detail.description || errorData.message || 'Error en la validación del pedido';
+        errorMessage =
+          detail.description ||
+          errorData.message ||
+          "Error en la validación del pedido";
       }
     } else if (errorData.message) {
       errorMessage = errorData.message;
     }
-    
+
     throw new Error(errorMessage);
   }
 
@@ -198,10 +236,7 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
 
     // 2. Get request body
@@ -210,8 +245,8 @@ export async function POST(req: NextRequest) {
 
     if (!orderId || !paymentId) {
       return NextResponse.json(
-        { error: 'Faltan campos requeridos' },
-        { status: 400 }
+        { error: "Faltan campos requeridos" },
+        { status: 400 },
       );
     }
 
@@ -230,30 +265,27 @@ export async function POST(req: NextRequest) {
           },
         },
         payment: true,
-        address: true,
+        shippingAddressData: true,
       },
     });
 
     if (!order) {
       return NextResponse.json(
-        { error: 'Pedido no encontrado' },
-        { status: 404 }
+        { error: "Pedido no encontrado" },
+        { status: 404 },
       );
     }
 
     // Verify order belongs to authenticated user
     if (order.user.email !== session.user.email) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "No autorizado" }, { status: 403 });
     }
 
     // Verificar que hay items
     if (!order.items || order.items.length === 0) {
       return NextResponse.json(
-        { error: 'El pedido no tiene items' },
-        { status: 400 }
+        { error: "El pedido no tiene items" },
+        { status: 400 },
       );
     }
 
@@ -266,13 +298,14 @@ export async function POST(req: NextRequest) {
       orderNumber: order.orderNumber,
       total: Number(order.total),
       shipping: Number(order.shipping),
-      items: order.items.map(item => ({
+      discount: Number(order.discount || 0),
+      items: order.items.map((item) => ({
         name: item.name,
         quantity: item.quantity,
         unitPrice: Number(item.price),
       })),
       shippingAddress: {
-        name: order.shippingName || order.user.name || 'Cliente',
+        name: order.shippingName || order.user.name || "Cliente",
         address: order.shippingAddress,
         city: order.shippingCity,
         postalCode: order.shippingPostalCode,
@@ -285,7 +318,7 @@ export async function POST(req: NextRequest) {
       where: { id: paymentId },
       data: {
         paypalOrderId: paypalOrder.id,
-        status: 'PROCESSING',
+        status: "PROCESSING",
       },
     });
 
@@ -298,11 +331,15 @@ export async function POST(req: NextRequest) {
     });
 
     // 7. Get approval URL from PayPal response
-    const approvalLink = paypalOrder.links.find(link => link.rel === 'approve');
+    const approvalLink = paypalOrder.links.find(
+      (link) => link.rel === "approve",
+    );
     const paypalApprovalUrl = approvalLink?.href;
 
     if (!paypalApprovalUrl) {
-      throw new Error('No se encontró la URL de aprobación en la respuesta de PayPal');
+      throw new Error(
+        "No se encontró la URL de aprobación en la respuesta de PayPal",
+      );
     }
 
     // 8. Return success with approval URL
@@ -311,9 +348,8 @@ export async function POST(req: NextRequest) {
       url: paypalApprovalUrl,
       paypalOrderId: paypalOrder.id,
     });
-
   } catch (error) {
-    console.error('Error creating PayPal payment:', error);
+    console.error("Error creating PayPal payment:", error);
 
     // Create alert for failed payment
     try {
@@ -325,18 +361,20 @@ export async function POST(req: NextRequest) {
           select: { orderNumber: true },
         });
         if (order) {
-          await createPaymentFailedAlert(orderId, order.orderNumber, error instanceof Error ? error.message : 'Error desconocido');
+          await createPaymentFailedAlert(
+            orderId,
+            order.orderNumber,
+            error instanceof Error ? error.message : "Error desconocido",
+          );
         }
       }
     } catch (alertError) {
-      console.error('Error creating payment failed alert:', alertError);
+      console.error("Error creating payment failed alert:", alertError);
     }
 
-    const errorMessage = error instanceof Error ? error.message : 'Error interno del servidor';
+    const errorMessage =
+      error instanceof Error ? error.message : "Error interno del servidor";
 
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

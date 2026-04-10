@@ -1,21 +1,21 @@
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 /**
  * API Route - Inventory Management (Admin)
  * GET /api/admin/inventory
  * Supports pagination, filtering by stock level
  */
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
-import { prisma } from '@/lib/db/prisma';
-import { Prisma } from '@prisma/client';
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/auth-options";
+import { prisma } from "@/lib/db/prisma";
+import { Prisma } from "@prisma/client";
 import {
   translateMovementType,
   translateErrorMessage,
   translateProductName,
   translateCategoryName,
-} from '@/lib/i18n';
+} from "@/lib/i18n";
 
 export async function GET(req: NextRequest) {
   try {
@@ -23,8 +23,8 @@ export async function GET(req: NextRequest) {
 
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 }
+        { success: false, error: "No autenticado" },
+        { status: 401 },
       );
     }
 
@@ -34,19 +34,19 @@ export async function GET(req: NextRequest) {
       select: { id: true, role: true },
     });
 
-    if (!adminUser || adminUser.role !== 'ADMIN') {
+    if (!adminUser || adminUser.role !== "ADMIN") {
       return NextResponse.json(
-        { success: false, error: 'Acceso denegado' },
-        { status: 403 }
+        { success: false, error: "Acceso denegado" },
+        { status: 403 },
       );
     }
 
     // Get query parameters
     const { searchParams } = new URL(req.url);
-    const page = Number.parseInt(searchParams.get('page') || '1', 10);
-    const limit = Number.parseInt(searchParams.get('limit') || '10', 10);
-    const search = searchParams.get('search') || '';
-    const stockLevel = searchParams.get('stockLevel') || 'all';
+    const page = Number.parseInt(searchParams.get("page") || "1", 10);
+    const limit = Number.parseInt(searchParams.get("limit") || "10", 10);
+    const search = searchParams.get("search") || "";
+    const stockLevel = searchParams.get("stockLevel") || "all";
 
     // Calculate pagination
     const skip = (page - 1) * limit;
@@ -56,35 +56,28 @@ export async function GET(req: NextRequest) {
 
     if (search) {
       where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { slug: { contains: search, mode: 'insensitive' } },
+        { name: { contains: search, mode: "insensitive" } },
+        { slug: { contains: search, mode: "insensitive" } },
       ];
     }
 
-    if (stockLevel === 'low') {
+    if (stockLevel === "low") {
       // Products with stock > 0 and stock <= minStock
       where.stock = { gt: 0 };
       where.minStock = { gt: 0 };
-    } else if (stockLevel === 'critical') {
+    } else if (stockLevel === "critical") {
       where.stock = { lte: 0 };
-    } else if (stockLevel === 'out') {
+    } else if (stockLevel === "out") {
       where.stock = 0;
     }
 
     // Get total count
     const total = await prisma.product.count({ where });
 
-    // Get products with stock info and images
+    // Get products with stock info and images using include
     const products = await prisma.product.findMany({
       where,
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        stock: true,
-        minStock: true,
-        price: true,
-        isActive: true,
+      include: {
         category: {
           select: {
             name: true,
@@ -100,11 +93,11 @@ export async function GET(req: NextRequest) {
         },
         _count: {
           select: {
-            movements: true,
+            inventoryMovements: true,
           },
         },
-        movements: {
-          orderBy: { createdAt: 'desc' },
+        inventoryMovements: {
+          orderBy: { createdAt: "desc" },
           take: 1,
           select: {
             createdAt: true,
@@ -113,18 +106,21 @@ export async function GET(req: NextRequest) {
           },
         },
       },
-      orderBy: { stock: 'asc' },
+      orderBy: { stock: "asc" },
       skip,
       take: limit,
     });
 
     // Determine stock status with translations
     const productsWithStatus = products.map((product) => {
-      const stockStatus = 
-        product.stock <= 0 ? 'critical' :
-        product.stock <= product.minStock ? 'low' : 'normal';
+      const stockStatus =
+        product.stock <= 0
+          ? "critical"
+          : product.stock <= product.minStock
+            ? "low"
+            : "normal";
 
-      const lastMovement = product.movements[0];
+      const lastMovement = product.inventoryMovements[0];
 
       return {
         id: product.id,
@@ -133,12 +129,16 @@ export async function GET(req: NextRequest) {
         stock: product.stock,
         minStock: product.minStock,
         price: product.price,
-        categoria: product.category ? translateCategoryName(product.category.slug) : 'Sin categoría',
+        categoria: product.category
+          ? translateCategoryName(product.category.slug)
+          : "Sin categoría",
         isActive: product.isActive,
         stockStatus,
-        movementCount: product._count.movements,
+        movementCount: product._count.inventoryMovements,
         lastMovementAt: lastMovement?.createdAt || null,
-        ultimoMovimientoTipo: lastMovement?.type ? translateMovementType(lastMovement.type) : null,
+        ultimoMovimientoTipo: lastMovement?.type
+          ? translateMovementType(lastMovement.type)
+          : null,
         imagenes: product.images,
       };
     });
@@ -154,10 +154,13 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error fetching inventory:', error);
+    console.error("Error fetching inventory:", error);
     return NextResponse.json(
-      { success: false, error: translateErrorMessage('Error al obtener inventario') },
-      { status: 500 }
+      {
+        success: false,
+        error: translateErrorMessage("Error al obtener inventario"),
+      },
+      { status: 500 },
     );
   }
 }

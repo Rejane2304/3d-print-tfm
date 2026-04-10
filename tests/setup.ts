@@ -12,7 +12,6 @@ import '@testing-library/jest-dom';
 import { 
   prisma, 
   cleanupDB, 
-  seedTestData, 
   validateTestDB,
   resetTestDatabase,
   validateTestDBSync 

@@ -2,14 +2,25 @@
  * Admin Client Detail Page
  * Show detailed information about a specific client
  */
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter, useParams } from 'next/navigation';
-import Link from 'next/link';
-import { Loader2, ArrowLeft, User, Mail, Phone, Calendar, ShoppingBag, MapPin, Package, DollarSign } from 'lucide-react';
-import { translateAddressName } from '@/lib/i18n';
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter, useParams } from "next/navigation";
+import Link from "next/link";
+import {
+  Loader2,
+  ArrowLeft,
+  User,
+  Mail,
+  Phone,
+  Calendar,
+  ShoppingBag,
+  MapPin,
+  Package,
+  DollarSign,
+} from "lucide-react";
+import { translateAddressName } from "@/lib/i18n";
 
 interface ClientDetail {
   id: string;
@@ -61,18 +72,18 @@ export default function AdminClientDetailPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login?callbackUrl=/admin/clients');
+    if (status === "unauthenticated") {
+      router.push("/login?callbackUrl=/admin/clients");
       return;
     }
 
     const user = session?.user as { rol?: string } | undefined;
-    if (status === 'authenticated' && user?.rol !== 'ADMIN') {
-      router.push('/');
+    if (status === "authenticated" && user?.rol !== "ADMIN") {
+      router.push("/");
       return;
     }
 
-    if (status === 'authenticated' && params.id) {
+    if (status === "authenticated" && params.id) {
       fetchClientDetail();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -87,21 +98,21 @@ export default function AdminClientDetailPage() {
       if (data.success) {
         setClient(data.client);
       } else {
-        router.push('/admin/clients');
+        router.push("/admin/clients");
       }
     } catch (error) {
-      console.error('Error fetching client:', error);
+      console.error("Error fetching client:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const formatDate = (date: string | null) => {
-    if (!date) return 'N/A';
-    return new Date(date).toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+    if (!date) return "N/A";
+    return new Date(date).toLocaleDateString("es-ES", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
@@ -111,17 +122,17 @@ export default function AdminClientDetailPage() {
 
   const getStatusBadge = (estado: string) => {
     const statusMap: Record<string, string> = {
-      'Pendiente': 'bg-yellow-100 text-yellow-800',
-      'Confirmado': 'bg-blue-100 text-blue-800',
-      'En preparación': 'bg-purple-100 text-purple-800',
-      'Enviado': 'bg-indigo-100 text-indigo-800',
-      'Entregado': 'bg-green-100 text-green-800',
-      'Cancelado': 'bg-red-100 text-red-800',
+      Pendiente: "bg-yellow-100 text-yellow-800",
+      Confirmado: "bg-blue-100 text-blue-800",
+      "En preparación": "bg-purple-100 text-purple-800",
+      Enviado: "bg-indigo-100 text-indigo-800",
+      Entregado: "bg-green-100 text-green-800",
+      Cancelado: "bg-red-100 text-red-800",
     };
-    return statusMap[estado] || 'bg-gray-100 text-gray-800';
+    return statusMap[estado] || "bg-gray-100 text-gray-800";
   };
 
-  if (status === 'loading' || loading) {
+  if (status === "loading" || loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -137,7 +148,10 @@ export default function AdminClientDetailPage() {
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-600">Cliente no encontrado</p>
-          <Link href="/admin/clients" className="text-indigo-600 hover:text-indigo-900 mt-4 inline-block">
+          <Link
+            href="/admin/clients"
+            className="text-indigo-600 hover:text-indigo-900 mt-4 inline-block"
+          >
             Volver al listado
           </Link>
         </div>
@@ -152,11 +166,16 @@ export default function AdminClientDetailPage() {
         <div className="max-w-[1920px] 3xl:max-w-[2200px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Link href="/admin/clients" className="text-gray-500 hover:text-gray-700">
+              <Link
+                href="/admin/clients"
+                className="text-gray-500 hover:text-gray-700"
+              >
                 <ArrowLeft className="h-6 w-6" />
               </Link>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">{client.nombre}</h1>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  {client.nombre}
+                </h1>
                 <p className="text-sm text-gray-500">Detalle del cliente</p>
               </div>
             </div>
@@ -171,7 +190,6 @@ export default function AdminClientDetailPage() {
       </header>
 
       <div className="max-w-[1920px] 3xl:max-w-[2200px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Client Info Card */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -180,11 +198,17 @@ export default function AdminClientDetailPage() {
                 <User className="h-8 w-8 text-indigo-600" />
               </div>
               <div className="ml-4">
-                <h2 className="text-xl font-semibold text-gray-900">{client.nombre}</h2>
-                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                  client.activo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                }`}>
-                  {client.activo ? 'Activo' : 'Inactivo'}
+                <h2 className="text-xl font-semibold text-gray-900">
+                  {client.nombre}
+                </h2>
+                <span
+                  className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                    client.activo
+                      ? "bg-green-100 text-green-800"
+                      : "bg-red-100 text-red-800"
+                  }`}
+                >
+                  {client.activo ? "Activo" : "Inactivo"}
                 </span>
               </div>
             </div>
@@ -196,7 +220,7 @@ export default function AdminClientDetailPage() {
               </div>
               <div className="flex items-center text-gray-600">
                 <Phone className="h-5 w-5 mr-3 text-gray-400" />
-                <span>{client.telefono || 'N/A'}</span>
+                <span>{client.telefono || "N/A"}</span>
               </div>
               <div className="flex items-center text-gray-600">
                 <Calendar className="h-5 w-5 mr-3 text-gray-400" />
@@ -215,8 +239,12 @@ export default function AdminClientDetailPage() {
               <div className="flex items-center">
                 <ShoppingBag className="h-8 w-8 text-indigo-500" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Pedidos</p>
-                  <p className="text-2xl font-bold text-gray-900">{client.estadisticas?.totalPedidos ?? 0}</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Total Pedidos
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {client.estadisticas?.totalPedidos ?? 0}
+                  </p>
                 </div>
               </div>
             </div>
@@ -225,8 +253,12 @@ export default function AdminClientDetailPage() {
               <div className="flex items-center">
                 <DollarSign className="h-8 w-8 text-green-500" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Gastado</p>
-                  <p className="text-2xl font-bold text-gray-900">{formatCurrency(client.estadisticas?.totalGastado ?? 0)}</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Total Gastado
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {formatCurrency(client.estadisticas?.totalGastado ?? 0)}
+                  </p>
                 </div>
               </div>
             </div>
@@ -235,8 +267,12 @@ export default function AdminClientDetailPage() {
               <div className="flex items-center">
                 <Package className="h-8 w-8 text-blue-500" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Completados</p>
-                  <p className="text-2xl font-bold text-gray-900">{client.estadisticas?.pedidosCompletados ?? 0}</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Completados
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {client.estadisticas?.pedidosCompletados ?? 0}
+                  </p>
                 </div>
               </div>
             </div>
@@ -245,8 +281,12 @@ export default function AdminClientDetailPage() {
               <div className="flex items-center">
                 <DollarSign className="h-8 w-8 text-purple-500" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Ticket Medio</p>
-                  <p className="text-2xl font-bold text-gray-900">{formatCurrency(client.estadisticas?.valorPromedio ?? 0)}</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Ticket Medio
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {formatCurrency(client.estadisticas?.valorPromedio ?? 0)}
+                  </p>
                 </div>
               </div>
             </div>
@@ -259,15 +299,20 @@ export default function AdminClientDetailPage() {
             <MapPin className="h-5 w-5 mr-2 text-indigo-500" />
             Direcciones ({client.addresses.length})
           </h3>
-          
+
           {client.addresses.length === 0 ? (
             <p className="text-gray-500">No hay direcciones registradas</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {client.addresses.map((address) => (
-                <div key={address.id} className="border border-gray-200 rounded-lg p-4">
+                <div
+                  key={address.id}
+                  className="border border-gray-200 rounded-lg p-4"
+                >
                   <div className="flex justify-between items-start mb-2">
-                    <span className="font-medium text-gray-900">{translateAddressName(address.name)}</span>
+                    <span className="font-medium text-gray-900">
+                      {translateAddressName(address.name)}
+                    </span>
                     {address.isDefault && (
                       <span className="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">
                         Principal
@@ -292,7 +337,7 @@ export default function AdminClientDetailPage() {
             <ShoppingBag className="h-5 w-5 mr-2 text-indigo-500" />
             Últimos Pedidos ({client.orders.length})
           </h3>
-          
+
           {client.orders.length === 0 ? (
             <div className="p-6 text-center text-gray-500">
               No hay pedidos registrados
@@ -337,7 +382,9 @@ export default function AdminClientDetailPage() {
                       {formatCurrency(order.total)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadge(order.estado)}`}>
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadge(order.estado)}`}
+                      >
                         {order.estado}
                       </span>
                     </td>

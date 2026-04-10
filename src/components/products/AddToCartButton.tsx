@@ -4,12 +4,12 @@
  * Soporta usuarios autenticados (API) y no autenticados (localStorage)
  * Responsive: mobile → desktop
  */
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useSession } from 'next-auth/react';
-import { useCart } from '@/hooks/useCart';
-import { ShoppingCart, Check, Loader2 } from 'lucide-react';
+import { useState } from "react";
+import { useSession } from "next-auth/react";
+import { useCart } from "@/hooks/useCart";
+import { ShoppingCart, Check, Loader2 } from "lucide-react";
 
 interface ProductInfo {
   id: string;
@@ -26,13 +26,17 @@ interface AddToCartButtonProps {
   product: ProductInfo;
 }
 
-export default function AddToCartButton({ productId, stock, product }: AddToCartButtonProps) {
+export default function AddToCartButton({
+  productId,
+  stock,
+  product,
+}: AddToCartButtonProps) {
   const { data: session } = useSession();
   const { addItem } = useCart();
-  
+
   // Check if user is admin - admins cannot purchase
-  const isAdmin = session?.user?.rol === 'ADMIN';
-  
+  const isAdmin = session?.user?.rol === "ADMIN";
+
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -47,7 +51,7 @@ export default function AddToCartButton({ productId, stock, product }: AddToCart
       const result = await addItem(productId, quantity, product);
 
       if (!result.success) {
-        throw new Error(result.error || 'Error al añadir al carrito');
+        throw new Error(result.error || "Error al añadir al carrito");
       }
 
       // Mostrar éxito temporalmente
@@ -55,7 +59,7 @@ export default function AddToCartButton({ productId, stock, product }: AddToCart
       setSuccess(true);
       setTimeout(() => setSuccess(false), 2000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : "Error desconocido");
     } finally {
       setLoading(false);
     }
@@ -81,11 +85,21 @@ export default function AddToCartButton({ productId, stock, product }: AddToCart
             aria-label="Decrementar quantity"
             data-testid="decrease-quantity"
           >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M20 12H4"
+              />
             </svg>
           </button>
-          
+
           <input
             type="number"
             id="quantity"
@@ -102,7 +116,7 @@ export default function AddToCartButton({ productId, stock, product }: AddToCart
             disabled={isDisabled}
             className="w-16 text-center border border-gray-300 rounded-md py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           />
-          
+
           <button
             type="button"
             onClick={() => setQuantity(Math.min(stock, quantity + 1))}
@@ -111,8 +125,18 @@ export default function AddToCartButton({ productId, stock, product }: AddToCart
             aria-label="Incrementar quantity"
             data-testid="increase-quantity"
           >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
             </svg>
           </button>
         </div>
@@ -126,10 +150,10 @@ export default function AddToCartButton({ productId, stock, product }: AddToCart
         data-testid="add-to-cart-button"
         className={`w-full py-3 px-6 rounded-md font-medium text-white transition-all duration-200 flex items-center justify-center gap-2 ${
           success
-            ? 'bg-green-600 hover:bg-green-700'
+            ? "bg-green-600 hover:bg-green-700"
             : isDisabled
-            ? 'bg-gray-400 cursor-not-allowed'
-            : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
         }`}
       >
         {loading ? (

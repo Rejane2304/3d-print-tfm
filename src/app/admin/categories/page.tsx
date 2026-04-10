@@ -2,24 +2,24 @@
  * Admin Categories Page
  * Category management with DataTable
  */
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import Image from 'next/image';
-import { 
-  Plus, 
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
+import {
+  Plus,
   FolderTree,
   Loader2,
   AlertCircle,
   Edit,
   Trash2,
   ImageIcon,
-} from 'lucide-react';
-import { DataTable, Column, BulkAction } from '@/components/ui/DataTable';
-import { ConfirmModal } from '@/components/ui/ConfirmModal';
+} from "lucide-react";
+import { DataTable, Column, BulkAction } from "@/components/ui/DataTable";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 interface Category extends Record<string, unknown> {
   id: string;
@@ -42,18 +42,20 @@ export default function AdminCategoriesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
+  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(
+    null,
+  );
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login?callbackUrl=/admin/categories');
+    if (status === "unauthenticated") {
+      router.push("/login?callbackUrl=/admin/categories");
       return;
     }
 
-    if (status === 'authenticated') {
+    if (status === "authenticated") {
       const user = session?.user as { rol?: string } | undefined;
-      if (user?.rol !== 'ADMIN') {
-        router.push('/');
+      if (user?.rol !== "ADMIN") {
+        router.push("/");
         return;
       }
       loadCategories();
@@ -65,16 +67,16 @@ export default function AdminCategoriesPage() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('/api/admin/categories');
+      const response = await fetch("/api/admin/categories");
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error cargando categorías');
+        throw new Error(data.error || "Error cargando categorías");
       }
 
       setCategories(data.categorias || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : "Error desconocido");
     } finally {
       setLoading(false);
     }
@@ -89,19 +91,24 @@ export default function AdminCategoriesPage() {
     if (!categoryToDelete) return;
 
     try {
-      const response = await fetch(`/api/admin/categories/${categoryToDelete.id}`, {
-        method: 'DELETE',
-      });
+      const response = await fetch(
+        `/api/admin/categories/${categoryToDelete.id}`,
+        {
+          method: "DELETE",
+        },
+      );
 
       const data = await response.json();
 
       if (response.ok) {
-        setCategories(categories.filter(c => c.id !== categoryToDelete.id));
+        setCategories(categories.filter((c) => c.id !== categoryToDelete.id));
       } else {
-        throw new Error(data.error || 'Error eliminando categoría');
+        throw new Error(data.error || "Error eliminando categoría");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error eliminando categoría');
+      setError(
+        err instanceof Error ? err.message : "Error eliminando categoría",
+      );
     } finally {
       setModalOpen(false);
       setCategoryToDelete(null);
@@ -111,34 +118,36 @@ export default function AdminCategoriesPage() {
   const handleBulkDelete = async (selectedIds: string[]) => {
     try {
       let hasError = false;
-      
+
       await Promise.all(
         selectedIds.map(async (id) => {
-          const response = await fetch(`/api/admin/categories/${id}`, { 
-            method: 'DELETE' 
+          const response = await fetch(`/api/admin/categories/${id}`, {
+            method: "DELETE",
           });
           if (!response.ok) {
             hasError = true;
           }
-        })
+        }),
       );
-      
+
       if (hasError) {
-        setError('Algunas categorías no pudieron ser eliminadas (posiblemente tienen productos asociados)');
+        setError(
+          "Algunas categorías no pudieron ser eliminadas (posiblemente tienen productos asociados)",
+        );
       }
-      
-      setCategories(categories.filter(c => !selectedIds.includes(c.id)));
+
+      setCategories(categories.filter((c) => !selectedIds.includes(c.id)));
     } catch {
-      setError('Error eliminando categorías');
+      setError("Error eliminando categorías");
     }
   };
 
   const columns: Column<Category>[] = [
     {
-      key: 'nombre',
-      header: 'Categoría',
+      key: "nombre",
+      header: "Categoría",
       sortable: true,
-      className: '',
+      className: "",
       render: (_, category) => (
         <div className="flex items-center">
           <div className="flex-shrink-0 h-10 w-10">
@@ -158,43 +167,49 @@ export default function AdminCategoriesPage() {
             )}
           </div>
           <div className="ml-4 min-w-0">
-            <div className="text-sm font-medium text-gray-900 truncate">{category.nombre}</div>
-            <div className="text-sm text-gray-500 hidden sm:block">/{category.slug}</div>
+            <div className="text-sm font-medium text-gray-900 truncate">
+              {category.nombre}
+            </div>
+            <div className="text-sm text-gray-500 hidden sm:block">
+              /{category.slug}
+            </div>
           </div>
         </div>
       ),
     },
     {
-      key: 'descripcion',
-      header: 'Descripción',
+      key: "descripcion",
+      header: "Descripción",
       sortable: true,
-      className: 'hidden sm:table-cell',
+      className: "hidden sm:table-cell",
       render: (value) => (
         <div className="max-w-xs truncate text-sm text-gray-600">
-          {value as string || '-'}
+          {(value as string) || "-"}
         </div>
       ),
     },
     {
-      key: 'totalProductos',
-      header: 'Productos',
+      key: "totalProductos",
+      header: "Productos",
       sortable: true,
-      className: 'hidden md:table-cell',
+      className: "hidden md:table-cell",
       render: (value) => (
-        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-          (value as number) > 0 
-            ? 'bg-blue-100 text-blue-800' 
-            : 'bg-gray-100 text-gray-600'
-        }`}>
+        <span
+          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+            (value as number) > 0
+              ? "bg-blue-100 text-blue-800"
+              : "bg-gray-100 text-gray-600"
+          }`}
+        >
           {value as number}
         </span>
       ),
     },
     {
-      key: 'ordenVisualizacion',
-      header: 'Orden',
+      key: "ordenVisualizacion",
+      header: "Orden",
       sortable: true,
-      className: 'hidden lg:table-cell',
+      className: "hidden lg:table-cell",
       render: (value) => (
         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
           {value as number}
@@ -202,24 +217,24 @@ export default function AdminCategoriesPage() {
       ),
     },
     {
-      key: 'activo',
-      header: 'Estado',
+      key: "activo",
+      header: "Estado",
       sortable: true,
-      className: 'hidden xl:table-cell',
+      className: "hidden xl:table-cell",
       render: (value) => (
-        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-          value 
-            ? 'bg-green-100 text-green-800' 
-            : 'bg-gray-100 text-gray-800'
-        }`}>
-          {value ? 'Activa' : 'Inactiva'}
+        <span
+          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+            value ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+          }`}
+        >
+          {value ? "Activa" : "Inactiva"}
         </span>
       ),
     },
     {
-      key: 'actions',
-      header: 'Acciones',
-      className: '',
+      key: "actions",
+      header: "Acciones",
+      className: "",
       render: (_, category) => (
         <div className="flex items-center gap-1">
           <Link
@@ -238,7 +253,9 @@ export default function AdminCategoriesPage() {
             title="Eliminar"
             disabled={category.totalProductos > 0}
           >
-            <Trash2 className={`h-4 w-4 ${category.totalProductos > 0 ? 'cursor-not-allowed' : ''}`} />
+            <Trash2
+              className={`h-4 w-4 ${category.totalProductos > 0 ? "cursor-not-allowed" : ""}`}
+            />
           </button>
         </div>
       ),
@@ -247,15 +264,15 @@ export default function AdminCategoriesPage() {
 
   const bulkActions: BulkAction[] = [
     {
-      key: 'delete',
-      label: 'Eliminar seleccionadas',
+      key: "delete",
+      label: "Eliminar seleccionadas",
       icon: <Trash2 className="h-4 w-4" />,
-      variant: 'danger',
+      variant: "danger",
       onClick: handleBulkDelete,
     },
   ];
 
-  if (status === 'loading' || loading) {
+  if (status === "loading" || loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -274,7 +291,9 @@ export default function AdminCategoriesPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <FolderTree className="h-8 w-8 text-indigo-600" />
-              <h1 className="text-2xl font-bold text-gray-900">Gestión de Categorías</h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Gestión de Categorías
+              </h1>
             </div>
             <div className="flex items-center gap-4">
               <Link
@@ -300,7 +319,10 @@ export default function AdminCategoriesPage() {
         <nav className="flex mb-6" aria-label="Breadcrumb">
           <ol className="flex items-center space-x-2">
             <li>
-              <Link href="/admin/dashboard" className="text-gray-500 hover:text-gray-700">
+              <Link
+                href="/admin/dashboard"
+                className="text-gray-500 hover:text-gray-700"
+              >
                 Panel
               </Link>
             </li>
@@ -323,24 +345,26 @@ export default function AdminCategoriesPage() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <p className="text-sm text-gray-500">Total Categorías</p>
-            <p className="text-2xl font-bold text-gray-900">{categories.length}</p>
+            <p className="text-2xl font-bold text-gray-900">
+              {categories.length}
+            </p>
           </div>
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <p className="text-sm text-gray-500">Activas</p>
             <p className="text-2xl font-bold text-green-600">
-              {categories.filter(c => c.activo).length}
+              {categories.filter((c) => c.activo).length}
             </p>
           </div>
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <p className="text-sm text-gray-500">Inactivas</p>
             <p className="text-2xl font-bold text-gray-600">
-              {categories.filter(c => !c.activo).length}
+              {categories.filter((c) => !c.activo).length}
             </p>
           </div>
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <p className="text-sm text-gray-500">Con Productos</p>
             <p className="text-2xl font-bold text-blue-600">
-              {categories.filter(c => c.totalProductos > 0).length}
+              {categories.filter((c) => c.totalProductos > 0).length}
             </p>
           </div>
         </div>
@@ -351,7 +375,7 @@ export default function AdminCategoriesPage() {
           columns={columns}
           rowKey="id"
           searchable={true}
-          searchKeys={['nombre', 'slug', 'descripcion']}
+          searchKeys={["nombre", "slug", "descripcion"]}
           searchPlaceholder="Buscar categorías..."
           pagination={true}
           pageSizeOptions={[10, 25, 50, 100]}
@@ -363,7 +387,9 @@ export default function AdminCategoriesPage() {
           loading={loading}
           emptyMessage="No se encontraron categorías"
           noResultsMessage="Ninguna categoría coincide con tu búsqueda"
-          onRowClick={(category) => router.push(`/admin/categories/${category.id}`)}
+          onRowClick={(category) =>
+            router.push(`/admin/categories/${category.id}`)
+          }
         />
       </div>
 
@@ -376,13 +402,23 @@ export default function AdminCategoriesPage() {
         onConfirm={confirmDelete}
         title="¿Eliminar categoría?"
         description={
-          categoryToDelete?.totalProductos && categoryToDelete.totalProductos > 0
+          categoryToDelete?.totalProductos &&
+          categoryToDelete.totalProductos > 0
             ? `Esta categoría tiene ${categoryToDelete.totalProductos} producto(s) asociado(s). Debes reasignar los productos antes de eliminarla.`
-            : 'Esta acción no se puede deshacer. La categoría será eliminada permanentemente.'
+            : "Esta acción no se puede deshacer. La categoría será eliminada permanentemente."
         }
         confirmText="Eliminar"
-        type={categoryToDelete?.totalProductos && categoryToDelete.totalProductos > 0 ? 'warning' : 'danger'}
-        confirmDisabled={categoryToDelete?.totalProductos ? categoryToDelete.totalProductos > 0 : false}
+        type={
+          categoryToDelete?.totalProductos &&
+          categoryToDelete.totalProductos > 0
+            ? "warning"
+            : "danger"
+        }
+        confirmDisabled={
+          categoryToDelete?.totalProductos
+            ? categoryToDelete.totalProductos > 0
+            : false
+        }
       />
     </div>
   );
