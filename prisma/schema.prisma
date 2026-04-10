@@ -8,7 +8,7 @@ datasource db {
 }
 
 model Address {
-  id         String   @id
+  id         String   @id @default(uuid())
   userId     String
   name       String   @db.VarChar(100)
   recipient  String   @db.VarChar(100)
@@ -21,7 +21,7 @@ model Address {
   country    String   @default("Spain") @db.VarChar(50)
   isDefault  Boolean  @default(false)
   createdAt  DateTime @default(now())
-  updatedAt  DateTime
+  updatedAt  DateTime @default(now())
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   carts      Cart[]
   orders     Order[]
@@ -32,7 +32,7 @@ model Address {
 }
 
 model Alert {
-  id              String        @id
+  id              String        @id @default(uuid())
   type            AlertType
   severity        AlertSeverity @default(MEDIUM)
   title           String        @db.VarChar(200)
@@ -63,7 +63,7 @@ model Alert {
 }
 
 model AuditLog {
-  id           String   @id
+  id           String   @id @default(uuid())
   action       String   @db.VarChar(100)
   entity       String   @db.VarChar(50)
   entityId     String   @db.VarChar(255)
@@ -82,13 +82,13 @@ model AuditLog {
 }
 
 model CartItem {
-  id        String   @id
+  id        String   @id @default(uuid())
   cartId    String
   productId String
   quantity  Int      @default(1)
   unitPrice Decimal  @db.Decimal(10, 2)
   createdAt DateTime @default(now())
-  updatedAt DateTime
+  updatedAt DateTime @default(now())
   cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
   product   Product  @relation(fields: [productId], references: [id])
 
@@ -97,12 +97,12 @@ model CartItem {
 }
 
 model Cart {
-  id                String     @id
+  id                String     @id @default(uuid())
   userId            String     @unique
   shippingAddressId String?
   subtotal          Decimal    @default(0) @db.Decimal(10, 2)
   createdAt         DateTime   @default(now())
-  updatedAt         DateTime
+  updatedAt         DateTime   @default(now())
   items             CartItem[]
   shippingAddress   Address?   @relation(fields: [shippingAddressId], references: [id])
   user              User       @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -111,7 +111,7 @@ model Cart {
 }
 
 model Category {
-  id           String    @id
+  id           String    @id @default(uuid())
   name         String    @db.VarChar(100)
   slug         String    @unique @db.VarChar(100)
   description  String?
@@ -119,7 +119,7 @@ model Category {
   displayOrder Int       @default(0)
   isActive     Boolean   @default(true)
   createdAt    DateTime  @default(now())
-  updatedAt    DateTime
+  updatedAt    DateTime  @default(now())
   products     Product[]
 
   @@index([displayOrder])
@@ -129,7 +129,7 @@ model Category {
 }
 
 model Coupon {
-  id             String   @id
+  id             String   @id @default(uuid())
   code           String   @unique @db.VarChar(50)
   type           CouponType
   value          Decimal  @db.Decimal(10, 2)
@@ -140,7 +140,7 @@ model Coupon {
   validUntil     DateTime
   isActive       Boolean  @default(true)
   createdAt      DateTime @default(now())
-  updatedAt      DateTime
+  updatedAt      DateTime @default(now())
   orders         Order[]
 
   @@index([code])
@@ -151,7 +151,7 @@ model Coupon {
 }
 
 model EventStore {
-  id          String   @id
+  id          String   @id @default(uuid())
   type        String
   payload     Json
   room        String
@@ -169,15 +169,15 @@ model EventStore {
   @@map("event_store")
 }
 
-model Faq {
-  id           String   @id
+model fAQ {
+  id           String   @id @default(uuid())
   question     String
   answer       String
   category     String   @db.VarChar(100)
   displayOrder Int      @default(0)
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
-  updatedAt    DateTime
+  updatedAt    DateTime @default(now())
 
   @@index([category])
   @@index([displayOrder])
@@ -186,7 +186,7 @@ model Faq {
 }
 
 model InventoryMovement {
-  id            String       @id
+  id            String       @id @default(uuid())
   productId     String
   orderId       String?
   type          MovementType
@@ -209,7 +209,7 @@ model InventoryMovement {
 }
 
 model Invoice {
-  id                String   @id
+  id                String   @id @default(uuid())
   orderId           String   @unique
   invoiceNumber     String   @unique @db.VarChar(50)
   series            String   @default("F") @db.VarChar(10)
@@ -247,7 +247,7 @@ model Invoice {
 }
 
 model OrderItem {
-  id          String   @id
+  id          String   @id @default(uuid())
   orderId     String
   productId   String?
   name        String   @db.VarChar(200)
@@ -268,7 +268,7 @@ model OrderItem {
 }
 
 model OrderMessage {
-  id             String   @id
+  id             String   @id @default(uuid())
   orderId        String
   userId         String
   message        String
@@ -287,7 +287,7 @@ model OrderMessage {
 }
 
 model Order {
-  id                    String               @id
+  id                    String               @id @default(uuid())
   orderNumber           String               @unique @db.VarChar(20)
   userId                String
   status                OrderStatus          @default(PENDING)
@@ -316,7 +316,7 @@ model Order {
   carrier               String?              @db.VarChar(100)
   deliveredAt           DateTime?
   createdAt             DateTime             @default(now())
-  updatedAt             DateTime
+  updatedAt             DateTime             @default(now())
   confirmedAt           DateTime?
   preparingAt           DateTime?
   sentAt                DateTime?
@@ -341,7 +341,7 @@ model Order {
 }
 
 model PasswordHistory {
-  id        String   @id
+  id        String   @id @default(uuid())
   userId    String
   hash      String
   createdAt DateTime @default(now())
@@ -351,7 +351,7 @@ model PasswordHistory {
 }
 
 model Payment {
-  id                    String        @id
+  id                    String        @id @default(uuid())
   orderId               String        @unique
   userId                String
   amount                Decimal       @db.Decimal(10, 2)
@@ -369,7 +369,7 @@ model Payment {
   refundedAt            DateTime?
   createdBy             String?
   createdAt             DateTime      @default(now())
-  updatedAt             DateTime
+  updatedAt             DateTime      @default(now())
   order                 Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
   user                  User          @relation(fields: [userId], references: [id])
 
@@ -380,7 +380,7 @@ model Payment {
 }
 
 model ProductImage {
-  id           String   @id
+  id           String   @id @default(uuid())
   productId    String
   url          String   @db.VarChar(500)
   filename     String   @db.VarChar(255)
@@ -402,7 +402,7 @@ model ProductImage {
 }
 
 model Product {
-  id                  String               @id
+  id                  String               @id @default(uuid())
   slug                String               @unique @db.VarChar(100)
   name                String               @db.VarChar(200)
   description         String
@@ -423,7 +423,7 @@ model Product {
   isActive            Boolean              @default(true)
   isFeatured          Boolean              @default(false)
   createdAt           DateTime             @default(now())
-  updatedAt           DateTime
+  updatedAt           DateTime             @default(now())
   alerts              Alert[]
   cartItems           CartItem[]
   inventoryMovements  InventoryMovement[]
@@ -442,7 +442,7 @@ model Product {
 }
 
 model Review {
-  id         String   @id
+  id         String   @id @default(uuid())
   productId  String
   userId     String
   rating     Int
@@ -451,7 +451,7 @@ model Review {
   isVerified Boolean  @default(false)
   isApproved Boolean  @default(false)
   createdAt  DateTime @default(now())
-  updatedAt  DateTime
+  updatedAt  DateTime @default(now())
   product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -464,7 +464,7 @@ model Review {
 }
 
 model Session {
-  id           String   @id
+  id           String   @id @default(uuid())
   sessionToken String   @unique
   userId       String
   expires      DateTime
@@ -475,7 +475,7 @@ model Session {
 }
 
 model ShippingConfig {
-  id               String   @id
+  id               String   @id @default(uuid())
   name             String   @db.VarChar(100)
   description      String?
   price            Decimal  @db.Decimal(10, 2)
@@ -486,7 +486,7 @@ model ShippingConfig {
   isDefault        Boolean  @default(false)
   displayOrder     Int      @default(0)
   createdAt        DateTime @default(now())
-  updatedAt        DateTime
+  updatedAt        DateTime @default(now())
 
   @@index([displayOrder])
   @@index([isActive])
@@ -495,7 +495,7 @@ model ShippingConfig {
 }
 
 model ShippingZone {
-  id                    String   @id
+  id                    String   @id @default(uuid())
   name                  String   @db.VarChar(100)
   country               String   @db.VarChar(100)
   regions               String[] @db.VarChar(100)
@@ -507,7 +507,7 @@ model ShippingZone {
   isActive              Boolean  @default(true)
   displayOrder          Int      @default(0)
   createdAt             DateTime @default(now())
-  updatedAt             DateTime
+  updatedAt             DateTime @default(now())
 
   @@index([country])
   @@index([displayOrder])
@@ -516,7 +516,7 @@ model ShippingZone {
 }
 
 model SiteConfig {
-  id                String   @id
+  id                String   @id @default(uuid())
   companyName       String   @db.VarChar(200)
   companyTaxId      String   @db.VarChar(20)
   companyAddress    String   @db.VarChar(255)
@@ -527,14 +527,14 @@ model SiteConfig {
   companyEmail      String   @db.VarChar(255)
   defaultVatRate    Decimal  @default(21) @db.Decimal(5, 2)
   lowStockThreshold Int      @default(5)
-  updatedAt         DateTime
+  updatedAt         DateTime @default(now())
   updatedBy         String?
 
   @@map("site_configs")
 }
 
 model User {
-  id                 String               @id
+  id                 String               @id @default(uuid())
   email              String               @unique @db.VarChar(255)
   password           String               @db.VarChar(255)
   name               String               @db.VarChar(100)
@@ -548,7 +548,7 @@ model User {
   failedAttempts     Int                  @default(0)
   lockedUntil        DateTime?
   createdAt          DateTime             @default(now())
-  updatedAt          DateTime
+  updatedAt          DateTime             @default(now())
   createdBy          String?
   addresses          Address[]
   alerts             Alert[]
@@ -577,7 +577,7 @@ model VerificationToken {
 }
 
 model WebsocketConnection {
-  id          String   @id
+  id          String   @id @default(uuid())
   socketId    String   @unique
   userId      String?
   rooms       String[]
