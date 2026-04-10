@@ -207,11 +207,11 @@ export async function POST(req: NextRequest) {
     const discount = Number(pedido.discount || 0);
     const shipping = Number(pedido.shipping);
 
-    // BASE IMPONIBLE: subtotal con descuento + envío (el envío lleva IVA)
-    const taxableAmount = Math.max(0, subtotal - discount) + shipping;
+    // IVA solo sobre productos (subtotal con descuento), envío sin IVA
+    const taxableAmount = Math.max(0, subtotal - discount);
     const vatRate = 21;
     const vatAmount = (taxableAmount * vatRate) / 100;
-    const total = taxableAmount + vatAmount;
+    const total = taxableAmount * (1 + vatRate / 100) + shipping;
 
     // Create invoice
     const factura = await prisma.invoice.create({

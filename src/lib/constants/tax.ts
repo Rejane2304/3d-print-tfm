@@ -57,25 +57,33 @@ export function calculateOrderTotals(
   total: number;
 } {
   const discountedSubtotal = Math.max(0, subtotal - discount);
-  const taxableBase = discountedSubtotal + shipping;
-  const vatAmount = roundToCents(taxableBase * DEFAULT_VAT_RATE);
-  const total = roundToCents(discountedSubtotal + shipping + vatAmount);
+  // IVA solo sobre productos (no sobre envío)
+  const vatAmount = roundToCents(discountedSubtotal * DEFAULT_VAT_RATE);
+  // Total = productos con IVA + envío (sin IVA)
+  const total = roundToCents(discountedSubtotal * (1 + DEFAULT_VAT_RATE) + shipping);
+  // Base imponible según Hacienda: productos + envío
+  const taxableBase = roundToCents(discountedSubtotal + shipping);
 
   return {
     discountedSubtotal: roundToCents(discountedSubtotal),
-    taxableBase: roundToCents(taxableBase),
+    taxableBase,
     vatAmount,
     total,
   };
 }
 
 /**
- * Fórmula documentada para referencia:
+ * FÓRMULA CORRECTA (según requerimiento fiscal):
  *
- * Base Imponible = (Subtotal - Descuento) + Envío
- * IVA = Base Imponible × 0.21
- * Total = Base Imponible + IVA
+ * IVA = (Subtotal - Descuento) × 0.21
+ * Total = (Subtotal - Descuento) × 1.21 + Envío
  *
- * O expresado de otra forma:
- * Total = (Subtotal - Descuento) + Envío + IVA
+ * El IVA solo se aplica sobre los productos, NO sobre el envío.
+ * El envío se suma al final sin IVA.
+ *
+ * Ejemplo:
+ *   Productos: 100€
+ *   IVA 21%: 21€ (solo sobre productos)
+ *   Envío: 5€
+ *   Total: 126€
  */

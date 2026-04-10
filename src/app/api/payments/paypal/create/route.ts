@@ -94,13 +94,13 @@ async function createPayPalOrder(
   // Aplicar descuento antes de calcular IVA
   const discountedItems = Math.max(0, itemsTotal - (orderData.discount || 0));
 
-  // Calcular IVA (21% sobre items con descuento + envío, ya que el envío lleva IVA)
+  // Calcular IVA (21% solo sobre items con descuento, envío sin IVA)
   const vatRate = 0.21;
-  const taxableBase = discountedItems + orderData.shipping;
-  const vatAmount = taxableBase * vatRate;
+  const vatAmount = discountedItems * vatRate;
 
-  // El total debe ser: items con descuento + envío + IVA
-  const calculatedTotal = discountedItems + orderData.shipping + vatAmount;
+  // El total debe ser: (items con descuento × 1.21) + envío
+  const calculatedTotal = discountedItems * (1 + vatRate) + orderData.shipping;
+  const taxableBase = discountedItems; // Base imponible solo productos
 
   // Asegurar que tenemos al menos 2 decimales
   const vatAmountStr = vatAmount.toFixed(2);

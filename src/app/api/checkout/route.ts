@@ -156,10 +156,10 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const shippingCost = subtotal >= 50 || hasFreeShipping ? 0 : 5.99;
   const discountedSubtotal = Math.max(0, subtotal - couponDiscount);
 
-  // BASE IMPONIBLE: subtotal con descuento + envío (el envío lleva IVA)
-  const taxableBase = discountedSubtotal + shippingCost;
-  const taxAmount = roundToCents(taxableBase * taxRate);
-  const total = roundToCents(discountedSubtotal + shippingCost + taxAmount);
+  // IVA solo sobre productos (subtotal con descuento), envío sin IVA
+  const taxAmount = roundToCents(discountedSubtotal * taxRate);
+  const total = roundToCents(discountedSubtotal * (1 + taxRate) + shippingCost);
+  const taxableBase = discountedSubtotal; // Base imponible solo productos
 
   try {
     // Get shipping address
