@@ -211,10 +211,10 @@ describe('Invoices API', () => {
       expect(body.factura.invoiceNumber).toMatch(/^F-\d{4}-\d{6}$/);
       expect(body.factura.orderId).toBe(testOrder.id);
       
-      // Verify VAT calculation (21%)
-      const taxableAmount = Number(body.factura.taxableAmount);
+      // Verify VAT calculation (21% on products only, not shipping)
+      const subtotal = Number(body.factura.subtotal);
       const vatAmount = Number(body.factura.vatAmount);
-      const expectedVat = (taxableAmount * 21) / 100;
+      const expectedVat = (subtotal * 21) / 100;
       expect(vatAmount).toBeCloseTo(expectedVat, 2);
     });
 
@@ -374,8 +374,41 @@ describe('Invoices API', () => {
 
   describe('GET /api/admin/invoices/[id]/pdf', () => {
     let invoiceId: string;
+    let pdfTestOrder: { id: string; orderNumber: string };
 
     beforeEach(async () => {
+      // Create fresh order for PDF tests
+      pdfTestOrder = await prisma.order.create({
+        data: {
+          id: randomUUID(),
+          orderNumber: `P-PDF-${Date.now().toString().slice(-8)}`,
+          userId: customerUser.id,
+          status: 'DELIVERED',
+          subtotal: 50.00,
+          shipping: 0.00,
+          total: 60.50,
+          shippingName: 'Test User',
+          shippingPhone: '+34 600 123 456',
+          shippingAddress: 'Calle Test 123',
+          shippingPostalCode: '28001',
+          shippingCity: 'Madrid',
+          shippingProvince: 'Madrid',
+          shippingCountry: 'Spain',
+          updatedAt: new Date(),
+          items: {
+            create: [{
+              id: randomUUID(),
+              name: 'Test Product',
+              price: 50.00,
+              quantity: 1,
+              subtotal: 50.00,
+              category: 'Test',
+              material: 'PLA',
+            }],
+          },
+        },
+      });
+
       // Create an invoice
       vi.mocked(getServerSession).mockResolvedValue({
         user: { email: adminUser.email, name: adminUser.name },
@@ -384,7 +417,7 @@ describe('Invoices API', () => {
       const res = await createInvoice(new NextRequest('http://localhost:3000/api/admin/invoices', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: testOrder.id }),
+        body: JSON.stringify({ orderId: pdfTestOrder.id }),
       }));
       const body = await res.json();
       invoiceId = body.factura.id;
@@ -424,6 +457,38 @@ describe('Invoices API', () => {
 
   describe('Invoice State Management', () => {
     it('should track invoice totals correctly', async () => {
+      // Create fresh order for this test
+      const freshOrder = await prisma.order.create({
+        data: {
+          id: randomUUID(),
+          orderNumber: `P-2024-${Date.now().toString().slice(-6)}`,
+          userId: customerUser.id,
+          status: 'DELIVERED',
+          subtotal: 100.00,
+          shipping: 5.00,
+          total: 126.00, // 100 * 1.21 + 5 = 126
+          shippingName: 'Test User',
+          shippingPhone: '+34 600 123 456',
+          shippingAddress: 'Calle Test 123',
+          shippingPostalCode: '28001',
+          shippingCity: 'Madrid',
+          shippingProvince: 'Madrid',
+          shippingCountry: 'Spain',
+          updatedAt: new Date(),
+          items: {
+            create: [{
+              id: randomUUID(),
+              name: 'Test Product',
+              price: 100.00,
+              quantity: 1,
+              subtotal: 100.00,
+              category: 'Test',
+              material: 'PLA',
+            }],
+          },
+        },
+      });
+
       vi.mocked(getServerSession).mockResolvedValue({
         user: { email: adminUser.email, name: adminUser.name },
       });
@@ -431,21 +496,63 @@ describe('Invoices API', () => {
       const req = new NextRequest('http://localhost:3000/api/admin/invoices', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: testOrder.id }),
+        body: JSON.stringify({ orderId: freshOrder.id }),
       });
 
       const res = await createInvoice(req);
       const body = await res.json();
 
-      const taxableAmount = Number(body.factura.subtotal) + Number(body.factura.shipping);
-      expect(body.factura.taxableAmount).toBeCloseTo(taxableAmount, 2);
+      expect(res.status).toBe(201);
+      expect(body.success).toBe(true);
+      expect(body.factura).toBeDefined();
+
+      // Fórmula: Total = (Subtotal - Discount) × 1.21 + Shipping
+      const subtotal = Number(body.factura.subtotal);
+      const shipping = Number(body.factura.shipping);
+      const vatAmount = Number(body.factura.vatAmount);
+      const total = Number(body.factura.total);
       
-      // Total = taxable + VAT
-      const expectedTotal = taxableAmount + Number(body.factura.vatAmount);
-      expect(body.factura.total).toBeCloseTo(expectedTotal, 2);
+      // Verificar que el IVA es solo sobre productos
+      expect(vatAmount).toBeCloseTo(subtotal * 0.21, 2);
+      
+      // Verificar el total
+      const expectedTotal = subtotal * 1.21 + shipping;
+      expect(total).toBeCloseTo(expectedTotal, 2);
     });
 
     it('should include order details in invoice', async () => {
+      // Create fresh order for this test
+      const freshOrder = await prisma.order.create({
+        data: {
+          id: randomUUID(),
+          orderNumber: `P-DETAIL-${Date.now().toString().slice(-8)}`,
+          userId: customerUser.id,
+          status: 'DELIVERED',
+          subtotal: 50.00,
+          shipping: 0.00,
+          total: 60.50,
+          shippingName: 'Test User',
+          shippingPhone: '+34 600 123 456',
+          shippingAddress: 'Calle Test 123',
+          shippingPostalCode: '28001',
+          shippingCity: 'Madrid',
+          shippingProvince: 'Madrid',
+          shippingCountry: 'Spain',
+          updatedAt: new Date(),
+          items: {
+            create: [{
+              id: randomUUID(),
+              name: 'Test Product',
+              price: 50.00,
+              quantity: 1,
+              subtotal: 50.00,
+              category: 'Test',
+              material: 'PLA',
+            }],
+          },
+        },
+      });
+
       vi.mocked(getServerSession).mockResolvedValue({
         user: { email: adminUser.email, name: adminUser.name },
       });
@@ -453,14 +560,17 @@ describe('Invoices API', () => {
       const req = new NextRequest('http://localhost:3000/api/admin/invoices', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: testOrder.id }),
+        body: JSON.stringify({ orderId: freshOrder.id }),
       });
 
       const res = await createInvoice(req);
       const body = await res.json();
 
+      expect(res.status).toBe(201);
+      expect(body.success).toBe(true);
+      expect(body.factura).toBeDefined();
       expect(body.factura.order).toBeDefined();
-      expect(body.factura.order.orderNumber).toBe(testOrder.orderNumber);
+      expect(body.factura.order.orderNumber).toBe(freshOrder.orderNumber);
     });
   });
 });
