@@ -10,6 +10,7 @@ import * as bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 // Test user credentials - must match what E2E tests expect
+// These should match the credentials shown in the auth page UI
 const TEST_USERS = [
   {
     email: 'juan@example.com',
@@ -18,9 +19,9 @@ const TEST_USERS = [
     role: Role.CUSTOMER,
   },
   {
-    email: 'admin@test.com',
-    password: 'Test123!',
-    name: 'Admin Test',
+    email: 'admin@3dprint.com',
+    password: 'AdminTFM2024!',
+    name: 'Admin Usuario',
     role: Role.ADMIN,
   },
   {
