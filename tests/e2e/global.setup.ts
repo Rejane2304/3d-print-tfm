@@ -6,6 +6,23 @@
 import { test as setup } from '@playwright/test';
 import { PrismaClient, Role } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+
+// Load test environment variables explicitly
+// This ensures we use the test database, not production
+dotenv.config({ path: path.resolve(__dirname, '../../.env.test') });
+
+// Verify we're using test database
+const databaseUrl = process.env.DATABASE_URL || '';
+if (!databaseUrl.includes('test') && !databaseUrl.includes('localhost')) {
+  console.error('❌ ERROR: DATABASE_URL does not point to a test database!');
+  console.error('   Current:', databaseUrl.substring(0, 50) + '...');
+  console.error('   E2E tests must use a test database only.');
+  process.exit(1);
+}
+
+console.log('✅ Using test database:', databaseUrl.split('@')[1]?.split('/')[0] || 'localhost');
 
 const prisma = new PrismaClient();
 

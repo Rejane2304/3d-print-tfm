@@ -263,11 +263,11 @@ export default async function HomePage() {
                       <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                         <div>
                           <span className="text-2xl font-bold text-indigo-600">
-                            {(Number(product.price) * 1.21).toFixed(2)}
+                            {Number(product.price).toFixed(2)}
                             <span className="text-lg text-indigo-400">€</span>
                           </span>
                           <span className="block text-xs text-gray-400">
-                            IVA incluido
+                            sin IVA
                           </span>
                         </div>
 
