@@ -37,7 +37,6 @@ interface InvoiceData {
   items: InvoiceItem[];
   subtotal: number;
   shipping: number;
-  taxableAmount: number;
   vatRate: number;
   vatAmount: number;
   total: number;
@@ -648,10 +647,6 @@ export function generateInvoiceHTML(data: InvoiceData): string {
               <div class="totals-row">
                 <span>Envío</span>
                 <span>${formatCurrency(data.shipping)}</span>
-              </div>
-              <div class="totals-row">
-                <span>Base imponible</span>
-                <span>${formatCurrency(data.taxableAmount)}</span>
               </div>
               <div class="totals-row">
                 <span>IVA (${data.vatRate}%)</span>

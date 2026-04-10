@@ -356,10 +356,12 @@ export async function createTestInvoice(orderId: string): Promise<{ id: string; 
     throw new Error('Order not found');
   }
 
-  const taxableAmount = Number(order.subtotal) + Number(order.shipping);
+  const subtotal = Number(order.subtotal);
+  const shipping = Number(order.shipping);
   const vatRate = 21;
-  const vatAmount = (taxableAmount * vatRate) / 100;
-  const total = taxableAmount + vatAmount;
+  // IVA solo sobre productos (no envío)
+  const vatAmount = (subtotal * vatRate) / 100;
+  const total = subtotal * (1 + vatRate / 100) + shipping;
 
   const invoice = await prisma.invoice.create({
     data: {
@@ -383,7 +385,6 @@ export async function createTestInvoice(orderId: string): Promise<{ id: string; 
       clientCountry: order.shippingCountry,
       subtotal: order.subtotal,
       shipping: order.shipping,
-      taxableAmount,
       vatRate: new Decimal(vatRate),
       vatAmount: new Decimal(vatAmount),
       total: new Decimal(total),

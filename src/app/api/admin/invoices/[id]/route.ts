@@ -76,7 +76,6 @@ export async function GET(
       emitidaEn: factura.issuedAt?.toISOString() || new Date().toISOString(),
       anulada: factura.isCancelled,
       anuladaEn: factura.cancelledAt?.toISOString() || null,
-      baseImponible: Number(factura.taxableAmount),
       cuotaIva: Number(factura.vatAmount),
       tipoIva: Number(factura.vatRate),
       total: Number(factura.total),

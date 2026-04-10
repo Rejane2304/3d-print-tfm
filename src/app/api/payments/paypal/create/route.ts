@@ -100,7 +100,6 @@ async function createPayPalOrder(
 
   // El total debe ser: (items con descuento × 1.21) + envío
   const calculatedTotal = discountedItems * (1 + vatRate) + orderData.shipping;
-  const taxableBase = discountedItems; // Base imponible solo productos
 
   // Asegurar que tenemos al menos 2 decimales
   const vatAmountStr = vatAmount.toFixed(2);

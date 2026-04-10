@@ -83,7 +83,6 @@ export async function GET(
       emitidaEn: factura.issuedAt,
       anulada: factura.isCancelled,
       anuladaEn: factura.cancelledAt,
-      baseImponible: Number(factura.taxableAmount),
       cuotaIva: Number(factura.vatAmount),
       tipoIva: Number(factura.vatRate),
       total: Number(factura.total),

@@ -159,7 +159,6 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   // IVA solo sobre productos (subtotal con descuento), envío sin IVA
   const taxAmount = roundToCents(discountedSubtotal * taxRate);
   const total = roundToCents(discountedSubtotal * (1 + taxRate) + shippingCost);
-  const taxableBase = discountedSubtotal; // Base imponible solo productos
 
   try {
     // Get shipping address

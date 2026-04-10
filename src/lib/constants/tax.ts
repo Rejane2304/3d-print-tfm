@@ -52,7 +52,6 @@ export function calculateOrderTotals(
   shipping: number,
 ): {
   discountedSubtotal: number;
-  taxableBase: number;
   vatAmount: number;
   total: number;
 } {
@@ -61,12 +60,9 @@ export function calculateOrderTotals(
   const vatAmount = roundToCents(discountedSubtotal * DEFAULT_VAT_RATE);
   // Total = productos con IVA + envío (sin IVA)
   const total = roundToCents(discountedSubtotal * (1 + DEFAULT_VAT_RATE) + shipping);
-  // Base imponible según Hacienda: productos + envío
-  const taxableBase = roundToCents(discountedSubtotal + shipping);
 
   return {
     discountedSubtotal: roundToCents(discountedSubtotal),
-    taxableBase,
     vatAmount,
     total,
   };

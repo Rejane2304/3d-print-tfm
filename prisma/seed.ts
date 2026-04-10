@@ -158,16 +158,6 @@ interface InventoryMovementCSV {
   _createdByRef: string;
 }
 
-interface AlertCSV {
-  _ref: string;
-  type: string;
-  severity: string;
-  title: string;
-  message: string;
-  _productRef: string;
-  status: string;
-}
-
 interface ReviewCSV {
   _ref: string;
   _productRef: string;
@@ -250,7 +240,6 @@ interface InvoiceCSV {
   subtotal: string;
   shipping: string;
   discount: string;
-  taxableAmount: string;
   vatRate: string;
   vatAmount: string;
   total: string;
@@ -727,27 +716,6 @@ async function seedInventoryMovements(): Promise<number> {
   return inventoryCSV.length;
 }
 
-async function seedAlerts(): Promise<number> {
-  console.log('⚠️ Creating alerts...');
-  const alertsCSV = parseCSV<AlertCSV>('alerts.csv');
-  
-  for (const alert of alertsCSV) {
-    const productId = alert._productRef ? idMaps.products.get(alert._productRef) : null;
-    await prisma.alert.create({
-      data: {
-        type: alert.type as AlertType,
-        severity: alert.severity as AlertSeverity,
-        title: alert.title,
-        message: alert.message,
-        productId: productId,
-        status: alert.status as AlertStatus,
-      },
-    });
-  }
-  console.log(`✅ ${alertsCSV.length} alerts created\n`);
-  return alertsCSV.length;
-}
-
 async function seedReviews(): Promise<number> {
   console.log('⭐ Creating reviews...');
   const reviewsCSV = parseCSV<ReviewCSV>('reviews.csv');
@@ -807,7 +775,6 @@ async function seedInvoices(): Promise<number> {
         subtotal: toDecimal(inv.subtotal),
         shipping: toDecimal(inv.shipping),
         discount: inv.discount ? toDecimal(inv.discount) : null,
-        taxableAmount: toDecimal(inv.taxableAmount),
         vatRate: toDecimal(inv.vatRate),
         vatAmount: toDecimal(inv.vatAmount),
         total: toDecimal(inv.total),
@@ -826,7 +793,7 @@ async function cleanDatabase(): Promise<void> {
   await prisma.$executeRaw`TRUNCATE TABLE 
     "reviews", "order_messages", "inventory_movements", "payments", 
     "order_items", "orders", "invoices", "product_images", "products", 
-    "categories", "addresses", "users", "alerts", "shipping_configs", 
+    "categories", "addresses", "users", "shipping_configs", 
     "shipping_zones", "site_configs", "sessions", "verification_tokens", "audit_logs", 
     "carts", "cart_items", "coupons", "faqs" CASCADE`;
   console.log('✅ Data cleaned\n');
@@ -856,7 +823,6 @@ async function main(): Promise<void> {
   const orderItems = await seedOrderItems();
   const payments = await seedPayments();
   const inventoryMovements = await seedInventoryMovements();
-  const alerts = await seedAlerts();
   const reviews = await seedReviews();
   const invoices = await seedInvoices();
 
@@ -872,7 +838,6 @@ async function main(): Promise<void> {
   console.log(`   - Order Items: ${orderItems}`);
   console.log(`   - Payments: ${payments}`);
   console.log(`   - Inventory Movements: ${inventoryMovements}`);
-  console.log(`   - Alerts: ${alerts}`);
   console.log(`   - Reviews: ${reviews}`);
   console.log(`   - Invoices: ${invoices}`);
 }

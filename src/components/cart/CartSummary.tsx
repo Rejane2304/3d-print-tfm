@@ -57,11 +57,9 @@ export default function CartSummary({
   // Calcular descuento del cupón
   const couponDiscount = appliedCoupon?.discount || 0;
 
-  // Cálculos con IVA separado (transparente) - BASE IMPONIBLE INCLUYE ENVÍO
   const discountedSubtotal = Math.max(0, subtotal - couponDiscount);
-  const taxableBase = discountedSubtotal + shipping; // Envío lleva IVA
   const taxMultiplier = taxRate / 100;
-  const taxAmount = taxableBase * taxMultiplier;
+  const taxAmount = (discountedSubtotal + shipping) * taxMultiplier;
 
   // Total final (subtotal con descuento + envío + IVA)
   const total = discountedSubtotal + shipping + taxAmount;

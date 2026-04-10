@@ -43,7 +43,6 @@ interface InvoiceData {
   items: InvoiceItem[];
   subtotal: number;
   shipping: number;
-  taxableAmount: number;
   vatRate: number;
   vatAmount: number;
   total: number;
@@ -665,10 +664,6 @@ export function InvoiceViewer({ data }: InvoiceViewerProps) {
                 <span>${formatCurrency(data.shipping)}</span>
               </div>
               <div class="totals-row">
-                <span>Base imponible</span>
-                <span>${formatCurrency(data.taxableAmount)}</span>
-              </div>
-              <div class="totals-row">
                 <span>IVA (${data.vatRate}%)</span>
                 <span>${formatCurrency(data.vatAmount)}</span>
               </div>
@@ -818,7 +813,6 @@ export function useInvoiceData(invoiceData: {
       })) || [],
     subtotal: invoiceData.subtotal || invoiceData.baseImponible,
     shipping: invoiceData.shipping || 0,
-    taxableAmount: invoiceData.baseImponible,
     vatRate: invoiceData.tipoIva,
     vatAmount: invoiceData.cuotaIva,
     total: invoiceData.total,

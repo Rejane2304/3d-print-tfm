@@ -111,7 +111,6 @@ export async function POST(req: NextRequest) {
     const shipping = Number(order.shipping || 0);
     const vatRate = 0.21;
     const vatAmount = discountedItems * vatRate; // IVA solo sobre productos
-    const taxableBase = discountedItems; // Base imponible solo productos
 
     // Calculate discount ratio for proportional distribution
     const discountRatio = itemsTotal > 0 ? discount / itemsTotal : 0;

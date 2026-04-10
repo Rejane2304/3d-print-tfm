@@ -178,7 +178,6 @@ export async function GET(
       items: itemsWithBase64Images,
       subtotal: Number(factura.subtotal),
       shipping: Number(factura.shipping),
-      taxableAmount: Number(factura.taxableAmount),
       vatRate: Number(factura.vatRate),
       vatAmount: Number(factura.vatAmount),
       total: Number(factura.total),

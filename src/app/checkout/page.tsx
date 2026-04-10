@@ -449,7 +449,6 @@ export default function CheckoutPage() {
     );
   }
 
-  // Cálculos con IVA separado (transparente) - BASE IMPONIBLE INCLUYE ENVÍO
   const subtotal = cart?.subtotal || 0;
   const shippingCost = subtotal >= 50 ? 0 : 5.99;
 
@@ -460,11 +459,9 @@ export default function CheckoutPage() {
   const hasFreeShippingCoupon = appliedCoupon?.type === "FREE_SHIPPING";
   const finalShippingCost = hasFreeShippingCoupon ? 0 : shippingCost;
 
-  // Cálculo de IVA (21% sobre base imponible: subtotal con descuento + envío)
   const taxRate = 0.21;
   const discountedSubtotal = Math.max(0, subtotal - couponDiscount);
-  const taxableBase = discountedSubtotal + finalShippingCost; // Envío lleva IVA
-  const taxAmount = taxableBase * taxRate;
+  const taxAmount = (discountedSubtotal + finalShippingCost) * taxRate;
 
   // Total final
   const total = discountedSubtotal + finalShippingCost + taxAmount;
