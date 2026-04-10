@@ -152,7 +152,7 @@ export default function Header() {
 
             {/* Avatar Menu for Authenticated Users */}
             {isAuthenticated ? (
-              <div ref={userMenuRef} className="relative">
+              <div ref={userMenuRef} className="relative" data-testid="user-menu">
                 {/* Avatar Button - Touch-friendly */}
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}

@@ -33,8 +33,8 @@ test.describe('Authentication', () => {
 
   test('should login with valid credentials', async ({ page }) => {
     // Fill login form
-    await page.locator('[data-testid="login-email"]').fill('admin@test.com');
-    await page.locator('[data-testid="login-password"]').fill('test123');
+    await page.locator('[data-testid="login-email"]').fill('juan@example.com');
+    await page.locator('[data-testid="login-password"]').fill('JuanTFM2024!');
     
     // Submit login
     await page.locator('[data-testid="login-submit"]').click();
@@ -57,8 +57,8 @@ test.describe('Authentication', () => {
 
   test('should redirect authenticated users from auth page', async ({ page }) => {
     // Login first
-    await page.locator('[data-testid="login-email"]').fill('admin@test.com');
-    await page.locator('[data-testid="login-password"]').fill('test123');
+    await page.locator('[data-testid="login-email"]').fill('juan@example.com');
+    await page.locator('[data-testid="login-password"]').fill('JuanTFM2024!');
     await page.locator('[data-testid="login-submit"]').click();
     
     // Wait for navigation

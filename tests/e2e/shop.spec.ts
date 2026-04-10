@@ -48,8 +48,8 @@ test.describe('Shopping Flow', () => {
     
     // Login if required
     if (await page.locator('[data-testid="login-form"]').isVisible()) {
-      await page.locator('[data-testid="login-email"]').fill('admin@test.com');
-      await page.locator('[data-testid="login-password"]').fill('test123');
+      await page.locator('[data-testid="login-email"]').fill('juan@example.com');
+      await page.locator('[data-testid="login-password"]').fill('JuanTFM2024!');
       await page.locator('[data-testid="login-submit"]').click();
     }
     

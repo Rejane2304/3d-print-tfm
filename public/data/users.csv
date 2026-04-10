@@ -9,3 +9,4 @@ USER-0007,laura@example.com,Bt7*Gx4&Lm1p,Laura Sánchez,+34 600 000 007,CUSTOMER
 USER-0008,miguel@example.com,Vf3@Jh9#Wc6r,Miguel Torres,+34 600 000 008,CUSTOMER,true
 USER-0009,sofia@example.com,Yq8$Pn2*Zd5k,Sofia Fernández,+34 600 000 009,CUSTOMER,true
 USER-0010,test@example.com,Dw6!Mt4#Lb9x,Test User,+34 600 000 010,CUSTOMER,true
+USER-0011,admin@test.com,Test123!,Admin Test,+34 600 000 011,ADMIN,true
