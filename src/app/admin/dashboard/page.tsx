@@ -177,7 +177,7 @@ export default function AdminPanelPage() {
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-indigo-600 mx-auto mb-4" />
-          <p className="text-gray-600">Cargando dashboard...</p>
+          <p className="text-gray-600">Cargando panel admin...</p>
         </div>
       </div>
     );

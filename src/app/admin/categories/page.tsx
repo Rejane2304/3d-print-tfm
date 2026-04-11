@@ -170,9 +170,6 @@ export default function AdminCategoriesPage() {
             <div className="text-sm font-medium text-gray-900 truncate">
               {category.nombre}
             </div>
-            <div className="text-sm text-gray-500 hidden sm:block">
-              /{category.slug}
-            </div>
           </div>
         </div>
       ),

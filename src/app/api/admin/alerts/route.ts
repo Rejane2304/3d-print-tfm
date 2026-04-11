@@ -49,7 +49,12 @@ export async function GET(req: NextRequest) {
     }
 
     // Ejecutar verificaciones programadas al cargar el panel
-    await runAllScheduledChecks();
+    try {
+      await runAllScheduledChecks();
+    } catch (checksError) {
+      console.error("Error en verificaciones programadas:", checksError);
+      // No fallar la petición si las verificaciones fallan
+    }
 
     const { searchParams } = new URL(req.url);
     const type = searchParams.get("type");
