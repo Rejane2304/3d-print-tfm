@@ -325,7 +325,7 @@ export default function NuevoProductoPage() {
               href="/admin/dashboard"
               className="text-indigo-600 hover:text-indigo-800 font-medium"
             >
-              ← Volver al Dashboard
+              ← Volver al Panel
             </Link>
           </div>
         </div>
