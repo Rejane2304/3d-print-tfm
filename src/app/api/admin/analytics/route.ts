@@ -190,12 +190,12 @@ export async function GET(req: NextRequest) {
         _sum: { total: true },
       }),
 
-      // CANCELACIONES (pérdidas por pedidos cancelados)
+      // CANCELACIONES (pérdidas por pedidos cancelados) - usando createdAt en lugar de cancelledAt
       // Today
       prisma.order.aggregate({
         where: {
           status: "CANCELLED",
-          cancelledAt: { gte: today },
+          createdAt: { gte: today },
         },
         _sum: { total: true },
       }),
@@ -203,7 +203,7 @@ export async function GET(req: NextRequest) {
       prisma.order.aggregate({
         where: {
           status: "CANCELLED",
-          cancelledAt: { gte: weekAgo },
+          createdAt: { gte: weekAgo },
         },
         _sum: { total: true },
       }),
@@ -211,7 +211,7 @@ export async function GET(req: NextRequest) {
       prisma.order.aggregate({
         where: {
           status: "CANCELLED",
-          cancelledAt: { gte: monthAgo },
+          createdAt: { gte: monthAgo },
         },
         _sum: { total: true },
       }),
@@ -219,7 +219,7 @@ export async function GET(req: NextRequest) {
       prisma.order.aggregate({
         where: {
           status: "CANCELLED",
-          cancelledAt: { gte: lastMonthStart, lte: lastMonthEnd },
+          createdAt: { gte: lastMonthStart, lte: lastMonthEnd },
         },
         _sum: { total: true },
       }),

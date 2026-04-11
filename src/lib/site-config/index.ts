@@ -103,7 +103,12 @@ export async function getCompanyDataForInvoice(): Promise<{
  */
 export async function getDefaultVatRate(): Promise<number> {
   const config = await getSiteConfig();
-  return config?.defaultVatRate?.toNumber() || 21;
+  if (!config?.defaultVatRate) return 21;
+  // Handle Decimal from Prisma
+  const vatRate = config.defaultVatRate;
+  return typeof vatRate === 'object' && 'toNumber' in vatRate
+    ? (vatRate as { toNumber: () => number }).toNumber()
+    : Number(vatRate);
 }
 
 /**
