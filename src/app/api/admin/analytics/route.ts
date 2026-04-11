@@ -82,12 +82,80 @@ export async function GET(req: NextRequest) {
         dateFilter = monthAgo;
     }
 
-    // Sales Summary - SOLO pedidos DELIVERED (ventas confirmadas y pagadas)
+    // Sales Summary - Ingresos completos para gestoría
     const salesSummary = await Promise.all([
+      // INGRESOS BRUTOS (todos los pedidos, incluyendo cancelados)
+      // Today
+      prisma.order.aggregate({
+        where: { createdAt: { gte: today } },
+        _sum: { total: true },
+      }),
+      // This week
+      prisma.order.aggregate({
+        where: { createdAt: { gte: weekAgo } },
+        _sum: { total: true },
+      }),
+      // This month
+      prisma.order.aggregate({
+        where: { createdAt: { gte: monthAgo } },
+        _sum: { total: true },
+      }),
+      // Last month
+      prisma.order.aggregate({
+        where: {
+          createdAt: { gte: lastMonthStart, lte: lastMonthEnd },
+        },
+        _sum: { total: true },
+      }),
+      // Total histórico bruto
+      prisma.order.aggregate({
+        _sum: { total: true },
+      }),
+
+      // INGRESOS NETOS (excluyendo cancelados) - Lo que realmente se espera recibir
       // Today
       prisma.order.aggregate({
         where: {
-          status: "DELIVERED", // Solo pedidos entregados = ventas reales
+          createdAt: { gte: today },
+          status: { not: "CANCELLED" },
+        },
+        _sum: { total: true },
+      }),
+      // This week
+      prisma.order.aggregate({
+        where: {
+          createdAt: { gte: weekAgo },
+          status: { not: "CANCELLED" },
+        },
+        _sum: { total: true },
+      }),
+      // This month
+      prisma.order.aggregate({
+        where: {
+          createdAt: { gte: monthAgo },
+          status: { not: "CANCELLED" },
+        },
+        _sum: { total: true },
+      }),
+      // Last month
+      prisma.order.aggregate({
+        where: {
+          createdAt: { gte: lastMonthStart, lte: lastMonthEnd },
+          status: { not: "CANCELLED" },
+        },
+        _sum: { total: true },
+      }),
+      // Total histórico neto
+      prisma.order.aggregate({
+        where: { status: { not: "CANCELLED" } },
+        _sum: { total: true },
+      }),
+
+      // INGRESOS REALIZADOS (DELIVERED) - Pedidos ya entregados y cobrados
+      // Today
+      prisma.order.aggregate({
+        where: {
+          status: "DELIVERED",
           deliveredAt: { gte: today },
         },
         _sum: { total: true },
@@ -116,36 +184,78 @@ export async function GET(req: NextRequest) {
         },
         _sum: { total: true },
       }),
-      // Total (histórico)
+      // Total histórico entregado
       prisma.order.aggregate({
         where: { status: "DELIVERED" },
         _sum: { total: true },
       }),
+
+      // CANCELACIONES (pérdidas por pedidos cancelados)
+      // Today
+      prisma.order.aggregate({
+        where: {
+          status: "CANCELLED",
+          cancelledAt: { gte: today },
+        },
+        _sum: { total: true },
+      }),
+      // This week
+      prisma.order.aggregate({
+        where: {
+          status: "CANCELLED",
+          cancelledAt: { gte: weekAgo },
+        },
+        _sum: { total: true },
+      }),
+      // This month
+      prisma.order.aggregate({
+        where: {
+          status: "CANCELLED",
+          cancelledAt: { gte: monthAgo },
+        },
+        _sum: { total: true },
+      }),
+      // Last month
+      prisma.order.aggregate({
+        where: {
+          status: "CANCELLED",
+          cancelledAt: { gte: lastMonthStart, lte: lastMonthEnd },
+        },
+        _sum: { total: true },
+      }),
+      // Total histórico cancelado
+      prisma.order.aggregate({
+        where: { status: "CANCELLED" },
+        _sum: { total: true },
+      }),
     ]);
 
-    // Order Stats - Excluir CANCELLED de totales
+    // Order Stats - Métricas completas para gestoría
     const orderStats = await Promise.all([
-      // Total orders (excluyendo cancelados)
+      // Total orders histórico (TODOS incluyendo cancelados)
+      prisma.order.count(),
+      // Total excluyendo cancelados (pedidos activos/completados)
       prisma.order.count({ where: { status: { not: "CANCELLED" } } }),
-      // Today (excluyendo cancelados)
+      // Today (TODOS los pedidos creados hoy)
       prisma.order.count({
-        where: {
-          createdAt: { gte: today },
-          status: { not: "CANCELLED" },
-        },
+        where: { createdAt: { gte: today } },
       }),
-      // This week (excluyendo cancelados)
+      // This week (TODOS los pedidos de la semana)
       prisma.order.count({
-        where: {
-          createdAt: { gte: weekAgo },
-          status: { not: "CANCELLED" },
-        },
+        where: { createdAt: { gte: weekAgo } },
       }),
-      // This month (excluyendo cancelados)
+      // This month (TODOS los pedidos del mes)
+      prisma.order.count({
+        where: { createdAt: { gte: monthAgo } },
+      }),
+      // Pedidos cancelados (total histórico)
+      prisma.order.count({ where: { status: "CANCELLED" } }),
+      // Pedidos pendientes de pago (PENDING)
+      prisma.order.count({ where: { status: "PENDING" } }),
+      // Pedidos pagados/confirmados (CONFIRMED y posteriores, excluyendo CANCELLED y PENDING)
       prisma.order.count({
         where: {
-          createdAt: { gte: monthAgo },
-          status: { not: "CANCELLED" },
+          status: { in: ["CONFIRMED", "PREPARING", "SHIPPED", "DELIVERED"] },
         },
       }),
       // By status (todos los estados para desglose)
@@ -262,7 +372,7 @@ export async function GET(req: NextRequest) {
     });
 
     const statusCounts: Record<string, number> = {};
-    orderStats[4].forEach((s) => {
+    orderStats[8].forEach((s: { status: string; _count: { status: number } }) => {
       const translatedStatus = translateOrderStatus(s.status);
       statusCounts[translatedStatus] = s._count.status;
     });
@@ -271,17 +381,60 @@ export async function GET(req: NextRequest) {
       success: true,
       data: {
         salesSummary: {
-          today: Number(salesSummary[0]._sum.total || 0),
-          thisWeek: Number(salesSummary[1]._sum.total || 0),
-          thisMonth: Number(salesSummary[2]._sum.total || 0),
-          lastMonth: Number(salesSummary[3]._sum.total || 0),
-          total: Number(salesSummary[4]._sum.total || 0),
+          // INGRESOS BRUTOS (todos los pedidos, incluyendo cancelados)
+          gross: {
+            today: Number(salesSummary[0]._sum.total || 0),
+            thisWeek: Number(salesSummary[1]._sum.total || 0),
+            thisMonth: Number(salesSummary[2]._sum.total || 0),
+            lastMonth: Number(salesSummary[3]._sum.total || 0),
+            total: Number(salesSummary[4]._sum.total || 0),
+          },
+          // INGRESOS NETOS (excluyendo cancelados) - Lo que se espera recibir
+          net: {
+            today: Number(salesSummary[5]._sum.total || 0),
+            thisWeek: Number(salesSummary[6]._sum.total || 0),
+            thisMonth: Number(salesSummary[7]._sum.total || 0),
+            lastMonth: Number(salesSummary[8]._sum.total || 0),
+            total: Number(salesSummary[9]._sum.total || 0),
+          },
+          // INGRESOS ENTREGADOS (DELIVERED) - Pedidos ya completados
+          delivered: {
+            today: Number(salesSummary[10]._sum.total || 0),
+            thisWeek: Number(salesSummary[11]._sum.total || 0),
+            thisMonth: Number(salesSummary[12]._sum.total || 0),
+            lastMonth: Number(salesSummary[13]._sum.total || 0),
+            total: Number(salesSummary[14]._sum.total || 0),
+          },
+          // CANCELACIONES (pérdidas)
+          cancelled: {
+            today: Number(salesSummary[15]._sum.total || 0),
+            thisWeek: Number(salesSummary[16]._sum.total || 0),
+            thisMonth: Number(salesSummary[17]._sum.total || 0),
+            lastMonth: Number(salesSummary[18]._sum.total || 0),
+            total: Number(salesSummary[19]._sum.total || 0),
+          },
+          // Legacy (para compatibilidad con frontend actual)
+          today: Number(salesSummary[5]._sum.total || 0),
+          thisWeek: Number(salesSummary[6]._sum.total || 0),
+          thisMonth: Number(salesSummary[7]._sum.total || 0),
+          lastMonth: Number(salesSummary[8]._sum.total || 0),
+          total: Number(salesSummary[9]._sum.total || 0),
         },
         orderStats: {
-          total: orderStats[0],
-          today: orderStats[1],
-          thisWeek: orderStats[2],
-          thisMonth: orderStats[3],
+          // Métricas de gestoría completas
+          totalHistoric: orderStats[0],           // Todos los pedidos (incluye cancelados)
+          totalActive: orderStats[1],            // Pedidos no cancelados
+          totalToday: orderStats[2],             // Pedidos creados hoy
+          totalThisWeek: orderStats[3],          // Pedidos de la semana
+          totalThisMonth: orderStats[4],         // Pedidos del mes
+          totalCancelled: orderStats[5],         // Pedidos cancelados
+          totalPending: orderStats[6],           // Pedidos pendientes de pago
+          totalPaid: orderStats[7],              // Pedidos pagados/confirmados
+          // Legacy (para compatibilidad)
+          total: orderStats[1],
+          today: orderStats[2],
+          thisWeek: orderStats[3],
+          thisMonth: orderStats[4],
           byStatus: statusCounts,
         },
         customerStats: {

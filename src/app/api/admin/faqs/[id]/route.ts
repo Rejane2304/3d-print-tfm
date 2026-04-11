@@ -78,7 +78,7 @@ export async function GET(
       );
     }
 
-    const faq = await prisma.faq.findUnique({
+    const faq = await prisma.fAQ.findUnique({
       where: { id },
     });
 
@@ -153,7 +153,7 @@ export async function PATCH(
     }
 
     // Verificar que la FAQ existe
-    const existing = await prisma.faq.findUnique({
+    const existing = await prisma.fAQ.findUnique({
       where: { id },
     });
 
@@ -168,7 +168,7 @@ export async function PATCH(
     const data = faqUpdateSchema.parse(body);
 
     // Actualizar FAQ
-    const faq = await prisma.faq.update({
+    const faq = await prisma.fAQ.update({
       where: { id },
       data: {
         ...(data.question && { question: data.question }),
@@ -230,7 +230,7 @@ export async function DELETE(
     }
 
     // Verificar que la FAQ existe
-    const existing = await prisma.faq.findUnique({
+    const existing = await prisma.fAQ.findUnique({
       where: { id },
     });
 
@@ -242,7 +242,7 @@ export async function DELETE(
     }
 
     // Eliminar FAQ
-    await prisma.faq.delete({
+    await prisma.fAQ.delete({
       where: { id },
     });
 

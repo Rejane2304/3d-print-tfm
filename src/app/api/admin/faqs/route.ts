@@ -70,7 +70,7 @@ export async function GET() {
       );
     }
 
-    const faqs = await prisma.faq.findMany({
+    const faqs = await prisma.fAQ.findMany({
       orderBy: [{ category: "asc" }, { displayOrder: "asc" }],
     });
 
@@ -138,7 +138,7 @@ export async function POST(req: NextRequest) {
     const data = faqSchema.parse(body);
 
     // Crear FAQ
-    const faq = await prisma.faq.create({
+    const faq = await prisma.fAQ.create({
       data: {
         id: crypto.randomUUID(),
         question: data.question,

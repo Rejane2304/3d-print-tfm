@@ -31,7 +31,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   }
 
   // Buscar FAQs
-  const faqs = await prisma.faq.findMany({
+  const faqs = await prisma.fAQ.findMany({
     where,
     orderBy: [{ category: "asc" }, { displayOrder: "asc" }],
   });

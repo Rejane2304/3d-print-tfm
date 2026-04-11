@@ -28,13 +28,43 @@ import {
 } from "lucide-react";
 
 interface AnalyticsData {
-  salesSummary: {
-    today: number;
-    thisWeek: number;
-    thisMonth: number;
-    lastMonth: number;
-    total: number;
-  };
+      salesSummary: {
+        // Nuevas métricas de gestoría
+        gross: {
+          today: number;
+          thisWeek: number;
+          thisMonth: number;
+          lastMonth: number;
+          total: number;
+        };
+        net: {
+          today: number;
+          thisWeek: number;
+          thisMonth: number;
+          lastMonth: number;
+          total: number;
+        };
+        delivered: {
+          today: number;
+          thisWeek: number;
+          thisMonth: number;
+          lastMonth: number;
+          total: number;
+        };
+        cancelled: {
+          today: number;
+          thisWeek: number;
+          thisMonth: number;
+          lastMonth: number;
+          total: number;
+        };
+        // Legacy
+        today: number;
+        thisWeek: number;
+        thisMonth: number;
+        lastMonth: number;
+        total: number;
+      };
   orderStats: {
     total: number;
     today: number;
@@ -195,27 +225,46 @@ export default function AdminPanelPage() {
           {/* Revenue Card */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Ingresos</p>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-gray-600">Ingresos Netos</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {formatCurrency(analytics.salesSummary.thisMonth)}
+                  {formatCurrency(analytics.salesSummary.net.thisMonth)}
                 </p>
+                {/* Desglose de ingresos */}
+                <div className="mt-2 space-y-1 text-xs">
+                  <div className="flex justify-between text-gray-500">
+                    <span>Bruto:</span>
+                    <span>{formatCurrency(analytics.salesSummary.gross.thisMonth)}</span>
+                  </div>
+                  <div className="flex justify-between text-red-500">
+                    <span>Cancelaciones:</span>
+                    <span>-{formatCurrency(analytics.salesSummary.cancelled.thisMonth)}</span>
+                  </div>
+                  <div className="flex justify-between text-green-600 font-medium border-t border-gray-200 pt-1">
+                    <span>Neto:</span>
+                    <span>{formatCurrency(analytics.salesSummary.net.thisMonth)}</span>
+                  </div>
+                  <div className="flex justify-between text-blue-600">
+                    <span>Entregado:</span>
+                    <span>{formatCurrency(analytics.salesSummary.delivered.thisMonth)}</span>
+                  </div>
+                </div>
                 {dateRange === "month" &&
-                  analytics.salesSummary.lastMonth > 0 && (
+                  analytics.salesSummary.net.lastMonth > 0 && (
                     <p
-                      className={`text-sm mt-1 ${
-                        analytics.salesSummary.thisMonth >=
-                        analytics.salesSummary.lastMonth
+                      className={`text-sm mt-2 ${
+                        analytics.salesSummary.net.thisMonth >=
+                        analytics.salesSummary.net.lastMonth
                           ? "text-green-600"
                           : "text-red-600"
                       }`}
                     >
-                      vs {formatCurrency(analytics.salesSummary.lastMonth)} mes
+                      vs {formatCurrency(analytics.salesSummary.net.lastMonth)} mes
                       ant.
                     </p>
                   )}
               </div>
-              <div className="p-3 bg-green-100 rounded-lg">
+              <div className="p-3 bg-green-100 rounded-lg ml-4">
                 <DollarSign className="h-6 w-6 text-green-600" />
               </div>
             </div>
@@ -257,22 +306,34 @@ export default function AdminPanelPage() {
             </div>
           </div>
 
-          {/* Average Order Card */}
+          {/* Average Order Card - Basado en ingresos netos */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">
-                  Ticket Medio
+                  Ticket Medio Neto
                 </p>
                 <p className="text-2xl font-bold text-gray-900">
                   {formatCurrency(
                     analytics.orderStats.thisMonth > 0
-                      ? analytics.salesSummary.thisMonth /
+                      ? analytics.salesSummary.net.thisMonth /
                           analytics.orderStats.thisMonth
                       : 0,
                   )}
                 </p>
-                <p className="text-sm text-gray-500 mt-1">por pedido</p>
+                <div className="mt-2 space-y-1 text-xs text-gray-500">
+                  <div className="flex justify-between">
+                    <span>Ticket Bruto:</span>
+                    <span>
+                      {formatCurrency(
+                        analytics.orderStats.thisMonth > 0
+                          ? analytics.salesSummary.gross.thisMonth /
+                              analytics.orderStats.thisMonth
+                          : 0,
+                      )}
+                    </span>
+                  </div>
+                </div>
               </div>
               <div className="p-3 bg-yellow-100 rounded-lg">
                 <TrendingUp className="h-6 w-6 text-yellow-600" />
