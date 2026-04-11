@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { DataTable, Column, BulkAction } from "@/components/ui/DataTable";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { BulkDeleteModal } from "@/components/ui/BulkDeleteModal";
 
 interface Category extends Record<string, unknown> {
   id: string;
@@ -45,6 +46,9 @@ export default function AdminCategoriesPage() {
   const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(
     null,
   );
+  const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
+  const [selectedCount, setSelectedCount] = useState(0);
+  const [selectedIdsToDelete, setSelectedIdsToDelete] = useState<string[]>([]);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -115,12 +119,18 @@ export default function AdminCategoriesPage() {
     }
   };
 
-  const handleBulkDelete = async (selectedIds: string[]) => {
+  const handleBulkDelete = (selectedIds: string[]) => {
+    setSelectedIdsToDelete(selectedIds);
+    setSelectedCount(selectedIds.length);
+    setBulkDeleteModalOpen(true);
+  };
+
+  const confirmBulkDelete = async () => {
     try {
       let hasError = false;
 
       await Promise.all(
-        selectedIds.map(async (id) => {
+        selectedIdsToDelete.map(async (id) => {
           const response = await fetch(`/api/admin/categories/${id}`, {
             method: "DELETE",
           });
@@ -136,9 +146,12 @@ export default function AdminCategoriesPage() {
         );
       }
 
-      setCategories(categories.filter((c) => !selectedIds.includes(c.id)));
+      setCategories(categories.filter((c) => !selectedIdsToDelete.includes(c.id)));
     } catch {
       setError("Error eliminando categorías");
+    } finally {
+      setBulkDeleteModalOpen(false);
+      setSelectedIdsToDelete([]);
     }
   };
 
@@ -416,6 +429,21 @@ export default function AdminCategoriesPage() {
             ? categoryToDelete.totalProductos > 0
             : false
         }
+      />
+
+      <BulkDeleteModal
+        isOpen={bulkDeleteModalOpen}
+        onClose={() => {
+          setBulkDeleteModalOpen(false);
+          setSelectedIdsToDelete([]);
+        }}
+        onConfirm={confirmBulkDelete}
+        selectedCount={selectedCount}
+        itemType="categories"
+        itemName="categoría"
+        itemNamePlural="categorías"
+        hasAssociatedItems={true}
+        associatedItemType="productos"
       />
     </div>
   );

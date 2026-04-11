@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { DataTable, Column, BulkAction } from "@/components/ui/DataTable";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { BulkDeleteModal } from "@/components/ui/BulkDeleteModal";
 
 interface ShippingZone extends Record<string, unknown> {
   id: string;
@@ -54,6 +55,8 @@ export default function AdminShippingPage() {
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [zoneToDelete, setZoneToDelete] = useState<ShippingZone | null>(null);
+  const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
+  const [bulkDeleteIds, setBulkDeleteIds] = useState<string[]>([]);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -122,12 +125,17 @@ export default function AdminShippingPage() {
     }
   };
 
-  const handleBulkDelete = async (selectedIds: string[]) => {
+  const handleBulkDelete = (selectedIds: string[]) => {
+    setBulkDeleteIds(selectedIds);
+    setBulkDeleteModalOpen(true);
+  };
+
+  const confirmBulkDelete = async () => {
     try {
       let hasError = false;
 
       await Promise.all(
-        selectedIds.map(async (id) => {
+        bulkDeleteIds.map(async (id) => {
           const response = await fetch(`/api/admin/shipping/${id}`, {
             method: "DELETE",
           });
@@ -141,9 +149,12 @@ export default function AdminShippingPage() {
         setError("Algunas zonas de envío no pudieron ser eliminadas");
       }
 
-      setZones(zones.filter((z) => !selectedIds.includes(z.id)));
+      setZones(zones.filter((z) => !bulkDeleteIds.includes(z.id)));
     } catch {
       setError("Error eliminando zonas de envío");
+    } finally {
+      setBulkDeleteModalOpen(false);
+      setBulkDeleteIds([]);
     }
   };
 
@@ -455,6 +466,20 @@ export default function AdminShippingPage() {
         description="Esta acción no se puede deshacer. La zona de envío será eliminada permanentemente."
         confirmText="Eliminar"
         type="danger"
+      />
+
+      <BulkDeleteModal
+        isOpen={bulkDeleteModalOpen}
+        onClose={() => {
+          setBulkDeleteModalOpen(false);
+          setBulkDeleteIds([]);
+        }}
+        onConfirm={confirmBulkDelete}
+        itemType="shipping"
+        itemName="zona de envío"
+        itemNamePlural="zonas de envío"
+        selectedCount={bulkDeleteIds.length}
+        hasAssociatedItems={false}
       />
     </div>
   );

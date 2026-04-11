@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { DataTable, Column, BulkAction } from "@/components/ui/DataTable";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { BulkDeleteModal } from "@/components/ui/BulkDeleteModal";
 
 interface Coupon extends Record<string, unknown> {
   id: string;
@@ -51,6 +52,11 @@ export default function AdminCouponsPage() {
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [couponToDelete, setCouponToDelete] = useState<Coupon | null>(null);
+
+  // Estados para bulk delete modal
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  const [selectedIdsForBulkDelete, setSelectedIdsForBulkDelete] = useState<string[]>([]);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -117,12 +123,20 @@ export default function AdminCouponsPage() {
     }
   };
 
-  const handleBulkDelete = async (selectedIds: string[]) => {
+  const handleBulkDelete = (selectedIds: string[]) => {
+    setSelectedIdsForBulkDelete(selectedIds);
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  const confirmBulkDelete = async () => {
+    if (selectedIdsForBulkDelete.length === 0) return;
+
+    setIsBulkDeleting(true);
     try {
       let hasError = false;
 
       await Promise.all(
-        selectedIds.map(async (id) => {
+        selectedIdsForBulkDelete.map(async (id) => {
           const response = await fetch(`/api/admin/coupons/${id}`, {
             method: "DELETE",
           });
@@ -136,9 +150,13 @@ export default function AdminCouponsPage() {
         setError("Algunos cupones no pudieron ser eliminados");
       }
 
-      setCoupons(coupons.filter((c) => !selectedIds.includes(c.id)));
+      setCoupons(coupons.filter((c) => !selectedIdsForBulkDelete.includes(c.id)));
     } catch {
       setError("Error eliminando cupones");
+    } finally {
+      setIsBulkDeleting(false);
+      setIsBulkDeleteModalOpen(false);
+      setSelectedIdsForBulkDelete([]);
     }
   };
 
@@ -475,6 +493,22 @@ export default function AdminCouponsPage() {
         description="Esta acción no se puede deshacer. El cupón será eliminado permanentemente."
         confirmText="Eliminar"
         type="danger"
+      />
+
+      <BulkDeleteModal
+        isOpen={isBulkDeleteModalOpen}
+        onClose={() => {
+          setIsBulkDeleteModalOpen(false);
+          setSelectedIdsForBulkDelete([]);
+        }}
+        onConfirm={confirmBulkDelete}
+        selectedCount={selectedIdsForBulkDelete.length}
+        itemType="coupons"
+        itemName="cupón"
+        itemNamePlural="cupones"
+        hasAssociatedItems={true}
+        associatedItemType="usos registrados"
+        isLoading={isBulkDeleting}
       />
     </div>
   );

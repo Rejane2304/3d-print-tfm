@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { DataTable, Column, BulkAction } from "@/components/ui/DataTable";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { BulkDeleteModal } from "@/components/ui/BulkDeleteModal";
 
 interface Resena extends Record<string, unknown> {
   id: string;
@@ -47,6 +48,8 @@ export default function AdminReviewsPage() {
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [resenaToDelete, setResenaToDelete] = useState<Resena | null>(null);
+  const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
+  const [selectedIdsToDelete, setSelectedIdsToDelete] = useState<string[]>([]);
   const [filters, setFilters] = useState({
     product: "",
     rating: "",
@@ -188,21 +191,29 @@ export default function AdminReviewsPage() {
     }
   };
 
-  const handleBulkDelete = async (selectedIds: string[]) => {
+  const handleBulkDelete = (selectedIds: string[]) => {
+    setSelectedIdsToDelete(selectedIds);
+    setBulkDeleteModalOpen(true);
+  };
+
+  const confirmBulkDelete = async () => {
     try {
       const response = await fetch("/api/admin/reviews", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids: selectedIds }),
+        body: JSON.stringify({ ids: selectedIdsToDelete }),
       });
 
       if (response.ok) {
-        setResenas(resenas.filter((r) => !selectedIds.includes(r.id)));
+        setResenas(resenas.filter((r) => !selectedIdsToDelete.includes(r.id)));
       } else {
         throw new Error("Error eliminando reseñas");
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error eliminando reseñas");
+    } finally {
+      setBulkDeleteModalOpen(false);
+      setSelectedIdsToDelete([]);
     }
   };
 
@@ -591,6 +602,20 @@ export default function AdminReviewsPage() {
         description="Esta acción no se puede deshacer. La reseña será eliminada permanentemente."
         confirmText="Eliminar"
         type="danger"
+      />
+
+      <BulkDeleteModal
+        isOpen={bulkDeleteModalOpen}
+        onClose={() => {
+          setBulkDeleteModalOpen(false);
+          setSelectedIdsToDelete([]);
+        }}
+        onConfirm={confirmBulkDelete}
+        selectedCount={selectedIdsToDelete.length}
+        itemType="reviews"
+        itemName="reseña"
+        itemNamePlural="reseñas"
+        hasAssociatedItems={false}
       />
     </div>
   );

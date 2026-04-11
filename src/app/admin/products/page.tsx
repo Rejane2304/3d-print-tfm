@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { DataTable, Column, BulkAction } from "@/components/ui/DataTable";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { BulkDeleteModal } from "@/components/ui/BulkDeleteModal";
 
 interface Product extends Record<string, unknown> {
   id: string;
@@ -40,6 +41,9 @@ export default function AdminProductsPage() {
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
+  const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
+  const [selectedCount, setSelectedCount] = useState(0);
+  const [selectedIdsToDelete, setSelectedIdsToDelete] = useState<string[]>([]);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -101,16 +105,26 @@ export default function AdminProductsPage() {
     }
   };
 
-  const handleBulkDelete = async (selectedIds: string[]) => {
+  const handleBulkDelete = (selectedIds: string[]) => {
+    setSelectedIdsToDelete(selectedIds);
+    setSelectedCount(selectedIds.length);
+    setBulkDeleteModalOpen(true);
+  };
+
+  const confirmBulkDelete = async () => {
     try {
       await Promise.all(
-        selectedIds.map((id) =>
+        selectedIdsToDelete.map((id) =>
           fetch(`/api/admin/products/${id}`, { method: "DELETE" }),
         ),
       );
-      setProducts(products.filter((p) => !selectedIds.includes(p.id)));
+      setProducts(products.filter((p) => !selectedIdsToDelete.includes(p.id)));
     } catch {
       setError("Error al eliminar productos");
+    } finally {
+      setBulkDeleteModalOpen(false);
+      setSelectedIdsToDelete([]);
+      setSelectedCount(0);
     }
   };
 
@@ -311,6 +325,21 @@ export default function AdminProductsPage() {
         description="Esta acción no se puede deshacer. El producto será eliminado permanentemente."
         confirmText="Eliminar"
         type="danger"
+      />
+
+      <BulkDeleteModal
+        isOpen={bulkDeleteModalOpen}
+        onClose={() => {
+          setBulkDeleteModalOpen(false);
+          setSelectedIdsToDelete([]);
+          setSelectedCount(0);
+        }}
+        onConfirm={confirmBulkDelete}
+        selectedCount={selectedCount}
+        itemType="products"
+        itemName="producto"
+        itemNamePlural="productos"
+        hasAssociatedItems={false}
       />
     </div>
   );
