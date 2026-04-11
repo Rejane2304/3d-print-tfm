@@ -70,7 +70,7 @@ export default function EditarFAQPage() {
     }
 
     const user = session?.user as { rol?: string } | undefined;
-    if (status === "authenticated" && user?.rol !== "ADMIN") {
+    if (status === "authenticated" && user?.role !== "ADMIN") {
       router.push("/");
       return;
     }

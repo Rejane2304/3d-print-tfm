@@ -42,7 +42,7 @@ export default function Header() {
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   const isAuthenticated = status === "authenticated";
-  const isAdmin = session?.user?.rol === "ADMIN";
+  const isAdmin = session?.user?.role === "ADMIN";
 
   // Get first letter of user's name
   const userName = session?.user?.name || "";

@@ -5,7 +5,7 @@ export interface CustomUser {
   id: string;
   email: string;
   name: string;
-  rol: string;
+  role: string;
 }
 
 export interface CustomSession {
@@ -20,6 +20,6 @@ export function getUserFromSession(session: unknown): CustomUser | null {
     id: s.user.id,
     email: s.user.email,
     name: s.user.name,
-    rol: s.user.rol,
+    role: s.user.role,
   };
 }

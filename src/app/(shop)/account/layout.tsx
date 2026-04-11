@@ -26,7 +26,7 @@ export default async function CuentaLayout({ children }: CuentaLayoutProps) {
     redirect("/login");
   }
 
-  const isAdmin = session.user.rol === "ADMIN";
+  const isAdmin = session.user.role === "ADMIN";
 
   // Menu items según el rol
   const menuItems = isAdmin

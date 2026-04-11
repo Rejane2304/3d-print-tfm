@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const lastEventId = searchParams.get("lastEventId");
     const userId = session.user.id;
-    const userRole = session.user.rol;
+    const userRole = session.user.role;
 
     // Construir rooms a las que el usuario tiene acceso
     const rooms = [`user:${userId}`];

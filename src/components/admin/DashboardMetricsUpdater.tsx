@@ -13,7 +13,7 @@ export default function DashboardMetricsUpdater({
 }: DashboardMetricsUpdaterProps) {
   const { data: session } = useSession();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const userRole = session?.user?.rol;
+  const userRole = session?.user?.role;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { events, pendingEvents, acknowledgeEvents } = useAdminRealTime({

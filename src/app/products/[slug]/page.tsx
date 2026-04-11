@@ -186,7 +186,7 @@ export default async function ProductDetailPage({
 }: ProductDetailPageProps) {
   // Get session to check if user is admin or logged in
   const session = await getServerSession(authOptions);
-  const isAdmin = session?.user?.rol === "ADMIN";
+  const isAdmin = session?.user?.role === "ADMIN";
   const isLoggedIn = !!session?.user;
 
   const data = await getProduct(params.slug);

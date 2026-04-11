@@ -108,8 +108,8 @@ export default function AdminOrdersPage() {
     }
 
     if (status === "authenticated") {
-      const user = session?.user as { rol?: string } | undefined;
-      if (user?.rol !== "ADMIN") {
+      const user = session?.user as { role?: string } | undefined;
+      if (user?.role !== "ADMIN") {
         router.push("/");
         return;
       }

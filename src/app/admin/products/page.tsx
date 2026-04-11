@@ -49,7 +49,7 @@ export default function AdminProductsPage() {
 
     if (status === "authenticated") {
       const user = session?.user as { rol?: string } | undefined;
-      if (user?.rol !== "ADMIN") {
+      if (user?.role !== "ADMIN") {
         router.push("/");
         return;
       }

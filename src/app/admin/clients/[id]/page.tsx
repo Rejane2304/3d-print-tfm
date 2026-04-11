@@ -77,8 +77,8 @@ export default function AdminClientDetailPage() {
       return;
     }
 
-    const user = session?.user as { rol?: string } | undefined;
-    if (status === "authenticated" && user?.rol !== "ADMIN") {
+    const user = session?.user as { role?: string } | undefined;
+    if (status === "authenticated" && user?.role !== "ADMIN") {
       router.push("/");
       return;
     }

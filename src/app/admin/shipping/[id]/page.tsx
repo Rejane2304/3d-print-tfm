@@ -56,9 +56,9 @@ export default function EditarZonaEnvioPage() {
       return;
     }
 
-    const user = session?.user as { rol?: string } | undefined;
+    const user = session?.user as { role?: string } | undefined;
     if (status === "authenticated") {
-      if (user?.rol !== "ADMIN") {
+      if (user?.role !== "ADMIN") {
         router.push("/");
         return;
       }

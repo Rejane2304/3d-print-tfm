@@ -34,7 +34,7 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
   const { data: session } = useSession();
   const { config } = useSiteConfig();
-  const isAdmin = session?.user?.rol === "ADMIN";
+  const isAdmin = session?.user?.role === "ADMIN";
 
   // Use config values with fallbacks
   const companyEmail = config?.emailEmpresa || "info@3dprint.com";

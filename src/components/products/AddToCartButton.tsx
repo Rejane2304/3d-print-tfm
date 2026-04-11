@@ -35,7 +35,7 @@ export default function AddToCartButton({
   const { addItem } = useCart();
 
   // Check if user is admin - admins cannot purchase
-  const isAdmin = session?.user?.rol === "ADMIN";
+  const isAdmin = session?.user?.role === "ADMIN";
 
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);

@@ -86,7 +86,7 @@ export default function RealTimeNotifications() {
     }
   };
 
-  if (!session?.user || session.user.rol !== "ADMIN") {
+  if (!session?.user || session.user.role !== "ADMIN") {
     return null;
   }
 

@@ -48,7 +48,7 @@ function AuthContent() {
         return;
       }
 
-      const userRole = (session.user as { rol?: string })?.rol;
+      const userRole = (session.user as { role?: string })?.role;
       if (userRole === "ADMIN") {
         router.push("/admin/dashboard");
       } else if (!justRegistered) {
