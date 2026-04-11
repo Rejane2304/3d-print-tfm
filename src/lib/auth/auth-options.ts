@@ -159,7 +159,7 @@ export const authOptions: AuthOptions = {
           select: { role: true },
         });
         if (dbUser) {
-          token.rol = dbUser.role;
+          token.role = dbUser.role;
         }
       }
       return token;
@@ -167,8 +167,8 @@ export const authOptions: AuthOptions = {
     async session({ session, token }) {
       if (token && session.user) {
         session.user.id = token.id as string;
-        if (token.rol) {
-          session.user.rol = token.rol;
+        if (token.role) {
+          session.user.role = token.role;
         }
       }
       return session;
