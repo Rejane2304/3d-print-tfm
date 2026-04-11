@@ -26,11 +26,12 @@ export default function PayPalProvider({ children }: PayPalProviderProps) {
     return <>{children}</>;
   }
 
-  // Determinar si es sandbox (sandbox creds empiezan con 'sb' o contienen 'sandbox')
+  // Determinar si es sandbox
+  // Sandbox IDs típicamente son más largos (>80 chars) o contienen indicadores
   const isSandbox =
+    clientId.length > 80 ||
     clientId.includes("sb") ||
-    clientId.startsWith("AY") ||
-    clientId.startsWith("AZ") ||
+    clientId.startsWith("A") ||
     process.env.NODE_ENV !== "production";
 
   return (
