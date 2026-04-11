@@ -101,7 +101,7 @@ export default function AdminInvoiceDetailPage() {
     }
 
     if (status === "authenticated") {
-      const user = session?.user as { rol?: string } | undefined;
+      const user = session?.user as { role?: string } | undefined;
       if (user?.role !== "ADMIN") {
         router.push("/");
         return;

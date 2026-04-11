@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { DataTable, Column, BulkAction } from "@/components/ui/DataTable";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { BulkDeleteModal } from "@/components/ui/BulkDeleteModal";
 
 interface Alert {
   id: string;
@@ -188,6 +189,8 @@ export default function AdminAlertsPage() {
   const [showModal, setShowModal] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [alertToDelete, setAlertToDelete] = useState<string | null>(null);
+  const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
+  const [selectedIdsToDelete, setSelectedIdsToDelete] = useState<string[]>([]);
 
   const loadAlerts = useCallback(async () => {
     try {
@@ -322,24 +325,24 @@ export default function AdminAlertsPage() {
     setShowModal(true);
   };
 
-  const handleBulkDelete = async (selectedIds: string[]) => {
-    if (
-      !confirm(
-        `¿Estás seguro de que quieres eliminar ${selectedIds.length} alerta(s)?`,
-      )
-    ) {
-      return;
-    }
+  const handleBulkDelete = (selectedIds: string[]) => {
+    setSelectedIdsToDelete(selectedIds);
+    setBulkDeleteModalOpen(true);
+  };
 
+  const confirmBulkDelete = async () => {
     try {
       await Promise.all(
-        selectedIds.map((id) =>
+        selectedIdsToDelete.map((id) =>
           fetch(`/api/admin/alerts/${id}`, { method: "DELETE" }),
         ),
       );
       await loadAlerts();
     } catch (error) {
       console.error("Error al eliminar alertas:", error);
+    } finally {
+      setBulkDeleteModalOpen(false);
+      setSelectedIdsToDelete([]);
     }
   };
 
@@ -867,6 +870,20 @@ export default function AdminAlertsPage() {
         description="Esta acción no se puede deshacer. La alerta será eliminada permanentemente."
         confirmText="Eliminar"
         type="danger"
+      />
+
+      {/* Bulk Delete Modal */}
+      <BulkDeleteModal
+        isOpen={bulkDeleteModalOpen}
+        onClose={() => {
+          setBulkDeleteModalOpen(false);
+          setSelectedIdsToDelete([]);
+        }}
+        onConfirm={confirmBulkDelete}
+        selectedCount={selectedIdsToDelete.length}
+        itemType="alerts"
+        itemName="alerta"
+        itemNamePlural="alertas"
       />
     </div>
   );
