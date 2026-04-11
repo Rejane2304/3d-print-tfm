@@ -5,6 +5,19 @@
 
 import { prisma } from '@/lib/db/prisma';
 
+// Helper para generar UUID compatible
+function generateUUID(): string {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback manual
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
 // Verificar cupones por caducar (expiran en ≤3 días)
 export async function checkExpiringCoupons() {
   const now = new Date();
@@ -35,7 +48,7 @@ export async function checkExpiringCoupons() {
     if (!existing) {
       await prisma.alert.create({
           data: {
-            id: crypto.randomUUID(),
+            id: generateUUID(),
             type: 'COUPON_EXPIRING',
           severity: daysUntil <= 1 ? 'HIGH' : 'MEDIUM',
           title: 'Cupón por Expirar',
@@ -71,7 +84,7 @@ export async function checkLongPreparationOrders() {
     if (!existing) {
       await prisma.alert.create({
           data: {
-            id: crypto.randomUUID(),
+            id: generateUUID(),
             type: 'PREPARING_ORDER',
           severity: 'MEDIUM',
           title: 'Preparación Prolongada',
@@ -108,7 +121,7 @@ export async function checkDelayedOrders() {
     if (!existing) {
       await prisma.alert.create({
           data: {
-            id: crypto.randomUUID(),
+            id: generateUUID(),
             type: 'ORDER_DELAYED',
           severity: 'HIGH',
           title: 'Pedido Atrasado',
@@ -151,7 +164,7 @@ export async function checkUnpaidOrders() {
     if (!existing) {
       await prisma.alert.create({
           data: {
-            id: crypto.randomUUID(),
+            id: generateUUID(),
             type: 'PAYMENT_FAILED',
           severity: 'HIGH',
           title: 'Pedido sin Pagar',
