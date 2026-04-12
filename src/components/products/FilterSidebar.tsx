@@ -35,7 +35,7 @@ interface FilterSidebarProps {
   };
 }
 
-export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
+export default function FilterSidebar({ searchParams }: Readonly<FilterSidebarProps>) {
   const router = useRouter();
   const currentSearchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
@@ -111,7 +111,38 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
     searchParams.inStock,
   ].filter(Boolean).length;
 
-  const FilterContent = () => (
+
+
+// --- FilterContent moved to end of file ---
+// --- FilterContent moved to end of file ---
+
+// --- FilterContent moved to end of file ---
+
+
+// --- FilterContent moved to end of file ---
+
+interface FilterContentProps {
+  hasActiveFilters: boolean;
+  clearFilters: () => void;
+  expandedSections: Record<string, boolean>;
+  toggleSection: (section: keyof typeof expandedSections) => void;
+  searchParams: FilterSidebarProps['searchParams'];
+  updateFilter: (key: string, value: string) => void;
+  setIsOpen: (open: boolean) => void;
+  activeFiltersCount: number;
+}
+
+function FilterContent({
+  hasActiveFilters,
+  clearFilters,
+  expandedSections,
+  toggleSection,
+  searchParams,
+  updateFilter,
+  setIsOpen,
+  activeFiltersCount,
+}: Readonly<FilterContentProps>) {
+  return (
     <>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-lg font-semibold text-gray-900">Filtros</h2>
@@ -197,8 +228,9 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
         >
           <div className="flex gap-3">
             <div className="flex-1">
-              <label className="text-xs text-gray-500 mb-1.5 block">Mín</label>
+              <label htmlFor="minPriceInput" className="text-xs text-gray-500 mb-1.5 block">Mín</label>
               <input
+                id="minPriceInput"
                 type="number"
                 placeholder="0"
                 value={searchParams.minPrice || ""}
@@ -208,8 +240,9 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
               />
             </div>
             <div className="flex-1">
-              <label className="text-xs text-gray-500 mb-1.5 block">Máx</label>
+              <label htmlFor="maxPriceInput" className="text-xs text-gray-500 mb-1.5 block">Máx</label>
               <input
+                id="maxPriceInput"
                 type="number"
                 placeholder="∞"
                 value={searchParams.maxPrice || ""}
@@ -262,6 +295,7 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
       </button>
     </>
   );
+}
 
   return (
     <>
@@ -283,16 +317,29 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
 
       {/* Desktop Sidebar */}
       <div className="hidden lg:block bg-white rounded-xl shadow-md p-6 sticky top-24">
-        <FilterContent />
+        <FilterContent
+          hasActiveFilters={!!hasActiveFilters}
+          clearFilters={clearFilters}
+          expandedSections={expandedSections}
+          toggleSection={toggleSection}
+          searchParams={searchParams}
+          updateFilter={updateFilter}
+          setIsOpen={setIsOpen}
+          activeFiltersCount={activeFiltersCount}
+        />
       </div>
 
       {/* Mobile Drawer */}
       {isOpen && (
         <>
           {/* Backdrop */}
-          <div
+          <button
+            type="button"
             className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm"
             onClick={() => setIsOpen(false)}
+            aria-label="Cerrar filtros"
+            tabIndex={0}
+            style={{ cursor: 'pointer' }}
           />
           {/* Drawer */}
           <div className="fixed inset-y-0 left-0 w-full max-w-sm bg-white z-50 lg:hidden flex flex-col">
@@ -309,7 +356,16 @@ export default function FilterSidebar({ searchParams }: FilterSidebarProps) {
             </div>
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto p-4">
-              <FilterContent />
+              <FilterContent
+                hasActiveFilters={!!hasActiveFilters}
+                clearFilters={clearFilters}
+                expandedSections={expandedSections}
+                toggleSection={toggleSection}
+                searchParams={searchParams}
+                updateFilter={updateFilter}
+                setIsOpen={setIsOpen}
+                activeFiltersCount={activeFiltersCount}
+              />
             </div>
           </div>
         </>
