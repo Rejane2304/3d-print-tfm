@@ -2,45 +2,45 @@
  * PayPal Test Page
  * Simple page to test PayPal integration
  */
-"use client";
+'use client';
 
-import { useState } from "react";
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
-import { CheckCircle2, XCircle } from "lucide-react";
+import { useState } from 'react';
+import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js';
+import { CheckCircle2, XCircle } from 'lucide-react';
 
 export default function PayPalTestPage() {
-  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
-  const [message, setMessage] = useState("");
+  const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [message, setMessage] = useState('');
 
-  const createOrder = async () => {
-    const response = await fetch("/api/paypal/create-order", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+  const createOrder = async() => {
+    const response = await fetch('/api/paypal/create-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        total: 10.0,
-        orderId: "test-order-123",
+        total: 10,
+        orderId: 'test-order-123',
       }),
     });
     const data = await response.json();
     return data.paypalOrderId;
   };
 
-  const onApprove = async (data: { orderID: string }) => {
-    const response = await fetch("/api/paypal/capture-order", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+  const onApprove = async(data: { orderID: string }) => {
+    const response = await fetch('/api/paypal/capture-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         paypalOrderId: data.orderID,
-        orderId: "test-order-123",
+        orderId: 'test-order-123',
       }),
     });
 
     if (response.ok) {
-      setStatus("success");
-      setMessage("Payment successful! PayPal is working correctly.");
+      setStatus('success');
+      setMessage('Payment successful! PayPal is working correctly.');
     } else {
-      setStatus("error");
-      setMessage("Payment failed. Check console for details.");
+      setStatus('error');
+      setMessage('Payment failed. Check console for details.');
     }
   };
 
@@ -50,31 +50,31 @@ export default function PayPalTestPage() {
         <h1 className="text-2xl font-bold text-center mb-2">PayPal Test</h1>
         <p className="text-gray-600 text-center mb-6">Test amount: €10.00</p>
 
-        {status === "idle" && (
+        {status === 'idle' && (
           <PayPalScriptProvider
             options={{
-              clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "",
-              currency: "EUR",
-              intent: "capture",
+              clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '',
+              currency: 'EUR',
+              intent: 'capture',
             }}
           >
             <PayPalButtons
               createOrder={createOrder}
               onApprove={onApprove}
               onError={(err) => {
-                setStatus("error");
-                setMessage(err instanceof Error ? err.message : "PayPal error");
+                setStatus('error');
+                setMessage(err instanceof Error ? err.message : 'PayPal error');
               }}
             />
           </PayPalScriptProvider>
         )}
 
-        {status === "success" && (
+        {status === 'success' && (
           <div className="text-center">
             <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-4" />
             <p className="text-green-600 font-medium">{message}</p>
             <button
-              onClick={() => setStatus("idle")}
+              onClick={() => setStatus('idle')}
               className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
             >
               Test Again
@@ -82,12 +82,12 @@ export default function PayPalTestPage() {
           </div>
         )}
 
-        {status === "error" && (
+        {status === 'error' && (
           <div className="text-center">
             <XCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
             <p className="text-red-600 font-medium">{message}</p>
             <button
-              onClick={() => setStatus("idle")}
+              onClick={() => setStatus('idle')}
               className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
             >
               Try Again

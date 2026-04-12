@@ -2,21 +2,21 @@
  * FAQs Page - Frontend
  * Public FAQ page with accordion display and search
  */
-"use client";
+'use client';
 
-import { useEffect, useState, useMemo } from "react";
-import Link from "next/link";
-import Head from "next/head";
+import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
+import Head from 'next/head';
 import {
-  Search,
+  AlertCircle,
+  ArrowRight,
   ChevronDown,
   ChevronUp,
   HelpCircle,
   Loader2,
-  AlertCircle,
   MessageCircle,
-  ArrowRight,
-} from "lucide-react";
+  Search,
+} from 'lucide-react';
 
 interface FAQ {
   id: string;
@@ -35,7 +35,7 @@ export default function FAQsPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
@@ -43,21 +43,21 @@ export default function FAQsPage() {
     loadFAQs();
   }, []);
 
-  const loadFAQs = async () => {
+  const loadFAQs = async() => {
     try {
       setLoading(true);
       setError(null);
 
-      const response = await fetch("/api/faqs");
+      const response = await fetch('/api/faqs');
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error cargando FAQs");
+        throw new Error(data.error || 'Error cargando FAQs');
       }
 
       setCategories(data.categorias || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error desconocido");
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
     }
@@ -127,7 +127,7 @@ export default function FAQsPage() {
     setActiveCategory(categoryName);
     const element = document.getElementById(`category-${categoryName}`);
     if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
@@ -148,7 +148,8 @@ export default function FAQsPage() {
         <title>Preguntas Frecuentes | 3D Print</title>
         <meta
           name="description"
-          content="Encuentra respuestas a las preguntas más comunes sobre nuestros productos impresos en 3D, envíos, devoluciones y más."
+          content="Encuentra respuestas a las preguntas más comunes sobre nuestros productos impresos en 3D, envíos, \
+            devoluciones y más."
         />
       </Head>
 
@@ -174,11 +175,12 @@ export default function FAQsPage() {
                   placeholder="Buscar en las FAQs..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 rounded-xl text-gray-900 placeholder-gray-500 focus:ring-4 focus:ring-white/30 focus:outline-none"
+                  className="w-full pl-12 pr-4 py-4 rounded-xl text-gray-900 placeholder-gray-500 focus:ring-4 \
+                    focus:ring-white/30 focus:outline-none"
                 />
                 {searchQuery && (
                   <button
-                    onClick={() => setSearchQuery("")}
+                    onClick={() => setSearchQuery('')}
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
                     ×
@@ -210,7 +212,7 @@ export default function FAQsPage() {
               </p>
               {searchQuery && (
                 <button
-                  onClick={() => setSearchQuery("")}
+                  onClick={() => setSearchQuery('')}
                   className="text-indigo-600 hover:text-indigo-800 font-medium"
                 >
                   Limpiar búsqueda
@@ -232,11 +234,12 @@ export default function FAQsPage() {
                       <button
                         key={category.nombre}
                         onClick={() => scrollToCategory(category.nombre)}
-                        className={`w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center justify-between ${
-                          activeCategory === category.nombre
-                            ? "bg-indigo-50 text-indigo-700"
-                            : "hover:bg-gray-100 text-gray-700"
-                        }`}
+                        className={`w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center \
+  justify-between ${
+                      activeCategory === category.nombre
+                        ? 'bg-indigo-50 text-indigo-700'
+                        : 'hover:bg-gray-100 text-gray-700'
+                      }`}
                       >
                         <span>{category.nombre}</span>
                         <span className="text-sm text-gray-400">
@@ -257,7 +260,8 @@ export default function FAQsPage() {
                     </p>
                     <Link
                       href="/contact"
-                      className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-medium text-sm"
+                      className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-medium \
+                        text-sm"
                     >
                       Contactar
                       <ArrowRight className="h-4 w-4" />
@@ -274,7 +278,7 @@ export default function FAQsPage() {
                     {filteredCategories.reduce(
                       (acc, cat) => acc + cat.faqs.length,
                       0,
-                    )}{" "}
+                    )}{' '}
                     preguntas encontradas
                   </p>
                   <div className="flex gap-2">
@@ -326,7 +330,8 @@ export default function FAQsPage() {
                           >
                             <button
                               onClick={() => toggleItem(faq.id)}
-                              className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors text-left"
+                              className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 \
+                                transition-colors text-left"
                             >
                               <span className="font-medium text-gray-900 pr-4">
                                 {faq.pregunta}
@@ -343,12 +348,15 @@ export default function FAQsPage() {
                               <div className="px-6 pb-4">
                                 <div className="prose prose-indigo max-w-none text-gray-600">
                                   {faq.respuesta
-                                    .split("\n")
-                                    .map((paragraph, idx) => (
-                                      <p key={idx} className="mb-2 last:mb-0">
-                                        {paragraph}
-                                      </p>
-                                    ))}
+                                    .split('\n')
+                                    .map((paragraph) => {
+                                      const key = `${faq.id}-${paragraph.slice(0, 16)}`;
+                                      return (
+                                        <p key={key} className="mb-2 last:mb-0">
+                                          {paragraph}
+                                        </p>
+                                      );
+                                    })}
                                 </div>
                               </div>
                             )}

@@ -1,11 +1,12 @@
+
+'use client';
 /**
  * Updated CartSummary Component with Coupon Support
  * Resumen del carrito con integración de cupones
  */
-"use client";
 
-import { ShoppingCart, ArrowRight, Loader2, Tag } from "lucide-react";
-import { CouponSelector } from "./CouponSelector";
+import { ArrowRight, Loader2, ShoppingCart, Tag } from 'lucide-react';
+import { CouponSelector } from './CouponSelector';
 
 interface CartSummaryProps {
   items: Array<{
@@ -34,34 +35,27 @@ interface CartSummaryProps {
   } | null;
 }
 
-export default function CartSummary({
+const CartSummary: React.FC<Readonly<CartSummaryProps>> = ({
   items,
   subtotal,
   shippingCost = 5.99,
   freeShippingFrom = 50,
-  taxRate = 21, // IVA 21% por defecto
+  taxRate = 21,
   isProcessing = false,
   onCheckout,
   onContinueShopping,
   onApplyCoupon,
   onRemoveCoupon,
   appliedCoupon,
-}: CartSummaryProps) {
+}) => {
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-
-  // Calcular envío gratis (usar freeShipping booleano del cupón)
   const hasFreeShippingCoupon = appliedCoupon?.freeShipping === true;
   const isFreeShipping = subtotal >= freeShippingFrom || hasFreeShippingCoupon;
   const shipping = isFreeShipping ? 0 : shippingCost;
-
-  // Calcular descuento del cupón
   const couponDiscount = appliedCoupon?.discount || 0;
-
   const discountedSubtotal = Math.max(0, subtotal - couponDiscount);
   const taxMultiplier = taxRate / 100;
   const taxAmount = (discountedSubtotal + shipping) * taxMultiplier;
-
-  // Total final (subtotal con descuento + envío + IVA)
   const total = discountedSubtotal + shipping + taxAmount;
   const hasItems = items.length > 0;
 
@@ -76,7 +70,7 @@ export default function CartSummary({
         <>
           {/* Items count */}
           <div className="mb-4 text-sm text-gray-600">
-            {totalItems} {totalItems === 1 ? "artículo" : "artículos"}
+            {totalItems} {totalItems === 1 ? 'artículo' : 'artículos'}
           </div>
 
           {/* Sección de Cupón */}
@@ -123,10 +117,10 @@ export default function CartSummary({
             <span className="text-gray-600">Envío</span>
             <span
               className={
-                isFreeShipping ? "text-green-600 font-medium" : "font-medium"
+                isFreeShipping ? 'text-green-600 font-medium' : 'font-medium'
               }
             >
-              {isFreeShipping ? "Gratis" : `${shipping.toFixed(2)} €`}
+              {isFreeShipping ? 'Gratis' : `${shipping.toFixed(2)} €`}
             </span>
           </div>
 
@@ -161,7 +155,9 @@ export default function CartSummary({
               onClick={onCheckout}
               disabled={isProcessing || !hasItems}
               data-testid="checkout-button"
-              className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors min-h-[44px]"
+              className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md font-medium hover:bg-indigo-700 \
+                focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 \
+                disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors min-h-[44px]"
             >
               {isProcessing ? (
                 <>
@@ -180,7 +176,9 @@ export default function CartSummary({
               type="button"
               onClick={onContinueShopping}
               disabled={isProcessing}
-              className="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-md font-medium hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 transition-colors min-h-[44px] text-sm sm:text-base"
+              className="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-md font-medium hover:bg-gray-200 \
+                focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 \
+                transition-colors min-h-[44px] text-sm sm:text-base"
             >
               Seguir comprando
             </button>
@@ -199,7 +197,8 @@ export default function CartSummary({
           <button
             type="button"
             onClick={onContinueShopping}
-            className="bg-indigo-600 text-white py-2.5 sm:py-2 px-6 rounded-md font-medium hover:bg-indigo-700 transition-colors min-h-[44px]"
+            className="bg-indigo-600 text-white py-2.5 sm:py-2 px-6 rounded-md font-medium hover:bg-indigo-700 \
+              transition-colors min-h-[44px]"
           >
             Explorar productos
           </button>
@@ -207,4 +206,4 @@ export default function CartSummary({
       )}
     </div>
   );
-}
+};

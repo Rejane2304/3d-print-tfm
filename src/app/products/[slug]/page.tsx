@@ -3,22 +3,21 @@
  * Muestra información completa de un producto traducida al español
  * Responsive: mobile → 4K
  */
-import { notFound } from "next/navigation";
-import { prisma } from "@/lib/db/prisma";
-
-import Link from "next/link";
-import AddToCartButton from "@/components/products/AddToCartButton";
-import ProductImageGallery from "@/components/products/ProductImageGallery";
-import { ReviewsList } from "@/components/reviews/ReviewsList";
-import { StarRating } from "@/components/ui/StarRating";
-import { ReviewFormClient } from "@/components/reviews/ReviewFormClient";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
+import { notFound } from 'next/navigation';
+import { prisma } from '@/lib/db/prisma';
+import Link from 'next/link';
+import AddToCartButton from '@/components/products/AddToCartButton';
+import ProductImageGallery from '@/components/products/ProductImageGallery';
+import { ReviewsList } from '@/components/reviews/ReviewsList';
+import { StarRating } from '@/components/ui/StarRating';
+import { ReviewFormClient } from '@/components/reviews/ReviewFormClient';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
 import {
-  translateProductName,
-  translateProductDescription,
   translateCategoryName,
-} from "@/lib/i18n";
+  translateProductDescription,
+  translateProductName,
+} from '@/lib/i18n';
 
 interface ProductDetailPageProps {
   params: {
@@ -57,13 +56,13 @@ async function getProduct(
     where: { slug },
     include: {
       images: {
-        orderBy: { displayOrder: "asc" },
+        orderBy: { displayOrder: 'asc' },
       },
       category: true,
     },
   });
 
-  if (!product || !product.isActive) {
+  if (!product?.isActive) {
     return null;
   }
 
@@ -89,8 +88,8 @@ async function getProduct(
     })),
     category: product.category
       ? {
-          name: translateCategoryName(product.category.slug),
-        }
+        name: translateCategoryName(product.category.slug),
+      }
       : null,
   };
 
@@ -131,7 +130,7 @@ async function getProduct(
       },
     },
     orderBy: {
-      createdAt: "desc",
+      createdAt: 'desc',
     },
     take: 10,
   });
@@ -183,11 +182,11 @@ async function getProduct(
 
 export default async function ProductDetailPage({
   params,
-}: ProductDetailPageProps) {
+}: Readonly<ProductDetailPageProps>) {
   // Get session to check if user is admin or logged in
   const session = await getServerSession(authOptions);
-  const isAdmin = session?.user?.role === "ADMIN";
-  const isLoggedIn = !!session?.user;
+  const isAdmin = session?.user?.role === 'ADMIN';
+  const isLoggedIn = Boolean(session?.user);
 
   const data = await getProduct(params.slug);
 
@@ -307,23 +306,23 @@ export default async function ProductDetailPage({
             )}
 
             {/* Detalles */}
-            {(product.widthCm ||
-              product.heightCm ||
-              product.depthCm ||
-              product.weight ||
-              (isAdmin && product.printTime)) && (
+            {(Boolean(product.widthCm) ||
+              Boolean(product.heightCm) ||
+              Boolean(product.depthCm) ||
+              Boolean(product.weight) ||
+              Boolean(isAdmin && product.printTime)) && (
               <div className="border-t pt-4 sm:pt-6">
                 <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
                   Especificaciones
                 </h3>
                 <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm sm:text-base">
-                  {(product.widthCm || product.heightCm || product.depthCm) && (
+                  {(Boolean(product.widthCm) || Boolean(product.heightCm) || Boolean(product.depthCm)) && (
                     <>
                       <dt className="text-gray-600">Dimensiones:</dt>
                       <dd className="font-medium">
                         {[product.widthCm, product.heightCm, product.depthCm]
                           .filter(Boolean)
-                          .join(" x ")}{" "}
+                          .join(' x ')}{' '}
                         cm
                       </dd>
                     </>
@@ -337,7 +336,7 @@ export default async function ProductDetailPage({
                     </>
                   )}
                   {/* Tiempo de impresión solo visible para admins */}
-                  {isAdmin && product.printTime && (
+                  {Boolean(isAdmin && product.printTime) && (
                     <>
                       <dt className="text-gray-600">Tiempo de impresión:</dt>
                       <dd className="font-medium">{product.printTime} min</dd>
@@ -364,7 +363,8 @@ export default async function ProductDetailPage({
 
               <Link
                 href="/products"
-                className="w-full border border-gray-300 text-gray-700 py-3 px-6 rounded-lg font-medium hover:bg-gray-50 transition-colors text-center block"
+                className="w-full border border-gray-300 text-gray-700 py-3 px-6 rounded-lg font-medium \
+                  hover:bg-gray-50 transition-colors text-center block"
               >
                 Ver más productos
               </Link>
@@ -422,7 +422,10 @@ export default async function ProductDetailPage({
                 </p>
                 <Link
                   href={`/login?callbackUrl=/products/${product.slug}`}
-                  className="inline-flex items-center justify-center w-full px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+                  className="inline-flex items-center justify-center w-full px-4 py-2 bg-indigo-600 text-white \
+                    rounded-lg font-medium"
+                  style={{ whiteSpace: 'normal' }}
+                  /* hover:bg-indigo-700 transition-colors */
                 >
                   Iniciar sesión
                 </Link>

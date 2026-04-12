@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import {
+  AlertCircle,
   Bell,
   CheckCircle,
-  AlertCircle,
   Package,
   TrendingUp,
-} from "lucide-react";
-import { useAdminRealTime, EventType } from "@/hooks/useRealTime";
+} from 'lucide-react';
+import { EventType, useAdminRealTime } from '@/hooks/useRealTime';
 
 interface Notification {
   id: string;
@@ -26,11 +26,7 @@ export default function RealTimeNotifications() {
   const [showPanel, setShowPanel] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const userId = session?.user?.id;
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { isConnected, events } = useAdminRealTime({
+  const { isConnected } = useAdminRealTime({
     onEvent: (event) => {
       const notification: Notification = {
         id: `${event.type}-${Date.now()}`,
@@ -66,27 +62,27 @@ export default function RealTimeNotifications() {
 
   const getNotificationIcon = (type: EventType) => {
     switch (type) {
-      case "order:new":
+      case 'order:new':
         return <Package className="h-5 w-5 text-blue-500" />;
-      case "order:status:updated":
+      case 'order:status:updated':
         return <CheckCircle className="h-5 w-5 text-green-500" />;
-      case "payment:confirmed":
+      case 'payment:confirmed':
         return <CheckCircle className="h-5 w-5 text-green-600" />;
-      case "stock:low":
-      case "alert:new":
+      case 'stock:low':
+      case 'alert:new':
         return <AlertCircle className="h-5 w-5 text-red-500" />;
-      case "stock:updated":
+      case 'stock:updated':
         return <Package className="h-5 w-5 text-orange-500" />;
-      case "review:new":
+      case 'review:new':
         return <Bell className="h-5 w-5 text-purple-500" />;
-      case "metrics:update":
+      case 'metrics:update':
         return <TrendingUp className="h-5 w-5 text-indigo-500" />;
       default:
         return <Bell className="h-5 w-5 text-gray-500" />;
     }
   };
 
-  if (!session?.user || session.user.role !== "ADMIN") {
+  if (session?.user?.role !== 'ADMIN') {
     return null;
   }
 
@@ -99,8 +95,12 @@ export default function RealTimeNotifications() {
       >
         <Bell className="h-6 w-6 text-gray-600" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-            {unreadCount > 9 ? "9+" : unreadCount}
+          <span
+            // eslint-disable-next-line max-len
+            className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center \
+            justify-center"
+          >
+            {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
         {!isConnected && (
@@ -111,17 +111,29 @@ export default function RealTimeNotifications() {
       {/* Notification Panel */}
       {showPanel && (
         <>
-          <div
+          <button
+            type="button"
             className="fixed inset-0 z-40"
+            aria-label="Cerrar panel de notificaciones"
             onClick={() => setShowPanel(false)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                setShowPanel(false);
+              }
+            }}
+            tabIndex={0}
+            style={{ background: 'transparent', border: 'none', padding: 0, margin: 0 }}
           />
-          <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-[80vh] overflow-hidden">
+          <div
+            className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white rounded-lg shadow-lg \
+            border border-gray-200 z-50 max-h-[80vh] overflow-hidden"
+          >
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
               <div>
                 <h3 className="font-semibold text-gray-900">Notificaciones</h3>
                 <p className="text-xs text-gray-500">
-                  {isConnected ? "En tiempo real" : "Modo offline"}
+                  {isConnected ? 'En tiempo real' : 'Modo offline'}
                 </p>
               </div>
               <div className="flex gap-2">
@@ -153,12 +165,15 @@ export default function RealTimeNotifications() {
                 </div>
               ) : (
                 notifications.map((notification) => (
-                  <div
+                  <button
+                    type="button"
                     key={notification.id}
                     onClick={() => markAsRead(notification.id)}
-                    className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
-                      !notification.read ? "bg-blue-50" : ""
-                    }`}
+                    aria-label="Marcar como leída"
+                    className={`p-4 w-full text-left border-b border-gray-100 cursor-pointer hover:bg-gray-50 \
+                    transition-colors${
+                  notification.read ? '' : ' bg-blue-50'
+                  }`}
                   >
                     <div className="flex gap-3">
                       <div className="flex-shrink-0">
@@ -172,14 +187,14 @@ export default function RealTimeNotifications() {
                           {notification.message}
                         </p>
                         <p className="text-xs text-gray-400 mt-1">
-                          {notification.timestamp.toLocaleTimeString("es-ES")}
+                          {notification.timestamp.toLocaleTimeString('es-ES')}
                         </p>
                       </div>
                       {!notification.read && (
                         <div className="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full" />
                       )}
                     </div>
-                  </div>
+                  </button>
                 ))
               )}
             </div>
@@ -191,17 +206,18 @@ export default function RealTimeNotifications() {
 }
 
 function getNotificationTitle(type: EventType): string {
-  const titles: Record<EventType, string> = {
-    "order:new": "Nuevo Pedido",
-    "order:status:updated": "Estado Actualizado",
-    "payment:confirmed": "Pago Confirmado",
-    "stock:low": "Stock Bajo",
-    "stock:updated": "Stock Actualizado",
-    "alert:new": "Nueva Alerta",
-    "review:new": "Nueva Reseña",
-    "metrics:update": "Métricas Actualizadas",
+  // Cubrir todos los posibles EventType con fallback genérico
+  const titles: Partial<Record<EventType, string>> = {
+    'order:new': 'Nuevo Pedido',
+    'order:status:updated': 'Estado Actualizado',
+    'payment:confirmed': 'Pago Confirmado',
+    'stock:low': 'Stock Bajo',
+    'stock:updated': 'Stock Actualizado',
+    'alert:new': 'Nueva Alerta',
+    'review:new': 'Nueva Reseña',
+    'metrics:update': 'Métricas Actualizadas',
   };
-  return titles[type] || "Notificación";
+  return titles[type] || 'Notificación';
 }
 
 function getNotificationMessage(event: {
@@ -209,23 +225,23 @@ function getNotificationMessage(event: {
   payload: Record<string, unknown>;
 }): string {
   switch (event.type) {
-    case "order:new":
+    case 'order:new':
       return `Pedido #${event.payload.orderNumber} por €${event.payload.total}`;
-    case "order:status:updated":
+    case 'order:status:updated':
       return `Pedido #${event.payload.orderId}: ${event.payload.status}`;
-    case "payment:confirmed":
+    case 'payment:confirmed':
       return `Pago confirmado para pedido #${event.payload.orderId}`;
-    case "stock:low":
+    case 'stock:low':
       return `Producto "${event.payload.productName}" tiene solo ${event.payload.stock} unidades`;
-    case "stock:updated":
+    case 'stock:updated':
       return `Stock de "${event.payload.productName}" actualizado a ${event.payload.newStock}`;
-    case "alert:new":
+    case 'alert:new':
       return `${event.payload.alertTitle}: ${event.payload.alertMessage}`;
-    case "review:new":
+    case 'review:new':
       return `Nueva reseña de ${event.payload.rating} estrellas en "${event.payload.productName}"`;
-    case "metrics:update":
-      return "Las métricas del dashboard han sido actualizadas";
+    case 'metrics:update':
+      return 'Las métricas del dashboard han sido actualizadas';
     default:
-      return "Nueva actualización del sistema";
+      return 'Nueva actualización del sistema';
   }
 }

@@ -20,7 +20,7 @@ export default function PayPalButton({
   orderId,
   onSuccess,
   onError,
-}: PayPalButtonProps) {
+}: Readonly<PayPalButtonProps>) {
   // Validate that orderId is provided
   if (!orderId) {
     throw new Error("orderId is required");

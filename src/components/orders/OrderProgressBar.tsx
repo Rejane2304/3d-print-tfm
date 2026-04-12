@@ -78,7 +78,7 @@ export default function OrderProgressBar({
   transportista,
   isCancelled = false,
   motivoCancelacion,
-}: OrderProgressBarProps) {
+}: Readonly<OrderProgressBarProps>) {
   // Si está cancelado, mostrar mensaje de cancelación
   if (isCancelled || estado === "Cancelado") {
     return (
@@ -108,6 +108,11 @@ export default function OrderProgressBar({
   const isPaymentPending =
     estadoPago === "Pendiente" || estadoPago === "Procesando";
 
+  let paymentClass = '';
+  if (isPaymentCompleted) paymentClass = 'bg-green-100 text-green-800';
+  else if (isPaymentFailed) paymentClass = 'bg-red-100 text-red-800';
+  else paymentClass = 'bg-yellow-100 text-yellow-800';
+
   return (
     <div className="bg-white rounded-lg shadow-sm border p-6">
       {/* Header con estado actual */}
@@ -117,20 +122,14 @@ export default function OrderProgressBar({
             Estado del Pedido
           </h2>
           <p className="text-gray-500 text-sm mt-1">
-            {steps[currentStepIndex]?.description || "Procesando..."}
+            {steps[currentStepIndex]?.description || 'Procesando...'}
           </p>
         </div>
 
         {/* Indicador de estado de pago */}
         {estadoPago && (
           <div
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${
-              isPaymentCompleted
-                ? "bg-green-100 text-green-800"
-                : isPaymentFailed
-                  ? "bg-red-100 text-red-800"
-                  : "bg-yellow-100 text-yellow-800"
-            }`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${paymentClass}`}
           >
             <CreditCard className="h-4 w-4" />
             <span>Pago: {estadoPago}</span>
@@ -160,29 +159,30 @@ export default function OrderProgressBar({
             const Icon = step.icon;
             const isCompleted = index < currentStepIndex;
             const isCurrent = index === currentStepIndex;
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const isPending = index > currentStepIndex;
-
             // Lógica especial para el paso de pago
             const showPaymentWarning =
               step.requiresPayment &&
               isCurrent &&
               isPaymentPending &&
-              step.key === "Pendiente";
+              step.key === 'Pendiente';
+
+            let circleClass = '';
+            if (isCompleted) circleClass = 'bg-green-500 text-white';
+            else if (isCurrent) {
+              if (showPaymentWarning) circleClass = 'bg-yellow-500 text-white ring-4 ring-yellow-200';
+              else circleClass = 'bg-indigo-600 text-white ring-4 ring-indigo-200';
+            } else circleClass = 'bg-gray-200 text-gray-400';
+
+            let labelClass = '';
+            if (isCompleted) labelClass = 'text-green-600';
+            else if (isCurrent) labelClass = 'text-indigo-900';
+            else labelClass = 'text-gray-400';
 
             return (
               <div key={step.key} className="flex flex-col items-center flex-1">
                 {/* Círculo del paso */}
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 relative z-10 ${
-                    isCompleted
-                      ? "bg-green-500 text-white"
-                      : isCurrent
-                        ? showPaymentWarning
-                          ? "bg-yellow-500 text-white ring-4 ring-yellow-200"
-                          : "bg-indigo-600 text-white ring-4 ring-indigo-200"
-                        : "bg-gray-200 text-gray-400"
-                  }`}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 relative z-10 ${circleClass}`}
                 >
                   {showPaymentWarning ? (
                     <Banknote className="h-5 w-5" />
@@ -193,13 +193,7 @@ export default function OrderProgressBar({
 
                 {/* Etiqueta del paso */}
                 <span
-                  className={`mt-2 text-xs font-medium text-center max-w-[80px] ${
-                    isCompleted
-                      ? "text-green-600"
-                      : isCurrent
-                        ? "text-indigo-900"
-                        : "text-gray-400"
-                  }`}
+                  className={`mt-2 text-xs font-medium text-center max-w-[80px] ${labelClass}`}
                 >
                   {step.label}
                 </span>

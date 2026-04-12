@@ -3,15 +3,15 @@
  * Muestra lista de productos traducidos con filtros y paginación
  * Responsive: mobile → 4K
  */
-import { prisma } from "@/lib/db/prisma";
-import { translateProductName, translateProductDescription } from "@/lib/i18n";
-import ProductCard from "@/components/products/ProductCard";
-import FilterSidebar from "@/components/products/FilterSidebar";
-import Pagination from "@/components/products/Pagination";
-import SearchBar from "@/components/products/SearchBar";
-import SortSelector from "@/components/products/SortSelector";
-import { Prisma } from "@prisma/client";
-import { Sparkles, Package, Shield, Truck } from "lucide-react";
+import { prisma } from '@/lib/db/prisma';
+import { translateProductDescription, translateProductName } from '@/lib/i18n';
+import ProductCard from '@/components/products/ProductCard';
+import FilterSidebar from '@/components/products/FilterSidebar';
+import Pagination from '@/components/products/Pagination';
+import SearchBar from '@/components/products/SearchBar';
+import SortSelector from '@/components/products/SortSelector';
+import { Prisma } from '@prisma/client';
+import { Package, Shield, Sparkles, Truck } from 'lucide-react';
 
 interface ProductsPageProps {
   searchParams: {
@@ -27,8 +27,8 @@ interface ProductsPageProps {
   };
 }
 
-async function getProducts(searchParams: ProductsPageProps["searchParams"]) {
-  const page = Number.parseInt(searchParams.page || "1", 10);
+async function getProducts(searchParams: ProductsPageProps['searchParams']) {
+  const page = Number.parseInt(searchParams.page || '1', 10);
   const pageSize = 12;
   const skip = (page - 1) * pageSize;
 
@@ -50,14 +50,14 @@ async function getProducts(searchParams: ProductsPageProps["searchParams"]) {
   if (searchParams.minPrice || searchParams.maxPrice) {
     where.price = {};
     if (searchParams.minPrice) {
-      where.price.gte = parseFloat(searchParams.minPrice);
+      where.price.gte = Number.parseFloat(searchParams.minPrice);
     }
     if (searchParams.maxPrice) {
-      where.price.lte = parseFloat(searchParams.maxPrice);
+      where.price.lte = Number.parseFloat(searchParams.maxPrice);
     }
   }
 
-  if (searchParams.inStock === "true") {
+  if (searchParams.inStock === 'true') {
     where.stock = { gt: 0 };
   }
 
@@ -66,23 +66,23 @@ async function getProducts(searchParams: ProductsPageProps["searchParams"]) {
       {
         name: {
           contains: searchParams.search,
-          mode: "insensitive" as Prisma.QueryMode,
+          mode: 'insensitive' as Prisma.QueryMode,
         },
       },
       {
         description: {
           contains: searchParams.search,
-          mode: "insensitive" as Prisma.QueryMode,
+          mode: 'insensitive' as Prisma.QueryMode,
         },
       },
     ];
   }
 
   const orderBy: Prisma.ProductOrderByWithRelationInput = {};
-  if (searchParams.sortBy === "price") {
-    orderBy.price = (searchParams.sortOrder as Prisma.SortOrder) || "asc";
-  } else if (searchParams.sortBy === "stock") {
-    orderBy.stock = (searchParams.sortOrder as Prisma.SortOrder) || "desc";
+  if (searchParams.sortBy === 'price') {
+    orderBy.price = (searchParams.sortOrder as Prisma.SortOrder) || 'asc';
+  } else if (searchParams.sortBy === 'stock') {
+    orderBy.stock = (searchParams.sortOrder as Prisma.SortOrder) || 'desc';
   }
 
   const [products, total] = await Promise.all([
@@ -90,7 +90,7 @@ async function getProducts(searchParams: ProductsPageProps["searchParams"]) {
       where,
       include: {
         images: {
-          orderBy: { displayOrder: "asc" },
+          orderBy: { displayOrder: 'asc' },
         },
       },
       orderBy,
@@ -109,19 +109,19 @@ async function getProducts(searchParams: ProductsPageProps["searchParams"]) {
   const sortedProducts = [...translatedProducts].sort((a, b) => {
     let comparison = 0;
 
-    if (searchParams.sortBy === "price") {
+    if (searchParams.sortBy === 'price') {
       const priceA = Number(a.price);
       const priceB = Number(b.price);
       comparison = priceA - priceB;
-    } else if (searchParams.sortBy === "stock") {
+    } else if (searchParams.sortBy === 'stock') {
       comparison = a.stock - b.stock;
     } else {
-      comparison = (a.name || "").localeCompare(b.name || "", "es", {
-        sensitivity: "base",
+      comparison = (a.name || '').localeCompare(b.name || '', 'es', {
+        sensitivity: 'base',
       });
     }
 
-    return searchParams.sortOrder === "desc" ? -comparison : comparison;
+    return searchParams.sortOrder === 'desc' ? -comparison : comparison;
   });
 
   return {
@@ -134,19 +134,23 @@ async function getProducts(searchParams: ProductsPageProps["searchParams"]) {
 
 export default async function ProductsPage({
   searchParams,
-}: ProductsPageProps) {
+}: Readonly<ProductsPageProps>) {
   const { products, total, totalPages, page } = await getProducts(searchParams);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Hero Section Moderno */}
       <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500">
-        <div className="absolute inset-0 bg-[url('/images/grid-pattern.svg')] opacity-10"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+        <div className="absolute inset-0 bg-[url('/images/grid-pattern.svg')] opacity-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
           <div className="text-center">
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 mb-6">
+            <div
+              className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 \
+                rounded-full px-4 py-2 mb-6"
+              style={{ maxWidth: '100%' }}
+            >
               <Sparkles className="h-4 w-4 text-yellow-300" />
               <span className="text-sm font-medium text-white/90">
                 Impresión 3D de Alta Calidad
@@ -164,9 +168,9 @@ export default async function ProductsPage({
             {/* Features Bar */}
             <div className="flex flex-wrap justify-center gap-4 sm:gap-8 mt-8">
               {[
-                { icon: Package, text: "Materiales Premium" },
-                { icon: Shield, text: "Garantía de Calidad" },
-                { icon: Truck, text: "Envío Rápido" },
+                { icon: Package, text: 'Materiales Premium' },
+                { icon: Shield, text: 'Garantía de Calidad' },
+                { icon: Truck, text: 'Envío Rápido' },
               ].map((feature) => (
                 <div
                   key={feature.text}
@@ -181,7 +185,7 @@ export default async function ProductsPage({
         </div>
 
         {/* Decorative Elements */}
-        <div className="absolute -bottom-1 left-0 right-0 h-16 bg-gradient-to-t from-gray-50 to-transparent"></div>
+        <div className="absolute -bottom-1 left-0 right-0 h-16 bg-gradient-to-t from-gray-50 to-transparent" />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
@@ -202,14 +206,18 @@ export default async function ProductsPage({
           {/* Product Grid Area */}
           <div className="flex-1 min-w-0">
             {/* Header de Productos */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-6 border-b border-gray-200">
+            <div
+              className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-6 \
+                border-b border-gray-200"
+              style={{ maxWidth: '100%' }}
+            >
               <div>
                 <p className="text-sm text-gray-500 mb-1">
                   Mostrando resultados
                 </p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {products.length}{" "}
-                  <span className="text-gray-400 font-normal">de</span> {total}{" "}
+                  {products.length}{' '}
+                  <span className="text-gray-400 font-normal">de</span> {total}{' '}
                   productos
                 </p>
               </div>

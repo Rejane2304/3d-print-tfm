@@ -3,18 +3,19 @@
  * Selector de cupones con dropdown de cupones disponibles
  * Simplificado y sin errores confusos
  */
-"use client";
 
-import { useState, useEffect } from "react";
+'use client';
+
+import { useEffect, useState } from 'react';
 import {
-  Ticket,
-  Loader2,
   CheckCircle2,
-  XCircle,
-  X,
   ChevronDown,
+  Loader2,
   Tag,
-} from "lucide-react";
+  Ticket,
+  X,
+  XCircle,
+} from 'lucide-react';
 
 interface AvailableCoupon {
   id: string;
@@ -44,8 +45,8 @@ export function CouponSelector({
   appliedCoupon,
   subtotal,
   disabled = false,
-}: CouponSelectorProps) {
-  const [code, setCode] = useState("");
+}: Readonly<CouponSelectorProps>) {
+  const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [availableCoupons, setAvailableCoupons] = useState<AvailableCoupon[]>(
@@ -58,15 +59,15 @@ export function CouponSelector({
     loadAvailableCoupons();
   }, []);
 
-  const loadAvailableCoupons = async () => {
+  const loadAvailableCoupons = async() => {
     try {
-      const response = await fetch("/api/coupons");
+      const response = await fetch('/api/coupons');
       const data = await response.json();
       if (data.success) {
         setAvailableCoupons(data.coupons || []);
       }
     } catch (err) {
-      console.error("Error loading coupons:", err);
+      console.error('Error loading coupons:', err);
     }
   };
 
@@ -75,44 +76,42 @@ export function CouponSelector({
     (coupon) => !coupon.minOrderAmount || subtotal >= coupon.minOrderAmount,
   );
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
-    if (!code.trim() || loading) return;
-
+    if (!code.trim() || loading) {
+      return;
+    }
     setLoading(true);
     setError(null);
-
     try {
       await onApply(code.trim().toUpperCase());
-      setCode("");
+      setCode('');
       setShowDropdown(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error aplicando cupón");
+      setError(err instanceof Error ? err.message : 'Error aplicando cupón');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSelectCoupon = async (
+  const handleSelectCoupon = async(
     couponCode: string,
     couponCodeRaw: string,
   ) => {
     setLoading(true);
     setError(null);
     setShowDropdown(false);
-
     try {
-      // Usar codeRaw (original en inglés) para aplicar el cupón
       await onApply(couponCodeRaw.toUpperCase());
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error aplicando cupón");
+      setError(err instanceof Error ? err.message : 'Error aplicando cupón');
     } finally {
       setLoading(false);
     }
   };
 
   const handleRemove = () => {
-    setCode("");
+    setCode('');
     setError(null);
     onRemove();
   };
@@ -136,7 +135,8 @@ export function CouponSelector({
           <button
             onClick={handleRemove}
             disabled={disabled}
-            className="p-2 text-green-600 hover:bg-green-100 rounded transition-colors disabled:opacity-50 flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
+            className="p-2 text-green-600 hover:bg-green-100 rounded transition-colors disabled:opacity-50 \
+              flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
             title="Eliminar cupón"
             aria-label="Eliminar cupón"
           >
@@ -167,23 +167,27 @@ export function CouponSelector({
             type="button"
             onClick={() => setShowDropdown(!showDropdown)}
             disabled={disabled || loading}
-            className="w-full flex items-center justify-between px-4 py-3 bg-indigo-50 border border-indigo-200 rounded-lg text-indigo-700 hover:bg-indigo-100 transition-colors disabled:opacity-50"
+            className="w-full flex items-center justify-between px-4 py-3 bg-indigo-50 border border-indigo-200 \
+              rounded-lg text-indigo-700 hover:bg-indigo-100 transition-colors disabled:opacity-50"
           >
             <div className="flex items-center gap-2">
               <Tag className="h-5 w-5" />
               <span className="font-medium">
                 {validCoupons.length} cupón
-                {validCoupons.length !== 1 ? "es" : ""} disponible
-                {validCoupons.length !== 1 ? "s" : ""}
+                {validCoupons.length === 1 ? '' : 'es'} disponible
+                {validCoupons.length === 1 ? '' : 's'}
               </span>
             </div>
             <ChevronDown
-              className={`h-5 w-5 transition-transform ${showDropdown ? "rotate-180" : ""}`}
+              className={`h-5 w-5 transition-transform ${showDropdown ? 'rotate-180' : ''}`}
             />
           </button>
 
           {showDropdown && (
-            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
+            <div
+              className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg \
+              max-h-60 overflow-auto"
+            >
               {validCoupons.map((coupon) => (
                 <button
                   key={coupon.id}
@@ -192,7 +196,8 @@ export function CouponSelector({
                     handleSelectCoupon(coupon.code, coupon.codeRaw)
                   }
                   disabled={loading}
-                  className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-0 disabled:opacity-50"
+                  className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-0 \
+                    disabled:opacity-50"
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -227,12 +232,14 @@ export function CouponSelector({
             }}
             placeholder="O ingresa tu código manualmente"
             disabled={disabled || loading}
-            className="flex-1 pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent uppercase disabled:bg-gray-100"
+            className="flex-1 pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 \
+              focus:border-transparent uppercase disabled:bg-gray-100"
           />
           <button
             type="submit"
             disabled={disabled || loading || !code.trim()}
-            className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-2 whitespace-nowrap"
+            className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 \
+              disabled:opacity-50 flex items-center gap-2 whitespace-nowrap"
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
             Aplicar

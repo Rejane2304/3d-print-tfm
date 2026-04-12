@@ -3,34 +3,34 @@
  * Estructura base de la aplicación con Header y Footer
  * Responsive: mobile → 4K
  */
-import type { Metadata } from "next";
-import localFont from "next/font/local";
-import "./globals.css";
-import { SessionProvider } from "@/components/providers/SessionProvider";
-import PayPalProvider from "@/components/providers/PayPalProvider";
-import { CartPersistenceProvider } from "@/components/providers/CartPersistenceProvider";
-import { SiteConfigProvider } from "@/providers/SiteConfigProvider";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
+import type { Metadata } from 'next';
+import localFont from 'next/font/local';
+import './globals.css';
+import { SessionProvider } from '@/components/providers/SessionProvider';
+import PayPalProvider from '@/components/providers/PayPalProvider';
+import { CartPersistenceProvider } from '@/components/providers/CartPersistenceProvider';
+import { SiteConfigProvider } from '@/providers/SiteConfigProvider';
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
 
 const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
+  src: './fonts/GeistVF.woff',
+  variable: '--font-geist-sans',
+  weight: '100 900',
 });
 const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
+  src: './fonts/GeistMonoVF.woff',
+  variable: '--font-geist-mono',
+  weight: '100 900',
 });
 
 export const metadata: Metadata = {
-  title: "3D Print - Impresión 3D",
-  description: "E-commerce de productos impresos en 3D de alta calidad.",
+  title: '3D Print - Impresión 3D',
+  description: 'E-commerce de productos impresos en 3D de alta calidad.',
   icons: {
-    icon: "/favicon.svg",
-    shortcut: "/favicon.svg",
-    apple: "/favicon.svg",
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
   },
 };
 

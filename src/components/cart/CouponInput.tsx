@@ -1,12 +1,8 @@
-/**
- * CouponInput Component
- * Input para aplicar cupones en el carrito
- * Con validación en tiempo real y estado de carga
- */
-"use client";
 
-import { useState } from "react";
-import { Ticket, Loader2, CheckCircle2, XCircle, X } from "lucide-react";
+'use client';
+
+import { useState } from 'react';
+import { CheckCircle2, Loader2, Ticket, X, XCircle } from 'lucide-react';
 
 interface CouponInputProps {
   onApply: (code: string) => Promise<void>;
@@ -26,38 +22,35 @@ export function CouponInput({
   appliedCoupon,
   subtotal,
   disabled = false,
-}: CouponInputProps) {
-  const [code, setCode] = useState("");
+}: Readonly<CouponInputProps>) {
+  const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [validating, setValidating] = useState(false);
 
-  const handleValidate = async () => {
-    if (!code.trim()) return;
-
+  const handleValidate = async() => {
+    if (!code.trim()) {
+      return;
+    }
     setValidating(true);
     setError(null);
-
     try {
-      const response = await fetch("/api/coupons/validate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/coupons/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           code: code.trim(),
           orderAmount: subtotal,
         }),
       });
-
       const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || "Cupón inválido");
-      } else {
-        // Cupón válido, no mostramos nada aún
+      if (response.ok) {
         setError(null);
+      } else {
+        setError(data.error || 'Cupón inválido');
       }
     } catch {
-      setError("Error validando cupón");
+      setError('Error validando cupón');
     } finally {
       setValidating(false);
     }
@@ -68,9 +61,7 @@ export function CouponInput({
     const newCode = e.target.value.toUpperCase();
     setCode(newCode);
     setError(null);
-
     if (newCode.trim()) {
-      // Debounce validation
       setTimeout(() => {
         if (newCode === e.target.value.toUpperCase()) {
           handleValidate();
@@ -79,25 +70,25 @@ export function CouponInput({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
-    if (!code.trim() || loading) return;
-
+    if (!code.trim() || loading) {
+      return;
+    }
     setLoading(true);
     setError(null);
-
     try {
       await onApply(code.trim().toUpperCase());
-      setCode("");
+      setCode('');
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error aplicando cupón");
+      setError(err instanceof Error ? err.message : 'Error aplicando cupón');
     } finally {
       setLoading(false);
     }
   };
 
   const handleRemove = () => {
-    setCode("");
+    setCode('');
     setError(null);
     onRemove();
   };
@@ -121,7 +112,8 @@ export function CouponInput({
           <button
             onClick={handleRemove}
             disabled={disabled}
-            className="p-2 text-green-600 hover:bg-green-100 rounded transition-colors disabled:opacity-50 flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
+            className="p-2 text-green-600 hover:bg-green-100 rounded transition-colors disabled:opacity-50 \
+              flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
             title="Eliminar cupón"
             aria-label="Eliminar cupón"
           >
@@ -158,7 +150,9 @@ export function CouponInput({
             onChange={handleCodeChange}
             placeholder="Ingresa tu código de cupón"
             disabled={disabled || loading}
-            className="w-full pl-10 pr-10 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent uppercase disabled:bg-gray-100 disabled:cursor-not-allowed text-sm sm:text-base min-h-[44px]"
+            className="w-full pl-10 pr-10 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 \
+              focus:ring-indigo-500 focus:border-transparent uppercase disabled:bg-gray-100 \
+              disabled:cursor-not-allowed text-sm sm:text-base min-h-[44px]"
           />
 
           {validating && (
@@ -171,7 +165,9 @@ export function CouponInput({
         <button
           type="submit"
           disabled={disabled || loading || !code.trim()}
-          className="px-4 py-2.5 sm:py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[44px] text-sm sm:text-base whitespace-nowrap"
+          className="px-4 py-2.5 sm:py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 \
+            disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 \
+            min-h-[44px] text-sm sm:text-base whitespace-nowrap"
         >
           {loading && <Loader2 className="h-4 w-4 animate-spin" />}
           Aplicar

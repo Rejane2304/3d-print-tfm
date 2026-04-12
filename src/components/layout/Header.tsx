@@ -2,37 +2,38 @@
  * Header Component with Avatar Menu
  * Shows avatar with first letter for authenticated users
  */
-"use client";
+/* eslint-disable max-len */
+'use client';
 
-import Link from "next/link";
-import { useSession, signOut } from "next-auth/react";
-import { useState, useRef, useEffect } from "react";
-import Image from "next/image";
+import Link from 'next/link';
+import Image from 'next/image';
+import { signOut, useSession } from 'next-auth/react';
+import { useEffect, useRef, useState } from 'react';
 import {
-  Home,
-  User,
-  LogOut,
-  LayoutDashboard,
-  Menu,
-  X,
-  Package,
-  ShoppingBag,
+  Bell,
   ChevronDown,
   ClipboardList,
-  Settings,
-  MapPin,
-  ShoppingCart,
   FileText,
-  Users,
-  Bell,
-  Warehouse,
   Folder,
-  Ticket,
   HelpCircle,
+  Home,
+  LayoutDashboard,
+  LogOut,
+  MapPin,
+  Menu,
+  Package,
+  Settings,
+  ShoppingBag,
+  ShoppingCart,
   Star,
+  Ticket,
   Truck,
-} from "lucide-react";
-import CartIcon from "@/components/cart/CartIcon";
+  User,
+  Users,
+  Warehouse,
+  X,
+} from 'lucide-react';
+import CartIcon from '@/components/cart/CartIcon';
 
 export default function Header() {
   const { data: session, status } = useSession();
@@ -41,26 +42,26 @@ export default function Header() {
   const [adminMenuOpen, setAdminMenuOpen] = useState(false); // Submenu for admin on mobile
   const userMenuRef = useRef<HTMLDivElement>(null);
 
-  const isAuthenticated = status === "authenticated";
-  const isAdmin = session?.user?.role === "ADMIN";
+  const isAuthenticated = status === 'authenticated';
+  const isAdmin = session?.user?.role === 'ADMIN';
 
   // Get first letter of user's name
-  const userName = session?.user?.name || "";
+  const userName = session?.user?.name || '';
   const firstLetter = userName.charAt(0).toUpperCase();
 
   const handleLogout = async () => {
     try {
       // Clear cart from database for authenticated users
       if (isAuthenticated) {
-        await fetch("/api/cart/clear", { method: "DELETE" });
+        await fetch('/api/cart/clear', { method: 'DELETE' });
       }
     } catch (err) {
-      console.error("Error clearing cart on logout:", err);
+      console.error('Error clearing cart on logout:', err);
     } finally {
       // Always clear localStorage and sign out
-      localStorage.removeItem("cart");
-      window.dispatchEvent(new Event("cartUpdated"));
-      await signOut({ callbackUrl: "/" });
+      localStorage.removeItem('cart');
+      globalThis.dispatchEvent(new Event('cartUpdated'));
+      await signOut({ callbackUrl: '/' });
     }
   };
 
@@ -75,31 +76,31 @@ export default function Header() {
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   // Close mobile menu on escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+      if (e.key === 'Escape') {
         setMobileMenuOpen(false);
         setUserMenuOpen(false);
       }
     };
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   // Prevent body scroll when mobile menu is open
   useEffect(() => {
     if (mobileMenuOpen) {
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = 'unset';
     }
     return () => {
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = 'unset';
     };
   }, [mobileMenuOpen]);
 
@@ -115,7 +116,7 @@ export default function Header() {
               width={120}
               height={40}
               className="h-8 lg:h-10 w-auto"
-              style={{ height: "auto", width: "auto" }}
+              style={{ height: 'auto', width: 'auto' }}
               priority
             />
           </Link>
@@ -166,7 +167,7 @@ export default function Header() {
                   </div>
                   {/* Dropdown Arrow - Hidden on very small screens */}
                   <ChevronDown
-                    className={`hidden sm:block h-4 w-4 text-gray-500 transition-transform duration-200 ${userMenuOpen ? "rotate-180" : ""}`}
+                    className={`hidden sm:block h-4 w-4 text-gray-500 transition-transform duration-200 ${userMenuOpen ? 'rotate-180' : ''}`}
                     aria-hidden="true"
                   />
                 </button>
@@ -404,7 +405,7 @@ export default function Header() {
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="md:hidden p-3 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors"
-            aria-label={mobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
+            aria-label={mobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
             aria-expanded={mobileMenuOpen}
           >
             {mobileMenuOpen ? (
@@ -420,9 +421,13 @@ export default function Header() {
       {mobileMenuOpen && (
         <div className="md:hidden fixed inset-0 top-16 z-40">
           {/* Backdrop */}
-          <div
+          <button
+            type="button"
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            aria-label="Cerrar menú móvil"
             onClick={() => setMobileMenuOpen(false)}
+            tabIndex={0}
+            style={{ border: 'none', background: 'none', padding: 0, margin: 0 }}
           />
           {/* Menu Content */}
           <div className="absolute top-0 left-0 right-0 max-h-[calc(100vh-64px)] bg-white border-t border-gray-100 shadow-2xl overflow-y-auto">
@@ -495,7 +500,7 @@ export default function Header() {
                       <span className="font-medium">Panel Admin</span>
                     </div>
                     <ChevronDown
-                      className={`h-5 w-5 flex-shrink-0 transition-transform duration-200 ${adminMenuOpen ? "rotate-180" : ""}`}
+                      className={`h-5 w-5 flex-shrink-0 transition-transform duration-200 ${adminMenuOpen ? 'rotate-180' : ''}`}
                     />
                   </button>
 

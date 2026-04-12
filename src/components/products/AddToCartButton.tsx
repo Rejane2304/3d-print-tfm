@@ -30,7 +30,7 @@ export default function AddToCartButton({
   productId,
   stock,
   product,
-}: AddToCartButtonProps) {
+}: Readonly<AddToCartButtonProps>) {
   const { data: session } = useSession();
   const { addItem } = useCart();
 
@@ -107,7 +107,7 @@ export default function AddToCartButton({
             value={quantity}
             onChange={(e) => {
               const value = Number.parseInt(e.target.value, 10);
-              if (!isNaN(value)) {
+              if (!Number.isNaN(value)) {
                 setQuantity(Math.max(1, Math.min(value, stock)));
               }
             }}
@@ -143,46 +143,36 @@ export default function AddToCartButton({
       </div>
 
       {/* Botón de añadir al carrito */}
-      <button
-        type="button"
-        onClick={handleAddToCart}
-        disabled={isDisabled}
-        data-testid="add-to-cart-button"
-        className={`w-full py-3 px-6 rounded-md font-medium text-white transition-all duration-200 flex items-center justify-center gap-2 ${
-          success
-            ? "bg-green-600 hover:bg-green-700"
-            : isDisabled
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-        }`}
-      >
-        {loading ? (
-          <>
-            <Loader2 className="h-5 w-5 animate-spin" />
-            Añadiendo...
-          </>
-        ) : success ? (
-          <>
-            <Check className="h-5 w-5" />
-            ¡Añadido!
-          </>
-        ) : isAdmin ? (
-          <>
-            <ShoppingCart className="h-5 w-5" />
-            No disponible para admins
-          </>
-        ) : isOutOfStock ? (
-          <>
-            <ShoppingCart className="h-5 w-5" />
-            Agotado
-          </>
-        ) : (
-          <>
-            <ShoppingCart className="h-5 w-5" />
-            Añadir al carrito
-          </>
-        )}
-      </button>
+      {(() => {
+        let btnClass = '';
+        if (success) btnClass = 'bg-green-600 hover:bg-green-700';
+        else if (isDisabled) btnClass = 'bg-gray-400 cursor-not-allowed';
+        else btnClass = 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2';
+
+        let content;
+        if (loading) {
+          content = <><Loader2 className="h-5 w-5 animate-spin" />Añadiendo...</>;
+        } else if (success) {
+          content = <><Check className="h-5 w-5" />¡Añadido!</>;
+        } else if (isAdmin) {
+          content = <><ShoppingCart className="h-5 w-5" />No disponible para admins</>;
+        } else if (isOutOfStock) {
+          content = <><ShoppingCart className="h-5 w-5" />Agotado</>;
+        } else {
+          content = <><ShoppingCart className="h-5 w-5" />Añadir al carrito</>;
+        }
+        return (
+          <button
+            type="button"
+            onClick={handleAddToCart}
+            disabled={isDisabled}
+            data-testid="add-to-cart-button"
+            className={`w-full py-3 px-6 rounded-md font-medium text-white transition-all duration-200 flex items-center justify-center gap-2 ${btnClass}`}
+          >
+            {content}
+          </button>
+        );
+      })()}
 
       {/* Mensaje de error */}
       {error && (

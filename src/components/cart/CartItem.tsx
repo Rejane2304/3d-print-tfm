@@ -3,13 +3,13 @@
  * Item individual del carrito de compras
  * Responsive: mobile → desktop
  */
-"use client";
+'use client';
 
-import { useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { Trash2, Minus, Plus, Loader2 } from "lucide-react";
-import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { Loader2, Minus, Plus, Trash2 } from 'lucide-react';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
 interface CartItemProps {
   item: {
@@ -36,7 +36,7 @@ export default function CartItem({
   onUpdateQuantity,
   onRemove,
   isUpdating = false,
-}: CartItemProps) {
+}: Readonly<CartItemProps>) {
   const [quantity, setQuantity] = useState(item.quantity);
   const [modalOpen, setModalOpen] = useState(false);
   const subtotal = item.unitPrice * item.quantity * 1.21; // IVA incluido
@@ -66,7 +66,7 @@ export default function CartItem({
   }
 
   // After early return, product is guaranteed to exist
-  const product = item.product!;
+  const product = item.product;
 
   const handleRemoveClick = () => {
     setModalOpen(true);
@@ -78,14 +78,18 @@ export default function CartItem({
   };
 
   const handleQuantityChange = (newQuantity: number) => {
-    if (newQuantity < 1 || newQuantity > product.stock) return;
+    if (newQuantity < 1 || newQuantity > product.stock) {
+      return;
+    }
     setQuantity(newQuantity);
     onUpdateQuantity(item.id, newQuantity);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number.parseInt(e.target.value, 10);
-    if (isNaN(value)) return;
+    if (Number.isNaN(value)) {
+      return;
+    }
 
     // Limitar entre 1 y stock disponible
     const clampedValue = Math.max(1, Math.min(value, product.stock));
@@ -104,7 +108,7 @@ export default function CartItem({
         className="relative w-full sm:w-32 h-32 flex-shrink-0"
       >
         <Image
-          src={product.image || "/images/placeholder.jpg"}
+          src={product.image || '/images/placeholder.jpg'}
           alt={product.name}
           fill
           className="object-cover"
@@ -135,7 +139,8 @@ export default function CartItem({
               onClick={() => handleQuantityChange(quantity - 1)}
               disabled={quantity <= 1 || isUpdating}
               aria-label="Decrementar cantidad"
-              className="p-2 rounded-md border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-md border border-gray-300 hover:bg-gray-100 disabled:opacity-50 \
+              disabled:cursor-not-allowed transition-colors"
             >
               <Minus className="h-4 w-4" />
             </button>
@@ -150,7 +155,8 @@ export default function CartItem({
               max={product.stock}
               disabled={isUpdating}
               data-testid="cart-item-quantity"
-              className="w-16 text-center border border-gray-300 rounded-md py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-16 text-center border border-gray-300 rounded-md py-2 focus:ring-2 \
+              focus:ring-indigo-500 focus:border-indigo-500"
             />
 
             {/* Botón incrementar */}
@@ -160,7 +166,8 @@ export default function CartItem({
               disabled={quantity >= product.stock || isUpdating}
               aria-label="Incrementar cantidad"
               data-testid="quantity-increase"
-              className="p-2 rounded-md border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-md border border-gray-300 hover:bg-gray-100 disabled:opacity-50 \
+              disabled:cursor-not-allowed transition-colors"
             >
               <Plus className="h-4 w-4" />
             </button>

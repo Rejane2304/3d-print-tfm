@@ -2,12 +2,12 @@
  * Página de Registro - Redirección a /auth
  * Mantiene compatibilidad con URLs antiguas
  */
-import { redirect } from "next/navigation";
-import { Metadata } from "next";
+import { redirect } from 'next/navigation';
+import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: "Registro - Redirección",
-  robots: "noindex, follow",
+  title: 'Registro - Redirección',
+  robots: 'noindex, follow',
 };
 
 interface RegistroPageProps {
@@ -19,7 +19,7 @@ export default function RegistroPage({ searchParams }: RegistroPageProps) {
   const callbackUrl = searchParams.callbackUrl;
   const redirectUrl = callbackUrl
     ? `/auth?tab=register&callbackUrl=${encodeURIComponent(String(callbackUrl))}`
-    : "/auth?tab=register";
+    : '/auth?tab=register';
 
   redirect(redirectUrl);
 }
