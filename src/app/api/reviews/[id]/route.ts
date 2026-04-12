@@ -4,11 +4,11 @@
  *
  * Requiere: Autenticación
  */
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
-import { z } from "zod";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
+import { z } from 'zod';
 
 // Schema de validación
 const reviewUpdateSchema = z.object({
@@ -16,17 +16,17 @@ const reviewUpdateSchema = z.object({
     .number()
     .int()
     .min(1)
-    .max(5, "La puntuación debe estar entre 1 y 5")
+    .max(5, 'La puntuación debe estar entre 1 y 5')
     .optional(),
   title: z
     .string()
-    .min(1, "El título es obligatorio")
-    .max(200, "Máximo 200 caracteres")
+    .min(1, 'El título es obligatorio')
+    .max(200, 'Máximo 200 caracteres')
     .optional(),
   comment: z
     .string()
-    .min(1, "El comentario es obligatorio")
-    .max(2000, "Máximo 2000 caracteres")
+    .min(1, 'El comentario es obligatorio')
+    .max(2000, 'Máximo 2000 caracteres')
     .optional(),
 });
 
@@ -46,7 +46,7 @@ export async function GET(
     }
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: "No autenticado" },
+        { success: false, error: 'No autenticado' },
         { status: 401 },
       );
     }
@@ -57,17 +57,17 @@ export async function GET(
 
     if (!user) {
       return NextResponse.json(
-        { success: false, error: "Usuario no encontrado" },
+        { success: false, error: 'Usuario no encontrado' },
         { status: 404 },
       );
     }
 
     // Si el id es 'my-review', buscar por productId en query params
     const { searchParams } = new URL(request.url);
-    const productId = searchParams.get("productId");
+    const productId = searchParams.get('productId');
 
     let review;
-    if (id === "my-review" && productId) {
+    if (id === 'my-review' && productId) {
       review = await prisma.review.findUnique({
         where: {
           productId_userId: {
@@ -103,15 +103,15 @@ export async function GET(
 
     if (!review) {
       return NextResponse.json(
-        { success: false, error: "Reseña no encontrada" },
+        { success: false, error: 'Reseña no encontrada' },
         { status: 404 },
       );
     }
 
     // Verificar que la reseña pertenece al usuario (a menos que sea admin)
-    if (review.userId !== user.id && user.role !== "ADMIN") {
+    if (review.userId !== user.id && user.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: "No autorizado" },
+        { success: false, error: 'No autorizado' },
         { status: 403 },
       );
     }
@@ -132,9 +132,9 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error("Error obteniendo reseña:", error);
+    console.error('Error obteniendo reseña:', error);
     return NextResponse.json(
-      { success: false, error: "Error interno" },
+      { success: false, error: 'Error interno' },
       { status: 500 },
     );
   }
@@ -156,7 +156,7 @@ export async function PATCH(
     }
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: "No autenticado" },
+        { success: false, error: 'No autenticado' },
         { status: 401 },
       );
     }
@@ -167,7 +167,7 @@ export async function PATCH(
 
     if (!user) {
       return NextResponse.json(
-        { success: false, error: "Usuario no encontrado" },
+        { success: false, error: 'Usuario no encontrado' },
         { status: 404 },
       );
     }
@@ -179,7 +179,7 @@ export async function PATCH(
 
     if (!existing) {
       return NextResponse.json(
-        { success: false, error: "Reseña no encontrada" },
+        { success: false, error: 'Reseña no encontrada' },
         { status: 404 },
       );
     }
@@ -187,7 +187,7 @@ export async function PATCH(
     // Verificar que la reseña pertenece al usuario
     if (existing.userId !== user.id) {
       return NextResponse.json(
-        { success: false, error: "No autorizado" },
+        { success: false, error: 'No autorizado' },
         { status: 403 },
       );
     }
@@ -232,9 +232,9 @@ export async function PATCH(
         { status: 400 },
       );
     }
-    console.error("Error actualizando reseña:", error);
+    console.error('Error actualizando reseña:', error);
     return NextResponse.json(
-      { success: false, error: "Error interno" },
+      { success: false, error: 'Error interno' },
       { status: 500 },
     );
   }
@@ -256,7 +256,7 @@ export async function DELETE(
     }
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: "No autenticado" },
+        { success: false, error: 'No autenticado' },
         { status: 401 },
       );
     }
@@ -267,7 +267,7 @@ export async function DELETE(
 
     if (!user) {
       return NextResponse.json(
-        { success: false, error: "Usuario no encontrado" },
+        { success: false, error: 'Usuario no encontrado' },
         { status: 404 },
       );
     }
@@ -279,15 +279,15 @@ export async function DELETE(
 
     if (!existing) {
       return NextResponse.json(
-        { success: false, error: "Reseña no encontrada" },
+        { success: false, error: 'Reseña no encontrada' },
         { status: 404 },
       );
     }
 
     // Verificar que la reseña pertenece al usuario (o es admin)
-    if (existing.userId !== user.id && user.role !== "ADMIN") {
+    if (existing.userId !== user.id && user.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: "No autorizado" },
+        { success: false, error: 'No autorizado' },
         { status: 403 },
       );
     }
@@ -299,12 +299,12 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: "Reseña eliminada correctamente",
+      message: 'Reseña eliminada correctamente',
     });
   } catch (error) {
-    console.error("Error eliminando reseña:", error);
+    console.error('Error eliminando reseña:', error);
     return NextResponse.json(
-      { success: false, error: "Error interno" },
+      { success: false, error: 'Error interno' },
       { status: 500 },
     );
   }

@@ -5,22 +5,22 @@
  * Soporta tanto ID (UUID) como SLUG
  * Requires: ADMIN role
  */
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
-import { z } from "zod";
-import { Material } from "@prisma/client";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
+import { z } from 'zod';
+import { Material } from '@prisma/client';
 import {
-  translateProductName,
-  translateProductDescription,
-  translateProductShortDescription,
   translateCategoryName,
   translateErrorMessage,
-} from "@/lib/i18n";
-import { unlink } from "fs/promises";
-import { existsSync } from "fs";
-import path from "path";
+  translateProductDescription,
+  translateProductName,
+  translateProductShortDescription,
+} from '@/lib/i18n';
+import { unlink } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import path from 'node:path';
 
 // Schema for image updates
 const imageUpdateSchema = z.object({
@@ -53,15 +53,15 @@ const updateProductSchema = z.object({
 async function verifyAdminAuth() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
-    return { error: "No autenticado", status: 401 };
+    return { error: 'No autenticado', status: 401 };
   }
 
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
   });
 
-  if (!user || user.role !== "ADMIN") {
-    return { error: "No autorizado", status: 403 };
+  if (user?.role !== 'ADMIN') {
+    return { error: 'No autorizado', status: 403 };
   }
 
   return { user };
@@ -95,7 +95,7 @@ export async function GET(
 ) {
   try {
     const auth = await verifyAdminAuth();
-    if ("error" in auth) {
+    if ('error' in auth) {
       return NextResponse.json(
         { success: false, error: auth.error },
         { status: auth.status },
@@ -107,7 +107,7 @@ export async function GET(
 
     if (!product) {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage("Producto not found") },
+        { success: false, error: translateErrorMessage('Producto not found') },
         { status: 404 },
       );
     }
@@ -132,7 +132,7 @@ export async function GET(
       categoryId: product.categoryId,
       categoria: product.category
         ? translateCategoryName(product.category.slug)
-        : "Sin categoría",
+        : 'Sin categoría',
       material: product.material,
       anchoCm: product.widthCm,
       altoCm: product.heightCm,
@@ -153,9 +153,9 @@ export async function GET(
 
     return NextResponse.json({ success: true, producto: transformedProduct });
   } catch (error) {
-    console.error("Error getting product:", error);
+    console.error('Error getting product:', error);
     return NextResponse.json(
-      { success: false, error: translateErrorMessage("Internal error") },
+      { success: false, error: translateErrorMessage('Internal error') },
       { status: 500 },
     );
   }
@@ -168,7 +168,7 @@ export async function PUT(
 ) {
   try {
     const auth = await verifyAdminAuth();
-    if ("error" in auth) {
+    if ('error' in auth) {
       return NextResponse.json(
         { success: false, error: auth.error },
         { status: auth.status },
@@ -180,7 +180,7 @@ export async function PUT(
 
     if (!existingProduct) {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage("Producto not found") },
+        { success: false, error: translateErrorMessage('Producto not found') },
         { status: 404 },
       );
     }
@@ -191,15 +191,15 @@ export async function PUT(
     // Generate new slug if name changed
     const newSlug = data.name
       ? data.name
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/(^-|-$)/g, "")
+        .normalize('NFD')
+        .replaceAll(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replaceAll(/[^a-z0-9]+/g, '-')
+        .replaceAll(/(^-|-$)/g, '')
       : existingProduct.slug;
 
     // Update product and images in a transaction
-    const updated = await prisma.$transaction(async (tx) => {
+    const updated = await prisma.$transaction(async(tx) => {
       // Update product data
       const productUpdateData: Record<string, unknown> = {
         name: data.name,
@@ -243,12 +243,12 @@ export async function PUT(
         // Delete removed images from filesystem
         for (const img of imagesToDelete) {
           try {
-            const filePath = path.join(process.cwd(), "public", img.url);
+            const filePath = path.join(process.cwd(), 'public', img.url);
             if (existsSync(filePath)) {
               await unlink(filePath);
             }
           } catch (err) {
-            console.warn("Error deleting old image file:", err);
+            console.error('Error deleting old image file:', err);
           }
         }
 
@@ -265,7 +265,7 @@ export async function PUT(
               id: crypto.randomUUID(),
               product: { connect: { id: updatedProduct.id } },
               url: img.url,
-              filename: img.url.split("/").pop() || "image.jpg",
+              filename: img.url.split('/').pop() || 'image.jpg',
               isMain: img.isMain ?? i === 0,
               displayOrder: i,
               altText: data.name || existingProduct.name,
@@ -289,9 +289,9 @@ export async function PUT(
         { status: 400 },
       );
     }
-    console.error("Error updating product:", error);
+    console.error('Error updating product:', error);
     return NextResponse.json(
-      { success: false, error: translateErrorMessage("Internal error") },
+      { success: false, error: translateErrorMessage('Internal error') },
       { status: 500 },
     );
   }
@@ -304,7 +304,7 @@ export async function DELETE(
 ) {
   try {
     const auth = await verifyAdminAuth();
-    if ("error" in auth) {
+    if ('error' in auth) {
       return NextResponse.json(
         { success: false, error: auth.error },
         { status: auth.status },
@@ -316,7 +316,7 @@ export async function DELETE(
 
     if (!existingProduct) {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage("Producto not found") },
+        { success: false, error: translateErrorMessage('Producto not found') },
         { status: 404 },
       );
     }
@@ -324,12 +324,12 @@ export async function DELETE(
     // Delete images from filesystem
     for (const image of existingProduct.images) {
       try {
-        const filePath = path.join(process.cwd(), "public", image.url);
+        const filePath = path.join(process.cwd(), 'public', image.url);
         if (existsSync(filePath)) {
           await unlink(filePath);
         }
-      } catch (err) {
-        console.warn("Error deleting image file:", err);
+      } catch {
+        // Error deleting image file; ignored intentionally
       }
     }
 
@@ -337,17 +337,17 @@ export async function DELETE(
     try {
       const dirPath = path.join(
         process.cwd(),
-        "public",
-        "images",
-        "products",
+        'public',
+        'images',
+        'products',
         existingProduct.slug,
       );
       if (existsSync(dirPath)) {
-        const { rmdir } = await import("fs/promises");
+        const { rmdir } = await import('node:fs/promises');
         await rmdir(dirPath, { recursive: true });
       }
-    } catch (err) {
-      console.warn("Error deleting product directory:", err);
+    } catch {
+      // Error deleting product directory
     }
 
     // Delete product (cascades delete images from DB)
@@ -357,9 +357,9 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting product:", error);
+    console.error('Error deleting product:', error);
     return NextResponse.json(
-      { success: false, error: translateErrorMessage("Internal error") },
+      { success: false, error: translateErrorMessage('Internal error') },
       { status: 500 },
     );
   }

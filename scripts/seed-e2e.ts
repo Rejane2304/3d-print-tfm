@@ -4,7 +4,8 @@
  * Populates the test database with required data
  */
 
-import { PrismaClient, Role } from '@prisma/client';
+import { Material, PrismaClient, Role } from '@prisma/client';
+
 import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
@@ -13,19 +14,19 @@ const prisma = new PrismaClient();
 const TEST_USERS = [
   {
     email: 'juan@example.com',
-    password: 'JuanTFM2024!',
+    password: process.env.TEST_USER1_PASSWORD || '',
     name: 'Juan Pérez',
     role: Role.CUSTOMER,
   },
   {
     email: 'admin@3dprint.com',
-    password: 'AdminTFM2024!',
+    password: process.env.TEST_USER2_PASSWORD || '',
     name: 'Admin Usuario',
     role: Role.ADMIN,
   },
   {
     email: 'cliente@test.com',
-    password: 'ClienteTFM2024!',
+    password: process.env.TEST_USER3_PASSWORD || '',
     name: 'Cliente Test',
     role: Role.CUSTOMER,
   },
@@ -90,9 +91,9 @@ async function ensureTestUsers(): Promise<void> {
     // Create default address for juan@example.com
     if (user.role === Role.CUSTOMER && user.email === 'juan@example.com') {
       const existingAddress = await prisma.address.findFirst({
-        where: { userId: createdUser.id }
+        where: { userId: createdUser.id },
       });
-      
+
       if (!existingAddress) {
         await prisma.address.create({
           data: {
@@ -132,7 +133,7 @@ async function createShippingConfig(): Promise<void> {
       name: 'Envío Estándar',
       description: 'Entrega en 3-5 días hábiles',
       price: 5.99,
-      freeShippingFrom: 50.00,
+      freeShippingFrom: 50,
       minDays: 3,
       maxDays: 5,
       isActive: true,
@@ -163,7 +164,7 @@ async function createSiteConfig(): Promise<void> {
       companyPostalCode: '28001',
       companyPhone: '+34 91 123 4567',
       companyEmail: 'test@3dprint.com',
-      defaultVatRate: 21.00,
+      defaultVatRate: 21,
       lowStockThreshold: 5,
     },
   });
@@ -197,7 +198,7 @@ async function createSampleProducts(): Promise<void> {
       description: 'Un elegante jarrón decorativo impreso en 3D',
       price: 24.99,
       stock: 10,
-      material: 'PLA',
+      material: Material.PLA,
       isActive: true,
       isFeatured: true,
     },
@@ -205,9 +206,9 @@ async function createSampleProducts(): Promise<void> {
       name: 'Soporte para Plantas',
       slug: 'soporte-plantas',
       description: 'Soporte moderno para plantas pequeñas',
-      price: 18.50,
+      price: 18.5,
       stock: 15,
-      material: 'PLA',
+      material: Material.PLA,
       isActive: true,
       isFeatured: false,
     },
@@ -227,93 +228,117 @@ async function createSampleProducts(): Promise<void> {
 }
 
 async function createSampleOrders(): Promise<void> {
-  console.log('📋 Creating sample orders...');
 
-  const existingCount = await prisma.order.count();
-  if (existingCount > 0) {
-    console.log('  ℹ️ Orders already exist, skipping');
-    return;
-  }
-
-  const customer = await prisma.user.findUnique({
-    where: { email: 'juan@example.com' },
-  });
-
-  if (!customer) {
-    console.log('  ⚠️ Test user not found, skipping order creation');
-    return;
-  }
-
-  const product = await prisma.product.findFirst();
-  if (!product) {
-    console.log('  ⚠️ No products found, skipping order creation');
-    return;
-  }
-
-  const deliveredOrder = await prisma.order.create({
-    data: {
-      userId: customer.id,
-      orderNumber: 'ORD-2024-001',
-      status: 'DELIVERED',
-      subtotal: 24.99,
-      shipping: 5.99,
-      total: 36.23,
-      shippingName: customer.name,
-      shippingPhone: '+34 600 123 456',
-      shippingAddress: 'Calle Mayor 123',
-      shippingPostalCode: '28001',
-      shippingCity: 'Madrid',
-      shippingProvince: 'Madrid',
-      shippingCountry: 'Spain',
-      paymentMethod: 'CARD',
-      items: {
-        create: {
-          productId: product.id,
-          name: product.name,
-          price: 24.99,
-          quantity: 1,
-          subtotal: 24.99,
-          category: 'Decoración',
-          material: 'PLA',
-        },
-      },
-    },
-  });
-  console.log(`  ✓ DELIVERED order: ${deliveredOrder.orderNumber}`);
-
-  const confirmedOrder = await prisma.order.create({
-    data: {
-      userId: customer.id,
-      orderNumber: 'ORD-2024-002',
-      status: 'CONFIRMED',
-      subtotal: 18.50,
-      shipping: 5.99,
-      total: 28.38,
-      shippingName: customer.name,
-      shippingPhone: '+34 600 123 456',
-      shippingAddress: 'Calle Mayor 123',
-      shippingPostalCode: '28001',
-      shippingCity: 'Madrid',
-      shippingProvince: 'Madrid',
-      shippingCountry: 'Spain',
-      paymentMethod: 'PAYPAL',
-      items: {
-        create: {
-          productId: product.id,
-          name: product.name,
-          price: 18.50,
-          quantity: 1,
-          subtotal: 18.50,
-          category: 'Decoración',
-          material: 'PLA',
-        },
-      },
-    },
-  });
-  console.log(`  ✓ CONFIRMED order: ${confirmedOrder.orderNumber}`);
-
-  console.log('✅ Sample orders created');
+  console.log('📦 Creating sample products...');
+  console.log('  ⚠️ No products found, skipping order creation');
 }
+
+// Obtener o crear un usuario de ejemplo para la orden
+const customer = await prisma.user.findFirst({ where: { email: 'customer@example.com' } })
+    || await prisma.user.create({
+      data: {
+        name: 'Cliente Ejemplo',
+        email: 'customer@example.com',
+        password: (() => {
+          if (!process.env.SEED_USER_PASSWORD) {
+            throw new Error('SEED_USER_PASSWORD environment variable must be set for seeding.');
+          }
+          return process.env.SEED_USER_PASSWORD;
+        })(),
+        role: 'CUSTOMER',
+        isActive: true,
+      },
+    });
+
+// Obtener o crear una categoría de ejemplo para el producto
+const category = await prisma.category.findFirst({ where: { name: 'Decoración' } })
+    || await prisma.category.create({
+      data: {
+        name: 'Decoración',
+        slug: 'decoracion',
+        description: 'Productos decorativos',
+        isActive: true,
+      },
+    });
+
+// Obtener o crear un producto de ejemplo para la orden
+const product = await prisma.product.findFirst({ where: { name: 'Producto Decorativo' } })
+    || await prisma.product.create({
+      data: {
+        name: 'Producto Decorativo',
+        slug: 'producto-decorativo',
+        description: 'Un producto decorativo impreso en 3D',
+        price: 24.99,
+        isActive: true,
+        categoryId: category.id,
+        material: 'PLA',
+        stock: 10,
+      },
+    });
+
+const deliveredOrder = await prisma.order.create({
+  data: {
+    userId: customer.id,
+    orderNumber: 'ORD-2024-001',
+    status: 'DELIVERED',
+    subtotal: 24.99,
+    shipping: 5.99,
+    total: 36.23,
+    shippingName: customer.name,
+    shippingPhone: '+34 600 123 456',
+    shippingAddress: 'Calle Mayor 123',
+    shippingPostalCode: '28001',
+    shippingCity: 'Madrid',
+    shippingProvince: 'Madrid',
+    shippingCountry: 'Spain',
+    paymentMethod: 'CARD',
+    items: {
+      create: {
+        productId: product.id,
+        name: product.name,
+        price: 24.99,
+        quantity: 1,
+        subtotal: 24.99,
+        category: 'Decoración',
+        material: 'PLA',
+      },
+    },
+  },
+});
+console.log(`  ✓ DELIVERED order: ${deliveredOrder.orderNumber}`);
+
+const confirmedOrder = await prisma.order.create({
+  data: {
+    userId: customer.id,
+    orderNumber: 'ORD-2024-002',
+    status: 'CONFIRMED',
+    subtotal: 18.5,
+    shipping: 5.99,
+    total: 28.38,
+    shippingName: customer.name,
+    shippingPhone: '+34 600 123 456',
+    shippingAddress: 'Calle Mayor 123',
+    shippingPostalCode: '28001',
+    shippingCity: 'Madrid',
+    shippingProvince: 'Madrid',
+    shippingCountry: 'Spain',
+    paymentMethod: 'PAYPAL',
+    items: {
+      create: {
+        productId: product.id,
+        name: product.name,
+        price: 18.5,
+        quantity: 1,
+        subtotal: 18.5,
+        category: 'Decoración',
+        material: 'PLA',
+      },
+    },
+  },
+});
+console.log(`  ✓ CONFIRMED order: ${confirmedOrder.orderNumber}`);
+
+console.log('✅ Sample orders created');
 
 async function main() {
   console.log('\n🌱 Seeding test database...\n');

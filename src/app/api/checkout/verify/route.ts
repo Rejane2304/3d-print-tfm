@@ -1,4 +1,4 @@
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 /**
  * API Route para verificar estado de checkout
@@ -6,15 +6,15 @@ export const dynamic = "force-dynamic";
  * GET /api/checkout/verify?session_id=xxx
  * Verifica el estado del pago con Stripe
  */
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
-import Stripe from "stripe";
-import { translateOrderStatus, translatePaymentStatus } from "@/lib/i18n";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
+import Stripe from 'stripe';
+import { translateOrderStatus, translatePaymentStatus } from '@/lib/i18n';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2023-10-16" as Stripe.LatestApiVersion,
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+  apiVersion: '2023-10-16' as Stripe.LatestApiVersion,
 });
 
 export async function GET(req: NextRequest) {
@@ -22,15 +22,15 @@ export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const { searchParams } = new URL(req.url);
-    const sessionId = searchParams.get("session_id");
+    const sessionId = searchParams.get('session_id');
 
     if (!sessionId) {
       return NextResponse.json(
-        { error: "El ID de sesión es requerido" },
+        { error: 'El ID de sesión es requerido' },
         { status: 400 },
       );
     }
@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
     // Verificar sesión con Stripe
     const stripeSession = await stripe.checkout.sessions.retrieve(sessionId);
 
-    if (stripeSession.payment_status === "paid") {
+    if (stripeSession.payment_status === 'paid') {
       // Buscar pedido asociado
       const order = await prisma.order.findFirst({
         where: { stripeSessionId: sessionId },
@@ -63,11 +63,11 @@ export async function GET(req: NextRequest) {
 
       if (order) {
         // Actualizar estado si aún está pendiente
-        if (order.status === "PENDING") {
+        if (order.status === 'PENDING') {
           await prisma.order.update({
             where: { id: order.id },
             data: {
-              status: "CONFIRMED",
+              status: 'CONFIRMED',
               confirmedAt: new Date(),
             },
           });
@@ -84,8 +84,8 @@ export async function GET(req: NextRequest) {
                 order: { connect: { id: order.id } },
                 user: { connect: { id: order.userId } },
                 amount: order.total,
-                status: "COMPLETED",
-                method: "CARD",
+                status: 'COMPLETED',
+                method: 'CARD',
                 stripePaymentIntentId: stripeSession.payment_intent as string,
                 processedAt: new Date(),
                 updatedAt: new Date(),
@@ -112,8 +112,8 @@ export async function GET(req: NextRequest) {
             id: order.id,
             orderNumber: order.orderNumber,
             total: order.total,
-            status: translateOrderStatus("CONFIRMED"),
-            paymentStatus: translatePaymentStatus("COMPLETED"),
+            status: translateOrderStatus('CONFIRMED'),
+            paymentStatus: translatePaymentStatus('COMPLETED'),
             items: order.items,
           },
         });
@@ -125,9 +125,9 @@ export async function GET(req: NextRequest) {
       status: translatePaymentStatus(stripeSession.payment_status),
     });
   } catch (error) {
-    console.error("Error verifying checkout:", error);
+    console.error('Error verifying checkout:', error);
     return NextResponse.json(
-      { error: "Error al verificar pago" },
+      { error: 'Error al verificar pago' },
       { status: 500 },
     );
   }

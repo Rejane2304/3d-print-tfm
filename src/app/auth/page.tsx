@@ -1,47 +1,46 @@
-"use client";
+/* eslint-disable max-len */
+'use client';
 
-import { useState, useEffect, Suspense } from "react";
-import { signIn, useSession } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
+import { Suspense, useEffect, useState } from 'react';
+import { signIn, useSession } from 'next-auth/react';
+import { useRouter, useSearchParams } from 'next/navigation';
+
 import {
-  User,
-  Mail,
-  Lock,
+  ArrowRight,
+  Building,
+  CheckCircle2,
   Eye,
   EyeOff,
-  ArrowRight,
-  CheckCircle2,
-  LogIn,
-  UserPlus,
-  MapPin,
   Home,
-  Building,
-  Map,
-  Phone,
   Loader2,
-} from "lucide-react";
-import PasswordStrength, {
-  isPasswordValid,
-} from "@/components/auth/PasswordStrength";
+  Lock,
+  LogIn,
+  Mail,
+  Map,
+  MapPin,
+  Phone,
+  User,
+  UserPlus,
+} from 'lucide-react';
+import PasswordStrength, { isPasswordValid } from '@/components/auth/PasswordStrength';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 function AuthContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();
-  const callbackUrl = searchParams.get("callbackUrl") || "/";
-  const cartStorageKey = "cart";
-  const registrationSuccessful = searchParams.get("registro") === "exitoso";
+  const callbackUrl = searchParams.get('callbackUrl') || '/';
+  const cartStorageKey = 'cart';
+  const registrationSuccessful = searchParams.get('registro') === 'exitoso';
 
   // Redirect authenticated users away from auth page
   // Skip redirect if we just logged in (handled by handleLogin)
   useEffect(() => {
-    if (status === "authenticated" && session) {
+    if (status === 'authenticated' && session) {
       // Check if we just came from login/register
-      const justRegistered = searchParams.get("registro") === "exitoso";
-      const migratingCart = sessionStorage.getItem("migratingCart");
+      const justRegistered = searchParams.get('registro') === 'exitoso';
+      const migratingCart = sessionStorage.getItem('migratingCart');
 
       // If we're migrating cart, don't redirect yet
       if (migratingCart) {
@@ -49,8 +48,8 @@ function AuthContent() {
       }
 
       const userRole = (session.user as { role?: string })?.role;
-      if (userRole === "ADMIN") {
-        router.push("/admin/dashboard");
+      if (userRole === 'ADMIN') {
+        router.push('/admin/dashboard');
       } else if (!justRegistered) {
         // Only redirect if not just registered (registration auto-redirects)
         router.push(callbackUrl);
@@ -59,36 +58,36 @@ function AuthContent() {
   }, [status, session, router, callbackUrl, searchParams]);
 
   // Tab state: 'login' | 'register'
-  const [activeTab, setActiveTab] = useState<"login" | "register">("login");
+  const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
 
   // Shared email state
-  const [sharedEmail, setSharedEmail] = useState("");
+  const [sharedEmail, setSharedEmail] = useState('');
 
   // Login form state
-  const [loginPassword, setLoginPassword] = useState("");
+  const [loginPassword, setLoginPassword] = useState('');
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
-  const [loginError, setLoginError] = useState("");
+  const [loginError, setLoginError] = useState('');
 
   // Register form state
   const [registerData, setRegisterData] = useState({
     // Datos personales
-    nombre: "",
-    email: "",
-    password: "",
-    confirmarPassword: "",
-    telefono: "",
+    nombre: '',
+    email: '',
+    password: '',
+    confirmarPassword: '',
+    telefono: '',
     // Datos de dirección
-    direccion: "",
-    complemento: "",
-    codigoPostal: "",
-    ciudad: "",
-    provincia: "",
+    direccion: '',
+    complemento: '',
+    codigoPostal: '',
+    ciudad: '',
+    provincia: '',
   });
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [registerLoading, setRegisterLoading] = useState(false);
-  const [registerError, setRegisterError] = useState("");
+  const [registerError, setRegisterError] = useState('');
   const [registerSuccess, setRegisterSuccess] = useState(false);
 
   // Sync shared email with register email
@@ -98,35 +97,35 @@ function AuthContent() {
 
   // Sync tab state with URL parameter on mount
   useEffect(() => {
-    const tabParam = searchParams.get("tab");
-    if (tabParam === "register") {
-      setActiveTab("register");
+    const tabParam = searchParams.get('tab');
+    if (tabParam === 'register') {
+      setActiveTab('register');
     }
   }, [searchParams]);
 
   // Handle tab switch with animation
-  const handleTabSwitch = (tab: "login" | "register") => {
+  const handleTabSwitch = (tab: 'login' | 'register') => {
     setActiveTab(tab);
-    setLoginError("");
-    setRegisterError("");
+    setLoginError('');
+    setRegisterError('');
   };
 
   // Login handler
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async(e: React.FormEvent) => {
     e.preventDefault();
     setLoginLoading(true);
-    setLoginError("");
+    setLoginError('');
 
     // Set migration flag BEFORE login to prevent useEffect redirect
     const localCart = localStorage.getItem(cartStorageKey);
     const hasItemsToMigrate = localCart && JSON.parse(localCart).length > 0;
 
     if (hasItemsToMigrate) {
-      sessionStorage.setItem("migratingCart", "true");
+      sessionStorage.setItem('migratingCart', 'true');
     }
 
     try {
-      const result = await signIn("credentials", {
+      const result = await signIn('credentials', {
         email: sharedEmail,
         password: loginPassword,
         redirect: false,
@@ -135,8 +134,8 @@ function AuthContent() {
 
       if (result?.error) {
         // Clear migration flag on error
-        sessionStorage.removeItem("migratingCart");
-        setLoginError("Email o contraseña incorrectos");
+        sessionStorage.removeItem('migratingCart');
+        setLoginError('Email o contraseña incorrectos');
       } else {
         // Login successful - migrate cart before redirecting
 
@@ -145,13 +144,13 @@ function AuthContent() {
             const items = JSON.parse(localCart);
 
             // Migrate each item to API with credentials
-            const migrationResults = await Promise.allSettled(
+            await Promise.allSettled(
               items.map(
-                async (item: { productId: string; quantity: number }) => {
-                  const response = await fetch("/api/cart", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include",
+                async(item: { productId: string; quantity: number }) => {
+                  const response = await fetch('/api/cart', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify({
                       productId: item.productId,
                       quantity: item.quantity,
@@ -160,7 +159,7 @@ function AuthContent() {
                   if (!response.ok) {
                     const errorData = await response.json().catch(() => ({}));
                     console.error(
-                      "Failed to migrate item:",
+                      'Failed to migrate item:',
                       item.productId,
                       errorData,
                     );
@@ -175,12 +174,7 @@ function AuthContent() {
               ),
             );
 
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const successful = migrationResults.filter(
-              (r) =>
-                r.status === "fulfilled" &&
-                (r.value as { success: boolean }).success,
-            ).length;
+            // Se omite la asignación innecesaria de 'successful' para evitar advertencias
 
             // Clear localStorage after migration attempt
             localStorage.removeItem(cartStorageKey);
@@ -188,45 +182,45 @@ function AuthContent() {
             // Small delay to ensure API consistency
             await new Promise((resolve) => setTimeout(resolve, 500));
           } catch (err) {
-            console.error("Error migrating cart:", err);
+            console.error('Error migrating cart:', err);
             // Still clear localStorage to prevent duplicate migration attempts
             localStorage.removeItem(cartStorageKey);
           }
         }
 
         // Clear migration flag and redirect
-        sessionStorage.removeItem("migratingCart");
+        sessionStorage.removeItem('migratingCart');
 
         // Trigger cart update to refresh header counter
-        window.dispatchEvent(new Event("cartUpdated"));
+        globalThis.dispatchEvent(new Event('cartUpdated'));
 
         // Redirect to callback URL
         router.push(callbackUrl);
       }
     } catch {
-      sessionStorage.removeItem("migratingCart");
-      setLoginError("Error al iniciar sesión. Inténtalo de nuevo.");
+      sessionStorage.removeItem('migratingCart');
+      setLoginError('Error al iniciar sesión. Inténtalo de nuevo.');
     } finally {
       setLoginLoading(false);
     }
   };
 
   // Register handler
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleRegister = async(e: React.FormEvent) => {
     e.preventDefault();
     setRegisterLoading(true);
-    setRegisterError("");
+    setRegisterError('');
 
     // Validation
     if (registerData.password !== registerData.confirmarPassword) {
-      setRegisterError("Las contraseñas no coinciden");
+      setRegisterError('Las contraseñas no coinciden');
       setRegisterLoading(false);
       return;
     }
 
     if (!isPasswordValid(registerData.password)) {
       setRegisterError(
-        "La contraseña no cumple con todos los requisitos de seguridad",
+        'La contraseña no cumple con todos los requisitos de seguridad',
       );
       setRegisterLoading(false);
       return;
@@ -240,7 +234,7 @@ function AuthContent() {
       !registerData.provincia
     ) {
       setRegisterError(
-        "Por favor, completa todos los campos de dirección obligatorios",
+        'Por favor, completa todos los campos de dirección obligatorios',
       );
       setRegisterLoading(false);
       return;
@@ -249,15 +243,15 @@ function AuthContent() {
     // Validate postal code (5 digits for Spain)
     const cpRegex = /^\d{5}$/;
     if (!cpRegex.test(registerData.codigoPostal)) {
-      setRegisterError("El código postal debe tener 5 dígitos");
+      setRegisterError('El código postal debe tener 5 dígitos');
       setRegisterLoading(false);
       return;
     }
 
     try {
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           nombre: registerData.nombre,
           email: registerData.email,
@@ -265,9 +259,9 @@ function AuthContent() {
           telefono: registerData.telefono || undefined,
           // Datos de dirección
           direccion: {
-            nombre: "Principal",
+            nombre: 'Principal',
             destinatario: registerData.nombre,
-            telefono: registerData.telefono || "",
+            telefono: registerData.telefono || '',
             direccion: registerData.direccion,
             complemento: registerData.complemento || undefined,
             codigoPostal: registerData.codigoPostal,
@@ -280,29 +274,31 @@ function AuthContent() {
 
       const data = await response.json();
 
-      if (!response.ok) {
-        setRegisterError(data.error || "Error al registrar usuario");
-      } else {
+      if (response.ok) {
         setRegisterSuccess(true);
         setSharedEmail(registerData.email);
         // Switch to login tab after 2 seconds
         setTimeout(() => {
-          setActiveTab("login");
+          setActiveTab('login');
           setRegisterSuccess(false);
         }, 2000);
+      } else {
+        setRegisterError(data.error || 'Error al registrar usuario');
       }
     } catch {
-      setRegisterError("Error al registrar. Inténtalo de nuevo.");
+      setRegisterError('Error al registrar. Inténtalo de nuevo.');
     } finally {
       setRegisterLoading(false);
     }
   };
 
   return (
+    // eslint-disable-next-line max-len
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-indigo-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-lg w-full">
         {/* Header with Logo */}
         <div className="text-center mb-8">
+
           <div className="mx-auto h-16 w-16 bg-indigo-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-indigo-200">
             <User className="h-8 w-8 text-white" />
           </div>
@@ -317,24 +313,26 @@ function AuthContent() {
           {/* Tabs */}
           <div className="flex border-b border-gray-200">
             <button
-              onClick={() => handleTabSwitch("login")}
+              onClick={() => handleTabSwitch('login')}
               data-testid="login-tab"
+              // eslint-disable-next-line max-len
               className={`flex-1 flex items-center justify-center gap-2 py-4 text-sm font-medium transition-all duration-300 ${
-                activeTab === "login"
-                  ? "text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50/50"
-                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                activeTab === 'login'
+                  ? 'text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50/50'
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
               }`}
             >
               <LogIn className="h-4 w-4" />
               Iniciar sesión
             </button>
             <button
-              onClick={() => handleTabSwitch("register")}
+              onClick={() => handleTabSwitch('register')}
               data-testid="register-tab"
+              // eslint-disable-next-line max-len
               className={`flex-1 flex items-center justify-center gap-2 py-4 text-sm font-medium transition-all duration-300 ${
-                activeTab === "register"
-                  ? "text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50/50"
-                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                activeTab === 'register'
+                  ? 'text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50/50'
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
               }`}
             >
               <UserPlus className="h-4 w-4" />
@@ -361,9 +359,9 @@ function AuthContent() {
             {/* Login Form */}
             <div
               className={`transition-all duration-500 ease-in-out ${
-                activeTab === "login"
-                  ? "opacity-100 translate-x-0"
-                  : "opacity-0 translate-x-10 absolute pointer-events-none"
+                activeTab === 'login'
+                  ? 'opacity-100 translate-x-0'
+                  : 'opacity-0 translate-x-10 absolute pointer-events-none'
               }`}
             >
               <form onSubmit={handleLogin} data-testid="login-form" className="space-y-5">
@@ -393,6 +391,7 @@ function AuthContent() {
                       data-testid="login-email"
                       type="email"
                       required
+                      // eslint-disable-next-line max-len
                       className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
                       placeholder="tu@email.com"
                       value={sharedEmail}
@@ -416,8 +415,9 @@ function AuthContent() {
                     <input
                       id="login-password"
                       data-testid="login-password"
-                      type={showLoginPassword ? "text" : "password"}
+                      type={showLoginPassword ? 'text' : 'password'}
                       required
+                      // eslint-disable-next-line max-len
                       className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
                       placeholder="••••••••"
                       value={loginPassword}
@@ -426,6 +426,7 @@ function AuthContent() {
                     <button
                       type="button"
                       onClick={() => setShowLoginPassword(!showLoginPassword)}
+                      // eslint-disable-next-line max-len
                       className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
                     >
                       {showLoginPassword ? (
@@ -442,6 +443,7 @@ function AuthContent() {
                   type="submit"
                   data-testid="login-submit"
                   disabled={loginLoading}
+                  // eslint-disable-next-line max-len
                   className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
                   {loginLoading ? (
@@ -459,12 +461,13 @@ function AuthContent() {
                           r="10"
                           stroke="currentColor"
                           strokeWidth="4"
-                        ></circle>
+                        />
                         <path
                           className="opacity-75"
                           fill="currentColor"
+                          // eslint-disable-next-line max-len
                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
+                        />
                       </svg>
                       Iniciando...
                     </div>
@@ -479,21 +482,25 @@ function AuthContent() {
 
               {/* Forgot password link */}
               <div className="mt-4 text-center">
-                <Link
-                  href="#"
-                  className="text-sm text-indigo-600 hover:text-indigo-500 transition-colors"
+                <button
+                  type="button"
+                  // eslint-disable-next-line max-len
+                  className="text-sm text-indigo-600 hover:text-indigo-500 transition-colors underline cursor-pointer bg-transparent border-none p-0"
+                  tabIndex={0}
+                  aria-label="¿Olvidaste tu contraseña?"
+                  onClick={() => {}}
                 >
                   ¿Olvidaste tu contraseña?
-                </Link>
+                </button>
               </div>
             </div>
 
             {/* Register Form */}
             <div
               className={`transition-all duration-500 ease-in-out ${
-                activeTab === "register"
-                  ? "opacity-100 translate-x-0"
-                  : "opacity-0 -translate-x-10 absolute pointer-events-none"
+                activeTab === 'register'
+                  ? 'opacity-100 translate-x-0'
+                  : 'opacity-0 -translate-x-10 absolute pointer-events-none'
               }`}
             >
               {registerSuccess ? (
@@ -588,7 +595,7 @@ function AuthContent() {
                         htmlFor="register-telefono"
                         className="block text-sm font-medium text-gray-700 mb-2"
                       >
-                        Teléfono{" "}
+                        Teléfono{' '}
                         <span className="text-gray-400 font-normal">
                           (opcional)
                         </span>
@@ -630,7 +637,7 @@ function AuthContent() {
                           id="register-password"
                           data-testid="register-password"
                           name="password"
-                          type={showRegisterPassword ? "text" : "password"}
+                          type={showRegisterPassword ? 'text' : 'password'}
                           required
                           className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
                           placeholder="Mínimo 10 caracteres"
@@ -675,7 +682,7 @@ function AuthContent() {
                           id="register-confirm"
                           data-testid="register-confirm-password"
                           name="confirmarPassword"
-                          type={showConfirmPassword ? "text" : "password"}
+                          type={showConfirmPassword ? 'text' : 'password'}
                           required
                           className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
                           placeholder="Repite tu contraseña"
@@ -747,7 +754,7 @@ function AuthContent() {
                         htmlFor="register-complemento"
                         className="block text-sm font-medium text-gray-700 mb-2"
                       >
-                        Piso, puerta, escalera{" "}
+                        Piso, puerta, escalera{' '}
                         <span className="text-gray-400 font-normal">
                           (opcional)
                         </span>
@@ -881,12 +888,12 @@ function AuthContent() {
                             r="10"
                             stroke="currentColor"
                             strokeWidth="4"
-                          ></circle>
+                          />
                           <path
                             className="opacity-75"
                             fill="currentColor"
                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                          ></path>
+                          />
                         </svg>
                         Registrando...
                       </div>
@@ -900,20 +907,26 @@ function AuthContent() {
 
                   {/* Terms */}
                   <p className="text-xs text-center text-gray-500">
-                    Al registrarte, aceptas nuestros{" "}
-                    <a
-                      href="#"
-                      className="text-indigo-600 hover:text-indigo-500"
+                    Al registrarte, aceptas nuestros{' '}
+                    <button
+                      type="button"
+                      className="text-indigo-600 hover:text-indigo-500 underline cursor-pointer bg-transparent border-none p-0"
+                      tabIndex={0}
+                      aria-label="Términos y condiciones"
+                      onClick={() => {}}
                     >
                       términos y condiciones
-                    </a>{" "}
-                    y{" "}
-                    <a
-                      href="#"
-                      className="text-indigo-600 hover:text-indigo-500"
+                    </button>{' '}
+                    y{' '}
+                    <button
+                      type="button"
+                      className="text-indigo-600 hover:text-indigo-500 underline cursor-pointer bg-transparent border-none p-0"
+                      tabIndex={0}
+                      aria-label="Política de privacidad"
+                      onClick={() => {}}
                     >
                       política de privacidad
-                    </a>
+                    </button>
                   </p>
                 </form>
               )}
@@ -949,14 +962,14 @@ function AuthContent() {
 export default function AuthPage() {
   return (
     <Suspense
-      fallback={
+      fallback={(
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-indigo-50">
           <div className="text-center">
             <Loader2 className="h-12 w-12 animate-spin text-indigo-600 mx-auto mb-4" />
             <p className="text-gray-600">Cargando...</p>
           </div>
         </div>
-      }
+      )}
     >
       <AuthContent />
     </Suspense>

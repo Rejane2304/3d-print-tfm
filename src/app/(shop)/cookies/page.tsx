@@ -3,32 +3,33 @@
  * Política de Cookies - Cumplimiento LOPD y RGPD (España/UE)
  * Responsive: mobile → 4K
  */
-import type { Metadata } from "next";
-import Link from "next/link";
+import type { Metadata } from 'next';
+import Link from 'next/link';
 import {
-  Cookie,
-  Shield,
   BarChart3,
+  ChevronRight,
+  Cookie,
+  ExternalLink,
+  Eye,
+  Info,
+  Mail,
   Megaphone,
   Settings,
-  ExternalLink,
-  Mail,
-  ChevronRight,
-  Info,
-  Eye,
-} from "lucide-react";
+  Shield,
+} from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: "Política de Cookies | 3D Print",
+  title: 'Política de Cookies | 3D Print',
   description:
-    "Información sobre el uso de cookies en nuestra tienda online de impresión 3D. Cumplimiento con la normativa LOPD y RGPD.",
-  robots: "index, follow",
+    'Información sobre el uso de cookies en nuestra tienda online de impresión 3D. ' +
+    'Cumplimiento con la normativa LOPD y RGPD.',
+  robots: 'index, follow',
 };
 
 interface CookieSectionProps {
-  title: string;
-  icon: React.ReactNode;
-  children: React.ReactNode;
+  readonly title: string;
+  readonly icon: React.ReactNode;
+  readonly children: React.ReactNode;
 }
 
 function CookieSection({ title, icon, children }: CookieSectionProps) {
@@ -100,19 +101,21 @@ export default function CookiesPage() {
               </h3>
               <nav className="space-y-2">
                 {[
-                  { href: "#que-son", label: "¿Qué son las cookies?" },
-                  { href: "#tipos", label: "Tipos de cookies" },
-                  { href: "#esenciales", label: "Cookies esenciales" },
-                  { href: "#analiticas", label: "Cookies analíticas" },
-                  { href: "#marketing", label: "Cookies de marketing" },
-                  { href: "#gestion", label: "Gestión de cookies" },
-                  { href: "#terceros", label: "Cookies de terceros" },
-                  { href: "#contacto", label: "Contacto" },
+                  { href: '#que-son', label: '¿Qué son las cookies?' },
+                  { href: '#tipos', label: 'Tipos de cookies' },
+                  { href: '#esenciales', label: 'Cookies esenciales' },
+                  { href: '#analiticas', label: 'Cookies analíticas' },
+                  { href: '#marketing', label: 'Cookies de marketing' },
+                  { href: '#gestion', label: 'Gestión de cookies' },
+                  { href: '#terceros', label: 'Cookies de terceros' },
+                  { href: '#contacto', label: 'Contacto' },
                 ].map((item) => (
                   <a
                     key={item.href}
                     href={item.href}
-                    className="block py-2 px-3 text-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                    className="block py-2 px-3 text-sm text-gray-600 \
+                      hover:text-indigo-600 hover:bg-indigo-50 \
+                      rounded-lg transition-colors"
                   >
                     {item.label}
                   </a>
@@ -124,10 +127,10 @@ export default function CookiesPage() {
                 <p className="text-xs text-gray-500">
                   <span className="font-medium">Última actualización:</span>
                   <br />
-                  {new Date().toLocaleDateString("es-ES", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
+                  {new Date().toLocaleDateString('es-ES', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
                   })}
                 </p>
               </div>
@@ -511,20 +514,20 @@ export default function CookiesPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {[
                     {
-                      name: "Google Chrome",
-                      url: "https://support.google.com/chrome/answer/95647",
+                      name: 'Google Chrome',
+                      url: 'https://support.google.com/chrome/answer/95647',
                     },
                     {
-                      name: "Mozilla Firefox",
-                      url: "https://support.mozilla.org/es/kb/cookies-informacion-que-los-sitios-web-guardan-en",
+                      name: 'Mozilla Firefox',
+                      url: 'https://support.mozilla.org/es/kb/cookies-informacion-que-los-sitios-web-guardan-en',
                     },
                     {
-                      name: "Safari",
-                      url: "https://support.apple.com/es-es/guide/safari/sfri11471/mac",
+                      name: 'Safari',
+                      url: 'https://support.apple.com/es-es/guide/safari/sfri11471/mac',
                     },
                     {
-                      name: "Microsoft Edge",
-                      url: "https://support.microsoft.com/es-es/microsoft-edge",
+                      name: 'Microsoft Edge',
+                      url: 'https://support.microsoft.com/es-es/microsoft-edge',
                     },
                   ].map((browser) => (
                     <a
@@ -532,12 +535,15 @@ export default function CookiesPage() {
                       href={browser.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group"
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg \
+                        hover:bg-gray-100 transition-colors group"
                     >
                       <span className="text-sm font-medium text-gray-700">
                         {browser.name}
                       </span>
-                      <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-indigo-600" />
+                      <ExternalLink
+                        className="h-4 w-4 text-gray-400 group-hover:text-indigo-600"
+                      />
                     </a>
                   ))}
                 </div>
@@ -569,30 +575,33 @@ export default function CookiesPage() {
                 <div className="space-y-4">
                   {[
                     {
-                      name: "Google Analytics",
+                      name: 'Google Analytics',
                       description:
-                        "Servicio de análisis web para estadísticas de uso anónimas.",
-                      policy: "https://policies.google.com/privacy",
+                        'Servicio de análisis web para estadísticas de uso anónimas.',
+                      policy: 'https://policies.google.com/privacy',
                     },
                     {
-                      name: "PayPal",
+                      name: 'PayPal',
                       description:
-                        "Procesamiento de pagos seguros (solo durante el proceso de compra).",
+                        'Procesamiento de pagos seguros (solo durante el proceso de compra).',
                       policy:
-                        "https://www.paypal.com/es/webapps/mpp/ua/privacy-full",
+                        'https://www.paypal.com/es/webapps/mpp/ua/privacy-full',
                     },
                     {
-                      name: "Stripe",
+                      name: 'Stripe',
                       description:
-                        "Procesamiento de pagos con tarjeta de crédito/débito.",
-                      policy: "https://stripe.com/es/privacy",
+                        'Procesamiento de pagos con tarjeta de crédito/débito.',
+                      policy: 'https://stripe.com/es/privacy',
                     },
                   ].map((provider) => (
                     <div
                       key={provider.name}
                       className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg"
                     >
-                      <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                      <div
+                        className="w-10 h-10 rounded-lg bg-white flex items-center \
+                          justify-center flex-shrink-0 shadow-sm"
+                      >
                         <ExternalLink className="h-5 w-5 text-gray-600" />
                       </div>
                       <div className="flex-1">
@@ -606,7 +615,8 @@ export default function CookiesPage() {
                           href={provider.policy}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                          className="inline-flex items-center gap-1 text-sm \
+                            text-indigo-600 hover:text-indigo-700 font-medium"
                         >
                           Ver política de privacidad
                           <ExternalLink className="h-3 w-3" />
@@ -635,9 +645,13 @@ export default function CookiesPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <a
                     href="mailto:privacy@3dprint.com"
-                    className="flex items-center gap-3 p-4 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors group"
+                    className="flex items-center gap-3 p-4 bg-indigo-50 rounded-lg \
+                      hover:bg-indigo-100 transition-colors group"
                   >
-                    <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-200 transition-colors">
+                    <div
+                      className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center \
+                        group-hover:bg-indigo-200 transition-colors"
+                    >
                       <Mail className="h-5 w-5 text-indigo-600" />
                     </div>
                     <div>
@@ -650,9 +664,13 @@ export default function CookiesPage() {
 
                   <Link
                     href="/faqs"
-                    className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group"
+                    className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg \
+                      hover:bg-gray-100 transition-colors group"
                   >
-                    <div className="w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center group-hover:bg-gray-300 transition-colors">
+                    <div
+                      className="w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center \
+                        group-hover:bg-gray-300 transition-colors"
+                    >
                       <Info className="h-5 w-5 text-gray-600" />
                     </div>
                     <div>
@@ -689,7 +707,7 @@ export default function CookiesPage() {
 
                 <div className="mt-6 text-sm text-gray-500">
                   <p>
-                    También tienes derecho a presentar una reclamación ante la{" "}
+                    También tienes derecho a presentar una reclamación ante la{' '}
                     <a
                       href="https://www.aepd.es/"
                       target="_blank"
@@ -697,7 +715,7 @@ export default function CookiesPage() {
                       className="text-indigo-600 hover:text-indigo-700 underline"
                     >
                       Agencia Española de Protección de Datos (AEPD)
-                    </a>{" "}
+                    </a>{' '}
                     si consideras que el tratamiento de tus datos personales
                     infringe la normativa vigente.
                   </p>

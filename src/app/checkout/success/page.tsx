@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useEffect, useState, useCallback, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
-import Link from "next/link";
-import { CheckCircle, Package, ArrowRight, Loader2 } from "lucide-react";
+import { Suspense, useCallback, useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import { ArrowRight, CheckCircle, Loader2, Package } from 'lucide-react';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 interface OrderData {
   orderNumber?: string;
@@ -17,44 +17,44 @@ interface OrderData {
 
 function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
-  const sessionId = searchParams.get("session_id");
-  const orderId = searchParams.get("orderId"); // Para verificación directa por ID
-  const paypalToken = searchParams.get("token"); // PayPal devuelve 'token'
-  const payerId = searchParams.get("PayerID"); // PayPal devuelve 'PayerID'
+  const sessionId = searchParams.get('session_id');
+  const orderId = searchParams.get('orderId'); // Para verificación directa por ID
+  const paypalToken = searchParams.get('token'); // PayPal devuelve 'token'
+  const payerId = searchParams.get('PayerID'); // PayPal devuelve 'PayerID'
   const [pedido, setPedido] = useState<OrderData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const verificarPagoStripe = useCallback(async (sid: string) => {
+  const verificarPagoStripe = useCallback(async(sid: string) => {
     try {
       const response = await fetch(`/api/checkout/verify?session_id=${sid}`);
       if (response.ok) {
         const data = await response.json();
         return data.order || data.pedido;
       }
-      throw new Error("Error verificando pago de Stripe");
+      throw new Error('Error verificando pago de Stripe');
     } catch (err) {
-      console.error("Error verificando pago Stripe:", err);
+      console.error('Error verificando pago Stripe:', err);
       throw err;
     }
   }, []);
 
-  const verificarPedidoPorId = useCallback(async (oid: string) => {
+  const verificarPedidoPorId = useCallback(async(oid: string) => {
     try {
       const response = await fetch(`/api/account/orders/${oid}`);
       if (response.ok) {
         const data = await response.json();
         return data.pedido;
       }
-      throw new Error("Error verificando pedido");
+      throw new Error('Error verificando pedido');
     } catch (err) {
-      console.error("Error verificando pedido por ID:", err);
+      console.error('Error verificando pedido por ID:', err);
       throw err;
     }
   }, []);
 
   const verificarPagoPayPal = useCallback(
-    async (paypalOrderId: string, payerId: string) => {
+    async(paypalOrderId: string, payerId: string) => {
       try {
         // Usar la misma API que Stripe - verifica y captura en un solo paso
         const response = await fetch(
@@ -65,9 +65,9 @@ function CheckoutSuccessContent() {
           return data.order;
         }
         const errorData = await response.json();
-        throw new Error(errorData.error || "Error verificando pago de PayPal");
+        throw new Error(errorData.error || 'Error verificando pago de PayPal');
       } catch (err) {
-        console.error("Error verificando pago PayPal:", err);
+        console.error('Error verificando pago PayPal:', err);
         throw err;
       }
     },
@@ -75,15 +75,15 @@ function CheckoutSuccessContent() {
   );
 
   const clearCart = useCallback(() => {
-    localStorage.removeItem("cart");
-    window.dispatchEvent(new Event("cartUpdated"));
+    localStorage.removeItem('cart');
+    globalThis.dispatchEvent(new Event('cartUpdated'));
     setTimeout(() => {
-      window.dispatchEvent(new Event("cartUpdated"));
+      globalThis.dispatchEvent(new Event('cartUpdated'));
     }, 100);
   }, []);
 
   useEffect(() => {
-    const verifyPayment = async () => {
+    const verifyPayment = async() => {
       setLoading(true);
       setError(null);
 
@@ -95,13 +95,13 @@ function CheckoutSuccessContent() {
           orderData = await verificarPagoStripe(sessionId);
         } else if (paypalToken && payerId) {
           // PayPal payment - usar API similar a Stripe
-          console.log("PayPal return detected:", { paypalToken, payerId });
+          // PayPal return detected: { paypalToken, payerId }
           orderData = await verificarPagoPayPal(paypalToken, payerId);
         } else if (orderId) {
           // Verificación por ID de pedido
           orderData = await verificarPedidoPorId(orderId);
         } else {
-          setError("No se encontró información del pago");
+          setError('No se encontró información del pago');
           setLoading(false);
           return;
         }
@@ -111,7 +111,7 @@ function CheckoutSuccessContent() {
           clearCart();
         }
       } catch (err: unknown) {
-        console.error("Error en verificación de pago:", err);
+        console.error('Error en verificación de pago:', err);
         setError(
           'Tu pedido ha sido registrado. Verifica el estado en "Mis Pedidos".',
         );
@@ -153,7 +153,9 @@ function CheckoutSuccessContent() {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 text-center">
             <div className="mb-4 sm:mb-6">
-              <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-red-100 rounded-full">
+              <div
+                className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-red-100 rounded-full"
+              >
                 <span className="text-2xl sm:text-4xl text-red-600">⚠️</span>
               </div>
             </div>
@@ -165,7 +167,10 @@ function CheckoutSuccessContent() {
             </p>
             <Link
               href="/account/orders"
-              className="inline-flex items-center justify-center gap-2 bg-indigo-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-indigo-700 transition-colors min-h-[44px]"
+              className="inline-flex items-center justify-center gap-2 bg-indigo-600 text-white py-3 px-6 rounded-lg
+                font-medium"
+              style={{ minHeight: 44 }}
+              /* hover:bg-indigo-700 transition-colors */
             >
               Ver mis pedidos
               <ArrowRight className="h-4 w-4 flex-shrink-0" />
@@ -182,7 +187,9 @@ function CheckoutSuccessContent() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 text-center">
           {/* Icono de éxito */}
           <div className="mb-4 sm:mb-6">
-            <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-green-100 rounded-full">
+            <div
+              className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-green-100 rounded-full"
+            >
               <CheckCircle className="h-8 w-8 sm:h-10 sm:w-10 text-green-600" />
             </div>
           </div>
@@ -227,7 +234,10 @@ function CheckoutSuccessContent() {
           <div className="space-y-3">
             <Link
               href="/account/orders"
-              className="inline-flex items-center justify-center gap-2 w-full bg-indigo-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-indigo-700 transition-colors min-h-[44px]"
+              className="inline-flex items-center justify-center gap-2 w-full bg-indigo-600 text-white py-3 px-6
+                rounded-lg font-medium"
+              style={{ minHeight: 44 }}
+              /* hover:bg-indigo-700 transition-colors */
             >
               Ver mis pedidos
               <ArrowRight className="h-4 w-4 flex-shrink-0" />
@@ -235,7 +245,10 @@ function CheckoutSuccessContent() {
 
             <Link
               href="/products"
-              className="inline-flex items-center justify-center w-full border border-gray-300 text-gray-700 py-3 px-6 rounded-lg font-medium hover:bg-gray-50 transition-colors min-h-[44px]"
+              className="inline-flex items-center justify-center w-full border border-gray-300 text-gray-700 py-3 px-6
+                rounded-lg font-medium"
+              style={{ minHeight: 44 }}
+              /* hover:bg-gray-50 transition-colors */
             >
               Seguir comprando
             </Link>
@@ -253,7 +266,7 @@ function CheckoutSuccessContent() {
 export default function CheckoutSuccessPage() {
   return (
     <Suspense
-      fallback={
+      fallback={(
         <div className="min-h-screen bg-gray-50 py-12">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
@@ -262,7 +275,7 @@ export default function CheckoutSuccessPage() {
             </div>
           </div>
         </div>
-      }
+      )}
     >
       <CheckoutSuccessContent />
     </Suspense>

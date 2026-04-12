@@ -2,29 +2,29 @@
  * Página de Detalle de Pedido - Admin
  * Vista completa del pedido con opciones de gestión
  */
-"use client";
+'use client';
 
-import { useEffect, useState, useCallback } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter, useParams } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
+import { useCallback, useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
 import {
+  AlertCircle,
   ArrowLeft,
-  Truck,
-  Package,
+  Box,
   CheckCircle2,
   Clock,
-  XCircle,
-  Box,
-  Loader2,
-  AlertCircle,
-  User,
-  MapPin,
   CreditCard,
   Edit,
-} from "lucide-react";
-import OrderProgressBar from "@/components/orders/OrderProgressBar";
+  Loader2,
+  MapPin,
+  Package,
+  Truck,
+  User,
+  XCircle,
+} from 'lucide-react';
+import OrderProgressBar from '@/components/orders/OrderProgressBar';
 
 interface OrderDetail {
   id: string;
@@ -69,14 +69,14 @@ interface OrderDetail {
 // Traducir nombres de dirección comunes
 const translateAddressName = (name: string): string => {
   const translations: { [key: string]: string } = {
-    home: "Casa",
-    house: "Casa",
-    work: "Trabajo",
-    office: "Oficina",
-    apartment: "Apartamento",
-    flat: "Piso",
-    parents: "Casa de padres",
-    family: "Casa familiar",
+    home: 'Casa',
+    house: 'Casa',
+    work: 'Trabajo',
+    office: 'Oficina',
+    apartment: 'Apartamento',
+    flat: 'Piso',
+    parents: 'Casa de padres',
+    family: 'Casa familiar',
   };
   const lowerName = name?.toLowerCase().trim();
   return translations[lowerName] || name;
@@ -87,34 +87,34 @@ const orderStatuses: Record<
   { color: string; icon: React.ElementType; label: string }
 > = {
   Pendiente: {
-    color: "bg-yellow-100 text-yellow-800 border-yellow-200",
+    color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
     icon: Clock,
-    label: "Pendiente",
+    label: 'Pendiente',
   },
   Confirmado: {
-    color: "bg-blue-100 text-blue-800 border-blue-200",
+    color: 'bg-blue-100 text-blue-800 border-blue-200',
     icon: CheckCircle2,
-    label: "Confirmado",
+    label: 'Confirmado',
   },
-  "En preparación": {
-    color: "bg-indigo-100 text-indigo-800 border-indigo-200",
+  'En preparación': {
+    color: 'bg-indigo-100 text-indigo-800 border-indigo-200',
     icon: Box,
-    label: "En preparación",
+    label: 'En preparación',
   },
   Enviado: {
-    color: "bg-purple-100 text-purple-800 border-purple-200",
+    color: 'bg-purple-100 text-purple-800 border-purple-200',
     icon: Truck,
-    label: "Enviado",
+    label: 'Enviado',
   },
   Entregado: {
-    color: "bg-green-100 text-green-800 border-green-200",
+    color: 'bg-green-100 text-green-800 border-green-200',
     icon: CheckCircle2,
-    label: "Entregado",
+    label: 'Entregado',
   },
   Cancelado: {
-    color: "bg-red-100 text-red-800 border-red-200",
+    color: 'bg-red-100 text-red-800 border-red-200',
     icon: XCircle,
-    label: "Cancelado",
+    label: 'Cancelado',
   },
 };
 
@@ -125,16 +125,16 @@ export default function AdminPedidoDetallePage() {
   const [order, setOrder] = useState<OrderDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [newStatus, setNewStatus] = useState("");
-  const [notas, setNotas] = useState("");
-  const [numeroSeguimiento, setNumeroSeguimiento] = useState("");
-  const [transportista, setTransportista] = useState("");
+  const [newStatus, setNewStatus] = useState('');
+  const [notas, setNotas] = useState('');
+  const [numeroSeguimiento, setNumeroSeguimiento] = useState('');
+  const [transportista, setTransportista] = useState('');
   const [showStatusForm, setShowStatusForm] = useState(false);
   const [statusSuccessMessage, setStatusSuccessMessage] = useState<
     string | null
   >(null);
 
-  const loadOrder = useCallback(async () => {
+  const loadOrder = useCallback(async() => {
     try {
       setLoading(true);
       setError(null);
@@ -143,42 +143,42 @@ export default function AdminPedidoDetallePage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error al cargar pedido");
+        throw new Error(data.error || 'Error al cargar pedido');
       }
 
       setOrder(data.pedido);
       setNewStatus(data.pedido.estado);
-      setNotas(data.pedido.notasInternas || "");
-      setNumeroSeguimiento(data.pedido.numeroSeguimiento || "");
-      setTransportista(data.pedido.transportista || "");
+      setNotas(data.pedido.notasInternas || '');
+      setNumeroSeguimiento(data.pedido.numeroSeguimiento || '');
+      setTransportista(data.pedido.transportista || '');
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error desconocido");
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
     }
   }, [params.id]);
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login?callbackUrl=/admin/orders");
+    if (status === 'unauthenticated') {
+      router.push('/login?callbackUrl=/admin/orders');
       return;
     }
 
-    if (status === "authenticated") {
+    if (status === 'authenticated') {
       const user = session?.user as { role?: string } | undefined;
-      if (user?.role !== "ADMIN") {
-        router.push("/");
+      if (user?.role !== 'ADMIN') {
+        router.push('/');
         return;
       }
       loadOrder();
     }
   }, [status, session, router, loadOrder]);
 
-  const updateStatus = async () => {
+  const updateStatus = async() => {
     try {
-      const response = await fetch("/api/admin/orders", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/admin/orders', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id: params.id,
           estado: newStatus,
@@ -191,18 +191,18 @@ export default function AdminPedidoDetallePage() {
       if (response.ok) {
         await loadOrder();
         setShowStatusForm(false);
-        setStatusSuccessMessage("Estado actualizado correctamente");
+        setStatusSuccessMessage('Estado actualizado correctamente');
         setTimeout(() => setStatusSuccessMessage(null), 3000);
       } else {
         const data = await response.json();
-        setError(data.error || "Error al actualizar");
+        setError(data.error || 'Error al actualizar');
       }
     } catch {
-      setError("Error al actualizar estado");
+      setError('Error al actualizar estado');
     }
   };
 
-  if (status === "loading" || loading) {
+  if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -231,7 +231,7 @@ export default function AdminPedidoDetallePage() {
   }
 
   const statusConfig = orderStatuses[order.estado] || {
-    color: "bg-gray-100 text-gray-800 border-gray-200",
+    color: 'bg-gray-100 text-gray-800 border-gray-200',
     icon: Package,
     label: order.estado,
   };
@@ -255,12 +255,13 @@ export default function AdminPedidoDetallePage() {
                   Pedido {order.orderNumber}
                 </h1>
                 <p className="text-sm text-gray-500">
-                  {new Date(order.createdAt).toLocaleDateString("es-ES")} -{" "}
-                  {new Date(order.createdAt).toLocaleTimeString("es-ES")}
+                  {new Date(order.createdAt).toLocaleDateString('es-ES')} -{' '}
+                  {new Date(order.createdAt).toLocaleTimeString('es-ES')}
                 </p>
               </div>
               <span
-                className={`ml-4 px-4 py-2 inline-flex items-center gap-2 text-sm font-semibold rounded-full border-2 ${statusConfig.color}`}
+                className={`ml-4 px-4 py-2 inline-flex items-center gap-2 text-sm font-semibold rounded-full border-2 \
+                ${statusConfig.color}`}
                 data-testid="order-status"
               >
                 <StatusIcon className="h-5 w-5" />
@@ -394,7 +395,7 @@ export default function AdminPedidoDetallePage() {
                   <p className="text-gray-600">{order.complementoEnvio}</p>
                 )}
                 <p className="text-gray-600">
-                  {order.postalCodeEnvio} {order.ciudadEnvio},{" "}
+                  {order.postalCodeEnvio} {order.ciudadEnvio},{' '}
                   {order.provinciaEnvio}
                 </p>
                 <p className="text-gray-600">{order.paisEnvio}</p>
@@ -432,8 +433,11 @@ export default function AdminPedidoDetallePage() {
                 </h2>
               </div>
               <div className="p-6">
-                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                  {order.paymentMethod === "CARD" ? "Tarjeta" : "PayPal"}
+                <span
+                  className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full \
+                bg-green-100 text-green-800"
+                >
+                  {order.paymentMethod === 'CARD' ? 'Tarjeta' : 'PayPal'}
                 </span>
               </div>
             </div>
@@ -447,10 +451,11 @@ export default function AdminPedidoDetallePage() {
                 </h2>
               </div>
               <div className="p-6 space-y-4">
-                {!showStatusForm ? (
+                {showStatusForm === false ? (
                   <button
                     onClick={() => setShowStatusForm(true)}
-                    className="w-full bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+                    className="w-full bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium \
+                    hover:bg-indigo-700 transition-colors"
                   >
                     Actualizar estado
                   </button>
@@ -467,7 +472,8 @@ export default function AdminPedidoDetallePage() {
                         id="orderStatus"
                         value={newStatus}
                         onChange={(e) => setNewStatus(e.target.value)}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 \
+                        focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         data-testid="status-dropdown"
                       >
                         <option value="Pendiente">Pendiente</option>
@@ -479,7 +485,7 @@ export default function AdminPedidoDetallePage() {
                       </select>
                     </div>
 
-                    {newStatus === "Enviado" && (
+                    {newStatus === 'Enviado' && (
                       <>
                         <div>
                           <label
@@ -495,7 +501,8 @@ export default function AdminPedidoDetallePage() {
                             onChange={(e) =>
                               setNumeroSeguimiento(e.target.value)
                             }
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 \
+                            focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="Ej: ABC123456"
                           />
                         </div>
@@ -511,7 +518,8 @@ export default function AdminPedidoDetallePage() {
                             id="carrier"
                             value={transportista}
                             onChange={(e) => setTransportista(e.target.value)}
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 \
+                            focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="Ej: Correos Express"
                           />
                         </div>
@@ -529,7 +537,8 @@ export default function AdminPedidoDetallePage() {
                         id="internalNotes"
                         value={notas}
                         onChange={(e) => setNotas(e.target.value)}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 \
+                        focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         rows={3}
                         placeholder="Notas para el equipo..."
                       />
@@ -538,14 +547,16 @@ export default function AdminPedidoDetallePage() {
                     <div className="flex gap-2">
                       <button
                         onClick={updateStatus}
-                        className="flex-1 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+                        className="flex-1 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium \
+                        hover:bg-indigo-700 transition-colors"
                         data-testid="update-status-button"
                       >
                         Guardar
                       </button>
                       <button
                         onClick={() => setShowStatusForm(false)}
-                        className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+                        className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium \
+                        hover:bg-gray-300 transition-colors"
                       >
                         Cancelar
                       </button>

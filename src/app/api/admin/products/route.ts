@@ -4,38 +4,38 @@
  *
  * Requiere: Rol ADMIN
  */
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
-import { z } from "zod";
-import { Material } from "@prisma/client";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
+import { z } from 'zod';
+import { Material } from '@prisma/client';
 import {
-  translateProductName,
-  translateProductDescription,
-  translateProductShortDescription,
   translateCategoryName,
   translateErrorMessage,
-} from "@/lib/i18n";
+  translateProductDescription,
+  translateProductName,
+  translateProductShortDescription,
+} from '@/lib/i18n';
 
 // Schema de validación para imágenes
 const imageSchema = z.object({
   url: z
     .string()
-    .min(1, "La URL de la imagen es obligatoria")
+    .min(1, 'La URL de la imagen es obligatoria')
     .refine(
       (url) => {
         // Permitir URLs blob: temporales (para preview) o URLs con extensión válida
-        if (url.startsWith("blob:") || url.startsWith("data:")) {
+        if (url.startsWith('blob:') || url.startsWith('data:')) {
           return true;
         }
-        const validExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
+        const validExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
         const lowercaseUrl = url.toLowerCase();
         return validExtensions.some((ext) => lowercaseUrl.endsWith(ext));
       },
       {
         message:
-          "La URL debe terminar en .jpg, .jpeg, .png, .webp o .gif o ser una URL temporal válida",
+          'La URL debe terminar en .jpg, .jpeg, .png, .webp o .gif o ser una URL temporal válida',
       },
     ),
   isMain: z.boolean().default(false),
@@ -60,9 +60,9 @@ const productSchema = z.object({
   isFeatured: z.boolean().default(false),
   images: z
     .array(imageSchema)
-    .min(1, "Debe agregar al menos una imagen")
+    .min(1, 'Debe agregar al menos una imagen')
     .refine((images) => images.some((img) => img.isMain), {
-      message: "Debe marcar al menos una imagen como principal",
+      message: 'Debe marcar al menos una imagen como principal',
     }),
 });
 
@@ -77,7 +77,7 @@ export async function GET() {
     }
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage("No autenticado") },
+        { success: false, error: translateErrorMessage('No autenticado') },
         { status: 401 },
       );
     }
@@ -86,9 +86,9 @@ export async function GET() {
       where: { email: session.user.email },
     });
 
-    if (!user || user.role !== "ADMIN") {
+    if (user?.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage("No autorizado") },
+        { success: false, error: translateErrorMessage('No autorizado') },
         { status: 401 },
       );
     }
@@ -96,7 +96,7 @@ export async function GET() {
     const products = await prisma.product.findMany({
       include: {
         images: {
-          orderBy: { displayOrder: "asc" },
+          orderBy: { displayOrder: 'asc' },
         },
         category: true,
       },
@@ -118,7 +118,7 @@ export async function GET() {
       stock: product.stock,
       categoria: product.category
         ? translateCategoryName(product.category.slug)
-        : "Sin categoría",
+        : 'Sin categoría',
       material: product.material,
       anchoCm: product.widthCm,
       altoCm: product.heightCm,
@@ -134,14 +134,14 @@ export async function GET() {
 
     // Sort by translated Spanish name alphabetically
     productosTraducidos.sort((a, b) =>
-      a.nombre.localeCompare(b.nombre, "es", { sensitivity: "base" }),
+      a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' }),
     );
 
     return NextResponse.json({ success: true, productos: productosTraducidos });
   } catch (error) {
-    console.error("Error listando productos:", error);
+    console.error('Error listando productos:', error);
     return NextResponse.json(
-      { success: false, error: translateErrorMessage("Internal error") },
+      { success: false, error: translateErrorMessage('Internal error') },
       { status: 500 },
     );
   }
@@ -158,7 +158,7 @@ export async function POST(req: NextRequest) {
     }
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage("No autenticado") },
+        { success: false, error: translateErrorMessage('No autenticado') },
         { status: 401 },
       );
     }
@@ -167,9 +167,9 @@ export async function POST(req: NextRequest) {
       where: { email: session.user.email },
     });
 
-    if (!user || user.role !== "ADMIN") {
+    if (user?.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage("No autorizado") },
+        { success: false, error: translateErrorMessage('No autorizado') },
         { status: 401 },
       );
     }
@@ -180,14 +180,14 @@ export async function POST(req: NextRequest) {
     // Generar slug
     // Normalize accented characters first, then convert to lowercase and replace special chars
     const slug = data.name
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "") // Remove diacritics
+      .normalize('NFD')
+      .replaceAll(/[\u0300-\u036f]/g, '') // Remove diacritics
       .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
+      .replaceAll(/[^a-z0-9]+/g, '-')
+      .replaceAll(/(^-|-$)/g, '');
 
     // Crear producto e imágenes en una transacción
-    const product = await prisma.$transaction(async (tx) => {
+    const product = await prisma.$transaction(async(tx) => {
       // Crear el producto - usar spread para construir el objeto dinámicamente
       const newProduct = await tx.product.create({
         data: {
@@ -220,7 +220,7 @@ export async function POST(req: NextRequest) {
             id: crypto.randomUUID(),
             product: { connect: { id: newProduct.id } },
             url: img.url,
-            filename: img.url.split("/").pop() || "image.jpg",
+            filename: img.url.split('/').pop() || 'image.jpg',
             isMain: img.isMain ?? i === 0, // Primera imagen como principal por defecto
             displayOrder: i,
             altText: data.name,
@@ -243,9 +243,9 @@ export async function POST(req: NextRequest) {
         { status: 400 },
       );
     }
-    console.error("Error creando producto:", error);
+    console.error('Error creando producto:', error);
     return NextResponse.json(
-      { success: false, error: translateErrorMessage("Internal error") },
+      { success: false, error: translateErrorMessage('Internal error') },
       { status: 500 },
     );
   }

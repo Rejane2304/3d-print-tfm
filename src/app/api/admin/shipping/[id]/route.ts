@@ -4,50 +4,50 @@
  *
  * Requiere: Rol ADMIN
  */
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
-import { z } from "zod";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
+import { z } from 'zod';
 
 // Schema de validación
 const shippingZoneUpdateSchema = z.object({
   name: z
     .string()
-    .min(2, "El nombre debe tener al menos 2 caracteres")
-    .max(100, "Máximo 100 caracteres")
+    .min(2, 'El nombre debe tener al menos 2 caracteres')
+    .max(100, 'Máximo 100 caracteres')
     .optional(),
   country: z
     .string()
-    .min(2, "El país es obligatorio")
-    .max(100, "Máximo 100 caracteres")
+    .min(2, 'El país es obligatorio')
+    .max(100, 'Máximo 100 caracteres')
     .optional(),
   regions: z
     .array(z.string())
-    .min(1, "Debe incluir al menos una región")
+    .min(1, 'Debe incluir al menos una región')
     .optional(),
   postalCodePrefixes: z
     .array(z.string())
-    .min(1, "Debe incluir al menos un prefijo de código postal")
+    .min(1, 'Debe incluir al menos un prefijo de código postal')
     .optional(),
   baseCost: z
     .number()
-    .min(0, "El costo base debe ser mayor o igual a 0")
+    .min(0, 'El costo base debe ser mayor o igual a 0')
     .optional(),
   freeShippingThreshold: z
     .number()
-    .min(0, "El mínimo para envío gratis debe ser mayor o igual a 0")
+    .min(0, 'El mínimo para envío gratis debe ser mayor o igual a 0')
     .optional()
     .nullable(),
   estimatedDaysMin: z
     .number()
     .int()
-    .min(1, "Los días estimados mínimos deben ser al menos 1")
+    .min(1, 'Los días estimados mínimos deben ser al menos 1')
     .optional(),
   estimatedDaysMax: z
     .number()
     .int()
-    .min(1, "Los días estimados máximos deben ser al menos 1")
+    .min(1, 'Los días estimados máximos deben ser al menos 1')
     .optional(),
   isActive: z.boolean().optional(),
   displayOrder: z.number().int().min(0).optional(),
@@ -69,7 +69,7 @@ export async function GET(
     }
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: "No autenticado" },
+        { success: false, error: 'No autenticado' },
         { status: 401 },
       );
     }
@@ -78,9 +78,9 @@ export async function GET(
       where: { email: session.user.email },
     });
 
-    if (!user || user.role !== "ADMIN") {
+    if (user?.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: "No autorizado" },
+        { success: false, error: 'No autorizado' },
         { status: 401 },
       );
     }
@@ -91,7 +91,7 @@ export async function GET(
 
     if (!zone) {
       return NextResponse.json(
-        { success: false, error: "Zona de envío no encontrada" },
+        { success: false, error: 'Zona de envío no encontrada' },
         { status: 404 },
       );
     }
@@ -117,9 +117,9 @@ export async function GET(
 
     return NextResponse.json({ success: true, zone: zoneFormateada });
   } catch (error) {
-    console.error("Error obteniendo zona de envío:", error);
+    console.error('Error obteniendo zona de envío:', error);
     return NextResponse.json(
-      { success: false, error: "Error interno" },
+      { success: false, error: 'Error interno' },
       { status: 500 },
     );
   }
@@ -141,7 +141,7 @@ export async function PATCH(
     }
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: "No autenticado" },
+        { success: false, error: 'No autenticado' },
         { status: 401 },
       );
     }
@@ -150,9 +150,9 @@ export async function PATCH(
       where: { email: session.user.email },
     });
 
-    if (!user || user.role !== "ADMIN") {
+    if (user?.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: "No autorizado" },
+        { success: false, error: 'No autorizado' },
         { status: 401 },
       );
     }
@@ -164,7 +164,7 @@ export async function PATCH(
 
     if (!existing) {
       return NextResponse.json(
-        { success: false, error: "Zona de envío no encontrada" },
+        { success: false, error: 'Zona de envío no encontrada' },
         { status: 404 },
       );
     }
@@ -181,7 +181,7 @@ export async function PATCH(
         {
           success: false,
           error:
-            "Los días estimados mínimos no pueden ser mayores que los máximos",
+            'Los días estimados mínimos no pueden ser mayores que los máximos',
         },
         { status: 400 },
       );
@@ -222,9 +222,9 @@ export async function PATCH(
         { status: 400 },
       );
     }
-    console.error("Error actualizando zona de envío:", error);
+    console.error('Error actualizando zona de envío:', error);
     return NextResponse.json(
-      { success: false, error: "Error interno" },
+      { success: false, error: 'Error interno' },
       { status: 500 },
     );
   }
@@ -246,7 +246,7 @@ export async function DELETE(
     }
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: "No autenticado" },
+        { success: false, error: 'No autenticado' },
         { status: 401 },
       );
     }
@@ -255,9 +255,9 @@ export async function DELETE(
       where: { email: session.user.email },
     });
 
-    if (!user || user.role !== "ADMIN") {
+    if (user?.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: "No autorizado" },
+        { success: false, error: 'No autorizado' },
         { status: 401 },
       );
     }
@@ -269,7 +269,7 @@ export async function DELETE(
 
     if (!existing) {
       return NextResponse.json(
-        { success: false, error: "Zona de envío no encontrada" },
+        { success: false, error: 'Zona de envío no encontrada' },
         { status: 404 },
       );
     }
@@ -281,12 +281,12 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: "Zona de envío eliminada correctamente",
+      message: 'Zona de envío eliminada correctamente',
     });
   } catch (error) {
-    console.error("Error eliminando zona de envío:", error);
+    console.error('Error eliminando zona de envío:', error);
     return NextResponse.json(
-      { success: false, error: "Error interno" },
+      { success: false, error: 'Error interno' },
       { status: 500 },
     );
   }

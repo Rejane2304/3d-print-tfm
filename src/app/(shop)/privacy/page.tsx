@@ -3,27 +3,27 @@
  * GDPR-compliant privacy policy for e-commerce in Spain
  * Responsive: mobile → 4K
  */
-import type { Metadata } from "next";
-import Link from "next/link";
+import type { Metadata } from 'next';
+import Link from 'next/link';
 import {
+  Building,
+  ChevronRight,
+  Clock,
+  Cookie,
+  Eye,
+  FileText,
+  Lock,
+  Mail,
+  Scale,
   Shield,
   User,
-  FileText,
-  Eye,
-  Scale,
-  Clock,
-  Lock,
   Users,
-  Cookie,
-  Mail,
-  ChevronRight,
-  Building,
-} from "lucide-react";
+} from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: "Política de Privacidad | 3D Print",
+  title: 'Política de Privacidad | 3D Print',
   description:
-    "Información sobre cómo recopilamos, utilizamos y protegemos tus datos personales conforme al RGPD.",
+    'Información sobre cómo recopilamos, utilizamos y protegemos tus datos personales conforme al RGPD.',
 };
 
 interface PrivacySection {
@@ -35,9 +35,9 @@ interface PrivacySection {
 
 const privacySections: PrivacySection[] = [
   {
-    id: "introduccion",
+    id: 'introduccion',
     icon: Shield,
-    title: "1. Introducción",
+    title: '1. Introducción',
     content: (
       <>
         <p className="mb-4">
@@ -61,9 +61,9 @@ const privacySections: PrivacySection[] = [
     ),
   },
   {
-    id: "responsable",
+    id: 'responsable',
     icon: Building,
-    title: "2. Responsable del Tratamiento",
+    title: '2. Responsable del Tratamiento',
     content: (
       <>
         <p className="mb-4">
@@ -83,7 +83,7 @@ const privacySections: PrivacySection[] = [
         <p>
           Para cualquier consulta relacionada con la protección de datos, puedes
           contactar con nuestro Delegado de Protección de Datos (DPD) enviando
-          un email a:{" "}
+          un email a:{' '}
           <a
             href="mailto:dpd@3dprint.com"
             className="text-indigo-600 hover:text-indigo-800"
@@ -95,9 +95,9 @@ const privacySections: PrivacySection[] = [
     ),
   },
   {
-    id: "datos-recopilados",
+    id: 'datos-recopilados',
     icon: FileText,
-    title: "3. Información que Recopilamos",
+    title: '3. Información que Recopilamos',
     content: (
       <>
         <p className="mb-4">
@@ -152,9 +152,9 @@ const privacySections: PrivacySection[] = [
     ),
   },
   {
-    id: "uso-datos",
+    id: 'uso-datos',
     icon: Eye,
-    title: "4. Cómo Utilizamos tus Datos",
+    title: '4. Cómo Utilizamos tus Datos',
     content: (
       <>
         <p className="mb-4">
@@ -205,9 +205,9 @@ const privacySections: PrivacySection[] = [
     ),
   },
   {
-    id: "base-juridica",
+    id: 'base-juridica',
     icon: Scale,
-    title: "5. Base Jurídica del Tratamiento",
+    title: '5. Base Jurídica del Tratamiento',
     content: (
       <>
         <p className="mb-4">
@@ -216,25 +216,37 @@ const privacySections: PrivacySection[] = [
         </p>
         <ul className="space-y-3 text-gray-700">
           <li className="flex items-start gap-3">
-            <span className="bg-indigo-100 text-indigo-700 rounded-full px-2 py-0.5 text-sm font-medium flex-shrink-0 mt-0.5">
+            <span
+              className="bg-indigo-100 text-indigo-700 rounded-full px-2 py-0.5 text-sm font-medium \
+                flex-shrink-0 mt-0.5"
+            >
               Ejecución de contrato
             </span>
             <span>Para procesar pedidos y entregar productos solicitados.</span>
           </li>
           <li className="flex items-start gap-3">
-            <span className="bg-indigo-100 text-indigo-700 rounded-full px-2 py-0.5 text-sm font-medium flex-shrink-0 mt-0.5">
+            <span
+              className="bg-indigo-100 text-indigo-700 rounded-full px-2 py-0.5 text-sm font-medium \
+                flex-shrink-0 mt-0.5"
+            >
               Obligación legal
             </span>
             <span>Para cumplir con obligaciones fiscales y contables.</span>
           </li>
           <li className="flex items-start gap-3">
-            <span className="bg-indigo-100 text-indigo-700 rounded-full px-2 py-0.5 text-sm font-medium flex-shrink-0 mt-0.5">
+            <span
+              className="bg-indigo-100 text-indigo-700 rounded-full px-2 py-0.5 text-sm font-medium \
+                flex-shrink-0 mt-0.5"
+            >
               Consentimiento
             </span>
             <span>Para enviar comunicaciones comerciales y newsletters.</span>
           </li>
           <li className="flex items-start gap-3">
-            <span className="bg-indigo-100 text-indigo-700 rounded-full px-2 py-0.5 text-sm font-medium flex-shrink-0 mt-0.5">
+            <span
+              className="bg-indigo-100 text-indigo-700 rounded-full px-2 py-0.5 text-sm font-medium \
+                flex-shrink-0 mt-0.5"
+            >
               Interés legítimo
             </span>
             <span>Para prevenir fraudes y mejorar nuestros servicios.</span>
@@ -244,9 +256,9 @@ const privacySections: PrivacySection[] = [
     ),
   },
   {
-    id: "conservacion",
+    id: 'conservacion',
     icon: Clock,
-    title: "6. Conservación de los Datos",
+    title: '6. Conservación de los Datos',
     content: (
       <>
         <p className="mb-4">
@@ -292,9 +304,9 @@ const privacySections: PrivacySection[] = [
     ),
   },
   {
-    id: "derechos",
+    id: 'derechos',
     icon: User,
-    title: "7. Tus Derechos",
+    title: '7. Tus Derechos',
     content: (
       <>
         <p className="mb-4">
@@ -370,7 +382,7 @@ const privacySections: PrivacySection[] = [
           </p>
           <ul className="text-sm text-indigo-800 space-y-1">
             <li>
-              <strong>Email:</strong>{" "}
+              <strong>Email:</strong>{' '}
               <a href="mailto:privacidad@3dprint.com" className="underline">
                 privacidad@3dprint.com
               </a>
@@ -394,9 +406,9 @@ const privacySections: PrivacySection[] = [
     ),
   },
   {
-    id: "seguridad",
+    id: 'seguridad',
     icon: Lock,
-    title: "8. Seguridad de los Datos",
+    title: '8. Seguridad de los Datos',
     content: (
       <>
         <p className="mb-4">
@@ -457,9 +469,9 @@ const privacySections: PrivacySection[] = [
     ),
   },
   {
-    id: "terceros",
+    id: 'terceros',
     icon: Users,
-    title: "9. Terceros y Cesiones de Datos",
+    title: '9. Terceros y Cesiones de Datos',
     content: (
       <>
         <p className="mb-4">
@@ -516,9 +528,9 @@ const privacySections: PrivacySection[] = [
     ),
   },
   {
-    id: "cookies",
+    id: 'cookies',
     icon: Cookie,
-    title: "10. Cookies y Tecnologías Similares",
+    title: '10. Cookies y Tecnologías Similares',
     content: (
       <>
         <p className="mb-4">
@@ -548,7 +560,9 @@ const privacySections: PrivacySection[] = [
             </span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="bg-yellow-100 text-yellow-700 rounded px-2 py-0.5 text-xs font-medium flex-shrink-0 mt-0.5">
+            <span
+              className="bg-yellow-100 text-yellow-700 rounded px-2 py-0.5 text-xs font-medium flex-shrink-0 mt-0.5"
+            >
               Estadísticas
             </span>
             <span>Nos ayudan a entender cómo interactúas con la web.</span>
@@ -567,7 +581,7 @@ const privacySections: PrivacySection[] = [
           de cookies&quot; en el footer.
         </p>
         <p className="text-gray-700">
-          Para más información, consulta nuestra{" "}
+          Para más información, consulta nuestra{' '}
           <Link
             href="/cookies"
             className="text-indigo-600 hover:text-indigo-800 underline"
@@ -580,9 +594,9 @@ const privacySections: PrivacySection[] = [
     ),
   },
   {
-    id: "contacto",
+    id: 'contacto',
     icon: Mail,
-    title: "11. Contacto",
+    title: '11. Contacto',
     content: (
       <>
         <p className="mb-4">
@@ -720,11 +734,17 @@ export default function PrivacyPolicyPage() {
                 <section
                   key={section.id}
                   id={section.id}
-                  className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow scroll-mt-8"
+                  className={
+                    'bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden ' +
+                    'hover:shadow-md transition-shadow ' +
+                    'scroll-mt-8'
+                  }
                 >
                   <div className="px-6 py-5 border-b border-gray-100 bg-gray-50/50">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                      <div
+                        className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center flex-shrink-0"
+                      >
                         <Icon className="h-5 w-5 text-indigo-600" />
                       </div>
                       <h2 className="text-xl font-bold text-gray-900">
@@ -754,14 +774,18 @@ export default function PrivacyPolicyPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
                 href="mailto:privacidad@3dprint.com"
-                className="inline-flex items-center justify-center gap-2 bg-white text-indigo-600 px-6 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors"
+                className="inline-flex items-center justify-center gap-2 \
+                  bg-white text-indigo-600 px-6 py-3 rounded-lg font-medium \
+                  hover:bg-gray-100 transition-colors"
               >
                 <Mail className="h-5 w-5" />
                 Contactar por email
               </a>
               <Link
                 href="/faqs"
-                className="inline-flex items-center justify-center gap-2 border-2 border-white text-white px-6 py-3 rounded-lg font-medium hover:bg-white/10 transition-colors"
+                className="inline-flex items-center justify-center gap-2 \
+                  border-2 border-white text-white px-6 py-3 rounded-lg font-medium \
+                  hover:bg-white/10 transition-colors"
               >
                 Ver FAQs
                 <ChevronRight className="h-5 w-5" />

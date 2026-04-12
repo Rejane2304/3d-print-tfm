@@ -6,14 +6,14 @@
  * Requiere: Rol ADMIN
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
-import { siteConfigSchema } from "@/lib/validators";
-import { z } from "zod";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
+import { siteConfigSchema } from '@/lib/validators';
+import { z } from 'zod';
 
-const SITE_CONFIG_ID = "site-config";
+const SITE_CONFIG_ID = 'site-config';
 
 // GET - Get current site configuration
 export async function GET() {
@@ -26,7 +26,7 @@ export async function GET() {
     }
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: "No autenticado" },
+        { success: false, error: 'No autenticado' },
         { status: 401 },
       );
     }
@@ -35,9 +35,9 @@ export async function GET() {
       where: { email: session.user.email },
     });
 
-    if (!user || user.role !== "ADMIN") {
+    if (user?.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: "No autorizado" },
+        { success: false, error: 'No autorizado' },
         { status: 401 },
       );
     }
@@ -46,25 +46,22 @@ export async function GET() {
     let config = await prisma.siteConfig.findUnique({
       where: { id: SITE_CONFIG_ID },
     });
-
-    if (!config) {
-      config = await prisma.siteConfig.create({
-        data: {
-          id: SITE_CONFIG_ID,
-          companyName: "3D Print",
-          companyTaxId: "B12345678",
-          companyAddress: "Calle Admin 123",
-          companyCity: "Barcelona",
-          companyProvince: "Barcelona",
-          companyPostalCode: "08001",
-          companyPhone: "+34930000001",
-          companyEmail: "info@3dprint.com",
-          defaultVatRate: 21,
-          lowStockThreshold: 5,
-          updatedAt: new Date(),
-        },
-      });
-    }
+    config ??= await prisma.siteConfig.create({
+      data: {
+        id: SITE_CONFIG_ID,
+        companyName: '3D Print',
+        companyTaxId: 'B12345678',
+        companyAddress: 'Calle Admin 123',
+        companyCity: 'Barcelona',
+        companyProvince: 'Barcelona',
+        companyPostalCode: '08001',
+        companyPhone: '+34930000001',
+        companyEmail: 'info@3dprint.com',
+        defaultVatRate: 21,
+        lowStockThreshold: 5,
+        updatedAt: new Date(),
+      },
+    });
 
     // Format for frontend (Spanish)
     const configFormateada = {
@@ -84,9 +81,9 @@ export async function GET() {
 
     return NextResponse.json({ success: true, config: configFormateada });
   } catch (error) {
-    console.error("Error getting site config:", error);
+    console.error('Error getting site config:', error);
     return NextResponse.json(
-      { success: false, error: "Error interno" },
+      { success: false, error: 'Error interno' },
       { status: 500 },
     );
   }
@@ -103,7 +100,7 @@ export async function PUT(req: NextRequest) {
     }
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: "No autenticado" },
+        { success: false, error: 'No autenticado' },
         { status: 401 },
       );
     }
@@ -112,9 +109,9 @@ export async function PUT(req: NextRequest) {
       where: { email: session.user.email },
     });
 
-    if (!user || user.role !== "ADMIN") {
+    if (user?.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: "No autorizado" },
+        { success: false, error: 'No autorizado' },
         { status: 401 },
       );
     }
@@ -186,9 +183,9 @@ export async function PUT(req: NextRequest) {
         { status: 400 },
       );
     }
-    console.error("Error updating site config:", error);
+    console.error('Error updating site config:', error);
     return NextResponse.json(
-      { success: false, error: "Error interno" },
+      { success: false, error: 'Error interno' },
       { status: 500 },
     );
   }

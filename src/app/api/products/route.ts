@@ -1,43 +1,43 @@
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 /**
  * API Route para catálogo de productos
  * GET /api/products - Listado con filtros y paginación
  */
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
-import { withErrorHandler } from "@/lib/errors/api-wrapper";
-import { Material, Prisma } from "@prisma/client";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { Material, Prisma } from '@prisma/client';
+import { withErrorHandler } from '@/lib/errors/api-wrapper';
 import {
-  translateProductName,
-  translateProductDescription,
-  translateProductShortDescription,
   translateCategoryName,
-} from "@/lib/i18n";
+  translateProductDescription,
+  translateProductName,
+  translateProductShortDescription,
+} from '@/lib/i18n';
 
-export const GET = withErrorHandler(async (req: NextRequest) => {
+export const GET = withErrorHandler(async(req: NextRequest) => {
   const { searchParams } = new URL(req.url);
 
   // Pagination parameters
-  const page = Number.parseInt(searchParams.get("page") || "1", 10);
-  const pageSize = Number.parseInt(searchParams.get("pageSize") || "12", 10);
+  const page = Number.parseInt(searchParams.get('page') || '1', 10);
+  const pageSize = Number.parseInt(searchParams.get('pageSize') || '12', 10);
   const skip = (page - 1) * pageSize;
 
   // Filter parameters
   const categorySlug =
-    searchParams.get("category") || searchParams.get("categoria");
-  const material = searchParams.get("material") as Material | null;
+    searchParams.get('category') || searchParams.get('categoria');
+  const material = searchParams.get('material') as Material | null;
   const minPrice =
-    searchParams.get("minPrice") || searchParams.get("minPrecio");
+    searchParams.get('minPrice') || searchParams.get('minPrecio');
   const maxPrice =
-    searchParams.get("maxPrice") || searchParams.get("maxPrecio");
+    searchParams.get('maxPrice') || searchParams.get('maxPrecio');
   const inStock =
-    (searchParams.get("inStock") || searchParams.get("enStock")) === "true";
+    (searchParams.get('inStock') || searchParams.get('enStock')) === 'true';
   const sortBy =
-    searchParams.get("sortBy") || searchParams.get("ordenar") || "name";
+    searchParams.get('sortBy') || searchParams.get('ordenar') || 'name';
   const sortOrder =
-    searchParams.get("sortOrder") || searchParams.get("orden") || "asc";
-  const search = searchParams.get("search") || searchParams.get("busqueda");
+    searchParams.get('sortOrder') || searchParams.get('orden') || 'asc';
+  const search = searchParams.get('search') || searchParams.get('busqueda');
 
   // Build where clause
   const where: Prisma.ProductWhereInput = {
@@ -61,10 +61,10 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   if (minPrice || maxPrice) {
     where.price = {};
     if (minPrice) {
-      where.price.gte = parseFloat(minPrice);
+      where.price.gte = Number.parseFloat(minPrice);
     }
     if (maxPrice) {
-      where.price.lte = parseFloat(maxPrice);
+      where.price.lte = Number.parseFloat(maxPrice);
     }
   }
 
@@ -74,11 +74,11 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
 
   if (search) {
     where.OR = [
-      { name: { contains: search, mode: "insensitive" as Prisma.QueryMode } },
+      { name: { contains: search, mode: 'insensitive' as Prisma.QueryMode } },
       {
         description: {
           contains: search,
-          mode: "insensitive" as Prisma.QueryMode,
+          mode: 'insensitive' as Prisma.QueryMode,
         },
       },
     ];
@@ -87,9 +87,9 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   // Build orderBy
   const orderBy: Prisma.ProductOrderByWithRelationInput = {};
   // Only order in DB for price and stock. Name ordering is done after translation.
-  if (sortBy === "price" || sortBy === "precio") {
+  if (sortBy === 'price' || sortBy === 'precio') {
     orderBy.price = sortOrder as Prisma.SortOrder;
-  } else if (sortBy === "stock") {
+  } else if (sortBy === 'stock') {
     orderBy.stock = sortOrder as Prisma.SortOrder;
   }
   // Name ordering is handled after translation
@@ -100,7 +100,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       where,
       include: {
         images: {
-          orderBy: { displayOrder: "asc" },
+          orderBy: { displayOrder: 'asc' },
         },
         category: true,
       },
@@ -121,19 +121,19 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     shortDescription: translateProductShortDescription(product.slug),
     category: product.category
       ? {
-          ...product.category,
-          name: translateCategoryName(product.category.slug),
-        }
+        ...product.category,
+        name: translateCategoryName(product.category.slug),
+      }
       : product.category,
   }));
 
   // Sort by name after translation if requested
   const sortedProducts = [...translatedProducts].sort((a, b) => {
-    if (sortBy === "name" || sortBy === "nombre") {
-      const comparison = (a.name || "").localeCompare(b.name || "", "es", {
-        sensitivity: "base",
+    if (sortBy === 'name' || sortBy === 'nombre') {
+      const comparison = (a.name || '').localeCompare(b.name || '', 'es', {
+        sensitivity: 'base',
       });
-      return sortOrder === "desc" ? -comparison : comparison;
+      return sortOrder === 'desc' ? -comparison : comparison;
     }
     return 0;
   });

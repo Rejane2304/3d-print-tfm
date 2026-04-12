@@ -4,30 +4,30 @@
  *
  * Requiere: Rol ADMIN
  */
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
-import { z } from "zod";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
+import { z } from 'zod';
 import {
-  translateCategoryName,
   translateCategoryDescription,
-} from "@/lib/i18n";
+  translateCategoryName,
+} from '@/lib/i18n';
 
 // Schema de validación
 const categoryUpdateSchema = z.object({
   name: z
     .string()
-    .min(1, "El nombre es obligatorio")
-    .max(100, "Máximo 100 caracteres")
+    .min(1, 'El nombre es obligatorio')
+    .max(100, 'Máximo 100 caracteres')
     .optional(),
   slug: z
     .string()
-    .min(1, "El slug es obligatorio")
-    .max(100, "Máximo 100 caracteres")
+    .min(1, 'El slug es obligatorio')
+    .max(100, 'Máximo 100 caracteres')
     .optional(),
-  description: z.string().max(500, "Máximo 500 caracteres").optional(),
-  image: z.string().max(500, "URL muy larga").optional().nullable(),
+  description: z.string().max(500, 'Máximo 500 caracteres').optional(),
+  image: z.string().max(500, 'URL muy larga').optional().nullable(),
   displayOrder: z.number().int().min(0).optional(),
   isActive: z.boolean().optional(),
 });
@@ -48,7 +48,7 @@ export async function GET(
     }
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: "No autenticado" },
+        { success: false, error: 'No autenticado' },
         { status: 401 },
       );
     }
@@ -57,9 +57,9 @@ export async function GET(
       where: { email: session.user.email },
     });
 
-    if (!user || user.role !== "ADMIN") {
+    if (user?.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: "No autorizado" },
+        { success: false, error: 'No autorizado' },
         { status: 401 },
       );
     }
@@ -75,7 +75,7 @@ export async function GET(
 
     if (!category) {
       return NextResponse.json(
-        { success: false, error: "Categoría no encontrada" },
+        { success: false, error: 'Categoría no encontrada' },
         { status: 404 },
       );
     }
@@ -97,9 +97,9 @@ export async function GET(
 
     return NextResponse.json({ success: true, categoria: categoriaTraducida });
   } catch (error) {
-    console.error("Error obteniendo categoría:", error);
+    console.error('Error obteniendo categoría:', error);
     return NextResponse.json(
-      { success: false, error: "Error interno" },
+      { success: false, error: 'Error interno' },
       { status: 500 },
     );
   }
@@ -121,7 +121,7 @@ export async function PATCH(
     }
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: "No autenticado" },
+        { success: false, error: 'No autenticado' },
         { status: 401 },
       );
     }
@@ -130,9 +130,9 @@ export async function PATCH(
       where: { email: session.user.email },
     });
 
-    if (!user || user.role !== "ADMIN") {
+    if (user?.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: "No autorizado" },
+        { success: false, error: 'No autorizado' },
         { status: 401 },
       );
     }
@@ -144,7 +144,7 @@ export async function PATCH(
 
     if (!existing) {
       return NextResponse.json(
-        { success: false, error: "Categoría no encontrada" },
+        { success: false, error: 'Categoría no encontrada' },
         { status: 404 },
       );
     }
@@ -160,7 +160,7 @@ export async function PATCH(
 
       if (slugExists) {
         return NextResponse.json(
-          { success: false, error: "Ya existe una categoría con ese slug" },
+          { success: false, error: 'Ya existe una categoría con ese slug' },
           { status: 400 },
         );
       }
@@ -191,9 +191,9 @@ export async function PATCH(
         { status: 400 },
       );
     }
-    console.error("Error actualizando categoría:", error);
+    console.error('Error actualizando categoría:', error);
     return NextResponse.json(
-      { success: false, error: "Error interno" },
+      { success: false, error: 'Error interno' },
       { status: 500 },
     );
   }
@@ -215,7 +215,7 @@ export async function DELETE(
     }
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: "No autenticado" },
+        { success: false, error: 'No autenticado' },
         { status: 401 },
       );
     }
@@ -224,9 +224,9 @@ export async function DELETE(
       where: { email: session.user.email },
     });
 
-    if (!user || user.role !== "ADMIN") {
+    if (user?.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: "No autorizado" },
+        { success: false, error: 'No autorizado' },
         { status: 401 },
       );
     }
@@ -243,7 +243,7 @@ export async function DELETE(
 
     if (!existing) {
       return NextResponse.json(
-        { success: false, error: "Categoría no encontrada" },
+        { success: false, error: 'Categoría no encontrada' },
         { status: 404 },
       );
     }
@@ -253,7 +253,7 @@ export async function DELETE(
       return NextResponse.json(
         {
           success: false,
-          error: "No se puede eliminar una categoría con productos asociados",
+          error: 'No se puede eliminar una categoría con productos asociados',
         },
         { status: 400 },
       );
@@ -266,12 +266,12 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: "Categoría eliminada correctamente",
+      message: 'Categoría eliminada correctamente',
     });
   } catch (error) {
-    console.error("Error eliminando categoría:", error);
+    console.error('Error eliminando categoría:', error);
     return NextResponse.json(
-      { success: false, error: "Error interno" },
+      { success: false, error: 'Error interno' },
       { status: 500 },
     );
   }

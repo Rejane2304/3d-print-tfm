@@ -4,8 +4,8 @@
  * Verifica contabilidad, stock y referencias cruzadas
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'node:fs';
+import path from 'node:path';
 
 const DATA_DIR = path.join(__dirname, '../public/data');
 
@@ -18,7 +18,11 @@ function readCSV(filename) {
     const values = line.split(',');
     const obj = {};
     headers.forEach((header, i) => {
-      obj[header.trim()] = values[i] !== undefined ? values[i].trim() : '';
+      if (values[i] === undefined) {
+        obj[header.trim()] = '';
+      } else {
+        obj[header.trim()] = values[i].trim();
+      }
     });
     return obj;
   });
@@ -41,7 +45,7 @@ const files = {
   payments: readCSV('payments.csv'),
   coupons: readCSV('coupons.csv'),
   categories: readCSV('categories.csv'),
-  inventoryMovements: readCSV('inventory_movements.csv')
+  inventoryMovements: readCSV('inventory_movements.csv'),
 };
 
 // ============================================
@@ -53,20 +57,20 @@ console.log('-'.repeat(60));
 files.orders.rows.forEach(order => {
   const orderRef = order._ref;
   const items = files.orderItems.rows.filter(item => item._orderRef === orderRef);
-  
+
   if (items.length === 0) {
     issues.push(`❌ ${orderRef}: No tiene items en order_items.csv`);
     console.log(`❌ ${orderRef}: Sin items`);
     return;
   }
-  
+
   const calculatedSubtotal = items.reduce((sum, item) => {
-    return sum + (parseFloat(item.price) * parseInt(item.quantity));
+    return sum + (Number.parseFloat(item.price) * Number.parseInt(item.quantity));
   }, 0);
-  
-  const orderSubtotal = parseFloat(order.subtotal);
+
+  const orderSubtotal = Number.parseFloat(order.subtotal);
   const diff = Math.abs(calculatedSubtotal - orderSubtotal);
-  
+
   if (diff > 0.01) {
     issues.push(`❌ ${orderRef}: Subtotal incorrecto. CSV=${orderSubtotal}, Calculado=${calculatedSubtotal.toFixed(2)}`);
     console.log(`❌ ${orderRef}: ${orderSubtotal} ≠ ${calculatedSubtotal.toFixed(2)} (diff: ${diff.toFixed(2)})`);
@@ -84,17 +88,17 @@ console.log('-'.repeat(60));
 files.invoices.rows.forEach(inv => {
   const orderRef = inv._orderRef;
   const order = files.orders.rows.find(o => o._ref === orderRef);
-  
+
   if (!order) {
     issues.push(`❌ Invoice ${inv.invoiceNumber}: Referencia a ${orderRef} no existe`);
     console.log(`❌ ${inv.invoiceNumber}: Orden ${orderRef} no existe`);
     return;
   }
-  
-  const orderTotal = parseFloat(order.total);
-  const invTotal = parseFloat(inv.total);
+
+  const orderTotal = Number.parseFloat(order.total);
+  const invTotal = Number.parseFloat(inv.total);
   const diff = Math.abs(orderTotal - invTotal);
-  
+
   if (diff > 0.01) {
     issues.push(`❌ ${inv.invoiceNumber}: Total ${invTotal} ≠ Orden ${orderTotal}`);
     console.log(`❌ ${inv.invoiceNumber}: ${invTotal} ≠ ${orderTotal} (orden ${orderRef})`);
@@ -110,28 +114,34 @@ console.log('\n📋 3. INVOICES (Matemática interna)');
 console.log('-'.repeat(60));
 
 files.invoices.rows.forEach(inv => {
-  const subtotal = parseFloat(inv.subtotal);
-  const shipping = parseFloat(inv.shipping);
-  const discount = parseFloat(inv.discount) || 0;
-  const vatRate = parseFloat(inv.vatRate);
-  const vatAmount = parseFloat(inv.vatAmount);
-  const total = parseFloat(inv.total);
-  const taxableAmount = parseFloat(inv.taxableAmount);
-  
+  const subtotal = Number.parseFloat(inv.subtotal);
+  const shipping = Number.parseFloat(inv.shipping);
+  const discount = Number.parseFloat(inv.discount) || 0;
+  const vatRate = Number.parseFloat(inv.vatRate);
+  const vatAmount = Number.parseFloat(inv.vatAmount);
+  const total = Number.parseFloat(inv.total);
+  const taxableAmount = Number.parseFloat(inv.taxableAmount);
+
   // Fórmula correcta: IVA solo sobre productos
   const expectedVat = (subtotal - discount) * (vatRate / 100);
   const expectedTotal = (subtotal - discount) * (1 + vatRate / 100) + shipping;
   const expectedTaxable = (subtotal - discount) + shipping;
-  
+
   const vatDiff = Math.abs(vatAmount - expectedVat);
   const totalDiff = Math.abs(total - expectedTotal);
   const taxableDiff = Math.abs(taxableAmount - expectedTaxable);
-  
-  let errors = [];
-  if (vatDiff > 0.01) errors.push(`IVA: ${vatAmount} ≠ ${expectedVat.toFixed(2)}`);
-  if (totalDiff > 0.01) errors.push(`Total: ${total} ≠ ${expectedTotal.toFixed(2)}`);
-  if (taxableDiff > 0.01) errors.push(`Base: ${taxableAmount} ≠ ${expectedTaxable.toFixed(2)}`);
-  
+
+  const errors = [];
+  if (vatDiff > 0.01) {
+    errors.push(`IVA: ${vatAmount} ≠ ${expectedVat.toFixed(2)}`);
+  }
+  if (totalDiff > 0.01) {
+    errors.push(`Total: ${total} ≠ ${expectedTotal.toFixed(2)}`);
+  }
+  if (taxableDiff > 0.01) {
+    errors.push(`Base: ${taxableAmount} ≠ ${expectedTaxable.toFixed(2)}`);
+  }
+
   if (errors.length > 0) {
     issues.push(`❌ ${inv.invoiceNumber}: ${errors.join(', ')}`);
     console.log(`❌ ${inv.invoiceNumber}: ${errors.join(', ')}`);
@@ -155,12 +165,12 @@ files.orderItems.rows.forEach(item => {
     console.log(`❌ ${item._ref}: Producto ${item._productRef} no existe`);
     productErrors++;
   }
-  
+
   // Verificar precio
   const product = files.products.rows.find(p => p._ref === item._productRef);
   if (product) {
-    const itemPrice = parseFloat(item.price);
-    const productPrice = parseFloat(product.price);
+    const itemPrice = Number.parseFloat(item.price);
+    const productPrice = Number.parseFloat(product.price);
     if (Math.abs(itemPrice - productPrice) > 0.01) {
       issues.push(`❌ ${item._ref}: Precio ${itemPrice} ≠ Producto ${productPrice}`);
       console.log(`❌ ${item._ref}: Precio ${itemPrice} ≠ ${productPrice}`);
@@ -181,30 +191,34 @@ console.log('-'.repeat(60));
 
 files.products.rows.forEach(prod => {
   const movements = files.inventoryMovements.rows.filter(m => m._productRef === prod._ref);
-  
+
   if (movements.length === 0) {
     // Productos sin movimientos pueden tener stock inicial
     console.log(`ℹ️  ${prod._ref}: Sin movimientos (stock: ${prod.stock})`);
     return;
   }
-  
+
   // Calcular stock basado en movimientos
   let calculatedStock = 0;
   movements.forEach(m => {
-    const qty = parseInt(m.quantity);
-    if (m.type === 'IN') calculatedStock += qty;
-    else if (m.type === 'OUT') calculatedStock -= qty;
-    else if (m.type === 'ADJUSTMENT') calculatedStock = qty; // Ajuste absoluto
+    const qty = Number.parseInt(m.quantity);
+    if (m.type === 'IN') {
+      calculatedStock += qty;
+    } else if (m.type === 'OUT') {
+      calculatedStock -= qty;
+    } else if (m.type === 'ADJUSTMENT') {
+      calculatedStock = qty; // Ajuste absoluto
+    }
   });
-  
-  const currentStock = parseInt(prod.stock);
+
+  const currentStock = Number.parseInt(prod.stock);
   const diff = currentStock - calculatedStock;
-  
-  if (diff !== 0) {
+
+  if (diff === 0) {
+    console.log(`✅ ${prod._ref}: Stock ${currentStock} (${movements.length} movimientos)`);
+  } else {
     issues.push(`❌ ${prod._ref}: Stock ${currentStock} ≠ Calculado ${calculatedStock} (diff: ${diff})`);
     console.log(`❌ ${prod._ref}: Stock ${currentStock} ≠ Calculado ${calculatedStock}`);
-  } else {
-    console.log(`✅ ${prod._ref}: Stock ${currentStock} (${movements.length} movimientos)`);
   }
 });
 
@@ -253,12 +267,12 @@ files.payments.rows.forEach(pay => {
     paymentErrors++;
     return;
   }
-  
+
   const order = files.orders.rows.find(o => o._ref === pay._orderRef);
-  const payAmount = parseFloat(pay.amount);
-  const orderTotal = parseFloat(order.total);
+  const payAmount = Number.parseFloat(pay.amount);
+  const orderTotal = Number.parseFloat(order.total);
   const diff = Math.abs(payAmount - orderTotal);
-  
+
   if (diff > 0.01) {
     issues.push(`❌ ${pay._ref}: Monto ${payAmount} ≠ Orden ${orderTotal}`);
     console.log(`❌ ${pay._ref}: ${payAmount} ≠ ${orderTotal}`);

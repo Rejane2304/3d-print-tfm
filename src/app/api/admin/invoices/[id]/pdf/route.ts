@@ -4,16 +4,15 @@
  *
  * Requiere: Rol ADMIN
  */
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
-import { Prisma } from "@prisma/client";
-import { generateInvoiceHTML } from "@/lib/invoices/invoice-template";
-import { generatePDF, COMPANY_CONFIG } from "@/lib/invoices/pdf-generator";
-import { readFileSync } from "fs";
-import { join } from "path";
-import { existsSync } from "fs";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
+import { Prisma } from '@prisma/client';
+import { generateInvoiceHTML } from '@/lib/invoices/invoice-template';
+import { COMPANY_CONFIG, generatePDF } from '@/lib/invoices/pdf-generator';
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 // Type for invoice with order
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -41,34 +40,30 @@ type InvoiceWithOrder = Prisma.InvoiceGetPayload<{
 async function getImageAsBase64(imageUrl: string): Promise<string | undefined> {
   try {
     // Si ya es una URL absoluta (http/https), devolverla tal cual
-    if (imageUrl.startsWith("http")) {
+    if (imageUrl.startsWith('http')) {
       return imageUrl;
     }
 
     // Convertir ruta relativa a ruta del sistema de archivos
     // /images/products/p1/p1-1.jpg -> public/images/products/p1/p1-1.jpg
-    const cleanPath = imageUrl.startsWith("/") ? imageUrl.slice(1) : imageUrl;
-    const filePath = join(process.cwd(), "public", cleanPath);
+    const cleanPath = imageUrl.startsWith('/') ? imageUrl.slice(1) : imageUrl;
+    const filePath = join(process.cwd(), 'public', cleanPath);
 
     // Verificar si el archivo existe
     if (!existsSync(filePath)) {
-      console.warn(`Image not found: ${filePath}`);
       return undefined;
     }
 
     // Leer archivo y convertir a base64
     const imageBuffer = readFileSync(filePath);
-    const ext = filePath.split(".").pop()?.toLowerCase() || "png";
-    const mimeType =
-      ext === "jpg" || ext === "jpeg"
-        ? "image/jpeg"
-        : ext === "png"
-          ? "image/png"
-          : ext === "gif"
-            ? "image/gif"
-            : "image/jpeg";
-
-    return `data:${mimeType};base64,${imageBuffer.toString("base64")}`;
+    const ext = filePath.split('.').pop()?.toLowerCase() || 'png';
+    let mimeType = 'image/jpeg';
+    if (ext === 'png') {
+      mimeType = 'image/png';
+    } else if (ext === 'gif') {
+      mimeType = 'image/gif';
+    }
+    return `data:${mimeType};base64,${imageBuffer.toString('base64')}`;
   } catch (error) {
     console.error(`Error converting image to base64: ${imageUrl}`, error);
     return undefined;
@@ -83,7 +78,7 @@ export async function GET(
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: "No autenticado" },
+        { success: false, error: 'No autenticado' },
         { status: 401 },
       );
     }
@@ -92,9 +87,9 @@ export async function GET(
       where: { email: session.user.email },
     });
 
-    if (!usuario || usuario.role !== "ADMIN") {
+    if (usuario?.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: "No autorizado" },
+        { success: false, error: 'No autorizado' },
         { status: 403 },
       );
     }
@@ -126,14 +121,14 @@ export async function GET(
 
     if (!factura) {
       return NextResponse.json(
-        { success: false, error: "Factura no encontrada" },
+        { success: false, error: 'Factura no encontrada' },
         { status: 404 },
       );
     }
 
     // Procesar items y convertir imágenes a base64
     const itemsWithBase64Images = await Promise.all(
-      factura.order?.items.map(async (item) => {
+      (factura.order?.items || []).map(async item => {
         const imageUrl = item.product?.images?.[0]?.url;
         const base64Image = imageUrl
           ? await getImageAsBase64(imageUrl)
@@ -146,7 +141,7 @@ export async function GET(
           subtotal: Number(item.subtotal),
           image: base64Image,
         };
-      }) || [],
+      })
     );
 
     // Mapear datos al formato del template usando los datos CORRECTOS de la empresa
@@ -196,14 +191,14 @@ export async function GET(
     // Retornar el PDF como descarga
     return new NextResponse(new Uint8Array(pdfBuffer), {
       headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="factura-${factura.invoiceNumber}.pdf"`,
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="factura-${factura.invoiceNumber}.pdf"`,
       },
     });
   } catch (error) {
-    console.error("Error generando PDF:", error);
+    console.error('Error generando PDF:', error);
     return NextResponse.json(
-      { success: false, error: "Error al generar el PDF" },
+      { success: false, error: 'Error al generar el PDF' },
       { status: 500 },
     );
   }

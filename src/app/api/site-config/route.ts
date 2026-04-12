@@ -4,8 +4,8 @@
  * Used by frontend to load configuration on app startup
  */
 
-import { NextResponse } from "next/server";
-import { getSiteConfig } from "@/lib/site-config";
+import { NextResponse } from 'next/server';
+import { getSiteConfig } from '@/lib/site-config';
 
 // GET - Get current site configuration (public)
 export async function GET() {
@@ -14,7 +14,7 @@ export async function GET() {
 
     if (!config) {
       return NextResponse.json(
-        { success: false, error: "Configuración no disponible" },
+        { success: false, error: 'Configuración no disponible' },
         { status: 500 },
       );
     }
@@ -38,9 +38,9 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error("Error getting site config:", error);
+    console.error('Error getting site config:', error);
     return NextResponse.json(
-      { success: false, error: "Error interno" },
+      { success: false, error: 'Error interno' },
       { status: 500 },
     );
   }

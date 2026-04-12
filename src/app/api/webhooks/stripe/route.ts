@@ -8,26 +8,26 @@
  * - checkout.session.completed - Successful payment
  * - checkout.session.expired - Session expired
  */
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
-import Stripe from "stripe";
-import { translateErrorMessage } from "@/lib/i18n";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { translateErrorMessage } from '@/lib/i18n';
+import Stripe from 'stripe';
 import {
-  createNewOrderAlert,
   createHighValueOrderAlert,
-} from "@/lib/alerts/alert-service";
+  createNewOrderAlert,
+} from '@/lib/alerts/alert-service';
 
 // Initialize Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2024-04-10",
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+  apiVersion: '2024-04-10',
 });
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || "";
+const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
 
 export async function POST(req: NextRequest) {
   try {
     const payload = await req.text();
-    const signature = req.headers.get("stripe-signature") || "";
+    const signature = req.headers.get('stripe-signature') || '';
 
     // Verify webhook signature
     let event: Stripe.Event;
@@ -35,44 +35,43 @@ export async function POST(req: NextRequest) {
       event = stripe.webhooks.constructEvent(payload, signature, webhookSecret);
     } catch (err: unknown) {
       console.error(
-        "Webhook signature verification failed:",
-        err instanceof Error ? err.message : "Unknown error",
+        'Webhook signature verification failed:',
+        err instanceof Error ? err.message : 'Unknown error',
       );
       return NextResponse.json(
-        { error: translateErrorMessage("Invalid signature") },
+        { error: translateErrorMessage('Invalid signature') },
         { status: 400 },
       );
     }
 
     // Process event
     switch (event.type) {
-      case "checkout.session.completed": {
-        const session = event.data.object as Stripe.Checkout.Session;
+      case 'checkout.session.completed': {
+        const session = event.data.object;
         await handleCheckoutCompleted(session);
         break;
       }
 
-      case "checkout.session.expired": {
-        const session = event.data.object as Stripe.Checkout.Session;
+      case 'checkout.session.expired': {
+        const session = event.data.object;
         await handleCheckoutExpired(session);
         break;
       }
 
-      case "payment_intent.payment_failed": {
-        const paymentIntent = event.data.object as Stripe.PaymentIntent;
-        await handlePaymentFailed(paymentIntent);
+      case 'payment_intent.payment_failed': {
+        await handlePaymentFailed();
         break;
       }
 
       default:
-        console.log(`Unhandled event type: ${event.type}`);
+        // Unhandled event type
     }
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error("Webhook error:", error);
+    console.error('Webhook error:', error);
     return NextResponse.json(
-      { error: translateErrorMessage("Webhook processing failed") },
+      { error: translateErrorMessage('Webhook processing failed') },
       { status: 500 },
     );
   }
@@ -82,7 +81,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const { userId, cartId } = session.metadata || {};
 
   if (!userId) {
-    console.error("No userId in session metadata");
+    console.error('No userId in session metadata');
     return;
   }
 
@@ -94,18 +93,13 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     });
 
     if (!order) {
-      console.error("Order not found for session:", session.id);
+      console.error('Order not found for session:', session.id);
       return;
     }
 
     // Check if order was already processed (avoid duplicates)
-    if (order.status !== "PENDING") {
-      console.log(
-        "Order already processed (status:",
-        order.status,
-        "):",
-        order.id,
-      );
+    if (order.status !== 'PENDING') {
+      // Order already processed
       return;
     }
 
@@ -119,10 +113,10 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       await prisma.payment.update({
         where: { orderId: order.id },
         data: {
-          status: "COMPLETED",
+          status: 'COMPLETED',
           stripeSessionId: session.id,
-          stripePaymentIntentId: session.payment_intent
-            ? String(session.payment_intent)
+          stripePaymentIntentId: typeof session.payment_intent === 'string'
+            ? session.payment_intent
             : undefined,
           processedAt: new Date(),
         },
@@ -135,11 +129,11 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
           order: { connect: { id: order.id } },
           user: { connect: { id: userId } },
           amount: order.total,
-          method: "CARD",
-          status: "COMPLETED",
+          method: 'CARD',
+          status: 'COMPLETED',
           stripeSessionId: session.id,
-          stripePaymentIntentId: session.payment_intent
-            ? String(session.payment_intent)
+          stripePaymentIntentId: typeof session.payment_intent === 'string'
+            ? session.payment_intent
             : undefined,
           processedAt: new Date(),
           updatedAt: new Date(),
@@ -151,7 +145,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     await prisma.order.update({
       where: { id: order.id },
       data: {
-        status: "CONFIRMED",
+        status: 'CONFIRMED',
         confirmedAt: new Date(),
       },
     });
@@ -171,7 +165,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       });
     }
 
-    console.log("Payment processed successfully for order:", order.id);
+    // Payment processed successfully for order
 
     // Crear alertas automáticas para el pedido
     try {
@@ -185,11 +179,11 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       // Alerta de pedido de alto valor (≥100€)
       await createHighValueOrderAlert(order.id, 100);
     } catch (alertError) {
-      console.error("Error creating order alerts:", alertError);
+      console.error('Error creating order alerts:', alertError);
       // No fallar el webhook si la alerta falla
     }
   } catch (error) {
-    console.error("Error processing checkout completed:", error);
+    console.error('Error processing checkout completed:', error);
     throw error;
   }
 }
@@ -201,8 +195,8 @@ async function handleCheckoutExpired(session: Stripe.Checkout.Session) {
       include: { items: true },
     });
 
-    if (order && order.status === "PENDING") {
-      await prisma.$transaction(async (tx) => {
+    if (order?.status === 'PENDING') {
+      await prisma.$transaction(async(tx) => {
         // Restore stock for all items AND register inventory movement
         for (const item of order.items) {
           if (item.productId) {
@@ -222,7 +216,7 @@ async function handleCheckoutExpired(session: Stripe.Checkout.Session) {
                 productId: item.productId,
                 orderId: order.id,
                 createdBy: order.userId, // Use order's user as reference
-                type: "IN",
+                type: 'IN',
                 quantity: item.quantity,
                 previousStock: product.stock - item.quantity,
                 newStock: product.stock,
@@ -231,9 +225,7 @@ async function handleCheckoutExpired(session: Stripe.Checkout.Session) {
               },
             });
 
-            console.log(
-              `Stock restored: ${item.quantity} units for product ${item.productId}`,
-            );
+            // Stock restored for product
           }
         }
 
@@ -241,29 +233,26 @@ async function handleCheckoutExpired(session: Stripe.Checkout.Session) {
         await tx.order.update({
           where: { id: order.id },
           data: {
-            status: "CANCELLED",
+            status: 'CANCELLED',
             cancelledAt: new Date(),
-            cancelReason: "Sesión de pago expirada",
+            cancelReason: 'Sesión de pago expirada',
           },
         });
       });
 
-      console.log(
-        "Order cancelled and stock restored for expired session:",
-        order.id,
-      );
+      // Order cancelled and stock restored for expired session
     }
   } catch (error) {
-    console.error("Error handling checkout expired:", error);
+    console.error('Error handling checkout expired:', error);
     throw error;
   }
 }
 
-async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
+async function handlePaymentFailed() {
   try {
     // Optional: send payment failed notification email
-    console.log("Payment failed:", paymentIntent.id);
+    // Payment failed
   } catch (error) {
-    console.error("Error handling payment failed:", error);
+    console.error('Error handling payment failed:', error);
   }
 }

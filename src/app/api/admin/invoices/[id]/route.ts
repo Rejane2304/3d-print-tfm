@@ -4,11 +4,11 @@
  *
  * Requiere: Rol ADMIN
  */
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
-import { translateErrorMessage } from "@/lib/i18n";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
+import { translateErrorMessage } from '@/lib/i18n';
 
 export async function GET(
   req: NextRequest,
@@ -18,7 +18,7 @@ export async function GET(
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage("No autenticado") },
+        { success: false, error: translateErrorMessage('No autenticado') },
         { status: 401 },
       );
     }
@@ -27,9 +27,9 @@ export async function GET(
       where: { email: session.user.email },
     });
 
-    if (!usuario || usuario.role !== "ADMIN") {
+    if (usuario?.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage("No autorizado") },
+        { success: false, error: translateErrorMessage('No autorizado') },
         { status: 403 },
       );
     }
@@ -64,7 +64,7 @@ export async function GET(
 
     if (!factura) {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage("Factura not found") },
+        { success: false, error: translateErrorMessage('Factura not found') },
         { status: 404 },
       );
     }
@@ -88,8 +88,8 @@ export async function GET(
       empresaCiudad: factura.companyCity,
       empresaProvincia: factura.companyProvince,
       empresaCodigoPostal: factura.companyPostalCode,
-      empresaEmail: "info@3dprint.com",
-      empresaTelefono: "+34 930 000 001",
+      empresaEmail: 'info@3dprint.com',
+      empresaTelefono: '+34 930 000 001',
       // Datos del cliente
       clienteNombre: factura.clientName,
       clienteNif: factura.clientTaxId,
@@ -97,13 +97,13 @@ export async function GET(
       clienteCiudad: factura.clientCity,
       clienteProvincia: factura.clientProvince,
       clienteCodigoPostal: factura.clientPostalCode,
-      clientePais: factura.clientCountry || "España",
+      clientePais: factura.clientCountry || 'España',
       clienteEmail: factura.order?.user?.email || undefined,
       clienteTelefono: factura.order?.user?.phone || undefined,
       // Items con imágenes
       order: {
-        numeroPedido: factura.order?.orderNumber || "",
-        metodoPago: factura.order?.paymentMethod || "CARD",
+        numeroPedido: factura.order?.orderNumber || '',
+        metodoPago: factura.order?.paymentMethod || 'CARD',
         items:
           factura.order?.items.map((item) => ({
             id: item.id,
@@ -115,8 +115,8 @@ export async function GET(
             description: item.product?.description || undefined,
           })) || [],
         usuario: {
-          nombre: factura.order?.user?.name || "",
-          email: factura.order?.user?.email || "",
+          nombre: factura.order?.user?.name || '',
+          email: factura.order?.user?.email || '',
           telefono: factura.order?.user?.phone || undefined,
         },
       },
@@ -124,9 +124,9 @@ export async function GET(
 
     return NextResponse.json({ success: true, factura: facturaFormateada });
   } catch (error) {
-    console.error("Error obteniendo factura:", error);
+    console.error('Error obteniendo factura:', error);
     return NextResponse.json(
-      { success: false, error: translateErrorMessage("Internal error") },
+      { success: false, error: translateErrorMessage('Internal error') },
       { status: 500 },
     );
   }
@@ -140,7 +140,7 @@ export async function DELETE(
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage("No autenticado") },
+        { success: false, error: translateErrorMessage('No autenticado') },
         { status: 401 },
       );
     }
@@ -149,9 +149,9 @@ export async function DELETE(
       where: { email: session.user.email },
     });
 
-    if (!usuario || usuario.role !== "ADMIN") {
+    if (usuario?.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage("No autorizado") },
+        { success: false, error: translateErrorMessage('No autorizado') },
         { status: 403 },
       );
     }
@@ -167,9 +167,9 @@ export async function DELETE(
 
     return NextResponse.json({ success: true, factura });
   } catch (error) {
-    console.error("Error anulando factura:", error);
+    console.error('Error anulando factura:', error);
     return NextResponse.json(
-      { success: false, error: translateErrorMessage("Internal error") },
+      { success: false, error: translateErrorMessage('Internal error') },
       { status: 500 },
     );
   }

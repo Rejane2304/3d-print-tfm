@@ -4,14 +4,49 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useSession } from "next-auth/react";
 
 export type EventType =
+  // Pedidos
   | "order:new"
   | "order:status:updated"
+  | "order:deleted"
+  // Pagos
   | "payment:confirmed"
+  // Stock
   | "stock:low"
   | "stock:updated"
+  // Alertas y reseñas
   | "alert:new"
+  | "alert:deleted"
   | "review:new"
-  | "metrics:update";
+  | "review:deleted"
+  // Métricas
+  | "metrics:update"
+  // Productos
+  | "product:created"
+  | "product:updated"
+  | "product:deleted"
+  // Clientes
+  | "client:created"
+  | "client:updated"
+  | "client:deleted"
+  // Facturas
+  | "invoice:created"
+  | "invoice:deleted"
+  // Categorías
+  | "category:created"
+  | "category:updated"
+  | "category:deleted"
+  // Cupones
+  | "coupon:created"
+  | "coupon:updated"
+  | "coupon:deleted"
+  // FAQs
+  | "faq:created"
+  | "faq:updated"
+  | "faq:deleted"
+  // Zonas de envío
+  | "shipping:created"
+  | "shipping:updated"
+  | "shipping:deleted";
 
 interface RealTimeEvent {
   type: EventType;

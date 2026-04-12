@@ -17,12 +17,11 @@ let retries = 0;
 
 console.log('⏳ Waiting for PostgreSQL to be ready...');
 
-
 function checkPostgres() {
   try {
     // Use pg_isready directly in the container
     execSync(
-      "docker exec 3dprint-test-db pg_isready -U testuser -d 3dprint_tfm_test > /dev/null 2>&1",
+      'docker exec 3dprint-test-db pg_isready -U testuser -d 3dprint_tfm_test > /dev/null 2>&1',
       { stdio: 'pipe' }
     );
     console.log('✅ PostgreSQL está listo');

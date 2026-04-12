@@ -6,16 +6,16 @@
  *
  * Requires authentication
  */
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
-import { withErrorHandler } from "@/lib/errors/api-wrapper";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
-import { translateErrorMessage } from "@/lib/i18n";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { withErrorHandler } from '@/lib/errors/api-wrapper';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
+import { translateErrorMessage } from '@/lib/i18n';
 
 // PATCH /api/cart/[itemId] - Update quantity
 export const PATCH = withErrorHandler(
-  async (req: NextRequest, { params }: { params: { itemId: string } }) => {
+  async(req: NextRequest, { params }: { params: { itemId: string } }) => {
     const { itemId } = params;
 
     // Verify authentication
@@ -23,7 +23,7 @@ export const PATCH = withErrorHandler(
 
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: "No autenticado" },
+        { success: false, error: 'No autenticado' },
         { status: 401 },
       );
     }
@@ -34,7 +34,7 @@ export const PATCH = withErrorHandler(
 
     if (quantity === undefined || quantity < 0) {
       return NextResponse.json(
-        { success: false, error: "Cantidad inválida" },
+        { success: false, error: 'Cantidad inválida' },
         { status: 400 },
       );
     }
@@ -57,7 +57,7 @@ export const PATCH = withErrorHandler(
 
     if (!item) {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage("Item not found") },
+        { success: false, error: translateErrorMessage('Item not found') },
         { status: 404 },
       );
     }
@@ -88,14 +88,14 @@ export const PATCH = withErrorHandler(
 
       return NextResponse.json({
         success: true,
-        message: "Artículo eliminado",
+        message: 'Artículo eliminado',
       });
     }
 
     // Verificar stock
     if (item.product.stock < quantity) {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage("Insufficient stock") },
+        { success: false, error: translateErrorMessage('Insufficient stock') },
         { status: 400 },
       );
     }
@@ -126,14 +126,14 @@ export const PATCH = withErrorHandler(
 
     return NextResponse.json({
       success: true,
-      message: "Cantidad actualizada",
+      message: 'Cantidad actualizada',
     });
   },
 );
 
 // DELETE /api/cart/[itemId] - Remove item
 export const DELETE = withErrorHandler(
-  async (req: NextRequest, { params }: { params: { itemId: string } }) => {
+  async(req: NextRequest, { params }: { params: { itemId: string } }) => {
     const { itemId } = params;
 
     // Verify authentication
@@ -141,7 +141,7 @@ export const DELETE = withErrorHandler(
 
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: "No autenticado" },
+        { success: false, error: 'No autenticado' },
         { status: 401 },
       );
     }
@@ -163,7 +163,7 @@ export const DELETE = withErrorHandler(
 
     if (!item) {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage("Item not found") },
+        { success: false, error: translateErrorMessage('Item not found') },
         { status: 404 },
       );
     }
@@ -193,7 +193,7 @@ export const DELETE = withErrorHandler(
 
     return NextResponse.json({
       success: true,
-      message: "Artículo eliminado del carrito",
+      message: 'Artículo eliminado del carrito',
     });
   },
 );

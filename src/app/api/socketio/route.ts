@@ -1,20 +1,20 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
-import { translateErrorMessage } from "@/lib/i18n";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { translateErrorMessage } from '@/lib/i18n';
 
-export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // Simple REST endpoint for event polling (fallback for WebSockets)
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
-    const lastEventId = searchParams.get("lastEventId");
+    const userId = searchParams.get('userId');
+    const lastEventId = searchParams.get('lastEventId');
 
     if (!userId) {
       return NextResponse.json(
-        { error: translateErrorMessage("User ID required") },
+        { error: translateErrorMessage('User ID required') },
         { status: 400 },
       );
     }
@@ -22,16 +22,16 @@ export async function GET(req: NextRequest) {
     // Get pending events for user
     const events = await prisma.eventStore.findMany({
       where: {
-        OR: [{ room: `user:${userId}` }, { room: "admin" }],
+        OR: [{ room: `user:${userId}` }, { room: 'admin' }],
         ...(lastEventId
           ? {
-              id: { gt: lastEventId },
-            }
+            id: { gt: lastEventId },
+          }
           : {
-              delivered: false,
-            }),
+            delivered: false,
+          }),
       },
-      orderBy: { timestamp: "asc" },
+      orderBy: { timestamp: 'asc' },
       take: 100,
     });
 
@@ -50,9 +50,9 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ events });
   } catch (error) {
-    console.error("Error fetching events:", error);
+    console.error('Error fetching events:', error);
     return NextResponse.json(
-      { error: translateErrorMessage("Internal server error") },
+      { error: translateErrorMessage('Internal server error') },
       { status: 500 },
     );
   }
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
 
     if (!type || !payload || !room) {
       return NextResponse.json(
-        { error: translateErrorMessage("Missing required fields") },
+        { error: translateErrorMessage('Missing required fields') },
         { status: 400 },
       );
     }
@@ -86,9 +86,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, eventId: event.id });
   } catch (error) {
-    console.error("Error emitting event:", error);
+    console.error('Error emitting event:', error);
     return NextResponse.json(
-      { error: translateErrorMessage("Internal server error") },
+      { error: translateErrorMessage('Internal server error') },
       { status: 500 },
     );
   }

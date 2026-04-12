@@ -1,15 +1,15 @@
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 /**
  * API Route - List Clients (Admin)
  * GET /api/admin/clients
  * Supports pagination, search, and filtering
  */
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
-import { prisma } from "@/lib/db/prisma";
-import { Prisma } from "@prisma/client";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
+import { prisma } from '@/lib/db/prisma';
+import { Prisma } from '@prisma/client';
 
 export async function GET(req: NextRequest) {
   try {
@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
 
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: "No autenticado" },
+        { success: false, error: 'No autenticado' },
         { status: 401 },
       );
     }
@@ -28,38 +28,38 @@ export async function GET(req: NextRequest) {
       select: { id: true, role: true },
     });
 
-    if (!adminUser || adminUser.role !== "ADMIN") {
+    if (adminUser?.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: "Acceso denegado" },
+        { success: false, error: 'Acceso denegado' },
         { status: 403 },
       );
     }
 
     // Get query parameters
     const { searchParams } = new URL(req.url);
-    const page = Number.parseInt(searchParams.get("page") || "1", 10);
-    const limit = Number.parseInt(searchParams.get("limit") || "10", 10);
-    const search = searchParams.get("search") || "";
-    const status = searchParams.get("status") || "all";
+    const page = Number.parseInt(searchParams.get('page') || '1', 10);
+    const limit = Number.parseInt(searchParams.get('limit') || '10', 10);
+    const search = searchParams.get('search') || '';
+    const status = searchParams.get('status') || 'all';
 
     // Calculate pagination
     const skip = (page - 1) * limit;
 
     // Build where clause
     const where: Prisma.UserWhereInput = {
-      role: "CUSTOMER",
+      role: 'CUSTOMER',
     };
 
     if (search) {
       where.OR = [
-        { name: { contains: search, mode: "insensitive" } },
-        { email: { contains: search, mode: "insensitive" } },
+        { name: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } },
       ];
     }
 
-    if (status === "active") {
+    if (status === 'active') {
       where.isActive = true;
-    } else if (status === "inactive") {
+    } else if (status === 'inactive') {
       where.isActive = false;
     }
 
@@ -90,7 +90,7 @@ export async function GET(req: NextRequest) {
           },
         },
       },
-      orderBy: { name: "asc" },
+      orderBy: { name: 'asc' },
       skip,
       take: limit,
     });
@@ -98,17 +98,16 @@ export async function GET(req: NextRequest) {
     // Calculate total spent per client
     const clientsWithStats = clients.map((client) => {
       const totalSpent = client.orders
-        .filter((o) => o.status !== "CANCELLED")
+        .filter((o) => o.status !== 'CANCELLED')
         .reduce((sum, o) => sum + Number(o.total), 0);
 
-      const lastOrder =
-        client.orders.length > 0
-          ? client.orders.sort(
-              (a, b) =>
-                new Date(b.createdAt).getTime() -
-                new Date(a.createdAt).getTime(),
-            )[0]
-          : null;
+      let lastOrder = null;
+      if (client.orders.length > 0) {
+        lastOrder = client.orders
+          .toSorted(
+            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+          )[0];
+      }
 
       return {
         id: client.id,
@@ -137,9 +136,9 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Error fetching clients:", error);
+    console.error('Error fetching clients:', error);
     return NextResponse.json(
-      { success: false, error: "Error al obtener clientes" },
+      { success: false, error: 'Error al obtener clientes' },
       { status: 500 },
     );
   }

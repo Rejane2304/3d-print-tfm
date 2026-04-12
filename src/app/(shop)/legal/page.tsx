@@ -3,30 +3,30 @@
  * Página de información legal requerida para empresas españolas
  * Responsive: mobile → 4K
  */
-import type { Metadata } from "next";
+import type { Metadata } from 'next';
 import {
+  AlertTriangle,
   Building2,
+  Copyright,
   FileText,
+  Globe,
   Mail,
-  Phone,
   MapPin,
+  Phone,
   Scale,
   Shield,
-  Globe,
-  Copyright,
-  AlertTriangle,
-} from "lucide-react";
+} from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: "Aviso Legal | 3D Print",
+  title: 'Aviso Legal | 3D Print',
   description:
-    "Información legal, datos de la empresa, propiedad intelectual y condiciones de uso del sitio web 3D Print.",
+    'Información legal, datos de la empresa, propiedad intelectual y condiciones de uso del sitio web 3D Print.',
 };
 
 interface LegalSectionProps {
-  title: string;
-  icon: React.ReactNode;
-  children: React.ReactNode;
+  readonly title: string;
+  readonly icon: React.ReactNode;
+  readonly children: React.ReactNode;
 }
 
 function LegalSection({ title, icon, children }: LegalSectionProps) {
@@ -278,21 +278,21 @@ export default function LegalPage() {
                   fiscal.
                 </p>
                 <p className="leading-relaxed">
-                  Para más información, consulte nuestra{" "}
+                  Para más información, consulte nuestra{' '}
                   <a
-                    href="#"
+                    href="/legal/privacy-policy"
                     className="text-indigo-600 hover:text-indigo-800 font-medium"
                   >
                     Política de Privacidad
-                  </a>{" "}
-                  y nuestra{" "}
+                  </a>{' '}
+                  y nuestra{' '}
                   <a
-                    href="#"
+                    href="/legal/cookies-policy"
                     className="text-indigo-600 hover:text-indigo-800 font-medium"
                   >
                     Política de Cookies
                   </a>
-                  .
+                  <span>. </span>
                 </p>
               </div>
             </LegalSection>
@@ -365,7 +365,7 @@ export default function LegalPage() {
                   Última actualización
                 </h4>
                 <p className="text-sm text-indigo-700">
-                  Este aviso legal fue actualizado el 8 de abril de{" "}
+                  Este aviso legal fue actualizado el 8 de abril de{' '}
                   {currentYear}.
                 </p>
               </div>
@@ -379,7 +379,7 @@ export default function LegalPage() {
                 </div>
                 <nav className="divide-y divide-gray-100">
                   <a
-                    href="#"
+                    href="/legal/terms"
                     className="flex items-center justify-between px-6 py-3 hover:bg-gray-50 transition-colors group"
                   >
                     <span className="text-sm text-gray-700 group-hover:text-indigo-600">
@@ -388,7 +388,7 @@ export default function LegalPage() {
                     <span className="text-gray-400">→</span>
                   </a>
                   <a
-                    href="#"
+                    href="/legal/privacy"
                     className="flex items-center justify-between px-6 py-3 hover:bg-gray-50 transition-colors group"
                   >
                     <span className="text-sm text-gray-700 group-hover:text-indigo-600">
@@ -397,7 +397,7 @@ export default function LegalPage() {
                     <span className="text-gray-400">→</span>
                   </a>
                   <a
-                    href="#"
+                    href="/legal/cookies"
                     className="flex items-center justify-between px-6 py-3 hover:bg-gray-50 transition-colors group"
                   >
                     <span className="text-sm text-gray-700 group-hover:text-indigo-600">
@@ -405,15 +405,16 @@ export default function LegalPage() {
                     </span>
                     <span className="text-gray-400">→</span>
                   </a>
-                  <a
-                    href="#"
-                    className="flex items-center justify-between px-6 py-3 hover:bg-gray-50 transition-colors group"
+                  <button
+                    type="button"
+                    className="flex w-full items-center justify-between px-6 py-3 \
+                      hover:bg-gray-50 transition-colors group text-left"
                   >
                     <span className="text-sm text-gray-700 group-hover:text-indigo-600">
                       Política de devoluciones
                     </span>
                     <span className="text-gray-400">→</span>
-                  </a>
+                  </button>
                 </nav>
               </div>
             </div>

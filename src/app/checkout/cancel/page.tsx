@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useEffect, useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
-import Link from "next/link";
-import { XCircle, ShoppingCart, ArrowLeft, Loader2 } from "lucide-react";
+import { Suspense, useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import { ArrowLeft, Loader2, ShoppingCart, XCircle } from 'lucide-react';
 
 /**
  * Checkout Cancel Page
@@ -12,19 +12,19 @@ import { XCircle, ShoppingCart, ArrowLeft, Loader2 } from "lucide-react";
  */
 function CheckoutCancelContent() {
   const searchParams = useSearchParams();
-  const orderId = searchParams.get("orderId");
+  const orderId = searchParams.get('orderId');
   const [cancelling, setCancelling] = useState(false);
   const [cancelled, setCancelled] = useState(false);
 
   useEffect(() => {
     // Si hay orderId, cancelar el pedido
     if (orderId && !cancelled) {
-      const cancelOrder = async () => {
+      const cancelOrder = async() => {
         setCancelling(true);
         try {
-          const response = await fetch("/api/orders/cancel", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
+          const response = await fetch('/api/orders/cancel', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ orderId }),
           });
 
@@ -32,7 +32,7 @@ function CheckoutCancelContent() {
             setCancelled(true);
           }
         } catch (error) {
-          console.error("Error cancelando pedido:", error);
+          console.error('Error cancelando pedido:', error);
         } finally {
           setCancelling(false);
         }
@@ -48,7 +48,9 @@ function CheckoutCancelContent() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 text-center">
           {/* Icono */}
           <div className="mb-4 sm:mb-6">
-            <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-orange-100 rounded-full">
+            <div
+              className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-orange-100 rounded-full"
+            >
               <XCircle className="h-8 w-8 sm:h-10 sm:w-10 text-orange-600" />
             </div>
           </div>
@@ -64,8 +66,7 @@ function CheckoutCancelContent() {
             </div>
           ) : (
             <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8">
-              Has cancelado el proceso de pago.{" "}
-              {cancelled && "El pedido ha sido cancelado."} Tu carrito sigue
+              Has cancelado el proceso de pago. {cancelled && 'El pedido ha sido cancelado.'} Tu carrito sigue
               guardado y puedes intentarlo de nuevo cuando quieras.
             </p>
           )}
@@ -73,30 +74,23 @@ function CheckoutCancelContent() {
           <div className="space-y-3">
             <Link
               href="/checkout"
-              className="inline-flex items-center justify-center gap-2 w-full bg-indigo-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-indigo-700 transition-colors min-h-[44px]"
+              className="inline-flex items-center justify-center gap-2 w-full bg-indigo-600 text-white py-3 px-6
+                rounded-lg font-medium"
+              style={{ minHeight: 44 }}
             >
               <ArrowLeft className="h-4 w-4 flex-shrink-0" />
               Volver al checkout
             </Link>
-
             <Link
               href="/cart"
-              className="inline-flex items-center justify-center w-full border border-gray-300 text-gray-700 py-3 px-6 rounded-lg font-medium hover:bg-gray-50 transition-colors min-h-[44px]"
+              className="inline-flex items-center justify-center w-full border border-gray-300 text-gray-700 py-3 px-6
+                rounded-lg font-medium"
+              style={{ minHeight: 44 }}
             >
               <ShoppingCart className="h-4 w-4 flex-shrink-0 mr-2" />
               Ver carrito
             </Link>
           </div>
-
-          <p className="text-sm text-gray-500 mt-6">
-            ¿Tienes alguna pregunta?{" "}
-            <a
-              href="mailto:soporte@3dprint.com"
-              className="text-indigo-600 hover:underline"
-            >
-              Contacta con soporte
-            </a>
-          </p>
         </div>
       </div>
     </div>
@@ -106,7 +100,7 @@ function CheckoutCancelContent() {
 export default function CheckoutCancelPage() {
   return (
     <Suspense
-      fallback={
+      fallback={(
         <div className="min-h-screen bg-gray-50 py-12">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
@@ -115,7 +109,7 @@ export default function CheckoutCancelPage() {
             </div>
           </div>
         </div>
-      }
+      )}
     >
       <CheckoutCancelContent />
     </Suspense>

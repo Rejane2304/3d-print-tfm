@@ -2,23 +2,24 @@
  * Edit Product Page - Admin
  * Formulario para editar producto existente
  */
-"use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter, useParams } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
+'use client';
+
+import { useCallback, useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
 import {
+  AlertCircle,
   ArrowLeft,
-  Package,
+  CheckCircle2,
   Loader2,
+  Package,
+  Save,
   Upload,
   X,
-  AlertCircle,
-  CheckCircle2,
-  Save,
-} from "lucide-react";
+} from 'lucide-react';
 
 interface Category {
   id: string;
@@ -26,15 +27,15 @@ interface Category {
 }
 
 const MATERIALES = [
-  "PLA",
-  "PETG",
-  "ABS",
-  "TPU",
-  "RESINA",
-  "NYLON",
-  "FIBRA_CARBONO",
-  "PC",
-  "ASA",
+  'PLA',
+  'PETG',
+  'ABS',
+  'TPU',
+  'RESINA',
+  'NYLON',
+  'FIBRA_CARBONO',
+  'PC',
+  'ASA',
 ];
 
 export default function EditarProductoPage() {
@@ -53,62 +54,62 @@ export default function EditarProductoPage() {
 
   // Form state
   const [formData, setFormData] = useState({
-    name: "",
-    slug: "",
-    description: "",
-    shortDescription: "",
-    price: "",
-    previousPrice: "",
-    stock: "",
-    minStock: "5",
-    categoryId: "",
-    material: "PLA",
-    widthCm: "",
-    heightCm: "",
-    depthCm: "",
-    weight: "",
-    printTime: "",
+    name: '',
+    slug: '',
+    description: '',
+    shortDescription: '',
+    price: '',
+    previousPrice: '',
+    stock: '',
+    minStock: '5',
+    categoryId: '',
+    material: 'PLA',
+    widthCm: '',
+    heightCm: '',
+    depthCm: '',
+    weight: '',
+    printTime: '',
     isActive: true,
     isFeatured: false,
   });
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/auth?callbackUrl=/admin/products");
+    if (status === 'unauthenticated') {
+      router.push('/auth?callbackUrl=/admin/products');
       return;
     }
 
     const user = session?.user as { role?: string } | undefined;
-    if (status === "authenticated" && user?.role !== "ADMIN") {
-      router.push("/");
+    if (status === 'authenticated' && user?.role !== 'ADMIN') {
+      router.push('/');
       return;
     }
 
-    if (status === "authenticated" && slug) {
+    if (status === 'authenticated' && slug) {
       loadCategories();
       loadProduct();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, session, router, slug]);
 
-  const loadCategories = async () => {
+  const loadCategories = async() => {
     try {
-      const response = await fetch("/api/categories");
+      const response = await fetch('/api/categories');
       if (response.ok) {
         const data = await response.json();
         setCategories(data.categories || []);
       }
     } catch (err) {
-      console.error("Error al cargar categorías:", err);
+      console.error('Error al cargar categorías:', err);
     }
   };
 
-  const loadProduct = useCallback(async () => {
+  const loadProduct = useCallback(async() => {
     try {
       setLoading(true);
       const response = await fetch(`/api/admin/products/${slug}`);
       if (!response.ok) {
-        throw new Error("Error al cargar producto");
+        throw new Error('Error al cargar producto');
       }
       const data = await response.json();
 
@@ -116,21 +117,21 @@ export default function EditarProductoPage() {
         const p = data.producto;
         // API returns Spanish field names with actual DB data as fallback
         setFormData({
-          name: p.nombre || "",
-          slug: p.slug || "",
-          description: p.descripcion || "",
-          shortDescription: p.descripcionCorta || "",
-          price: p.precio?.toString() || "",
-          previousPrice: p.precioAnterior?.toString() || "",
-          stock: p.stock?.toString() || "",
-          minStock: p.minStock?.toString() || "5",
-          categoryId: p.categoryId || "",
-          material: p.material || "PLA",
-          widthCm: p.anchoCm?.toString() || "",
-          heightCm: p.altoCm?.toString() || "",
-          depthCm: p.profundidadCm?.toString() || "",
-          weight: p.peso?.toString() || "",
-          printTime: p.tiempoImpresion?.toString() || "",
+          name: p.nombre || '',
+          slug: p.slug || '',
+          description: p.descripcion || '',
+          shortDescription: p.descripcionCorta || '',
+          price: p.precio?.toString() || '',
+          previousPrice: p.precioAnterior?.toString() || '',
+          stock: p.stock?.toString() || '',
+          minStock: p.minStock?.toString() || '5',
+          categoryId: p.categoryId || '',
+          material: p.material || 'PLA',
+          widthCm: p.anchoCm?.toString() || '',
+          heightCm: p.altoCm?.toString() || '',
+          depthCm: p.profundidadCm?.toString() || '',
+          weight: p.peso?.toString() || '',
+          printTime: p.tiempoImpresion?.toString() || '',
           isActive: p.activo !== false,
           isFeatured: p.destacado === true,
         });
@@ -144,8 +145,8 @@ export default function EditarProductoPage() {
         setImages(formattedImages);
       }
     } catch (err) {
-      console.error("Error al cargar producto:", err);
-      setError("Error al cargar el producto");
+      console.error('Error al cargar producto:', err);
+      setError('Error al cargar el producto');
     } finally {
       setLoading(false);
     }
@@ -160,13 +161,15 @@ export default function EditarProductoPage() {
     setFormData((prev) => ({
       ...prev,
       [name]:
-        type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
+        type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
     }));
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async(e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      return;
+    }
 
     setUploadingImage(true);
     try {
@@ -176,15 +179,15 @@ export default function EditarProductoPage() {
         { url: tempUrl, isMain: prev.length === 0 },
       ]);
     } catch (err) {
-      console.error("Error uploading image:", err);
-      alert("Error al subir imagen. Intente nuevamente.");
+      console.error('Error uploading image:', err);
+      alert('Error al subir imagen. Intente nuevamente.');
     } finally {
       setUploadingImage(false);
     }
   };
 
   const handleImageUrlAdd = () => {
-    const url = prompt("Ingrese la URL de la imagen:");
+    const url = prompt('Ingrese la URL de la imagen:');
     if (url) {
       setImages((prev) => [...prev, { url, isMain: prev.length === 0 }]);
     }
@@ -207,17 +210,28 @@ export default function EditarProductoPage() {
   };
 
   const validateForm = () => {
-    if (!formData.name.trim()) return "El nombre es obligatorio";
-    if (!formData.slug.trim()) return "El slug es obligatorio";
-    if (!formData.description.trim()) return "La descripción es obligatoria";
-    if (!formData.price || parseFloat(formData.price) <= 0)
-      return "El precio debe ser mayor a 0";
-    if (!formData.categoryId) return "Debe seleccionar una categoría";
-    if (images.length === 0) return "Debe agregar al menos una imagen";
+    if (!formData.name.trim()) {
+      return 'El nombre es obligatorio';
+    }
+    if (!formData.slug.trim()) {
+      return 'El slug es obligatorio';
+    }
+    if (!formData.description.trim()) {
+      return 'La descripción es obligatoria';
+    }
+    if (!formData.price || Number.parseFloat(formData.price) <= 0) {
+      return 'El precio debe ser mayor a 0';
+    }
+    if (!formData.categoryId) {
+      return 'Debe seleccionar una categoría';
+    }
+    if (images.length === 0) {
+      return 'Debe agregar al menos una imagen';
+    }
     return null;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
 
     const validationError = validateForm();
@@ -231,13 +245,13 @@ export default function EditarProductoPage() {
 
     try {
       const response = await fetch(`/api/admin/products/${slug}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          price: parseFloat(formData.price),
+          price: Number.parseFloat(formData.price),
           previousPrice: formData.previousPrice
-            ? parseFloat(formData.previousPrice)
+            ? Number.parseFloat(formData.previousPrice)
             : null,
           stock: Number.parseInt(formData.stock) || 0,
           minStock: Number.parseInt(formData.minStock) || 5,
@@ -251,23 +265,23 @@ export default function EditarProductoPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error al actualizar producto");
+        throw new Error(data.error || 'Error al actualizar producto');
       }
 
       setSuccess(true);
       setTimeout(() => {
-        router.push("/admin/products");
+        router.push('/admin/products');
       }, 1500);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Error al actualizar producto",
+        err instanceof Error ? err.message : 'Error al actualizar producto',
       );
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading || status === "loading") {
+  if (loading || status === 'loading') {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -352,6 +366,7 @@ export default function EditarProductoPage() {
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
+                      // eslint-disable-next-line max-len
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       placeholder="Ej: Jarrón Decorativo Floral"
                       required
@@ -371,7 +386,8 @@ export default function EditarProductoPage() {
                       name="slug"
                       value={formData.slug}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg \
+                        focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       placeholder="jarron-decorativo-floral"
                       required
                     />
@@ -389,7 +405,8 @@ export default function EditarProductoPage() {
                       name="categoryId"
                       value={formData.categoryId}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg \
+                        focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       required
                     >
                       <option value="">Seleccionar categoría</option>
@@ -414,7 +431,8 @@ export default function EditarProductoPage() {
                       name="shortDescription"
                       value={formData.shortDescription}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg \
+                        focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       placeholder="Breve descripción para listados (máx. 255 caracteres)"
                       maxLength={255}
                     />
@@ -433,7 +451,8 @@ export default function EditarProductoPage() {
                       value={formData.description}
                       onChange={handleInputChange}
                       rows={6}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg \
+                        focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       placeholder="Descripción detallada del producto..."
                       required
                     />
@@ -463,7 +482,8 @@ export default function EditarProductoPage() {
                       onChange={handleInputChange}
                       step="0.01"
                       min="0"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg \
+                        focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       placeholder="29.99"
                       required
                     />
@@ -484,7 +504,8 @@ export default function EditarProductoPage() {
                       onChange={handleInputChange}
                       step="0.01"
                       min="0"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg \
+                        focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       placeholder="39.99"
                     />
                   </div>
@@ -501,7 +522,8 @@ export default function EditarProductoPage() {
                       name="material"
                       value={formData.material}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg \
+                        focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     >
                       {MATERIALES.map((mat) => (
                         <option key={mat} value={mat}>
@@ -525,7 +547,8 @@ export default function EditarProductoPage() {
                       value={formData.stock}
                       onChange={handleInputChange}
                       min="0"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg \
+                        focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       placeholder="10"
                       required
                     />
@@ -545,6 +568,7 @@ export default function EditarProductoPage() {
                       value={formData.minStock}
                       onChange={handleInputChange}
                       min="0"
+                      // eslint-disable-next-line max-len
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       placeholder="5"
                     />
@@ -574,6 +598,7 @@ export default function EditarProductoPage() {
                       onChange={handleInputChange}
                       step="0.1"
                       min="0"
+                      // eslint-disable-next-line max-len
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       placeholder="10"
                     />
@@ -594,6 +619,7 @@ export default function EditarProductoPage() {
                       onChange={handleInputChange}
                       step="0.1"
                       min="0"
+                      // eslint-disable-next-line max-len
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       placeholder="15"
                     />
@@ -614,6 +640,7 @@ export default function EditarProductoPage() {
                       onChange={handleInputChange}
                       step="0.1"
                       min="0"
+                      // eslint-disable-next-line max-len
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       placeholder="8"
                     />
@@ -634,6 +661,7 @@ export default function EditarProductoPage() {
                       onChange={handleInputChange}
                       step="0.1"
                       min="0"
+                      // eslint-disable-next-line max-len
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       placeholder="150"
                     />
@@ -654,7 +682,8 @@ export default function EditarProductoPage() {
                     value={formData.printTime}
                     onChange={handleInputChange}
                     min="0"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg \
+                      focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     placeholder="120"
                   />
                 </div>
@@ -678,10 +707,14 @@ export default function EditarProductoPage() {
                         onChange={handleImageUpload}
                         className="hidden"
                       />
-                      <div className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-colors">
+                      <div
+                        // eslint-disable-next-line max-len
+                        className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 \
+                        rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-colors"
+                      >
                         <Upload className="h-5 w-5 text-gray-500" />
                         <span className="text-sm text-gray-600">
-                          {uploadingImage ? "Subiendo..." : "Subir imagen"}
+                          {uploadingImage ? 'Subiendo...' : 'Subir imagen'}
                         </span>
                       </div>
                     </label>
@@ -699,9 +732,9 @@ export default function EditarProductoPage() {
                     <div className="grid grid-cols-2 gap-2">
                       {images.map((img, index) => (
                         <div
-                          key={index}
+                          key={img.url}
                           className={`relative aspect-square border-2 ${
-                            img.isMain ? "border-indigo-500" : "border-gray-200"
+                            img.isMain ? 'border-indigo-500' : 'border-gray-200'
                           }`}
                         >
                           <Image
@@ -727,7 +760,8 @@ export default function EditarProductoPage() {
                             <button
                               type="button"
                               onClick={() => setMainImage(index)}
-                              className="absolute bottom-1 left-1 px-2 py-1 bg-gray-800 text-white text-xs hover:bg-gray-700"
+                              className="absolute bottom-1 left-1 px-2 py-1 bg-gray-800 text-white text-xs \
+                                hover:bg-gray-700"
                             >
                               Principal
                             </button>
@@ -793,14 +827,16 @@ export default function EditarProductoPage() {
               <div className="flex gap-3">
                 <Link
                   href="/admin/products"
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-center"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 \
+                    hover:bg-gray-50 text-center"
                 >
                   Cancelar
                 </Link>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 \
+                    disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {saving && <Loader2 className="h-4 w-4 animate-spin" />}
                   <Save className="h-4 w-4" />

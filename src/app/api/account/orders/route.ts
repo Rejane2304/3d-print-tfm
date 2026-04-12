@@ -1,27 +1,27 @@
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 /**
  * API - Listado de Pedidos del Usuario Autenticado
  * GET /api/account/orders
  * Devuelve todos los pedidos del usuario logueado con nombres en español
  */
-import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
-import { prisma } from "@/lib/db/prisma";
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
+import { prisma } from '@/lib/db/prisma';
 import {
   translateOrderStatus,
-  translatePaymentStatus,
   translatePaymentMethod,
+  translatePaymentStatus,
   translateProductName,
-} from "@/lib/i18n";
+} from '@/lib/i18n';
 
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     // Obtener usuario
@@ -32,7 +32,7 @@ export async function GET() {
 
     if (!usuario) {
       return NextResponse.json(
-        { error: "Usuario no encontrado" },
+        { error: 'Usuario no encontrado' },
         { status: 404 },
       );
     }
@@ -40,7 +40,7 @@ export async function GET() {
     // Obtener pedidos del usuario
     const pedidosRaw = await prisma.order.findMany({
       where: { userId: usuario.id },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
       include: {
         items: {
           include: {
@@ -88,31 +88,31 @@ export async function GET() {
         producto: {
           nombre: item.product?.slug
             ? translateProductName(item.product.slug)
-            : "Producto",
-          slug: item.product?.slug || "",
+            : 'Producto',
+          slug: item.product?.slug || '',
           images: item.product?.images || [],
         },
       })),
       factura: pedido.invoice
         ? {
-            id: pedido.invoice.id,
-            numeroFactura: pedido.invoice.invoiceNumber,
-            anulada: pedido.invoice.isCancelled,
-          }
+          id: pedido.invoice.id,
+          numeroFactura: pedido.invoice.invoiceNumber,
+          anulada: pedido.invoice.isCancelled,
+        }
         : undefined,
       pago: pedido.payment
         ? {
-            estado: translatePaymentStatus(pedido.payment.status),
-            metodo: translatePaymentMethod(pedido.payment.method),
-          }
+          estado: translatePaymentStatus(pedido.payment.status),
+          metodo: translatePaymentMethod(pedido.payment.method),
+        }
         : undefined,
     }));
 
     return NextResponse.json({ pedidos });
   } catch (error) {
-    console.error("Error al obtener pedidos:", error);
+    console.error('Error al obtener pedidos:', error);
     return NextResponse.json(
-      { error: "Error al obtener pedidos" },
+      { error: 'Error al obtener pedidos' },
       { status: 500 },
     );
   }

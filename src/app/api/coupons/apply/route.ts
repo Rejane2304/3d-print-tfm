@@ -6,15 +6,15 @@
  * Body: { code: string }
  * Requiere autenticación
  */
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
-import { z } from "zod";
-import { translateCouponCode } from "@/lib/i18n";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
+import { z } from 'zod';
+import { translateCouponCode } from '@/lib/i18n';
 
 const applySchema = z.object({
-  code: z.string().min(1, "El código es obligatorio"),
+  code: z.string().min(1, 'El código es obligatorio'),
 });
 
 export async function POST(req: NextRequest) {
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
 
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: "No autenticado" },
+        { success: false, error: 'No autenticado' },
         { status: 401 },
       );
     }
@@ -49,14 +49,14 @@ export async function POST(req: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { success: false, error: "Usuario no encontrado" },
+        { success: false, error: 'Usuario no encontrado' },
         { status: 404 },
       );
     }
 
     if (!user.cart || user.cart.items.length === 0) {
       return NextResponse.json(
-        { success: false, error: "El carrito está vacío" },
+        { success: false, error: 'El carrito está vacío' },
         { status: 400 },
       );
     }
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
 
     // Si no se encuentra, buscar en traducciones inversas
     if (!coupon) {
-      const { couponTranslations } = await import("@/lib/i18n");
+      const { couponTranslations } = await import('@/lib/i18n');
       const reverseTranslations: Record<string, string> = {};
       for (const [eng, esp] of Object.entries(couponTranslations)) {
         reverseTranslations[esp.toUpperCase()] = eng.toUpperCase();
@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
 
     if (!coupon) {
       return NextResponse.json(
-        { success: false, error: "Cupón no encontrado" },
+        { success: false, error: 'Cupón no encontrado' },
         { status: 404 },
       );
     }
@@ -101,28 +101,28 @@ export async function POST(req: NextRequest) {
 
     if (!coupon.isActive) {
       return NextResponse.json(
-        { success: false, error: "Este cupón está inactivo" },
+        { success: false, error: 'Este cupón está inactivo' },
         { status: 400 },
       );
     }
 
     if (coupon.validFrom > now) {
       return NextResponse.json(
-        { success: false, error: "Este cupón aún no está disponible" },
+        { success: false, error: 'Este cupón aún no está disponible' },
         { status: 400 },
       );
     }
 
     if (coupon.validUntil < now) {
       return NextResponse.json(
-        { success: false, error: "Este cupón ha expirado" },
+        { success: false, error: 'Este cupón ha expirado' },
         { status: 400 },
       );
     }
 
     if (coupon.maxUses !== null && coupon.usedCount >= coupon.maxUses) {
       return NextResponse.json(
-        { success: false, error: "Este cupón ha alcanzado el límite de usos" },
+        { success: false, error: 'Este cupón ha alcanzado el límite de usos' },
         { status: 400 },
       );
     }
@@ -142,16 +142,15 @@ export async function POST(req: NextRequest) {
 
     // Calcular descuento
     let discount = 0;
-    let discountType: "amount" | "percentage" | "free_shipping" = "amount";
+    let discountType: 'amount' | 'percentage' | 'free_shipping' = 'amount';
 
-    if (coupon.type === "PERCENTAGE") {
+    if (coupon.type === 'PERCENTAGE') {
       discount = subtotal * (Number(coupon.value) / 100);
-      discountType = "percentage";
-    } else if (coupon.type === "FIXED") {
+      discountType = 'percentage';
+    } else if (coupon.type === 'FIXED') {
       discount = Math.min(Number(coupon.value), subtotal);
-      discountType = "amount";
-    } else if (coupon.type === "FREE_SHIPPING") {
-      discountType = "free_shipping";
+    } else if (coupon.type === 'FREE_SHIPPING') {
+      discountType = 'free_shipping';
     }
 
     // Redondear a 2 decimales
@@ -161,12 +160,14 @@ export async function POST(req: NextRequest) {
     // Nota: En una implementación real, podrías querer guardar el couponId en el carrito
     // Aquí devolvemos los datos para que el frontend los maneje
 
-    const tipoTexto =
-      coupon.type === "PERCENTAGE"
-        ? "Porcentaje"
-        : coupon.type === "FIXED"
-          ? "Fijo"
-          : "Envío Gratis";
+    let tipoTexto = '';
+    if (coupon.type === 'PERCENTAGE') {
+      tipoTexto = 'Porcentaje';
+    } else if (coupon.type === 'FIXED') {
+      tipoTexto = 'Fijo';
+    } else {
+      tipoTexto = 'Envío Gratis';
+    }
 
     return NextResponse.json({
       success: true,
@@ -182,7 +183,7 @@ export async function POST(req: NextRequest) {
         subtotal,
         discount,
         discountType,
-        freeShipping: coupon.type === "FREE_SHIPPING",
+        freeShipping: coupon.type === 'FREE_SHIPPING',
         totalAfterDiscount: Math.max(0, subtotal - discount),
       },
     });
@@ -193,9 +194,9 @@ export async function POST(req: NextRequest) {
         { status: 400 },
       );
     }
-    console.error("Error aplicando cupón:", error);
+    console.error('Error aplicando cupón:', error);
     return NextResponse.json(
-      { success: false, error: "Error interno" },
+      { success: false, error: 'Error interno' },
       { status: 500 },
     );
   }

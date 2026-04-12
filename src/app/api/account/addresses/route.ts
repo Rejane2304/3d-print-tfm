@@ -2,22 +2,22 @@
  * API - Gestión de Direcciones del Usuario
  * CRUD completo de direcciones de envío
  */
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
-import { prisma } from "@/lib/db/prisma";
-import { z } from "zod";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
+import { prisma } from '@/lib/db/prisma';
+import { z } from 'zod';
 
 // Schema de validación
 const addressSchema = z.object({
-  name: z.string().min(1, "El nombre is required"),
-  recipient: z.string().min(1, "El destinatario is required"),
-  phone: z.string().min(9, "Teléfono inválido"),
-  address: z.string().min(1, "La dirección es requerida"),
+  name: z.string().min(1, 'El nombre is required'),
+  recipient: z.string().min(1, 'El destinatario is required'),
+  phone: z.string().min(9, 'Teléfono inválido'),
+  address: z.string().min(1, 'La dirección es requerida'),
   complement: z.string().optional(),
-  postalCode: z.string().regex(/^\d{5}$/, "Código postal inválido"),
-  city: z.string().min(1, "La ciudad es requerida"),
-  province: z.string().min(1, "La provincia es requerida"),
+  postalCode: z.string().regex(/^\d{5}$/, 'Código postal inválido'),
+  city: z.string().min(1, 'La ciudad es requerida'),
+  province: z.string().min(1, 'La provincia es requerida'),
   isDefault: z.boolean().default(false),
 });
 
@@ -27,7 +27,7 @@ export async function GET() {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const usuario = await prisma.user.findUnique({
@@ -36,19 +36,19 @@ export async function GET() {
     });
 
     if (!usuario) {
-      return NextResponse.json({ error: "Usuario not found" }, { status: 404 });
+      return NextResponse.json({ error: 'Usuario not found' }, { status: 404 });
     }
 
     const addresses = await prisma.address.findMany({
       where: { userId: usuario.id },
-      orderBy: [{ isDefault: "desc" }, { createdAt: "desc" }],
+      orderBy: [{ isDefault: 'desc' }, { createdAt: 'desc' }],
     });
 
     return NextResponse.json({ addresses });
   } catch (error) {
-    console.error("Error al obtener direcciones:", error);
+    console.error('Error al obtener direcciones:', error);
     return NextResponse.json(
-      { error: "Error al obtener direcciones" },
+      { error: 'Error al obtener direcciones' },
       { status: 500 },
     );
   }
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const usuario = await prisma.user.findUnique({
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!usuario) {
-      return NextResponse.json({ error: "Usuario not found" }, { status: 404 });
+      return NextResponse.json({ error: 'Usuario not found' }, { status: 404 });
     }
 
     const body = await request.json();
@@ -116,13 +116,13 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Datos inválidos", details: error.errors },
+        { error: 'Datos inválidos', details: error.errors },
         { status: 400 },
       );
     }
-    console.error("Error al crear dirección:", error);
+    console.error('Error al crear dirección:', error);
     return NextResponse.json(
-      { error: "Error al crear dirección" },
+      { error: 'Error al crear dirección' },
       { status: 500 },
     );
   }
@@ -134,7 +134,7 @@ export async function PATCH(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const usuario = await prisma.user.findUnique({
@@ -143,14 +143,14 @@ export async function PATCH(request: NextRequest) {
     });
 
     if (!usuario) {
-      return NextResponse.json({ error: "Usuario not found" }, { status: 404 });
+      return NextResponse.json({ error: 'Usuario not found' }, { status: 404 });
     }
 
     const { id, ...data } = await request.json();
 
     if (!id) {
       return NextResponse.json(
-        { error: "ID de dirección requerido" },
+        { error: 'ID de dirección requerido' },
         { status: 400 },
       );
     }
@@ -162,7 +162,7 @@ export async function PATCH(request: NextRequest) {
 
     if (!existing) {
       return NextResponse.json(
-        { error: "Dirección no encontrada" },
+        { error: 'Dirección no encontrada' },
         { status: 404 },
       );
     }
@@ -182,9 +182,9 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({ address: updatedAddress });
   } catch (error) {
-    console.error("Error al actualizar dirección:", error);
+    console.error('Error al actualizar dirección:', error);
     return NextResponse.json(
-      { error: "Error al actualizar dirección" },
+      { error: 'Error al actualizar dirección' },
       { status: 500 },
     );
   }
@@ -196,7 +196,7 @@ export async function DELETE(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const usuario = await prisma.user.findUnique({
@@ -205,15 +205,15 @@ export async function DELETE(request: NextRequest) {
     });
 
     if (!usuario) {
-      return NextResponse.json({ error: "Usuario not found" }, { status: 404 });
+      return NextResponse.json({ error: 'Usuario not found' }, { status: 404 });
     }
 
     const { searchParams } = new URL(request.url);
-    const id = searchParams.get("id");
+    const id = searchParams.get('id');
 
     if (!id) {
       return NextResponse.json(
-        { error: "ID de dirección requerido" },
+        { error: 'ID de dirección requerido' },
         { status: 400 },
       );
     }
@@ -225,7 +225,7 @@ export async function DELETE(request: NextRequest) {
 
     if (!existing) {
       return NextResponse.json(
-        { error: "Dirección no encontrada" },
+        { error: 'Dirección no encontrada' },
         { status: 404 },
       );
     }
@@ -236,7 +236,7 @@ export async function DELETE(request: NextRequest) {
     if (existing.isDefault) {
       const otra = await prisma.address.findFirst({
         where: { userId: usuario.id },
-        orderBy: { createdAt: "asc" },
+        orderBy: { createdAt: 'asc' },
       });
 
       if (otra) {
@@ -249,9 +249,9 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error al eliminar dirección:", error);
+    console.error('Error al eliminar dirección:', error);
     return NextResponse.json(
-      { error: "Error al eliminar dirección" },
+      { error: 'Error al eliminar dirección' },
       { status: 500 },
     );
   }

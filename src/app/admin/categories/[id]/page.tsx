@@ -2,26 +2,26 @@
  * Edit Category Page - Admin
  * Form for editing an existing category
  */
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter, useParams } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
+import { useCallback, useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
 import {
+  AlertCircle,
   ArrowLeft,
+  CheckCircle2,
   FolderTree,
+  ImageIcon,
   Loader2,
+  Save,
+  Trash2,
   Upload,
   X,
-  AlertCircle,
-  CheckCircle2,
-  Save,
-  ImageIcon,
-  Trash2,
-} from "lucide-react";
-import { ConfirmModal } from "@/components/ui/ConfirmModal";
+} from 'lucide-react';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
 interface Category {
   id: string;
@@ -51,33 +51,33 @@ export default function EditarCategoriaPage() {
 
   // Form state
   const [formData, setFormData] = useState({
-    name: "",
-    slug: "",
-    description: "",
-    image: "",
+    name: '',
+    slug: '',
+    description: '',
+    image: '',
     displayOrder: 0,
     isActive: true,
   });
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/auth?callbackUrl=/admin/categories");
+    if (status === 'unauthenticated') {
+      router.push('/auth?callbackUrl=/admin/categories');
       return;
     }
 
     const user = session?.user as { role?: string } | undefined;
-    if (status === "authenticated" && user?.role !== "ADMIN") {
-      router.push("/");
+    if (status === 'authenticated' && user?.role !== 'ADMIN') {
+      router.push('/');
       return;
     }
 
-    if (status === "authenticated" && categoryId) {
+    if (status === 'authenticated' && categoryId) {
       loadCategory();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, session, router, categoryId]);
 
-  const loadCategory = useCallback(async () => {
+  const loadCategory = useCallback(async() => {
     try {
       setLoading(true);
       setError(null);
@@ -86,23 +86,23 @@ export default function EditarCategoriaPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error al cargar categoría");
+        throw new Error(data.error || 'Error al cargar categoría');
       }
 
       const cat = data.categoria;
       setCategory(cat);
       setFormData({
-        name: cat.nombre || "",
-        slug: cat.slug || "",
-        description: cat.descripcion || "",
-        image: cat.imagen || "",
+        name: cat.nombre || '',
+        slug: cat.slug || '',
+        description: cat.descripcion || '',
+        image: cat.imagen || '',
         displayOrder: cat.ordenVisualizacion || 0,
         isActive: cat.activo,
       });
       setImagePreview(cat.imagen);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Error al cargar la categoría",
+        err instanceof Error ? err.message : 'Error al cargar la categoría',
       );
     } finally {
       setLoading(false);
@@ -118,7 +118,7 @@ export default function EditarCategoriaPage() {
     setFormData((prev) => ({
       ...prev,
       [name]:
-        type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
+        type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
     }));
   };
 
@@ -130,9 +130,11 @@ export default function EditarCategoriaPage() {
     }));
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async(e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      return;
+    }
 
     setUploadingImage(true);
     try {
@@ -140,15 +142,15 @@ export default function EditarCategoriaPage() {
       setImagePreview(tempUrl);
       setFormData((prev) => ({ ...prev, image: tempUrl }));
     } catch (err) {
-      console.error("Error uploading image:", err);
-      setError("Error al subir imagen. Intente nuevamente.");
+      console.error('Error uploading image:', err);
+      setError('Error al subir imagen. Intente nuevamente.');
     } finally {
       setUploadingImage(false);
     }
   };
 
   const handleImageUrlAdd = () => {
-    const url = prompt("Ingrese la URL de la imagen:");
+    const url = prompt('Ingrese la URL de la imagen:');
     if (url) {
       setImagePreview(url);
       setFormData((prev) => ({ ...prev, image: url }));
@@ -157,18 +159,23 @@ export default function EditarCategoriaPage() {
 
   const removeImage = () => {
     setImagePreview(null);
-    setFormData((prev) => ({ ...prev, image: "" }));
+    setFormData((prev) => ({ ...prev, image: '' }));
   };
 
   const validateForm = () => {
-    if (!formData.name.trim()) return "El nombre es obligatorio";
-    if (!formData.slug.trim()) return "El slug es obligatorio";
-    if (formData.slug.length < 2)
-      return "El slug debe tener al menos 2 caracteres";
+    if (!formData.name.trim()) {
+      return 'El nombre es obligatorio';
+    }
+    if (!formData.slug.trim()) {
+      return 'El slug es obligatorio';
+    }
+    if (formData.slug.length < 2) {
+      return 'El slug debe tener al menos 2 caracteres';
+    }
     return null;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
 
     const validationError = validateForm();
@@ -182,8 +189,8 @@ export default function EditarCategoriaPage() {
 
     try {
       const response = await fetch(`/api/admin/categories/${categoryId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: formData.name,
           slug: formData.slug,
@@ -197,7 +204,7 @@ export default function EditarCategoriaPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error al actualizar categoría");
+        throw new Error(data.error || 'Error al actualizar categoría');
       }
 
       setSuccess(true);
@@ -206,35 +213,35 @@ export default function EditarCategoriaPage() {
       }, 3000);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Error al actualizar categoría",
+        err instanceof Error ? err.message : 'Error al actualizar categoría',
       );
     } finally {
       setSaving(false);
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = async() => {
     try {
       const response = await fetch(`/api/admin/categories/${categoryId}`, {
-        method: "DELETE",
+        method: 'DELETE',
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error al eliminar categoría");
+        throw new Error(data.error || 'Error al eliminar categoría');
       }
 
-      router.push("/admin/categories");
+      router.push('/admin/categories');
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Error al eliminar categoría",
+        err instanceof Error ? err.message : 'Error al eliminar categoría',
       );
       setDeleteModalOpen(false);
     }
   };
 
-  if (loading || status === "loading") {
+  if (loading || status === 'loading') {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -319,11 +326,13 @@ export default function EditarCategoriaPage() {
                 disabled={
                   !!category?.totalProductos && category.totalProductos > 0
                 }
-                className="inline-flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-2 \
+                  bg-red-600 text-white px-4 py-2 rounded-lg font-medium \
+                  hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 title={
                   category?.totalProductos && category.totalProductos > 0
-                    ? "No se puede eliminar una categoría con productos"
-                    : "Eliminar categoría"
+                    ? 'No se puede eliminar una categoría con productos'
+                    : 'Eliminar categoría'
                 }
               >
                 <Trash2 className="h-5 w-5" />
@@ -374,7 +383,8 @@ export default function EditarCategoriaPage() {
                     name="name"
                     value={formData.name}
                     onChange={handleNameChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg \
+                      focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     placeholder="Ej: Decoración"
                     required
                   />
@@ -393,12 +403,13 @@ export default function EditarCategoriaPage() {
                     name="slug"
                     value={formData.slug}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg \
+                      focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     placeholder="decoracion"
                     required
                   />
                   <p className="mt-1 text-xs text-gray-500">
-                    Usado en URLs: /categoria/{"{slug}"}
+                    Usado en URLs: /categoria/{'{slug}'}
                   </p>
                 </div>
 
@@ -416,7 +427,8 @@ export default function EditarCategoriaPage() {
                     value={formData.displayOrder}
                     onChange={handleInputChange}
                     min="0"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg \
+                      focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     placeholder="0"
                   />
                   <p className="mt-1 text-xs text-gray-500">
@@ -437,7 +449,8 @@ export default function EditarCategoriaPage() {
                     value={formData.description}
                     onChange={handleInputChange}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg \
+                      focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     placeholder="Descripción de la categoría..."
                     maxLength={500}
                   />
@@ -467,10 +480,13 @@ export default function EditarCategoriaPage() {
                       onChange={handleImageUpload}
                       className="hidden"
                     />
-                    <div className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-colors">
+                    <div
+                      className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed \
+                      border-gray-300 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-colors"
+                    >
                       <Upload className="h-5 w-5 text-gray-500" />
                       <span className="text-sm text-gray-600">
-                        {uploadingImage ? "Subiendo..." : "Cambiar imagen"}
+                        {uploadingImage ? 'Subiendo...' : 'Cambiar imagen'}
                       </span>
                     </div>
                   </label>
@@ -501,7 +517,10 @@ export default function EditarCategoriaPage() {
                     </button>
                   </div>
                 ) : (
-                  <div className="w-48 h-48 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-400">
+                  <div
+                    className="w-48 h-48 border-2 border-dashed border-gray-300 rounded-lg \
+                      flex items-center justify-center text-gray-400"
+                  >
                     <div className="text-center">
                       <ImageIcon className="h-12 w-12 mx-auto mb-2" />
                       <p className="text-sm">Sin imagen</p>
@@ -557,7 +576,8 @@ export default function EditarCategoriaPage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="flex-1 max-w-xs px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 max-w-xs px-4 py-2 bg-indigo-600 text-white rounded-lg \
+                  hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {saving && <Loader2 className="h-4 w-4 animate-spin" />}
                 <Save className="h-4 w-4" />
@@ -575,14 +595,15 @@ export default function EditarCategoriaPage() {
         title="¿Eliminar categoría?"
         description={
           category?.totalProductos && category.totalProductos > 0
-            ? `Esta categoría tiene ${category.totalProductos} producto(s) asociado(s). Debes reasignar los productos antes de eliminarla.`
-            : "Esta acción no se puede deshacer. La categoría será eliminada permanentemente."
+            ? `Esta categoría tiene ${category.totalProductos} producto(s) asociado(s). ` +
+              'Debes reasignar los productos antes de eliminarla.'
+            : 'Esta acción no se puede deshacer. La categoría será eliminada permanentemente.'
         }
         confirmText="Eliminar"
         type={
           category?.totalProductos && category.totalProductos > 0
-            ? "warning"
-            : "danger"
+            ? 'warning'
+            : 'danger'
         }
         confirmDisabled={
           category?.totalProductos ? category.totalProductos > 0 : false

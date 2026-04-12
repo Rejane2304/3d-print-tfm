@@ -3,7 +3,7 @@
  * Identifica registros históricos inconsistentes para limpieza manual
  * Ejecutar: npx tsx scripts/audit-database.ts
  */
-import { PrismaClient, OrderStatus } from '@prisma/client';
+import { OrderStatus, PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -22,7 +22,9 @@ function generateInClause(ids: string[]): string {
 }
 
 function truncateDetails(details: string, maxLength: number): string {
-  if (details.length <= maxLength) return details;
+  if (details.length <= maxLength) {
+    return details;
+  }
   return details.substring(0, maxLength) + '...';
 }
 
@@ -40,10 +42,12 @@ async function checkCancelledOrders(): Promise<Issue | null> {
     },
   });
 
-  if (orders.length === 0) return null;
+  if (orders.length === 0) {
+    return null;
+  }
 
   const orderIds = orders.map(o => o.id);
-  const details = orders.map(o => 
+  const details = orders.map(o =>
     `${o.orderNumber} -> Factura ${o.invoice?.invoiceNumber || 'N/A'}`
   ).join(', ');
 
@@ -60,7 +64,7 @@ async function checkCancelledOrders(): Promise<Issue | null> {
 // Checker 2: Pagos duplicados
 async function checkDuplicatePayments(): Promise<Issue | null> {
   const payments = await prisma.payment.findMany({
-    select: { orderId: true }
+    select: { orderId: true },
   });
 
   const counts = new Map<string, number>();
@@ -72,7 +76,9 @@ async function checkDuplicatePayments(): Promise<Issue | null> {
     .filter(([, count]) => count > 1)
     .map(([orderId, count]) => ({ orderId, count }));
 
-  if (duplicates.length === 0) return null;
+  if (duplicates.length === 0) {
+    return null;
+  }
 
   const orderIds = duplicates.map(d => d.orderId);
   const details = duplicates.map(d => `Order ${d.orderId}: ${d.count} pagos`).join(', ');
@@ -102,7 +108,9 @@ async function checkOldPending(): Promise<Issue | null> {
     },
   });
 
-  if (orders.length === 0) return null;
+  if (orders.length === 0) {
+    return null;
+  }
 
   const orderIds = orders.map(o => o.id);
   const details = orders.map(o => {
@@ -116,7 +124,9 @@ async function checkOldPending(): Promise<Issue | null> {
     description: 'Pedidos PENDING con más de 24 horas',
     count: orders.length,
     details,
-    sql: `-- Cancelar: UPDATE orders SET status='CANCELLED',cancelled_at=NOW() WHERE id IN (${generateInClause(orderIds)});`,
+    sql:
+      '-- Cancelar: UPDATE orders SET status=\'CANCELLED\',cancelled_at=NOW()' +
+      ` WHERE id IN (${generateInClause(orderIds)});`,
   };
 }
 
@@ -127,7 +137,9 @@ async function checkNegativeStock(): Promise<Issue | null> {
     select: { id: true, name: true, stock: true },
   });
 
-  if (products.length === 0) return null;
+  if (products.length === 0) {
+    return null;
+  }
 
   const productIds = products.map(p => p.id);
   const details = products.map(p => `${p.name}: ${p.stock}`).join(', ');
@@ -150,19 +162,25 @@ async function checkStockMismatch(): Promise<Issue | null> {
   });
 
   const mismatches = [];
-  
+
   for (const product of products) {
     const movements = await prisma.inventoryMovement.findMany({
       where: { productId: product.id },
     });
 
-    if (movements.length === 0) continue;
+    if (movements.length === 0) {
+      continue;
+    }
 
     let calculated = 0;
     for (const m of movements) {
-      if (m.type === 'IN') calculated += m.quantity;
-      else if (m.type === 'OUT') calculated -= m.quantity;
-      else if (m.type === 'ADJUSTMENT') calculated = m.newStock;
+      if (m.type === 'IN') {
+        calculated += m.quantity;
+      } else if (m.type === 'OUT') {
+        calculated -= m.quantity;
+      } else if (m.type === 'ADJUSTMENT') {
+        calculated = m.newStock;
+      }
     }
 
     if (calculated !== product.stock) {
@@ -170,13 +188,17 @@ async function checkStockMismatch(): Promise<Issue | null> {
     }
   }
 
-  if (mismatches.length === 0) return null;
-
+  if (mismatches.length === 0) {
+    return null;
+  }
+  if (mismatches.length === 0) {
+    return null;
+  }
   const details = mismatches
     .slice(0, 5)
     .map(m => `${m.name}: ${m.current} vs ${m.calculated}`)
     .join(', ');
-  
+
   const suffix = mismatches.length > 5 ? '...' : '';
 
   return {
@@ -195,7 +217,9 @@ async function checkEmptyOrders(): Promise<Issue | null> {
     select: { id: true, orderNumber: true },
   });
 
-  if (orders.length === 0) return null;
+  if (orders.length === 0) {
+    return null;
+  }
 
   return {
     category: 'Pedidos Vacíos',
@@ -211,10 +235,12 @@ async function checkOrphanedInvoices(): Promise<Issue | null> {
   const invoices = await prisma.invoice.findMany({
     select: { id: true, invoiceNumber: true, orderId: true },
   });
-  
+
   const orphaned = invoices.filter(inv => !inv.orderId);
 
-  if (orphaned.length === 0) return null;
+  if (orphaned.length === 0) {
+    return null;
+  }
 
   return {
     category: 'Facturas Huérfanas',
@@ -231,7 +257,9 @@ async function checkCoupons(): Promise<Issue | null> {
     select: { id: true, code: true, usedCount: true },
   });
 
-  if (coupons.length === 0) return null;
+  if (coupons.length === 0) {
+    return null;
+  }
 
   return {
     category: 'Cupones',
@@ -308,7 +336,9 @@ async function auditDatabase() {
 
   // Filtrar resultados nulos
   for (const result of results) {
-    if (result) issues.push(result);
+    if (result) {
+      issues.push(result);
+    }
   }
 
   printReport(issues);
@@ -316,7 +346,7 @@ async function auditDatabase() {
   await prisma.$disconnect();
 }
 
-auditDatabase().catch(async (error) => {
+auditDatabase().catch(async(error) => {
   console.error('Error:', error);
   await prisma.$disconnect();
   process.exit(1);

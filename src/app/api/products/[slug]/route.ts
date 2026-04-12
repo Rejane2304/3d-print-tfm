@@ -2,26 +2,26 @@
  * API Route for product detail
  * GET /api/products/[slug] - Get product by slug
  */
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
-import { withErrorHandler } from "@/lib/errors/api-wrapper";
-import { ApiError, ErrorCode } from "@/lib/errors";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { ApiError, ErrorCode } from '@/lib/errors';
+import { withErrorHandler } from '@/lib/errors/api-wrapper';
 import {
-  translateProductName,
-  translateProductDescription,
-  translateProductShortDescription,
-  translateCategoryName,
   translateCategoryDescription,
-} from "@/lib/i18n";
+  translateCategoryName,
+  translateProductDescription,
+  translateProductName,
+  translateProductShortDescription,
+} from '@/lib/i18n';
 
 export const GET = withErrorHandler(
-  async (req: NextRequest, { params }: { params: { slug: string } }) => {
+  async(req: NextRequest, { params }: { params: { slug: string } }) => {
     const { slug } = params;
 
     if (!slug) {
       throw new ApiError(
         ErrorCode.VALIDATION_INVALID_INPUT,
-        "El identificador del producto es requerido",
+        'El identificador del producto es requerido',
         400,
       );
     }
@@ -30,18 +30,18 @@ export const GET = withErrorHandler(
       where: { slug },
       include: {
         images: {
-          orderBy: { displayOrder: "asc" },
+          orderBy: { displayOrder: 'asc' },
         },
         category: true,
       },
     });
 
     if (!product) {
-      throw new ApiError(ErrorCode.DB_NOT_FOUND, "Producto no encontrado", 404);
+      throw new ApiError(ErrorCode.DB_NOT_FOUND, 'Producto no encontrado', 404);
     }
 
     if (!product.isActive) {
-      throw new ApiError(ErrorCode.DB_NOT_FOUND, "Producto no disponible", 404);
+      throw new ApiError(ErrorCode.DB_NOT_FOUND, 'Producto no disponible', 404);
     }
 
     // Translate product fields to Spanish
@@ -52,10 +52,10 @@ export const GET = withErrorHandler(
       shortDescription: translateProductShortDescription(product.slug),
       category: product.category
         ? {
-            ...product.category,
-            name: translateCategoryName(product.category.slug),
-            description: translateCategoryDescription(product.category.slug),
-          }
+          ...product.category,
+          name: translateCategoryName(product.category.slug),
+          description: translateCategoryDescription(product.category.slug),
+        }
         : product.category,
     };
 

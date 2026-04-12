@@ -5,8 +5,8 @@
  * IVA solo sobre productos, envío sin IVA
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'node:fs';
+import path from 'node:path';
 
 const DATA_DIR = path.join(__dirname, '../public/data');
 
@@ -19,7 +19,7 @@ function readCSV(filename) {
     const values = line.split(',');
     const obj = {};
     headers.forEach((header, i) => {
-      obj[header.trim()] = values[i] !== undefined ? values[i].trim() : '';
+      obj[header.trim()] = values[i] === undefined ? '' : values[i].trim();
     });
     return obj;
   });
@@ -50,18 +50,21 @@ console.log('📄 Procesando orders.csv...');
 const orders = readCSV('orders.csv');
 
 orders.rows = orders.rows.map(row => {
-  const subtotal = parseFloat(row.subtotal) || 0;
-  const shipping = parseFloat(row.shipping) || 0;
-  const discount = parseFloat(row.discount) || 0;
-  
+  const subtotal = Number.parseFloat(row.subtotal) || 0;
+  const shipping = Number.parseFloat(row.shipping) || 0;
+  const discount = Number.parseFloat(row.discount) || 0;
+
   // FÓRMULA CORRECTA: (subtotal - discount) × 1.21 + shipping
   const total = round2((subtotal - discount) * 1.21 + shipping);
-  
-  const oldTotal = parseFloat(row.total);
+
+  const oldTotal = Number.parseFloat(row.total);
   if (Math.abs(oldTotal - total) > 0.01) {
-    console.log(`  📝 ${row._ref}: ${oldTotal} → ${total} (subtotal: ${subtotal}, shipping: ${shipping}, discount: ${discount})`);
+    console.log(
+      `  📝 ${row._ref}: ${oldTotal} → ${total} ` +
+      `(subtotal: ${subtotal}, shipping: ${shipping}, discount: ${discount})`
+    );
   }
-  
+
   row.total = total.toFixed(2);
   return row;
 });
@@ -76,34 +79,34 @@ console.log('📄 Procesando invoices.csv...');
 const invoices = readCSV('invoices.csv');
 
 invoices.rows = invoices.rows.map(row => {
-  const subtotal = parseFloat(row.subtotal) || 0;
-  const shipping = parseFloat(row.shipping) || 0;
-  const discount = parseFloat(row.discount) || 0;
-  
+  const subtotal = Number.parseFloat(row.subtotal) || 0;
+  const shipping = Number.parseFloat(row.shipping) || 0;
+  const discount = Number.parseFloat(row.discount) || 0;
+
   // FÓRMULA CORRECTA:
   // Base imponible = subtotal - discount (productos sin IVA)
   // IVA = (subtotal - discount) × 0.21
   // Total = (subtotal - discount) × 1.21 + shipping
-  
+
   const netAmount = subtotal - discount;
   const vatAmount = round2(netAmount * 0.21);
   const total = round2(netAmount * 1.21 + shipping);
-  
+
   // taxableAmount según Hacienda: base imponible = productos + envío (sin IVA aún)
   const taxableAmount = round2(netAmount + shipping);
-  
-  const oldTotal = parseFloat(row.total);
-  const oldVat = parseFloat(row.vatAmount);
-  
+
+  const oldTotal = Number.parseFloat(row.total);
+  const oldVat = Number.parseFloat(row.vatAmount);
+
   if (Math.abs(oldTotal - total) > 0.01 || Math.abs(oldVat - vatAmount) > 0.01) {
     console.log(`  📝 ${row.invoiceNumber}: total ${oldTotal} → ${total}, iva ${oldVat} → ${vatAmount}`);
   }
-  
+
   row.taxableAmount = taxableAmount.toFixed(2);
   row.vatAmount = vatAmount.toFixed(2);
   row.total = total.toFixed(2);
   row.vatRate = '21.00';
-  
+
   return row;
 });
 

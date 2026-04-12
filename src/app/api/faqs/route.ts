@@ -1,25 +1,25 @@
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 /**
  * API Route para FAQs (Preguntas Frecuentes)
  * GET /api/faqs - Listado de preguntas frecuentes agrupadas por categoría
  * Traduce inglés → español antes de enviar al frontend
  */
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
-import { withErrorHandler } from "@/lib/errors/api-wrapper";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { withErrorHandler } from '@/lib/errors/api-wrapper';
 import {
-  faqTranslations,
   faqCategoryTranslations,
-} from "@/lib/i18n/faq-translations";
+  faqTranslations,
+} from '@/lib/i18n/faq-translations';
 
 // GET /api/faqs - Listar FAQs agrupadas por categoría
-export const GET = withErrorHandler(async (req: NextRequest) => {
+export const GET = withErrorHandler(async(req: NextRequest) => {
   const { searchParams } = new URL(req.url);
 
   // Parámetros de filtrado
-  const category = searchParams.get("category");
-  const isActive = searchParams.get("isActive") !== "false"; // Por defecto true
+  const category = searchParams.get('category');
+  const isActive = searchParams.get('isActive') !== 'false'; // Por defecto true
 
   // Construir where clause
   const where: { isActive: boolean; category?: string } = {
@@ -33,7 +33,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   // Buscar FAQs
   const faqs = await prisma.fAQ.findMany({
     where,
-    orderBy: [{ category: "asc" }, { displayOrder: "asc" }],
+    orderBy: [{ category: 'asc' }, { displayOrder: 'asc' }],
   });
 
   // Agrupar por categoría con traducción al español
@@ -67,10 +67,13 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
 
   // Convertir a array de categorías con FAQs
   const categorias = Object.entries(groupedByCategory).map(
-    ([nombre, faqsList]) => ({
-      nombre,
-      faqs: faqsList.sort((a, b) => a.orden - b.orden),
-    }),
+    ([nombre, faqsList]) => {
+      const faqsOrdenadas = [...faqsList].sort((a, b) => a.orden - b.orden);
+      return {
+        nombre,
+        faqs: faqsOrdenadas,
+      };
+    },
   );
 
   return NextResponse.json({

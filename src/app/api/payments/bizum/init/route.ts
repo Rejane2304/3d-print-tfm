@@ -3,21 +3,21 @@
  * POST /api/payments/bizum/init
  * Simulates Bizum payment initialization without real bank integration
  */
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
-import { prisma } from "@/lib/db/prisma";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
+import { prisma } from '@/lib/db/prisma';
 
 /**
  * Generates a fake Bizum reference token
  * Format: BZM-XXXX-XXXX (where X is alphanumeric)
  */
 function generateBizumReference(): string {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   const segment = () =>
     Array.from({ length: 4 }, () =>
       chars.charAt(Math.floor(Math.random() * chars.length)),
-    ).join("");
+    ).join('');
   return `BZM-${segment()}-${segment()}`;
 }
 
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const body = await req.json();
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     // Validate required fields
     if (!orderId || !paymentId) {
       return NextResponse.json(
-        { error: "El ID de pedido y el ID de pago son requeridos" },
+        { error: 'El ID de pedido y el ID de pago son requeridos' },
         { status: 400 },
       );
     }
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { error: "Usuario no encontrado" },
+        { error: 'Usuario no encontrado' },
         { status: 404 },
       );
     }
@@ -60,9 +60,9 @@ export async function POST(req: NextRequest) {
       include: { user: true },
     });
 
-    if (!order || order.userId !== user.id) {
+    if (order?.userId !== user.id) {
       return NextResponse.json(
-        { error: "Pedido no encontrado" },
+        { error: 'Pedido no encontrado' },
         { status: 404 },
       );
     }
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
 
     if (!payment) {
       return NextResponse.json(
-        { error: "Pago no encontrado" },
+        { error: 'Pago no encontrado' },
         { status: 404 },
       );
     }
@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
     await prisma.payment.update({
       where: { id: paymentId },
       data: {
-        status: "PROCESSING",
+        status: 'PROCESSING',
         stripeSessionId: reference, // Using stripeSessionId field to store the Bizum reference
       },
     });
@@ -104,12 +104,12 @@ export async function POST(req: NextRequest) {
       reference,
       expiresAt: expiresAt.toISOString(),
       message:
-        "Inicie el pago en su app de Bizum usando la referencia proporcionada",
+        'Inicie el pago en su app de Bizum usando la referencia proporcionada',
     });
   } catch (error) {
-    console.error("Error initializing Bizum payment:", error);
+    console.error('Error initializing Bizum payment:', error);
     return NextResponse.json(
-      { error: "Error al inicializar el pago de Bizum" },
+      { error: 'Error al inicializar el pago de Bizum' },
       { status: 500 },
     );
   }

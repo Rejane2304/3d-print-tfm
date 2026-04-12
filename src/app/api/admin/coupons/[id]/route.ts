@@ -4,40 +4,40 @@
  *
  * Requiere: Rol ADMIN
  */
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
-import { z } from "zod";
-import { CouponType } from "@prisma/client";
-import { translateCouponCode } from "@/lib/i18n";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
+import { z } from 'zod';
+import { CouponType } from '@prisma/client';
+import { translateCouponCode } from '@/lib/i18n';
 
 // Schema de validación
 const couponUpdateSchema = z.object({
   code: z
     .string()
-    .min(3, "El código debe tener al menos 3 caracteres")
-    .max(50, "Máximo 50 caracteres")
+    .min(3, 'El código debe tener al menos 3 caracteres')
+    .max(50, 'Máximo 50 caracteres')
     .optional(),
   type: z
-    .enum(["FIXED", "PERCENTAGE", "FREE_SHIPPING"], {
-      errorMap: () => ({ message: "Tipo inválido" }),
+    .enum(['FIXED', 'PERCENTAGE', 'FREE_SHIPPING'], {
+      errorMap: () => ({ message: 'Tipo inválido' }),
     })
     .optional(),
-  value: z.number().min(0, "El valor debe ser mayor o igual a 0").optional(),
+  value: z.number().min(0, 'El valor debe ser mayor o igual a 0').optional(),
   minOrderAmount: z
     .number()
-    .min(0, "El mínimo debe ser mayor o igual a 0")
+    .min(0, 'El mínimo debe ser mayor o igual a 0')
     .optional()
     .nullable(),
   maxUses: z
     .number()
     .int()
-    .min(1, "El máximo de usos debe ser al menos 1")
+    .min(1, 'El máximo de usos debe ser al menos 1')
     .optional()
     .nullable(),
-  validFrom: z.string().datetime("Fecha de inicio inválida").optional(),
-  validUntil: z.string().datetime("Fecha de fin inválida").optional(),
+  validFrom: z.string().datetime('Fecha de inicio inválida').optional(),
+  validUntil: z.string().datetime('Fecha de fin inválida').optional(),
   isActive: z.boolean().optional(),
 });
 
@@ -57,7 +57,7 @@ export async function GET(
     }
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: "No autenticado" },
+        { success: false, error: 'No autenticado' },
         { status: 401 },
       );
     }
@@ -66,9 +66,9 @@ export async function GET(
       where: { email: session.user.email },
     });
 
-    if (!user || user.role !== "ADMIN") {
+    if (user?.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: "No autorizado" },
+        { success: false, error: 'No autorizado' },
         { status: 401 },
       );
     }
@@ -79,7 +79,7 @@ export async function GET(
 
     if (!coupon) {
       return NextResponse.json(
-        { success: false, error: "Cupón no encontrado" },
+        { success: false, error: 'Cupón no encontrado' },
         { status: 404 },
       );
     }
@@ -91,25 +91,34 @@ export async function GET(
     const isMaxedOut =
       coupon.maxUses !== null && coupon.usedCount >= coupon.maxUses;
 
-    let estado = "Activo";
-    if (!coupon.isActive) estado = "Inactivo";
-    else if (isExpired) estado = "Expirado";
-    else if (isNotStarted) estado = "Pendiente";
-    else if (isMaxedOut) estado = "Agotado";
+    let estado = 'Activo';
+    if (!coupon.isActive) {
+      estado = 'Inactivo';
+    } else if (isExpired) {
+      estado = 'Expirado';
+    } else if (isNotStarted) {
+      estado = 'Pendiente';
+    } else if (isMaxedOut) {
+      estado = 'Agotado';
+    }
 
-    const tipoTexto =
-      coupon.type === "PERCENTAGE"
-        ? "Porcentaje"
-        : coupon.type === "FIXED"
-          ? "Fijo"
-          : "Envío Gratis";
+    let tipoTexto = '';
+    if (coupon.type === 'PERCENTAGE') {
+      tipoTexto = 'Porcentaje';
+    } else if (coupon.type === 'FIXED') {
+      tipoTexto = 'Fijo';
+    } else {
+      tipoTexto = 'Envío Gratis';
+    }
 
-    const valorTexto =
-      coupon.type === "PERCENTAGE"
-        ? `${coupon.value}%`
-        : coupon.type === "FIXED"
-          ? `${coupon.value}€`
-          : "Gratis";
+    let valorTexto = '';
+    if (coupon.type === 'PERCENTAGE') {
+      valorTexto = `${coupon.value}%`;
+    } else if (coupon.type === 'FIXED') {
+      valorTexto = `${coupon.value}€`;
+    } else {
+      valorTexto = 'Gratis';
+    }
 
     const couponFormateado = {
       id: coupon.id,
@@ -136,9 +145,9 @@ export async function GET(
 
     return NextResponse.json({ success: true, coupon: couponFormateado });
   } catch (error) {
-    console.error("Error obteniendo cupón:", error);
+    console.error('Error obteniendo cupón:', error);
     return NextResponse.json(
-      { success: false, error: "Error interno" },
+      { success: false, error: 'Error interno' },
       { status: 500 },
     );
   }
@@ -160,7 +169,7 @@ export async function PATCH(
     }
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: "No autenticado" },
+        { success: false, error: 'No autenticado' },
         { status: 401 },
       );
     }
@@ -169,9 +178,9 @@ export async function PATCH(
       where: { email: session.user.email },
     });
 
-    if (!user || user.role !== "ADMIN") {
+    if (user?.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: "No autorizado" },
+        { success: false, error: 'No autorizado' },
         { status: 401 },
       );
     }
@@ -183,7 +192,7 @@ export async function PATCH(
 
     if (!existing) {
       return NextResponse.json(
-        { success: false, error: "Cupón no encontrado" },
+        { success: false, error: 'Cupón no encontrado' },
         { status: 404 },
       );
     }
@@ -199,7 +208,7 @@ export async function PATCH(
 
       if (codeExists) {
         return NextResponse.json(
-          { success: false, error: "Ya existe un cupón con ese código" },
+          { success: false, error: 'Ya existe un cupón con ese código' },
           { status: 400 },
         );
       }
@@ -218,7 +227,7 @@ export async function PATCH(
         return NextResponse.json(
           {
             success: false,
-            error: "La fecha de fin debe ser posterior a la fecha de inicio",
+            error: 'La fecha de fin debe ser posterior a la fecha de inicio',
           },
           { status: 400 },
         );
@@ -250,9 +259,9 @@ export async function PATCH(
         { status: 400 },
       );
     }
-    console.error("Error actualizando cupón:", error);
+    console.error('Error actualizando cupón:', error);
     return NextResponse.json(
-      { success: false, error: "Error interno" },
+      { success: false, error: 'Error interno' },
       { status: 500 },
     );
   }
@@ -274,7 +283,7 @@ export async function DELETE(
     }
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: "No autenticado" },
+        { success: false, error: 'No autenticado' },
         { status: 401 },
       );
     }
@@ -283,9 +292,9 @@ export async function DELETE(
       where: { email: session.user.email },
     });
 
-    if (!user || user.role !== "ADMIN") {
+    if (user?.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: "No autorizado" },
+        { success: false, error: 'No autorizado' },
         { status: 401 },
       );
     }
@@ -297,7 +306,7 @@ export async function DELETE(
 
     if (!existing) {
       return NextResponse.json(
-        { success: false, error: "Cupón no encontrado" },
+        { success: false, error: 'Cupón no encontrado' },
         { status: 404 },
       );
     }
@@ -309,12 +318,12 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: "Cupón eliminado correctamente",
+      message: 'Cupón eliminado correctamente',
     });
   } catch (error) {
-    console.error("Error eliminando cupón:", error);
+    console.error('Error eliminando cupón:', error);
     return NextResponse.json(
-      { success: false, error: "Error interno" },
+      { success: false, error: 'Error interno' },
       { status: 500 },
     );
   }

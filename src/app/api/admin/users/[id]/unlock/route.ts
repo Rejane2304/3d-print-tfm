@@ -5,19 +5,19 @@
  * Allows admins to manually unlock a locked user account
  * by resetting failedAttempts to 0 and clearing lockedUntil
  */
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
-import { prisma } from "@/lib/db/prisma";
-import { withErrorHandler } from "@/lib/errors/api-wrapper";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
+import { prisma } from '@/lib/db/prisma';
+import { withErrorHandler } from '@/lib/errors/api-wrapper';
 
 export const POST = withErrorHandler(
-  async (req: NextRequest, { params }: { params: { id: string } }) => {
+  async(req: NextRequest, { params }: { params: { id: string } }) => {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
       return NextResponse.json(
-        { success: false, error: "No autenticado" },
+        { success: false, error: 'No autenticado' },
         { status: 401 },
       );
     }
@@ -28,9 +28,9 @@ export const POST = withErrorHandler(
       select: { id: true, role: true },
     });
 
-    if (!adminUser || adminUser.role !== "ADMIN") {
+    if (adminUser?.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: "Acceso denegado" },
+        { success: false, error: 'Acceso denegado' },
         { status: 403 },
       );
     }
@@ -51,7 +51,7 @@ export const POST = withErrorHandler(
 
     if (!user) {
       return NextResponse.json(
-        { success: false, error: "Usuario no encontrado" },
+        { success: false, error: 'Usuario no encontrado' },
         { status: 404 },
       );
     }
@@ -64,7 +64,7 @@ export const POST = withErrorHandler(
       return NextResponse.json(
         {
           success: false,
-          error: "La cuenta no está bloqueada",
+          error: 'La cuenta no está bloqueada',
           user: {
             id: user.id,
             email: user.email,
@@ -105,7 +105,7 @@ export const POST = withErrorHandler(
 
     return NextResponse.json({
       success: true,
-      message: "Cuenta desbloqueada exitosamente",
+      message: 'Cuenta desbloqueada exitosamente',
       user: {
         id: updatedUser.id,
         email: updatedUser.email,

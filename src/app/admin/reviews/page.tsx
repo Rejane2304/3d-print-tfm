@@ -2,25 +2,25 @@
  * Admin Reviews Page
  * Review management with DataTable
  */
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
-  MessageSquare,
-  Loader2,
   AlertCircle,
-  Trash2,
   CheckCircle2,
-  XCircle,
-  Star,
   Filter,
-} from "lucide-react";
-import { DataTable, Column, BulkAction } from "@/components/ui/DataTable";
-import { ConfirmModal } from "@/components/ui/ConfirmModal";
-import { BulkDeleteModal } from "@/components/ui/BulkDeleteModal";
+  Loader2,
+  MessageSquare,
+  Star,
+  Trash2,
+  XCircle,
+} from 'lucide-react';
+import { BulkAction, Column, DataTable } from '@/components/ui/DataTable';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { BulkDeleteModal } from '@/components/ui/BulkDeleteModal';
 
 interface Resena extends Record<string, unknown> {
   id: string;
@@ -51,21 +51,21 @@ export default function AdminReviewsPage() {
   const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
   const [selectedIdsToDelete, setSelectedIdsToDelete] = useState<string[]>([]);
   const [filters, setFilters] = useState({
-    product: "",
-    rating: "",
-    verified: "",
+    product: '',
+    rating: '',
+    verified: '',
   });
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login?callbackUrl=/admin/reviews");
+    if (status === 'unauthenticated') {
+      router.push('/login?callbackUrl=/admin/reviews');
       return;
     }
 
-    if (status === "authenticated") {
+    if (status === 'authenticated') {
       const user = session?.user as { role?: string } | undefined;
-      if (user?.role !== "ADMIN") {
-        router.push("/");
+      if (user?.role !== 'ADMIN') {
+        router.push('/');
         return;
       }
       loadResenas();
@@ -73,20 +73,24 @@ export default function AdminReviewsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, session, router]);
 
-  const loadResenas = async () => {
+  const loadResenas = async() => {
     try {
       setLoading(true);
       setError(null);
 
       const params = new URLSearchParams();
-      if (filters.rating) params.append("rating", filters.rating);
-      if (filters.verified) params.append("verified", filters.verified);
+      if (filters.rating) {
+        params.append('rating', filters.rating);
+      }
+      if (filters.verified) {
+        params.append('verified', filters.verified);
+      }
 
       const response = await fetch(`/api/admin/reviews?${params.toString()}`);
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error cargando reseñas");
+        throw new Error(data.error || 'Error cargando reseñas');
       }
 
       // Apply product filter client-side
@@ -100,7 +104,7 @@ export default function AdminReviewsPage() {
 
       setResenas(filtered);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error desconocido");
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
     }
@@ -111,15 +115,15 @@ export default function AdminReviewsPage() {
   };
 
   const clearFilters = () => {
-    setFilters({ product: "", rating: "", verified: "" });
+    setFilters({ product: '', rating: '', verified: '' });
     loadResenas();
   };
 
-  const toggleVerification = async (resena: Resena) => {
+  const toggleVerification = async(resena: Resena) => {
     try {
       const response = await fetch(`/api/admin/reviews/${resena.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isVerified: !resena.verificado }),
       });
 
@@ -130,20 +134,20 @@ export default function AdminReviewsPage() {
           ),
         );
       } else {
-        throw new Error("Error actualizando reseña");
+        throw new Error('Error actualizando reseña');
       }
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Error actualizando reseña",
+        err instanceof Error ? err.message : 'Error actualizando reseña',
       );
     }
   };
 
-  const toggleApproval = async (resena: Resena) => {
+  const toggleApproval = async(resena: Resena) => {
     try {
       const response = await fetch(`/api/admin/reviews/${resena.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isApproved: !resena.aprobado }),
       });
 
@@ -154,11 +158,11 @@ export default function AdminReviewsPage() {
           ),
         );
       } else {
-        throw new Error("Error actualizando reseña");
+        throw new Error('Error actualizando reseña');
       }
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Error actualizando reseña",
+        err instanceof Error ? err.message : 'Error actualizando reseña',
       );
     }
   };
@@ -168,12 +172,14 @@ export default function AdminReviewsPage() {
     setModalOpen(true);
   };
 
-  const confirmDelete = async () => {
-    if (!resenaToDelete) return;
+  const confirmDelete = async() => {
+    if (!resenaToDelete) {
+      return;
+    }
 
     try {
       const response = await fetch(`/api/admin/reviews/${resenaToDelete.id}`, {
-        method: "DELETE",
+        method: 'DELETE',
       });
 
       const data = await response.json();
@@ -181,10 +187,10 @@ export default function AdminReviewsPage() {
       if (response.ok) {
         setResenas(resenas.filter((r) => r.id !== resenaToDelete.id));
       } else {
-        throw new Error(data.error || "Error eliminando reseña");
+        throw new Error(data.error || 'Error eliminando reseña');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error eliminando reseña");
+      setError(err instanceof Error ? err.message : 'Error eliminando reseña');
     } finally {
       setModalOpen(false);
       setResenaToDelete(null);
@@ -196,21 +202,21 @@ export default function AdminReviewsPage() {
     setBulkDeleteModalOpen(true);
   };
 
-  const confirmBulkDelete = async () => {
+  const confirmBulkDelete = async() => {
     try {
-      const response = await fetch("/api/admin/reviews", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/admin/reviews', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ids: selectedIdsToDelete }),
       });
 
       if (response.ok) {
         setResenas(resenas.filter((r) => !selectedIdsToDelete.includes(r.id)));
       } else {
-        throw new Error("Error eliminando reseñas");
+        throw new Error('Error eliminando reseñas');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error eliminando reseñas");
+      setError(err instanceof Error ? err.message : 'Error eliminando reseñas');
     } finally {
       setBulkDeleteModalOpen(false);
       setSelectedIdsToDelete([]);
@@ -228,10 +234,10 @@ export default function AdminReviewsPage() {
 
   const columns: Column<Resena>[] = [
     {
-      key: "productoNombre",
-      header: "Producto",
+      key: 'productoNombre',
+      header: 'Producto',
       sortable: true,
-      className: "",
+      className: '',
       render: (_, resena) => (
         <div className="flex flex-col min-w-0">
           <span className="text-sm font-medium text-gray-900 truncate">
@@ -248,10 +254,10 @@ export default function AdminReviewsPage() {
       ),
     },
     {
-      key: "usuarioNombre",
-      header: "Usuario",
+      key: 'usuarioNombre',
+      header: 'Usuario',
       sortable: true,
-      className: "hidden sm:table-cell",
+      className: 'hidden sm:table-cell',
       render: (_, resena) => (
         <div className="flex flex-col min-w-0">
           <span className="text-sm font-medium text-gray-900 truncate">
@@ -264,10 +270,10 @@ export default function AdminReviewsPage() {
       ),
     },
     {
-      key: "puntuacion",
-      header: "Punt.",
+      key: 'puntuacion',
+      header: 'Punt.',
       sortable: true,
-      className: "",
+      className: '',
       render: (_, resena) => (
         <div className="flex items-center gap-1">
           <span className="text-sm font-bold text-gray-900">
@@ -278,10 +284,10 @@ export default function AdminReviewsPage() {
       ),
     },
     {
-      key: "titulo",
-      header: "Reseña",
+      key: 'titulo',
+      header: 'Reseña',
       sortable: true,
-      className: "hidden md:table-cell",
+      className: 'hidden md:table-cell',
       render: (_, resena) => (
         <div className="flex flex-col min-w-0">
           <span className="text-sm font-medium text-gray-900 truncate">
@@ -289,23 +295,23 @@ export default function AdminReviewsPage() {
           </span>
           <span className="text-xs text-gray-500 line-clamp-2">
             {resena.comentario.substring(0, 80)}
-            {resena.comentario.length > 80 ? "..." : ""}
+            {resena.comentario.length > 80 ? '...' : ''}
           </span>
         </div>
       ),
     },
     {
-      key: "status",
-      header: "Estado",
+      key: 'status',
+      header: 'Estado',
       sortable: false,
-      className: "hidden lg:table-cell",
+      className: 'hidden lg:table-cell',
       render: (_, resena) => (
         <div className="flex flex-col gap-1">
           <span
             className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium ${
               resena.aprobado
-                ? "bg-green-100 text-green-800"
-                : "bg-yellow-100 text-yellow-800"
+                ? 'bg-green-100 text-green-800'
+                : 'bg-yellow-100 text-yellow-800'
             }`}
           >
             {resena.aprobado ? (
@@ -321,7 +327,10 @@ export default function AdminReviewsPage() {
             )}
           </span>
           {resena.verificado && (
-            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-100 text-blue-800">
+            <span
+              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium \
+                bg-blue-100 text-blue-800"
+            >
               <CheckCircle2 className="h-3 w-3" />
               Verif.
             </span>
@@ -330,24 +339,24 @@ export default function AdminReviewsPage() {
       ),
     },
     {
-      key: "creadoEn",
-      header: "Fecha",
+      key: 'creadoEn',
+      header: 'Fecha',
       sortable: true,
-      className: "hidden xl:table-cell",
+      className: 'hidden xl:table-cell',
       render: (value) => (
         <span className="text-xs text-gray-600 whitespace-nowrap">
-          {new Date(value as string).toLocaleDateString("es-ES", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "2-digit",
+          {new Date(value as string).toLocaleDateString('es-ES', {
+            day: '2-digit',
+            month: '2-digit',
+            year: '2-digit',
           })}
         </span>
       ),
     },
     {
-      key: "actions",
-      header: "Acc.",
-      className: "",
+      key: 'actions',
+      header: 'Acc.',
+      className: '',
       render: (_, resena) => (
         <div className="flex items-center gap-0.5">
           <button
@@ -357,10 +366,10 @@ export default function AdminReviewsPage() {
             }}
             className={`p-1 rounded transition-colors ${
               resena.verificado
-                ? "text-green-600 hover:bg-green-50"
-                : "text-gray-400 hover:bg-gray-50"
+                ? 'text-green-600 hover:bg-green-50'
+                : 'text-gray-400 hover:bg-gray-50'
             }`}
-            title={resena.verificado ? "Quitar verificación" : "Verificar"}
+            title={resena.verificado ? 'Quitar verificación' : 'Verificar'}
           >
             <CheckCircle2 className="h-4 w-4" />
           </button>
@@ -371,10 +380,10 @@ export default function AdminReviewsPage() {
             }}
             className={`p-1 rounded transition-colors ${
               resena.aprobado
-                ? "text-green-600 hover:bg-green-50"
-                : "text-yellow-600 hover:bg-yellow-50"
+                ? 'text-green-600 hover:bg-green-50'
+                : 'text-yellow-600 hover:bg-yellow-50'
             }`}
-            title={resena.aprobado ? "Ocultar" : "Mostrar"}
+            title={resena.aprobado ? 'Ocultar' : 'Mostrar'}
           >
             {resena.aprobado ? (
               <XCircle className="h-4 w-4" />
@@ -399,15 +408,15 @@ export default function AdminReviewsPage() {
 
   const bulkActions: BulkAction[] = [
     {
-      key: "delete",
-      label: "Eliminar seleccionadas",
+      key: 'delete',
+      label: 'Eliminar seleccionadas',
       icon: <Trash2 className="h-4 w-4" />,
-      variant: "danger",
+      variant: 'danger',
       onClick: handleBulkDelete,
     },
   ];
 
-  if (status === "loading" || loading) {
+  if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -500,29 +509,33 @@ export default function AdminReviewsPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
+              <label htmlFor="filter-product" className="block text-xs font-medium text-gray-700 mb-1">
                 Producto
               </label>
               <input
+                id="filter-product"
                 type="text"
                 value={filters.product}
                 onChange={(e) =>
                   setFilters({ ...filters, product: e.target.value })
                 }
                 placeholder="Buscar por nombre..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm \
+                  focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
+              <label htmlFor="filter-rating" className="block text-xs font-medium text-gray-700 mb-1">
                 Puntuación
               </label>
               <select
+                id="filter-rating"
                 value={filters.rating}
                 onChange={(e) =>
                   setFilters({ ...filters, rating: e.target.value })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm \
+                  focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               >
                 <option value="">Todas</option>
                 <option value="5">5 estrellas</option>
@@ -533,15 +546,17 @@ export default function AdminReviewsPage() {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
+              <label htmlFor="filter-verified" className="block text-xs font-medium text-gray-700 mb-1">
                 Verificación
               </label>
               <select
+                id="filter-verified"
                 value={filters.verified}
                 onChange={(e) =>
                   setFilters({ ...filters, verified: e.target.value })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm \
+                  focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               >
                 <option value="">Todas</option>
                 <option value="true">Verificadas</option>
@@ -557,7 +572,8 @@ export default function AdminReviewsPage() {
               </button>
               <button
                 onClick={clearFilters}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50"
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium \
+                  hover:bg-gray-50"
               >
                 Limpiar
               </button>
@@ -572,10 +588,10 @@ export default function AdminReviewsPage() {
           rowKey="id"
           searchable={true}
           searchKeys={[
-            "productoNombre",
-            "usuarioNombre",
-            "titulo",
-            "comentario",
+            'productoNombre',
+            'usuarioNombre',
+            'titulo',
+            'comentario',
           ]}
           searchPlaceholder="Buscar reseñas..."
           pagination={true}

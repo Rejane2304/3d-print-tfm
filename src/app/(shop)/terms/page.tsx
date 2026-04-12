@@ -3,31 +3,32 @@
  * Página legal para el e-commerce de productos impresos en 3D
  * Responsive: mobile → 4K
  */
-import type { Metadata } from "next";
-import Link from "next/link";
+import type { Metadata } from 'next';
+import Link from 'next/link';
 import {
-  Scale,
-  Globe,
-  Package,
-  CreditCard,
-  Truck,
-  RotateCcw,
-  Copyright,
-  Shield,
   BookOpen,
   ChevronRight,
-} from "lucide-react";
+  Copyright,
+  CreditCard,
+  Globe,
+  Package,
+  RotateCcw,
+  Scale,
+  Shield,
+  Truck,
+} from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: "Términos y Condiciones | 3D Print",
+  title: 'Términos y Condiciones | 3D Print',
   description:
-    "Términos y condiciones de uso de nuestra tienda de productos impresos en 3D. Información legal sobre compras, envíos, devoluciones y propiedad intelectual.",
+    'Términos y condiciones de uso de nuestra tienda de productos impresos en 3D. ' +
+    'Información legal sobre compras, envíos, devoluciones y propiedad intelectual.',
   robots: {
     index: true,
     follow: true,
   },
   alternates: {
-    canonical: "/terms",
+    canonical: '/terms',
   },
 };
 
@@ -40,9 +41,9 @@ interface TermsSection {
 
 const termsSections: TermsSection[] = [
   {
-    id: "general",
+    id: 'general',
     icon: BookOpen,
-    title: "1. Términos Generales",
+    title: '1. Términos Generales',
     content: (
       <div className="space-y-4">
         <p>
@@ -66,7 +67,7 @@ const termsSections: TermsSection[] = [
         </p>
         <p>
           Para cualquier consulta relacionada con estas condiciones, puede
-          contactarnos a través del correo electrónico:{" "}
+          contactarnos a través del correo electrónico:{' '}
           <a
             href="mailto:info@3dprint.com"
             className="text-indigo-600 hover:text-indigo-800"
@@ -78,9 +79,9 @@ const termsSections: TermsSection[] = [
     ),
   },
   {
-    id: "website",
+    id: 'website',
     icon: Globe,
-    title: "2. Uso del Sitio Web",
+    title: '2. Uso del Sitio Web',
     content: (
       <div className="space-y-4">
         <p>
@@ -115,9 +116,9 @@ const termsSections: TermsSection[] = [
     ),
   },
   {
-    id: "products",
+    id: 'products',
     icon: Package,
-    title: "3. Productos y Precios",
+    title: '3. Productos y Precios',
     content: (
       <div className="space-y-4">
         <p>
@@ -158,9 +159,9 @@ const termsSections: TermsSection[] = [
     ),
   },
   {
-    id: "orders",
+    id: 'orders',
     icon: CreditCard,
-    title: "4. Pedidos y Pago",
+    title: '4. Pedidos y Pago',
     content: (
       <div className="space-y-4">
         <p>
@@ -202,9 +203,9 @@ const termsSections: TermsSection[] = [
     ),
   },
   {
-    id: "shipping",
+    id: 'shipping',
     icon: Truck,
-    title: "5. Envíos y Entrega",
+    title: '5. Envíos y Entrega',
     content: (
       <div className="space-y-4">
         <p>
@@ -243,9 +244,9 @@ const termsSections: TermsSection[] = [
     ),
   },
   {
-    id: "returns",
+    id: 'returns',
     icon: RotateCcw,
-    title: "6. Devoluciones y Reembolsos",
+    title: '6. Devoluciones y Reembolsos',
     content: (
       <div className="space-y-4">
         <p>
@@ -274,13 +275,14 @@ const termsSections: TermsSection[] = [
         </ul>
         <p>
           <strong>Proceso de devolución:</strong> Para iniciar una devolución,
-          el Cliente debe contactar con nosotros a través del correo{" "}
+          el Cliente debe contactar con nosotros a través del correo{' '}
           <a
             href="mailto:devoluciones@3dprint.com"
             className="text-indigo-600 hover:text-indigo-800"
           >
             devoluciones@3dprint.com
           </a>
+          {' '}
           indicando el número de pedido y motivo de la devolución.
         </p>
         <p>
@@ -299,9 +301,9 @@ const termsSections: TermsSection[] = [
     ),
   },
   {
-    id: "intellectual-property",
+    id: 'intellectual-property',
     icon: Copyright,
-    title: "7. Propiedad Intelectual",
+    title: '7. Propiedad Intelectual',
     content: (
       <div className="space-y-4">
         <p>
@@ -345,9 +347,9 @@ const termsSections: TermsSection[] = [
     ),
   },
   {
-    id: "liability",
+    id: 'liability',
     icon: Shield,
-    title: "8. Limitación de Responsabilidad",
+    title: '8. Limitación de Responsabilidad',
     content: (
       <div className="space-y-4">
         <p>
@@ -391,9 +393,9 @@ const termsSections: TermsSection[] = [
     ),
   },
   {
-    id: "governing-law",
+    id: 'governing-law',
     icon: Scale,
-    title: "9. Legislación Aplicable",
+    title: '9. Legislación Aplicable',
     content: (
       <div className="space-y-4">
         <p>
@@ -411,7 +413,7 @@ const termsSections: TermsSection[] = [
         <p>
           <strong>Resolución de conflictos:</strong> En cumplimiento de la
           normativa europea, informamos al Cliente que puede acudir a la
-          plataforma de resolución de litigios en línea de la Unión Europea:{" "}
+          plataforma de resolución de litigios en línea de la Unión Europea:{' '}
           <a
             href="https://ec.europa.eu/consumers/odr"
             target="_blank"
@@ -452,11 +454,11 @@ export default function TermsPage() {
               de compra
             </p>
             <p className="text-sm text-indigo-200">
-              Última actualización:{" "}
-              {new Date().toLocaleDateString("es-ES", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
+              Última actualización:{' '}
+              {new Date().toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
               })}
             </p>
           </div>
@@ -476,11 +478,12 @@ export default function TermsPage() {
                   <a
                     key={section.id}
                     href={`#${section.id}`}
-                    className="w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center gap-3 text-gray-700 hover:bg-white hover:shadow-sm group"
+                    className="w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center gap-3 \
+                      text-gray-700 hover:bg-white hover:shadow-sm group"
                   >
                     <section.icon className="h-5 w-5 text-gray-400 group-hover:text-indigo-600" />
                     <span className="text-sm">
-                      {section.title.split(". ")[1]}
+                      {section.title.split('. ')[1]}
                     </span>
                   </a>
                 ))}

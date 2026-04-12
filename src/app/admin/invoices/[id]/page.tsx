@@ -3,19 +3,14 @@
  * Solo visualización de la factura
  * Las acciones (Ver PDF, Descargar, Anular) están en el listado
  */
-"use client";
+'use client';
 
-import { useEffect, useState, useCallback } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter, useParams } from "next/navigation";
-import Link from "next/link";
-import { ArrowLeft, Loader2, AlertCircle } from "lucide-react";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Clock, CheckCircle2, Truck, XCircle, Edit } from "lucide-react";
-import {
-  InvoiceViewer,
-  useInvoiceData,
-} from "@/components/invoices/InvoiceViewer";
+import { useCallback, useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { AlertCircle, ArrowLeft, Loader2 } from 'lucide-react';
+import { InvoiceViewer, useInvoiceData } from '@/components/invoices/InvoiceViewer';
 
 interface InvoiceDetail {
   id: string;
@@ -74,7 +69,7 @@ export default function AdminInvoiceDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadInvoice = useCallback(async () => {
+  const loadInvoice = useCallback(async() => {
     try {
       setLoading(true);
       setError(null);
@@ -83,27 +78,27 @@ export default function AdminInvoiceDetailPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error al cargar factura");
+        throw new Error(data.error || 'Error al cargar factura');
       }
 
       setInvoice(data.factura);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error desconocido");
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
     }
   }, [params.id]);
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login?callbackUrl=/admin/invoices");
+    if (status === 'unauthenticated') {
+      router.push('/login?callbackUrl=/admin/invoices');
       return;
     }
 
-    if (status === "authenticated") {
+    if (status === 'authenticated') {
       const user = session?.user as { role?: string } | undefined;
-      if (user?.role !== "ADMIN") {
-        router.push("/");
+      if (user?.role !== 'ADMIN') {
+        router.push('/');
         return;
       }
       loadInvoice();
@@ -114,7 +109,7 @@ export default function AdminInvoiceDetailPage() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const invoiceData = invoice ? useInvoiceData(invoice) : null;
 
-  if (status === "loading" || loading) {
+  if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -160,10 +155,10 @@ export default function AdminInvoiceDetailPage() {
                   Factura {invoice.invoiceNumber}
                 </h1>
                 <p className="text-sm text-gray-500">
-                  Emitida el{" "}
+                  Emitida el{' '}
                   {invoice.issuedAt
-                    ? new Date(invoice.issuedAt).toLocaleDateString("es-ES")
-                    : "Fecha no disponible"}
+                    ? new Date(invoice.issuedAt).toLocaleDateString('es-ES')
+                    : 'Fecha no disponible'}
                 </p>
               </div>
             </div>

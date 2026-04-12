@@ -2,25 +2,25 @@
  * Página de Historial de Inventario - Admin
  * Muestra el historial de movimientos de un producto específico
  */
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter, useParams } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
+import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
 import {
-  Loader2,
-  ArrowLeft,
-  Package,
   AlertCircle,
-  Plus,
-  Minus,
-  RotateCcw,
+  ArrowLeft,
   ChevronLeft,
   ChevronRight,
   History,
-} from "lucide-react";
+  Loader2,
+  Minus,
+  Package,
+  Plus,
+  RotateCcw,
+} from 'lucide-react';
 
 interface Producto {
   id: string;
@@ -31,7 +31,7 @@ interface Producto {
 
 interface Movimiento {
   id: string;
-  tipo: "IN" | "OUT" | "ADJUST";
+  tipo: 'IN' | 'OUT' | 'ADJUST';
   cantidad: number;
   stockAnterior: number;
   stockNuevo: number;
@@ -59,22 +59,22 @@ const tipoMovimientoConfig: Record<
   { color: string; bgColor: string; icon: React.ElementType; label: string }
 > = {
   IN: {
-    color: "text-green-700",
-    bgColor: "bg-green-100",
+    color: 'text-green-700',
+    bgColor: 'bg-green-100',
     icon: Plus,
-    label: "Entrada",
+    label: 'Entrada',
   },
   OUT: {
-    color: "text-red-700",
-    bgColor: "bg-red-100",
+    color: 'text-red-700',
+    bgColor: 'bg-red-100',
     icon: Minus,
-    label: "Salida",
+    label: 'Salida',
   },
   ADJUST: {
-    color: "text-blue-700",
-    bgColor: "bg-blue-100",
+    color: 'text-blue-700',
+    bgColor: 'bg-blue-100',
     icon: RotateCcw,
-    label: "Ajuste",
+    label: 'Ajuste',
   },
 };
 
@@ -95,24 +95,24 @@ export default function InventoryHistoryPage() {
   const productId = params.id as string;
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login?callbackUrl=/admin/inventory");
+    if (status === 'unauthenticated') {
+      router.push('/login?callbackUrl=/admin/inventory');
       return;
     }
 
     const user = session?.user as { role?: string } | undefined;
-    if (status === "authenticated" && user?.role !== "ADMIN") {
-      router.push("/");
+    if (status === 'authenticated' && user?.role !== 'ADMIN') {
+      router.push('/');
       return;
     }
 
-    if (status === "authenticated" && productId) {
+    if (status === 'authenticated' && productId) {
       fetchHistory();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, session, router, productId, pagination.page]);
 
-  const fetchHistory = async () => {
+  const fetchHistory = async() => {
     try {
       setLoading(true);
       setError(null);
@@ -128,13 +128,13 @@ export default function InventoryHistoryPage() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || "Error al cargar historial");
+        throw new Error(result.error || 'Error al cargar historial');
       }
 
       setData(result);
       setPagination(result.pagination);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error desconocido");
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
     }
@@ -142,28 +142,32 @@ export default function InventoryHistoryPage() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("es-ES", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
+    return date.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
     });
   };
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleTimeString("es-ES", {
-      hour: "2-digit",
-      minute: "2-digit",
+    return date.toLocaleTimeString('es-ES', {
+      hour: '2-digit',
+      minute: '2-digit',
     });
   };
 
   const getStockStatusColor = (stock: number) => {
-    if (stock <= 0) return "text-red-600";
-    if (stock <= 5) return "text-yellow-600";
-    return "text-green-600";
+    if (stock <= 0) {
+      return 'text-red-600';
+    }
+    if (stock <= 5) {
+      return 'text-yellow-600';
+    }
+    return 'text-green-600';
   };
 
-  if (status === "loading" || loading) {
+  if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -180,7 +184,7 @@ export default function InventoryHistoryPage() {
         <div className="text-center">
           <AlertCircle className="h-12 w-12 text-red-600 mx-auto mb-4" />
           <p className="text-gray-900 font-medium">
-            {error || "Producto no encontrado"}
+            {error || 'Producto no encontrado'}
           </p>
           <Link
             href="/admin/inventory"
@@ -333,28 +337,34 @@ export default function InventoryHistoryPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${tipoConfig.bgColor} ${tipoConfig.color}`}
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium \
+                            ${tipoConfig.bgColor} ${tipoConfig.color}`}
                           >
                             <TipoIcon className="h-3 w-3 mr-1" />
                             {tipoConfig.label}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span
-                            className={`text-sm font-medium ${
-                              movimiento.tipo === "IN"
-                                ? "text-green-600"
-                                : movimiento.tipo === "OUT"
-                                  ? "text-red-600"
-                                  : "text-blue-600"
-                            }`}
-                          >
-                            {movimiento.tipo === "IN" && "+"}
-                            {movimiento.tipo === "OUT" && "-"}
-                            {movimiento.tipo === "ADJUST" &&
-                              (movimiento.cantidad >= 0 ? "+" : "")}
-                            {movimiento.cantidad}
-                          </span>
+                          {(() => {
+                            let color = '';
+                            let prefix = '';
+                            if (movimiento.tipo === 'IN') {
+                              color = 'text-green-600';
+                              prefix = '+';
+                            } else if (movimiento.tipo === 'OUT') {
+                              color = 'text-red-600';
+                              prefix = '-';
+                            } else {
+                              color = 'text-blue-600';
+                              prefix = movimiento.cantidad >= 0 ? '+' : '';
+                            }
+                            return (
+                              <span className={`text-sm font-medium ${color}`}>
+                                {prefix}
+                                {movimiento.cantidad}
+                              </span>
+                            );
+                          })()}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">
@@ -394,8 +404,8 @@ export default function InventoryHistoryPage() {
         {pagination.totalPages > 1 && (
           <div className="mt-6 flex items-center justify-between">
             <p className="text-sm text-gray-700">
-              Mostrando {(pagination.page - 1) * pagination.limit + 1} a{" "}
-              {Math.min(pagination.page * pagination.limit, pagination.total)}{" "}
+              Mostrando {(pagination.page - 1) * pagination.limit + 1} a{' '}
+              {Math.min(pagination.page * pagination.limit, pagination.total)}{' '}
               de {pagination.total} movimientos
             </p>
             <div className="flex gap-2">
@@ -407,7 +417,8 @@ export default function InventoryHistoryPage() {
                   }))
                 }
                 disabled={pagination.page === 1}
-                className="flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium \
+                text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ChevronLeft className="h-4 w-4 mr-1" />
                 Anterior
@@ -420,7 +431,8 @@ export default function InventoryHistoryPage() {
                   }))
                 }
                 disabled={pagination.page === pagination.totalPages}
-                className="flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium \
+                text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Siguiente
                 <ChevronRight className="h-4 w-4 ml-1" />

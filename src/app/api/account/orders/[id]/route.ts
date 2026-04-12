@@ -3,17 +3,17 @@
  * GET /api/account/orders/[id]
  * Devuelve el detalle completo de un pedido específico del usuario
  */
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
-import { prisma } from "@/lib/db/prisma";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
+import { prisma } from '@/lib/db/prisma';
 import {
-  translateOrderStatus,
-  translatePaymentStatus,
-  translatePaymentMethod,
   translateErrorMessage,
+  translateOrderStatus,
+  translatePaymentMethod,
+  translatePaymentStatus,
   translateProductName,
-} from "@/lib/i18n";
+} from '@/lib/i18n';
 
 export async function GET(
   request: NextRequest,
@@ -23,7 +23,7 @@ export async function GET(
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     // Obtener usuario
@@ -33,7 +33,7 @@ export async function GET(
     });
 
     if (!usuario) {
-      return NextResponse.json({ error: "Usuario not found" }, { status: 404 });
+      return NextResponse.json({ error: 'Usuario not found' }, { status: 404 });
     }
 
     // Obtener pedido específico del usuario
@@ -74,7 +74,7 @@ export async function GET(
           },
         },
         messages: {
-          orderBy: { createdAt: "asc" },
+          orderBy: { createdAt: 'asc' },
           select: {
             id: true,
             message: true,
@@ -88,7 +88,7 @@ export async function GET(
 
     if (!pedido) {
       return NextResponse.json(
-        { error: translateErrorMessage("Pedido not found") },
+        { error: translateErrorMessage('Pedido not found') },
         { status: 404 },
       );
     }
@@ -105,14 +105,17 @@ export async function GET(
         select: { code: true, type: true },
       });
       if (coupon) {
+        let couponType = '';
+        if (coupon.type === 'PERCENTAGE') {
+          couponType = 'Porcentaje';
+        } else if (coupon.type === 'FIXED') {
+          couponType = 'Monto Fijo';
+        } else {
+          couponType = 'Envío Gratis';
+        }
         couponInfo = {
           code: coupon.code,
-          type:
-            coupon.type === "PERCENTAGE"
-              ? "Porcentaje"
-              : coupon.type === "FIXED"
-                ? "Monto Fijo"
-                : "Envío Gratis",
+          type: couponType,
         };
       }
     }
@@ -150,39 +153,39 @@ export async function GET(
         producto: {
           nombre: item.product?.slug
             ? translateProductName(item.product.slug)
-            : "",
-          slug: item.product?.slug || "",
+            : '',
+          slug: item.product?.slug || '',
           images: item.product?.images || [],
         },
       })),
       factura: pedido.invoice
         ? {
-            id: pedido.invoice.id,
-            numeroFactura: pedido.invoice.invoiceNumber,
-            anulada: pedido.invoice.isCancelled,
-            emitidaEn: pedido.invoice.issuedAt,
-          }
+          id: pedido.invoice.id,
+          numeroFactura: pedido.invoice.invoiceNumber,
+          anulada: pedido.invoice.isCancelled,
+          emitidaEn: pedido.invoice.issuedAt,
+        }
         : undefined,
       pago: pedido.payment
         ? {
-            estado: translatePaymentStatus(pedido.payment.status),
-            metodo: translatePaymentMethod(pedido.payment.method),
-            createdAt: pedido.payment.createdAt,
-          }
+          estado: translatePaymentStatus(pedido.payment.status),
+          metodo: translatePaymentMethod(pedido.payment.method),
+          createdAt: pedido.payment.createdAt,
+        }
         : undefined,
       messages: pedido.messages.map((msg) => ({
         id: msg.id,
         mensaje: msg.message,
-        tipoRemitente: msg.isFromCustomer ? "CLIENTE" : "ADMIN",
+        tipoRemitente: msg.isFromCustomer ? 'CLIENTE' : 'ADMIN',
         createdAt: msg.createdAt,
       })),
     };
 
     return NextResponse.json({ pedido: pedidoTransformado });
   } catch (error) {
-    console.error("Error al obtener pedido:", error);
+    console.error('Error al obtener pedido:', error);
     return NextResponse.json(
-      { error: "Error al obtener pedido" },
+      { error: 'Error al obtener pedido' },
       { status: 500 },
     );
   }

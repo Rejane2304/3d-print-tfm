@@ -5,16 +5,16 @@
  *
  * Now supports: couponCode in request body
  */
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
-import { withErrorHandler } from "@/lib/errors/api-wrapper";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
-import { Prisma } from "@prisma/client";
-import { translatePaymentMethod, translateErrorMessage } from "@/lib/i18n";
-import { emitNewOrder } from "@/lib/realtime/event-service";
-import { createNewOrderAlert } from "@/lib/alerts/alert-service";
-import { DEFAULT_VAT_RATE, roundToCents } from "@/lib/constants/tax";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { withErrorHandler } from '@/lib/errors/api-wrapper';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
+import { Prisma } from '@prisma/client';
+import { translateErrorMessage, translatePaymentMethod } from '@/lib/i18n';
+import { emitNewOrder } from '@/lib/realtime/event-service';
+import { createNewOrderAlert } from '@/lib/alerts/alert-service';
+import { DEFAULT_VAT_RATE, roundToCents } from '@/lib/constants/tax';
 
 // Type for cart items with product included
 type CartItemWithProduct = Prisma.CartItemGetPayload<{
@@ -28,13 +28,13 @@ type CartItemWithProduct = Prisma.CartItemGetPayload<{
 }>;
 
 // POST /api/checkout - Create order and process payment
-export const POST = withErrorHandler(async (req: NextRequest) => {
+export const POST = withErrorHandler(async(req: NextRequest) => {
   // Verify authentication
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.email) {
     return NextResponse.json(
-      { success: false, error: "No autenticado" },
+      { success: false, error: 'No autenticado' },
       { status: 401 },
     );
   }
@@ -43,22 +43,22 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const body = await req.json();
   const {
     shippingAddressId,
-    paymentMethod = "CARD",
+    paymentMethod = 'CARD',
     couponCode,
   } = body;
 
   if (!shippingAddressId) {
     return NextResponse.json(
-      { success: false, error: "Dirección de envío requerida" },
+      { success: false, error: 'Dirección de envío requerida' },
       { status: 400 },
     );
   }
 
   // Validate payment method
-  const validPaymentMethods = ["CARD", "PAYPAL", "BIZUM", "TRANSFER"];
+  const validPaymentMethods = ['CARD', 'PAYPAL', 'BIZUM', 'TRANSFER'];
   if (!validPaymentMethods.includes(paymentMethod)) {
     return NextResponse.json(
-      { success: false, error: "Método de pago no válido" },
+      { success: false, error: 'Método de pago no válido' },
       { status: 400 },
     );
   }
@@ -85,7 +85,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   if (!user) {
     return NextResponse.json(
-      { success: false, error: translateErrorMessage("Usuario not found") },
+      { success: false, error: translateErrorMessage('Usuario not found') },
       { status: 404 },
     );
   }
@@ -93,7 +93,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   // Verify user has cart with items
   if (!user.cart || user.cart.items.length === 0) {
     return NextResponse.json(
-      { success: false, error: "El carrito está vacío" },
+      { success: false, error: 'El carrito está vacío' },
       { status: 400 },
     );
   }
@@ -136,11 +136,11 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       if (isValid) {
         couponId = coupon.id;
 
-        if (coupon.type === "PERCENTAGE") {
+        if (coupon.type === 'PERCENTAGE') {
           couponDiscount = subtotal * (Number(coupon.value) / 100);
-        } else if (coupon.type === "FIXED") {
+        } else if (coupon.type === 'FIXED') {
           couponDiscount = Math.min(Number(coupon.value), subtotal);
-        } else if (coupon.type === "FREE_SHIPPING") {
+        } else if (coupon.type === 'FREE_SHIPPING') {
           hasFreeShipping = true;
         }
 
@@ -157,7 +157,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const discountedSubtotal = Math.max(0, subtotal - couponDiscount);
 
   // IVA solo sobre productos (subtotal con descuento), envío sin IVA
-  const taxAmount = roundToCents(discountedSubtotal * taxRate);
+  // const taxAmount = roundToCents(discountedSubtotal * taxRate); // Eliminado porque no se usa
   const total = roundToCents(discountedSubtotal * (1 + taxRate) + shippingCost);
 
   try {
@@ -170,7 +170,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       return NextResponse.json(
         {
           success: false,
-          error: translateErrorMessage("Dirección de envío no encontrada"),
+          error: translateErrorMessage('Dirección de envío no encontrada'),
         },
         { status: 404 },
       );
@@ -179,20 +179,20 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     // Generate order number
     const year = new Date().getFullYear();
     const count = await prisma.order.count();
-    const orderNumber = `P-${year}${String(count + 1).padStart(6, "0")}`;
+    const orderNumber = `P-${year}${String(count + 1).padStart(6, '0')}`;
 
     // Save cart reference
     const cart = user.cart;
     const cartItems = cart.items as CartItemWithProduct[];
 
     // Create order and payment in a transaction
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async(tx) => {
       // 1. Create the order as PENDING (payment will be processed separately)
       const order = await tx.order.create({
         data: {
           id: crypto.randomUUID(),
           user: { connect: { id: user.id } },
-          status: "PENDING",
+          status: 'PENDING',
           orderNumber,
           subtotal,
           shipping: shippingCost,
@@ -208,10 +208,10 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
           shippingProvince: address.province,
           shippingCountry: address.country,
           paymentMethod: paymentMethod as
-            | "CARD"
-            | "PAYPAL"
-            | "BIZUM"
-            | "TRANSFER",
+            | 'CARD'
+            | 'PAYPAL'
+            | 'BIZUM'
+            | 'TRANSFER',
           updatedAt: new Date(),
           // Create order items from cart items
           items: {
@@ -224,7 +224,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
               subtotal: new Prisma.Decimal(item.product.price).mul(
                 item.quantity,
               ),
-              category: item.product.category?.name || "Uncategorized",
+              category: item.product.category?.name || 'Uncategorized',
               material: item.product.material,
             })),
           },
@@ -241,8 +241,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
           order: { connect: { id: order.id } },
           user: { connect: { id: user.id } },
           amount: total,
-          method: paymentMethod as "CARD" | "PAYPAL" | "BIZUM" | "TRANSFER",
-          status: "PENDING",
+          method: paymentMethod as 'CARD' | 'PAYPAL' | 'BIZUM' | 'TRANSFER',
+          status: 'PENDING',
           updatedAt: new Date(),
           // processedAt will be set when payment is completed
         },
@@ -275,7 +275,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
             productId: item.productId,
             orderId: order.id,
             createdBy: user.id,
-            type: "OUT",
+            type: 'OUT',
             quantity: item.quantity,
             previousStock: product.stock + item.quantity,
             newStock: product.stock,
@@ -310,7 +310,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         Number(result.order.total),
       );
     } catch (alertError) {
-      console.error("Error creating new order alert:", alertError);
+      console.error('Error creating new order alert:', alertError);
     }
 
     // Return order and payment IDs for frontend to handle payment processing
@@ -319,17 +319,17 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       orderId: result.order.id,
       paymentId: result.payment.id,
       orderNumber: result.order.orderNumber,
-      status: "PENDING",
+      status: 'PENDING',
       paymentMethod: translatePaymentMethod(paymentMethod),
       discount: couponDiscount > 0 ? couponDiscount : undefined,
-      message: "Pedido creado. Proceda al pago.",
+      message: 'Pedido creado. Proceda al pago.',
     });
   } catch (error) {
-    console.error("Error in checkout:", error);
+    console.error('Error in checkout:', error);
     return NextResponse.json(
       {
         success: false,
-        error: translateErrorMessage("Error al procesar el pedido"),
+        error: translateErrorMessage('Error al procesar el pedido'),
       },
       { status: 500 },
     );

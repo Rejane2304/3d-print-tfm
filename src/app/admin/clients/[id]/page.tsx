@@ -2,25 +2,25 @@
  * Admin Client Detail Page
  * Show detailed information about a specific client
  */
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter, useParams } from "next/navigation";
-import Link from "next/link";
+import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
-  Loader2,
   ArrowLeft,
-  User,
-  Mail,
-  Phone,
   Calendar,
-  ShoppingBag,
+  DollarSign,
+  Loader2,
+  Mail,
   MapPin,
   Package,
-  DollarSign,
-} from "lucide-react";
-import { translateAddressName } from "@/lib/i18n";
+  Phone,
+  ShoppingBag,
+  User,
+} from 'lucide-react';
+import { translateAddressName } from '@/lib/i18n';
 
 interface ClientDetail {
   id: string;
@@ -72,24 +72,24 @@ export default function AdminClientDetailPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login?callbackUrl=/admin/clients");
+    if (status === 'unauthenticated') {
+      router.push('/login?callbackUrl=/admin/clients');
       return;
     }
 
     const user = session?.user as { role?: string } | undefined;
-    if (status === "authenticated" && user?.role !== "ADMIN") {
-      router.push("/");
+    if (status === 'authenticated' && user?.role !== 'ADMIN') {
+      router.push('/');
       return;
     }
 
-    if (status === "authenticated" && params.id) {
+    if (status === 'authenticated' && params.id) {
       fetchClientDetail();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, session, router, params.id]);
 
-  const fetchClientDetail = async () => {
+  const fetchClientDetail = async() => {
     try {
       setLoading(true);
       const response = await fetch(`/api/admin/clients/${params.id}`);
@@ -98,41 +98,43 @@ export default function AdminClientDetailPage() {
       if (data.success) {
         setClient(data.client);
       } else {
-        router.push("/admin/clients");
+        router.push('/admin/clients');
       }
     } catch (error) {
-      console.error("Error fetching client:", error);
+      console.error('Error fetching client:', error);
     } finally {
       setLoading(false);
     }
   };
 
   const formatDate = (date: string | null) => {
-    if (!date) return "N/A";
-    return new Date(date).toLocaleDateString("es-ES", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
+    if (!date) {
+      return 'N/A';
+    }
+    return new Date(date).toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
     });
   };
 
   const formatCurrency = (amount: number | string) => {
-    return `${parseFloat(amount.toString()).toFixed(2)} €`;
+    return `${Number.parseFloat(amount.toString()).toFixed(2)} €`;
   };
 
   const getStatusBadge = (estado: string) => {
     const statusMap: Record<string, string> = {
-      Pendiente: "bg-yellow-100 text-yellow-800",
-      Confirmado: "bg-blue-100 text-blue-800",
-      "En preparación": "bg-purple-100 text-purple-800",
-      Enviado: "bg-indigo-100 text-indigo-800",
-      Entregado: "bg-green-100 text-green-800",
-      Cancelado: "bg-red-100 text-red-800",
+      Pendiente: 'bg-yellow-100 text-yellow-800',
+      Confirmado: 'bg-blue-100 text-blue-800',
+      'En preparación': 'bg-purple-100 text-purple-800',
+      Enviado: 'bg-indigo-100 text-indigo-800',
+      Entregado: 'bg-green-100 text-green-800',
+      Cancelado: 'bg-red-100 text-red-800',
     };
-    return statusMap[estado] || "bg-gray-100 text-gray-800";
+    return statusMap[estado] || 'bg-gray-100 text-gray-800';
   };
 
-  if (status === "loading" || loading) {
+  if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -204,11 +206,11 @@ export default function AdminClientDetailPage() {
                 <span
                   className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                     client.activo
-                      ? "bg-green-100 text-green-800"
-                      : "bg-red-100 text-red-800"
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-red-100 text-red-800'
                   }`}
                 >
-                  {client.activo ? "Activo" : "Inactivo"}
+                  {client.activo ? 'Activo' : 'Inactivo'}
                 </span>
               </div>
             </div>
@@ -220,7 +222,7 @@ export default function AdminClientDetailPage() {
               </div>
               <div className="flex items-center text-gray-600">
                 <Phone className="h-5 w-5 mr-3 text-gray-400" />
-                <span>{client.telefono || "N/A"}</span>
+                <span>{client.telefono || 'N/A'}</span>
               </div>
               <div className="flex items-center text-gray-600">
                 <Calendar className="h-5 w-5 mr-3 text-gray-400" />
@@ -383,7 +385,10 @@ export default function AdminClientDetailPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadge(order.estado)}`}
+                        className={
+                          'inline-flex px-2 py-1 text-xs font-semibold rounded-full ' +
+                          getStatusBadge(order.estado)
+                        }
                       >
                         {order.estado}
                       </span>

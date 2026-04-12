@@ -2,24 +2,24 @@
  * Admin Site Config Page
  * Configuration form for site settings
  */
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
-  Settings,
+  AlertCircle,
+  AlertTriangle,
   Building2,
-  Phone,
+  CheckCircle2,
+  Loader2,
   Mail,
   Percent,
-  AlertTriangle,
+  Phone,
   Save,
-  Loader2,
-  AlertCircle,
-  CheckCircle2,
-} from "lucide-react";
+  Settings,
+} from 'lucide-react';
 
 interface SiteConfig {
   _ref: string;
@@ -54,38 +54,38 @@ export default function AdminSiteConfigPage() {
   const [formData, setFormData] = useState<Partial<SiteConfig>>({});
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login?callbackUrl=/admin/site-config");
+    if (status === 'unauthenticated') {
+      router.push('/login?callbackUrl=/admin/site-config');
       return;
     }
 
-    if (status === "authenticated") {
+    if (status === 'authenticated') {
       const user = session?.user as { role?: string } | undefined;
-      if (user?.role !== "ADMIN") {
-        router.push("/");
+      if (user?.role !== 'ADMIN') {
+        router.push('/');
         return;
       }
       loadConfig();
     }
   }, [status, session, router]);
 
-  const loadConfig = async () => {
+  const loadConfig = async() => {
     try {
       setLoading(true);
       setError(null);
 
-      const response = await fetch("/api/admin/site-config");
+      const response = await fetch('/api/admin/site-config');
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error cargando configuración");
+        throw new Error(data.error || 'Error cargando configuración');
       }
 
       const configData = data.config;
       setConfig(configData);
       setFormData(configData);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error desconocido");
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
     }
@@ -95,35 +95,35 @@ export default function AdminSiteConfigPage() {
     const errors: FormErrors = {};
 
     if (!formData.nombreEmpresa?.trim()) {
-      errors.nombreEmpresa = "El nombre de la empresa es obligatorio";
+      errors.nombreEmpresa = 'El nombre de la empresa es obligatorio';
     }
 
     if (!formData.cifNif?.trim()) {
-      errors.cifNif = "El CIF/NIF es obligatorio";
+      errors.cifNif = 'El CIF/NIF es obligatorio';
     }
 
     if (!formData.direccionEmpresa?.trim()) {
-      errors.direccionEmpresa = "La dirección es obligatoria";
+      errors.direccionEmpresa = 'La dirección es obligatoria';
     }
 
     if (!formData.ciudadEmpresa?.trim()) {
-      errors.ciudadEmpresa = "La ciudad es obligatoria";
+      errors.ciudadEmpresa = 'La ciudad es obligatoria';
     }
 
     if (!formData.provinciaEmpresa?.trim()) {
-      errors.provinciaEmpresa = "La provincia es obligatoria";
+      errors.provinciaEmpresa = 'La provincia es obligatoria';
     }
 
     if (!formData.codigoPostalEmpresa?.match(/^\d{5}$/)) {
-      errors.codigoPostalEmpresa = "El código postal debe tener 5 dígitos";
+      errors.codigoPostalEmpresa = 'El código postal debe tener 5 dígitos';
     }
 
     if (!formData.telefonoEmpresa?.match(/^\+?\d{9,20}$/)) {
-      errors.telefonoEmpresa = "El teléfono debe tener entre 9 y 20 dígitos";
+      errors.telefonoEmpresa = 'El teléfono debe tener entre 9 y 20 dígitos';
     }
 
     if (!formData.emailEmpresa?.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-      errors.emailEmpresa = "El email no es válido";
+      errors.emailEmpresa = 'El email no es válido';
     }
 
     if (
@@ -131,21 +131,21 @@ export default function AdminSiteConfigPage() {
       formData.ivaPorDefecto < 0 ||
       formData.ivaPorDefecto > 100
     ) {
-      errors.ivaPorDefecto = "El IVA debe estar entre 0 y 100";
+      errors.ivaPorDefecto = 'El IVA debe estar entre 0 y 100';
     }
 
     if (
       formData.umbralStockBajo === undefined ||
       formData.umbralStockBajo < 1
     ) {
-      errors.umbralStockBajo = "El umbral debe ser al menos 1";
+      errors.umbralStockBajo = 'El umbral debe ser al menos 1';
     }
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateForm()) {
@@ -157,10 +157,10 @@ export default function AdminSiteConfigPage() {
       setError(null);
       setSuccess(false);
 
-      const response = await fetch("/api/admin/site-config", {
-        method: "PUT",
+      const response = await fetch('/api/admin/site-config', {
+        method: 'PUT',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
       });
@@ -168,14 +168,14 @@ export default function AdminSiteConfigPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error guardando configuración");
+        throw new Error(data.error || 'Error guardando configuración');
       }
 
       setConfig(data.config);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error desconocido");
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setSaving(false);
     }
@@ -185,11 +185,11 @@ export default function AdminSiteConfigPage() {
     setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear error when user types
     if (formErrors[field]) {
-      setFormErrors((prev) => ({ ...prev, [field]: "" }));
+      setFormErrors((prev) => ({ ...prev, [field]: '' }));
     }
   };
 
-  if (status === "loading" || loading) {
+  if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -262,17 +262,17 @@ export default function AdminSiteConfigPage() {
         {config?._ref && (
           <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
             <p className="text-sm text-gray-500">
-              Referencia:{" "}
+              Referencia:{' '}
               <span className="font-mono font-medium text-gray-700">
                 {config._ref}
               </span>
             </p>
             {config.actualizadoEn && (
               <p className="text-sm text-gray-500 mt-1">
-                Última actualización:{" "}
-                {new Date(config.actualizadoEn).toLocaleString("es-ES", {
-                  dateStyle: "long",
-                  timeStyle: "short",
+                Última actualización:{' '}
+                {new Date(config.actualizadoEn).toLocaleString('es-ES', {
+                  dateStyle: 'long',
+                  timeStyle: 'short',
                 })}
               </p>
             )}
@@ -300,15 +300,12 @@ export default function AdminSiteConfigPage() {
                   <input
                     type="text"
                     id="nombreEmpresa"
-                    value={formData.nombreEmpresa || ""}
+                    value={formData.nombreEmpresa || ''}
                     onChange={(e) =>
-                      handleChange("nombreEmpresa", e.target.value)
+                      handleChange('nombreEmpresa', e.target.value)
                     }
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-                      formErrors.nombreEmpresa
-                        ? "border-red-300"
-                        : "border-gray-300"
-                    }`}
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 \
+                      focus:border-indigo-500 ${formErrors.nombreEmpresa ? 'border-red-300' : 'border-gray-300'}`}
                     placeholder="3D Print"
                   />
                   {formErrors.nombreEmpresa && (
@@ -328,11 +325,10 @@ export default function AdminSiteConfigPage() {
                   <input
                     type="text"
                     id="cifNif"
-                    value={formData.cifNif || ""}
-                    onChange={(e) => handleChange("cifNif", e.target.value)}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-                      formErrors.cifNif ? "border-red-300" : "border-gray-300"
-                    }`}
+                    value={formData.cifNif || ''}
+                    onChange={(e) => handleChange('cifNif', e.target.value)}
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 \
+                      focus:border-indigo-500 ${formErrors.cifNif ? 'border-red-300' : 'border-gray-300'}`}
                     placeholder="B12345678"
                   />
                   {formErrors.cifNif && (
@@ -352,15 +348,10 @@ export default function AdminSiteConfigPage() {
                   <input
                     type="text"
                     id="direccionEmpresa"
-                    value={formData.direccionEmpresa || ""}
-                    onChange={(e) =>
-                      handleChange("direccionEmpresa", e.target.value)
-                    }
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-                      formErrors.direccionEmpresa
-                        ? "border-red-300"
-                        : "border-gray-300"
-                    }`}
+                    value={formData.direccionEmpresa || ''}
+                    onChange={(e) => handleChange('direccionEmpresa', e.target.value)}
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 \
+                      focus:border-indigo-500 ${formErrors.direccionEmpresa ? 'border-red-300' : 'border-gray-300'}`}
                     placeholder="Calle Admin 123"
                   />
                   {formErrors.direccionEmpresa && (
@@ -380,15 +371,10 @@ export default function AdminSiteConfigPage() {
                   <input
                     type="text"
                     id="ciudadEmpresa"
-                    value={formData.ciudadEmpresa || ""}
-                    onChange={(e) =>
-                      handleChange("ciudadEmpresa", e.target.value)
-                    }
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-                      formErrors.ciudadEmpresa
-                        ? "border-red-300"
-                        : "border-gray-300"
-                    }`}
+                    value={formData.ciudadEmpresa || ''}
+                    onChange={(e) => handleChange('ciudadEmpresa', e.target.value)}
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 \
+                      focus:border-indigo-500 ${formErrors.ciudadEmpresa ? 'border-red-300' : 'border-gray-300'}`}
                     placeholder="Barcelona"
                   />
                   {formErrors.ciudadEmpresa && (
@@ -408,15 +394,10 @@ export default function AdminSiteConfigPage() {
                   <input
                     type="text"
                     id="provinciaEmpresa"
-                    value={formData.provinciaEmpresa || ""}
-                    onChange={(e) =>
-                      handleChange("provinciaEmpresa", e.target.value)
-                    }
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-                      formErrors.provinciaEmpresa
-                        ? "border-red-300"
-                        : "border-gray-300"
-                    }`}
+                    value={formData.provinciaEmpresa || ''}
+                    onChange={(e) => handleChange('provinciaEmpresa', e.target.value)}
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 \
+                      focus:border-indigo-500 ${formErrors.provinciaEmpresa ? 'border-red-300' : 'border-gray-300'}`}
                     placeholder="Barcelona"
                   />
                   {formErrors.provinciaEmpresa && (
@@ -436,16 +417,11 @@ export default function AdminSiteConfigPage() {
                   <input
                     type="text"
                     id="codigoPostalEmpresa"
-                    value={formData.codigoPostalEmpresa || ""}
-                    onChange={(e) =>
-                      handleChange("codigoPostalEmpresa", e.target.value)
-                    }
+                    value={formData.codigoPostalEmpresa || ''}
+                    onChange={(e) => handleChange('codigoPostalEmpresa', e.target.value)}
                     maxLength={5}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-                      formErrors.codigoPostalEmpresa
-                        ? "border-red-300"
-                        : "border-gray-300"
-                    }`}
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 \
+                      focus:border-indigo-500 ${formErrors.codigoPostalEmpresa ? 'border-red-300' : 'border-gray-300'}`}
                     placeholder="08001"
                   />
                   {formErrors.codigoPostalEmpresa && (
@@ -478,15 +454,12 @@ export default function AdminSiteConfigPage() {
                     <input
                       type="tel"
                       id="telefonoEmpresa"
-                      value={formData.telefonoEmpresa || ""}
+                      value={formData.telefonoEmpresa || ''}
                       onChange={(e) =>
-                        handleChange("telefonoEmpresa", e.target.value)
+                        handleChange('telefonoEmpresa', e.target.value)
                       }
-                      className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-                        formErrors.telefonoEmpresa
-                          ? "border-red-300"
-                          : "border-gray-300"
-                      }`}
+                      className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 \
+                        focus:border-indigo-500 ${formErrors.telefonoEmpresa ? 'border-red-300' : 'border-gray-300'}`}
                       placeholder="+34 930 000 001"
                     />
                   </div>
@@ -509,15 +482,12 @@ export default function AdminSiteConfigPage() {
                     <input
                       type="email"
                       id="emailEmpresa"
-                      value={formData.emailEmpresa || ""}
+                      value={formData.emailEmpresa || ''}
                       onChange={(e) =>
-                        handleChange("emailEmpresa", e.target.value)
+                        handleChange('emailEmpresa', e.target.value)
                       }
-                      className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-                        formErrors.emailEmpresa
-                          ? "border-red-300"
-                          : "border-gray-300"
-                      }`}
+                      className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 \
+                        focus:border-indigo-500 ${formErrors.emailEmpresa ? 'border-red-300' : 'border-gray-300'}`}
                       placeholder="info@3dprint.com"
                     />
                   </div>
@@ -545,28 +515,25 @@ export default function AdminSiteConfigPage() {
                   htmlFor="ivaPorDefecto"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  Tipo de IVA por defecto (%){" "}
+                  Tipo de IVA por defecto (%){' '}
                   <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <input
                     type="number"
                     id="ivaPorDefecto"
-                    value={formData.ivaPorDefecto || ""}
+                    value={formData.ivaPorDefecto || ''}
                     onChange={(e) =>
                       handleChange(
-                        "ivaPorDefecto",
-                        parseFloat(e.target.value) || 0,
+                        'ivaPorDefecto',
+                        Number.parseFloat(e.target.value) || 0,
                       )
                     }
                     min={0}
                     max={100}
                     step={0.01}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 pr-8 ${
-                      formErrors.ivaPorDefecto
-                        ? "border-red-300"
-                        : "border-gray-300"
-                    }`}
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 \
+                      focus:border-indigo-500 pr-8 ${formErrors.ivaPorDefecto ? 'border-red-300' : 'border-gray-300'}`}
                     placeholder="21"
                   />
                   <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
@@ -604,21 +571,18 @@ export default function AdminSiteConfigPage() {
                 <input
                   type="number"
                   id="umbralStockBajo"
-                  value={formData.umbralStockBajo || ""}
+                  value={formData.umbralStockBajo || ''}
                   onChange={(e) =>
                     handleChange(
-                      "umbralStockBajo",
-                      parseInt(e.target.value) || 0,
+                      'umbralStockBajo',
+                      Number.parseInt(e.target.value) || 0,
                     )
                   }
                   min={1}
                   max={1000}
                   step={1}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-                    formErrors.umbralStockBajo
-                      ? "border-red-300"
-                      : "border-gray-300"
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 \
+                    focus:border-indigo-500 ${formErrors.umbralStockBajo ? 'border-red-300' : 'border-gray-300'}`}
                   placeholder="5"
                 />
                 {formErrors.umbralStockBajo && (
@@ -639,7 +603,8 @@ export default function AdminSiteConfigPage() {
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium \
+                hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? (
                 <>

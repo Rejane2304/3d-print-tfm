@@ -3,18 +3,18 @@
  * POST /api/orders/cancel-and-restore
  * Cancela un pedido pendiente y restaura el stock reservado
  */
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
-import { createOrderCancelledAlert } from "@/lib/alerts/alert-service";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
+import { createOrderCancelledAlert } from '@/lib/alerts/alert-service';
 
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const body = await req.json();
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
 
     if (!orderId) {
       return NextResponse.json(
-        { error: "Order ID requerido" },
+        { error: 'Order ID requerido' },
         { status: 400 },
       );
     }
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     const order = await prisma.order.findFirst({
       where: {
         id: orderId,
-        status: "PENDING",
+        status: 'PENDING',
         user: { email: session.user.email },
       },
       include: {
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
 
     if (!order) {
       return NextResponse.json(
-        { error: "Pedido no encontrado o ya procesado" },
+        { error: 'Pedido no encontrado o ya procesado' },
         { status: 404 },
       );
     }
@@ -60,16 +60,18 @@ export async function POST(req: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { error: "Usuario no encontrado" },
+        { error: 'Usuario no encontrado' },
         { status: 404 },
       );
     }
 
     // Ejecutar en transacción: restaurar stock + cancelar pedido + movimientos
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async(tx) => {
       // 1. Restaurar stock de cada producto Y registrar movimiento
       for (const item of order.items) {
-        if (!item.productId) continue;
+        if (!item.productId) {
+          continue;
+        }
 
         const product = await tx.product.update({
           where: { id: item.productId },
@@ -87,7 +89,7 @@ export async function POST(req: NextRequest) {
             productId: item.productId,
             orderId: orderId,
             createdBy: user.id,
-            type: "IN",
+            type: 'IN',
             quantity: item.quantity,
             previousStock: product.stock - item.quantity, // antes del incremento
             newStock: product.stock,
@@ -101,9 +103,9 @@ export async function POST(req: NextRequest) {
       await tx.order.update({
         where: { id: orderId },
         data: {
-          status: "CANCELLED",
+          status: 'CANCELLED',
           cancelledAt: new Date(),
-          cancelReason: "Payment cancelled by user",
+          cancelReason: 'Payment cancelled by user',
         },
       });
 
@@ -111,7 +113,7 @@ export async function POST(req: NextRequest) {
       await tx.payment.updateMany({
         where: { orderId: orderId },
         data: {
-          status: "FAILED",
+          status: 'FAILED',
         },
       });
     });
@@ -121,17 +123,17 @@ export async function POST(req: NextRequest) {
       const orderNumber = order.orderNumber || `N/A-${orderId.slice(0, 8)}`;
       await createOrderCancelledAlert(orderId, orderNumber);
     } catch (alertError) {
-      console.error("Error creating order cancelled alert:", alertError);
+      console.error('Error creating order cancelled alert:', alertError);
     }
 
     return NextResponse.json({
       success: true,
-      message: "Pedido cancelado y stock restaurado correctamente",
+      message: 'Pedido cancelado y stock restaurado correctamente',
     });
   } catch (error) {
-    console.error("Error cancelling order:", error);
+    console.error('Error cancelling order:', error);
     return NextResponse.json(
-      { error: "Error al cancelar el pedido" },
+      { error: 'Error al cancelar el pedido' },
       { status: 500 },
     );
   }

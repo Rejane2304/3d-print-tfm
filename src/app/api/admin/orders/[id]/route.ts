@@ -4,18 +4,18 @@
  *
  * Requiere: Rol ADMIN
  */
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
 import {
-  translateOrderStatus,
-  translatePaymentStatus,
-  translatePaymentMethod,
-  translateErrorMessage,
   translateCountry,
+  translateErrorMessage,
+  translateOrderStatus,
+  translatePaymentMethod,
+  translatePaymentStatus,
   translateProductName,
-} from "@/lib/i18n";
+} from '@/lib/i18n';
 
 export async function GET(
   req: NextRequest,
@@ -25,7 +25,7 @@ export async function GET(
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: "No autenticado" },
+        { success: false, error: 'No autenticado' },
         { status: 401 },
       );
     }
@@ -34,9 +34,9 @@ export async function GET(
       where: { email: session.user.email },
     });
 
-    if (!user || user.role !== "ADMIN") {
+    if (user?.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: "No autorizado" },
+        { success: false, error: 'No autorizado' },
         { status: 403 },
       );
     }
@@ -70,7 +70,7 @@ export async function GET(
 
     if (!order) {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage("Pedido not found") },
+        { success: false, error: translateErrorMessage('Pedido not found') },
         { status: 404 },
       );
     }
@@ -94,7 +94,7 @@ export async function GET(
         id: item.id,
         nombre: item.product?.slug
           ? translateProductName(item.product.slug)
-          : item.product?.name || "Producto",
+          : item.product?.name || 'Producto',
         quantity: item.quantity,
         price: Number(item.price),
         subtotal: Number(item.subtotal),
@@ -116,18 +116,18 @@ export async function GET(
       notasInternas: order.internalNotes,
       pago: order.payment
         ? {
-            estado: translatePaymentStatus(order.payment.status),
-            metodo: translatePaymentMethod(order.payment.method),
-            createdAt: order.payment.createdAt,
-          }
+          estado: translatePaymentStatus(order.payment.status),
+          metodo: translatePaymentMethod(order.payment.method),
+          createdAt: order.payment.createdAt,
+        }
         : undefined,
     };
 
     return NextResponse.json({ success: true, pedido: pedidoTransformado });
   } catch (error) {
-    console.error("Error obteniendo pedido:", error);
+    console.error('Error obteniendo pedido:', error);
     return NextResponse.json(
-      { success: false, error: translateErrorMessage("Internal error") },
+      { success: false, error: translateErrorMessage('Internal error') },
       { status: 500 },
     );
   }

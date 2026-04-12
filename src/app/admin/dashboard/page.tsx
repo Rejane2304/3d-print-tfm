@@ -2,30 +2,30 @@
  * Admin Panel Page
  * Show analytics and statistics for the store
  */
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
-  Loader2,
-  DollarSign,
-  ShoppingBag,
-  Users,
-  TrendingUp,
-  Package,
+  Bell,
   Calendar,
   ChevronDown,
+  DollarSign,
+  FileText,
   FolderTree,
   HelpCircle,
+  Loader2,
   MessageSquare,
-  Ticket,
+  Package,
   Settings,
-  Bell,
+  ShoppingBag,
+  Ticket,
+  TrendingUp,
   Truck,
-  FileText,
-} from "lucide-react";
+  Users,
+} from 'lucide-react';
 
 interface AnalyticsData {
       salesSummary: {
@@ -100,34 +100,34 @@ interface AnalyticsData {
   }>;
 }
 
-type DateRange = "today" | "week" | "month" | "lastMonth" | "year";
+type DateRange = 'today' | 'week' | 'month' | 'lastMonth' | 'year';
 
 export default function AdminPanelPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [dateRange, setDateRange] = useState<DateRange>("month");
+  const [dateRange, setDateRange] = useState<DateRange>('month');
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login?callbackUrl=/admin/dashboard");
+    if (status === 'unauthenticated') {
+      router.push('/login?callbackUrl=/admin/dashboard');
       return;
     }
 
     const user = session?.user as { role?: string } | undefined;
-    if (status === "authenticated" && user?.role !== "ADMIN") {
-      router.push("/");
+    if (status === 'authenticated' && user?.role !== 'ADMIN') {
+      router.push('/');
       return;
     }
 
-    if (status === "authenticated") {
+    if (status === 'authenticated') {
       fetchAnalytics();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, session, router, dateRange]);
 
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = async() => {
     try {
       setLoading(true);
       const response = await fetch(`/api/admin/analytics?range=${dateRange}`);
@@ -137,42 +137,44 @@ export default function AdminPanelPage() {
         setAnalytics(data.data);
       }
     } catch (error) {
-      console.error("Error fetching analytics:", error);
+      console.error('Error fetching analytics:', error);
     } finally {
       setLoading(false);
     }
   };
 
   const formatCurrency = (amount: number | undefined | null) => {
-    if (amount === undefined || amount === null) return "0.00 €";
+    if (amount === undefined || amount === null) {
+      return '0.00 €';
+    }
     return `${Number(amount).toFixed(2)} €`;
   };
 
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString("es-ES");
+    return new Date(date).toLocaleDateString('es-ES');
   };
 
   const getStatusBadge = (status: string) => {
     const statusMap: Record<string, string> = {
       // Spanish status names (translated from API)
-      Pendiente: "bg-yellow-100 text-yellow-800",
-      Confirmado: "bg-blue-100 text-blue-800",
-      "En preparación": "bg-purple-100 text-purple-800",
-      Enviado: "bg-indigo-100 text-indigo-800",
-      Entregado: "bg-green-100 text-green-800",
-      Cancelado: "bg-red-100 text-red-800",
+      Pendiente: 'bg-yellow-100 text-yellow-800',
+      Confirmado: 'bg-blue-100 text-blue-800',
+      'En preparación': 'bg-purple-100 text-purple-800',
+      Enviado: 'bg-indigo-100 text-indigo-800',
+      Entregado: 'bg-green-100 text-green-800',
+      Cancelado: 'bg-red-100 text-red-800',
       // Legacy English status names (for backwards compatibility)
-      PENDING: "bg-yellow-100 text-yellow-800",
-      CONFIRMED: "bg-blue-100 text-blue-800",
-      PREPARING: "bg-purple-100 text-purple-800",
-      SHIPPED: "bg-indigo-100 text-indigo-800",
-      DELIVERED: "bg-green-100 text-green-800",
-      CANCELLED: "bg-red-100 text-red-800",
+      PENDING: 'bg-yellow-100 text-yellow-800',
+      CONFIRMED: 'bg-blue-100 text-blue-800',
+      PREPARING: 'bg-purple-100 text-purple-800',
+      SHIPPED: 'bg-indigo-100 text-indigo-800',
+      DELIVERED: 'bg-green-100 text-green-800',
+      CANCELLED: 'bg-red-100 text-red-800',
     };
-    return statusMap[status] || "bg-gray-100 text-gray-800";
+    return statusMap[status] || 'bg-gray-100 text-gray-800';
   };
 
-  if (status === "loading" || loading) {
+  if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -208,7 +210,8 @@ export default function AdminPanelPage() {
             <select
               value={dateRange}
               onChange={(e) => setDateRange(e.target.value as DateRange)}
-              className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-10 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-10 \
+                focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             >
               <option value="today">Hoy</option>
               <option value="week">Últimos 7 días</option>
@@ -216,7 +219,9 @@ export default function AdminPanelPage() {
               <option value="lastMonth">Mes anterior</option>
               <option value="year">Este año</option>
             </select>
-            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+            <ChevronDown
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none"
+            />
           </div>
         </div>
 
@@ -249,20 +254,20 @@ export default function AdminPanelPage() {
                     <span>{formatCurrency(analytics.salesSummary.delivered.thisMonth)}</span>
                   </div>
                 </div>
-                {dateRange === "month" &&
+                {dateRange === 'month' &&
                   analytics.salesSummary.net.lastMonth > 0 && (
-                    <p
-                      className={`text-sm mt-2 ${
-                        analytics.salesSummary.net.thisMonth >=
+                  <p
+                    className={`text-sm mt-2 ${
+                      analytics.salesSummary.net.thisMonth >=
                         analytics.salesSummary.net.lastMonth
-                          ? "text-green-600"
-                          : "text-red-600"
-                      }`}
-                    >
-                      vs {formatCurrency(analytics.salesSummary.net.lastMonth)} mes
-                      ant.
-                    </p>
-                  )}
+                        ? 'text-green-600'
+                        : 'text-red-600'
+                    }`}
+                  >
+                    vs {formatCurrency(analytics.salesSummary.net.lastMonth)} mes
+                    ant.
+                  </p>
+                )}
               </div>
               <div className="p-3 bg-green-100 rounded-lg ml-4">
                 <DollarSign className="h-6 w-6 text-green-600" />
@@ -361,7 +366,10 @@ export default function AdminPanelPage() {
                 <div className="space-y-4">
                   {analytics.topProducts.map((product, index) => (
                     <div key={product.id} className="flex items-center">
-                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-sm font-bold text-indigo-600">
+                      <div
+                        className="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-100 flex items-center \
+                        justify-center text-sm font-bold text-indigo-600"
+                      >
                         {index + 1}
                       </div>
                       <div className="ml-4 flex-1">
@@ -377,13 +385,22 @@ export default function AdminPanelPage() {
                       </div>
                       <div className="text-right">
                         <span
-                          className={`inline-flex px-2 py-1 text-xs rounded-full ${
-                            product.stock > 5
-                              ? "bg-green-100 text-green-800"
-                              : product.stock > 0
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-red-100 text-red-800"
-                          }`}
+                          className={[
+                            'inline-flex',
+                            'px-2',
+                            'py-1',
+                            'text-xs',
+                            'rounded-full',
+                            (() => {
+                              if (product.stock > 5) {
+                                return 'bg-green-100 text-green-800';
+                              }
+                              if (product.stock > 0) {
+                                return 'bg-yellow-100 text-yellow-800';
+                              }
+                              return 'bg-red-100 text-red-800';
+                            })(),
+                          ].join(' ')}
                         >
                           {product.stock} en stock
                         </span>

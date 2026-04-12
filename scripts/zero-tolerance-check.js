@@ -17,9 +17,9 @@
  * Cualquier error detiene el commit.
  */
 
-import { execSync } from 'child_process';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { execSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -30,17 +30,19 @@ let TOTAL_ERRORS = 0;
 function runCheck(name, command, parser) {
   console.log(`\n🔍 ${name}...`);
   try {
-    const output = execSync(command, { 
-      cwd: ROOT_DIR, 
+    const output = execSync(command, {
+      cwd: ROOT_DIR,
       encoding: 'utf-8',
-      stdio: ['pipe', 'pipe', 'pipe']
+      stdio: ['pipe', 'pipe', 'pipe'],
     });
     const result = parser ? parser(output) : { errors: 0, output };
     if (result.errors === 0) {
       console.log(`  ✅ ${name}: SIN ERRORES`);
     } else {
       console.log(`  ❌ ${name}: ${result.errors} ERRORES`);
-      if (result.output) console.log(result.output);
+      if (result.output) {
+        console.log(result.output);
+      }
       TOTAL_ERRORS += result.errors;
     }
     return result.errors;
@@ -48,7 +50,9 @@ function runCheck(name, command, parser) {
     const errorOutput = error.stdout || error.message;
     const result = parser ? parser(errorOutput) : { errors: 1, output: errorOutput };
     console.log(`  ❌ ${name}: ${result.errors} ERRORES`);
-    if (result.output) console.log(result.output);
+    if (result.output) {
+      console.log(result.output);
+    }
     TOTAL_ERRORS += result.errors;
     return result.errors;
   }
@@ -67,13 +71,13 @@ runCheck('TypeScript', 'npx tsc --noEmit --project tsconfig.json', (output) => {
 // 2. ESLint - Todos los archivos
 runCheck('ESLint (src/)', 'npx eslint src/ --ext .ts,.tsx --max-warnings 0', (output) => {
   const match = output.match(/(\d+) problem/);
-  return { errors: match ? parseInt(match[1]) : 0, output };
+  return { errors: match ? Number.parseInt(match[1]) : 0, output };
 });
 
 // 3. ESLint - Tests
 runCheck('ESLint (tests/)', 'npx eslint tests/ --ext .ts,.tsx --max-warnings 0', (output) => {
   const match = output.match(/(\d+) problem/);
-  return { errors: match ? parseInt(match[1]) : 0, output };
+  return { errors: match ? Number.parseInt(match[1]) : 0, output };
 });
 
 // 4. Prettier Check

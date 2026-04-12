@@ -4,14 +4,14 @@
  *
  * Requires: ADMIN role
  */
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
-import { z } from "zod";
-import { Prisma } from "@prisma/client";
-import { COMPANY_CONFIG } from "@/lib/invoices/pdf-generator";
-import { translateErrorMessage } from "@/lib/i18n";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
+import { z } from 'zod';
+import { Prisma } from '@prisma/client';
+import { getCompanyConfig } from '@/lib/invoices/pdf-generator';
+import { translateErrorMessage } from '@/lib/i18n';
 
 // Validation schema
 const crearFacturaSchema = z.object({
@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage("No autenticado") },
+        { success: false, error: translateErrorMessage('No autenticado') },
         { status: 401 },
       );
     }
@@ -33,36 +33,40 @@ export async function GET(req: NextRequest) {
       where: { email: session.user.email },
     });
 
-    if (!usuario || usuario.role !== "ADMIN") {
+    if (usuario?.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage("No autorizado") },
+        { success: false, error: translateErrorMessage('No autorizado') },
         { status: 403 },
       );
     }
 
     const { searchParams } = new URL(req.url);
-    const busqueda = searchParams.get("busqueda") || "";
-    const desde = searchParams.get("desde");
-    const hasta = searchParams.get("hasta");
-    const anulada = searchParams.get("anulada");
-    const limit = Number.parseInt(searchParams.get("limit") || "50", 10);
-    const page = Number.parseInt(searchParams.get("page") || "1", 10);
+    const busqueda = searchParams.get('busqueda') || '';
+    const desde = searchParams.get('desde');
+    const hasta = searchParams.get('hasta');
+    const anulada = searchParams.get('anulada');
+    const limit = Number.parseInt(searchParams.get('limit') || '50', 10);
+    const page = Number.parseInt(searchParams.get('page') || '1', 10);
     const skip = (page - 1) * limit;
 
     const where: Prisma.InvoiceWhereInput = {};
 
     if (busqueda) {
-      where.invoiceNumber = { contains: busqueda, mode: "insensitive" };
+      where.invoiceNumber = { contains: busqueda, mode: 'insensitive' };
     }
 
     if (desde || hasta) {
       where.issuedAt = {};
-      if (desde) where.issuedAt.gte = new Date(desde);
-      if (hasta) where.issuedAt.lte = new Date(hasta);
+      if (desde) {
+        where.issuedAt.gte = new Date(desde);
+      }
+      if (hasta) {
+        where.issuedAt.lte = new Date(hasta);
+      }
     }
 
     if (anulada !== null) {
-      where.isCancelled = anulada === "true";
+      where.isCancelled = anulada === 'true';
     }
 
     const [facturas, total] = await Promise.all([
@@ -82,7 +86,7 @@ export async function GET(req: NextRequest) {
             },
           },
         },
-        orderBy: { issuedAt: "desc" },
+        orderBy: { issuedAt: 'desc' },
         skip,
         take: limit,
       }),
@@ -113,9 +117,9 @@ export async function GET(req: NextRequest) {
       limit,
     });
   } catch (error) {
-    console.error("Error listing invoices:", error);
+    console.error('Error listing invoices:', error);
     return NextResponse.json(
-      { success: false, error: translateErrorMessage("Internal error") },
+      { success: false, error: translateErrorMessage('Internal error') },
       { status: 500 },
     );
   }
@@ -127,7 +131,7 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage("No autenticado") },
+        { success: false, error: translateErrorMessage('No autenticado') },
         { status: 401 },
       );
     }
@@ -136,9 +140,9 @@ export async function POST(req: NextRequest) {
       where: { email: session.user.email },
     });
 
-    if (!usuario || usuario.role !== "ADMIN") {
+    if (usuario?.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage("No autorizado") },
+        { success: false, error: translateErrorMessage('No autorizado') },
         { status: 403 },
       );
     }
@@ -157,17 +161,17 @@ export async function POST(req: NextRequest) {
 
     if (!pedido) {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage("Pedido not found") },
+        { success: false, error: translateErrorMessage('Pedido not found') },
         { status: 404 },
       );
     }
 
     // Verify the order is delivered
-    if (pedido.status !== "DELIVERED") {
+    if (pedido.status !== 'DELIVERED') {
       return NextResponse.json(
         {
           success: false,
-          error: "El pedido debe estar entregado para generar factura",
+          error: 'El pedido debe estar entregado para generar factura',
         },
         { status: 400 },
       );
@@ -183,7 +187,7 @@ export async function POST(req: NextRequest) {
         {
           success: false,
           error: translateErrorMessage(
-            "Already exists una factura para este pedido",
+            'Already exists una factura para este pedido',
           ),
         },
         { status: 400 },
@@ -194,13 +198,13 @@ export async function POST(req: NextRequest) {
     const year = new Date().getFullYear();
     const ultimaFactura = await prisma.invoice.findFirst({
       where: {
-        series: "F",
+        series: 'F',
       },
-      orderBy: { number: "desc" },
+      orderBy: { number: 'desc' },
     });
 
     const numero = ultimaFactura ? ultimaFactura.number + 1 : 1;
-    const invoiceNumber = `F-${year}-${String(numero).padStart(6, "0")}`;
+    const invoiceNumber = `F-${year}-${String(numero).padStart(6, '0')}`;
 
     // Calculate totals with VAT separated and discount applied (transparent)
     const subtotal = Number(pedido.subtotal);
@@ -213,23 +217,24 @@ export async function POST(req: NextRequest) {
     const total = (subtotal - discount) * (1 + vatRate / 100) + shipping;
 
     // Create invoice
+    const companyConfig = await getCompanyConfig();
     const factura = await prisma.invoice.create({
       data: {
         id: crypto.randomUUID(),
         invoiceNumber,
-        series: "F",
+        series: 'F',
         number: numero,
         order: { connect: { id: orderId } },
         // Company data
-        companyName: COMPANY_CONFIG.name,
-        companyTaxId: COMPANY_CONFIG.taxId,
-        companyAddress: COMPANY_CONFIG.address,
-        companyCity: COMPANY_CONFIG.city,
-        companyProvince: COMPANY_CONFIG.province,
-        companyPostalCode: COMPANY_CONFIG.postalCode,
+        companyName: companyConfig.name,
+        companyTaxId: companyConfig.taxId,
+        companyAddress: companyConfig.address,
+        companyCity: companyConfig.city,
+        companyProvince: companyConfig.province,
+        companyPostalCode: companyConfig.postalCode,
         // Client data
         clientName: pedido.shippingName,
-        clientTaxId: pedido.user.taxId || "",
+        clientTaxId: pedido.user.taxId || '',
         clientAddress: pedido.shippingAddress,
         clientCity: pedido.shippingCity,
         clientProvince: pedido.shippingProvince,
@@ -266,9 +271,9 @@ export async function POST(req: NextRequest) {
         { status: 400 },
       );
     }
-    console.error("Error creating invoice:", error);
+    console.error('Error creating invoice:', error);
     return NextResponse.json(
-      { success: false, error: translateErrorMessage("Internal error") },
+      { success: false, error: translateErrorMessage('Internal error') },
       { status: 500 },
     );
   }

@@ -2,22 +2,23 @@
  * Edit FAQ Page - Admin
  * Form for editing an existing FAQ
  */
-"use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter, useParams } from "next/navigation";
-import Link from "next/link";
+'use client';
+
+import { useCallback, useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
+  AlertCircle,
   ArrowLeft,
+  CheckCircle2,
   HelpCircle,
   Loader2,
-  AlertCircle,
-  CheckCircle2,
   Save,
   Trash2,
-} from "lucide-react";
-import { ConfirmModal } from "@/components/ui/ConfirmModal";
+} from 'lucide-react';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
 interface FAQ {
   id: string;
@@ -30,14 +31,14 @@ interface FAQ {
 
 // Categorías predefinidas comunes
 const PREDEFINED_CATEGORIES = [
-  "Materiales",
-  "Envío",
-  "Devoluciones",
-  "Pedidos",
-  "Cuidado",
-  "Pagos",
-  "Seguridad",
-  "General",
+  'Materiales',
+  'Envío',
+  'Devoluciones',
+  'Pedidos',
+  'Cuidado',
+  'Pagos',
+  'Seguridad',
+  'General',
 ];
 
 export default function EditarFAQPage() {
@@ -56,32 +57,32 @@ export default function EditarFAQPage() {
 
   // Form state
   const [formData, setFormData] = useState({
-    question: "",
-    answer: "",
-    category: "",
+    question: '',
+    answer: '',
+    category: '',
     displayOrder: 0,
     isActive: true,
   });
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/auth?callbackUrl=/admin/faqs");
+    if (status === 'unauthenticated') {
+      router.push('/auth?callbackUrl=/admin/faqs');
       return;
     }
 
     const user = session?.user as { role?: string } | undefined;
-    if (status === "authenticated" && user?.role !== "ADMIN") {
-      router.push("/");
+    if (status === 'authenticated' && user?.role !== 'ADMIN') {
+      router.push('/');
       return;
     }
 
-    if (status === "authenticated" && faqId) {
+    if (status === 'authenticated' && faqId) {
       loadFAQ();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, session, router, faqId]);
 
-  const loadFAQ = useCallback(async () => {
+  const loadFAQ = useCallback(async() => {
     try {
       setLoading(true);
       setError(null);
@@ -90,15 +91,15 @@ export default function EditarFAQPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error al cargar FAQ");
+        throw new Error(data.error || 'Error al cargar FAQ');
       }
 
       const loadedFaq = data.faq;
       setFaq(loadedFaq);
       setFormData({
-        question: loadedFaq.pregunta || "",
-        answer: loadedFaq.respuesta || "",
-        category: loadedFaq.categoria || "",
+        question: loadedFaq.pregunta || '',
+        answer: loadedFaq.respuesta || '',
+        category: loadedFaq.categoria || '',
         displayOrder: loadedFaq.ordenVisualizacion || 0,
         isActive: loadedFaq.activo,
       });
@@ -108,7 +109,7 @@ export default function EditarFAQPage() {
         setCustomCategory(true);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al cargar la FAQ");
+      setError(err instanceof Error ? err.message : 'Error al cargar la FAQ');
     } finally {
       setLoading(false);
     }
@@ -123,15 +124,15 @@ export default function EditarFAQPage() {
     setFormData((prev) => ({
       ...prev,
       [name]:
-        type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
+        type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
     }));
   };
 
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
-    if (value === "custom") {
+    if (value === 'custom') {
       setCustomCategory(true);
-      setFormData((prev) => ({ ...prev, category: "" }));
+      setFormData((prev) => ({ ...prev, category: '' }));
     } else {
       setCustomCategory(false);
       setFormData((prev) => ({ ...prev, category: value }));
@@ -139,17 +140,25 @@ export default function EditarFAQPage() {
   };
 
   const validateForm = () => {
-    if (!formData.question.trim()) return "La pregunta es obligatoria";
-    if (formData.question.length < 10)
-      return "La pregunta debe tener al menos 10 caracteres";
-    if (!formData.answer.trim()) return "La respuesta es obligatoria";
-    if (formData.answer.length < 20)
-      return "La respuesta debe tener al menos 20 caracteres";
-    if (!formData.category.trim()) return "La categoría es obligatoria";
+    if (!formData.question.trim()) {
+      return 'La pregunta es obligatoria';
+    }
+    if (formData.question.length < 10) {
+      return 'La pregunta debe tener al menos 10 caracteres';
+    }
+    if (!formData.answer.trim()) {
+      return 'La respuesta es obligatoria';
+    }
+    if (formData.answer.length < 20) {
+      return 'La respuesta debe tener al menos 20 caracteres';
+    }
+    if (!formData.category.trim()) {
+      return 'La categoría es obligatoria';
+    }
     return null;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
 
     const validationError = validateForm();
@@ -163,8 +172,8 @@ export default function EditarFAQPage() {
 
     try {
       const response = await fetch(`/api/admin/faqs/${faqId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           question: formData.question,
           answer: formData.answer,
@@ -177,7 +186,7 @@ export default function EditarFAQPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error al actualizar FAQ");
+        throw new Error(data.error || 'Error al actualizar FAQ');
       }
 
       setSuccess(true);
@@ -185,32 +194,32 @@ export default function EditarFAQPage() {
         setSuccess(false);
       }, 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al actualizar FAQ");
+      setError(err instanceof Error ? err.message : 'Error al actualizar FAQ');
     } finally {
       setSaving(false);
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = async() => {
     try {
       const response = await fetch(`/api/admin/faqs/${faqId}`, {
-        method: "DELETE",
+        method: 'DELETE',
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error al eliminar FAQ");
+        throw new Error(data.error || 'Error al eliminar FAQ');
       }
 
-      router.push("/admin/faqs");
+      router.push('/admin/faqs');
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al eliminar FAQ");
+      setError(err instanceof Error ? err.message : 'Error al eliminar FAQ');
       setDeleteModalOpen(false);
     }
   };
 
-  if (loading || status === "loading") {
+  if (loading || status === 'loading') {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -292,7 +301,8 @@ export default function EditarFAQPage() {
               <button
                 type="button"
                 onClick={() => setDeleteModalOpen(true)}
-                className="inline-flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700"
+                className="inline-flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg font-medium \
+                hover:bg-red-700"
               >
                 <Trash2 className="h-5 w-5" />
                 Eliminar
@@ -340,7 +350,8 @@ export default function EditarFAQPage() {
                     name="question"
                     value={formData.question}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg \
+                    focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     placeholder="Ej: ¿Cuánto tarda el envío?"
                     required
                   />
@@ -362,7 +373,8 @@ export default function EditarFAQPage() {
                     value={formData.answer}
                     onChange={handleInputChange}
                     rows={6}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg \
+                    focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     placeholder="Escribe la respuesta detallada..."
                     required
                   />
@@ -380,13 +392,14 @@ export default function EditarFAQPage() {
                     >
                       Categoría *
                     </label>
-                    {!customCategory ? (
+                    {customCategory === false ? (
                       <select
                         id="category"
                         name="category"
                         value={formData.category}
                         onChange={handleCategoryChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg \
+                        focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                         required
                       >
                         <option value="">Selecciona una categoría</option>
@@ -404,7 +417,8 @@ export default function EditarFAQPage() {
                           name="category"
                           value={formData.category}
                           onChange={handleInputChange}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg \
+                          focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                           placeholder="Nombre de la nueva categoría"
                           required
                         />
@@ -412,7 +426,7 @@ export default function EditarFAQPage() {
                           type="button"
                           onClick={() => {
                             setCustomCategory(false);
-                            setFormData((prev) => ({ ...prev, category: "" }));
+                            setFormData((prev) => ({ ...prev, category: '' }));
                           }}
                           className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
                         >
@@ -436,7 +450,8 @@ export default function EditarFAQPage() {
                       value={formData.displayOrder}
                       onChange={handleInputChange}
                       min="0"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg \
+                      focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       placeholder="0"
                     />
                     <p className="mt-1 text-xs text-gray-500">
@@ -482,7 +497,8 @@ export default function EditarFAQPage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="flex-1 max-w-xs px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 max-w-xs px-4 py-2 bg-indigo-600 text-white rounded-lg \
+                hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {saving && <Loader2 className="h-4 w-4 animate-spin" />}
                 <Save className="h-4 w-4" />

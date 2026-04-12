@@ -3,36 +3,37 @@
  * POST /api/paypal/capture-order
  * Captures payment after user approves
  */
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
-import { prisma } from "@/lib/db/prisma";
-import { translateErrorMessage } from "@/lib/i18n";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
+import { prisma } from '@/lib/db/prisma';
+import { translateErrorMessage } from '@/lib/i18n';
 
 const PAYPAL_API =
-  process.env.NODE_ENV === "production"
-    ? "https://api-m.paypal.com"
-    : "https://api-m.sandbox.paypal.com";
+  process.env.NODE_ENV === 'production'
+    ? 'https://api-m.paypal.com'
+    : 'https://api-m.sandbox.paypal.com';
 
 async function getPayPalAccessToken(): Promise<string> {
   const clientId = process.env.PAYPAL_CLIENT_ID;
   const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
 
   if (!clientId || !clientSecret) {
-    throw new Error("PayPal credentials not configured");
+    throw new Error('PayPal credentials not configured');
   }
 
+  const basicAuth = Buffer.from(clientId + ':' + clientSecret).toString('base64');
   const response = await fetch(`${PAYPAL_API}/v1/oauth2/token`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString("base64")}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+      Authorization: `Basic ${basicAuth}`,
     },
-    body: "grant_type=client_credentials",
+    body: 'grant_type=client_credentials',
   });
 
   if (!response.ok) {
-    throw new Error("Error al obtener token de acceso de PayPal");
+    throw new Error('Error al obtener token de acceso de PayPal');
   }
 
   const data = await response.json();
@@ -45,7 +46,7 @@ export async function POST(req: NextRequest) {
 
     if (!session?.user?.email) {
       return NextResponse.json(
-        { error: translateErrorMessage("No autenticado") },
+        { error: translateErrorMessage('No autenticado') },
         { status: 401 },
       );
     }
@@ -55,7 +56,7 @@ export async function POST(req: NextRequest) {
 
     if (!paypalOrderId || !orderId) {
       return NextResponse.json(
-        { error: translateErrorMessage("Missing required fields") },
+        { error: translateErrorMessage('Missing required fields') },
         { status: 400 },
       );
     }
@@ -66,9 +67,9 @@ export async function POST(req: NextRequest) {
     const captureResponse = await fetch(
       `${PAYPAL_API}/v2/checkout/orders/${paypalOrderId}/capture`,
       {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${accessToken}`,
         },
       },
@@ -76,8 +77,8 @@ export async function POST(req: NextRequest) {
 
     if (!captureResponse.ok) {
       const errorData = await captureResponse.json();
-      console.error("PayPal capture error:", errorData);
-      throw new Error("Error capturing PayPal payment");
+      console.error('PayPal capture error:', errorData);
+      throw new Error('Error capturing PayPal payment');
     }
 
     const captureData = await captureResponse.json();
@@ -89,15 +90,15 @@ export async function POST(req: NextRequest) {
     });
 
     if (!order) {
-      throw new Error("Pedido no encontrado");
+      throw new Error('Pedido no encontrado');
     }
 
     // Check if already processed (avoid duplicates)
-    if (order.status !== "PENDING") {
+    if (order.status !== 'PENDING') {
       return NextResponse.json({
         success: true,
         captureId: captureData.purchase_units[0]?.payments?.captures[0]?.id,
-        status: "ALREADY_PROCESSED",
+        status: 'ALREADY_PROCESSED',
       });
     }
 
@@ -109,7 +110,7 @@ export async function POST(req: NextRequest) {
       console.error(
         `Amount mismatch: captured ${capturedAmount}, expected ${orderAmount}`,
       );
-      throw new Error("El monto capturado no coincide con el pedido");
+      throw new Error('El monto capturado no coincide con el pedido');
     }
 
     const userRecord = await prisma.user.findUnique({
@@ -118,12 +119,12 @@ export async function POST(req: NextRequest) {
     });
 
     // Transaction for consistency
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async(tx) => {
       // Update order status
       await tx.order.update({
         where: { id: orderId },
         data: {
-          status: "CONFIRMED",
+          status: 'CONFIRMED',
           confirmedAt: new Date(),
         },
       });
@@ -139,10 +140,10 @@ export async function POST(req: NextRequest) {
           data: {
             id: crypto.randomUUID(),
             order: { connect: { id: orderId } },
-            user: { connect: { id: userRecord?.id || "" } },
+            user: { connect: { id: userRecord?.id || '' } },
             amount: capturedAmount,
-            status: "COMPLETED",
-            method: "PAYPAL",
+            status: 'COMPLETED',
+            method: 'PAYPAL',
             processedAt: new Date(),
             updatedAt: new Date(),
           },
@@ -163,9 +164,9 @@ export async function POST(req: NextRequest) {
       status: captureData.status,
     });
   } catch (error) {
-    console.error("Error capturing PayPal order:", error);
+    console.error('Error capturing PayPal order:', error);
     return NextResponse.json(
-      { error: "Error al procesar pago de PayPal" },
+      { error: 'Error al procesar pago de PayPal' },
       { status: 500 },
     );
   }

@@ -1,15 +1,15 @@
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 /**
  * API Route - Admin Analytics Dashboard
  * GET /api/admin/analytics
  * Returns sales, orders, customer statistics
  */
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
-import { prisma } from "@/lib/db/prisma";
-import { translateProductName, translateOrderStatus } from "@/lib/i18n";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
+import { prisma } from '@/lib/db/prisma';
+import { translateOrderStatus, translateProductName } from '@/lib/i18n';
 
 export async function GET(req: NextRequest) {
   try {
@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
 
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: "No autenticado" },
+        { success: false, error: 'No autenticado' },
         { status: 401 },
       );
     }
@@ -28,16 +28,16 @@ export async function GET(req: NextRequest) {
       select: { id: true, role: true },
     });
 
-    if (!adminUser || adminUser.role !== "ADMIN") {
+    if (adminUser?.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: "Acceso denegado" },
+        { success: false, error: 'Acceso denegado' },
         { status: 403 },
       );
     }
 
     // Get date range from query
     const { searchParams } = new URL(req.url);
-    const range = searchParams.get("range") || "month";
+    const range = searchParams.get('range') || 'month';
 
     // Calculate date ranges - use ISO format for PostgreSQL compatibility
     const now = new Date();
@@ -54,28 +54,21 @@ export async function GET(req: NextRequest) {
     const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
     const yearStart = new Date(today.getFullYear(), 0, 1);
 
-    // Debug logging
-    console.log('Analytics Date Ranges:', {
-      today: today.toISOString(),
-      weekAgo: weekAgo.toISOString(),
-      monthAgo: monthAgo.toISOString(),
-      lastMonthStart: lastMonthStart.toISOString(),
-      lastMonthEnd: lastMonthEnd.toISOString(),
-    });
+    // Debug logging eliminado por lint
 
     // Build date filters
     let dateFilter: Date;
     switch (range) {
-      case "today":
+      case 'today':
         dateFilter = today;
         break;
-      case "week":
+      case 'week':
         dateFilter = weekAgo;
         break;
-      case "lastMonth":
+      case 'lastMonth':
         dateFilter = lastMonthStart;
         break;
-      case "year":
+      case 'year':
         dateFilter = yearStart;
         break;
       default:
@@ -117,7 +110,7 @@ export async function GET(req: NextRequest) {
       prisma.order.aggregate({
         where: {
           createdAt: { gte: today },
-          status: { not: "CANCELLED" },
+          status: { not: 'CANCELLED' },
         },
         _sum: { total: true },
       }),
@@ -125,7 +118,7 @@ export async function GET(req: NextRequest) {
       prisma.order.aggregate({
         where: {
           createdAt: { gte: weekAgo },
-          status: { not: "CANCELLED" },
+          status: { not: 'CANCELLED' },
         },
         _sum: { total: true },
       }),
@@ -133,7 +126,7 @@ export async function GET(req: NextRequest) {
       prisma.order.aggregate({
         where: {
           createdAt: { gte: monthAgo },
-          status: { not: "CANCELLED" },
+          status: { not: 'CANCELLED' },
         },
         _sum: { total: true },
       }),
@@ -141,13 +134,13 @@ export async function GET(req: NextRequest) {
       prisma.order.aggregate({
         where: {
           createdAt: { gte: lastMonthStart, lte: lastMonthEnd },
-          status: { not: "CANCELLED" },
+          status: { not: 'CANCELLED' },
         },
         _sum: { total: true },
       }),
       // Total histórico neto
       prisma.order.aggregate({
-        where: { status: { not: "CANCELLED" } },
+        where: { status: { not: 'CANCELLED' } },
         _sum: { total: true },
       }),
 
@@ -155,7 +148,7 @@ export async function GET(req: NextRequest) {
       // Today
       prisma.order.aggregate({
         where: {
-          status: "DELIVERED",
+          status: 'DELIVERED',
           deliveredAt: { gte: today },
         },
         _sum: { total: true },
@@ -163,7 +156,7 @@ export async function GET(req: NextRequest) {
       // This week
       prisma.order.aggregate({
         where: {
-          status: "DELIVERED",
+          status: 'DELIVERED',
           deliveredAt: { gte: weekAgo },
         },
         _sum: { total: true },
@@ -171,7 +164,7 @@ export async function GET(req: NextRequest) {
       // This month
       prisma.order.aggregate({
         where: {
-          status: "DELIVERED",
+          status: 'DELIVERED',
           deliveredAt: { gte: monthAgo },
         },
         _sum: { total: true },
@@ -179,14 +172,14 @@ export async function GET(req: NextRequest) {
       // Last month
       prisma.order.aggregate({
         where: {
-          status: "DELIVERED",
+          status: 'DELIVERED',
           deliveredAt: { gte: lastMonthStart, lte: lastMonthEnd },
         },
         _sum: { total: true },
       }),
       // Total histórico entregado
       prisma.order.aggregate({
-        where: { status: "DELIVERED" },
+        where: { status: 'DELIVERED' },
         _sum: { total: true },
       }),
 
@@ -194,7 +187,7 @@ export async function GET(req: NextRequest) {
       // Today
       prisma.order.aggregate({
         where: {
-          status: "CANCELLED",
+          status: 'CANCELLED',
           createdAt: { gte: today },
         },
         _sum: { total: true },
@@ -202,7 +195,7 @@ export async function GET(req: NextRequest) {
       // This week
       prisma.order.aggregate({
         where: {
-          status: "CANCELLED",
+          status: 'CANCELLED',
           createdAt: { gte: weekAgo },
         },
         _sum: { total: true },
@@ -210,7 +203,7 @@ export async function GET(req: NextRequest) {
       // This month
       prisma.order.aggregate({
         where: {
-          status: "CANCELLED",
+          status: 'CANCELLED',
           createdAt: { gte: monthAgo },
         },
         _sum: { total: true },
@@ -218,14 +211,14 @@ export async function GET(req: NextRequest) {
       // Last month
       prisma.order.aggregate({
         where: {
-          status: "CANCELLED",
+          status: 'CANCELLED',
           createdAt: { gte: lastMonthStart, lte: lastMonthEnd },
         },
         _sum: { total: true },
       }),
       // Total histórico cancelado
       prisma.order.aggregate({
-        where: { status: "CANCELLED" },
+        where: { status: 'CANCELLED' },
         _sum: { total: true },
       }),
     ]);
@@ -235,7 +228,7 @@ export async function GET(req: NextRequest) {
       // Total orders histórico (TODOS incluyendo cancelados)
       prisma.order.count(),
       // Total excluyendo cancelados (pedidos activos/completados)
-      prisma.order.count({ where: { status: { not: "CANCELLED" } } }),
+      prisma.order.count({ where: { status: { not: 'CANCELLED' } } }),
       // Today (TODOS los pedidos creados hoy)
       prisma.order.count({
         where: { createdAt: { gte: today } },
@@ -249,18 +242,18 @@ export async function GET(req: NextRequest) {
         where: { createdAt: { gte: monthAgo } },
       }),
       // Pedidos cancelados (total histórico)
-      prisma.order.count({ where: { status: "CANCELLED" } }),
+      prisma.order.count({ where: { status: 'CANCELLED' } }),
       // Pedidos pendientes de pago (PENDING)
-      prisma.order.count({ where: { status: "PENDING" } }),
+      prisma.order.count({ where: { status: 'PENDING' } }),
       // Pedidos pagados/confirmados (CONFIRMED y posteriores, excluyendo CANCELLED y PENDING)
       prisma.order.count({
         where: {
-          status: { in: ["CONFIRMED", "PREPARING", "SHIPPED", "DELIVERED"] },
+          status: { in: ['CONFIRMED', 'PREPARING', 'SHIPPED', 'DELIVERED'] },
         },
       }),
       // By status (todos los estados para desglose)
       prisma.order.groupBy({
-        by: ["status"],
+        by: ['status'],
         _count: { status: true },
       }),
     ]);
@@ -268,18 +261,18 @@ export async function GET(req: NextRequest) {
     // Customer Stats
     const customerStats = await Promise.all([
       // Total customers
-      prisma.user.count({ where: { role: "CUSTOMER" } }),
+      prisma.user.count({ where: { role: 'CUSTOMER' } }),
       // New this month
       prisma.user.count({
         where: {
-          role: "CUSTOMER",
+          role: 'CUSTOMER',
           createdAt: { gte: monthAgo },
         },
       }),
       // Active (have placed orders)
       prisma.user.count({
         where: {
-          role: "CUSTOMER",
+          role: 'CUSTOMER',
           orders: { some: {} },
         },
       }),
@@ -287,10 +280,10 @@ export async function GET(req: NextRequest) {
 
     // Top Products - Solo pedidos DELIVERED (ventas reales)
     const topProducts = await prisma.orderItem.groupBy({
-      by: ["productId"],
+      by: ['productId'],
       where: {
         order: {
-          status: "DELIVERED",
+          status: 'DELIVERED',
           deliveredAt: { gte: dateFilter },
         },
       },
@@ -299,23 +292,23 @@ export async function GET(req: NextRequest) {
         subtotal: true,
       },
       orderBy: {
-        _sum: { quantity: "desc" },
+        _sum: { quantity: 'desc' },
       },
       take: 5,
     });
 
     // Get product details for top products
     const topProductsWithDetails = await Promise.all(
-      topProducts.map(async (item) => {
+      topProducts.map(async item => {
         const product = await prisma.product.findUnique({
-          where: { id: item.productId || "" },
+          where: { id: item.productId || '' },
           select: { name: true, stock: true, slug: true },
         });
         return {
           id: item.productId,
           nombre: product?.slug
             ? translateProductName(product.slug)
-            : "Producto eliminado",
+            : 'Producto eliminado',
           vendido: item._sum.quantity || 0,
           ingresos: Number(item._sum.subtotal || 0),
           stock: product?.stock || 0,
@@ -325,29 +318,29 @@ export async function GET(req: NextRequest) {
 
     // Top Customers - Solo pedidos DELIVERED
     const topCustomers = await prisma.order.groupBy({
-      by: ["userId"],
+      by: ['userId'],
       where: {
-        status: "DELIVERED",
+        status: 'DELIVERED',
         deliveredAt: { gte: dateFilter },
       },
       _count: { id: true },
       _sum: { total: true },
       orderBy: {
-        _sum: { total: "desc" },
+        _sum: { total: 'desc' },
       },
       take: 5,
     });
 
     // Get customer details
     const topCustomersWithDetails = await Promise.all(
-      topCustomers.map(async (customer) => {
+      topCustomers.map(async customer => {
         const user = await prisma.user.findUnique({
           where: { id: customer.userId },
           select: { name: true },
         });
         return {
           id: customer.userId,
-          nombre: user?.name || "Cliente eliminado",
+          nombre: user?.name || 'Cliente eliminado',
           pedidos: customer._count.id,
           gastado: Number(customer._sum.total || 0),
         };
@@ -357,7 +350,7 @@ export async function GET(req: NextRequest) {
     // Recent Orders
     const recentOrders = await prisma.order.findMany({
       where: { createdAt: { gte: dateFilter } },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
       take: 10,
       select: {
         id: true,
@@ -447,7 +440,7 @@ export async function GET(req: NextRequest) {
         recentOrders: recentOrders.map((o) => ({
           id: o.id,
           numeroPedido: o.orderNumber,
-          clienteNombre: o.user?.name || "N/A",
+          clienteNombre: o.user?.name || 'N/A',
           total: Number(o.total),
           estado: translateOrderStatus(o.status),
           creadoEn: o.createdAt,
@@ -455,9 +448,9 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Error fetching analytics:", error);
+    console.error('Error fetching analytics:', error);
     return NextResponse.json(
-      { success: false, error: "Error al obtener analytics" },
+      { success: false, error: 'Error al obtener analytics' },
       { status: 500 },
     );
   }

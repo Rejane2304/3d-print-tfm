@@ -2,25 +2,25 @@
  * Edit Shipping Zone Page - Admin
  * Form for editing an existing shipping zone
  */
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter, useParams } from "next/navigation";
-import Link from "next/link";
+import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
-  ArrowLeft,
-  Truck,
-  Loader2,
   AlertCircle,
+  ArrowLeft,
   CheckCircle2,
-  Save,
-  MapPin,
-  Euro,
   Clock,
+  Euro,
+  Loader2,
+  MapPin,
   Plus,
+  Save,
+  Truck,
   X,
-} from "lucide-react";
+} from 'lucide-react';
 
 export default function EditarZonaEnvioPage() {
   const { data: session, status } = useSession();
@@ -34,32 +34,32 @@ export default function EditarZonaEnvioPage() {
   const [success, setSuccess] = useState(false);
 
   // Arrays para regiones y prefijos
-  const [regionInput, setRegionInput] = useState("");
-  const [postalCodeInput, setPostalCodeInput] = useState("");
+  const [regionInput, setRegionInput] = useState('');
+  const [postalCodeInput, setPostalCodeInput] = useState('');
 
   // Form state
   const [formData, setFormData] = useState({
-    name: "",
-    country: "",
+    name: '',
+    country: '',
     regions: [] as string[],
     postalCodePrefixes: [] as string[],
     baseCost: 0,
-    freeShippingThreshold: "",
+    freeShippingThreshold: '',
     estimatedDaysMin: 3,
     estimatedDaysMax: 5,
     isActive: true,
   });
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/auth?callbackUrl=/admin/shipping");
+    if (status === 'unauthenticated') {
+      router.push('/auth?callbackUrl=/admin/shipping');
       return;
     }
 
     const user = session?.user as { role?: string } | undefined;
-    if (status === "authenticated") {
-      if (user?.role !== "ADMIN") {
-        router.push("/");
+    if (status === 'authenticated') {
+      if (user?.role !== 'ADMIN') {
+        router.push('/');
         return;
       }
       loadZone();
@@ -67,14 +67,14 @@ export default function EditarZonaEnvioPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, session, router, zoneId]);
 
-  const loadZone = async () => {
+  const loadZone = async() => {
     try {
       setLoading(true);
       const response = await fetch(`/api/admin/shipping/${zoneId}`);
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error cargando zona de envío");
+        throw new Error(data.error || 'Error cargando zona de envío');
       }
 
       const zone = data.zone;
@@ -84,14 +84,14 @@ export default function EditarZonaEnvioPage() {
         regions: zone.regiones,
         postalCodePrefixes: zone.prefijosCP,
         baseCost: zone.costoBase,
-        freeShippingThreshold: zone.envioGratisDesde?.toString() || "",
+        freeShippingThreshold: zone.envioGratisDesde?.toString() || '',
         estimatedDaysMin: zone.diasEstimadosMin,
         estimatedDaysMax: zone.diasEstimadosMax,
         isActive: zone.activo,
       });
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Error cargando zona de envío",
+        err instanceof Error ? err.message : 'Error cargando zona de envío',
       );
     } finally {
       setLoading(false);
@@ -102,14 +102,17 @@ export default function EditarZonaEnvioPage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value, type } = e.target;
+    let newValue;
+    if (type === 'checkbox') {
+      newValue = (e.target as HTMLInputElement).checked;
+    } else if (type === 'number') {
+      newValue = Number(value);
+    } else {
+      newValue = value;
+    }
     setFormData((prev) => ({
       ...prev,
-      [name]:
-        type === "checkbox"
-          ? (e.target as HTMLInputElement).checked
-          : type === "number"
-            ? Number(value)
-            : value,
+      [name]: newValue,
     }));
   };
 
@@ -119,7 +122,7 @@ export default function EditarZonaEnvioPage() {
         ...prev,
         regions: [...prev.regions, regionInput.trim()],
       }));
-      setRegionInput("");
+      setRegionInput('');
     }
   };
 
@@ -142,7 +145,7 @@ export default function EditarZonaEnvioPage() {
           postalCodeInput.trim(),
         ],
       }));
-      setPostalCodeInput("");
+      setPostalCodeInput('');
     }
   };
 
@@ -154,25 +157,35 @@ export default function EditarZonaEnvioPage() {
   };
 
   const validateForm = () => {
-    if (!formData.name.trim()) return "El nombre de la zona es obligatorio";
-    if (!formData.country.trim()) return "El país es obligatorio";
-    if (formData.regions.length === 0)
-      return "Debe agregar al menos una región";
-    if (formData.postalCodePrefixes.length === 0)
-      return "Debe agregar al menos un prefijo de código postal";
-    if (formData.baseCost < 0) return "El costo base no puede ser negativo";
-    if (formData.estimatedDaysMin < 1)
-      return "Los días estimados mínimos deben ser al menos 1";
-    if (formData.estimatedDaysMax < 1)
-      return "Los días estimados máximos deben ser al menos 1";
+    if (!formData.name.trim()) {
+      return 'El nombre de la zona es obligatorio';
+    }
+    if (!formData.country.trim()) {
+      return 'El país es obligatorio';
+    }
+    if (formData.regions.length === 0) {
+      return 'Debe agregar al menos una región';
+    }
+    if (formData.postalCodePrefixes.length === 0) {
+      return 'Debe agregar al menos un prefijo de código postal';
+    }
+    if (formData.baseCost < 0) {
+      return 'El costo base no puede ser negativo';
+    }
+    if (formData.estimatedDaysMin < 1) {
+      return 'Los días estimados mínimos deben ser al menos 1';
+    }
+    if (formData.estimatedDaysMax < 1) {
+      return 'Los días estimados máximos deben ser al menos 1';
+    }
     if (formData.estimatedDaysMin > formData.estimatedDaysMax) {
-      return "Los días estimados mínimos no pueden ser mayores que los máximos";
+      return 'Los días estimados mínimos no pueden ser mayores que los máximos';
     }
 
     return null;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
 
     const validationError = validateForm();
@@ -186,8 +199,8 @@ export default function EditarZonaEnvioPage() {
 
     try {
       const response = await fetch(`/api/admin/shipping/${zoneId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: formData.name,
           country: formData.country,
@@ -206,25 +219,25 @@ export default function EditarZonaEnvioPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error al actualizar zona de envío");
+        throw new Error(data.error || 'Error al actualizar zona de envío');
       }
 
       setSuccess(true);
       setTimeout(() => {
-        router.push("/admin/shipping");
+        router.push('/admin/shipping');
       }, 1500);
     } catch (err) {
       setError(
         err instanceof Error
           ? err.message
-          : "Error al actualizar zona de envío",
+          : 'Error al actualizar zona de envío',
       );
     } finally {
       setSaving(false);
     }
   };
 
-  if (status === "loading" || loading) {
+  if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -329,7 +342,9 @@ export default function EditarZonaEnvioPage() {
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    // eslint-disable-next-line max-len
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg \
+                      focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     placeholder="Ej: Península - Zona Centro"
                     required
                   />
@@ -348,7 +363,9 @@ export default function EditarZonaEnvioPage() {
                     name="country"
                     value={formData.country}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    // eslint-disable-next-line max-len
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg \
+                      focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     placeholder="Ej: España"
                     required
                   />
@@ -369,9 +386,13 @@ export default function EditarZonaEnvioPage() {
                     type="text"
                     value={regionInput}
                     onChange={(e) => setRegionInput(e.target.value)}
-                    onKeyPress={(e) =>
-                      e.key === "Enter" && (e.preventDefault(), addRegion())
-                    }
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addRegion();
+                      }
+                    }}
+                    // eslint-disable-next-line max-len
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     placeholder="Ej: Madrid"
                   />
@@ -387,15 +408,16 @@ export default function EditarZonaEnvioPage() {
 
                 {formData.regions.length > 0 && (
                   <div className="flex flex-wrap gap-2">
-                    {formData.regions.map((region, index) => (
+                    {formData.regions.map((region) => (
                       <span
-                        key={index}
-                        className="inline-flex items-center gap-1 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-sm"
+                        key={region}
+                        className="inline-flex items-center gap-1 px-3 py-1 bg-indigo-50 text-indigo-700 \
+                          rounded-full text-sm"
                       >
                         {region}
                         <button
                           type="button"
-                          onClick={() => removeRegion(index)}
+                          onClick={() => removeRegion(formData.regions.indexOf(region))}
                           className="p-0.5 hover:bg-indigo-100 rounded-full"
                         >
                           <X className="h-3 w-3" />
@@ -420,10 +442,14 @@ export default function EditarZonaEnvioPage() {
                     type="text"
                     value={postalCodeInput}
                     onChange={(e) => setPostalCodeInput(e.target.value)}
-                    onKeyPress={(e) =>
-                      e.key === "Enter" && (e.preventDefault(), addPostalCode())
-                    }
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addPostalCode();
+                      }
+                    }}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg \
+                      focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     placeholder="Ej: 28"
                   />
                   <button
@@ -444,15 +470,16 @@ export default function EditarZonaEnvioPage() {
 
                 {formData.postalCodePrefixes.length > 0 && (
                   <div className="flex flex-wrap gap-2">
-                    {formData.postalCodePrefixes.map((prefix, index) => (
+                    {formData.postalCodePrefixes.map((prefix) => (
                       <span
-                        key={index}
-                        className="inline-flex items-center gap-1 px-3 py-1 bg-green-50 text-green-700 rounded-full text-sm font-mono"
+                        key={prefix}
+                        className="inline-flex items-center gap-1 px-3 py-1 bg-green-50 text-green-700 \
+                          rounded-full text-sm font-mono"
                       >
                         {prefix}
                         <button
                           type="button"
-                          onClick={() => removePostalCode(index)}
+                          onClick={() => removePostalCode(formData.postalCodePrefixes.indexOf(prefix))}
                           className="p-0.5 hover:bg-green-100 rounded-full"
                         >
                           <X className="h-3 w-3" />
@@ -487,7 +514,8 @@ export default function EditarZonaEnvioPage() {
                     onChange={handleInputChange}
                     min="0"
                     step="0.01"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg \
+                      focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     required
                   />
                 </div>
@@ -507,7 +535,8 @@ export default function EditarZonaEnvioPage() {
                     onChange={handleInputChange}
                     min="0"
                     step="0.01"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg \
+                      focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     placeholder="Opcional"
                   />
                   <p className="text-xs text-gray-500 mt-1">
@@ -539,7 +568,8 @@ export default function EditarZonaEnvioPage() {
                     value={formData.estimatedDaysMin}
                     onChange={handleInputChange}
                     min="1"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg \
+                      focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     required
                   />
                 </div>
@@ -558,7 +588,8 @@ export default function EditarZonaEnvioPage() {
                     value={formData.estimatedDaysMax}
                     onChange={handleInputChange}
                     min="1"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg \
+                      focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     required
                   />
                 </div>
@@ -600,7 +631,8 @@ export default function EditarZonaEnvioPage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="flex-1 max-w-xs px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 max-w-xs px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 \
+                  disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {saving && <Loader2 className="h-4 w-4 animate-spin" />}
                 <Save className="h-4 w-4" />

@@ -2,26 +2,26 @@
  * Página de Mis Direcciones - Usuario
  * Gestión completa de direcciones de envío
  */
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
-  MapPin,
-  Plus,
-  Edit2,
-  Trash2,
-  Star,
-  Loader2,
   AlertCircle,
   CheckCircle2,
-  X,
+  Edit2,
+  Loader2,
+  MapPin,
   Phone,
+  Plus,
+  Star,
+  Trash2,
   User,
-} from "lucide-react";
-import { ConfirmModal } from "@/components/ui/ConfirmModal";
+  X,
+} from 'lucide-react';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
 interface Address {
   id: string;
@@ -40,14 +40,14 @@ interface Address {
 // Traducir nombres de dirección comunes
 const translateAddressName = (name: string): string => {
   const translations: { [key: string]: string } = {
-    home: "Casa",
-    house: "Casa",
-    work: "Trabajo",
-    office: "Oficina",
-    apartment: "Apartamento",
-    flat: "Piso",
-    parents: "Casa de padres",
-    family: "Casa familiar",
+    home: 'Casa',
+    house: 'Casa',
+    work: 'Trabajo',
+    office: 'Oficina',
+    apartment: 'Apartamento',
+    flat: 'Piso',
+    parents: 'Casa de padres',
+    family: 'Casa familiar',
   };
   const lowerName = name?.toLowerCase().trim();
   return translations[lowerName] || name;
@@ -66,135 +66,137 @@ export default function MyAddressesPage() {
   const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState({
-    name: "",
-    recipient: "",
-    phone: "",
-    address: "",
-    complement: "",
-    postalCode: "",
-    city: "",
-    province: "",
+    name: '',
+    recipient: '',
+    phone: '',
+    address: '',
+    complement: '',
+    postalCode: '',
+    city: '',
+    province: '',
     isDefault: false,
   });
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/auth?callbackUrl=/account/addresses");
+    if (status === 'unauthenticated') {
+      router.push('/auth?callbackUrl=/account/addresses');
       return;
     }
 
-    if (status === "authenticated") {
+    if (status === 'authenticated') {
       loadAddresses();
     }
   }, [status, router]);
 
-  const loadAddresses = async () => {
+  const loadAddresses = async() => {
     try {
       setLoading(true);
       setError(null);
 
-      const response = await fetch("/api/account/addresses");
+      const response = await fetch('/api/account/addresses');
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error al cargar direcciones");
+        throw new Error(data.error || 'Error al cargar direcciones');
       }
 
       setAddresses(data.addresses || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error desconocido");
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setError(null);
 
     try {
-      const url = "/api/account/addresses";
-      const method = editingAddress ? "PATCH" : "POST";
+      const url = '/api/account/addresses';
+      const method = editingAddress ? 'PATCH' : 'POST';
       const body = editingAddress
         ? { id: editingAddress.id, ...formData }
         : formData;
 
       const response = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error al guardar dirección");
+        throw new Error(data.error || 'Error al guardar dirección');
       }
 
       await loadAddresses();
       closeModal();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error desconocido");
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setSaving(false);
     }
   };
 
-  const deleteAddress = async () => {
-    if (!addressToDelete) return;
+  const deleteAddress = async() => {
+    if (!addressToDelete) {
+      return;
+    }
 
     try {
       const response = await fetch(
         `/api/account/addresses?id=${addressToDelete.id}`,
         {
-          method: "DELETE",
+          method: 'DELETE',
         },
       );
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || "Error al eliminar");
+        throw new Error(data.error || 'Error al eliminar');
       }
 
       await loadAddresses();
       setDeleteModalOpen(false);
       setAddressToDelete(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error desconocido");
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     }
   };
 
-  const setAsPrimary = async (id: string) => {
+  const setAsPrimary = async(id: string) => {
     try {
-      const response = await fetch("/api/account/addresses", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/account/addresses', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, isDefault: true }),
       });
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || "Error al actualizar");
+        throw new Error(data.error || 'Error al actualizar');
       }
 
       await loadAddresses();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error desconocido");
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     }
   };
 
   const openNewModal = () => {
     setEditingAddress(null);
     setFormData({
-      name: "",
-      recipient: session?.user?.name || "",
-      phone: "",
-      address: "",
-      complement: "",
-      postalCode: "",
-      city: "",
-      province: "",
+      name: '',
+      recipient: session?.user?.name || '',
+      phone: '',
+      address: '',
+      complement: '',
+      postalCode: '',
+      city: '',
+      province: '',
       isDefault: addresses.length === 0,
     });
     setFormModalOpen(true);
@@ -208,7 +210,7 @@ export default function MyAddressesPage() {
       recipient: address.recipient,
       phone: address.phone,
       address: address.address,
-      complement: address.complement || "",
+      complement: address.complement || '',
       postalCode: address.postalCode,
       city: address.city,
       province: address.province,
@@ -229,7 +231,7 @@ export default function MyAddressesPage() {
     setDeleteModalOpen(true);
   };
 
-  if (status === "loading" || loading) {
+  if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -285,7 +287,8 @@ export default function MyAddressesPage() {
             </p>
             <button
               onClick={openNewModal}
-              className="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+              className="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium \
+                hover:bg-indigo-700 transition-colors"
             >
               <Plus className="h-5 w-5" />
               Agregar dirección
@@ -299,8 +302,8 @@ export default function MyAddressesPage() {
                   key={address.id}
                   className={`bg-white rounded-lg shadow-sm border overflow-hidden ${
                     address.isDefault
-                      ? "border-indigo-500 ring-1 ring-indigo-500"
-                      : ""
+                      ? 'border-indigo-500 ring-1 ring-indigo-500'
+                      : ''
                   }`}
                 >
                   {/* Header de la dirección */}
@@ -311,7 +314,11 @@ export default function MyAddressesPage() {
                           {translateAddressName(address.name)}
                         </h3>
                         {address.isDefault && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs font-medium rounded-full flex-shrink-0">
+                          <span
+                            className="inline-flex items-center gap-1 px-2 py-0.5 \
+                              bg-indigo-100 text-indigo-700 text-xs font-medium \
+                              rounded-full flex-shrink-0"
+                          >
                             <Star className="h-3 w-3 fill-current" />
                             Principal
                           </span>
@@ -320,7 +327,8 @@ export default function MyAddressesPage() {
                       <div className="flex items-center gap-1 flex-shrink-0">
                         <button
                           onClick={() => openEditModal(address)}
-                          className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                          className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg \
+                            transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                           title="Editar"
                           aria-label="Editar dirección"
                         >
@@ -328,7 +336,8 @@ export default function MyAddressesPage() {
                         </button>
                         <button
                           onClick={() => confirmDelete(address)}
-                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg \
+                            transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                           title="Eliminar"
                           aria-label="Eliminar dirección"
                         >
@@ -385,7 +394,8 @@ export default function MyAddressesPage() {
                     ) : (
                       <button
                         onClick={() => setAsPrimary(address.id)}
-                        className="text-xs sm:text-sm text-indigo-600 hover:text-indigo-800 font-medium min-h-[44px] flex items-center"
+                        className="text-xs sm:text-sm text-indigo-600 hover:text-indigo-800 font-medium min-h-[44px] \
+                        flex items-center"
                       >
                         Establecer como dirección principal
                       </button>
@@ -400,7 +410,8 @@ export default function MyAddressesPage() {
               <div className="mt-6 text-center">
                 <button
                   onClick={openNewModal}
-                  className="inline-flex items-center gap-2 border-2 border-dashed border-gray-300 text-gray-600 px-6 py-3 rounded-lg font-medium hover:border-indigo-500 hover:text-indigo-600 transition-colors"
+                  className="inline-flex items-center gap-2 border-2 border-dashed border-gray-300 text-gray-600 \
+                  px-6 py-3 rounded-lg font-medium hover:border-indigo-500 hover:text-indigo-600 transition-colors"
                 >
                   <Plus className="h-5 w-5" />
                   Agregar otra dirección
@@ -415,19 +426,24 @@ export default function MyAddressesPage() {
       {formModalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-3 sm:p-4">
-            <div
+            <button
+              type="button"
               className="fixed inset-0 bg-gray-500 bg-opacity-75"
+              aria-label="Cerrar modal"
               onClick={closeModal}
+              tabIndex={0}
+              style={{ cursor: 'pointer' }}
             />
 
             <div className="relative bg-white rounded-2xl shadow-xl max-w-lg w-full p-4 sm:p-6 m-2">
               <div className="flex items-center justify-between mb-4 sm:mb-6">
                 <h2 className="text-lg sm:text-xl font-bold text-gray-900">
-                  {editingAddress ? "Editar dirección" : "Nueva dirección"}
+                  {editingAddress ? 'Editar dirección' : 'Nueva dirección'}
                 </h2>
                 <button
                   onClick={closeModal}
-                  className="text-gray-400 hover:text-gray-600 p-1 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  className="text-gray-400 hover:text-gray-600 p-1 min-h-[44px] min-w-[44px] flex items-center \
+                    justify-center"
                   aria-label="Cerrar"
                 >
                   <X className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -443,36 +459,53 @@ export default function MyAddressesPage() {
 
               <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
                 <div>
-                  <label htmlFor="addressName" className="block text-sm font-medium text-gray-700 mb-1">Nombre de la dirección *</label>
-                  <input id="addressName"
+                  <label
+                    htmlFor="addressName"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Nombre de la dirección *
+                  </label>
+                  <input
+                    id="addressName"
                     type="text"
                     value={formData.name}
                     onChange={(e) =>
                       setFormData({ ...formData, name: e.target.value })
                     }
                     placeholder="Ej: Casa, Trabajo, Casa de mis padres"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base min-h-[44px]"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:py-2 \
+                      focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 \
+                      text-sm sm:text-base min-h-[44px]"
                     required
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
-                    <label htmlFor="recipient" className="block text-sm font-medium text-gray-700 mb-1">Destinatario *</label>
-                    <input id="recipient"
+                    <label
+                      htmlFor="recipient"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Destinatario *
+                    </label>
+                    <input
+                      id="recipient"
                       type="text"
                       value={formData.recipient}
                       onChange={(e) =>
                         setFormData({ ...formData, recipient: e.target.value })
                       }
                       placeholder="Nombre y apellidos"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base min-h-[44px]"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:py-2 \
+                        focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 \
+                        text-sm sm:text-base min-h-[44px]"
                       required
                     />
                   </div>
                   <div>
                     <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Teléfono *</label>
-                    <input id="phone"
+                    <input
+                      id="phone"
                       type="tel"
                       inputMode="tel"
                       autoComplete="tel"
@@ -481,15 +514,25 @@ export default function MyAddressesPage() {
                         setFormData({ ...formData, phone: e.target.value })
                       }
                       placeholder="612345678"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base min-h-[44px]"
+                      className={
+                        'w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:py-2 ' +
+                        'focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ' +
+                        'text-sm sm:text-base min-h-[44px]'
+                      }
                       required
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="addressLine" className="block text-sm font-medium text-gray-700 mb-1">Dirección *</label>
-                  <input id="addressLine"
+                  <label
+                    htmlFor="addressLine"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Dirección *
+                  </label>
+                  <input
+                    id="addressLine"
                     type="text"
                     autoComplete="street-address"
                     value={formData.address}
@@ -497,32 +540,42 @@ export default function MyAddressesPage() {
                       setFormData({ ...formData, address: e.target.value })
                     }
                     placeholder="Calle, número, piso..."
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base min-h-[44px]"
+                    className={
+                      'w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:py-2 ' +
+                      'focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ' +
+                      'text-sm sm:text-base min-h-[44px]'
+                    }
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="complement" className="block text-sm font-medium text-gray-700 mb-1">
                     Complemento (opcional)
                   </label>
                   <input
+                    id="complement"
                     type="text"
                     value={formData.complement}
                     onChange={(e) =>
                       setFormData({ ...formData, complement: e.target.value })
                     }
                     placeholder="Piso, puerta, escalera..."
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base min-h-[44px]"
+                    className={
+                      'w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:py-2 ' +
+                      'focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ' +
+                      'text-sm sm:text-base min-h-[44px]'
+                    }
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700 mb-1">
                       Código Postal *
                     </label>
                     <input
+                      id="postalCode"
                       type="text"
                       inputMode="numeric"
                       autoComplete="postal-code"
@@ -532,13 +585,30 @@ export default function MyAddressesPage() {
                       }
                       placeholder="28001"
                       maxLength={5}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base min-h-[44px]"
+                      className={
+                        [
+                          'w-full',
+                          'border',
+                          'border-gray-300',
+                          'rounded-lg',
+                          'px-3',
+                          'py-2.5',
+                          'sm:py-2',
+                          'focus:ring-2',
+                          'focus:ring-indigo-500',
+                          'focus:border-indigo-500',
+                          'text-sm',
+                          'sm:text-base',
+                          'min-h-[44px]',
+                        ].join(' ')
+                      }
                       required
                     />
                   </div>
                   <div>
                     <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">Ciudad *</label>
-                    <input id="city"
+                    <input
+                      id="city"
                       type="text"
                       autoComplete="address-level2"
                       value={formData.city}
@@ -546,7 +616,23 @@ export default function MyAddressesPage() {
                         setFormData({ ...formData, city: e.target.value })
                       }
                       placeholder="Madrid"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base min-h-[44px]"
+                      className={
+                        [
+                          'w-full',
+                          'border',
+                          'border-gray-300',
+                          'rounded-lg',
+                          'px-3',
+                          'py-2.5',
+                          'sm:py-2',
+                          'focus:ring-2',
+                          'focus:ring-indigo-500',
+                          'focus:border-indigo-500',
+                          'text-sm',
+                          'sm:text-base',
+                          'min-h-[44px]',
+                        ].join(' ')
+                      }
                       required
                     />
                   </div>
@@ -554,7 +640,8 @@ export default function MyAddressesPage() {
 
                 <div>
                   <label htmlFor="province" className="block text-sm font-medium text-gray-700 mb-1">Provincia *</label>
-                  <input id="province"
+                  <input
+                    id="province"
                     type="text"
                     autoComplete="address-level1"
                     value={formData.province}
@@ -562,7 +649,21 @@ export default function MyAddressesPage() {
                       setFormData({ ...formData, province: e.target.value })
                     }
                     placeholder="Madrid"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base min-h-[44px]"
+                    className={[
+                      'w-full',
+                      'border',
+                      'border-gray-300',
+                      'rounded-lg',
+                      'px-3',
+                      'py-2.5',
+                      'sm:py-2',
+                      'focus:ring-2',
+                      'focus:ring-indigo-500',
+                      'focus:border-indigo-500',
+                      'text-sm',
+                      'sm:text-base',
+                      'min-h-[44px]',
+                    ].join(' ')}
                     required
                   />
                 </div>
@@ -579,7 +680,16 @@ export default function MyAddressesPage() {
                           isDefault: e.target.checked,
                         })
                       }
-                      className="h-4 w-4 min-h-[16px] min-w-[16px] text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                      className={[
+                        'h-4',
+                        'w-4',
+                        'min-h-[16px]',
+                        'min-w-[16px]',
+                        'text-indigo-600',
+                        'focus:ring-indigo-500',
+                        'border-gray-300',
+                        'rounded',
+                      ].join(' ')}
                     />
                     <label
                       htmlFor="isDefault"
@@ -594,17 +704,45 @@ export default function MyAddressesPage() {
                   <button
                     type="button"
                     onClick={closeModal}
-                    className="flex-1 px-4 py-2.5 sm:py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 min-h-[44px]"
+                    className={[
+                      'flex-1',
+                      'px-4',
+                      'py-2.5',
+                      'sm:py-2',
+                      'border',
+                      'border-gray-300',
+                      'text-gray-700',
+                      'rounded-lg',
+                      'font-medium',
+                      'hover:bg-gray-50',
+                      'min-h-[44px]',
+                    ].join(' ')}
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
                     disabled={saving}
-                    className="flex-1 px-4 py-2.5 sm:py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2 min-h-[44px]"
+                    className={[
+                      'flex-1',
+                      'px-4',
+                      'py-2.5',
+                      'sm:py-2',
+                      'bg-indigo-600',
+                      'text-white',
+                      'rounded-lg',
+                      'font-medium',
+                      'hover:bg-indigo-700',
+                      'disabled:opacity-50',
+                      'flex',
+                      'items-center',
+                      'justify-center',
+                      'gap-2',
+                      'min-h-[44px]',
+                    ].join(' ')}
                   >
                     {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-                    {editingAddress ? "Guardar cambios" : "Agregar dirección"}
+                    {editingAddress ? 'Guardar cambios' : 'Agregar dirección'}
                   </button>
                 </div>
               </form>
@@ -622,7 +760,9 @@ export default function MyAddressesPage() {
         }}
         onConfirm={deleteAddress}
         title="¿Eliminar dirección?"
-        description={`¿Estás seguro de que deseas eliminar la dirección "${addressToDelete ? translateAddressName(addressToDelete.name) : ""}"? Esta acción no se puede deshacer.`}
+        description={`¿Estás seguro de que deseas eliminar la dirección "${
+          addressToDelete ? translateAddressName(addressToDelete.name) : ''
+        }"? Esta acción no se puede deshacer.`}
         confirmText="Eliminar"
         type="danger"
       />

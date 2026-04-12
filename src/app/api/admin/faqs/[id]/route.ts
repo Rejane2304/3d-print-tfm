@@ -4,43 +4,43 @@
  *
  * Requiere: Rol ADMIN
  */
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
-import { z } from "zod";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
+import { z } from 'zod';
 import {
-  faqTranslations,
   faqCategoryTranslations,
-} from "@/lib/i18n/faq-translations";
+  faqTranslations,
+} from '@/lib/i18n/faq-translations';
 
 // Mapeo de categorías en inglés → español
 const categoryTranslations: Record<string, string> = {
-  Materials: "Materiales",
-  Shipping: "Envío",
-  Returns: "Devoluciones",
-  Orders: "Pedidos",
-  Care: "Cuidado",
-  Payments: "Pagos",
-  Safety: "Seguridad",
+  Materials: 'Materiales',
+  Shipping: 'Envío',
+  Returns: 'Devoluciones',
+  Orders: 'Pedidos',
+  Care: 'Cuidado',
+  Payments: 'Pagos',
+  Safety: 'Seguridad',
 };
 
 // Schema de validación
 const faqUpdateSchema = z.object({
   question: z
     .string()
-    .min(1, "La pregunta es obligatoria")
-    .max(500, "Máximo 500 caracteres")
+    .min(1, 'La pregunta es obligatoria')
+    .max(500, 'Máximo 500 caracteres')
     .optional(),
   answer: z
     .string()
-    .min(1, "La respuesta es obligatoria")
-    .max(5000, "Máximo 5000 caracteres")
+    .min(1, 'La respuesta es obligatoria')
+    .max(5000, 'Máximo 5000 caracteres')
     .optional(),
   category: z
     .string()
-    .min(1, "La categoría es obligatoria")
-    .max(100, "Máximo 100 caracteres")
+    .min(1, 'La categoría es obligatoria')
+    .max(100, 'Máximo 100 caracteres')
     .optional(),
   displayOrder: z.number().int().min(0).optional(),
   isActive: z.boolean().optional(),
@@ -62,7 +62,7 @@ export async function GET(
     }
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: "No autenticado" },
+        { success: false, error: 'No autenticado' },
         { status: 401 },
       );
     }
@@ -71,9 +71,9 @@ export async function GET(
       where: { email: session.user.email },
     });
 
-    if (!user || user.role !== "ADMIN") {
+    if (user?.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: "No autorizado" },
+        { success: false, error: 'No autorizado' },
         { status: 401 },
       );
     }
@@ -84,7 +84,7 @@ export async function GET(
 
     if (!faq) {
       return NextResponse.json(
-        { success: false, error: "FAQ no encontrada" },
+        { success: false, error: 'FAQ no encontrada' },
         { status: 404 },
       );
     }
@@ -112,9 +112,9 @@ export async function GET(
 
     return NextResponse.json({ success: true, faq: faqFormateada });
   } catch (error) {
-    console.error("Error obteniendo FAQ:", error);
+    console.error('Error obteniendo FAQ:', error);
     return NextResponse.json(
-      { success: false, error: "Error interno" },
+      { success: false, error: 'Error interno' },
       { status: 500 },
     );
   }
@@ -136,7 +136,7 @@ export async function PATCH(
     }
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: "No autenticado" },
+        { success: false, error: 'No autenticado' },
         { status: 401 },
       );
     }
@@ -145,9 +145,9 @@ export async function PATCH(
       where: { email: session.user.email },
     });
 
-    if (!user || user.role !== "ADMIN") {
+    if (user?.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: "No autorizado" },
+        { success: false, error: 'No autorizado' },
         { status: 401 },
       );
     }
@@ -159,7 +159,7 @@ export async function PATCH(
 
     if (!existing) {
       return NextResponse.json(
-        { success: false, error: "FAQ no encontrada" },
+        { success: false, error: 'FAQ no encontrada' },
         { status: 404 },
       );
     }
@@ -189,9 +189,9 @@ export async function PATCH(
         { status: 400 },
       );
     }
-    console.error("Error actualizando FAQ:", error);
+    console.error('Error actualizando FAQ:', error);
     return NextResponse.json(
-      { success: false, error: "Error interno" },
+      { success: false, error: 'Error interno' },
       { status: 500 },
     );
   }
@@ -213,7 +213,7 @@ export async function DELETE(
     }
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: "No autenticado" },
+        { success: false, error: 'No autenticado' },
         { status: 401 },
       );
     }
@@ -222,9 +222,9 @@ export async function DELETE(
       where: { email: session.user.email },
     });
 
-    if (!user || user.role !== "ADMIN") {
+    if (user?.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: "No autorizado" },
+        { success: false, error: 'No autorizado' },
         { status: 401 },
       );
     }
@@ -236,7 +236,7 @@ export async function DELETE(
 
     if (!existing) {
       return NextResponse.json(
-        { success: false, error: "FAQ no encontrada" },
+        { success: false, error: 'FAQ no encontrada' },
         { status: 404 },
       );
     }
@@ -248,12 +248,12 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: "FAQ eliminada correctamente",
+      message: 'FAQ eliminada correctamente',
     });
   } catch (error) {
-    console.error("Error eliminando FAQ:", error);
+    console.error('Error eliminando FAQ:', error);
     return NextResponse.json(
-      { success: false, error: "Error interno" },
+      { success: false, error: 'Error interno' },
       { status: 500 },
     );
   }

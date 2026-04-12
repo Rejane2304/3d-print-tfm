@@ -3,14 +3,14 @@
  * POST /api/admin/inventory/[id]/adjust
  * Creates inventory movement and updates stock
  */
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
-import { prisma } from "@/lib/db/prisma";
-import { MovementType } from "@prisma/client";
-import { translateMovementType, translateErrorMessage } from "@/lib/i18n";
-import { emitStockUpdated, emitStockLow } from "@/lib/realtime/event-service";
-import { createStockAlert } from "@/lib/alerts/alert-service";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
+import { prisma } from '@/lib/db/prisma';
+import { MovementType } from '@prisma/client';
+import { translateErrorMessage, translateMovementType } from '@/lib/i18n';
+import { emitStockLow, emitStockUpdated } from '@/lib/realtime/event-service';
+import { createStockAlert } from '@/lib/alerts/alert-service';
 
 export async function POST(
   req: NextRequest,
@@ -21,7 +21,7 @@ export async function POST(
 
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: "No autenticado" },
+        { success: false, error: 'No autenticado' },
         { status: 401 },
       );
     }
@@ -32,9 +32,9 @@ export async function POST(
       select: { id: true, role: true },
     });
 
-    if (!adminUser || adminUser.role !== "ADMIN") {
+    if (adminUser?.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: "Acceso denegado" },
+        { success: false, error: 'Acceso denegado' },
         { status: 403 },
       );
     }
@@ -44,23 +44,23 @@ export async function POST(
     const { type, quantity, reason } = body;
 
     // Validate input
-    if (!type || !["IN", "OUT", "ADJUST"].includes(type)) {
+    if (!type || !['IN', 'OUT', 'ADJUST'].includes(type)) {
       return NextResponse.json(
-        { success: false, error: "Tipo de movimiento inválido" },
+        { success: false, error: 'Tipo de movimiento inválido' },
         { status: 400 },
       );
     }
 
     if (!quantity || quantity <= 0) {
       return NextResponse.json(
-        { success: false, error: "Cantidad debe ser mayor a 0" },
+        { success: false, error: 'Cantidad debe ser mayor a 0' },
         { status: 400 },
       );
     }
 
     if (!reason || reason.length < 3) {
       return NextResponse.json(
-        { success: false, error: "Motivo requerido (mínimo 3 caracteres)" },
+        { success: false, error: 'Motivo requerido (mínimo 3 caracteres)' },
         { status: 400 },
       );
     }
@@ -73,7 +73,7 @@ export async function POST(
 
     if (!product) {
       return NextResponse.json(
-        { success: false, error: "Producto no encontrado" },
+        { success: false, error: 'Producto no encontrado' },
         { status: 404 },
       );
     }
@@ -84,21 +84,21 @@ export async function POST(
 
     // Calculate new stock based on movement type
     switch (type) {
-      case "IN":
+      case 'IN':
         newStock = previousStock + quantity;
         movementType = MovementType.IN;
         break;
-      case "OUT":
+      case 'OUT':
         newStock = previousStock - quantity;
         movementType = MovementType.OUT;
         break;
-      case "ADJUST":
+      case 'ADJUST':
         newStock = quantity; // In ADJUST, quantity is the new target value
         movementType = MovementType.ADJUSTMENT;
         break;
       default:
         return NextResponse.json(
-          { success: false, error: "Tipo de movimiento no válido" },
+          { success: false, error: 'Tipo de movimiento no válido' },
           { status: 400 },
         );
     }
@@ -106,13 +106,13 @@ export async function POST(
     // Validate stock won't go negative
     if (newStock < 0) {
       return NextResponse.json(
-        { success: false, error: "El stock no puede ser negativo" },
+        { success: false, error: 'El stock no puede ser negativo' },
         { status: 400 },
       );
     }
 
     // Execute transaction
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async tx => {
       // Create inventory movement
       const movement = await tx.inventoryMovement.create({
         data: {
@@ -121,7 +121,7 @@ export async function POST(
           createdBy: adminUser.id,
           type: movementType,
           quantity:
-            type === "ADJUST" ? Math.abs(newStock - previousStock) : quantity,
+            type === 'ADJUST' ? Math.abs(newStock - previousStock) : quantity,
           previousStock,
           newStock,
           reason,
@@ -152,13 +152,13 @@ export async function POST(
       try {
         await createStockAlert(result.product.id, result.product.stock);
       } catch (alertError) {
-        console.error("Error creating stock alert:", alertError);
+        console.error('Error creating stock alert:', alertError);
       }
     }
 
     return NextResponse.json({
       success: true,
-      message: translateErrorMessage("Stock actualizado correctamente"),
+      message: translateErrorMessage('Stock actualizado correctamente'),
       data: {
         product: {
           id: result.product.id,
@@ -177,11 +177,11 @@ export async function POST(
       },
     });
   } catch (error) {
-    console.error("Error adjusting inventory:", error);
+    console.error('Error adjusting inventory:', error);
     return NextResponse.json(
       {
         success: false,
-        error: translateErrorMessage("Error al ajustar inventario"),
+        error: translateErrorMessage('Error al ajustar inventario'),
       },
       { status: 500 },
     );

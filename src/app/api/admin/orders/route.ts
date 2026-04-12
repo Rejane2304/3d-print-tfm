@@ -4,30 +4,30 @@
  *
  * Requires: ADMIN role
  */
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
-import { z } from "zod";
-import { Prisma, OrderStatus } from "@prisma/client";
-import { translateOrderStatus, translateErrorMessage } from "@/lib/i18n";
-import { emitOrderStatusUpdated } from "@/lib/realtime/event-service";
-import { createOrderStatusChangedAlert } from "@/lib/alerts/alert-service";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
+import { z } from 'zod';
+import { OrderStatus, Prisma } from '@prisma/client';
+import { translateErrorMessage, translateOrderStatus } from '@/lib/i18n';
+import { createOrderStatusChangedAlert } from '@/lib/alerts/alert-service';
+import { emitOrderStatusUpdated } from '@/lib/realtime/event-service';
 import {
-  validateStatusTransition,
   prepareStatusUpdate,
-} from "@/lib/orders/status-machine";
+  validateStatusTransition,
+} from '@/lib/orders/status-machine';
 
 // Validation schema for update
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const actualizarPedidoSchema = z.object({
   status: z.enum([
-    "PENDING",
-    "CONFIRMED",
-    "PREPARING",
-    "SHIPPED",
-    "DELIVERED",
-    "CANCELLED",
+    'PENDING',
+    'CONFIRMED',
+    'PREPARING',
+    'SHIPPED',
+    'DELIVERED',
+    'CANCELLED',
   ]),
   internalNotes: z.string().optional(),
   shippedAt: z.string().datetime().optional(),
@@ -37,12 +37,12 @@ const actualizarPedidoSchema = z.object({
 
 // Mapping of statuses from Spanish to English
 const estadoToEnglish: Record<string, string> = {
-  Pendiente: "PENDING",
-  Confirmado: "CONFIRMED",
-  "En preparación": "PREPARING",
-  Enviado: "SHIPPED",
-  Entregado: "DELIVERED",
-  Cancelado: "CANCELLED",
+  Pendiente: 'PENDING',
+  Confirmado: 'CONFIRMED',
+  'En preparación': 'PREPARING',
+  Enviado: 'SHIPPED',
+  Entregado: 'DELIVERED',
+  Cancelado: 'CANCELLED',
 };
 
 // GET - List orders
@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: "No autenticado" },
+        { success: false, error: 'No autenticado' },
         { status: 401 },
       );
     }
@@ -60,17 +60,17 @@ export async function GET(req: NextRequest) {
       where: { email: session.user.email },
     });
 
-    if (!usuario || usuario.role !== "ADMIN") {
+    if (usuario?.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: "No autorizado" },
+        { success: false, error: 'No autorizado' },
         { status: 403 },
       );
     }
 
     const { searchParams } = new URL(req.url);
-    const status = searchParams.get("status");
-    const limit = Number.parseInt(searchParams.get("limit") || "50", 10);
-    const page = Number.parseInt(searchParams.get("page") || "1", 10);
+    const status = searchParams.get('status');
+    const limit = Number.parseInt(searchParams.get('limit') || '50', 10);
+    const page = Number.parseInt(searchParams.get('page') || '1', 10);
     const skip = (page - 1) * limit;
 
     const where: Prisma.OrderWhereInput = {};
@@ -98,7 +98,7 @@ export async function GET(req: NextRequest) {
           },
           payment: true,
         },
-        orderBy: { createdAt: "desc" },
+        orderBy: { createdAt: 'desc' },
         skip,
         take: limit,
       }),
@@ -129,9 +129,9 @@ export async function GET(req: NextRequest) {
       limit,
     });
   } catch (error) {
-    console.error("Error listing orders:", error);
+    console.error('Error listing orders:', error);
     return NextResponse.json(
-      { success: false, error: translateErrorMessage("Internal error") },
+      { success: false, error: translateErrorMessage('Internal error') },
       { status: 500 },
     );
   }
@@ -143,7 +143,7 @@ export async function PATCH(req: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: "No autenticado" },
+        { success: false, error: 'No autenticado' },
         { status: 401 },
       );
     }
@@ -152,9 +152,9 @@ export async function PATCH(req: NextRequest) {
       where: { email: session.user.email },
     });
 
-    if (!usuario || usuario.role !== "ADMIN") {
+    if (usuario?.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: "No autorizado" },
+        { success: false, error: 'No autorizado' },
         { status: 403 },
       );
     }
@@ -165,7 +165,7 @@ export async function PATCH(req: NextRequest) {
 
     if (!id) {
       return NextResponse.json(
-        { success: false, error: "ID requerido" },
+        { success: false, error: 'ID requerido' },
         { status: 400 },
       );
     }
@@ -174,7 +174,7 @@ export async function PATCH(req: NextRequest) {
     const englishStatus = estadoToEnglish[estado];
     if (!englishStatus) {
       return NextResponse.json(
-        { success: false, error: "Estado inválido" },
+        { success: false, error: 'Estado inválido' },
         { status: 400 },
       );
     }
@@ -191,7 +191,7 @@ export async function PATCH(req: NextRequest) {
 
     if (!existingOrder) {
       return NextResponse.json(
-        { success: false, error: "Pedido no encontrado" },
+        { success: false, error: 'Pedido no encontrado' },
         { status: 404 },
       );
     }
@@ -212,7 +212,7 @@ export async function PATCH(req: NextRequest) {
 
     // VALIDACIÓN: No se puede cancelar si hay factura activa
     if (
-      englishStatus === "CANCELLED" &&
+      englishStatus === 'CANCELLED' &&
       existingOrder.invoice &&
       !existingOrder.invoice.isCancelled
     ) {
@@ -220,7 +220,7 @@ export async function PATCH(req: NextRequest) {
         {
           success: false,
           error:
-            "No se puede cancelar un pedido con factura emitida. Anule la factura primero.",
+            'No se puede cancelar un pedido con factura emitida. Anule la factura primero.',
         },
         { status: 400 },
       );
@@ -229,7 +229,7 @@ export async function PATCH(req: NextRequest) {
     // Preparar datos de actualización CON TIMESTAMP
     const updateData = prepareStatusUpdate(englishStatus as OrderStatus, {
       internalNotes: notasInternas,
-      ...(englishStatus === "SHIPPED" && {
+      ...(englishStatus === 'SHIPPED' && {
         trackingNumber: numeroSeguimiento,
         carrier: transportista,
       }),
@@ -261,7 +261,7 @@ export async function PATCH(req: NextRequest) {
         englishStatus,
       );
     } catch (alertError) {
-      console.error("Error creating order status changed alert:", alertError);
+      console.error('Error creating order status changed alert:', alertError);
     }
 
     return NextResponse.json({ success: true, pedido });
@@ -272,9 +272,9 @@ export async function PATCH(req: NextRequest) {
         { status: 400 },
       );
     }
-    console.error("Error updating order:", error);
+    console.error('Error updating order:', error);
     return NextResponse.json(
-      { success: false, error: translateErrorMessage("Internal error") },
+      { success: false, error: translateErrorMessage('Internal error') },
       { status: 500 },
     );
   }

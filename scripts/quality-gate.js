@@ -1,31 +1,29 @@
 #!/usr/bin/env node
 /**
  * QUALITY GATE - Sistema Definitivo de Calidad de Código
- * 
+ *
  * REGLAS ESTRICTAS:
  * - CERO errores TypeScript
  * - CERO errores ESLint
  * - CERO advertencias SonarQube
  * - CERO console.log en producción
  * - CÓDIGO 100% formateado
- * 
+ *
  * Cualquier fallo = BLOQUEO INMEDIATO
  */
 
-import { execSync } from 'child_process';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { execSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const ROOT = join(__dirname, '..');
 
-let EXIT_CODE = 0;
 const ERRORS = [];
 
 function error(file, line, message, severity = 'ERROR') {
   ERRORS.push({ file, line, message, severity });
-  EXIT_CODE = 1;
 }
 
 function section(title) {
@@ -35,14 +33,16 @@ function section(title) {
 
 function run(command, options = {}) {
   try {
-    return execSync(command, { 
-      cwd: ROOT, 
+    return execSync(command, {
+      cwd: ROOT,
       encoding: 'utf-8',
       stdio: options.silent ? ['pipe', 'pipe', 'pipe'] : 'inherit',
-      ...options 
+      ...options,
     });
   } catch (e) {
-    if (options.ignoreErrors) return e.stdout || '';
+    if (options.ignoreErrors) {
+      return e.stdout || '';
+    }
     throw e;
   }
 }
@@ -89,7 +89,10 @@ try {
 // CHECK 3: No Console.log in Production Code
 // ═══════════════════════════════════════════════════════════
 section('Console.log Detection (src/ only)');
-const consoleOutput = run('grep -r "console\\.log" src/ --include="*.ts" --include="*.tsx" -n || true', { silent: true });
+const consoleOutput = run(
+  String.raw`grep -r "console\.log" src/ --include="*.ts" --include="*.tsx" -n || true`,
+  { silent: true }
+);
 const consoleLines = consoleOutput.split('\n').filter(l => l.trim() && !l.includes('node_modules'));
 if (consoleLines.length > 0) {
   consoleLines.forEach(line => {
@@ -123,8 +126,8 @@ try {
 section('SonarQube Critical Rules');
 const patterns = [
   { pattern: 'dangerouslySetInnerHTML', desc: 'XSS Risk: dangerouslySetInnerHTML' },
-  { pattern: 'eval\\(', desc: 'Security: eval() usage' },
-  { pattern: 'innerHTML\\s*=', desc: 'XSS Risk: innerHTML assignment' },
+  { pattern: String.raw`eval(`, desc: 'Security: eval() usage' },
+  { pattern: String.raw`innerHTML\s*=`, desc: 'XSS Risk: innerHTML assignment' },
 ];
 
 patterns.forEach(({ pattern, desc }) => {
@@ -156,13 +159,13 @@ if (ERRORS.length === 0) {
   console.log('');
   console.log('Detalles:');
   console.log('─'.repeat(60));
-  
+
   ERRORS.forEach(({ file, line, message, severity }) => {
     const icon = severity === 'ERROR' || severity === 'TS_ERROR' ? '🔴' : '🟡';
     console.log(`${icon} ${file}:${line}`);
     console.log(`   ${message}`);
   });
-  
+
   console.log('');
   console.log('═'.repeat(60));
   console.log('ACCIÓN REQUERIDA:');
