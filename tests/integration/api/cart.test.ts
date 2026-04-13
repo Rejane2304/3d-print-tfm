@@ -14,7 +14,7 @@ import { GET as getCart, POST as addToCart } from '@/app/api/cart/route';
 import { PATCH as updateCartItem, DELETE as deleteCartItem } from '@/app/api/cart/[itemId]/route';
 import { prisma } from '@/lib/db/prisma';
 import bcrypt from 'bcrypt';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 
 // Mock next-auth
 vi.mock('next-auth', () => ({

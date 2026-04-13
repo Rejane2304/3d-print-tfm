@@ -7,7 +7,7 @@
 import { prisma } from '../helpers';
 import bcrypt from 'bcrypt';
 import { Material, OrderStatus } from '@/types/prisma-enums';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { Decimal } from '@prisma/client/runtime/library';
 
 // Test data interfaces
@@ -96,7 +96,7 @@ export async function createTestUser(options: {
   email?: string;
 }): Promise<TestUser> {
   const { role, isActive = true, email = generateTestEmail(role.toLowerCase()) } = options;
-  const password = 'TestPassword123!';
+  const password = 'TestPassword123!'; // NOSONAR - Test password
   const hashedPassword = await bcrypt.hash(password, 10);
 
   const user = await prisma.user.create({
@@ -126,7 +126,7 @@ export async function createTestUser(options: {
  */
 export async function createTestCategory(name?: string): Promise<{ id: string; name: string; slug: string }> {
   const categoryName = name || `Test Category ${Date.now()}`;
-  const slug = categoryName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  const slug = categoryName.toLowerCase().replaceAll(' ', '-').replace(/[^a-z0-9-]/g, '');
 
   const category = await prisma.category.create({
     data: {
@@ -175,7 +175,7 @@ export async function createTestProduct(categoryId: string, options?: Partial<Te
     price: Number(product.price),
     stock: product.stock,
     categoryId: product.categoryId,
-    material: product.material as Material,
+    material: product.material,
     isActive: product.isActive,
   };
 }
@@ -293,7 +293,6 @@ export async function createTestOrder(userId: string, options?: {
   total?: number;
   shippingAddressId?: string;
 }): Promise<{ id: string; orderNumber: string; status: OrderStatus; total: number }> {
-  const timestamp = Date.now();
   const year = new Date().getFullYear();
   const count = await prisma.order.count();
   const orderNumber = `P-${year}${String(count + 1).padStart(6, '0')}`;
@@ -330,7 +329,7 @@ export async function createTestOrder(userId: string, options?: {
   return {
     id: order.id,
     orderNumber: order.orderNumber,
-    status: order.status as OrderStatus,
+    status: order.status,
     total: Number(order.total),
   };
 }

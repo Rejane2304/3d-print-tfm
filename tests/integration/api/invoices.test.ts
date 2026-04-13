@@ -13,7 +13,7 @@ import { GET as listInvoices, POST as createInvoice } from '@/app/api/admin/invo
 import { GET as generateInvoicePDF } from '@/app/api/admin/invoices/[id]/pdf/route';
 import { prisma } from '@/lib/db/prisma';
 import bcrypt from 'bcrypt';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 
 // Mock next-auth
 vi.mock('next-auth', () => ({
@@ -384,8 +384,8 @@ describe('Invoices API', () => {
           orderNumber: `P-PDF-${Date.now().toString().slice(-8)}`,
           userId: customerUser.id,
           status: 'DELIVERED',
-          subtotal: 50.00,
-          shipping: 0.00,
+          subtotal: 50,
+          shipping: 0,
           total: 60.50,
           shippingName: 'Test User',
           shippingPhone: '+34 600 123 456',
@@ -399,9 +399,9 @@ describe('Invoices API', () => {
             create: [{
               id: randomUUID(),
               name: 'Test Product',
-              price: 50.00,
+              price: 50,
               quantity: 1,
-              subtotal: 50.00,
+              subtotal: 50,
               category: 'Test',
               material: 'PLA',
             }],
@@ -464,9 +464,9 @@ describe('Invoices API', () => {
           orderNumber: `P-2024-${Date.now().toString().slice(-6)}`,
           userId: customerUser.id,
           status: 'DELIVERED',
-          subtotal: 100.00,
-          shipping: 5.00,
-          total: 126.00, // 100 * 1.21 + 5 = 126
+          subtotal: 100,
+          shipping: 5,
+          total: 126, // 100 * 1.21 + 5 = 126
           shippingName: 'Test User',
           shippingPhone: '+34 600 123 456',
           shippingAddress: 'Calle Test 123',
@@ -479,9 +479,9 @@ describe('Invoices API', () => {
             create: [{
               id: randomUUID(),
               name: 'Test Product',
-              price: 100.00,
+              price: 100,
               quantity: 1,
-              subtotal: 100.00,
+              subtotal: 100,
               category: 'Test',
               material: 'PLA',
             }],
@@ -528,8 +528,8 @@ describe('Invoices API', () => {
           orderNumber: `P-DETAIL-${Date.now().toString().slice(-8)}`,
           userId: customerUser.id,
           status: 'DELIVERED',
-          subtotal: 50.00,
-          shipping: 0.00,
+          subtotal: 50,
+          shipping: 0,
           total: 60.50,
           shippingName: 'Test User',
           shippingPhone: '+34 600 123 456',
@@ -543,9 +543,9 @@ describe('Invoices API', () => {
             create: [{
               id: randomUUID(),
               name: 'Test Product',
-              price: 50.00,
+              price: 50,
               quantity: 1,
-              subtotal: 50.00,
+              subtotal: 50,
               category: 'Test',
               material: 'PLA',
             }],

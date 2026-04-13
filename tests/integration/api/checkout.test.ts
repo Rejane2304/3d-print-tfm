@@ -13,7 +13,7 @@ import { POST as createCheckout } from '@/app/api/checkout/route';
 import { POST as stripeWebhook } from '@/app/api/webhooks/stripe/route';
 import { prisma } from '@/lib/db/prisma';
 import bcrypt from 'bcrypt';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 
 // Mock next-auth
 vi.mock('next-auth', () => ({
@@ -287,7 +287,7 @@ describe('Checkout API', () => {
         data: {
           id: randomUUID(),
           userId: customerUser.id,
-          subtotal: 299.90,
+          subtotal: 299.9,
           updatedAt: new Date(),
         },
       });

@@ -12,10 +12,10 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { GET as getProducts } from '@/app/api/products/route';
 import { GET as getProductDetail } from '@/app/api/products/[slug]/route';
-import { GET as getAdminProducts, POST as createProduct } from '@/app/api/admin/products/route';
+import { POST as createProduct } from '@/app/api/admin/products/route';
 import { prisma } from '@/lib/db/prisma';
 import bcrypt from 'bcrypt';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { Material } from '@prisma/client';
 
 describe('Products API', () => {
@@ -103,9 +103,9 @@ describe('Products API', () => {
     });
 
     testProducts = [
-      { ...product1, price: Number(product1.price), material: product1.material as Material },
-      { ...product2, price: Number(product2.price), material: product2.material as Material },
-      { ...inactiveProduct, price: Number(inactiveProduct.price), material: inactiveProduct.material as Material },
+      { ...product1, price: Number(product1.price) },
+      { ...product2, price: Number(product2.price) },
+      { ...inactiveProduct, price: Number(inactiveProduct.price) },
     ];
   });
 
@@ -308,15 +308,13 @@ describe('Products API', () => {
   });
 
   describe('POST /api/admin/products - Create Product (Admin)', () => {
-    let adminUser: { id: string; email: string };
-
     beforeEach(async () => {
-      // Create admin user
+      // Create admin user for tests
       const hashedPassword = await bcrypt.hash('AdminPass123!', 10);
-      adminUser = await prisma.user.create({
+      await prisma.user.create({
         data: {
           id: randomUUID(),
-        email: `admin-${Date.now()}@test.com`,
+          email: `admin-${Date.now()}@test.com`,
           password: hashedPassword,
           name: 'Admin User',
           role: 'ADMIN',
