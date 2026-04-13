@@ -149,7 +149,7 @@ async function verifyAuthSession(req: NextRequest): Promise<AuthResult> {
     };
   }
 
-  return { success: true, email: session.user.email as string };
+  return { success: true, email: session.user.email };
 }
 
 // Get user from database
@@ -281,7 +281,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 4. Get order data with items
-    const orderResult = await getOrderForPayment(orderId as string, userResult.user.id);
+    const orderResult = await getOrderForPayment(orderId, userResult.user.id);
     if (!orderResult.success) {
       return orderResult.response;
     }
