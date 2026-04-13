@@ -192,7 +192,7 @@ function AuthContent() {
             {/* Register Form */}
             <div
               className={`transition-all duration-500 ease-in-out ${
-                !isLoginTab
+                activeTab === 'register'
                   ? 'opacity-100 translate-x-0'
                   : 'opacity-0 -translate-x-10 absolute pointer-events-none'
               }`}
