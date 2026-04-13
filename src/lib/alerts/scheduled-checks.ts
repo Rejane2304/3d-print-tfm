@@ -3,6 +3,7 @@
  * Se ejecutan al cargar el panel de alertas, NO cada 15 min
  */
 
+import { AlertType } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 
 // Helper para generar UUID compatible
