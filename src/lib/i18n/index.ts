@@ -519,7 +519,7 @@ export function translateProductName(slug: string): string {
   }
 
   // If no translation found, format the slug nicely
-  return cleanSlug.replaceAll('-', ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  return cleanSlug.replaceAll('-', ' ').replaceAll(/\b\w/g, (c) => c.toUpperCase());
 }
 
 export function translateProductDescription(slug: string): string {
