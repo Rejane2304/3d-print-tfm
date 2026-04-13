@@ -247,7 +247,7 @@ async function createSampleProducts(): Promise<void> {
       name: 'Soporte para Plantas',
       slug: 'soporte-plantas',
       description: 'Soporte moderno para plantas pequeñas',
-      price: 18.50,
+      price: 18.5,
       stock: 15,
       material: Material.PLA,
       isActive: true,
@@ -355,7 +355,7 @@ async function createSampleOrders(): Promise<void> {
         create: {
           productId: product.id,
           name: product.name,
-          price: 18.50,
+          price: 18.5,
           quantity: 1,
           subtotal: 18.50,
           category: 'Decoración',

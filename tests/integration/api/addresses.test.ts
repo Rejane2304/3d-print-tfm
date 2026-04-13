@@ -13,7 +13,7 @@ import { NextRequest } from 'next/server';
 import { GET, POST, PATCH, DELETE } from '@/app/api/account/addresses/route';
 import { prisma } from '@/lib/db/prisma';
 import bcrypt from 'bcrypt';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 
 // Mock next-auth
 vi.mock('next-auth', () => ({
