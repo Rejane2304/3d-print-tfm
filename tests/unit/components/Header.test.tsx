@@ -22,10 +22,10 @@ vi.mock('next-auth/react', () => ({
 }));
 
 // Mock de next/image
-// eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
+// eslint-disable-next-line @next/next/no-img-element
 vi.mock('next/image', () => ({
   __esModule: true,
-  default: (props: any) => <img {...props} />,
+  default: (props: any) => <img alt="" {...props} />,
 }));
 
 // Mock de next/link - preservar todos los atributos incluyendo title
@@ -381,14 +381,14 @@ describe('Header Component', () => {
     it('debe ocultar navegación desktop en móvil', () => {
       render(<Header />);
 
-      const desktopNav = document.querySelector('.hidden.md\\:flex');
+      const desktopNav = document.querySelector(String.raw`.hidden.md\:flex`);
       expect(desktopNav).toBeInTheDocument();
     });
 
     it('debe mostrar botón de menú en móvil', () => {
       render(<Header />);
 
-      const mobileButton = document.querySelector('.md\\:hidden');
+      const mobileButton = document.querySelector(String.raw`.md\:hidden`);
       expect(mobileButton).toBeInTheDocument();
     });
   });

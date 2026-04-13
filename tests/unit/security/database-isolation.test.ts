@@ -41,7 +41,7 @@ describe('🔒 Security - Database Isolation (MANDATORY)', () => {
 
   it('DATABASE_URL must contain "test" in database name', () => {
     const url = process.env.DATABASE_URL || '';
-    const dbNameMatch = url.match(/\/([^/?]+)(\?|$)/);
+    const dbNameMatch = /\/([^/?]+)(\?|$)/.exec(url);
     const dbName = dbNameMatch ? dbNameMatch[1] : '';
     
     // STRICT: Database name must contain "test"
@@ -72,7 +72,7 @@ describe('🔒 Security - Database Isolation (MANDATORY)', () => {
     const url = process.env.DATABASE_URL || '';
     
     const isTestPort = url.includes(':5433') || url.includes(':5434') || url.includes(':5435');
-    const dbNameMatch = url.match(/\/([^/?]+)(\?|$)/);
+    const dbNameMatch = /\/([^/?]+)(\?|$)/.exec(url);
     const dbName = dbNameMatch ? dbNameMatch[1] : '';
     const isTestName = dbName.toLowerCase().includes('test');
     

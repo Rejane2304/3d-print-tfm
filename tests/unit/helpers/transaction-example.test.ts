@@ -18,7 +18,7 @@ import {
   prisma,
   getDBInfo 
 } from '../../helpers';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 
 describe('Example: Transaction Safety Demo', () => {
   // Reset database before the test suite

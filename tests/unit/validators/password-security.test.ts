@@ -117,7 +117,7 @@ describe('Password Security Module', () => {
   describe('checkPwnedPassword', () => {
     it('should handle API errors gracefully', async () => {
       // Mock fetch to simulate network error
-      global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
+      globalThis.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
 
       const result = await checkPwnedPassword('somePassword123');
       expect(result.error).toBe(PASSWORD_SECURITY_ERRORS.PWNED_API_ERROR);
@@ -125,7 +125,7 @@ describe('Password Security Module', () => {
     });
 
     it('should handle API non-OK responses', async () => {
-      global.fetch = vi.fn().mockResolvedValue({
+      globalThis.fetch = vi.fn().mockResolvedValue({
         ok: false,
         status: 500,
       } as Response);
@@ -138,7 +138,7 @@ describe('Password Security Module', () => {
     it('should detect breached passwords from HIBP', async () => {
       // Mock a response where the password suffix matches
       const mockHashSuffix = 'A1B2C'; // This would match based on hash
-      global.fetch = vi.fn().mockResolvedValue({
+      globalThis.fetch = vi.fn().mockResolvedValue({
         ok: true,
         text: async () => `${mockHashSuffix}:123\nOTHERHASH:456`,
       } as Response);
@@ -148,7 +148,7 @@ describe('Password Security Module', () => {
     });
 
     it('should return safe for non-breached passwords', async () => {
-      global.fetch = vi.fn().mockResolvedValue({
+      globalThis.fetch = vi.fn().mockResolvedValue({
         ok: true,
         text: async () => 'SOMEOTHERSUFFIX:123\nANOTHERHASH:456',
       } as Response);

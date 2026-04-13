@@ -101,7 +101,7 @@ export async function validateTestDB(): Promise<void> {
   }
 
   // STRICT: Validate database name contains "test"
-  const dbNameMatch = url.match(/\/([^/?]+)(\?|$)/);
+  const dbNameMatch = /\/([^/?]+)(\?|$)/.exec(url);
   const dbName = dbNameMatch ? dbNameMatch[1] : '';
   
   if (!dbName.toLowerCase().includes('test')) {
@@ -147,7 +147,7 @@ export async function validateTestDB(): Promise<void> {
 
   // STRICT: Validate port (test databases typically use different ports)
   const hasTestPort = url.includes(':5433') || url.includes(':5434') || url.includes(':5435');
-  const isTestPort = url.match(/:\d{4}/) && hasTestPort;
+  const isTestPort = /:\d{4}/.exec(url) && hasTestPort;
   
   // Also allow if explicitly using a test-named database on standard port
   if (!isTestPort && dbName.toLowerCase().includes('test')) {
@@ -511,7 +511,7 @@ export async function seedTestData(): Promise<void> {
  */
 export function getDBInfo() {
   const url = process.env.DATABASE_URL || '';
-  const match = url.match(/\/([^/?]+)(\?|$)/);
+  const match = /\/([^/?]+)(\?|$)/.exec(url);
   const dbName = match ? match[1] : 'unknown';
   const nodeEnv = process.env.NODE_ENV || 'unknown';
 
