@@ -8,8 +8,10 @@
 import React, {
   ReactNode,
   createContext,
+  useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from 'react';
 
@@ -39,12 +41,12 @@ const SiteConfigContext = createContext<SiteConfigContextType | undefined>(
   undefined,
 );
 
-export function SiteConfigProvider({ children }: { children: ReactNode }) {
+export function SiteConfigProvider({ children }: Readonly<{ children: ReactNode }>) {
   const [config, setConfig] = useState<SiteConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchConfig = async() => {
+  const fetchConfig = useCallback(async() => {
     try {
       setLoading(true);
       setError(null);
@@ -65,16 +67,16 @@ export function SiteConfigProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchConfig();
-  }, []);
+  }, [fetchConfig]);
+
+  const value = useMemo(() => ({ config, loading, error, refetch: fetchConfig }), [config, loading, error, fetchConfig]);
 
   return (
-    <SiteConfigContext.Provider
-      value={{ config, loading, error, refetch: fetchConfig }}
-    >
+    <SiteConfigContext.Provider value={value}>
       {children}
     </SiteConfigContext.Provider>
   );
