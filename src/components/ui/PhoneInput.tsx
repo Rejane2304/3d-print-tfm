@@ -26,7 +26,7 @@ export default function PhoneInput({
   // Function to format the phone number
   const formatPhoneNumber = (input: string): string => {
     // Remove everything except digits
-    const digits = input.replace(/\D/g, "");
+    const digits = input.replaceAll(/\D/g, "");
 
     // For Spanish numbers (9 digits) or international
     if (digits.length <= 9) {
@@ -69,12 +69,12 @@ export default function PhoneInput({
     if (rawValue.length < value.length) {
       // Remove the last significant character
       const newValue = value.replace(/\s$/, "").slice(0, -1);
-      onChange(newValue.replace(/\s/g, ""));
+      onChange(newValue.replaceAll(/\s/g, ""));
       return;
     }
 
     // Get only digits from the new value
-    const digits = rawValue.replace(/\D/g, "");
+    const digits = rawValue.replaceAll(/\D/g, "");
 
     // Limit to maximum 15 digits (complete international number)
     const limitedDigits = digits.slice(0, 15);
@@ -86,7 +86,7 @@ export default function PhoneInput({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Backspace" && value.endsWith(" ")) {
       e.preventDefault();
-      onChange(value.replace(/\s$/, "").slice(0, -1).replace(/\s/g, ""));
+      onChange(value.replace(/\s$/, "").slice(0, -1).replaceAll(/\s/g, ""));
     }
   };
 
