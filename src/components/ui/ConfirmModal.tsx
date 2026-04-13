@@ -21,18 +21,19 @@ interface ConfirmModalProps {
   confirmDisabled?: boolean;
 }
 
-export function ConfirmModal({
-  isOpen,
-  onClose,
-  onConfirm,
-  title,
-  description,
-  confirmText = "Confirmar",
-  cancelText = "Cancelar",
-  type = "danger",
-  isLoading = false,
-  confirmDisabled = false,
-}: ConfirmModalProps) {
+export function ConfirmModal(props: Readonly<ConfirmModalProps>) {
+  const {
+    isOpen,
+    onClose,
+    onConfirm,
+    title,
+    description,
+    confirmText = "Confirmar",
+    cancelText = "Cancelar",
+    type = "danger",
+    isLoading = false,
+    confirmDisabled = false,
+  } = props;
   // Cerrar con ESC
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -85,23 +86,27 @@ export function ConfirmModal({
   const Icon = config.icon;
 
   return (
-    <div
-      className="fixed inset-0 z-50 overflow-y-auto"
+    <dialog
+      open={isOpen}
       aria-labelledby="modal-title"
-      role="dialog"
-      aria-modal="true"
+      className="fixed inset-0 z-50 overflow-y-auto bg-transparent flex items-center justify-center"
+      style={{ padding: 0, border: "none", background: "none" }}
+      onClose={onClose}
     >
       {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-gray-500/75 backdrop-blur-sm transition-opacity"
+      <button
+        type="button"
+        className="fixed inset-0 bg-gray-500/75 backdrop-blur-sm transition-opacity cursor-pointer"
+        aria-label="Cerrar modal"
+        disabled={isLoading}
         onClick={onClose}
+        style={{ outline: "none", border: "none", padding: 0, margin: 0 }}
       />
 
       {/* Modal Container */}
       <div className="flex min-h-full items-center justify-center p-3 sm:p-4 text-center">
         <div
           className="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all w-full max-w-sm sm:max-w-lg mx-auto"
-          onClick={(e) => e.stopPropagation()}
         >
           {/* Close Button */}
           <button
@@ -189,7 +194,7 @@ export function ConfirmModal({
           </div>
         </div>
       </div>
-    </div>
+    </dialog>
   );
 }
 

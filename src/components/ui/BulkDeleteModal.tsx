@@ -78,23 +78,27 @@ export function BulkDeleteModal(props: Readonly<BulkDeleteModalProps>) {
   const Icon = typeIcons[itemType] || typeIcons.default;
 
   return (
-    <div
-      className="fixed inset-0 z-50 overflow-y-auto"
+    <dialog
+      open={isOpen}
       aria-labelledby="modal-title"
-      role="dialog"
-      aria-modal="true"
+      className="fixed inset-0 z-50 overflow-y-auto bg-transparent flex items-center justify-center"
+      style={{ padding: 0, border: "none", background: "none" }}
+      onClose={onClose}
     >
       {/* Backdrop con animación */}
-      <div
-        className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity duration-300"
-        onClick={!isLoading ? onClose : undefined}
+      <button
+        type="button"
+        className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity duration-300 cursor-pointer"
+        aria-label="Cerrar modal"
+        disabled={isLoading}
+        onClick={onClose}
+        style={{ outline: "none", border: "none", padding: 0, margin: 0 }}
       />
 
       {/* Modal Container */}
       <div className="flex min-h-full items-center justify-center p-4 text-center">
         <div
           className="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all duration-300 w-full max-w-md sm:max-w-lg mx-auto scale-100"
-          onClick={(e) => e.stopPropagation()}
         >
           {/* Header con gradiente de advertencia */}
           <div className="bg-gradient-to-r from-red-50 to-orange-50 px-6 py-4 border-b border-red-100">
@@ -274,7 +278,7 @@ export function BulkDeleteModal(props: Readonly<BulkDeleteModalProps>) {
           </div>
         </div>
       </div>
-    </div>
+    </dialog>
   );
 }
 
