@@ -247,7 +247,7 @@ describe('Admin Clients API', () => {
         const data = await res.json();
         expect(data).toHaveProperty('client');
         expect(data.client).toHaveProperty('id');
-        expect(data.client).toHaveProperty('stats');
+        expect(data.client).toHaveProperty('estadisticas'); // API returns estadisticas, not stats
       } else {
         expect([401, 403, 404, 500]).toContain(res.status);
       }
