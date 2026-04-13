@@ -2,10 +2,10 @@
  * Modal Mejorado para Eliminación Masiva (Bulk Delete)
  * Muestra información detallada sobre los elementos a eliminar
  */
-"use client";
+'use client';
 
-import { useEffect, useCallback, useState } from "react";
-import { AlertTriangle, X, Trash2, Package, Tag, HelpCircle, MessageSquare, Bell, Truck } from "lucide-react";
+import { useCallback, useEffect, useState } from 'react';
+import { AlertTriangle, Bell, HelpCircle, MessageSquare, Package, Tag, Trash2, Truck, X } from 'lucide-react';
 
 // Iconos por tipo de elemento
 const typeIcons: Record<string, React.ElementType> = {
@@ -40,12 +40,12 @@ export function BulkDeleteModal(props: Readonly<BulkDeleteModalProps>) {
     onClose,
     onConfirm,
     selectedCount,
-    itemType = "items",
-    itemName = "elemento",
-    itemNamePlural = "elementos",
+    itemType = 'items',
+    itemName = 'elemento',
+    itemNamePlural = 'elementos',
     hasAssociatedItems = false,
     associatedItemCount = 0,
-    associatedItemType = "elementos",
+    associatedItemType = 'elementos',
     isLoading = false,
   } = props;
   const [showDetails, setShowDetails] = useState(false);
@@ -53,7 +53,7 @@ export function BulkDeleteModal(props: Readonly<BulkDeleteModalProps>) {
   // Cerrar con ESC
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !isLoading) {
+      if (e.key === 'Escape' && !isLoading) {
         onClose();
       }
     },
@@ -62,18 +62,20 @@ export function BulkDeleteModal(props: Readonly<BulkDeleteModalProps>) {
 
   useEffect(() => {
     if (isOpen) {
-      document.addEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "hidden";
+      document.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'hidden';
       setShowDetails(false);
     }
 
     return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "unset";
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'unset';
     };
   }, [isOpen, handleKeyDown]);
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
   const Icon = typeIcons[itemType] || typeIcons.default;
 
@@ -82,7 +84,7 @@ export function BulkDeleteModal(props: Readonly<BulkDeleteModalProps>) {
       open={isOpen}
       aria-labelledby="modal-title"
       className="fixed inset-0 z-50 overflow-y-auto bg-transparent flex items-center justify-center"
-      style={{ padding: 0, border: "none", background: "none" }}
+      style={{ padding: 0, border: 'none', background: 'none' }}
       onClose={onClose}
     >
       {/* Backdrop con animación */}
@@ -92,7 +94,7 @@ export function BulkDeleteModal(props: Readonly<BulkDeleteModalProps>) {
         aria-label="Cerrar modal"
         disabled={isLoading}
         onClick={onClose}
-        style={{ outline: "none", border: "none", padding: 0, margin: 0 }}
+        style={{ outline: 'none', border: 'none', padding: 0, margin: 0 }}
       />
 
       {/* Modal Container */}
@@ -166,7 +168,7 @@ export function BulkDeleteModal(props: Readonly<BulkDeleteModalProps>) {
                       Atención: Hay {associatedItemCount} {associatedItemType} asociados
                     </p>
                     <p className="text-sm text-yellow-700 mt-1">
-                      Algunos {itemNamePlural} no se pueden eliminar porque tienen {associatedItemType} vinculados. 
+                      Algunos {itemNamePlural} no se pueden eliminar porque tienen {associatedItemType} vinculados.
                       Los elementos que no puedan eliminarse permanecerán en la lista.
                     </p>
                   </div>
@@ -185,7 +187,7 @@ export function BulkDeleteModal(props: Readonly<BulkDeleteModalProps>) {
                 </span>
                 <svg
                   className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
-                    showDetails ? "rotate-180" : ""
+                    showDetails ? 'rotate-180' : ''
                   }`}
                   fill="none"
                   viewBox="0 0 24 24"

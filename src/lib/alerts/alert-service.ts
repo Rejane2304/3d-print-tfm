@@ -3,7 +3,7 @@
  * Manages automatic creation of system alerts
  */
 import { prisma } from '@/lib/db/prisma';
-import { AlertType, AlertSeverity } from '@prisma/client';
+import { AlertSeverity, AlertType } from '@prisma/client';
 import { getLowStockThreshold } from '@/lib/site-config';
 import { emitNewAlert } from '@/lib/realtime/event-service';
 import { translateOrderStatus } from '@/lib/i18n';
@@ -12,8 +12,6 @@ interface AlertConfig {
   lowStockThreshold: number;
   criticalStockThreshold: number;
 }
-
-
 
 /**
  * Load alert configuration from the database
@@ -35,7 +33,9 @@ export async function createStockAlert(productId: string, currentStock: number, 
     include: { category: true },
   });
 
-  if (!product) return null;
+  if (!product) {
+    return null;
+  }
 
   // Determine severity and type
   let severity: AlertSeverity;
@@ -101,7 +101,7 @@ export async function createStockAlert(productId: string, currentStock: number, 
 export async function checkAllStockAlerts(config?: AlertConfig) {
   // Load config from DB if not provided
   const alertConfig = config || await getAlertConfig();
-  
+
   const products = await prisma.product.findMany({
     where: {
       isActive: true,
@@ -113,7 +113,9 @@ export async function checkAllStockAlerts(config?: AlertConfig) {
   const alerts = [];
   for (const product of products) {
     const alert = await createStockAlert(product.id, product.stock, alertConfig.lowStockThreshold);
-    if (alert) alerts.push(alert);
+    if (alert) {
+      alerts.push(alert);
+    }
   }
 
   return alerts;
@@ -123,7 +125,9 @@ export async function checkAllStockAlerts(config?: AlertConfig) {
  * Automatically resolve stock alerts when restocked
  */
 export async function resolveStockAlert(productId: string, newStock: number) {
-  if (newStock <= 5) return; // Still low stock
+  if (newStock <= 5) {
+    return;
+  } // Still low stock
 
   const pendingAlerts = await prisma.alert.findMany({
     where: {
@@ -157,16 +161,16 @@ export async function createUnpaidOrderAlerts(hoursThreshold: number = 24) {
       status: 'PENDING',
       createdAt: { lt: cutoffDate },
     },
-    include: { 
+    include: {
       user: {
-        select: { name: true, email: true }
+        select: { name: true, email: true },
       },
       payment: true,
     },
   });
 
   // Filter only those that are not paid
-  const ordersNotPaid = unpaidOrders.filter(order => 
+  const ordersNotPaid = unpaidOrders.filter(order =>
     order.payment?.status !== 'COMPLETED'
   );
 
@@ -183,9 +187,9 @@ export async function createUnpaidOrderAlerts(hoursThreshold: number = 24) {
 
     if (!existingAlert) {
       const alert = await prisma.alert.create({
-      data: {
-        id: crypto.randomUUID(),
-        type: 'PAYMENT_FAILED',
+        data: {
+          id: crypto.randomUUID(),
+          type: 'PAYMENT_FAILED',
           severity: 'MEDIUM',
           title: 'Pedido sin Pagar',
           message: `Pedido ${order.orderNumber} de ${order.user.name || order.user.email} lleva sin pagar más de ${hoursThreshold} horas`,
@@ -212,9 +216,9 @@ export async function createDelayedOrderAlerts(daysThreshold: number = 3) {
       status: 'PREPARING',
       updatedAt: { lt: cutoffDate },
     },
-    include: { 
+    include: {
       user: {
-        select: { name: true, email: true }
+        select: { name: true, email: true },
       },
     },
   });
@@ -231,9 +235,9 @@ export async function createDelayedOrderAlerts(daysThreshold: number = 3) {
 
     if (!existingAlert) {
       const alert = await prisma.alert.create({
-      data: {
-        id: crypto.randomUUID(),
-        type: 'ORDER_DELAYED',
+        data: {
+          id: crypto.randomUUID(),
+          type: 'ORDER_DELAYED',
           severity: 'HIGH',
           title: 'Pedido Atrasado',
           message: `Pedido ${order.orderNumber} lleva más de ${daysThreshold} días en procesamiento`,
@@ -248,8 +252,6 @@ export async function createDelayedOrderAlerts(daysThreshold: number = 3) {
   return alerts;
 }
 
-
-
 /**
  * Create alert for high value order
  */
@@ -261,7 +263,9 @@ export async function createHighValueOrderAlert(orderId: string, threshold: numb
     },
   });
 
-  if (!order || Number(order.total) < threshold) return null;
+  if (!order || Number(order.total) < threshold) {
+    return null;
+  }
 
   const existingAlert = await prisma.alert.findFirst({
     where: {
@@ -297,13 +301,17 @@ export async function createNewUserAlert(userId: string) {
     select: { id: true, name: true, email: true, createdAt: true },
   });
 
-  if (!user) return null;
+  if (!user) {
+    return null;
+  }
 
   // Only alert if user was created less than 1 hour ago
   const oneHourAgo = new Date();
   oneHourAgo.setHours(oneHourAgo.getHours() - 1);
 
-  if (user.createdAt < oneHourAgo) return null;
+  if (user.createdAt < oneHourAgo) {
+    return null;
+  }
 
   const existingAlert = await prisma.alert.findFirst({
     where: {
@@ -345,11 +353,15 @@ export async function createCouponExpiringAlert(couponId: string, daysThreshold:
     },
   });
 
-  if (!coupon || !coupon.validUntil) return null;
+  if (!coupon || !coupon.validUntil) {
+    return null;
+  }
 
   const daysUntilExpiry = Math.ceil((new Date(coupon.validUntil).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
 
-  if (daysUntilExpiry > daysThreshold || daysUntilExpiry < 0) return null;
+  if (daysUntilExpiry > daysThreshold || daysUntilExpiry < 0) {
+    return null;
+  }
 
   const existingAlert = await prisma.alert.findFirst({
     where: {
@@ -413,7 +425,9 @@ export async function createNewOrderAlert(orderId: string, orderNumber: string, 
         status: { in: ['PENDING', 'IN_PROGRESS'] },
       },
     });
-    if (existing) return existing;
+    if (existing) {
+      return existing;
+    }
 
     // Obtener info del pedido
     const order = await prisma.order.findUnique({
@@ -457,7 +471,9 @@ export async function createOrderCancelledAlert(orderId: string, orderNumber: st
         status: { in: ['PENDING', 'IN_PROGRESS'] },
       },
     });
-    if (existing) return existing;
+    if (existing) {
+      return existing;
+    }
 
     // Crear alerta
     const alert = await prisma.alert.create({
@@ -466,7 +482,7 @@ export async function createOrderCancelledAlert(orderId: string, orderNumber: st
         type: 'ORDER_CANCELLED',
         severity: 'MEDIUM',
         title: `Pedido Cancelado #${orderNumber}`,
-        message: `El pedido ha sido cancelado`,
+        message: 'El pedido ha sido cancelado',
         orderId,
         status: 'PENDING',
       },
@@ -532,7 +548,9 @@ export async function createPaymentFailedAlert(
         status: { in: ['PENDING', 'IN_PROGRESS'] },
       },
     });
-    if (existing) return existing;
+    if (existing) {
+      return existing;
+    }
 
     // Crear alerta
     const alert = await prisma.alert.create({
@@ -574,7 +592,9 @@ export async function createNewReviewAlert(
         status: { in: ['PENDING', 'IN_PROGRESS'] },
       },
     });
-    if (existing) return existing;
+    if (existing) {
+      return existing;
+    }
 
     // Determinar severidad
     const severity: AlertSeverity = rating <= 2 ? 'HIGH' : 'LOW';
@@ -625,7 +645,9 @@ export async function createNewMessageAlert(
         status: { in: ['PENDING', 'IN_PROGRESS'] },
       },
     });
-    if (existing) return existing;
+    if (existing) {
+      return existing;
+    }
 
     // Crear alerta
     const alert = await prisma.alert.create({

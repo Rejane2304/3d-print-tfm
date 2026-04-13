@@ -17,13 +17,13 @@ export function useCancelledOrder(setCart: (cart: Cart | null) => void): UseCanc
       const urlParams = new URLSearchParams(globalThis.location.search);
       const cancelled = urlParams.get('cancelled');
       const orderId = urlParams.get('orderId');
-      
+
       if (cancelled === 'true' && orderId) {
         setCancelledOrderId(orderId);
         globalThis.history.replaceState({}, '', '/checkout');
-        
+
         // Cancelar el pedido en el backend
-        void (async () => {
+        void (async() => {
           try {
             await fetch('/api/orders/cancel-and-restore', {
               method: 'POST',
@@ -36,12 +36,14 @@ export function useCancelledOrder(setCart: (cart: Cart | null) => void): UseCanc
         })();
       }
     };
-    
+
     checkCancelledPayment();
   }, []);
 
-  const restoreCart = async () => {
-    if (!cancelledOrderId) return;
+  const restoreCart = async() => {
+    if (!cancelledOrderId) {
+      return;
+    }
 
     try {
       const response = await fetch('/api/cart/restore-from-order', {
@@ -49,7 +51,7 @@ export function useCancelledOrder(setCart: (cart: Cart | null) => void): UseCanc
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ orderId: cancelledOrderId }),
       });
-      
+
       if (response.ok) {
         const cartRes = await fetch('/api/cart');
         if (cartRes.ok) {

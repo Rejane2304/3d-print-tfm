@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useEffect, useCallback } from "react";
-import { useSession } from "next-auth/react";
+import { useCallback, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 
-const CART_STORAGE_KEY = "cart";
+const CART_STORAGE_KEY = 'cart';
 const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes
 
 /**
@@ -13,20 +13,21 @@ const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes
  */
 export function useCartPersistence() {
   const { status } = useSession();
-  const isAuthenticated = status === "authenticated";
-  const isLoading = status === "loading";
+  const isAuthenticated = status === 'authenticated';
+  const isLoading = status === 'loading';
 
   // Function to clear guest cart
   const clearGuestCart = useCallback(() => {
     if (!isAuthenticated) {
       localStorage.removeItem(CART_STORAGE_KEY);
-      window.dispatchEvent(new Event("cartUpdated"));
-      console.log("[CartPersistence] Guest cart cleared");
+      window.dispatchEvent(new Event('cartUpdated'));
     }
   }, [isAuthenticated]);
 
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading) {
+      return;
+    }
 
     // For NON-authenticated users
     if (!isAuthenticated) {
@@ -41,7 +42,7 @@ export function useCartPersistence() {
       };
 
       // Events that indicate user activity
-      const activityEvents = ["mousedown", "keydown", "touchstart", "scroll"];
+      const activityEvents = ['mousedown', 'keydown', 'touchstart', 'scroll'];
 
       // Start timer
       resetInactivityTimer();
@@ -54,29 +55,29 @@ export function useCartPersistence() {
       // Clear cart when closing tab (for guests)
       const handleBeforeUnload = () => {
         // Only clear if not a refresh
-        if (!sessionStorage.getItem("isRefreshing")) {
+        if (!sessionStorage.getItem('isRefreshing')) {
           localStorage.removeItem(CART_STORAGE_KEY);
         }
       };
 
       // Mark when refreshing
       const handleLoad = () => {
-        sessionStorage.setItem("isRefreshing", "true");
+        sessionStorage.setItem('isRefreshing', 'true');
         setTimeout(() => {
-          sessionStorage.removeItem("isRefreshing");
+          sessionStorage.removeItem('isRefreshing');
         }, 1000);
       };
 
-      window.addEventListener("beforeunload", handleBeforeUnload);
-      window.addEventListener("load", handleLoad);
+      window.addEventListener('beforeunload', handleBeforeUnload);
+      window.addEventListener('load', handleLoad);
 
       return () => {
         clearTimeout(inactivityTimer);
         activityEvents.forEach((event) => {
           document.removeEventListener(event, resetInactivityTimer);
         });
-        window.removeEventListener("beforeunload", handleBeforeUnload);
-        window.removeEventListener("load", handleLoad);
+        window.removeEventListener('beforeunload', handleBeforeUnload);
+        window.removeEventListener('load', handleLoad);
       };
     }
   }, [isAuthenticated, isLoading, clearGuestCart]);

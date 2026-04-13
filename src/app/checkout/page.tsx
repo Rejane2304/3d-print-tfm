@@ -1,8 +1,7 @@
 'use client';
 
-import { Loader2, CheckCircle2, ShoppingCart } from 'lucide-react';
+import { CheckCircle2, Loader2, ShoppingCart } from 'lucide-react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 
 import { useCheckoutData } from './hooks/useCheckoutData';
 import { useCancelledOrder } from './hooks/useCancelledOrder';
@@ -30,11 +29,11 @@ function CancelledOrderAlert({
   orderId,
   onRestore,
   onDismiss,
-}: {
+}: Readonly<{
   orderId: string;
   onRestore: () => void;
   onDismiss: () => void;
-}) {
+}>) {
   return (
     <div className="mb-4 sm:mb-6 p-4 sm:p-6 bg-orange-50 border border-orange-200 rounded-lg">
       <div className="flex flex-col sm:flex-row sm:items-start gap-4">
@@ -88,13 +87,13 @@ function PaymentConfirmation({
   paymentMethodName,
   onConfirm,
   onCancel,
-}: {
+}: Readonly<{
   total: number;
   processing: boolean;
   paymentMethodName: string;
   onConfirm: () => void;
   onCancel: () => void;
-}) {
+}>) {
   return (
     <div className="space-y-3 sm:space-y-4">
       <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 sm:p-4">
@@ -138,7 +137,6 @@ function PaymentConfirmation({
 
 export default function CheckoutPage() {
   const { status } = useSession();
-  const router = useRouter();
   const [showConfirmation, setShowConfirmation] = useState(false);
 
   const {
@@ -173,7 +171,19 @@ export default function CheckoutPage() {
   const subtotal = cart?.subtotal || 0;
   const couponDiscount = appliedCoupon?.discount || 0;
   const hasFreeShippingCoupon = appliedCoupon?.type === 'FREE_SHIPPING';
-  const shippingCost = subtotal >= 50 ? 0 : hasFreeShippingCoupon ? 0 : 5.99;
+
+  // Calculate shipping cost
+  const getShippingCost = () => {
+    if (subtotal >= 50) {
+      return 0;
+    }
+    if (hasFreeShippingCoupon) {
+      return 0;
+    }
+    return 5.99;
+  };
+  const shippingCost = getShippingCost();
+
   const discountedSubtotal = Math.max(0, subtotal - couponDiscount);
   const taxAmount = (discountedSubtotal + shippingCost) * 0.21;
   const total = discountedSubtotal + shippingCost + taxAmount;
@@ -186,7 +196,7 @@ export default function CheckoutPage() {
     setShowConfirmation(true);
   };
 
-  const handlePayment = async () => {
+  const handlePayment = async() => {
     const result = await processPayment(selectedAddressId);
     if (result.success) {
       // Payment started successfully, will redirect or open external window
@@ -197,7 +207,7 @@ export default function CheckoutPage() {
     setShowConfirmation(false);
   };
 
-  const handleRestoreCart = async () => {
+  const handleRestoreCart = async() => {
     await restoreCart();
   };
 

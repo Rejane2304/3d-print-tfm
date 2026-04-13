@@ -3,10 +3,10 @@
  * Para acciones destructivas (eliminar, anular, etc.)
  * Diseño consistente con Tailwind CSS y animaciones suaves
  */
-"use client";
+'use client';
 
-import { useEffect, useCallback } from "react";
-import { AlertTriangle, X, Trash2, AlertCircle } from "lucide-react";
+import { useCallback, useEffect } from 'react';
+import { AlertCircle, AlertTriangle, Trash2, X } from 'lucide-react';
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -16,7 +16,7 @@ interface ConfirmModalProps {
   description: string;
   confirmText?: string;
   cancelText?: string;
-  type?: "danger" | "warning" | "info";
+  type?: 'danger' | 'warning' | 'info';
   isLoading?: boolean;
   confirmDisabled?: boolean;
 }
@@ -28,16 +28,16 @@ export function ConfirmModal(props: Readonly<ConfirmModalProps>) {
     onConfirm,
     title,
     description,
-    confirmText = "Confirmar",
-    cancelText = "Cancelar",
-    type = "danger",
+    confirmText = 'Confirmar',
+    cancelText = 'Cancelar',
+    type = 'danger',
     isLoading = false,
     confirmDisabled = false,
   } = props;
   // Cerrar con ESC
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+      if (e.key === 'Escape') {
         onClose();
       }
     },
@@ -46,39 +46,41 @@ export function ConfirmModal(props: Readonly<ConfirmModalProps>) {
 
   useEffect(() => {
     if (isOpen) {
-      document.addEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "hidden";
+      document.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'hidden';
     }
 
     return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "unset";
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'unset';
     };
   }, [isOpen, handleKeyDown]);
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
   const typeConfig = {
     danger: {
       icon: Trash2,
-      iconBg: "bg-red-100",
-      iconColor: "text-red-600",
-      buttonBg: "bg-red-600 hover:bg-red-700",
-      buttonFocus: "focus:ring-red-500",
+      iconBg: 'bg-red-100',
+      iconColor: 'text-red-600',
+      buttonBg: 'bg-red-600 hover:bg-red-700',
+      buttonFocus: 'focus:ring-red-500',
     },
     warning: {
       icon: AlertTriangle,
-      iconBg: "bg-yellow-100",
-      iconColor: "text-yellow-600",
-      buttonBg: "bg-yellow-600 hover:bg-yellow-700",
-      buttonFocus: "focus:ring-yellow-500",
+      iconBg: 'bg-yellow-100',
+      iconColor: 'text-yellow-600',
+      buttonBg: 'bg-yellow-600 hover:bg-yellow-700',
+      buttonFocus: 'focus:ring-yellow-500',
     },
     info: {
       icon: AlertCircle,
-      iconBg: "bg-blue-100",
-      iconColor: "text-blue-600",
-      buttonBg: "bg-blue-600 hover:bg-blue-700",
-      buttonFocus: "focus:ring-blue-500",
+      iconBg: 'bg-blue-100',
+      iconColor: 'text-blue-600',
+      buttonBg: 'bg-blue-600 hover:bg-blue-700',
+      buttonFocus: 'focus:ring-blue-500',
     },
   };
 
@@ -90,7 +92,7 @@ export function ConfirmModal(props: Readonly<ConfirmModalProps>) {
       open={isOpen}
       aria-labelledby="modal-title"
       className="fixed inset-0 z-50 overflow-y-auto bg-transparent flex items-center justify-center"
-      style={{ padding: 0, border: "none", background: "none" }}
+      style={{ padding: 0, border: 'none', background: 'none' }}
       onClose={onClose}
     >
       {/* Backdrop */}
@@ -100,7 +102,7 @@ export function ConfirmModal(props: Readonly<ConfirmModalProps>) {
         aria-label="Cerrar modal"
         disabled={isLoading}
         onClick={onClose}
-        style={{ outline: "none", border: "none", padding: 0, margin: 0 }}
+        style={{ outline: 'none', border: 'none', padding: 0, margin: 0 }}
       />
 
       {/* Modal Container */}

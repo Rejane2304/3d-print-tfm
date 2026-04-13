@@ -2,16 +2,16 @@
  * useCoupon Hook
  * Hook personalizado para gestionar cupones en el carrito
  */
-"use client";
+'use client';
 
-import { useState, useCallback } from "react";
+import { useCallback, useState } from 'react';
 
 interface AppliedCoupon {
   code: string;
   type: string;
   value: number;
   discount: number;
-  discountType: "amount" | "percentage" | "free_shipping";
+  discountType: 'amount' | 'percentage' | 'free_shipping';
   freeShipping: boolean;
 }
 
@@ -22,21 +22,21 @@ export function useCoupon() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const applyCoupon = useCallback(async (code: string) => {
+  const applyCoupon = useCallback(async(code: string) => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await fetch("/api/coupons/apply", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/coupons/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error aplicando cupón");
+        throw new Error(data.error || 'Error aplicando cupón');
       }
 
       setAppliedCoupon({
@@ -56,7 +56,7 @@ export function useCoupon() {
       };
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : "Error aplicando cupón";
+        err instanceof Error ? err.message : 'Error aplicando cupón';
       setError(message);
       throw err;
     } finally {
@@ -70,11 +70,11 @@ export function useCoupon() {
   }, []);
 
   const validateCoupon = useCallback(
-    async (code: string, orderAmount: number) => {
+    async(code: string, orderAmount: number) => {
       try {
-        const response = await fetch("/api/coupons/validate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        const response = await fetch('/api/coupons/validate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ code, orderAmount }),
         });
 
@@ -88,7 +88,7 @@ export function useCoupon() {
       } catch {
         return {
           valid: false,
-          error: "Error validando cupón",
+          error: 'Error validando cupón',
         };
       }
     },
@@ -97,11 +97,13 @@ export function useCoupon() {
 
   const calculateDiscount = useCallback(
     (subtotal: number): number => {
-      if (!appliedCoupon) return 0;
+      if (!appliedCoupon) {
+        return 0;
+      }
 
-      if (appliedCoupon.discountType === "percentage") {
+      if (appliedCoupon.discountType === 'percentage') {
         return Math.round(subtotal * (appliedCoupon.value / 100) * 100) / 100;
-      } else if (appliedCoupon.discountType === "amount") {
+      } else if (appliedCoupon.discountType === 'amount') {
         return Math.min(appliedCoupon.value, subtotal);
       }
 

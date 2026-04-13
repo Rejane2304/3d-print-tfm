@@ -2,16 +2,16 @@
  * SearchBar Component
  * Barra de búsqueda para el catálogo de productos
  */
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 interface SearchBarProps {
   initialValue?: string;
 }
 
-export default function SearchBar({ initialValue = "" }: Readonly<SearchBarProps>) {
+export default function SearchBar({ initialValue = '' }: Readonly<SearchBarProps>) {
   const [searchTerm, setSearchTerm] = useState(initialValue);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -22,13 +22,13 @@ export default function SearchBar({ initialValue = "" }: Readonly<SearchBarProps
     const params = new URLSearchParams(searchParams.toString());
 
     if (searchTerm.trim()) {
-      params.set("busqueda", searchTerm.trim());
+      params.set('busqueda', searchTerm.trim());
     } else {
-      params.delete("busqueda");
+      params.delete('busqueda');
     }
 
     // Resetear página al buscar
-    params.delete("page");
+    params.delete('page');
 
     router.push(`/products?${params.toString()}`);
   };

@@ -4,12 +4,12 @@
  * Soporta usuarios autenticados (API) y no autenticados (localStorage)
  * Responsive: mobile → desktop
  */
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useSession } from "next-auth/react";
-import { useCart } from "@/hooks/useCart";
-import { ShoppingCart, Check, Loader2 } from "lucide-react";
+import { useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useCart } from '@/hooks/useCart';
+import { Check, Loader2, ShoppingCart } from 'lucide-react';
 
 interface ProductInfo {
   id: string;
@@ -35,14 +35,14 @@ export default function AddToCartButton({
   const { addItem } = useCart();
 
   // Check if user is admin - admins cannot purchase
-  const isAdmin = session?.user?.role === "ADMIN";
+  const isAdmin = session?.user?.role === 'ADMIN';
 
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleAddToCart = async () => {
+  const handleAddToCart = async() => {
     try {
       setLoading(true);
       setError(null);
@@ -51,7 +51,7 @@ export default function AddToCartButton({
       const result = await addItem(productId, quantity, product);
 
       if (!result.success) {
-        throw new Error(result.error || "Error al añadir al carrito");
+        throw new Error(result.error || 'Error al añadir al carrito');
       }
 
       // Mostrar éxito temporalmente
@@ -59,7 +59,7 @@ export default function AddToCartButton({
       setSuccess(true);
       setTimeout(() => setSuccess(false), 2000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error desconocido");
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
     }
@@ -145,9 +145,13 @@ export default function AddToCartButton({
       {/* Botón de añadir al carrito */}
       {(() => {
         let btnClass = '';
-        if (success) btnClass = 'bg-green-600 hover:bg-green-700';
-        else if (isDisabled) btnClass = 'bg-gray-400 cursor-not-allowed';
-        else btnClass = 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2';
+        if (success) {
+          btnClass = 'bg-green-600 hover:bg-green-700';
+        } else if (isDisabled) {
+          btnClass = 'bg-gray-400 cursor-not-allowed';
+        } else {
+          btnClass = 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2';
+        }
 
         let content;
         if (loading) {

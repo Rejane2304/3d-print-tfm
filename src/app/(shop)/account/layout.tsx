@@ -3,17 +3,17 @@
  * Navegación lateral adaptada según el rol del usuario
  * Responsive: Desktop - sidebar lateral | Mobile - tabs horizontales
  */
-import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
 import {
-  Package,
-  MapPin,
-  User,
   ChevronRight,
+  MapPin,
   MessageSquare,
-} from "lucide-react";
+  Package,
+  User,
+} from 'lucide-react';
 
 interface CuentaLayoutProps {
   children: React.ReactNode;
@@ -23,20 +23,20 @@ export default async function CuentaLayout({ children }: CuentaLayoutProps) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
-    redirect("/login");
+    redirect('/login');
   }
 
-  const isAdmin = session.user.role === "ADMIN";
+  const isAdmin = session.user.role === 'ADMIN';
 
   // Menu items según el rol
   const menuItems = isAdmin
-    ? [{ href: "/account/profile", label: "Mi Perfil", icon: User }]
+    ? [{ href: '/account/profile', label: 'Mi Perfil', icon: User }]
     : [
-        { href: "/account/orders", label: "Mis Pedidos", icon: Package },
-        { href: "/account/reviews", label: "Mis Reseñas", icon: MessageSquare },
-        { href: "/account/addresses", label: "Mis Direcciones", icon: MapPin },
-        { href: "/account/profile", label: "Mi Perfil", icon: User },
-      ];
+      { href: '/account/orders', label: 'Mis Pedidos', icon: Package },
+      { href: '/account/reviews', label: 'Mis Reseñas', icon: MessageSquare },
+      { href: '/account/addresses', label: 'Mis Direcciones', icon: MapPin },
+      { href: '/account/profile', label: 'Mi Perfil', icon: User },
+    ];
 
   return (
     <div className="min-h-screen bg-gray-50">

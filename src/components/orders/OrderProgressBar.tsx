@@ -4,18 +4,18 @@
  *
  * Muestra los 5 estados del flujo de pedido con integración de estado de pago
  */
-"use client";
+'use client';
 
 import {
-  Clock,
+  AlertCircle,
+  Banknote,
   CheckCircle2,
+  Clock,
+  CreditCard,
   Package,
   Truck,
-  AlertCircle,
-  CreditCard,
   XCircle,
-  Banknote,
-} from "lucide-react";
+} from 'lucide-react';
 
 interface OrderProgressBarProps {
   estado: string; // Estado del pedido en español
@@ -37,36 +37,36 @@ interface StepConfig {
 
 const steps: StepConfig[] = [
   {
-    key: "Pendiente",
-    label: "Pendiente",
+    key: 'Pendiente',
+    label: 'Pendiente',
     icon: Clock,
-    description: "Pedido recibido",
+    description: 'Pedido recibido',
     requiresPayment: true,
   },
   {
-    key: "Confirmado",
-    label: "Confirmado",
+    key: 'Confirmado',
+    label: 'Confirmado',
     icon: CheckCircle2,
-    description: "Pago verificado",
+    description: 'Pago verificado',
     requiresPayment: true,
   },
   {
-    key: "En preparación",
-    label: "En preparación",
+    key: 'En preparación',
+    label: 'En preparación',
     icon: Package,
-    description: "Preparando tu pedido",
+    description: 'Preparando tu pedido',
   },
   {
-    key: "Enviado",
-    label: "Enviado",
+    key: 'Enviado',
+    label: 'Enviado',
     icon: Truck,
-    description: "En camino",
+    description: 'En camino',
   },
   {
-    key: "Entregado",
-    label: "Entregado",
+    key: 'Entregado',
+    label: 'Entregado',
     icon: CheckCircle2,
-    description: "Pedido completado",
+    description: 'Pedido completado',
   },
 ];
 
@@ -80,7 +80,7 @@ export default function OrderProgressBar({
   motivoCancelacion,
 }: Readonly<OrderProgressBarProps>) {
   // Si está cancelado, mostrar mensaje de cancelación
-  if (isCancelled || estado === "Cancelado") {
+  if (isCancelled || estado === 'Cancelado') {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-6">
         <div className="flex items-start gap-4">
@@ -92,7 +92,7 @@ export default function OrderProgressBar({
               Pedido Cancelado
             </h3>
             <p className="text-red-700 mt-1">
-              {motivoCancelacion || "Este pedido ha sido cancelado."}
+              {motivoCancelacion || 'Este pedido ha sido cancelado.'}
             </p>
           </div>
         </div>
@@ -103,15 +103,19 @@ export default function OrderProgressBar({
   // Calcular el índice del paso actual
   const currentStepIndex = steps.findIndex((step) => step.key === estado);
   const isPaymentCompleted =
-    estadoPago === "Completado" || estadoPago === "Reembolsado";
-  const isPaymentFailed = estadoPago === "Fallido";
+    estadoPago === 'Completado' || estadoPago === 'Reembolsado';
+  const isPaymentFailed = estadoPago === 'Fallido';
   const isPaymentPending =
-    estadoPago === "Pendiente" || estadoPago === "Procesando";
+    estadoPago === 'Pendiente' || estadoPago === 'Procesando';
 
   let paymentClass = '';
-  if (isPaymentCompleted) paymentClass = 'bg-green-100 text-green-800';
-  else if (isPaymentFailed) paymentClass = 'bg-red-100 text-red-800';
-  else paymentClass = 'bg-yellow-100 text-yellow-800';
+  if (isPaymentCompleted) {
+    paymentClass = 'bg-green-100 text-green-800';
+  } else if (isPaymentFailed) {
+    paymentClass = 'bg-red-100 text-red-800';
+  } else {
+    paymentClass = 'bg-yellow-100 text-yellow-800';
+  }
 
   return (
     <div className="bg-white rounded-lg shadow-sm border p-6">
@@ -149,7 +153,7 @@ export default function OrderProgressBar({
             width:
               currentStepIndex >= 0
                 ? `${(currentStepIndex / (steps.length - 1)) * 100}%`
-                : "0%",
+                : '0%',
           }}
         />
 
@@ -167,16 +171,26 @@ export default function OrderProgressBar({
               step.key === 'Pendiente';
 
             let circleClass = '';
-            if (isCompleted) circleClass = 'bg-green-500 text-white';
-            else if (isCurrent) {
-              if (showPaymentWarning) circleClass = 'bg-yellow-500 text-white ring-4 ring-yellow-200';
-              else circleClass = 'bg-indigo-600 text-white ring-4 ring-indigo-200';
-            } else circleClass = 'bg-gray-200 text-gray-400';
+            if (isCompleted) {
+              circleClass = 'bg-green-500 text-white';
+            } else if (isCurrent) {
+              if (showPaymentWarning) {
+                circleClass = 'bg-yellow-500 text-white ring-4 ring-yellow-200';
+              } else {
+                circleClass = 'bg-indigo-600 text-white ring-4 ring-indigo-200';
+              }
+            } else {
+              circleClass = 'bg-gray-200 text-gray-400';
+            }
 
             let labelClass = '';
-            if (isCompleted) labelClass = 'text-green-600';
-            else if (isCurrent) labelClass = 'text-indigo-900';
-            else labelClass = 'text-gray-400';
+            if (isCompleted) {
+              labelClass = 'text-green-600';
+            } else if (isCurrent) {
+              labelClass = 'text-indigo-900';
+            } else {
+              labelClass = 'text-gray-400';
+            }
 
             return (
               <div key={step.key} className="flex flex-col items-center flex-1">
@@ -213,7 +227,7 @@ export default function OrderProgressBar({
       {/* Información adicional según estado */}
 
       {/* Mensaje de pago fallido */}
-      {isPaymentFailed && estado === "Pendiente" && (
+      {isPaymentFailed && estado === 'Pendiente' && (
         <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
           <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
           <div className="flex-1">
@@ -230,7 +244,7 @@ export default function OrderProgressBar({
       )}
 
       {/* Mensaje de pago pendiente */}
-      {isPaymentPending && estado === "Pendiente" && !isPaymentFailed && (
+      {isPaymentPending && estado === 'Pendiente' && !isPaymentFailed && (
         <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-3">
           <Banknote className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
           <div className="flex-1">
@@ -244,7 +258,7 @@ export default function OrderProgressBar({
       )}
 
       {/* Información de envío */}
-      {estado === "Enviado" && (numeroSeguimiento || transportista) && (
+      {estado === 'Enviado' && (numeroSeguimiento || transportista) && (
         <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <p className="text-blue-900 font-medium flex items-center gap-2">
             <Truck className="h-5 w-5" />
@@ -252,13 +266,13 @@ export default function OrderProgressBar({
           </p>
           {transportista && (
             <p className="text-blue-700 text-sm mt-1">
-              Transportista:{" "}
+              Transportista:{' '}
               <span className="font-medium">{transportista}</span>
             </p>
           )}
           {numeroSeguimiento && (
             <p className="text-blue-700 text-sm mt-1">
-              Número de seguimiento:{" "}
+              Número de seguimiento:{' '}
               <span className="font-mono font-medium bg-blue-100 px-2 py-1 rounded">
                 {numeroSeguimiento}
               </span>
@@ -268,7 +282,7 @@ export default function OrderProgressBar({
       )}
 
       {/* Mensaje de entrega completada */}
-      {estado === "Entregado" && (
+      {estado === 'Entregado' && (
         <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
           <CheckCircle2 className="h-6 w-6 text-green-600" />
           <div>

@@ -49,7 +49,7 @@ export default function Header() {
   const userName = session?.user?.name || '';
   const firstLetter = userName.charAt(0).toUpperCase();
 
-  const handleLogout = async () => {
+  const handleLogout = async() => {
     try {
       // Clear cart from database for authenticated users
       if (isAuthenticated) {

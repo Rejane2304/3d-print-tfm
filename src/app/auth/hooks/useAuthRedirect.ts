@@ -9,19 +9,23 @@ export function useAuthRedirect() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();
-  
+
   const callbackUrl = searchParams.get('callbackUrl') || '/';
   const justRegistered = searchParams.get('registro') === 'exitoso';
 
   useEffect(() => {
-    if (status !== 'authenticated' || !session) return;
+    if (status !== 'authenticated' || !session) {
+      return;
+    }
 
     // Si estamos migrando el carrito, no redirigir aún
     const migratingCart = sessionStorage.getItem('migratingCart');
-    if (migratingCart) return;
+    if (migratingCart) {
+      return;
+    }
 
     const userRole = (session.user as { role?: string })?.role;
-    
+
     if (userRole === 'ADMIN') {
       router.push('/admin/dashboard');
     } else if (!justRegistered) {

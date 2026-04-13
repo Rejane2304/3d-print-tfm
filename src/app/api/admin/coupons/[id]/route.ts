@@ -9,7 +9,7 @@ import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
-import { CouponType, Coupon } from '@prisma/client';
+import { Coupon, CouponType } from '@prisma/client';
 import { translateCouponCode } from '@/lib/i18n';
 
 // Schema de validación
@@ -71,10 +71,18 @@ function calcularEstadoCupón(coupon: Coupon, now: Date): string {
   const isNotStarted = coupon.validFrom > now;
   const isMaxedOut = coupon.maxUses !== null && coupon.usedCount >= coupon.maxUses;
 
-  if (!coupon.isActive) return 'Inactivo';
-  if (isExpired) return 'Expirado';
-  if (isNotStarted) return 'Pendiente';
-  if (isMaxedOut) return 'Agotado';
+  if (!coupon.isActive) {
+    return 'Inactivo';
+  }
+  if (isExpired) {
+    return 'Expirado';
+  }
+  if (isNotStarted) {
+    return 'Pendiente';
+  }
+  if (isMaxedOut) {
+    return 'Agotado';
+  }
   return 'Activo';
 }
 
@@ -90,8 +98,12 @@ function obtenerTipoTexto(type: CouponType): string {
 
 // Helper para formatear el valor del cupón
 function formatearValor(coupon: Coupon): string {
-  if (coupon.type === 'PERCENTAGE') return `${coupon.value}%`;
-  if (coupon.type === 'FIXED') return `${coupon.value}€`;
+  if (coupon.type === 'PERCENTAGE') {
+    return `${coupon.value}%`;
+  }
+  if (coupon.type === 'FIXED') {
+    return `${coupon.value}€`;
+  }
   return 'Gratis';
 }
 
@@ -126,13 +138,27 @@ function formatearCupón(coupon: Coupon) {
 function construirDatosActualizacion(data: z.infer<typeof couponUpdateSchema>) {
   const updateData: Record<string, unknown> = {};
 
-  if (data.type) updateData.type = data.type;
-  if (data.value !== undefined) updateData.value = data.value;
-  if (data.minOrderAmount !== undefined) updateData.minOrderAmount = data.minOrderAmount;
-  if (data.maxUses !== undefined) updateData.maxUses = data.maxUses;
-  if (data.validFrom) updateData.validFrom = new Date(data.validFrom);
-  if (data.validUntil) updateData.validUntil = new Date(data.validUntil);
-  if (data.isActive !== undefined) updateData.isActive = data.isActive;
+  if (data.type) {
+    updateData.type = data.type;
+  }
+  if (data.value !== undefined) {
+    updateData.value = data.value;
+  }
+  if (data.minOrderAmount !== undefined) {
+    updateData.minOrderAmount = data.minOrderAmount;
+  }
+  if (data.maxUses !== undefined) {
+    updateData.maxUses = data.maxUses;
+  }
+  if (data.validFrom) {
+    updateData.validFrom = new Date(data.validFrom);
+  }
+  if (data.validUntil) {
+    updateData.validUntil = new Date(data.validUntil);
+  }
+  if (data.isActive !== undefined) {
+    updateData.isActive = data.isActive;
+  }
 
   return updateData;
 }

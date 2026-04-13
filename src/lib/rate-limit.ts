@@ -4,10 +4,10 @@
  * All messages in Spanish as per project conventions
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
 
 // Rate limit types with their configurations
-export type RateLimitType = "login" | "register" | "passwordChange";
+export type RateLimitType = 'login' | 'register' | 'passwordChange';
 
 interface RateLimitConfig {
   maxAttempts: number;
@@ -48,22 +48,22 @@ const rateLimitStore: Record<
  */
 function getClientIp(request: NextRequest): string {
   // Check for forwarded headers (common in production with proxies)
-  const forwardedFor = request.headers.get("x-forwarded-for");
+  const forwardedFor = request.headers.get('x-forwarded-for');
   if (forwardedFor) {
     // Get the first IP in the chain (original client)
-    const ips = forwardedFor.split(",").map((ip) => ip.trim());
-    return ips[0] || "unknown";
+    const ips = forwardedFor.split(',').map((ip) => ip.trim());
+    return ips[0] || 'unknown';
   }
 
   // Check for other common headers
-  const realIp = request.headers.get("x-real-ip");
+  const realIp = request.headers.get('x-real-ip');
   if (realIp) {
     return realIp;
   }
 
   // Fallback to socket remote address
   // Note: In Next.js edge runtime, this might not be available
-  return "unknown";
+  return 'unknown';
 }
 
 /**
@@ -160,8 +160,8 @@ export function checkRateLimit(
 ): NextResponse | null {
   // Skip rate limiting in test environment
   if (
-    process.env.NODE_ENV === "test" ||
-    process.env.VITEST_ENV === "integration"
+    process.env.NODE_ENV === 'test' ||
+    process.env.VITEST_ENV === 'integration'
   ) {
     return null;
   }
@@ -186,10 +186,10 @@ export function checkRateLimit(
       {
         status: 429,
         headers: {
-          "X-RateLimit-Limit": String(RATE_LIMITS[type].maxAttempts),
-          "X-RateLimit-Remaining": "0",
-          "X-RateLimit-Reset": String(Math.ceil(result.resetTime / 1000)),
-          "Retry-After": String(
+          'X-RateLimit-Limit': String(RATE_LIMITS[type].maxAttempts),
+          'X-RateLimit-Remaining': '0',
+          'X-RateLimit-Reset': String(Math.ceil(result.resetTime / 1000)),
+          'Retry-After': String(
             Math.ceil((result.resetTime - Date.now()) / 1000),
           ),
         },
@@ -238,6 +238,6 @@ export function getRateLimitStatus(
 }
 
 // Schedule cleanup every 5 minutes to prevent memory leaks
-if (typeof setInterval !== "undefined") {
+if (typeof setInterval !== 'undefined') {
   setInterval(cleanupExpiredEntries, 5 * 60 * 1000);
 }

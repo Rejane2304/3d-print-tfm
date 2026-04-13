@@ -2,24 +2,24 @@
  * Admin Inventory Page
  * Manage product stock with DataTable component
  */
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
-  Loader2,
-  Package,
   AlertTriangle,
   CheckCircle,
-  Plus,
-  Minus,
-  RotateCcw,
   Eye,
-} from "lucide-react";
-import Image from "next/image";
-import { DataTable, Column, BulkAction } from "@/components/ui/DataTable";
+  Loader2,
+  Minus,
+  Package,
+  Plus,
+  RotateCcw,
+} from 'lucide-react';
+import Image from 'next/image';
+import { BulkAction, Column, DataTable } from '@/components/ui/DataTable';
 
 interface Product {
   id: string;
@@ -30,7 +30,7 @@ interface Product {
   price: number;
   categoria: string;
   isActive: boolean;
-  stockStatus: "normal" | "low" | "critical";
+  stockStatus: 'normal' | 'low' | 'critical';
   movementCount: number;
   lastMovementAt: string | null;
   ultimoMovimientoTipo: string | null;
@@ -42,36 +42,36 @@ export default function AdminInventoryPage() {
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [stockLevel, setStockLevel] = useState("all");
+  const [stockLevel, setStockLevel] = useState('all');
   const [adjustingProduct, setAdjustingProduct] = useState<Product | null>(
     null,
   );
-  const [adjustmentType, setAdjustmentType] = useState<"IN" | "OUT" | "ADJUST">(
-    "IN",
+  const [adjustmentType, setAdjustmentType] = useState<'IN' | 'OUT' | 'ADJUST'>(
+    'IN',
   );
-  const [adjustmentQuantity, setAdjustmentQuantity] = useState("");
-  const [adjustmentReason, setAdjustmentReason] = useState("");
+  const [adjustmentQuantity, setAdjustmentQuantity] = useState('');
+  const [adjustmentReason, setAdjustmentReason] = useState('');
   const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login?callbackUrl=/admin/inventory");
+    if (status === 'unauthenticated') {
+      router.push('/login?callbackUrl=/admin/inventory');
       return;
     }
 
     const user = session?.user as { role?: string } | undefined;
-    if (status === "authenticated" && user?.role !== "ADMIN") {
-      router.push("/");
+    if (status === 'authenticated' && user?.role !== 'ADMIN') {
+      router.push('/');
       return;
     }
 
-    if (status === "authenticated") {
+    if (status === 'authenticated') {
       fetchInventory();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, session, router, stockLevel]);
 
-  const fetchInventory = async () => {
+  const fetchInventory = async() => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
@@ -85,36 +85,38 @@ export default function AdminInventoryPage() {
         setProducts(data.products);
       }
     } catch (error) {
-      console.error("Error fetching inventory:", error);
+      console.error('Error fetching inventory:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const openAdjustModal = (product: Product, type: "IN" | "OUT" | "ADJUST") => {
+  const openAdjustModal = (product: Product, type: 'IN' | 'OUT' | 'ADJUST') => {
     setAdjustingProduct(product);
     setAdjustmentType(type);
-    setAdjustmentQuantity(type === "ADJUST" ? product.stock.toString() : "");
-    setAdjustmentReason("");
+    setAdjustmentQuantity(type === 'ADJUST' ? product.stock.toString() : '');
+    setAdjustmentReason('');
   };
 
   const closeAdjustModal = () => {
     setAdjustingProduct(null);
-    setAdjustmentQuantity("");
-    setAdjustmentReason("");
+    setAdjustmentQuantity('');
+    setAdjustmentReason('');
   };
 
-  const handleAdjustment = async (e: React.FormEvent) => {
+  const handleAdjustment = async(e: React.FormEvent) => {
     e.preventDefault();
-    if (!adjustingProduct || !adjustmentQuantity || !adjustmentReason) return;
+    if (!adjustingProduct || !adjustmentQuantity || !adjustmentReason) {
+      return;
+    }
 
     try {
       setProcessing(true);
       const response = await fetch(
         `/api/admin/inventory/${adjustingProduct.id}/adjust`,
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             type: adjustmentType,
             quantity: Number.parseInt(adjustmentQuantity),
@@ -130,22 +132,22 @@ export default function AdminInventoryPage() {
           products.map((p) =>
             p.id === adjustingProduct.id
               ? {
-                  ...p,
-                  stock: data.data.product.stock,
-                  stockStatus: getStockStatus(
-                    data.data.product.stock,
-                    p.minStock,
-                  ),
-                }
+                ...p,
+                stock: data.data.product.stock,
+                stockStatus: getStockStatus(
+                  data.data.product.stock,
+                  p.minStock,
+                ),
+              }
               : p,
           ),
         );
         closeAdjustModal();
       } else {
-        alert(data.error || "Error adjusting stock");
+        alert(data.error || 'Error adjusting stock');
       }
     } catch (error) {
-      console.error("Error adjusting stock:", error);
+      console.error('Error adjusting stock:', error);
     } finally {
       setProcessing(false);
     }
@@ -154,33 +156,37 @@ export default function AdminInventoryPage() {
   const getStockStatus = (
     stock: number,
     minStock: number,
-  ): "normal" | "low" | "critical" => {
-    if (stock <= 0) return "critical";
-    if (stock <= minStock) return "low";
-    return "normal";
+  ): 'normal' | 'low' | 'critical' => {
+    if (stock <= 0) {
+      return 'critical';
+    }
+    if (stock <= minStock) {
+      return 'low';
+    }
+    return 'normal';
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "normal":
-        return "bg-green-100 text-green-800";
-      case "low":
-        return "bg-yellow-100 text-yellow-800";
-      case "critical":
-        return "bg-red-100 text-red-800";
+      case 'normal':
+        return 'bg-green-100 text-green-800';
+      case 'low':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'critical':
+        return 'bg-red-100 text-red-800';
       default:
-        return "bg-gray-100 text-gray-800";
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case "normal":
-        return "Normal";
-      case "low":
-        return "Bajo";
-      case "critical":
-        return "Crítico";
+      case 'normal':
+        return 'Normal';
+      case 'low':
+        return 'Bajo';
+      case 'critical':
+        return 'Crítico';
       default:
         return status;
     }
@@ -188,10 +194,10 @@ export default function AdminInventoryPage() {
 
   const columns: Column<Product>[] = [
     {
-      key: "nombre",
-      header: "Producto",
+      key: 'nombre',
+      header: 'Producto',
       sortable: true,
-      className: "",
+      className: '',
       render: (value, row) => (
         <div className="flex items-center">
           {row.imagenes?.[0] ? (
@@ -221,10 +227,10 @@ export default function AdminInventoryPage() {
       ),
     },
     {
-      key: "categoria",
-      header: "Categoría",
+      key: 'categoria',
+      header: 'Categoría',
       sortable: true,
-      className: "hidden sm:table-cell",
+      className: 'hidden sm:table-cell',
       render: (value) => (
         <span className="text-sm text-gray-600 truncate">
           {value as string}
@@ -232,18 +238,18 @@ export default function AdminInventoryPage() {
       ),
     },
     {
-      key: "stock",
-      header: "Stock",
+      key: 'stock',
+      header: 'Stock',
       sortable: true,
-      className: "",
+      className: '',
       render: (value, row) => {
         let stockColorClass: string;
-        if (row.stockStatus === "critical") {
-          stockColorClass = "text-red-600";
-        } else if (row.stockStatus === "low") {
-          stockColorClass = "text-yellow-600";
+        if (row.stockStatus === 'critical') {
+          stockColorClass = 'text-red-600';
+        } else if (row.stockStatus === 'low') {
+          stockColorClass = 'text-yellow-600';
         } else {
-          stockColorClass = "text-green-600";
+          stockColorClass = 'text-green-600';
         }
         return (
           <span className={`text-lg font-bold ${stockColorClass}`}>
@@ -253,27 +259,27 @@ export default function AdminInventoryPage() {
       },
     },
     {
-      key: "minStock",
-      header: "Mínimo",
+      key: 'minStock',
+      header: 'Mínimo',
       sortable: true,
-      className: "hidden md:table-cell",
+      className: 'hidden md:table-cell',
       render: (value) => (
         <span className="text-sm text-gray-600">{value as number}</span>
       ),
     },
     {
-      key: "stockStatus",
-      header: "Estado",
+      key: 'stockStatus',
+      header: 'Estado',
       sortable: true,
-      className: "hidden lg:table-cell",
+      className: 'hidden lg:table-cell',
       render: (value) => (
         <span
           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(value as string)}`}
         >
-          {(value as string) === "critical" && (
+          {(value as string) === 'critical' && (
             <AlertTriangle className="h-3 w-3 mr-1" />
           )}
-          {(value as string) === "normal" && (
+          {(value as string) === 'normal' && (
             <CheckCircle className="h-3 w-3 mr-1" />
           )}
           {getStatusLabel(value as string)}
@@ -281,24 +287,24 @@ export default function AdminInventoryPage() {
       ),
     },
     {
-      key: "movementCount",
-      header: "Movimientos",
+      key: 'movementCount',
+      header: 'Movimientos',
       sortable: true,
-      className: "hidden xl:table-cell",
+      className: 'hidden xl:table-cell',
       render: (value) => (
         <span className="text-sm text-gray-600">{value as number}</span>
       ),
     },
     {
-      key: "actions",
-      header: "Acciones",
-      className: "",
+      key: 'actions',
+      header: 'Acciones',
+      className: '',
       render: (_, row) => (
         <div className="flex items-center justify-end gap-1">
           <button
             onClick={(e) => {
               e.stopPropagation();
-              openAdjustModal(row, "IN");
+              openAdjustModal(row, 'IN');
             }}
             className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg"
             title="Añadir stock"
@@ -308,7 +314,7 @@ export default function AdminInventoryPage() {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              openAdjustModal(row, "OUT");
+              openAdjustModal(row, 'OUT');
             }}
             className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg"
             title="Reducir stock"
@@ -318,7 +324,7 @@ export default function AdminInventoryPage() {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              openAdjustModal(row, "ADJUST");
+              openAdjustModal(row, 'ADJUST');
             }}
             className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg"
             title="Ajustar stock"
@@ -339,16 +345,16 @@ export default function AdminInventoryPage() {
 
   const bulkActions: BulkAction[] = [
     {
-      key: "export",
-      label: "Exportar seleccionados",
-      variant: "primary",
-      onClick: async (selectedIds) => {
-        console.log("Export selected:", selectedIds);
+      key: 'export',
+      label: 'Exportar seleccionados',
+      variant: 'primary',
+      onClick: async() => {
+        // TODO: Implementar exportación
       },
     },
   ];
 
-  if (status === "loading" || loading) {
+  if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -406,7 +412,7 @@ export default function AdminInventoryPage() {
           columns={columns}
           rowKey="id"
           searchable
-          searchKeys={["nombre", "categoria"]}
+          searchKeys={['nombre', 'categoria']}
           searchPlaceholder="Buscar productos..."
           pagination
           selectable
@@ -423,9 +429,9 @@ export default function AdminInventoryPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              {adjustmentType === "IN" && "Añadir Stock"}
-              {adjustmentType === "OUT" && "Reducir Stock"}
-              {adjustmentType === "ADJUST" && "Ajustar Stock"}
+              {adjustmentType === 'IN' && 'Añadir Stock'}
+              {adjustmentType === 'OUT' && 'Reducir Stock'}
+              {adjustmentType === 'ADJUST' && 'Ajustar Stock'}
             </h3>
 
             <form onSubmit={handleAdjustment}>
@@ -446,7 +452,7 @@ export default function AdminInventoryPage() {
                   htmlFor="adjustmentQuantity"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  {adjustmentType === "ADJUST" ? "Nuevo Stock" : "Cantidad"}
+                  {adjustmentType === 'ADJUST' ? 'Nuevo Stock' : 'Cantidad'}
                 </label>
                 <input
                   id="adjustmentQuantity"

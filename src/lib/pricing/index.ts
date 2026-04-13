@@ -3,7 +3,7 @@
  * Helper functions for price calculations with VAT
  */
 
-import { Decimal } from "@prisma/client/runtime/library";
+import { Decimal } from '@prisma/client/runtime/library';
 
 const DEFAULT_VAT_RATE = 0.21; // 21% IVA en España
 
@@ -16,16 +16,20 @@ export function formatPrice(
   options: { showSymbol?: boolean; decimals?: number } = {},
 ): string {
   const { showSymbol = true, decimals = 2 } = options;
-  if (price === undefined || price === null) return showSymbol ? "0 €" : "0";
+  if (price === undefined || price === null) {
+    return showSymbol ? '0 €' : '0';
+  }
 
   const numPrice =
     price instanceof Decimal
       ? price.toNumber()
-      : typeof price === "string"
+      : typeof price === 'string'
         ? parseFloat(price)
         : price;
 
-  if (isNaN(numPrice)) return showSymbol ? "0 €" : "0";
+  if (isNaN(numPrice)) {
+    return showSymbol ? '0 €' : '0';
+  }
 
   const formatted = numPrice.toFixed(decimals);
   return showSymbol ? `${formatted} €` : formatted;
@@ -40,14 +44,18 @@ export function addVat(
   price: number | string | Decimal | undefined,
   vatRate: number = DEFAULT_VAT_RATE,
 ): number {
-  if (price === undefined || price === null) return 0;
+  if (price === undefined || price === null) {
+    return 0;
+  }
   const numPrice =
     price instanceof Decimal
       ? price.toNumber()
-      : typeof price === "string"
+      : typeof price === 'string'
         ? parseFloat(price)
         : price;
-  if (isNaN(numPrice)) return 0;
+  if (isNaN(numPrice)) {
+    return 0;
+  }
   return numPrice * (1 + vatRate);
 }
 
@@ -58,9 +66,13 @@ export function removeVat(
   price: number | string | undefined,
   vatRate: number = DEFAULT_VAT_RATE,
 ): number {
-  if (price === undefined || price === null) return 0;
-  const numPrice = typeof price === "string" ? parseFloat(price) : price;
-  if (isNaN(numPrice)) return 0;
+  if (price === undefined || price === null) {
+    return 0;
+  }
+  const numPrice = typeof price === 'string' ? parseFloat(price) : price;
+  if (isNaN(numPrice)) {
+    return 0;
+  }
   return numPrice / (1 + vatRate);
 }
 
@@ -85,9 +97,13 @@ export function calculateVatAmount(
   price: number | string | undefined,
   vatRate: number = DEFAULT_VAT_RATE,
 ): number {
-  if (price === undefined || price === null) return 0;
-  const numPrice = typeof price === "string" ? parseFloat(price) : price;
-  if (isNaN(numPrice)) return 0;
+  if (price === undefined || price === null) {
+    return 0;
+  }
+  const numPrice = typeof price === 'string' ? parseFloat(price) : price;
+  if (isNaN(numPrice)) {
+    return 0;
+  }
   return numPrice * vatRate;
 }
 

@@ -2,24 +2,24 @@
  * New Category Page - Admin
  * Form for creating a new category
  */
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
+import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
 import {
+  AlertCircle,
   ArrowLeft,
+  CheckCircle2,
   FolderTree,
+  ImageIcon,
   Loader2,
+  Save,
   Upload,
   X,
-  AlertCircle,
-  CheckCircle2,
-  Save,
-  ImageIcon,
-} from "lucide-react";
+} from 'lucide-react';
 
 export default function NuevaCategoriaPage() {
   const { data: session, status } = useSession();
@@ -32,23 +32,23 @@ export default function NuevaCategoriaPage() {
 
   // Form state
   const [formData, setFormData] = useState({
-    name: "",
-    slug: "",
-    description: "",
-    image: "",
+    name: '',
+    slug: '',
+    description: '',
+    image: '',
     displayOrder: 0,
     isActive: true,
   });
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/auth?callbackUrl=/admin/categories/new");
+    if (status === 'unauthenticated') {
+      router.push('/auth?callbackUrl=/admin/categories/new');
       return;
     }
 
     const user = session?.user as { role?: string } | undefined;
-    if (status === "authenticated" && user?.role !== "ADMIN") {
-      router.push("/");
+    if (status === 'authenticated' && user?.role !== 'ADMIN') {
+      router.push('/');
       return;
     }
   }, [status, session, router]);
@@ -56,10 +56,10 @@ export default function NuevaCategoriaPage() {
   const generateSlug = (name: string) => {
     return name
       .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
   };
 
   const handleInputChange = (
@@ -71,7 +71,7 @@ export default function NuevaCategoriaPage() {
     setFormData((prev) => ({
       ...prev,
       [name]:
-        type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
+        type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
     }));
   };
 
@@ -84,9 +84,11 @@ export default function NuevaCategoriaPage() {
     }));
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async(e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      return;
+    }
 
     setUploadingImage(true);
     try {
@@ -98,15 +100,15 @@ export default function NuevaCategoriaPage() {
       // For now, we'll use the temp URL
       setFormData((prev) => ({ ...prev, image: tempUrl }));
     } catch (err) {
-      console.error("Error uploading image:", err);
-      setError("Error al subir imagen. Intente nuevamente.");
+      console.error('Error uploading image:', err);
+      setError('Error al subir imagen. Intente nuevamente.');
     } finally {
       setUploadingImage(false);
     }
   };
 
   const handleImageUrlAdd = () => {
-    const url = prompt("Ingrese la URL de la imagen:");
+    const url = prompt('Ingrese la URL de la imagen:');
     if (url) {
       setImagePreview(url);
       setFormData((prev) => ({ ...prev, image: url }));
@@ -115,18 +117,23 @@ export default function NuevaCategoriaPage() {
 
   const removeImage = () => {
     setImagePreview(null);
-    setFormData((prev) => ({ ...prev, image: "" }));
+    setFormData((prev) => ({ ...prev, image: '' }));
   };
 
   const validateForm = () => {
-    if (!formData.name.trim()) return "El nombre es obligatorio";
-    if (!formData.slug.trim()) return "El slug es obligatorio";
-    if (formData.slug.length < 2)
-      return "El slug debe tener al menos 2 caracteres";
+    if (!formData.name.trim()) {
+      return 'El nombre es obligatorio';
+    }
+    if (!formData.slug.trim()) {
+      return 'El slug es obligatorio';
+    }
+    if (formData.slug.length < 2) {
+      return 'El slug debe tener al menos 2 caracteres';
+    }
     return null;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
 
     const validationError = validateForm();
@@ -139,9 +146,9 @@ export default function NuevaCategoriaPage() {
     setError(null);
 
     try {
-      const response = await fetch("/api/admin/categories", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/admin/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: formData.name,
           slug: formData.slug,
@@ -155,21 +162,21 @@ export default function NuevaCategoriaPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error al crear categoría");
+        throw new Error(data.error || 'Error al crear categoría');
       }
 
       setSuccess(true);
       setTimeout(() => {
-        router.push("/admin/categories");
+        router.push('/admin/categories');
       }, 1500);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al crear categoría");
+      setError(err instanceof Error ? err.message : 'Error al crear categoría');
     } finally {
       setLoading(false);
     }
   };
 
-  if (status === "loading") {
+  if (status === 'loading') {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -298,7 +305,7 @@ export default function NuevaCategoriaPage() {
                     required
                   />
                   <p className="mt-1 text-xs text-gray-500">
-                    Usado en URLs: /categoria/{"{slug}"}
+                    Usado en URLs: /categoria/{'{slug}'}
                   </p>
                 </div>
 
@@ -370,7 +377,7 @@ export default function NuevaCategoriaPage() {
                     <div className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-colors">
                       <Upload className="h-5 w-5 text-gray-500" />
                       <span className="text-sm text-gray-600">
-                        {uploadingImage ? "Subiendo..." : "Subir imagen"}
+                        {uploadingImage ? 'Subiendo...' : 'Subir imagen'}
                       </span>
                     </div>
                   </label>

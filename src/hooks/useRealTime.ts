@@ -1,52 +1,52 @@
-"use client";
+'use client';
 
-import { useEffect, useState, useCallback, useRef } from "react";
-import { useSession } from "next-auth/react";
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useSession } from 'next-auth/react';
 
 export type EventType =
   // Pedidos
-  | "order:new"
-  | "order:status:updated"
-  | "order:deleted"
+  | 'order:new'
+  | 'order:status:updated'
+  | 'order:deleted'
   // Pagos
-  | "payment:confirmed"
+  | 'payment:confirmed'
   // Stock
-  | "stock:low"
-  | "stock:updated"
+  | 'stock:low'
+  | 'stock:updated'
   // Alertas y reseñas
-  | "alert:new"
-  | "alert:deleted"
-  | "review:new"
-  | "review:deleted"
+  | 'alert:new'
+  | 'alert:deleted'
+  | 'review:new'
+  | 'review:deleted'
   // Métricas
-  | "metrics:update"
+  | 'metrics:update'
   // Productos
-  | "product:created"
-  | "product:updated"
-  | "product:deleted"
+  | 'product:created'
+  | 'product:updated'
+  | 'product:deleted'
   // Clientes
-  | "client:created"
-  | "client:updated"
-  | "client:deleted"
+  | 'client:created'
+  | 'client:updated'
+  | 'client:deleted'
   // Facturas
-  | "invoice:created"
-  | "invoice:deleted"
+  | 'invoice:created'
+  | 'invoice:deleted'
   // Categorías
-  | "category:created"
-  | "category:updated"
-  | "category:deleted"
+  | 'category:created'
+  | 'category:updated'
+  | 'category:deleted'
   // Cupones
-  | "coupon:created"
-  | "coupon:updated"
-  | "coupon:deleted"
+  | 'coupon:created'
+  | 'coupon:updated'
+  | 'coupon:deleted'
   // FAQs
-  | "faq:created"
-  | "faq:updated"
-  | "faq:deleted"
+  | 'faq:created'
+  | 'faq:updated'
+  | 'faq:deleted'
   // Zonas de envío
-  | "shipping:created"
-  | "shipping:updated"
-  | "shipping:deleted";
+  | 'shipping:created'
+  | 'shipping:updated'
+  | 'shipping:deleted';
 
 interface RealTimeEvent {
   type: EventType;
@@ -72,14 +72,18 @@ export function useRealTime(options: UseRealTimeOptions = {}) {
   const userId = session?.user?.id;
 
   // Polling function to fetch events from server
-  const pollEvents = useCallback(async () => {
-    if (!userId) return;
+  const pollEvents = useCallback(async() => {
+    if (!userId) {
+      return;
+    }
 
     try {
       const response = await fetch(
-        `/api/events?userId=${userId}&lastEventId=${lastEventIdRef.current || ""}`,
+        `/api/events?userId=${userId}&lastEventId=${lastEventIdRef.current || ''}`,
       );
-      if (!response.ok) throw new Error("Failed to fetch events");
+      if (!response.ok) {
+        throw new Error('Failed to fetch events');
+      }
 
       const data = await response.json();
 
@@ -106,8 +110,8 @@ export function useRealTime(options: UseRealTimeOptions = {}) {
         // Filter events by type if specified
         const filteredEvents = options.eventTypes
           ? newEvents.filter((e: { type: EventType }) =>
-              options.eventTypes?.includes(e.type),
-            )
+            options.eventTypes?.includes(e.type),
+          )
           : newEvents;
 
         if (filteredEvents.length > 0) {
@@ -124,7 +128,7 @@ export function useRealTime(options: UseRealTimeOptions = {}) {
       setIsConnected(true);
       options.onConnect?.();
     } catch (error) {
-      console.error("Error polling events:", error);
+      console.error('Error polling events:', error);
       setIsConnected(false);
       options.onDisconnect?.();
     }
@@ -132,7 +136,9 @@ export function useRealTime(options: UseRealTimeOptions = {}) {
 
   // Start polling on mount
   useEffect(() => {
-    if (!userId) return;
+    if (!userId) {
+      return;
+    }
 
     // Initial poll
     pollEvents();
@@ -149,17 +155,19 @@ export function useRealTime(options: UseRealTimeOptions = {}) {
 
   // Subscribe to specific rooms
   const subscribe = useCallback(
-    async (room: string) => {
-      if (!userId) return;
+    async(room: string) => {
+      if (!userId) {
+        return;
+      }
 
       try {
-        await fetch("/api/events/subscribe", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        await fetch('/api/events/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ room, userId }),
         });
       } catch (error) {
-        console.error("Error subscribing to room:", error);
+        console.error('Error subscribing to room:', error);
       }
     },
     [userId],
@@ -167,17 +175,19 @@ export function useRealTime(options: UseRealTimeOptions = {}) {
 
   // Unsubscribe from room
   const unsubscribe = useCallback(
-    async (room: string) => {
-      if (!userId) return;
+    async(room: string) => {
+      if (!userId) {
+        return;
+      }
 
       try {
-        await fetch("/api/events/unsubscribe", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        await fetch('/api/events/unsubscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ room, userId }),
         });
       } catch (error) {
-        console.error("Error unsubscribing from room:", error);
+        console.error('Error unsubscribing from room:', error);
       }
     },
     [userId],
@@ -190,11 +200,11 @@ export function useRealTime(options: UseRealTimeOptions = {}) {
   }, []);
 
   // Acknowledge specific events
-  const acknowledgeEvents = useCallback(async (eventIds: string[]) => {
+  const acknowledgeEvents = useCallback(async(eventIds: string[]) => {
     try {
-      await fetch("/api/events/acknowledge", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      await fetch('/api/events/acknowledge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ eventIds }),
       });
 
@@ -203,7 +213,7 @@ export function useRealTime(options: UseRealTimeOptions = {}) {
         prev.filter((e) => !eventIds.includes(e.timestamp)),
       );
     } catch (error) {
-      console.error("Error acknowledging events:", error);
+      console.error('Error acknowledging events:', error);
     }
   }, []);
 
@@ -221,11 +231,11 @@ export function useRealTime(options: UseRealTimeOptions = {}) {
 
 // Hook específico para dashboard de admin
 export function useAdminRealTime(
-  options: Omit<UseRealTimeOptions, "rooms"> = {},
+  options: Omit<UseRealTimeOptions, 'rooms'> = {},
 ) {
   const baseOptions: UseRealTimeOptions = {
     ...options,
-    rooms: ["admin"],
+    rooms: ['admin'],
   };
 
   return useRealTime(baseOptions);
@@ -234,7 +244,7 @@ export function useAdminRealTime(
 // Hook específico para cuenta de usuario
 export function useUserRealTime(
   userId: string,
-  options: Omit<UseRealTimeOptions, "rooms"> = {},
+  options: Omit<UseRealTimeOptions, 'rooms'> = {},
 ) {
   const baseOptions: UseRealTimeOptions = {
     ...options,
@@ -247,7 +257,7 @@ export function useUserRealTime(
 // Hook específico para detalle de producto
 export function useProductRealTime(
   productId: string,
-  options: Omit<UseRealTimeOptions, "rooms"> = {},
+  options: Omit<UseRealTimeOptions, 'rooms'> = {},
 ) {
   const baseOptions: UseRealTimeOptions = {
     ...options,
@@ -273,43 +283,43 @@ export function useNotificationToast() {
     const id = `${event.type}-${Date.now()}`;
 
     const titles: Record<string, string> = {
-      "order:new": "Nuevo Pedido",
-      "order:status:updated": "Estado de Pedido Actualizado",
-      "order:deleted": "Pedido Eliminado",
-      "payment:confirmed": "Pago Confirmado",
-      "stock:low": "Stock Bajo",
-      "stock:updated": "Stock Actualizado",
-      "alert:new": "Nueva Alerta",
-      "alert:deleted": "Alerta Eliminada",
-      "review:new": "Nueva Reseña",
-      "review:deleted": "Reseña Eliminada",
-      "metrics:update": "Métricas Actualizadas",
-      "product:created": "Producto Creado",
-      "product:updated": "Producto Actualizado",
-      "product:deleted": "Producto Eliminado",
-      "client:created": "Cliente Creado",
-      "client:updated": "Cliente Actualizado",
-      "client:deleted": "Cliente Eliminado",
-      "invoice:created": "Factura Creada",
-      "invoice:deleted": "Factura Eliminada",
-      "category:created": "Categoría Creada",
-      "category:updated": "Categoría Actualizada",
-      "category:deleted": "Categoría Eliminada",
-      "coupon:created": "Cupón Creado",
-      "coupon:updated": "Cupón Actualizado",
-      "coupon:deleted": "Cupón Eliminado",
-      "faq:created": "FAQ Creada",
-      "faq:updated": "FAQ Actualizada",
-      "faq:deleted": "FAQ Eliminada",
-      "shipping:created": "Zona de Envío Creada",
-      "shipping:updated": "Zona de Envío Actualizada",
-      "shipping:deleted": "Zona de Envío Eliminada",
+      'order:new': 'Nuevo Pedido',
+      'order:status:updated': 'Estado de Pedido Actualizado',
+      'order:deleted': 'Pedido Eliminado',
+      'payment:confirmed': 'Pago Confirmado',
+      'stock:low': 'Stock Bajo',
+      'stock:updated': 'Stock Actualizado',
+      'alert:new': 'Nueva Alerta',
+      'alert:deleted': 'Alerta Eliminada',
+      'review:new': 'Nueva Reseña',
+      'review:deleted': 'Reseña Eliminada',
+      'metrics:update': 'Métricas Actualizadas',
+      'product:created': 'Producto Creado',
+      'product:updated': 'Producto Actualizado',
+      'product:deleted': 'Producto Eliminado',
+      'client:created': 'Cliente Creado',
+      'client:updated': 'Cliente Actualizado',
+      'client:deleted': 'Cliente Eliminado',
+      'invoice:created': 'Factura Creada',
+      'invoice:deleted': 'Factura Eliminada',
+      'category:created': 'Categoría Creada',
+      'category:updated': 'Categoría Actualizada',
+      'category:deleted': 'Categoría Eliminada',
+      'coupon:created': 'Cupón Creado',
+      'coupon:updated': 'Cupón Actualizado',
+      'coupon:deleted': 'Cupón Eliminado',
+      'faq:created': 'FAQ Creada',
+      'faq:updated': 'FAQ Actualizada',
+      'faq:deleted': 'FAQ Eliminada',
+      'shipping:created': 'Zona de Envío Creada',
+      'shipping:updated': 'Zona de Envío Actualizada',
+      'shipping:deleted': 'Zona de Envío Eliminada',
     };
 
     const notification = {
       id,
       type: event.type,
-      title: titles[event.type] || "Notificación",
+      title: titles[event.type] || 'Notificación',
       message: getNotificationMessage(event),
       timestamp: new Date(),
     };
@@ -340,23 +350,23 @@ export function useNotificationToast() {
 
 function getNotificationMessage(event: RealTimeEvent): string {
   switch (event.type) {
-    case "order:new":
+    case 'order:new':
       return `Nuevo pedido #${event.payload.orderNumber} por €${event.payload.total}`;
-    case "order:status:updated":
+    case 'order:status:updated':
       return `Pedido #${event.payload.orderId} cambió a ${event.payload.status}`;
-    case "payment:confirmed":
+    case 'payment:confirmed':
       return `Pago confirmado para pedido #${event.payload.orderId}`;
-    case "stock:low":
+    case 'stock:low':
       return `Producto con stock bajo: ${event.payload.productName}`;
-    case "stock:updated":
+    case 'stock:updated':
       return `Stock actualizado: ${event.payload.productName}`;
-    case "alert:new":
+    case 'alert:new':
       return `Nueva alerta: ${event.payload.alertTitle}`;
-    case "review:new":
+    case 'review:new':
       return `Nueva reseña de ${event.payload.rating} estrellas`;
-    case "metrics:update":
-      return "Métricas del dashboard actualizadas";
+    case 'metrics:update':
+      return 'Métricas del dashboard actualizadas';
     default:
-      return "Nueva actualización recibida";
+      return 'Nueva actualización recibida';
   }
 }

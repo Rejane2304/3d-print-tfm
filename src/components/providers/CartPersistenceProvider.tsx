@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useCartPersistence } from "@/hooks/useCartPersistence";
+import { useCartPersistence } from '@/hooks/useCartPersistence';
 
 /**
  * CartPersistenceProvider

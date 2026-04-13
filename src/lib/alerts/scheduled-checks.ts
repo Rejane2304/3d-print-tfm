@@ -22,7 +22,7 @@ function generateUUID(): string {
 export async function checkExpiringCoupons() {
   const now = new Date();
   const threeDaysLater = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
-  
+
   const expiringCoupons = await prisma.coupon.findMany({
     where: {
       isActive: true,
@@ -32,10 +32,10 @@ export async function checkExpiringCoupons() {
       },
     },
   });
-  
+
   for (const coupon of expiringCoupons) {
     const daysUntil = Math.ceil((coupon.validUntil.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    
+
     // Verificar si ya existe alerta
     const existing = await prisma.alert.findFirst({
       where: {
@@ -44,12 +44,12 @@ export async function checkExpiringCoupons() {
         status: { in: ['PENDING', 'IN_PROGRESS'] },
       },
     });
-    
+
     if (!existing) {
       await prisma.alert.create({
-          data: {
-            id: generateUUID(),
-            type: 'COUPON_EXPIRING',
+        data: {
+          id: generateUUID(),
+          type: 'COUPON_EXPIRING',
           severity: daysUntil <= 1 ? 'HIGH' : 'MEDIUM',
           title: 'Cupón por Expirar',
           message: `Cupón ${coupon.code} expira en ${daysUntil} día(s)`,
@@ -64,14 +64,14 @@ export async function checkExpiringCoupons() {
 // Verificar pedidos en preparación >48h
 export async function checkLongPreparationOrders() {
   const fortyEightHoursAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
-  
+
   const orders = await prisma.order.findMany({
     where: {
       status: 'PREPARING',
       preparingAt: { lt: fortyEightHoursAgo },
     },
   });
-  
+
   for (const order of orders) {
     const existing = await prisma.alert.findFirst({
       where: {
@@ -80,12 +80,12 @@ export async function checkLongPreparationOrders() {
         status: { in: ['PENDING', 'IN_PROGRESS'] },
       },
     });
-    
+
     if (!existing) {
       await prisma.alert.create({
-          data: {
-            id: generateUUID(),
-            type: 'PREPARING_ORDER',
+        data: {
+          id: generateUUID(),
+          type: 'PREPARING_ORDER',
           severity: 'MEDIUM',
           title: 'Preparación Prolongada',
           message: `Pedido ${order.orderNumber} lleva >48h en preparación`,
@@ -100,14 +100,14 @@ export async function checkLongPreparationOrders() {
 // Verificar pedidos retrasados >3 días
 export async function checkDelayedOrders() {
   const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
-  
+
   const orders = await prisma.order.findMany({
     where: {
       status: 'PREPARING',
       preparingAt: { lt: threeDaysAgo },
     },
   });
-  
+
   for (const order of orders) {
     // Buscar alerta de ORDER_DELAYED
     const existing = await prisma.alert.findFirst({
@@ -117,12 +117,12 @@ export async function checkDelayedOrders() {
         status: { in: ['PENDING', 'IN_PROGRESS'] },
       },
     });
-    
+
     if (!existing) {
       await prisma.alert.create({
-          data: {
-            id: generateUUID(),
-            type: 'ORDER_DELAYED',
+        data: {
+          id: generateUUID(),
+          type: 'ORDER_DELAYED',
           severity: 'HIGH',
           title: 'Pedido Atrasado',
           message: `Pedido ${order.orderNumber} lleva >3 días en preparación`,
@@ -137,7 +137,7 @@ export async function checkDelayedOrders() {
 // Verificar pedidos sin pagar >24h
 export async function checkUnpaidOrders() {
   const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-  
+
   const orders = await prisma.order.findMany({
     where: {
       status: 'PENDING',
@@ -148,11 +148,13 @@ export async function checkUnpaidOrders() {
       user: { select: { name: true, email: true } },
     },
   });
-  
+
   for (const order of orders) {
     // Solo si no está pagado
-    if (order.payment?.status === 'COMPLETED') continue;
-    
+    if (order.payment?.status === 'COMPLETED') {
+      continue;
+    }
+
     const existing = await prisma.alert.findFirst({
       where: {
         orderId: order.id,
@@ -160,12 +162,12 @@ export async function checkUnpaidOrders() {
         status: { in: ['PENDING', 'IN_PROGRESS'] },
       },
     });
-    
+
     if (!existing) {
       await prisma.alert.create({
-          data: {
-            id: generateUUID(),
-            type: 'PAYMENT_FAILED',
+        data: {
+          id: generateUUID(),
+          type: 'PAYMENT_FAILED',
           severity: 'HIGH',
           title: 'Pedido sin Pagar',
           message: `Pedido ${order.orderNumber} de ${order.user?.name || order.user?.email} >24h sin pagar`,

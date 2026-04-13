@@ -14,7 +14,7 @@ import {
   translatePaymentStatus,
   translateProductName,
 } from '@/lib/i18n';
-import { Order, OrderItem, Invoice, Payment, OrderMessage } from '@prisma/client';
+import { Invoice, Order, OrderItem, OrderMessage, Payment } from '@prisma/client';
 
 interface OrderWithRelations extends Order {
   items: (OrderItem & {
@@ -54,14 +54,18 @@ async function authenticateUser() {
 }
 
 async function getCouponInfo(couponId: string | null | undefined): Promise<CouponInfo | null> {
-  if (!couponId) return null;
+  if (!couponId) {
+    return null;
+  }
 
   const coupon = await prisma.coupon.findUnique({
     where: { id: couponId },
     select: { code: true, type: true },
   });
 
-  if (!coupon) return null;
+  if (!coupon) {
+    return null;
+  }
 
   let couponType = '';
   if (coupon.type === 'PERCENTAGE') {
@@ -119,18 +123,18 @@ function transformOrder(pedido: OrderWithRelations, couponInfo: CouponInfo | nul
     })),
     factura: pedido.invoice
       ? {
-          id: pedido.invoice.id,
-          numeroFactura: pedido.invoice.invoiceNumber,
-          anulada: pedido.invoice.isCancelled,
-          emitidaEn: pedido.invoice.issuedAt,
-        }
+        id: pedido.invoice.id,
+        numeroFactura: pedido.invoice.invoiceNumber,
+        anulada: pedido.invoice.isCancelled,
+        emitidaEn: pedido.invoice.issuedAt,
+      }
       : undefined,
     pago: pedido.payment
       ? {
-          estado: translatePaymentStatus(pedido.payment.status),
-          metodo: translatePaymentMethod(pedido.payment.method),
-          createdAt: pedido.payment.createdAt,
-        }
+        estado: translatePaymentStatus(pedido.payment.status),
+        metodo: translatePaymentMethod(pedido.payment.method),
+        createdAt: pedido.payment.createdAt,
+      }
       : undefined,
     messages: pedido.messages.map((msg) => ({
       id: msg.id,

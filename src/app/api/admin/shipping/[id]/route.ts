@@ -118,7 +118,9 @@ export async function GET(
     const { id } = await params;
 
     const authError = await verifyAdminAuth();
-    if (authError) return authError;
+    if (authError) {
+      return authError;
+    }
 
     const zone = await prisma.shippingZone.findUnique({
       where: { id },
@@ -153,7 +155,9 @@ export async function PATCH(
     const { id } = await params;
 
     const authError = await verifyAdminAuth();
-    if (authError) return authError;
+    if (authError) {
+      return authError;
+    }
 
     const existing = await prisma.shippingZone.findUnique({
       where: { id },
@@ -234,7 +238,9 @@ export async function DELETE(
     const { id } = await params;
 
     const authError = await verifyAdminAuth();
-    if (authError) return authError;
+    if (authError) {
+      return authError;
+    }
 
     const existing = await prisma.shippingZone.findUnique({
       where: { id },

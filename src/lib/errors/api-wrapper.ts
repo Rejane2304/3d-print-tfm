@@ -2,8 +2,8 @@
  * Wrapper for handling errors in Next.js API routes
  * Ensures errors don't reach the client unhandled
  */
-import { NextRequest, NextResponse } from "next/server";
-import { ApiError, ErrorCode, handleError } from "./index";
+import { NextRequest, NextResponse } from 'next/server';
+import { ApiError, ErrorCode, handleError } from './index';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type RouteHandler = (req: NextRequest, ...args: any[]) => Promise<NextResponse>;
@@ -14,15 +14,15 @@ type RouteHandler = (req: NextRequest, ...args: any[]) => Promise<NextResponse>;
  */
 export function withErrorHandler(handler: RouteHandler): RouteHandler {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return async (req: NextRequest, ...args: any[]) => {
+  return async(req: NextRequest, ...args: any[]) => {
     try {
       return await handler(req, ...args);
     } catch (error) {
       const apiError = handleError(error);
 
       // Log error for debugging (development only)
-      if (process.env.NODE_ENV === "development") {
-        console.error("🔴 API route error:", {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('🔴 API route error:', {
           code: apiError.code,
           message: apiError.message,
           stack: error instanceof Error ? error.stack : undefined,
@@ -44,7 +44,7 @@ export function withErrorHandler(handler: RouteHandler): RouteHandler {
 export function validateInput<T>(
   schema: { parse: (data: unknown) => T },
   data: unknown,
-  context: string = "input",
+  context: string = 'input',
 ): T {
   try {
     return schema.parse(data);
@@ -73,9 +73,9 @@ export async function withDbOperation<T>(
       meta?: { target?: string[] };
     };
     // Handle specific Prisma errors
-    if (prismaError.code === "P2002") {
+    if (prismaError.code === 'P2002') {
       // Unique constraint violation
-      const field = prismaError.meta?.target?.[0] || "field";
+      const field = prismaError.meta?.target?.[0] || 'field';
       throw new ApiError(
         ErrorCode.DB_DUPLICATE_ENTRY,
         `A record already exists with that ${field}`,
@@ -84,12 +84,12 @@ export async function withDbOperation<T>(
       );
     }
 
-    if (prismaError.code === "P2025") {
+    if (prismaError.code === 'P2025') {
       // Record not found
       throw new ApiError(ErrorCode.DB_NOT_FOUND, `${context} not found`, 404);
     }
 
-    if (prismaError.code === "P2003") {
+    if (prismaError.code === 'P2003') {
       // Foreign key constraint
       throw new ApiError(
         ErrorCode.VALIDATION_INVALID_INPUT,

@@ -2,31 +2,31 @@
  * New FAQ Page - Admin
  * Form for creating a new FAQ
  */
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
+  AlertCircle,
   ArrowLeft,
+  CheckCircle2,
   HelpCircle,
   Loader2,
-  AlertCircle,
-  CheckCircle2,
   Save,
-} from "lucide-react";
+} from 'lucide-react';
 
 // Categorías predefinidas comunes
 const PREDEFINED_CATEGORIES = [
-  "Materiales",
-  "Envío",
-  "Devoluciones",
-  "Pedidos",
-  "Cuidado",
-  "Pagos",
-  "Seguridad",
-  "General",
+  'Materiales',
+  'Envío',
+  'Devoluciones',
+  'Pedidos',
+  'Cuidado',
+  'Pagos',
+  'Seguridad',
+  'General',
 ];
 
 export default function NuevaFAQPage() {
@@ -39,22 +39,22 @@ export default function NuevaFAQPage() {
 
   // Form state
   const [formData, setFormData] = useState({
-    question: "",
-    answer: "",
-    category: "",
+    question: '',
+    answer: '',
+    category: '',
     displayOrder: 0,
     isActive: true,
   });
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/auth?callbackUrl=/admin/faqs/new");
+    if (status === 'unauthenticated') {
+      router.push('/auth?callbackUrl=/admin/faqs/new');
       return;
     }
 
     const user = session?.user as { role?: string } | undefined;
-    if (status === "authenticated" && user?.role !== "ADMIN") {
-      router.push("/");
+    if (status === 'authenticated' && user?.role !== 'ADMIN') {
+      router.push('/');
       return;
     }
   }, [status, session, router]);
@@ -68,15 +68,15 @@ export default function NuevaFAQPage() {
     setFormData((prev) => ({
       ...prev,
       [name]:
-        type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
+        type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
     }));
   };
 
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
-    if (value === "custom") {
+    if (value === 'custom') {
       setCustomCategory(true);
-      setFormData((prev) => ({ ...prev, category: "" }));
+      setFormData((prev) => ({ ...prev, category: '' }));
     } else {
       setCustomCategory(false);
       setFormData((prev) => ({ ...prev, category: value }));
@@ -84,17 +84,25 @@ export default function NuevaFAQPage() {
   };
 
   const validateForm = () => {
-    if (!formData.question.trim()) return "La pregunta es obligatoria";
-    if (formData.question.length < 10)
-      return "La pregunta debe tener al menos 10 caracteres";
-    if (!formData.answer.trim()) return "La respuesta es obligatoria";
-    if (formData.answer.length < 20)
-      return "La respuesta debe tener al menos 20 caracteres";
-    if (!formData.category.trim()) return "La categoría es obligatoria";
+    if (!formData.question.trim()) {
+      return 'La pregunta es obligatoria';
+    }
+    if (formData.question.length < 10) {
+      return 'La pregunta debe tener al menos 10 caracteres';
+    }
+    if (!formData.answer.trim()) {
+      return 'La respuesta es obligatoria';
+    }
+    if (formData.answer.length < 20) {
+      return 'La respuesta debe tener al menos 20 caracteres';
+    }
+    if (!formData.category.trim()) {
+      return 'La categoría es obligatoria';
+    }
     return null;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
 
     const validationError = validateForm();
@@ -107,9 +115,9 @@ export default function NuevaFAQPage() {
     setError(null);
 
     try {
-      const response = await fetch("/api/admin/faqs", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/admin/faqs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           question: formData.question,
           answer: formData.answer,
@@ -122,21 +130,21 @@ export default function NuevaFAQPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error al crear FAQ");
+        throw new Error(data.error || 'Error al crear FAQ');
       }
 
       setSuccess(true);
       setTimeout(() => {
-        router.push("/admin/faqs");
+        router.push('/admin/faqs');
       }, 1500);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al crear FAQ");
+      setError(err instanceof Error ? err.message : 'Error al crear FAQ');
     } finally {
       setLoading(false);
     }
   };
 
-  if (status === "loading") {
+  if (status === 'loading') {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -311,7 +319,7 @@ export default function NuevaFAQPage() {
                           type="button"
                           onClick={() => {
                             setCustomCategory(false);
-                            setFormData((prev) => ({ ...prev, category: "" }));
+                            setFormData((prev) => ({ ...prev, category: '' }));
                           }}
                           className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
                         >

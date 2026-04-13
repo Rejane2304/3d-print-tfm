@@ -96,7 +96,9 @@ export async function GET(
     const { id } = await params;
 
     const authError = await verifyAdminAuth();
-    if (authError) return authError;
+    if (authError) {
+      return authError;
+    }
 
     const category = await prisma.category.findUnique({
       where: { id },
@@ -155,10 +157,14 @@ export async function PATCH(
     const { id } = await params;
 
     const authError = await verifyAdminAuth();
-    if (authError) return authError;
+    if (authError) {
+      return authError;
+    }
 
     const existing = await getCategoryOr404(id);
-    if (existing instanceof NextResponse) return existing;
+    if (existing instanceof NextResponse) {
+      return existing;
+    }
 
     const body = await request.json();
     const data = categoryUpdateSchema.parse(body);
@@ -219,7 +225,9 @@ export async function DELETE(
     const { id } = await params;
 
     const authError = await verifyAdminAuth();
-    if (authError) return authError;
+    if (authError) {
+      return authError;
+    }
 
     const existing = await prisma.category.findUnique({
       where: { id },

@@ -72,17 +72,21 @@ export function useCheckoutData(): CheckoutDataResult {
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
-  const migrateLocalCart = useCallback(async () => {
+  const migrateLocalCart = useCallback(async() => {
     const localCartData = localStorage.getItem('cart');
-    if (!localCartData) return;
+    if (!localCartData) {
+      return;
+    }
 
     try {
       const localItems = JSON.parse(localCartData) as Array<{
         productId: string;
         quantity: number;
       }>;
-      
-      if (localItems.length === 0) return;
+
+      if (localItems.length === 0) {
+        return;
+      }
 
       // Migrar items del localStorage
       for (const item of localItems) {
@@ -110,7 +114,9 @@ export function useCheckoutData(): CheckoutDataResult {
 
   const loadCoupon = useCallback(() => {
     const storedCoupon = localStorage.getItem('appliedCoupon');
-    if (!storedCoupon) return;
+    if (!storedCoupon) {
+      return;
+    }
 
     try {
       const parsed = JSON.parse(storedCoupon) as AppliedCoupon;
@@ -120,7 +126,7 @@ export function useCheckoutData(): CheckoutDataResult {
     }
   }, []);
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async() => {
     try {
       setLoading(true);
       setError(null);

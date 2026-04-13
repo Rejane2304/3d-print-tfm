@@ -2,12 +2,12 @@
  * Inventory Movement Service
  * Gestiona todos los movimientos de stock con trazabilidad completa
  */
-import { prisma } from "@/lib/db/prisma";
+import { prisma } from '@/lib/db/prisma';
 
 export interface MovementData {
   productId: string;
   orderId?: string;
-  type: "IN" | "OUT" | "ADJUSTMENT";
+  type: 'IN' | 'OUT' | 'ADJUSTMENT';
   quantity: number;
   reason: string;
   reference?: string;
@@ -18,7 +18,7 @@ export interface MovementData {
  * Crea un movimiento de inventario con validación de stock
  */
 export async function createInventoryMovement(data: MovementData) {
-  return await prisma.$transaction(async (tx) => {
+  return await prisma.$transaction(async(tx) => {
     // Obtener stock actual del producto
     const product = await tx.product.findUnique({
       where: { id: data.productId },
@@ -34,10 +34,10 @@ export async function createInventoryMovement(data: MovementData) {
 
     // Calcular nuevo stock según tipo de movimiento
     switch (data.type) {
-      case "IN":
+      case 'IN':
         newStock = previousStock + data.quantity;
         break;
-      case "OUT":
+      case 'OUT':
         newStock = previousStock - data.quantity;
         if (newStock < 0) {
           throw new Error(
@@ -45,10 +45,10 @@ export async function createInventoryMovement(data: MovementData) {
           );
         }
         break;
-      case "ADJUSTMENT":
+      case 'ADJUSTMENT':
         newStock = data.quantity; // Cantidad directa, no delta
         if (newStock < 0) {
-          throw new Error(`Stock ajustado no puede ser negativo`);
+          throw new Error('Stock ajustado no puede ser negativo');
         }
         break;
       default:
@@ -94,7 +94,7 @@ export async function recordStockOut(
   return createInventoryMovement({
     productId,
     orderId,
-    type: "OUT",
+    type: 'OUT',
     quantity,
     reason: `Venta - Pedido ${orderNumber}`,
     reference: orderId,
@@ -111,12 +111,12 @@ export async function recordStockReturn(
   orderId: string,
   orderNumber: string,
   userId: string,
-  reason: string = "Cancelación de pedido",
+  reason: string = 'Cancelación de pedido',
 ) {
   return createInventoryMovement({
     productId,
     orderId,
-    type: "IN",
+    type: 'IN',
     quantity,
     reason: `${reason} - Pedido ${orderNumber}`,
     reference: orderId,
@@ -139,14 +139,14 @@ export async function recordStockAdjustment(
   });
 
   if (!product) {
-    throw new Error("Producto no encontrado");
+    throw new Error('Producto no encontrado');
   }
 
   const delta = newStock - product.stock;
 
   return createInventoryMovement({
     productId,
-    type: delta >= 0 ? "IN" : "OUT",
+    type: delta >= 0 ? 'IN' : 'OUT',
     quantity: Math.abs(delta),
     reason: `Ajuste manual: ${reason}`,
     createdBy: userId,
@@ -162,7 +162,7 @@ export async function getProductMovementHistory(
 ) {
   return prisma.inventoryMovement.findMany({
     where: { productId },
-    orderBy: { createdAt: "desc" },
+    orderBy: { createdAt: 'desc' },
     take: limit,
     include: {
       order: {
@@ -192,22 +192,22 @@ export async function verifyStockIntegrity(productId: string): Promise<{
   });
 
   if (!product) {
-    throw new Error("Producto no encontrado");
+    throw new Error('Producto no encontrado');
   }
 
   // Calcular stock basado en movimientos
   const movements = await prisma.inventoryMovement.findMany({
     where: { productId },
-    orderBy: { createdAt: "asc" },
+    orderBy: { createdAt: 'asc' },
   });
 
   let calculatedStock = 0;
   for (const movement of movements) {
-    if (movement.type === "IN") {
+    if (movement.type === 'IN') {
       calculatedStock += movement.quantity;
-    } else if (movement.type === "OUT") {
+    } else if (movement.type === 'OUT') {
       calculatedStock -= movement.quantity;
-    } else if (movement.type === "ADJUSTMENT") {
+    } else if (movement.type === 'ADJUSTMENT') {
       calculatedStock = movement.newStock;
     }
   }
@@ -235,7 +235,7 @@ export async function reconcileInventory(): Promise<
     calculatedStock: number;
     discrepancy: number;
   }>
-> {
+  > {
   const products = await prisma.product.findMany({
     select: { id: true, name: true, stock: true },
   });

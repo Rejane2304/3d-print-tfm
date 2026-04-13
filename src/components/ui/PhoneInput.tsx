@@ -4,7 +4,7 @@
  * Compatible with Spanish (9 digits) and international numbers
  */
 
-import { Phone } from "lucide-react";
+import { Phone } from 'lucide-react';
 
 interface PhoneInputProps {
   value: string;
@@ -18,15 +18,15 @@ interface PhoneInputProps {
 export default function PhoneInput({
   value,
   onChange,
-  placeholder = "612 345 678",
+  placeholder = '612 345 678',
   required = false,
   disabled = false,
-  className = "",
+  className = '',
 }: PhoneInputProps) {
   // Function to format the phone number
   const formatPhoneNumber = (input: string): string => {
     // Remove everything except digits
-    const digits = input.replaceAll(/\D/g, "");
+    const digits = input.replaceAll(/\D/g, '');
 
     // For Spanish numbers (9 digits) or international
     if (digits.length <= 9) {
@@ -35,19 +35,19 @@ export default function PhoneInput({
       for (let i = 0; i < digits.length; i += 3) {
         groups.push(digits.slice(i, i + 3));
       }
-      return groups.join(" ");
+      return groups.join(' ');
     } else {
       // For international numbers (more than 9 digits)
       // Detect if it starts with international prefix
-      let formatted = "";
+      let formatted = '';
       let remaining = digits;
 
       // If it starts with 34 (Spain) or +34
-      if (digits.startsWith("34") && digits.length > 2) {
-        formatted = "+34 ";
+      if (digits.startsWith('34') && digits.length > 2) {
+        formatted = '+34 ';
         remaining = digits.slice(2);
-      } else if (digits.startsWith("0034") && digits.length > 4) {
-        formatted = "+34 ";
+      } else if (digits.startsWith('0034') && digits.length > 4) {
+        formatted = '+34 ';
         remaining = digits.slice(4);
       }
 
@@ -57,7 +57,7 @@ export default function PhoneInput({
         groups.push(remaining.slice(i, i + 3));
       }
 
-      return formatted + groups.join(" ");
+      return formatted + groups.join(' ');
     }
   };
 
@@ -68,13 +68,13 @@ export default function PhoneInput({
     // If user is deleting, allow it
     if (rawValue.length < value.length) {
       // Remove the last significant character
-      const newValue = value.replace(/\s$/, "").slice(0, -1);
-      onChange(newValue.replaceAll(/\s/g, ""));
+      const newValue = value.replace(/\s$/, '').slice(0, -1);
+      onChange(newValue.replaceAll(/\s/g, ''));
       return;
     }
 
     // Get only digits from the new value
-    const digits = rawValue.replaceAll(/\D/g, "");
+    const digits = rawValue.replaceAll(/\D/g, '');
 
     // Limit to maximum 15 digits (complete international number)
     const limitedDigits = digits.slice(0, 15);
@@ -84,9 +84,9 @@ export default function PhoneInput({
 
   // Handler for keydown (handle backspace on spaces)
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Backspace" && value.endsWith(" ")) {
+    if (e.key === 'Backspace' && value.endsWith(' ')) {
       e.preventDefault();
-      onChange(value.replace(/\s$/, "").slice(0, -1).replaceAll(/\s/g, ""));
+      onChange(value.replace(/\s$/, '').slice(0, -1).replaceAll(/\s/g, ''));
     }
   };
 

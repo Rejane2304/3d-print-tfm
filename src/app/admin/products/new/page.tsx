@@ -2,23 +2,23 @@
  * New Product Page - Admin
  * Complete form for creating a product according to Prisma schema
  */
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
+import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
 import {
+  AlertCircle,
   ArrowLeft,
-  Package,
+  CheckCircle2,
   Loader2,
+  Package,
+  Save,
   Upload,
   X,
-  AlertCircle,
-  CheckCircle2,
-  Save,
-} from "lucide-react";
+} from 'lucide-react';
 
 interface Category {
   id: string;
@@ -26,15 +26,15 @@ interface Category {
 }
 
 const MATERIALES = [
-  "PLA",
-  "PETG",
-  "ABS",
-  "TPU",
-  "RESINA",
-  "NYLON",
-  "FIBRA_CARBONO",
-  "PC",
-  "ASA",
+  'PLA',
+  'PETG',
+  'ABS',
+  'TPU',
+  'RESINA',
+  'NYLON',
+  'FIBRA_CARBONO',
+  'PC',
+  'ASA',
 ];
 
 export default function NuevoProductoPage() {
@@ -52,51 +52,51 @@ export default function NuevoProductoPage() {
 
   // Form state - all fields from Product schema
   const [formData, setFormData] = useState({
-    name: "",
-    slug: "",
-    description: "",
-    shortDescription: "",
-    price: "",
-    previousPrice: "",
-    stock: "",
-    minStock: "5",
-    categoryId: "",
-    material: "PLA",
-    widthCm: "",
-    heightCm: "",
-    depthCm: "",
-    weight: "",
-    printTime: "",
+    name: '',
+    slug: '',
+    description: '',
+    shortDescription: '',
+    price: '',
+    previousPrice: '',
+    stock: '',
+    minStock: '5',
+    categoryId: '',
+    material: 'PLA',
+    widthCm: '',
+    heightCm: '',
+    depthCm: '',
+    weight: '',
+    printTime: '',
     isActive: true,
     isFeatured: false,
   });
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/auth?callbackUrl=/admin/products/new");
+    if (status === 'unauthenticated') {
+      router.push('/auth?callbackUrl=/admin/products/new');
       return;
     }
 
     const user = session?.user as { role?: string } | undefined;
-    if (status === "authenticated" && user?.role !== "ADMIN") {
-      router.push("/");
+    if (status === 'authenticated' && user?.role !== 'ADMIN') {
+      router.push('/');
       return;
     }
 
-    if (status === "authenticated") {
+    if (status === 'authenticated') {
       loadCategories();
     }
   }, [status, session, router]);
 
-  const loadCategories = async () => {
+  const loadCategories = async() => {
     try {
-      const response = await fetch("/api/categories");
+      const response = await fetch('/api/categories');
       if (response.ok) {
         const data = await response.json();
         setCategories(data.categories || []);
       }
     } catch (err) {
-      console.error("Error al cargar categorías:", err);
+      console.error('Error al cargar categorías:', err);
     }
   };
 
@@ -109,15 +109,15 @@ export default function NuevoProductoPage() {
     setFormData((prev) => ({
       ...prev,
       [name]:
-        type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
+        type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
     }));
   };
 
   const generateSlug = (name: string) => {
     return name
       .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
   };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -129,9 +129,11 @@ export default function NuevoProductoPage() {
     }));
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async(e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      return;
+    }
 
     setUploadingImage(true);
     try {
@@ -142,15 +144,15 @@ export default function NuevoProductoPage() {
         { url: tempUrl, isMain: prev.length === 0, file },
       ]);
     } catch (err) {
-      console.error("Error uploading image:", err);
-      alert("Error al preparar imagen. Intente nuevamente.");
+      console.error('Error uploading image:', err);
+      alert('Error al preparar imagen. Intente nuevamente.');
     } finally {
       setUploadingImage(false);
     }
   };
 
   const handleImageUrlAdd = () => {
-    const url = prompt("Ingrese la URL de la imagen:");
+    const url = prompt('Ingrese la URL de la imagen:');
     if (url) {
       setImages((prev) => [...prev, { url, isMain: prev.length === 0 }]);
     }
@@ -173,17 +175,28 @@ export default function NuevoProductoPage() {
   };
 
   const validateForm = () => {
-    if (!formData.name.trim()) return "El nombre es obligatorio";
-    if (!formData.slug.trim()) return "El slug es obligatorio";
-    if (!formData.description.trim()) return "La descripción es obligatoria";
-    if (!formData.price || parseFloat(formData.price) <= 0)
-      return "El precio debe ser mayor a 0";
-    if (!formData.categoryId) return "Debe seleccionar una categoría";
-    if (images.length === 0) return "Debe agregar al menos una imagen";
+    if (!formData.name.trim()) {
+      return 'El nombre es obligatorio';
+    }
+    if (!formData.slug.trim()) {
+      return 'El slug es obligatorio';
+    }
+    if (!formData.description.trim()) {
+      return 'La descripción es obligatoria';
+    }
+    if (!formData.price || parseFloat(formData.price) <= 0) {
+      return 'El precio debe ser mayor a 0';
+    }
+    if (!formData.categoryId) {
+      return 'Debe seleccionar una categoría';
+    }
+    if (images.length === 0) {
+      return 'Debe agregar al menos una imagen';
+    }
     return null;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
 
     const validationError = validateForm();
@@ -209,9 +222,9 @@ export default function NuevoProductoPage() {
           });
           const base64 = await base64Promise;
 
-          const uploadResponse = await fetch("/api/admin/upload", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
+          const uploadResponse = await fetch('/api/admin/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               image: base64,
               filename: img.file.name,
@@ -221,7 +234,7 @@ export default function NuevoProductoPage() {
 
           if (!uploadResponse.ok) {
             const uploadData = await uploadResponse.json();
-            throw new Error(uploadData.error || "Error al subir imagen");
+            throw new Error(uploadData.error || 'Error al subir imagen');
           }
 
           const uploadData = await uploadResponse.json();
@@ -234,11 +247,11 @@ export default function NuevoProductoPage() {
 
       // Preparar datos del producto
       const optionalNumberFields = [
-        "widthCm",
-        "heightCm",
-        "depthCm",
-        "weight",
-        "previousPrice",
+        'widthCm',
+        'heightCm',
+        'depthCm',
+        'weight',
+        'previousPrice',
       ];
       const payload: Record<string, unknown> = {
         ...formData,
@@ -251,7 +264,7 @@ export default function NuevoProductoPage() {
       // Convertir campos opcionales vacíos a undefined
       optionalNumberFields.forEach((field) => {
         const value = formData[field as keyof typeof formData];
-        if (value === "" || value === null || value === undefined) {
+        if (value === '' || value === null || value === undefined) {
           payload[field] = undefined;
         } else {
           payload[field] = parseFloat(value as string);
@@ -265,30 +278,30 @@ export default function NuevoProductoPage() {
         payload.printTime = undefined;
       }
 
-      const response = await fetch("/api/admin/products", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/admin/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error al crear producto");
+        throw new Error(data.error || 'Error al crear producto');
       }
 
       setSuccess(true);
       setTimeout(() => {
-        router.push("/admin/products");
+        router.push('/admin/products');
       }, 1500);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al crear producto");
+      setError(err instanceof Error ? err.message : 'Error al crear producto');
     } finally {
       setLoading(false);
     }
   };
 
-  if (status === "loading") {
+  if (status === 'loading') {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -706,7 +719,7 @@ export default function NuevoProductoPage() {
                       <div className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-colors">
                         <Upload className="h-5 w-5 text-gray-500" />
                         <span className="text-sm text-gray-600">
-                          {uploadingImage ? "Subiendo..." : "Subir imagen"}
+                          {uploadingImage ? 'Subiendo...' : 'Subir imagen'}
                         </span>
                       </div>
                     </label>
@@ -726,7 +739,7 @@ export default function NuevoProductoPage() {
                         <div
                           key={index}
                           className={`relative aspect-square border-2 ${
-                            img.isMain ? "border-indigo-500" : "border-gray-200"
+                            img.isMain ? 'border-indigo-500' : 'border-gray-200'
                           }`}
                         >
                           <Image

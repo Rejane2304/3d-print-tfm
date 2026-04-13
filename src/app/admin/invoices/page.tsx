@@ -2,25 +2,25 @@
  * Gestión de Facturas Page - Admin
  * Invoice listing and management with DataTable component
  */
-"use client";
+'use client';
 
-import { useEffect, useState, useCallback } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useCallback, useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
-  Loader2,
-  FileText,
-  Plus,
-  CheckCircle2,
   AlertTriangle,
-  Printer,
+  CheckCircle2,
   Eye,
-  XCircle,
+  FileText,
+  Loader2,
+  Plus,
+  Printer,
   Trash2,
-} from "lucide-react";
-import { DataTable, Column, BulkAction } from "@/components/ui/DataTable";
-import ConfirmModal from "@/components/ui/ConfirmModal";
+  XCircle,
+} from 'lucide-react';
+import { BulkAction, Column, DataTable } from '@/components/ui/DataTable';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 
 interface Invoice {
   id: string;
@@ -44,58 +44,62 @@ export default function AdminInvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState('');
   const [showGenerateModal, setShowGenerateModal] = useState(false);
-  const [orderIdInput, setOrderIdInput] = useState("");
+  const [orderIdInput, setOrderIdInput] = useState('');
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [invoiceToCancel, setInvoiceToCancel] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const loadInvoices = useCallback(async () => {
+  const loadInvoices = useCallback(async() => {
     try {
       setLoading(true);
       setError(null);
 
       const params = new URLSearchParams();
       if (statusFilter) {
-        if (statusFilter === "active") params.append("anulada", "false");
-        if (statusFilter === "cancelled") params.append("anulada", "true");
+        if (statusFilter === 'active') {
+          params.append('anulada', 'false');
+        }
+        if (statusFilter === 'cancelled') {
+          params.append('anulada', 'true');
+        }
       }
 
       const response = await fetch(`/api/admin/invoices?${params.toString()}`);
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error al cargar facturas");
+        throw new Error(data.error || 'Error al cargar facturas');
       }
 
       setInvoices(data.facturas || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error desconocido");
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
     }
   }, [statusFilter]);
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login?callbackUrl=/admin/invoices");
+    if (status === 'unauthenticated') {
+      router.push('/login?callbackUrl=/admin/invoices');
       return;
     }
 
-    if (status === "authenticated") {
+    if (status === 'authenticated') {
       const user = session?.user as { role?: string } | undefined;
-      if (user?.role !== "ADMIN") {
-        router.push("/");
+      if (user?.role !== 'ADMIN') {
+        router.push('/');
         return;
       }
       loadInvoices();
     }
   }, [status, session, router, loadInvoices]);
 
-  const generateInvoice = async () => {
+  const generateInvoice = async() => {
     if (!orderIdInput.trim()) {
-      setError("Introduce el número de pedido");
+      setError('Introduce el número de pedido');
       return;
     }
 
@@ -108,7 +112,7 @@ export default function AdminInvoicesPage() {
       const searchData = await searchResponse.json();
 
       if (!searchResponse.ok) {
-        throw new Error("Error al buscar pedido");
+        throw new Error('Error al buscar pedido');
       }
 
       const pedido = searchData.pedidos?.find(
@@ -117,42 +121,44 @@ export default function AdminInvoicesPage() {
       );
 
       if (!pedido) {
-        throw new Error("Pedido no encontrado con ese número");
+        throw new Error('Pedido no encontrado con ese número');
       }
 
-      const response = await fetch("/api/admin/invoices", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/admin/invoices', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ orderId: pedido.id }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error al generar factura");
+        throw new Error(data.error || 'Error al generar factura');
       }
 
       setShowGenerateModal(false);
-      setOrderIdInput("");
-      setSuccessMessage("Factura generada correctamente");
+      setOrderIdInput('');
+      setSuccessMessage('Factura generada correctamente');
       setTimeout(() => setSuccessMessage(null), 3000);
       await loadInvoices();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error desconocido");
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     }
   };
 
-  const cancelInvoice = async (id: string) => {
+  const cancelInvoice = async(id: string) => {
     setInvoiceToCancel(id);
     setCancelModalOpen(true);
   };
 
-  const confirmCancel = async () => {
-    if (!invoiceToCancel) return;
+  const confirmCancel = async() => {
+    if (!invoiceToCancel) {
+      return;
+    }
 
     try {
       const response = await fetch(`/api/admin/invoices/${invoiceToCancel}`, {
-        method: "DELETE",
+        method: 'DELETE',
       });
 
       if (response.ok) {
@@ -161,15 +167,15 @@ export default function AdminInvoicesPage() {
         await loadInvoices();
       }
     } catch {
-      setError("Error al anular factura");
+      setError('Error al anular factura');
     }
   };
 
   const openPDF = (id: string) => {
-    window.open(`/api/admin/invoices/${id}/pdf`, "_blank");
+    window.open(`/api/admin/invoices/${id}/pdf`, '_blank');
   };
 
-  const handleDeleteInvoices = async (selectedIds: string[]) => {
+  const handleDeleteInvoices = async(selectedIds: string[]) => {
     if (
       !confirm(
         `¿Estás seguro de que deseas eliminar ${selectedIds.length} factura(s)?`,
@@ -181,21 +187,21 @@ export default function AdminInvoicesPage() {
     try {
       await Promise.all(
         selectedIds.map((id) =>
-          fetch(`/api/admin/invoices/${id}`, { method: "DELETE" }),
+          fetch(`/api/admin/invoices/${id}`, { method: 'DELETE' }),
         ),
       );
       await loadInvoices();
     } catch (error) {
-      console.error("Error al eliminar facturas:", error);
+      console.error('Error al eliminar facturas:', error);
     }
   };
 
   const columns: Column<Invoice>[] = [
     {
-      key: "invoiceNumber",
-      header: "Factura #",
+      key: 'invoiceNumber',
+      header: 'Factura #',
       sortable: true,
-      className: "",
+      className: '',
       render: (value) => (
         <div className="text-sm font-medium text-indigo-600">
           {value as string}
@@ -203,9 +209,9 @@ export default function AdminInvoicesPage() {
       ),
     },
     {
-      key: "pedido",
-      header: "Cliente",
-      className: "",
+      key: 'pedido',
+      header: 'Cliente',
+      className: '',
       render: (value) => {
         const pedido = value as {
           usuario: { nombre: string; email: string; nif: string | null };
@@ -224,10 +230,10 @@ export default function AdminInvoicesPage() {
       },
     },
     {
-      key: "total",
-      header: "Total",
+      key: 'total',
+      header: 'Total',
       sortable: true,
-      className: "",
+      className: '',
       render: (value) => (
         <span className="text-sm text-gray-900 font-medium">
           {Number(value).toFixed(2)} €
@@ -235,23 +241,23 @@ export default function AdminInvoicesPage() {
       ),
     },
     {
-      key: "emitidaEn",
-      header: "Fecha",
+      key: 'emitidaEn',
+      header: 'Fecha',
       sortable: true,
-      className: "hidden md:table-cell",
+      className: 'hidden md:table-cell',
       render: (value) => (
         <span className="text-sm text-gray-500">
           {value
-            ? new Date(value as string).toLocaleDateString("es-ES")
-            : "N/A"}
+            ? new Date(value as string).toLocaleDateString('es-ES')
+            : 'N/A'}
         </span>
       ),
     },
     {
-      key: "anulada",
-      header: "Estado",
+      key: 'anulada',
+      header: 'Estado',
       sortable: true,
-      className: "hidden lg:table-cell",
+      className: 'hidden lg:table-cell',
       render: (value) =>
         value ? (
           <span className="px-2 inline-flex items-center gap-1 text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
@@ -266,9 +272,9 @@ export default function AdminInvoicesPage() {
         ),
     },
     {
-      key: "actions",
-      header: "Acciones",
-      className: "",
+      key: 'actions',
+      header: 'Acciones',
+      className: '',
       render: (_, row) => (
         <div className="flex items-center justify-end gap-1">
           <Link
@@ -285,7 +291,7 @@ export default function AdminInvoicesPage() {
             }}
             disabled={row.anulada}
             className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            title={row.anulada ? "Anulada - no disponible" : "Descargar PDF"}
+            title={row.anulada ? 'Anulada - no disponible' : 'Descargar PDF'}
           >
             <Printer className="h-4 w-4" />
           </button>
@@ -308,15 +314,15 @@ export default function AdminInvoicesPage() {
 
   const bulkActions: BulkAction[] = [
     {
-      key: "delete",
-      label: "Eliminar seleccionados",
+      key: 'delete',
+      label: 'Eliminar seleccionados',
       icon: <Trash2 className="h-4 w-4" />,
-      variant: "danger",
+      variant: 'danger',
       onClick: handleDeleteInvoices,
     },
   ];
 
-  if (status === "loading" || loading) {
+  if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -401,9 +407,9 @@ export default function AdminInvoicesPage() {
           rowKey="id"
           searchable
           searchKeys={[
-            "invoiceNumber",
-            "pedido.usuario.nombre",
-            "pedido.orderNumber",
+            'invoiceNumber',
+            'pedido.usuario.nombre',
+            'pedido.orderNumber',
           ]}
           searchPlaceholder="Buscar por número de factura..."
           pagination
@@ -452,7 +458,7 @@ export default function AdminInvoicesPage() {
               <button
                 onClick={() => {
                   setShowGenerateModal(false);
-                  setOrderIdInput("");
+                  setOrderIdInput('');
                   setError(null);
                 }}
                 className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-300 transition-colors"

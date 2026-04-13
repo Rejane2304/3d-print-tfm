@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Tag, Loader2, CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Loader2, Tag } from 'lucide-react';
 import type { AppliedCoupon } from '../hooks/useCheckoutData';
 
 interface CouponSectionProps {
@@ -19,8 +19,10 @@ export function CouponSection({
   const [applying, setApplying] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleApply = async () => {
-    if (!couponCode.trim()) return;
+  const handleApply = async() => {
+    if (!couponCode.trim()) {
+      return;
+    }
 
     setApplying(true);
     setError(null);

@@ -3,11 +3,11 @@
  * Product card with premium style and smooth animations
  * Server Component - do not use event handlers
  */
-import Link from "next/link";
-import Image from "next/image";
-import { Decimal } from "@prisma/client/runtime/library";
-import { StarRating } from "@/components/ui/StarRating";
-import { formatPrice } from "@/lib/pricing";
+import Link from 'next/link';
+import Image from 'next/image';
+import { Decimal } from '@prisma/client/runtime/library';
+import { StarRating } from '@/components/ui/StarRating';
+import { formatPrice } from '@/lib/pricing';
 
 interface Product {
   id: string;
@@ -133,11 +133,11 @@ export default function ProductCard({ product }: Readonly<ProductCardProps>) {
               </span>
               <span
                 className={`text-sm font-medium ${
-                  product.stock > 0 ? "text-green-600" : "text-red-500"
+                  product.stock > 0 ? 'text-green-600' : 'text-red-500'
                 }`}
                 data-testid="product-stock"
               >
-                {product.stock > 0 ? `${product.stock} unid.` : "Sin stock"}
+                {product.stock > 0 ? `${product.stock} unid.` : 'Sin stock'}
               </span>
             </div>
           </div>

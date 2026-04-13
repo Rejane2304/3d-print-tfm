@@ -15,7 +15,9 @@ export interface CustomSession {
 // Helper to get user from session
 export function getUserFromSession(session: unknown): CustomUser | null {
   const s = session as { user?: CustomUser } | null;
-  if (!s?.user) return null;
+  if (!s?.user) {
+    return null;
+  }
   return {
     id: s.user.id,
     email: s.user.email,

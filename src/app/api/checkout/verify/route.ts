@@ -12,7 +12,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import Stripe from 'stripe';
 import { translateOrderStatus, translatePaymentStatus } from '@/lib/i18n';
-import { Prisma, Order, OrderItem } from '@prisma/client';
+import { Order, OrderItem, Prisma } from '@prisma/client';
 
 // Tipo para el pedido incluyendo items y producto
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

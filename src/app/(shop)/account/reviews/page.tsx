@@ -3,23 +3,23 @@
  * Gestiona las reseñas del usuario autenticado
  * Responsive: mobile → 4K
  */
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
+import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
 import {
-  Star,
-  Loader2,
   AlertCircle,
-  Edit2,
-  Trash2,
-  Package,
   CheckCircle2,
-} from "lucide-react";
-import { ConfirmModal } from "@/components/ui/ConfirmModal";
+  Edit2,
+  Loader2,
+  Package,
+  Star,
+  Trash2,
+} from 'lucide-react';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
 interface Review {
   id: string;
@@ -44,31 +44,31 @@ export default function MyReviewsPage() {
   const [reviewToDelete, setReviewToDelete] = useState<string | null>(null);
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login?callbackUrl=/account/reviews");
+    if (status === 'unauthenticated') {
+      router.push('/login?callbackUrl=/account/reviews');
       return;
     }
 
-    if (status === "authenticated") {
+    if (status === 'authenticated') {
       loadReviews();
     }
   }, [status, router]);
 
-  const loadReviews = async () => {
+  const loadReviews = async() => {
     try {
       setLoading(true);
       setError(null);
 
-      const response = await fetch("/api/reviews");
+      const response = await fetch('/api/reviews');
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error al cargar reseñas");
+        throw new Error(data.error || 'Error al cargar reseñas');
       }
 
       setReviews(data.data || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error desconocido");
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
     }
@@ -79,22 +79,24 @@ export default function MyReviewsPage() {
     setDeleteModalOpen(true);
   };
 
-  const confirmDelete = async () => {
-    if (!reviewToDelete) return;
+  const confirmDelete = async() => {
+    if (!reviewToDelete) {
+      return;
+    }
 
     try {
       const response = await fetch(`/api/reviews/${reviewToDelete}`, {
-        method: "DELETE",
+        method: 'DELETE',
       });
 
       if (response.ok) {
         setReviews(reviews.filter((r) => r.id !== reviewToDelete));
       } else {
         const data = await response.json();
-        setError(data.error || "Error al eliminar reseña");
+        setError(data.error || 'Error al eliminar reseña');
       }
     } catch {
-      setError("Error al eliminar reseña");
+      setError('Error al eliminar reseña');
     } finally {
       setDeleteModalOpen(false);
       setReviewToDelete(null);
@@ -109,8 +111,8 @@ export default function MyReviewsPage() {
             key={star}
             className={`h-3 w-3 sm:h-4 sm:w-4 ${
               star <= rating
-                ? "text-yellow-400 fill-yellow-400"
-                : "text-gray-300"
+                ? 'text-yellow-400 fill-yellow-400'
+                : 'text-gray-300'
             }`}
           />
         ))}
@@ -118,7 +120,7 @@ export default function MyReviewsPage() {
     );
   };
 
-  if (status === "loading" || loading) {
+  if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="text-center">
@@ -141,7 +143,7 @@ export default function MyReviewsPage() {
               Mis Reseñas
             </h1>
             <p className="text-gray-500 mt-1 text-sm sm:text-base">
-              {reviews.length} {reviews.length === 1 ? "reseña" : "reseñas"}{" "}
+              {reviews.length} {reviews.length === 1 ? 'reseña' : 'reseñas'}{' '}
               escritas
             </p>
           </div>
@@ -216,7 +218,7 @@ export default function MyReviewsPage() {
                         {renderStars(review.rating)}
                         <span className="text-xs sm:text-sm text-gray-500">
                           {new Date(review.createdAt).toLocaleDateString(
-                            "es-ES",
+                            'es-ES',
                           )}
                         </span>
                       </div>

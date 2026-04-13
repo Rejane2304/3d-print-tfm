@@ -2,10 +2,10 @@
  * Pagination Component
  * Componente de paginación para el catálogo
  */
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 interface PaginationProps {
   readonly currentPage: number;
@@ -20,7 +20,7 @@ export default function Pagination({
 
   const buildPageUrl = (page: number) => {
     const params = new URLSearchParams(currentSearchParams.toString());
-    params.set("page", page.toString());
+    params.set('page', page.toString());
     return `/products?${params.toString()}`;
   };
 
@@ -38,7 +38,7 @@ export default function Pagination({
       pages.push(1);
 
       if (currentPage > 3) {
-        pages.push("...");
+        pages.push('...');
       }
 
       // Páginas alrededor de la actual
@@ -52,7 +52,7 @@ export default function Pagination({
       }
 
       if (currentPage < totalPages - 2) {
-        pages.push("...");
+        pages.push('...');
       }
 
       // Siempre mostrar última página
@@ -66,7 +66,9 @@ export default function Pagination({
 
   const pageNumbers = getPageNumbers();
 
-  if (totalPages <= 1) return null;
+  if (totalPages <= 1) {
+    return null;
+  }
 
   return (
     <nav
@@ -90,7 +92,7 @@ export default function Pagination({
       {/* Números de página */}
       <div className="flex gap-1">
         {pageNumbers.map((page, index) => {
-          if (page === "...") {
+          if (page === '...') {
             // Usar una key única basada en la posición y el valor anterior/siguiente
             const prev = pageNumbers[index - 1] ?? 'start';
             const next = pageNumbers[index + 1] ?? 'end';
@@ -112,8 +114,8 @@ export default function Pagination({
               href={buildPageUrl(page as number)}
               className={`px-3 py-2 rounded-md transition-colors ${
                 isCurrent
-                  ? "bg-indigo-600 text-white"
-                  : "border border-gray-300 hover:bg-gray-50 text-gray-700"
+                  ? 'bg-indigo-600 text-white'
+                  : 'border border-gray-300 hover:bg-gray-50 text-gray-700'
               }`}
             >
               {page}

@@ -4,37 +4,37 @@
  *
  * Requiere: Rol ADMIN
  */
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
-import { z } from "zod";
-import { CouponType } from "@prisma/client";
-import { translateCouponCode } from "@/lib/i18n";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
+import { z } from 'zod';
+import { CouponType } from '@prisma/client';
+import { translateCouponCode } from '@/lib/i18n';
 
 // Schema de validación
 const couponSchema = z.object({
   code: z
     .string()
-    .min(3, "El código debe tener al menos 3 caracteres")
-    .max(50, "Máximo 50 caracteres"),
-  type: z.enum(["FIXED", "PERCENTAGE", "FREE_SHIPPING"], {
+    .min(3, 'El código debe tener al menos 3 caracteres')
+    .max(50, 'Máximo 50 caracteres'),
+  type: z.enum(['FIXED', 'PERCENTAGE', 'FREE_SHIPPING'], {
     errorMap: () => ({
-      message: "Tipo inválido. Debe ser FIXED, PERCENTAGE o FREE_SHIPPING",
+      message: 'Tipo inválido. Debe ser FIXED, PERCENTAGE o FREE_SHIPPING',
     }),
   }),
-  value: z.number().min(0, "El valor debe ser mayor o igual a 0").default(0),
+  value: z.number().min(0, 'El valor debe ser mayor o igual a 0').default(0),
   minOrderAmount: z
     .number()
-    .min(0, "El mínimo debe ser mayor o igual a 0")
+    .min(0, 'El mínimo debe ser mayor o igual a 0')
     .optional(),
   maxUses: z
     .number()
     .int()
-    .min(1, "El máximo de usos debe ser al menos 1")
+    .min(1, 'El máximo de usos debe ser al menos 1')
     .optional(),
-  validFrom: z.string().datetime("Fecha de inicio inválida"),
-  validUntil: z.string().datetime("Fecha de fin inválida"),
+  validFrom: z.string().datetime('Fecha de inicio inválida'),
+  validUntil: z.string().datetime('Fecha de fin inválida'),
   isActive: z.boolean().default(true),
 });
 
@@ -49,7 +49,7 @@ export async function GET() {
     }
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: "No autenticado" },
+        { success: false, error: 'No autenticado' },
         { status: 401 },
       );
     }
@@ -58,15 +58,15 @@ export async function GET() {
       where: { email: session.user.email },
     });
 
-    if (!user || user.role !== "ADMIN") {
+    if (!user || user.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: "No autorizado" },
+        { success: false, error: 'No autorizado' },
         { status: 401 },
       );
     }
 
     const coupons = await prisma.coupon.findMany({
-      orderBy: [{ createdAt: "desc" }],
+      orderBy: [{ createdAt: 'desc' }],
     });
 
     // Formatear para el panel admin (español)
@@ -77,25 +77,30 @@ export async function GET() {
       const isMaxedOut =
         coupon.maxUses !== null && coupon.usedCount >= coupon.maxUses;
 
-      let estado = "Activo";
-      if (!coupon.isActive) estado = "Inactivo";
-      else if (isExpired) estado = "Expirado";
-      else if (isNotStarted) estado = "Pendiente";
-      else if (isMaxedOut) estado = "Agotado";
+      let estado = 'Activo';
+      if (!coupon.isActive) {
+        estado = 'Inactivo';
+      } else if (isExpired) {
+        estado = 'Expirado';
+      } else if (isNotStarted) {
+        estado = 'Pendiente';
+      } else if (isMaxedOut) {
+        estado = 'Agotado';
+      }
 
       const tipoTexto =
-        coupon.type === "PERCENTAGE"
-          ? "Porcentaje"
-          : coupon.type === "FIXED"
-            ? "Fijo"
-            : "Envío Gratis";
+        coupon.type === 'PERCENTAGE'
+          ? 'Porcentaje'
+          : coupon.type === 'FIXED'
+            ? 'Fijo'
+            : 'Envío Gratis';
 
       const valorTexto =
-        coupon.type === "PERCENTAGE"
+        coupon.type === 'PERCENTAGE'
           ? `${coupon.value}%`
-          : coupon.type === "FIXED"
+          : coupon.type === 'FIXED'
             ? `${coupon.value}€`
-            : "Gratis";
+            : 'Gratis';
 
       return {
         id: coupon.id,
@@ -124,9 +129,9 @@ export async function GET() {
 
     return NextResponse.json({ success: true, coupons: couponsFormateados });
   } catch (error) {
-    console.error("Error listando cupones:", error);
+    console.error('Error listando cupones:', error);
     return NextResponse.json(
-      { success: false, error: "Error interno" },
+      { success: false, error: 'Error interno' },
       { status: 500 },
     );
   }
@@ -143,7 +148,7 @@ export async function POST(req: NextRequest) {
     }
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: "No autenticado" },
+        { success: false, error: 'No autenticado' },
         { status: 401 },
       );
     }
@@ -152,9 +157,9 @@ export async function POST(req: NextRequest) {
       where: { email: session.user.email },
     });
 
-    if (!user || user.role !== "ADMIN") {
+    if (!user || user.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: "No autorizado" },
+        { success: false, error: 'No autorizado' },
         { status: 401 },
       );
     }
@@ -169,7 +174,7 @@ export async function POST(req: NextRequest) {
 
     if (existing) {
       return NextResponse.json(
-        { success: false, error: "Ya existe un cupón con ese código" },
+        { success: false, error: 'Ya existe un cupón con ese código' },
         { status: 400 },
       );
     }
@@ -182,7 +187,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: "La fecha de fin debe ser posterior a la fecha de inicio",
+          error: 'La fecha de fin debe ser posterior a la fecha de inicio',
         },
         { status: 400 },
       );
@@ -213,9 +218,9 @@ export async function POST(req: NextRequest) {
         { status: 400 },
       );
     }
-    console.error("Error creando cupón:", error);
+    console.error('Error creando cupón:', error);
     return NextResponse.json(
-      { success: false, error: "Error interno" },
+      { success: false, error: 'Error interno' },
       { status: 500 },
     );
   }

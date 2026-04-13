@@ -3,17 +3,17 @@
  * POST /api/cart/restore-from-order
  * Restaura el carrito desde un pedido cancelado
  */
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
 
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const body = await req.json();
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
 
     if (!orderId) {
       return NextResponse.json(
-        { error: "Order ID requerido" },
+        { error: 'Order ID requerido' },
         { status: 400 },
       );
     }
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     const order = await prisma.order.findFirst({
       where: {
         id: orderId,
-        status: { in: ["PENDING", "CANCELLED"] },
+        status: { in: ['PENDING', 'CANCELLED'] },
         user: { email: session.user.email },
       },
       include: {
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
 
     if (!order) {
       return NextResponse.json(
-        { error: "Pedido no encontrado o ya procesado" },
+        { error: 'Pedido no encontrado o ya procesado' },
         { status: 404 },
       );
     }
@@ -69,7 +69,9 @@ export async function POST(req: NextRequest) {
     // Restaurar items del pedido al carrito
     for (const orderItem of order.items) {
       // Saltar items sin productId (producto eliminado)
-      if (!orderItem.productId) continue;
+      if (!orderItem.productId) {
+        continue;
+      }
 
       // Verificar si el producto ya esta en el carrito
       const existingItem = cart.items.find(
@@ -101,12 +103,12 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: "Carrito restaurado correctamente",
+      message: 'Carrito restaurado correctamente',
     });
   } catch (error) {
-    console.error("Error restoring cart:", error);
+    console.error('Error restoring cart:', error);
     return NextResponse.json(
-      { error: "Error al restaurar carrito" },
+      { error: 'Error al restaurar carrito' },
       { status: 500 },
     );
   }

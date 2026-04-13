@@ -1,6 +1,6 @@
 'use client';
 
-import { X, CreditCard, Wallet, Banknote, ArrowRightLeft } from 'lucide-react';
+import { ArrowRightLeft, Banknote, CreditCard, Wallet, X } from 'lucide-react';
 import type { PaymentMethod } from '../hooks/usePaymentProcessing';
 
 interface TestDataModalProps {

@@ -2,7 +2,7 @@
 
 import { Package } from 'lucide-react';
 import Image from 'next/image';
-import type { CartItem, AppliedCoupon } from '../hooks/useCheckoutData';
+import type { AppliedCoupon, CartItem } from '../hooks/useCheckoutData';
 
 interface OrderSummaryProps {
   items: CartItem[];
@@ -20,13 +20,19 @@ const FREE_SHIPPING_THRESHOLD = 50;
 const DEFAULT_SHIPPING_COST = 5.99;
 
 function calculateShipping(subtotal: number, coupon: AppliedCoupon | null): number {
-  if (subtotal >= FREE_SHIPPING_THRESHOLD) return 0;
-  if (coupon?.type === 'FREE_SHIPPING') return 0;
+  if (subtotal >= FREE_SHIPPING_THRESHOLD) {
+    return 0;
+  }
+  if (coupon?.type === 'FREE_SHIPPING') {
+    return 0;
+  }
   return DEFAULT_SHIPPING_COST;
 }
 
 function calculateDiscount(subtotal: number, coupon: AppliedCoupon | null): number {
-  if (!coupon) return 0;
+  if (!coupon) {
+    return 0;
+  }
   if (coupon.type === 'PERCENTAGE') {
     return subtotal * (coupon.discount / 100);
   }

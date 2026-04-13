@@ -2,26 +2,26 @@
  * Order State Machine
  * Gestiona las transiciones válidas entre estados de pedidos
  */
-import { OrderStatus } from "@prisma/client";
+import { OrderStatus } from '@prisma/client';
 
 // Definición de transiciones válidas entre estados
 const VALID_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
-  PENDING: ["CONFIRMED", "CANCELLED"],
-  CONFIRMED: ["PREPARING", "CANCELLED"],
-  PREPARING: ["SHIPPED", "CANCELLED"],
-  SHIPPED: ["DELIVERED"],
+  PENDING: ['CONFIRMED', 'CANCELLED'],
+  CONFIRMED: ['PREPARING', 'CANCELLED'],
+  PREPARING: ['SHIPPED', 'CANCELLED'],
+  SHIPPED: ['DELIVERED'],
   DELIVERED: [],
   CANCELLED: [], // Estado final, no se puede salir
 };
 
 // Timestamps a actualizar en cada estado
 export const STATUS_TIMESTAMPS: Record<OrderStatus, string> = {
-  PENDING: "",
-  CONFIRMED: "confirmedAt",
-  PREPARING: "preparingAt",
-  SHIPPED: "shippedAt",
-  DELIVERED: "deliveredAt",
-  CANCELLED: "cancelledAt",
+  PENDING: '',
+  CONFIRMED: 'confirmedAt',
+  PREPARING: 'preparingAt',
+  SHIPPED: 'shippedAt',
+  DELIVERED: 'deliveredAt',
+  CANCELLED: 'cancelledAt',
 };
 
 /**
@@ -37,7 +37,7 @@ export function isValidStatusTransition(
   }
 
   // Estados finales no pueden cambiar
-  if (fromStatus === "DELIVERED" || fromStatus === "CANCELLED") {
+  if (fromStatus === 'DELIVERED' || fromStatus === 'CANCELLED') {
     return false;
   }
 
@@ -61,22 +61,22 @@ export function validateStatusTransition(
   toStatus: OrderStatus,
 ): { valid: boolean; error?: string } {
   if (fromStatus === toStatus) {
-    return { valid: false, error: "No se puede cambiar al mismo estado" };
+    return { valid: false, error: 'No se puede cambiar al mismo estado' };
   }
 
-  if (fromStatus === "DELIVERED") {
-    return { valid: false, error: "No se puede modificar un pedido entregado" };
+  if (fromStatus === 'DELIVERED') {
+    return { valid: false, error: 'No se puede modificar un pedido entregado' };
   }
 
-  if (fromStatus === "CANCELLED") {
-    return { valid: false, error: "No se puede reactivar un pedido cancelado" };
+  if (fromStatus === 'CANCELLED') {
+    return { valid: false, error: 'No se puede reactivar un pedido cancelado' };
   }
 
   const validNextStatuses = VALID_STATUS_TRANSITIONS[fromStatus];
   if (!validNextStatuses.includes(toStatus)) {
     return {
       valid: false,
-      error: `Transición inválida: no se puede pasar de ${fromStatus} a ${toStatus}. Estados válidos: ${validNextStatuses.join(", ") || "ninguno"}`,
+      error: `Transición inválida: no se puede pasar de ${fromStatus} a ${toStatus}. Estados válidos: ${validNextStatuses.join(', ') || 'ninguno'}`,
     };
   }
 
@@ -94,7 +94,7 @@ export function getAvailableStatuses(fromStatus: OrderStatus): OrderStatus[] {
  * Verifica si se puede cancelar un pedido
  */
 export function canCancelOrder(status: OrderStatus): boolean {
-  return ["PENDING", "CONFIRMED", "PREPARING"].includes(status);
+  return ['PENDING', 'CONFIRMED', 'PREPARING'].includes(status);
 }
 
 /**
@@ -122,11 +122,11 @@ export function prepareStatusUpdate(
  * Obtiene el orden secuencial de los estados para validación
  */
 export const STATUS_SEQUENCE: OrderStatus[] = [
-  "PENDING",
-  "CONFIRMED",
-  "PREPARING",
-  "SHIPPED",
-  "DELIVERED",
+  'PENDING',
+  'CONFIRMED',
+  'PREPARING',
+  'SHIPPED',
+  'DELIVERED',
 ];
 
 /**

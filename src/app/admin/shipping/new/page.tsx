@@ -2,25 +2,25 @@
  * New Shipping Zone Page - Admin
  * Form for creating a new shipping zone
  */
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
-  ArrowLeft,
-  Truck,
-  Loader2,
   AlertCircle,
+  ArrowLeft,
   CheckCircle2,
-  Save,
-  MapPin,
-  Euro,
   Clock,
+  Euro,
+  Loader2,
+  MapPin,
   Plus,
+  Save,
+  Truck,
   X,
-} from "lucide-react";
+} from 'lucide-react';
 
 export default function NuevaZonaEnvioPage() {
   const { data: session, status } = useSession();
@@ -30,17 +30,17 @@ export default function NuevaZonaEnvioPage() {
   const [success, setSuccess] = useState(false);
 
   // Arrays para regiones y prefijos
-  const [regionInput, setRegionInput] = useState("");
-  const [postalCodeInput, setPostalCodeInput] = useState("");
+  const [regionInput, setRegionInput] = useState('');
+  const [postalCodeInput, setPostalCodeInput] = useState('');
 
   // Form state
   const [formData, setFormData] = useState({
-    name: "",
-    country: "España",
+    name: '',
+    country: 'España',
     regions: [] as string[],
     postalCodePrefixes: [] as string[],
     baseCost: 4.99,
-    freeShippingThreshold: "",
+    freeShippingThreshold: '',
     estimatedDaysMin: 3,
     estimatedDaysMax: 5,
     isActive: true,
@@ -48,14 +48,14 @@ export default function NuevaZonaEnvioPage() {
   });
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/auth?callbackUrl=/admin/shipping/new");
+    if (status === 'unauthenticated') {
+      router.push('/auth?callbackUrl=/admin/shipping/new');
       return;
     }
 
     const user = session?.user as { role?: string } | undefined;
-    if (status === "authenticated" && user?.role !== "ADMIN") {
-      router.push("/");
+    if (status === 'authenticated' && user?.role !== 'ADMIN') {
+      router.push('/');
       return;
     }
   }, [status, session, router]);
@@ -67,9 +67,9 @@ export default function NuevaZonaEnvioPage() {
     setFormData((prev) => ({
       ...prev,
       [name]:
-        type === "checkbox"
+        type === 'checkbox'
           ? (e.target as HTMLInputElement).checked
-          : type === "number"
+          : type === 'number'
             ? Number(value)
             : value,
     }));
@@ -81,7 +81,7 @@ export default function NuevaZonaEnvioPage() {
         ...prev,
         regions: [...prev.regions, regionInput.trim()],
       }));
-      setRegionInput("");
+      setRegionInput('');
     }
   };
 
@@ -104,7 +104,7 @@ export default function NuevaZonaEnvioPage() {
           postalCodeInput.trim(),
         ],
       }));
-      setPostalCodeInput("");
+      setPostalCodeInput('');
     }
   };
 
@@ -116,25 +116,35 @@ export default function NuevaZonaEnvioPage() {
   };
 
   const validateForm = () => {
-    if (!formData.name.trim()) return "El nombre de la zona es obligatorio";
-    if (!formData.country.trim()) return "El país es obligatorio";
-    if (formData.regions.length === 0)
-      return "Debe agregar al menos una región";
-    if (formData.postalCodePrefixes.length === 0)
-      return "Debe agregar al menos un prefijo de código postal";
-    if (formData.baseCost < 0) return "El costo base no puede ser negativo";
-    if (formData.estimatedDaysMin < 1)
-      return "Los días estimados mínimos deben ser al menos 1";
-    if (formData.estimatedDaysMax < 1)
-      return "Los días estimados máximos deben ser al menos 1";
+    if (!formData.name.trim()) {
+      return 'El nombre de la zona es obligatorio';
+    }
+    if (!formData.country.trim()) {
+      return 'El país es obligatorio';
+    }
+    if (formData.regions.length === 0) {
+      return 'Debe agregar al menos una región';
+    }
+    if (formData.postalCodePrefixes.length === 0) {
+      return 'Debe agregar al menos un prefijo de código postal';
+    }
+    if (formData.baseCost < 0) {
+      return 'El costo base no puede ser negativo';
+    }
+    if (formData.estimatedDaysMin < 1) {
+      return 'Los días estimados mínimos deben ser al menos 1';
+    }
+    if (formData.estimatedDaysMax < 1) {
+      return 'Los días estimados máximos deben ser al menos 1';
+    }
     if (formData.estimatedDaysMin > formData.estimatedDaysMax) {
-      return "Los días estimados mínimos no pueden ser mayores que los máximos";
+      return 'Los días estimados mínimos no pueden ser mayores que los máximos';
     }
 
     return null;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
 
     const validationError = validateForm();
@@ -147,9 +157,9 @@ export default function NuevaZonaEnvioPage() {
     setError(null);
 
     try {
-      const response = await fetch("/api/admin/shipping", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/admin/shipping', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: formData.name,
           country: formData.country,
@@ -169,23 +179,23 @@ export default function NuevaZonaEnvioPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error al crear zona de envío");
+        throw new Error(data.error || 'Error al crear zona de envío');
       }
 
       setSuccess(true);
       setTimeout(() => {
-        router.push("/admin/shipping");
+        router.push('/admin/shipping');
       }, 1500);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Error al crear zona de envío",
+        err instanceof Error ? err.message : 'Error al crear zona de envío',
       );
     } finally {
       setLoading(false);
     }
   };
 
-  if (status === "loading") {
+  if (status === 'loading') {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -331,7 +341,7 @@ export default function NuevaZonaEnvioPage() {
                     value={regionInput}
                     onChange={(e) => setRegionInput(e.target.value)}
                     onKeyPress={(e) =>
-                      e.key === "Enter" && (e.preventDefault(), addRegion())
+                      e.key === 'Enter' && (e.preventDefault(), addRegion())
                     }
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     placeholder="Ej: Madrid"
@@ -382,7 +392,7 @@ export default function NuevaZonaEnvioPage() {
                     value={postalCodeInput}
                     onChange={(e) => setPostalCodeInput(e.target.value)}
                     onKeyPress={(e) =>
-                      e.key === "Enter" && (e.preventDefault(), addPostalCode())
+                      e.key === 'Enter' && (e.preventDefault(), addPostalCode())
                     }
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     placeholder="Ej: 28"

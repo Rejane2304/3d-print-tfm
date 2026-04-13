@@ -5,16 +5,16 @@
  * POST /api/coupons/validate
  * Body: { code: string, orderAmount: number }
  */
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
-import { z } from "zod";
-import { couponTranslations } from "@/lib/i18n";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { z } from 'zod';
+import { couponTranslations } from '@/lib/i18n';
 
 const validateSchema = z.object({
-  code: z.string().min(1, "El código es obligatorio"),
+  code: z.string().min(1, 'El código es obligatorio'),
   orderAmount: z
     .number()
-    .min(0, "El monto debe ser mayor o igual a 0")
+    .min(0, 'El monto debe ser mayor o igual a 0')
     .default(0),
 });
 
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
 
     if (!coupon) {
       return NextResponse.json(
-        { success: false, error: "Cupón no encontrado" },
+        { success: false, error: 'Cupón no encontrado' },
         { status: 404 },
       );
     }
@@ -58,28 +58,28 @@ export async function POST(req: NextRequest) {
 
     if (!coupon.isActive) {
       return NextResponse.json(
-        { success: false, error: "Este cupón está inactivo" },
+        { success: false, error: 'Este cupón está inactivo' },
         { status: 400 },
       );
     }
 
     if (coupon.validFrom > now) {
       return NextResponse.json(
-        { success: false, error: "Este cupón aún no está disponible" },
+        { success: false, error: 'Este cupón aún no está disponible' },
         { status: 400 },
       );
     }
 
     if (coupon.validUntil < now) {
       return NextResponse.json(
-        { success: false, error: "Este cupón ha expirado" },
+        { success: false, error: 'Este cupón ha expirado' },
         { status: 400 },
       );
     }
 
     if (coupon.maxUses !== null && coupon.usedCount >= coupon.maxUses) {
       return NextResponse.json(
-        { success: false, error: "Este cupón ha alcanzado el límite de usos" },
+        { success: false, error: 'Este cupón ha alcanzado el límite de usos' },
         { status: 400 },
       );
     }
@@ -99,22 +99,22 @@ export async function POST(req: NextRequest) {
 
     // Calcular descuento
     let discount = 0;
-    if (coupon.type === "PERCENTAGE") {
+    if (coupon.type === 'PERCENTAGE') {
       discount = data.orderAmount * (Number(coupon.value) / 100);
-    } else if (coupon.type === "FIXED") {
+    } else if (coupon.type === 'FIXED') {
       discount = Math.min(Number(coupon.value), data.orderAmount);
-    } else if (coupon.type === "FREE_SHIPPING") {
+    } else if (coupon.type === 'FREE_SHIPPING') {
       // El descuento de envío gratis se maneja separadamente
       discount = 0;
     }
 
     // Formatear respuesta
     const tipoTexto =
-      coupon.type === "PERCENTAGE"
-        ? "Porcentaje"
-        : coupon.type === "FIXED"
-          ? "Fijo"
-          : "Envío Gratis";
+      coupon.type === 'PERCENTAGE'
+        ? 'Porcentaje'
+        : coupon.type === 'FIXED'
+          ? 'Fijo'
+          : 'Envío Gratis';
 
     return NextResponse.json({
       success: true,
@@ -126,7 +126,7 @@ export async function POST(req: NextRequest) {
         typeRaw: coupon.type,
         value: Number(coupon.value),
         discount: Math.round(discount * 100) / 100,
-        freeShipping: coupon.type === "FREE_SHIPPING",
+        freeShipping: coupon.type === 'FREE_SHIPPING',
       },
     });
   } catch (error) {
@@ -136,9 +136,9 @@ export async function POST(req: NextRequest) {
         { status: 400 },
       );
     }
-    console.error("Error validando cupón:", error);
+    console.error('Error validando cupón:', error);
     return NextResponse.json(
-      { success: false, error: "Error interno" },
+      { success: false, error: 'Error interno' },
       { status: 500 },
     );
   }

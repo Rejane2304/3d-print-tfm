@@ -2,8 +2,8 @@
  * API de Reseñas por Producto
  * Obtener reseñas públicas de un producto específico
  */
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
 
 // GET - Obtener reseñas de un producto
 export async function GET(
@@ -15,9 +15,9 @@ export async function GET(
 
     // Get query params for pagination and sorting
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "10");
-    const sortBy = searchParams.get("sortBy") || "newest"; // newest, oldest, highest, lowest
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+    const sortBy = searchParams.get('sortBy') || 'newest'; // newest, oldest, highest, lowest
 
     // Verificar que el producto existe
     const product = await prisma.product.findUnique({
@@ -26,7 +26,7 @@ export async function GET(
 
     if (!product) {
       return NextResponse.json(
-        { success: false, error: "Producto no encontrado" },
+        { success: false, error: 'Producto no encontrado' },
         { status: 404 },
       );
     }
@@ -34,18 +34,18 @@ export async function GET(
     // Construir orden
     let orderBy: Record<string, string> = {};
     switch (sortBy) {
-      case "oldest":
-        orderBy = { createdAt: "asc" };
+      case 'oldest':
+        orderBy = { createdAt: 'asc' };
         break;
-      case "highest":
-        orderBy = { rating: "desc" };
+      case 'highest':
+        orderBy = { rating: 'desc' };
         break;
-      case "lowest":
-        orderBy = { rating: "asc" };
+      case 'lowest':
+        orderBy = { rating: 'asc' };
         break;
-      case "newest":
+      case 'newest':
       default:
-        orderBy = { createdAt: "desc" };
+        orderBy = { createdAt: 'desc' };
         break;
     }
 
@@ -124,9 +124,9 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error("Error obteniendo reseñas:", error);
+    console.error('Error obteniendo reseñas:', error);
     return NextResponse.json(
-      { success: false, error: "Error interno" },
+      { success: false, error: 'Error interno' },
       { status: 500 },
     );
   }

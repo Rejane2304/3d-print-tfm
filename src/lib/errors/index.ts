@@ -9,27 +9,27 @@
 
 export enum ErrorCode {
   // Authentication errors
-  AUTH_INVALID_CREDENTIALS = "AUTH_INVALID_CREDENTIALS",
-  AUTH_SESSION_EXPIRED = "AUTH_SESSION_EXPIRED",
-  AUTH_UNAUTHORIZED = "AUTH_UNAUTHORIZED",
+  AUTH_INVALID_CREDENTIALS = 'AUTH_INVALID_CREDENTIALS',
+  AUTH_SESSION_EXPIRED = 'AUTH_SESSION_EXPIRED',
+  AUTH_UNAUTHORIZED = 'AUTH_UNAUTHORIZED',
 
   // Validation errors
-  VALIDATION_INVALID_INPUT = "VALIDATION_INVALID_INPUT",
-  VALIDATION_REQUIRED_FIELD = "VALIDATION_REQUIRED_FIELD",
+  VALIDATION_INVALID_INPUT = 'VALIDATION_INVALID_INPUT',
+  VALIDATION_REQUIRED_FIELD = 'VALIDATION_REQUIRED_FIELD',
 
   // Database errors
-  DB_CONNECTION_ERROR = "DB_CONNECTION_ERROR",
-  DB_NOT_FOUND = "DB_NOT_FOUND",
-  DB_DUPLICATE_ENTRY = "DB_DUPLICATE_ENTRY",
+  DB_CONNECTION_ERROR = 'DB_CONNECTION_ERROR',
+  DB_NOT_FOUND = 'DB_NOT_FOUND',
+  DB_DUPLICATE_ENTRY = 'DB_DUPLICATE_ENTRY',
 
   // Business errors
-  BUSINESS_INSUFFICIENT_STOCK = "BUSINESS_INSUFFICIENT_STOCK",
-  BUSINESS_INVALID_STATE = "BUSINESS_INVALID_STATE",
-  BUSINESS_PAYMENT_FAILED = "BUSINESS_PAYMENT_FAILED",
+  BUSINESS_INSUFFICIENT_STOCK = 'BUSINESS_INSUFFICIENT_STOCK',
+  BUSINESS_INVALID_STATE = 'BUSINESS_INVALID_STATE',
+  BUSINESS_PAYMENT_FAILED = 'BUSINESS_PAYMENT_FAILED',
 
   // Server errors
-  SERVER_INTERNAL_ERROR = "SERVER_INTERNAL_ERROR",
-  SERVER_SERVICE_UNAVAILABLE = "SERVER_SERVICE_UNAVAILABLE",
+  SERVER_INTERNAL_ERROR = 'SERVER_INTERNAL_ERROR',
+  SERVER_SERVICE_UNAVAILABLE = 'SERVER_SERVICE_UNAVAILABLE',
 }
 
 export interface ApiErrorResponse {
@@ -51,7 +51,7 @@ export class ApiError extends Error {
     public details?: string,
   ) {
     super(message);
-    this.name = "ApiError";
+    this.name = 'ApiError';
   }
 
   toResponse(): ApiErrorResponse {
@@ -73,21 +73,21 @@ export const Errors = {
   invalidCredentials: () =>
     new ApiError(
       ErrorCode.AUTH_INVALID_CREDENTIALS,
-      "Email o contraseña incorrectos",
+      'Email o contraseña incorrectos',
       401,
     ),
 
   sessionExpired: () =>
     new ApiError(
       ErrorCode.AUTH_SESSION_EXPIRED,
-      "Sesión expirada, por favor inicia sesión de nuevo",
+      'Sesión expirada, por favor inicia sesión de nuevo',
       401,
     ),
 
   unauthorized: () =>
     new ApiError(
       ErrorCode.AUTH_UNAUTHORIZED,
-      "No tienes permiso para realizar esta acción",
+      'No tienes permiso para realizar esta acción',
       403,
     ),
 
@@ -146,14 +146,14 @@ export const Errors = {
   internalError: () =>
     new ApiError(
       ErrorCode.SERVER_INTERNAL_ERROR,
-      "Error interno del servidor",
+      'Error interno del servidor',
       500,
     ),
 
   serviceUnavailable: () =>
     new ApiError(
       ErrorCode.SERVER_SERVICE_UNAVAILABLE,
-      "Servicio no disponible, inténtalo más tarde",
+      'Servicio no disponible, inténtalo más tarde',
       503,
     ),
 };
@@ -170,12 +170,12 @@ export function handleError(error: unknown): ApiError {
 
   // If it's a standard Error
   if (error instanceof Error) {
-    console.error("Unhandled error:", error);
+    console.error('Unhandled error:', error);
     return Errors.internalError();
   }
 
   // Unknown error
-  console.error("Unknown error:", error);
+  console.error('Unknown error:', error);
   return Errors.internalError();
 }
 
@@ -190,5 +190,5 @@ export function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
   }
-  return "Error desconocido";
+  return 'Error desconocido';
 }

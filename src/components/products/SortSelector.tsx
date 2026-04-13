@@ -2,9 +2,9 @@
  * SortSelector Component
  * Client Component para el selector de ordenamiento
  */
-"use client";
+'use client';
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from 'next/navigation';
 
 interface SortSelectorProps {
   initialSortBy?: string;
@@ -12,23 +12,23 @@ interface SortSelectorProps {
 }
 
 export default function SortSelector({
-  initialSortBy = "nombre",
-  initialSortOrder = "asc",
+  initialSortBy = 'nombre',
+  initialSortOrder = 'asc',
 }: Readonly<SortSelectorProps>) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const handleSortByChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const params = new URLSearchParams(searchParams.toString());
-    params.set("sortBy", e.target.value);
-    params.delete("page");
+    params.set('sortBy', e.target.value);
+    params.delete('page');
     router.push(`/products?${params.toString()}`);
   };
 
   const handleSortOrderChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const params = new URLSearchParams(searchParams.toString());
-    params.set("sortOrder", e.target.value);
-    params.delete("page");
+    params.set('sortOrder', e.target.value);
+    params.delete('page');
     router.push(`/products?${params.toString()}`);
   };
 

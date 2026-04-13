@@ -45,27 +45,27 @@ interface InvoiceData {
 }
 
 export function generateInvoiceHTML(data: InvoiceData): string {
-  const fechaEmision = new Date(data.issuedAt).toLocaleDateString("es-ES", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
+  const fechaEmision = new Date(data.issuedAt).toLocaleDateString('es-ES', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
   });
 
   const formatCurrency = (amount: number) =>
-    new Intl.NumberFormat("es-ES", {
-      style: "currency",
-      currency: "EUR",
+    new Intl.NumberFormat('es-ES', {
+      style: 'currency',
+      currency: 'EUR',
     }).format(amount);
 
   const getPaymentMethodName = (method?: string) => {
     const methods: Record<string, string> = {
-      CARD: "Tarjeta de crédito/débito",
-      PAYPAL: "PayPal",
-      BIZUM: "Bizum",
-      TRANSFER: "Transferencia bancaria",
-      TARJETA: "Tarjeta de crédito/débito",
+      CARD: 'Tarjeta de crédito/débito',
+      PAYPAL: 'PayPal',
+      BIZUM: 'Bizum',
+      TRANSFER: 'Transferencia bancaria',
+      TARJETA: 'Tarjeta de crédito/débito',
     };
-    return methods[method || ""] || "Tarjeta de crédito/débito";
+    return methods[method || ''] || 'Tarjeta de crédito/débito';
   };
 
   const itemsHTML = data.items
@@ -75,27 +75,27 @@ export function generateInvoiceHTML(data: InvoiceData): string {
       <td>
         <div class="product-cell">
           ${
-            item.image
-              ? `
+  item.image
+    ? `
             <div class="product-image-container">
               <img src="${item.image}" alt="${item.name}">
             </div>
           `
-              : `
+    : `
             <div class="product-image-placeholder">
               <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
               </svg>
             </div>
           `
-          }
+}
           <div class="product-info">
             <span class="product-name">${item.name}</span>
             ${
-              item.description
-                ? `<span class="product-description">${item.description}</span>`
-                : ""
-            }
+  item.description
+    ? `<span class="product-description">${item.description}</span>`
+    : ''
+}
           </div>
         </div>
       </td>
@@ -107,7 +107,7 @@ export function generateInvoiceHTML(data: InvoiceData): string {
     </tr>
   `,
     )
-    .join("");
+    .join('');
 
   return `
 <!DOCTYPE html>
@@ -567,15 +567,15 @@ export function generateInvoiceHTML(data: InvoiceData): string {
                 <strong>NIF:</strong> ${data.companyTaxId}<br>
                 ${data.companyAddress}<br>
                 ${data.companyPostalCode} ${data.companyCity}, ${data.companyProvince}
-                ${data.companyPhone ? `<br>📞 ${data.companyPhone}` : ""}
-                ${data.companyEmail ? `<br>✉ ${data.companyEmail}` : ""}
+                ${data.companyPhone ? `<br>📞 ${data.companyPhone}` : ''}
+                ${data.companyEmail ? `<br>✉ ${data.companyEmail}` : ''}
               </div>
             </div>
             <div class="invoice-meta">
               <div class="invoice-label">Factura</div>
               <div class="invoice-number">${data.invoiceNumber}</div>
               <div class="invoice-date">${fechaEmision}</div>
-              ${data.isCancelled ? '<div class="cancelled-badge">Factura Anulada</div>' : ""}
+              ${data.isCancelled ? '<div class="cancelled-badge">Factura Anulada</div>' : ''}
             </div>
           </div>
         </div>
@@ -588,28 +588,28 @@ export function generateInvoiceHTML(data: InvoiceData): string {
               <div class="section-label">Facturar a</div>
               <div class="client-name">${data.clientName}</div>
               <div class="client-details">
-                <strong>NIF:</strong> ${data.clientTaxId || "No especificado"}<br>
+                <strong>NIF:</strong> ${data.clientTaxId || 'No especificado'}<br>
                 ${data.clientAddress}<br>
                 ${data.clientPostalCode} ${data.clientCity}, ${data.clientProvince}<br>
-                ${data.clientCountry || "España"}
+                ${data.clientCountry || 'España'}
               </div>
               ${
-                data.clientEmail || data.clientPhone
-                  ? `
+  data.clientEmail || data.clientPhone
+    ? `
               <div class="client-contact">
-                ${data.clientEmail ? `✉ ${data.clientEmail}` : ""}
-                ${data.clientEmail && data.clientPhone ? " · " : ""}
-                ${data.clientPhone ? `📞 ${data.clientPhone}` : ""}
+                ${data.clientEmail ? `✉ ${data.clientEmail}` : ''}
+                ${data.clientEmail && data.clientPhone ? ' · ' : ''}
+                ${data.clientPhone ? `📞 ${data.clientPhone}` : ''}
               </div>
               `
-                  : ""
-              }
+    : ''
+}
             </div>
 
             <div class="client-card">
               <div class="section-label">Información del pedido</div>
               <div class="client-details">
-                <strong>Pedido:</strong> ${data.orderNumber || "N/A"}<br>
+                <strong>Pedido:</strong> ${data.orderNumber || 'N/A'}<br>
                 <strong>Método de pago:</strong> ${getPaymentMethodName(data.paymentMethod)}<br>
                 <strong>Fecha de emisión:</strong> ${fechaEmision}
               </div>
@@ -620,7 +620,7 @@ export function generateInvoiceHTML(data: InvoiceData): string {
           <div class="items-section">
             <div class="section-header">
               <h3 class="section-title">Conceptos</h3>
-              <span class="items-count">${data.items.length} producto${data.items.length !== 1 ? "s" : ""}</span>
+              <span class="items-count">${data.items.length} producto${data.items.length !== 1 ? 's' : ''}</span>
             </div>
             <table class="items-table">
               <thead>
@@ -675,8 +675,8 @@ export function generateInvoiceHTML(data: InvoiceData): string {
               </div>
             </div>
             ${
-              data.orderNumber
-                ? `
+  data.orderNumber
+    ? `
             <div class="footer-block">
               <div class="footer-icon">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -689,14 +689,14 @@ export function generateInvoiceHTML(data: InvoiceData): string {
               </div>
             </div>
             `
-                : ""
-            }
+    : ''
+}
           </div>
 
           <div class="footer-note">
             <strong>${data.companyName}</strong> · ${data.companyCity}, ${data.companyProvince}<br>
             Factura generada electrónicamente · Este documento es válido sin firma según la normativa vigente<br>
-            ${data.companyEmail ? `Contacto: ${data.companyEmail}` : ""}
+            ${data.companyEmail ? `Contacto: ${data.companyEmail}` : ''}
           </div>
         </div>
       </div>

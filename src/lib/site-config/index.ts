@@ -3,10 +3,10 @@
  * Server-side functions for managing site configuration
  */
 
-import { prisma } from "@/lib/db/prisma";
-import { Prisma } from "@prisma/client";
+import { prisma } from '@/lib/db/prisma';
+import { Prisma } from '@prisma/client';
 
-const SITE_CONFIG_ID = "site-config";
+const SITE_CONFIG_ID = 'site-config';
 
 // Type from Prisma
 export type SiteConfig = Prisma.SiteConfigGetPayload<Record<string, never>>;
@@ -28,21 +28,21 @@ export async function getSiteConfig(): Promise<SiteConfig | null> {
     return await prisma.siteConfig.create({
       data: {
         id: SITE_CONFIG_ID,
-        companyName: "3D Print",
-        companyTaxId: "B12345678",
-        companyAddress: "Calle Admin 123",
-        companyCity: "Barcelona",
-        companyProvince: "Barcelona",
-        companyPostalCode: "08001",
-        companyPhone: "+34930000001",
-        companyEmail: "info@3dprint.com",
+        companyName: '3D Print',
+        companyTaxId: 'B12345678',
+        companyAddress: 'Calle Admin 123',
+        companyCity: 'Barcelona',
+        companyProvince: 'Barcelona',
+        companyPostalCode: '08001',
+        companyPhone: '+34930000001',
+        companyEmail: 'info@3dprint.com',
         defaultVatRate: 21,
         lowStockThreshold: 5,
         updatedAt: new Date(),
       },
     });
   } catch (error) {
-    console.error("Error getting site config:", error);
+    console.error('Error getting site config:', error);
     return null;
   }
 }
@@ -51,7 +51,7 @@ export async function getSiteConfig(): Promise<SiteConfig | null> {
  * Update site configuration
  */
 export async function updateSiteConfig(
-  data: Omit<SiteConfig, "id" | "updatedAt">,
+  data: Omit<SiteConfig, 'id' | 'updatedAt'>,
 ): Promise<SiteConfig | null> {
   try {
     const config = await prisma.siteConfig.upsert({
@@ -69,7 +69,7 @@ export async function updateSiteConfig(
 
     return config;
   } catch (error) {
-    console.error("Error updating site config:", error);
+    console.error('Error updating site config:', error);
     return null;
   }
 }
@@ -86,7 +86,9 @@ export async function getCompanyDataForInvoice(): Promise<{
   companyPostalCode: string;
 } | null> {
   const config = await getSiteConfig();
-  if (!config) return null;
+  if (!config) {
+    return null;
+  }
 
   return {
     companyName: config.companyName,
@@ -103,7 +105,9 @@ export async function getCompanyDataForInvoice(): Promise<{
  */
 export async function getDefaultVatRate(): Promise<number> {
   const config = await getSiteConfig();
-  if (!config?.defaultVatRate) return 21;
+  if (!config?.defaultVatRate) {
+    return 21;
+  }
   // Handle Decimal from Prisma
   const vatRate = config.defaultVatRate;
   return typeof vatRate === 'object' && 'toNumber' in vatRate
@@ -132,7 +136,9 @@ export async function getCompanyContact(): Promise<{
   companyPostalCode: string;
 } | null> {
   const config = await getSiteConfig();
-  if (!config) return null;
+  if (!config) {
+    return null;
+  }
 
   return {
     companyName: config.companyName,

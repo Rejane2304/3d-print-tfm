@@ -117,7 +117,7 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
     return data.filter((row) => {
       return keysToSearch.some((key) => {
         const value = row[key as keyof T];
-        if (value == null) {
+        if (value === null || value === undefined) {
           return false;
         }
         return String(value).toLowerCase().includes(query);
@@ -135,13 +135,13 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
       const aValue = a[sortColumn as keyof T];
       const bValue = b[sortColumn as keyof T];
 
-      if (aValue == null && bValue == null) {
-        return 0;
-      }
-      if (aValue == null) {
+      if (aValue === null || aValue === undefined) {
+        if (bValue === null || bValue === undefined) {
+          return 0;
+        }
         return sortDirection === 'asc' ? -1 : 1;
       }
-      if (bValue == null) {
+      if (bValue === null || bValue === undefined) {
         return sortDirection === 'asc' ? 1 : -1;
       }
 
@@ -225,7 +225,7 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
         columns
           .map((col) => {
             const value = row[col.key as keyof T];
-            if (value == null) {
+            if (value === null || value === undefined) {
               return '';
             }
             // Escape quotes and wrap in quotes if contains comma
@@ -362,93 +362,95 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
             );
           }
           return (
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                {selectable && (
-                  <th className="px-4 py-3 w-10">
-                    <input
-                      type="checkbox"
-                      checked={
-                        paginatedData.length > 0 &&
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  {selectable && (
+                    <th className="px-4 py-3 w-10">
+                      <input
+                        type="checkbox"
+                        checked={
+                          paginatedData.length > 0 &&
                         paginatedData.every((row) =>
                           selectedRows.has(String(row[rowKey])),
                         )
-                      }
-                      onChange={toggleAllSelection}
-                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                    />
-                  </th>
-                )}
-                {columns.map((column) => (
-                  <th
-                    key={String(column.key)}
-                    className={`px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
-                      column.sortable ? 'cursor-pointer hover:bg-gray-100' : ''
-                    } ${column.className || ''}`}
-                    style={{ width: column.width }}
-                    onClick={() => column.sortable && handleSort(column.key)}
-                  >
-                    <div className="flex items-center gap-1">
-                      {column.header}
-                      {(() => {
-                         const isSorted = column.sortable && sortColumn === column.key;
-                         if (!isSorted) return null;
-                         if (sortDirection === 'asc') {
-                           return <ChevronUp className="h-4 w-4" />;
-                         }
-                         if (sortDirection === 'desc') {
-                           return <ChevronDown className="h-4 w-4" />;
-                         }
-                         return null;
-                       })()}
-                    </div>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {paginatedData.map((row) => {
-                const rowId = String(row[rowKey]);
-                const isSelected = selectedRows.has(rowId);
+                        }
+                        onChange={toggleAllSelection}
+                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                      />
+                    </th>
+                  )}
+                  {columns.map((column) => (
+                    <th
+                      key={String(column.key)}
+                      className={`px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
+                        column.sortable ? 'cursor-pointer hover:bg-gray-100' : ''
+                      } ${column.className || ''}`}
+                      style={{ width: column.width }}
+                      onClick={() => column.sortable && handleSort(column.key)}
+                    >
+                      <div className="flex items-center gap-1">
+                        {column.header}
+                        {(() => {
+                          const isSorted = column.sortable && sortColumn === column.key;
+                          if (!isSorted) {
+                            return null;
+                          }
+                          if (sortDirection === 'asc') {
+                            return <ChevronUp className="h-4 w-4" />;
+                          }
+                          if (sortDirection === 'desc') {
+                            return <ChevronDown className="h-4 w-4" />;
+                          }
+                          return null;
+                        })()}
+                      </div>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {paginatedData.map((row) => {
+                  const rowId = String(row[rowKey]);
+                  const isSelected = selectedRows.has(rowId);
 
-                return (
-                  <tr
-                    key={rowId}
-                    className={`hover:bg-gray-50 ${
-                      isSelected ? selectedRowClassName : ''
-                    } ${onRowClick ? 'cursor-pointer' : ''}`}
-                    onClick={() => onRowClick?.(row)}
-                  >
-                    {selectable && (
-                      <td
-                        className="px-4 py-3"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => toggleRowSelection(rowId)}
-                          className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                        />
-                      </td>
-                    )}
-                    {columns.map((column) => (
-                      <td
-                        key={String(column.key)}
-                        className={`px-4 py-3 text-sm text-gray-900 ${
-                          column.width ? '' : 'whitespace-nowrap'
-                        } ${column.className || ''}`}
-                        style={{ width: column.width }}
-                      >
-                        {getCellValue(row, column)}
-                      </td>
-                    ))}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                  return (
+                    <tr
+                      key={rowId}
+                      className={`hover:bg-gray-50 ${
+                        isSelected ? selectedRowClassName : ''
+                      } ${onRowClick ? 'cursor-pointer' : ''}`}
+                      onClick={() => onRowClick?.(row)}
+                    >
+                      {selectable && (
+                        <td
+                          className="px-4 py-3"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => toggleRowSelection(rowId)}
+                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                          />
+                        </td>
+                      )}
+                      {columns.map((column) => (
+                        <td
+                          key={String(column.key)}
+                          className={`px-4 py-3 text-sm text-gray-900 ${
+                            column.width ? '' : 'whitespace-nowrap'
+                          } ${column.className || ''}`}
+                          style={{ width: column.width }}
+                        >
+                          {getCellValue(row, column)}
+                        </td>
+                      ))}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           );
         })()}
       </div>

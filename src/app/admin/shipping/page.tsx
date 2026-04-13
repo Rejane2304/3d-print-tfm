@@ -2,28 +2,28 @@
  * Admin Shipping Page
  * Zone management with DataTable
  */
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
-  Plus,
-  Truck,
-  Loader2,
   AlertCircle,
-  Edit,
-  Trash2,
-  MapPin,
-  Euro,
   Clock,
-  Package,
+  Edit,
+  Euro,
   Globe,
-} from "lucide-react";
-import { DataTable, Column, BulkAction } from "@/components/ui/DataTable";
-import { ConfirmModal } from "@/components/ui/ConfirmModal";
-import { BulkDeleteModal } from "@/components/ui/BulkDeleteModal";
+  Loader2,
+  MapPin,
+  Package,
+  Plus,
+  Trash2,
+  Truck,
+} from 'lucide-react';
+import { BulkAction, Column, DataTable } from '@/components/ui/DataTable';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { BulkDeleteModal } from '@/components/ui/BulkDeleteModal';
 
 interface ShippingZone extends Record<string, unknown> {
   id: string;
@@ -59,15 +59,15 @@ export default function AdminShippingPage() {
   const [bulkDeleteIds, setBulkDeleteIds] = useState<string[]>([]);
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login?callbackUrl=/admin/shipping");
+    if (status === 'unauthenticated') {
+      router.push('/login?callbackUrl=/admin/shipping');
       return;
     }
 
-    if (status === "authenticated") {
+    if (status === 'authenticated') {
       const user = session?.user as { role?: string } | undefined;
-      if (user?.role !== "ADMIN") {
-        router.push("/");
+      if (user?.role !== 'ADMIN') {
+        router.push('/');
         return;
       }
       loadZones();
@@ -75,21 +75,21 @@ export default function AdminShippingPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, session, router]);
 
-  const loadZones = async () => {
+  const loadZones = async() => {
     try {
       setLoading(true);
       setError(null);
 
-      const response = await fetch("/api/admin/shipping");
+      const response = await fetch('/api/admin/shipping');
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error cargando zonas de envío");
+        throw new Error(data.error || 'Error cargando zonas de envío');
       }
 
       setZones(data.zones || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error desconocido");
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
     }
@@ -100,12 +100,14 @@ export default function AdminShippingPage() {
     setModalOpen(true);
   };
 
-  const confirmDelete = async () => {
-    if (!zoneToDelete) return;
+  const confirmDelete = async() => {
+    if (!zoneToDelete) {
+      return;
+    }
 
     try {
       const response = await fetch(`/api/admin/shipping/${zoneToDelete.id}`, {
-        method: "DELETE",
+        method: 'DELETE',
       });
 
       const data = await response.json();
@@ -113,11 +115,11 @@ export default function AdminShippingPage() {
       if (response.ok) {
         setZones(zones.filter((z) => z.id !== zoneToDelete.id));
       } else {
-        throw new Error(data.error || "Error eliminando zona de envío");
+        throw new Error(data.error || 'Error eliminando zona de envío');
       }
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Error eliminando zona de envío",
+        err instanceof Error ? err.message : 'Error eliminando zona de envío',
       );
     } finally {
       setModalOpen(false);
@@ -130,14 +132,14 @@ export default function AdminShippingPage() {
     setBulkDeleteModalOpen(true);
   };
 
-  const confirmBulkDelete = async () => {
+  const confirmBulkDelete = async() => {
     try {
       let hasError = false;
 
       await Promise.all(
-        bulkDeleteIds.map(async (id) => {
+        bulkDeleteIds.map(async(id) => {
           const response = await fetch(`/api/admin/shipping/${id}`, {
-            method: "DELETE",
+            method: 'DELETE',
           });
           if (!response.ok) {
             hasError = true;
@@ -146,12 +148,12 @@ export default function AdminShippingPage() {
       );
 
       if (hasError) {
-        setError("Algunas zonas de envío no pudieron ser eliminadas");
+        setError('Algunas zonas de envío no pudieron ser eliminadas');
       }
 
       setZones(zones.filter((z) => !bulkDeleteIds.includes(z.id)));
     } catch {
-      setError("Error eliminando zonas de envío");
+      setError('Error eliminando zonas de envío');
     } finally {
       setBulkDeleteModalOpen(false);
       setBulkDeleteIds([]);
@@ -170,21 +172,21 @@ export default function AdminShippingPage() {
 
   const getStatusColor = (estado: string) => {
     switch (estado) {
-      case "Activo":
-        return "bg-green-100 text-green-800";
-      case "Inactivo":
-        return "bg-gray-100 text-gray-800";
+      case 'Activo':
+        return 'bg-green-100 text-green-800';
+      case 'Inactivo':
+        return 'bg-gray-100 text-gray-800';
       default:
-        return "bg-gray-100 text-gray-800";
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const columns: Column<ShippingZone>[] = [
     {
-      key: "nombre",
-      header: "Zona",
+      key: 'nombre',
+      header: 'Zona',
       sortable: true,
-      className: "",
+      className: '',
       render: (value) => (
         <div className="flex items-center gap-2 min-w-0">
           <MapPin className="h-4 w-4 text-indigo-600 flex-shrink-0" />
@@ -195,10 +197,10 @@ export default function AdminShippingPage() {
       ),
     },
     {
-      key: "pais",
-      header: "País",
+      key: 'pais',
+      header: 'País',
       sortable: true,
-      className: "hidden sm:table-cell",
+      className: 'hidden sm:table-cell',
       render: (value) => (
         <div className="flex items-center gap-1">
           <Globe className="h-3 w-3 text-gray-400 flex-shrink-0" />
@@ -207,10 +209,10 @@ export default function AdminShippingPage() {
       ),
     },
     {
-      key: "regionesTexto",
-      header: "Regiones",
+      key: 'regionesTexto',
+      header: 'Regiones',
       sortable: true,
-      className: "hidden md:table-cell",
+      className: 'hidden md:table-cell',
       render: (value) => (
         <span className="text-sm text-gray-600 truncate max-w-[150px] block">
           {value as string}
@@ -218,10 +220,10 @@ export default function AdminShippingPage() {
       ),
     },
     {
-      key: "costoBase",
-      header: "Costo",
+      key: 'costoBase',
+      header: 'Costo',
       sortable: true,
-      className: "hidden lg:table-cell",
+      className: 'hidden lg:table-cell',
       render: (_, zone) => (
         <div className="flex items-center gap-1">
           <Euro className="h-3 w-3 text-gray-400 flex-shrink-0" />
@@ -232,10 +234,10 @@ export default function AdminShippingPage() {
       ),
     },
     {
-      key: "envioGratisDesde",
-      header: "Envío Gratis",
+      key: 'envioGratisDesde',
+      header: 'Envío Gratis',
       sortable: true,
-      className: "hidden xl:table-cell",
+      className: 'hidden xl:table-cell',
       render: (value) =>
         value ? (
           <span className="text-sm text-green-600 font-medium">
@@ -246,10 +248,10 @@ export default function AdminShippingPage() {
         ),
     },
     {
-      key: "diasEstimadosTexto",
-      header: "Entrega",
+      key: 'diasEstimadosTexto',
+      header: 'Entrega',
       sortable: true,
-      className: "hidden lg:table-cell",
+      className: 'hidden lg:table-cell',
       render: (value) => (
         <div className="flex items-center gap-1">
           <Clock className="h-3 w-3 text-gray-400 flex-shrink-0" />
@@ -258,10 +260,10 @@ export default function AdminShippingPage() {
       ),
     },
     {
-      key: "estado",
-      header: "Estado",
+      key: 'estado',
+      header: 'Estado',
       sortable: true,
-      className: "hidden md:table-cell",
+      className: 'hidden md:table-cell',
       render: (value) => (
         <span
           className={`px-2 py-0.5 inline-flex text-[10px] leading-4 font-semibold rounded-full ${getStatusColor(value as string)}`}
@@ -271,9 +273,9 @@ export default function AdminShippingPage() {
       ),
     },
     {
-      key: "actions",
-      header: "Acciones",
-      className: "",
+      key: 'actions',
+      header: 'Acciones',
+      className: '',
       render: (_, zone) => (
         <div className="flex items-center gap-1">
           <Link
@@ -300,15 +302,15 @@ export default function AdminShippingPage() {
 
   const bulkActions: BulkAction[] = [
     {
-      key: "delete",
-      label: "Eliminar seleccionados",
+      key: 'delete',
+      label: 'Eliminar seleccionados',
       icon: <Trash2 className="h-4 w-4" />,
-      variant: "danger",
+      variant: 'danger',
       onClick: handleBulkDelete,
     },
   ];
 
-  if (status === "loading" || loading) {
+  if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -439,7 +441,7 @@ export default function AdminShippingPage() {
           columns={columns}
           rowKey="id"
           searchable={true}
-          searchKeys={["nombre", "pais", "regionesTexto"]}
+          searchKeys={['nombre', 'pais', 'regionesTexto']}
           searchPlaceholder="Buscar zonas..."
           pagination={true}
           pageSizeOptions={[10, 25, 50, 100]}

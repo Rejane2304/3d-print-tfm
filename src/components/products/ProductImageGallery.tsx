@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useState, useCallback, useEffect } from "react";
-import Image from "next/image";
-import { X, ChevronLeft, ChevronRight, ZoomIn } from "lucide-react";
+import { useCallback, useEffect, useState } from 'react';
+import Image from 'next/image';
+import { ChevronLeft, ChevronRight, X, ZoomIn } from 'lucide-react';
 
 interface ProductImage {
   id: string;
@@ -43,26 +43,34 @@ export default function ProductImageGallery({
   // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isModalOpen) return;
+      if (!isModalOpen) {
+        return;
+      }
 
-      if (e.key === "Escape") closeModal();
-      if (e.key === "ArrowRight") nextImage();
-      if (e.key === "ArrowLeft") prevImage();
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+      if (e.key === 'ArrowRight') {
+        nextImage();
+      }
+      if (e.key === 'ArrowLeft') {
+        prevImage();
+      }
     };
 
-    globalThis.addEventListener("keydown", handleKeyDown);
-    return () => globalThis.removeEventListener("keydown", handleKeyDown);
+    globalThis.addEventListener('keydown', handleKeyDown);
+    return () => globalThis.removeEventListener('keydown', handleKeyDown);
   }, [isModalOpen, nextImage, prevImage]);
 
   // Prevent body scroll when modal is open
   useEffect(() => {
     if (isModalOpen) {
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = 'unset';
     }
     return () => {
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = 'unset';
     };
   }, [isModalOpen]);
 
@@ -111,11 +119,11 @@ export default function ProductImageGallery({
                   onClick={() => setSelectedIndex(index)}
                   className={`relative flex-shrink-0 w-28 h-24 sm:w-full sm:aspect-[4/3] bg-gray-100 overflow-hidden transition-all rounded-lg ${
                     selectedIndex === index
-                      ? "ring-2 ring-indigo-600 ring-offset-2"
-                      : "hover:ring-2 hover:ring-indigo-400 hover:ring-offset-2"
+                      ? 'ring-2 ring-indigo-600 ring-offset-2'
+                      : 'hover:ring-2 hover:ring-indigo-400 hover:ring-offset-2'
                   }`}
                   aria-label={`Ver imagen ${index + 1}`}
-                  aria-current={selectedIndex === index ? "true" : undefined}
+                  aria-current={selectedIndex === index ? 'true' : undefined}
                 >
                   <Image
                     src={image.url}
@@ -212,11 +220,11 @@ export default function ProductImageGallery({
                   onClick={() => setSelectedIndex(index)}
                   className={`relative w-12 h-12 sm:w-16 sm:h-16 flex-shrink-0 bg-gray-800 rounded overflow-hidden transition-all ${
                     selectedIndex === index
-                      ? "ring-2 ring-white"
-                      : "opacity-60 hover:opacity-100"
+                      ? 'ring-2 ring-white'
+                      : 'opacity-60 hover:opacity-100'
                   }`}
                   aria-label={`Ir a imagen ${index + 1}`}
-                  aria-current={selectedIndex === index ? "true" : undefined}
+                  aria-current={selectedIndex === index ? 'true' : undefined}
                 >
                   <Image
                     src={image.url}

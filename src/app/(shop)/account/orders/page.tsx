@@ -3,29 +3,29 @@
  * Historial completo de pedidos del usuario autenticado
  * Responsive: mobile → 4K
  */
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
+import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
 import {
-  Package,
-  Clock,
+  AlertCircle,
+  Calendar,
   CheckCircle2,
+  ChevronRight,
+  Clock,
+  Eye,
+  FileText,
+  Filter,
+  Loader2,
+  Package,
+  ShoppingCart,
   Truck,
   XCircle,
-  Loader2,
-  AlertCircle,
-  ChevronRight,
-  FileText,
-  Eye,
-  Filter,
-  Calendar,
-  ShoppingCart,
-} from "lucide-react";
-import { InvoiceNotAvailableModal } from "@/components/invoices/InvoiceNotAvailableModal";
+} from 'lucide-react';
+import { InvoiceNotAvailableModal } from '@/components/invoices/InvoiceNotAvailableModal';
 
 interface Order {
   id: string;
@@ -59,34 +59,34 @@ const estadosConfig: Record<
   { color: string; icon: React.ElementType; label: string }
 > = {
   Pendiente: {
-    color: "bg-yellow-100 text-yellow-800 border-yellow-200",
+    color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
     icon: Clock,
-    label: "Pendiente",
+    label: 'Pendiente',
   },
   Confirmado: {
-    color: "bg-blue-100 text-blue-800 border-blue-200",
+    color: 'bg-blue-100 text-blue-800 border-blue-200',
     icon: CheckCircle2,
-    label: "Confirmado",
+    label: 'Confirmado',
   },
-  "En preparación": {
-    color: "bg-indigo-100 text-indigo-800 border-indigo-200",
+  'En preparación': {
+    color: 'bg-indigo-100 text-indigo-800 border-indigo-200',
     icon: Package,
-    label: "En preparación",
+    label: 'En preparación',
   },
   Enviado: {
-    color: "bg-purple-100 text-purple-800 border-purple-200",
+    color: 'bg-purple-100 text-purple-800 border-purple-200',
     icon: Truck,
-    label: "Enviado",
+    label: 'Enviado',
   },
   Entregado: {
-    color: "bg-green-100 text-green-800 border-green-200",
+    color: 'bg-green-100 text-green-800 border-green-200',
     icon: CheckCircle2,
-    label: "Entregado",
+    label: 'Entregado',
   },
   Cancelado: {
-    color: "bg-red-100 text-red-800 border-red-200",
+    color: 'bg-red-100 text-red-800 border-red-200',
     icon: XCircle,
-    label: "Cancelado",
+    label: 'Cancelado',
   },
 };
 
@@ -96,11 +96,11 @@ export default function MyOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState('');
   const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
   const [invoiceModalReason, setInvoiceModalReason] = useState<
-    "not_completed" | "not_generated" | "payment_pending" | "cancelled"
-  >("not_generated");
+    'not_completed' | 'not_generated' | 'payment_pending' | 'cancelled'
+  >('not_generated');
   const [selectedOrderNumber, setSelectedOrderNumber] = useState<
     string | undefined
   >(undefined);
@@ -110,49 +110,49 @@ export default function MyOrdersPage() {
 
   // Cargar pedidos al montar el componente
   useEffect(() => {
-    if (status === "authenticated") {
+    if (status === 'authenticated') {
       loadOrders();
     }
   }, [status]);
 
-  const loadOrders = async () => {
+  const loadOrders = async() => {
     try {
       setLoading(true);
       setError(null);
 
-      const response = await fetch("/api/account/orders");
+      const response = await fetch('/api/account/orders');
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error al cargar pedidos");
+        throw new Error(data.error || 'Error al cargar pedidos');
       }
 
       setOrders(data.pedidos || []);
     } catch (err) {
-      console.error("Error loading orders:", err);
-      setError(err instanceof Error ? err.message : "Error desconocido");
+      console.error('Error loading orders:', err);
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
     }
   };
 
   // Recalcular pedidos cancelados
-  const cancelledOrders = orders.filter((o) => o.estado === "Cancelado");
+  const cancelledOrders = orders.filter((o) => o.estado === 'Cancelado');
 
-  const handleRestoreCart = async (orderId: string) => {
+  const handleRestoreCart = async(orderId: string) => {
     try {
       setRestoringOrder(orderId);
-      const response = await fetch("/api/cart/restore-from-order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/cart/restore-from-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ orderId }),
       });
 
       if (!response.ok) {
-        throw new Error("Error al restaurar carrito");
+        throw new Error('Error al restaurar carrito');
       }
 
-      setRestoredMessage("Carrito restaurado correctamente");
+      setRestoredMessage('Carrito restaurado correctamente');
 
       // Ocultar el pedido inmediatamente
       setHiddenOrders((prev) => {
@@ -162,11 +162,11 @@ export default function MyOrdersPage() {
       });
 
       setTimeout(() => {
-        router.push("/checkout");
+        router.push('/checkout');
       }, 1500);
     } catch (err) {
-      console.error("Error restoring cart:", err);
-      setRestoredMessage("Error al restaurar carrito");
+      console.error('Error restoring cart:', err);
+      setRestoredMessage('Error al restaurar carrito');
     } finally {
       setRestoringOrder(null);
       setTimeout(() => setRestoredMessage(null), 3000);
@@ -177,11 +177,11 @@ export default function MyOrdersPage() {
   const hiddenOrdersArray = Array.from(hiddenOrders);
   const filteredOrders = statusFilter
     ? orders.filter(
-        (o) => o.estado === statusFilter && !hiddenOrdersArray.includes(o.id),
-      )
+      (o) => o.estado === statusFilter && !hiddenOrdersArray.includes(o.id),
+    )
     : orders.filter((o) => !hiddenOrdersArray.includes(o.id));
 
-  if (status === "loading" || loading) {
+  if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="text-center">
@@ -205,7 +205,7 @@ export default function MyOrdersPage() {
                 Mis Pedidos
               </h1>
               <p className="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">
-                {orders.length} {orders.length === 1 ? "pedido" : "pedidos"} en
+                {orders.length} {orders.length === 1 ? 'pedido' : 'pedidos'} en
                 total
               </p>
             </div>
@@ -232,11 +232,11 @@ export default function MyOrdersPage() {
           </div>
           <div className="flex flex-wrap gap-2">
             <button
-              onClick={() => setStatusFilter("")}
+              onClick={() => setStatusFilter('')}
               className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
-                statusFilter === ""
-                  ? "bg-indigo-600 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                statusFilter === ''
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
               Todos
@@ -250,8 +250,8 @@ export default function MyOrdersPage() {
                   onClick={() => setStatusFilter(estado)}
                   className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-colors flex items-center gap-1.5 sm:gap-2 whitespace-nowrap ${
                     statusFilter === estado
-                      ? "bg-indigo-600 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
                   <Icon className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -260,8 +260,8 @@ export default function MyOrdersPage() {
                     <span
                       className={`ml-0.5 sm:ml-1 px-1.5 sm:px-2 py-0.5 rounded-full text-xs ${
                         statusFilter === estado
-                          ? "bg-indigo-500 text-white"
-                          : "bg-gray-300 text-gray-700"
+                          ? 'bg-indigo-500 text-white'
+                          : 'bg-gray-300 text-gray-700'
                       }`}
                     >
                       {count}
@@ -284,10 +284,10 @@ export default function MyOrdersPage() {
               </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-orange-900 text-sm sm:text-base">
-                  Tienes {cancelledOrders.length}{" "}
+                  Tienes {cancelledOrders.length}{' '}
                   {cancelledOrders.length === 1
-                    ? "pedido cancelado"
-                    : "pedidos cancelados"}
+                    ? 'pedido cancelado'
+                    : 'pedidos cancelados'}
                 </h3>
                 <p className="text-orange-700 text-xs sm:text-sm mt-0.5">
                   Puedes restaurar el carrito de cualquier pedido cancelado para
@@ -302,18 +302,18 @@ export default function MyOrdersPage() {
         {restoredMessage && (
           <div
             className={`mb-4 sm:mb-6 p-3 sm:p-4 rounded-lg flex items-center gap-2 sm:gap-3 ${
-              restoredMessage.includes("Error")
-                ? "bg-red-50 border border-red-200"
-                : "bg-green-50 border border-green-200"
+              restoredMessage.includes('Error')
+                ? 'bg-red-50 border border-red-200'
+                : 'bg-green-50 border border-green-200'
             }`}
           >
-            {restoredMessage.includes("Error") ? (
+            {restoredMessage.includes('Error') ? (
               <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-600 flex-shrink-0" />
             ) : (
               <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 flex-shrink-0" />
             )}
             <p
-              className={`text-sm ${restoredMessage.includes("Error") ? "text-red-700" : "text-green-700"}`}
+              className={`text-sm ${restoredMessage.includes('Error') ? 'text-red-700' : 'text-green-700'}`}
             >
               {restoredMessage}
             </p>
@@ -326,13 +326,13 @@ export default function MyOrdersPage() {
             <Package className="h-12 w-12 sm:h-16 sm:w-16 text-gray-300 mx-auto mb-3 sm:mb-4" />
             <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">
               {statusFilter
-                ? "No hay pedidos con este estado"
-                : "No tienes pedidos"}
+                ? 'No hay pedidos con este estado'
+                : 'No tienes pedidos'}
             </h3>
             <p className="text-sm text-gray-500 mb-4 sm:mb-6">
               {statusFilter
-                ? "Prueba con otro filtro o espera a que se actualicen tus pedidos"
-                : "Aún no has realizado ningún pedido. ¡Explora nuestro catálogo!"}
+                ? 'Prueba con otro filtro o espera a que se actualicen tus pedidos'
+                : 'Aún no has realizado ningún pedido. ¡Explora nuestro catálogo!'}
             </p>
             <Link
               href="/products"
@@ -365,7 +365,7 @@ export default function MyOrdersPage() {
                           {firstImage ? (
                             <Image
                               src={firstImage}
-                              alt={firstItem?.producto?.nombre || "Producto"}
+                              alt={firstItem?.producto?.nombre || 'Producto'}
                               fill
                               sizes="80px"
                               className="object-cover"
@@ -395,15 +395,15 @@ export default function MyOrdersPage() {
                             <span className="flex items-center gap-1">
                               <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
                               {new Date(order.createdAt).toLocaleDateString(
-                                "es-ES",
+                                'es-ES',
                               )}
                             </span>
                             <span className="flex items-center gap-1">
                               <Package className="h-3 w-3 sm:h-4 sm:w-4" />
-                              {order.items?.length || 0}{" "}
+                              {order.items?.length || 0}{' '}
                               {order.items?.length === 1
-                                ? "producto"
-                                : "productos"}
+                                ? 'producto'
+                                : 'productos'}
                             </span>
                           </div>
                         </div>
@@ -439,16 +439,16 @@ export default function MyOrdersPage() {
                               {item.quantity}x
                             </span>
                             <Link
-                              href={`/products/${item.producto?.slug || "#"}`}
+                              href={`/products/${item.producto?.slug || '#'}`}
                               className="text-gray-700 hover:text-indigo-600 truncate"
                             >
-                              {item.producto?.nombre || "Producto"}
+                              {item.producto?.nombre || 'Producto'}
                             </Link>
                           </div>
                           <span className="text-gray-600 whitespace-nowrap ml-2">
                             {(item.quantity * Number(item.unitPrice)).toFixed(
                               2,
-                            )}{" "}
+                            )}{' '}
                             €
                           </span>
                         </div>
@@ -476,12 +476,12 @@ export default function MyOrdersPage() {
                         <button
                           onClick={() => {
                             setSelectedOrderNumber(order.numeroPedido);
-                            if (order.estado === "Cancelado") {
-                              setInvoiceModalReason("cancelled");
-                            } else if (order.estado !== "Entregado") {
-                              setInvoiceModalReason("not_completed");
+                            if (order.estado === 'Cancelado') {
+                              setInvoiceModalReason('cancelled');
+                            } else if (order.estado !== 'Entregado') {
+                              setInvoiceModalReason('not_completed');
                             } else {
-                              setInvoiceModalReason("not_generated");
+                              setInvoiceModalReason('not_generated');
                             }
                             setInvoiceModalOpen(true);
                           }}
@@ -492,13 +492,13 @@ export default function MyOrdersPage() {
                         </button>
                       )}
 
-                      {order.estado === "SHIPPED" && (
+                      {order.estado === 'SHIPPED' && (
                         <span className="text-xs sm:text-sm text-purple-600">
                           Pedido en camino
                         </span>
                       )}
 
-                      {order.estado === "DELIVERED" && (
+                      {order.estado === 'DELIVERED' && (
                         <span className="text-xs sm:text-sm text-green-600 flex items-center gap-1">
                           <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />
                           Entregado
@@ -506,7 +506,7 @@ export default function MyOrdersPage() {
                       )}
 
                       {/* Botón de restaurar carrito para pedidos cancelados */}
-                      {order.estado === "Cancelado" && (
+                      {order.estado === 'Cancelado' && (
                         <button
                           onClick={() => handleRestoreCart(order.id)}
                           disabled={restoringOrder === order.id}

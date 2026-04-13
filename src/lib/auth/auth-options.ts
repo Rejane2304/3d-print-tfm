@@ -2,11 +2,11 @@
  * NextAuth Configuration
  * Separate file to avoid import issues in Route Handlers
  */
-import CredentialsProvider from "next-auth/providers/credentials";
-import bcrypt from "bcrypt";
-import { prisma } from "@/lib/db/prisma";
+import CredentialsProvider from 'next-auth/providers/credentials';
+import bcrypt from 'bcrypt';
+import { prisma } from '@/lib/db/prisma';
 
-import type { AuthOptions } from "next-auth";
+import type { AuthOptions } from 'next-auth';
 
 // Account lockout configuration
 const MAX_FAILED_ATTEMPTS = 5;
@@ -17,9 +17,13 @@ const LOCKOUT_DURATION_MINUTES = 30;
  * Returns 0 if not locked
  */
 function getRemainingLockoutMinutes(lockedUntil: Date | null): number {
-  if (!lockedUntil) return 0;
+  if (!lockedUntil) {
+    return 0;
+  }
   const now = new Date();
-  if (lockedUntil <= now) return 0;
+  if (lockedUntil <= now) {
+    return 0;
+  }
   return Math.ceil((lockedUntil.getTime() - now.getTime()) / (1000 * 60));
 }
 
@@ -32,19 +36,19 @@ function getLockoutErrorMessage(remainingMinutes: number): string {
 
 export const authOptions: AuthOptions = {
   session: {
-    strategy: "jwt",
+    strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60,
   },
   pages: {
-    signIn: "/auth",
-    error: "/auth",
+    signIn: '/auth',
+    error: '/auth',
   },
   providers: [
     CredentialsProvider({
-      name: "credentials",
+      name: 'credentials',
       credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Contraseña", type: "password" },
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Contraseña', type: 'password' },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
@@ -136,11 +140,11 @@ export const authOptions: AuthOptions = {
             image: null,
           };
         } catch (error) {
-          console.error("Error in authorize:", error);
+          console.error('Error in authorize:', error);
           // Re-throw lockout errors to be handled by NextAuth
           if (
             error instanceof Error &&
-            error.message.includes("Cuenta bloqueada")
+            error.message.includes('Cuenta bloqueada')
           ) {
             throw error;
           }

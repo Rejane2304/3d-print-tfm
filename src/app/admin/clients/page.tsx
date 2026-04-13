@@ -2,21 +2,21 @@
  * Admin Clients Page
  * List all customers with DataTable component
  */
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
-  Loader2,
-  User,
-  ShoppingBag,
   DollarSign,
   Eye,
+  Loader2,
+  ShoppingBag,
   Trash2,
-} from "lucide-react";
-import { DataTable, Column, BulkAction } from "@/components/ui/DataTable";
+  User,
+} from 'lucide-react';
+import { BulkAction, Column, DataTable } from '@/components/ui/DataTable';
 
 interface Client {
   id: string;
@@ -36,27 +36,27 @@ export default function AdminClientsPage() {
   const router = useRouter();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState('all');
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login?callbackUrl=/admin/clients");
+    if (status === 'unauthenticated') {
+      router.push('/login?callbackUrl=/admin/clients');
       return;
     }
 
     const user = session?.user as { role?: string } | undefined;
-    if (status === "authenticated" && user?.role !== "ADMIN") {
-      router.push("/");
+    if (status === 'authenticated' && user?.role !== 'ADMIN') {
+      router.push('/');
       return;
     }
 
-    if (status === "authenticated") {
+    if (status === 'authenticated') {
       fetchClients();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, session, router, statusFilter]);
 
-  const fetchClients = async () => {
+  const fetchClients = async() => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
@@ -70,13 +70,13 @@ export default function AdminClientsPage() {
         setClients(data.clients);
       }
     } catch (error) {
-      console.error("Error fetching clients:", error);
+      console.error('Error fetching clients:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDeleteClients = async (selectedIds: string[]) => {
+  const handleDeleteClients = async(selectedIds: string[]) => {
     if (
       !confirm(
         `¿Estás seguro de que deseas eliminar ${selectedIds.length} cliente(s)?`,
@@ -88,18 +88,20 @@ export default function AdminClientsPage() {
     try {
       await Promise.all(
         selectedIds.map((id) =>
-          fetch(`/api/admin/clients/${id}`, { method: "DELETE" }),
+          fetch(`/api/admin/clients/${id}`, { method: 'DELETE' }),
         ),
       );
       await fetchClients();
     } catch (error) {
-      console.error("Error al eliminar clientes:", error);
+      console.error('Error al eliminar clientes:', error);
     }
   };
 
   const formatDate = (date: string | null) => {
-    if (!date) return "N/A";
-    return new Date(date).toLocaleDateString("es-ES");
+    if (!date) {
+      return 'N/A';
+    }
+    return new Date(date).toLocaleDateString('es-ES');
   };
 
   const formatCurrency = (amount: string) => {
@@ -108,10 +110,10 @@ export default function AdminClientsPage() {
 
   const columns: Column<Client>[] = [
     {
-      key: "nombre",
-      header: "Nombre",
+      key: 'nombre',
+      header: 'Nombre',
       sortable: true,
-      className: "",
+      className: '',
       render: (_, row) => (
         <div className="flex items-center">
           <div className="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
@@ -129,10 +131,10 @@ export default function AdminClientsPage() {
       ),
     },
     {
-      key: "email",
-      header: "Email",
+      key: 'email',
+      header: 'Email',
       sortable: true,
-      className: "hidden sm:table-cell",
+      className: 'hidden sm:table-cell',
       render: (value) => (
         <span className="text-sm text-gray-600 truncate">
           {value as string}
@@ -140,10 +142,10 @@ export default function AdminClientsPage() {
       ),
     },
     {
-      key: "totalPedidos",
-      header: "Pedidos",
+      key: 'totalPedidos',
+      header: 'Pedidos',
       sortable: true,
-      className: "hidden md:table-cell",
+      className: 'hidden md:table-cell',
       render: (value: unknown) => (
         <div className="flex items-center text-sm text-gray-900">
           <ShoppingBag className="h-4 w-4 mr-1 text-indigo-500" />
@@ -152,10 +154,10 @@ export default function AdminClientsPage() {
       ),
     },
     {
-      key: "totalGastado",
-      header: "Total",
+      key: 'totalGastado',
+      header: 'Total',
       sortable: true,
-      className: "hidden lg:table-cell",
+      className: 'hidden lg:table-cell',
       render: (value) => (
         <div className="flex items-center text-sm font-medium text-gray-900">
           <DollarSign className="h-4 w-4 mr-1 text-green-500" />
@@ -164,10 +166,10 @@ export default function AdminClientsPage() {
       ),
     },
     {
-      key: "fechaUltimoPedido",
-      header: "Último",
+      key: 'fechaUltimoPedido',
+      header: 'Último',
       sortable: true,
-      className: "hidden xl:table-cell",
+      className: 'hidden xl:table-cell',
       render: (value) => (
         <span className="text-sm text-gray-500">
           {formatDate(value as string)}
@@ -175,9 +177,9 @@ export default function AdminClientsPage() {
       ),
     },
     {
-      key: "actions",
-      header: "Acciones",
-      className: "",
+      key: 'actions',
+      header: 'Acciones',
+      className: '',
       render: (_, row) => (
         <div className="flex items-center gap-1">
           <Link
@@ -194,15 +196,15 @@ export default function AdminClientsPage() {
 
   const bulkActions: BulkAction[] = [
     {
-      key: "delete",
-      label: "Eliminar seleccionados",
+      key: 'delete',
+      label: 'Eliminar seleccionados',
       icon: <Trash2 className="h-4 w-4" />,
-      variant: "danger",
+      variant: 'danger',
       onClick: handleDeleteClients,
     },
   ];
 
-  if (status === "loading" || loading) {
+  if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -259,7 +261,7 @@ export default function AdminClientsPage() {
           columns={columns}
           rowKey="id"
           searchable
-          searchKeys={["nombre", "email", "telefono"]}
+          searchKeys={['nombre', 'email', 'telefono']}
           searchPlaceholder="Buscar por nombre o email..."
           pagination
           selectable

@@ -73,7 +73,7 @@ export function usePaymentProcessing(): UsePaymentProcessingResult {
   const [error, setError] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('CARD');
 
-  const processCardPayment = async (orderId: string, paymentId: string) => {
+  const processCardPayment = async(orderId: string, paymentId: string) => {
     const stripeResponse = await fetch('/api/payments/stripe/create', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -89,7 +89,7 @@ export function usePaymentProcessing(): UsePaymentProcessingResult {
     return stripeData.url as string;
   };
 
-  const processPayPalPayment = async (orderId: string, paymentId: string) => {
+  const processPayPalPayment = async(orderId: string, paymentId: string) => {
     const paypalResponse = await fetch('/api/payments/paypal/create', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -110,7 +110,7 @@ export function usePaymentProcessing(): UsePaymentProcessingResult {
   };
 
   const processPayment = useCallback(
-    async (selectedAddressId: string): Promise<PaymentResult> => {
+    async(selectedAddressId: string): Promise<PaymentResult> => {
       if (!selectedAddressId) {
         setError('Selecciona una dirección de envío');
         return { success: false, error: 'Selecciona una dirección de envío' };

@@ -3,27 +3,27 @@
  * Vista completa de un pedido específico del usuario autenticado
  * Responsive: mobile → 4K
  */
-"use client";
+'use client';
 
-import { useEffect, useState, useCallback } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter, useParams } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
+import { useCallback, useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
 import {
-  Package,
-  Loader2,
   AlertCircle,
   ArrowLeft,
-  MapPin,
   CreditCard,
-  Phone,
-  MessageSquare,
-  Printer,
   Download,
-} from "lucide-react";
-import OrderProgressBar from "@/components/orders/OrderProgressBar";
-import { InvoiceNotAvailableModal } from "@/components/invoices/InvoiceNotAvailableModal";
+  Loader2,
+  MapPin,
+  MessageSquare,
+  Package,
+  Phone,
+  Printer,
+} from 'lucide-react';
+import OrderProgressBar from '@/components/orders/OrderProgressBar';
+import { InvoiceNotAvailableModal } from '@/components/invoices/InvoiceNotAvailableModal';
 
 interface OrderDetail {
   id: string;
@@ -83,26 +83,26 @@ interface OrderDetail {
 
 // El método de pago ya viene traducido de la API
 const metodosPago: Record<string, string> = {
-  Tarjeta: "Tarjeta",
-  PAYPAL: "PayPal",
-  PayPal: "PayPal",
-  BIZUM: "Bizum",
-  Bizum: "Bizum",
-  TRANSFER: "Transferencia",
-  Transferencia: "Transferencia",
+  Tarjeta: 'Tarjeta',
+  PAYPAL: 'PayPal',
+  PayPal: 'PayPal',
+  BIZUM: 'Bizum',
+  Bizum: 'Bizum',
+  TRANSFER: 'Transferencia',
+  Transferencia: 'Transferencia',
 };
 
 // Traducir nombres de dirección comunes
 const translateAddressName = (name: string): string => {
   const translations: { [key: string]: string } = {
-    home: "Casa",
-    house: "Casa",
-    work: "Trabajo",
-    office: "Oficina",
-    apartment: "Apartamento",
-    flat: "Piso",
-    parents: "Casa de padres",
-    family: "Casa familiar",
+    home: 'Casa',
+    house: 'Casa',
+    work: 'Trabajo',
+    office: 'Oficina',
+    apartment: 'Apartamento',
+    flat: 'Piso',
+    parents: 'Casa de padres',
+    family: 'Casa familiar',
   };
   const lowerName = name?.toLowerCase().trim();
   return translations[lowerName] || name;
@@ -117,10 +117,10 @@ export default function OrderDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
   const [invoiceModalReason, setInvoiceModalReason] = useState<
-    "not_completed" | "not_generated" | "payment_pending" | "cancelled"
-  >("not_generated");
+    'not_completed' | 'not_generated' | 'payment_pending' | 'cancelled'
+  >('not_generated');
 
-  const loadOrder = useCallback(async () => {
+  const loadOrder = useCallback(async() => {
     try {
       setLoading(true);
       setError(null);
@@ -129,68 +129,68 @@ export default function OrderDetailPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error al cargar pedido");
+        throw new Error(data.error || 'Error al cargar pedido');
       }
 
       setOrder(data.pedido);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error desconocido");
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
     }
   }, [params.id]);
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/auth?callbackUrl=/account/orders");
+    if (status === 'unauthenticated') {
+      router.push('/auth?callbackUrl=/account/orders');
       return;
     }
 
-    if (status === "authenticated" && params.id) {
+    if (status === 'authenticated' && params.id) {
       loadOrder();
     }
   }, [status, router, params.id, loadOrder]);
 
   const downloadInvoice = () => {
     if (order?.factura && !order.factura.anulada) {
-      window.open(`/api/account/invoices/${order.factura.id}/pdf`, "_blank");
+      window.open(`/api/account/invoices/${order.factura.id}/pdf`, '_blank');
     } else {
-      if (order?.estado === "Cancelado") {
-        setInvoiceModalReason("cancelled");
-      } else if (order?.estado !== "Entregado") {
-        setInvoiceModalReason("not_completed");
+      if (order?.estado === 'Cancelado') {
+        setInvoiceModalReason('cancelled');
+      } else if (order?.estado !== 'Entregado') {
+        setInvoiceModalReason('not_completed');
       } else {
-        setInvoiceModalReason("not_generated");
+        setInvoiceModalReason('not_generated');
       }
       setInvoiceModalOpen(true);
     }
   };
 
-  const printOrder = async () => {
+  const printOrder = async() => {
     if (order?.factura && !order.factura.anulada) {
       try {
-        window.open(`/api/account/invoices/${order.factura.id}/pdf`, "_blank");
+        window.open(`/api/account/invoices/${order.factura.id}/pdf`, '_blank');
       } catch (error) {
-        console.error("Error al abrir factura:", error);
-        setInvoiceModalReason("not_generated");
+        console.error('Error al abrir factura:', error);
+        setInvoiceModalReason('not_generated');
         setInvoiceModalOpen(true);
       }
     } else if (order?.factura?.anulada) {
-      setInvoiceModalReason("cancelled");
+      setInvoiceModalReason('cancelled');
       setInvoiceModalOpen(true);
     } else {
-      if (order?.estado === "Cancelado") {
-        setInvoiceModalReason("cancelled");
-      } else if (order?.estado !== "Entregado") {
-        setInvoiceModalReason("not_completed");
+      if (order?.estado === 'Cancelado') {
+        setInvoiceModalReason('cancelled');
+      } else if (order?.estado !== 'Entregado') {
+        setInvoiceModalReason('not_completed');
       } else {
-        setInvoiceModalReason("not_generated");
+        setInvoiceModalReason('not_generated');
       }
       setInvoiceModalOpen(true);
     }
   };
 
-  if (status === "loading" || loading) {
+  if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="text-center">
@@ -240,12 +240,12 @@ export default function OrderDetailPage() {
                   Pedido {order.orderNumber}
                 </h1>
                 <p className="text-xs sm:text-sm text-gray-500">
-                  Realizado el{" "}
-                  {new Date(order.createdAt).toLocaleDateString("es-ES", {
-                    weekday: "long",
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
+                  Realizado el{' '}
+                  {new Date(order.createdAt).toLocaleDateString('es-ES', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
                   })}
                 </p>
               </div>
@@ -382,30 +382,30 @@ export default function OrderDetailPage() {
                     <div
                       key={message.id}
                       className={`p-3 sm:p-4 rounded-lg ${
-                        message.tipoRemitente === "ADMIN"
-                          ? "bg-indigo-50 border border-indigo-100"
-                          : "bg-gray-50 border border-gray-100"
+                        message.tipoRemitente === 'ADMIN'
+                          ? 'bg-indigo-50 border border-indigo-100'
+                          : 'bg-gray-50 border border-gray-100'
                       }`}
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
                         <span
                           className={`text-xs sm:text-sm font-medium ${
-                            message.tipoRemitente === "ADMIN"
-                              ? "text-indigo-700"
-                              : "text-gray-700"
+                            message.tipoRemitente === 'ADMIN'
+                              ? 'text-indigo-700'
+                              : 'text-gray-700'
                           }`}
                         >
-                          {message.tipoRemitente === "ADMIN"
-                            ? "Administrador"
-                            : "Tú"}
+                          {message.tipoRemitente === 'ADMIN'
+                            ? 'Administrador'
+                            : 'Tú'}
                         </span>
                         <span className="text-xs text-gray-400">
                           {new Date(message.createdAt).toLocaleDateString(
-                            "es-ES",
-                          )}{" "}
+                            'es-ES',
+                          )}{' '}
                           {new Date(message.createdAt).toLocaleTimeString(
-                            "es-ES",
-                            { hour: "2-digit", minute: "2-digit" },
+                            'es-ES',
+                            { hour: '2-digit', minute: '2-digit' },
                           )}
                         </span>
                       </div>
@@ -436,7 +436,7 @@ export default function OrderDetailPage() {
                     <span className="text-gray-600">Fecha:</span>
                     <span>
                       {new Date(order.factura.emitidaEn).toLocaleDateString(
-                        "es-ES",
+                        'es-ES',
                       )}
                     </span>
                   </div>
@@ -490,7 +490,7 @@ export default function OrderDetailPage() {
                   <span className="font-medium">
                     {metodosPago[order.metodoPago] ||
                       order.metodoPago ||
-                      "No disponible"}
+                      'No disponible'}
                   </span>
                 </div>
                 {order.pago && (
@@ -499,13 +499,13 @@ export default function OrderDetailPage() {
                       <span className="text-gray-600">Estado:</span>
                       <span
                         className={`font-medium ${
-                          order.pago.estado === "COMPLETADO"
-                            ? "text-green-600"
-                            : "text-yellow-600"
+                          order.pago.estado === 'COMPLETADO'
+                            ? 'text-green-600'
+                            : 'text-yellow-600'
                         }`}
                       >
-                        {order.pago.estado === "COMPLETADO"
-                          ? "Pagado"
+                        {order.pago.estado === 'COMPLETADO'
+                          ? 'Pagado'
                           : order.pago.estado}
                       </span>
                     </div>
@@ -513,7 +513,7 @@ export default function OrderDetailPage() {
                       <span className="text-gray-600">Fecha:</span>
                       <span>
                         {new Date(order.pago.createdAt).toLocaleDateString(
-                          "es-ES",
+                          'es-ES',
                         )}
                       </span>
                     </div>
@@ -535,13 +535,13 @@ export default function OrderDetailPage() {
                 <div className="flex justify-between">
                   <span className="text-gray-600">Fecha:</span>
                   <span>
-                    {new Date(order.createdAt).toLocaleDateString("es-ES")}
+                    {new Date(order.createdAt).toLocaleDateString('es-ES')}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Actualizado:</span>
                   <span>
-                    {new Date(order.updatedAt).toLocaleDateString("es-ES")}
+                    {new Date(order.updatedAt).toLocaleDateString('es-ES')}
                   </span>
                 </div>
               </div>

@@ -19,8 +19,10 @@ export function useCartMigration() {
 
   const getLocalCart = useCallback((): CartItem[] | null => {
     const localCart = localStorage.getItem(cartStorageKey);
-    if (!localCart) return null;
-    
+    if (!localCart) {
+      return null;
+    }
+
     try {
       const items = JSON.parse(localCart) as CartItem[];
       return items.length > 0 ? items : null;
@@ -43,7 +45,7 @@ export function useCartMigration() {
     sessionStorage.removeItem('migratingCart');
   }, []);
 
-  const migrateItem = async (item: CartItem): Promise<MigrationResult> => {
+  const migrateItem = async(item: CartItem): Promise<MigrationResult> => {
     try {
       const response = await fetch('/api/cart', {
         method: 'POST',
@@ -68,9 +70,11 @@ export function useCartMigration() {
     }
   };
 
-  const migrateCart = async (): Promise<void> => {
+  const migrateCart = async(): Promise<void> => {
     const items = getLocalCart();
-    if (!items) return;
+    if (!items) {
+      return;
+    }
 
     try {
       // Migrar cada item

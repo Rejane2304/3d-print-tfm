@@ -4,9 +4,9 @@
  *
  * Devuelve solo cupones válidos y activos
  */
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
-import { translateCouponCode } from "@/lib/i18n";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { translateCouponCode } from '@/lib/i18n';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function GET(_req: NextRequest) {
@@ -24,18 +24,18 @@ export async function GET(_req: NextRequest) {
           { usedCount: { lt: prisma.coupon.fields.maxUses } },
         ],
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
     });
 
     // Formatear respuesta
     const formattedCoupons = coupons.map((coupon) => {
-      let description = "";
-      if (coupon.type === "PERCENTAGE") {
+      let description = '';
+      if (coupon.type === 'PERCENTAGE') {
         description = `${coupon.value}% de descuento`;
-      } else if (coupon.type === "FIXED") {
+      } else if (coupon.type === 'FIXED') {
         description = `${coupon.value}€ de descuento`;
-      } else if (coupon.type === "FREE_SHIPPING") {
-        description = "Envío gratis";
+      } else if (coupon.type === 'FREE_SHIPPING') {
+        description = 'Envío gratis';
       }
 
       if (coupon.minOrderAmount) {
@@ -57,9 +57,9 @@ export async function GET(_req: NextRequest) {
 
     return NextResponse.json({ success: true, coupons: formattedCoupons });
   } catch (error) {
-    console.error("Error fetching coupons:", error);
+    console.error('Error fetching coupons:', error);
     return NextResponse.json(
-      { success: false, error: "Error interno" },
+      { success: false, error: 'Error interno' },
       { status: 500 },
     );
   }

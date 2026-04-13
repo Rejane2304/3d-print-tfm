@@ -1,6 +1,6 @@
-import { Prisma } from "@prisma/client";
-import { prisma } from "@/lib/db/prisma";
-import type { Server as SocketIOServer } from "socket.io";
+import { Prisma } from '@prisma/client';
+import { prisma } from '@/lib/db/prisma';
+import type { Server as SocketIOServer } from 'socket.io';
 
 // Extend global to include Socket.IO server instance
 declare global {
@@ -9,14 +9,14 @@ declare global {
 }
 
 export type EventType =
-  | "order:new"
-  | "order:status:updated"
-  | "payment:confirmed"
-  | "stock:low"
-  | "stock:updated"
-  | "alert:new"
-  | "review:new"
-  | "metrics:update";
+  | 'order:new'
+  | 'order:status:updated'
+  | 'payment:confirmed'
+  | 'stock:low'
+  | 'stock:updated'
+  | 'alert:new'
+  | 'review:new'
+  | 'metrics:update';
 
 export interface EventPayload {
   [key: string]: unknown;
@@ -60,12 +60,12 @@ export async function emitEvent(
 
     // Also emit to any connected WebSocket clients (if server-side)
     // This will be handled by the socket.io server
-    if (typeof global !== "undefined" && global.io) {
+    if (typeof global !== 'undefined' && global.io) {
       const io = global.io;
       io.to(room).emit(type, payload);
     }
   } catch (error) {
-    console.error("Error emitting event:", error);
+    console.error('Error emitting event:', error);
     throw error;
   }
 }
@@ -77,8 +77,8 @@ export async function getPendingEvents(
   Array<{ id: string; type: string; payload: EventPayload; timestamp: Date }>
 > {
   const rooms = [`user:${userId}`];
-  if (userRole === "ADMIN") {
-    rooms.push("admin");
+  if (userRole === 'ADMIN') {
+    rooms.push('admin');
   }
 
   const events = (await prisma.eventStore.findMany({
@@ -86,7 +86,7 @@ export async function getPendingEvents(
       room: { in: rooms },
       delivered: false,
     },
-    orderBy: { timestamp: "asc" },
+    orderBy: { timestamp: 'asc' },
     take: 100,
   })) as EventStoreRecord[];
 
@@ -99,7 +99,9 @@ export async function getPendingEvents(
 }
 
 export async function markEventsAsDelivered(eventIds: string[]): Promise<void> {
-  if (eventIds.length === 0) return;
+  if (eventIds.length === 0) {
+    return;
+  }
 
   await prisma.eventStore.updateMany({
     where: {
@@ -114,7 +116,7 @@ export async function markEventsAsDelivered(eventIds: string[]): Promise<void> {
 
 // Specific event emitters
 export async function emitNewOrder(order: unknown): Promise<void> {
-  await emitEvent("order:new", { order }, "admin");
+  await emitEvent('order:new', { order }, 'admin');
 }
 
 export async function emitOrderStatusUpdated(
@@ -123,7 +125,7 @@ export async function emitOrderStatusUpdated(
   userId: string,
 ): Promise<void> {
   await emitEvent(
-    "order:status:updated",
+    'order:status:updated',
     { orderId, status, timestamp: new Date().toISOString() },
     `user:${userId}`,
     userId,
@@ -136,12 +138,12 @@ export async function emitPaymentConfirmed(
   userId: string,
 ): Promise<void> {
   await emitEvent(
-    "payment:confirmed",
+    'payment:confirmed',
     { orderId, payment, timestamp: new Date().toISOString() },
     `user:${userId}`,
     userId,
   );
-  await emitEvent("payment:confirmed", { orderId, payment }, "admin");
+  await emitEvent('payment:confirmed', { orderId, payment }, 'admin');
 }
 
 export async function emitStockLow(
@@ -149,9 +151,9 @@ export async function emitStockLow(
   stock: number,
 ): Promise<void> {
   await emitEvent(
-    "stock:low",
+    'stock:low',
     { productId, stock, timestamp: new Date().toISOString() },
-    "admin",
+    'admin',
   );
 }
 
@@ -161,12 +163,12 @@ export async function emitStockUpdated(
   previousStock: number,
 ): Promise<void> {
   await emitEvent(
-    "stock:updated",
+    'stock:updated',
     { productId, newStock, previousStock, timestamp: new Date().toISOString() },
-    "admin",
+    'admin',
   );
   await emitEvent(
-    "stock:updated",
+    'stock:updated',
     { productId, newStock, previousStock, timestamp: new Date().toISOString() },
     `product:${productId}`,
   );
@@ -174,9 +176,9 @@ export async function emitStockUpdated(
 
 export async function emitNewAlert(alert: unknown): Promise<void> {
   await emitEvent(
-    "alert:new",
+    'alert:new',
     { alert, timestamp: new Date().toISOString() },
-    "admin",
+    'admin',
   );
 }
 
@@ -185,16 +187,16 @@ export async function emitNewReview(
   productId: string,
 ): Promise<void> {
   await emitEvent(
-    "review:new",
+    'review:new',
     { review, productId, timestamp: new Date().toISOString() },
-    "admin",
+    'admin',
   );
 }
 
 export async function emitMetricsUpdate(metrics: unknown): Promise<void> {
   await emitEvent(
-    "metrics:update",
+    'metrics:update',
     { metrics, timestamp: new Date().toISOString() },
-    "admin",
+    'admin',
   );
 }

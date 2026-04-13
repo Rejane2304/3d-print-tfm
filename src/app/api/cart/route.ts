@@ -6,21 +6,21 @@
  *
  * Requires authentication (session token)
  */
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
-import { withErrorHandler } from "@/lib/errors/api-wrapper";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
-import { translateProductName, translateErrorMessage } from "@/lib/i18n";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { withErrorHandler } from '@/lib/errors/api-wrapper';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
+import { translateErrorMessage, translateProductName } from '@/lib/i18n';
 
 // GET /api/cart - Get user's cart
-export const GET = withErrorHandler(async () => {
+export const GET = withErrorHandler(async() => {
   // Verify authentication
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.email) {
     return NextResponse.json(
-      { success: false, error: "No autenticado" },
+      { success: false, error: 'No autenticado' },
       { status: 401 },
     );
   }
@@ -50,7 +50,7 @@ export const GET = withErrorHandler(async () => {
 
   if (!user) {
     return NextResponse.json(
-      { success: false, error: "Usuario no encontrado" },
+      { success: false, error: 'Usuario no encontrado' },
       { status: 404 },
     );
   }
@@ -101,13 +101,13 @@ export const GET = withErrorHandler(async () => {
 });
 
 // POST /api/cart - Add product to cart
-export const POST = withErrorHandler(async (req: NextRequest) => {
+export const POST = withErrorHandler(async(req: NextRequest) => {
   // Verify authentication
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.email) {
     return NextResponse.json(
-      { success: false, error: "No autenticado" },
+      { success: false, error: 'No autenticado' },
       { status: 401 },
     );
   }
@@ -119,14 +119,14 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   // Validations
   if (!productId) {
     return NextResponse.json(
-      { success: false, error: "El producto es requerido" },
+      { success: false, error: 'El producto es requerido' },
       { status: 400 },
     );
   }
 
   if (quantity <= 0) {
     return NextResponse.json(
-      { success: false, error: "La cantidad debe ser mayor a 0" },
+      { success: false, error: 'La cantidad debe ser mayor a 0' },
       { status: 400 },
     );
   }
@@ -139,7 +139,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   if (!user) {
     return NextResponse.json(
-      { success: false, error: "Usuario no encontrado" },
+      { success: false, error: 'Usuario no encontrado' },
       { status: 404 },
     );
   }
@@ -151,21 +151,21 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   if (!product) {
     return NextResponse.json(
-      { success: false, error: translateErrorMessage("Producto not found") },
+      { success: false, error: translateErrorMessage('Producto not found') },
       { status: 404 },
     );
   }
 
   if (!product.isActive) {
     return NextResponse.json(
-      { success: false, error: "Producto no disponible" },
+      { success: false, error: 'Producto no disponible' },
       { status: 400 },
     );
   }
 
   if (product.stock < quantity) {
     return NextResponse.json(
-      { success: false, error: translateErrorMessage("Insufficient stock") },
+      { success: false, error: translateErrorMessage('Insufficient stock') },
       { status: 400 },
     );
   }
@@ -198,7 +198,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         {
           success: false,
           error: translateErrorMessage(
-            "Insufficient stock para la cantidad total",
+            'Insufficient stock para la cantidad total',
           ),
         },
         { status: 400 },
@@ -242,7 +242,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   return NextResponse.json(
     {
       success: true,
-      message: "Producto añadido al carrito",
+      message: 'Producto añadido al carrito',
     },
     { status: 201 },
   );

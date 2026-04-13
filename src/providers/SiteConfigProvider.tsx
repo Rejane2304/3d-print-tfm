@@ -3,15 +3,15 @@
  * Loads and provides site configuration to the frontend
  */
 
-"use client";
+'use client';
 
 import React, {
+  ReactNode,
   createContext,
   useContext,
   useEffect,
   useState,
-  ReactNode,
-} from "react";
+} from 'react';
 
 interface SiteConfig {
   _ref: string;
@@ -44,24 +44,24 @@ export function SiteConfigProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchConfig = async () => {
+  const fetchConfig = async() => {
     try {
       setLoading(true);
       setError(null);
 
-      const response = await fetch("/api/site-config");
+      const response = await fetch('/api/site-config');
       const data = await response.json();
 
       if (!response.ok) {
         throw new Error(
-          data.error || "Error al cargar configuración del sitio",
+          data.error || 'Error al cargar configuración del sitio',
         );
       }
 
       setConfig(data.config);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error desconocido");
-      console.error("Error al cargar configuración del sitio:", err);
+      setError(err instanceof Error ? err.message : 'Error desconocido');
+      console.error('Error al cargar configuración del sitio:', err);
     } finally {
       setLoading(false);
     }
@@ -83,7 +83,7 @@ export function SiteConfigProvider({ children }: { children: ReactNode }) {
 export function useSiteConfig() {
   const context = useContext(SiteConfigContext);
   if (context === undefined) {
-    throw new Error("useSiteConfig must be used within a SiteConfigProvider");
+    throw new Error('useSiteConfig must be used within a SiteConfigProvider');
   }
   return context;
 }

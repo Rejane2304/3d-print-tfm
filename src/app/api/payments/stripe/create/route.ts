@@ -5,17 +5,17 @@
  * Creates a Stripe Checkout session for order payment
  * Requires authentication
  */
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
-import { prisma } from "@/lib/db/prisma";
-import { translateErrorMessage, translateProductName } from "@/lib/i18n";
-import { createPaymentFailedAlert } from "@/lib/alerts/alert-service";
-import Stripe from "stripe";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
+import { prisma } from '@/lib/db/prisma';
+import { translateErrorMessage, translateProductName } from '@/lib/i18n';
+import { createPaymentFailedAlert } from '@/lib/alerts/alert-service';
+import Stripe from 'stripe';
 
 // Initialize Stripe with TEST mode
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2024-04-10" as Stripe.LatestApiVersion,
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+  apiVersion: '2024-04-10' as Stripe.LatestApiVersion,
 });
 
 export async function POST(req: NextRequest) {
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
 
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: "No autenticado" },
+        { success: false, error: 'No autenticado' },
         { status: 401 },
       );
     }
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
 
     if (!orderId) {
       return NextResponse.json(
-        { success: false, error: "El ID de pedido es requerido" },
+        { success: false, error: 'El ID de pedido es requerido' },
         { status: 400 },
       );
     }
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { success: false, error: translateErrorMessage("Usuario not found") },
+        { success: false, error: translateErrorMessage('Usuario not found') },
         { status: 404 },
       );
     }
@@ -84,22 +84,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: translateErrorMessage("Pedido no encontrado"),
+          error: translateErrorMessage('Pedido no encontrado'),
         },
         { status: 404 },
       );
     }
 
     // Check if order can be paid
-    if (order.status !== "PENDING") {
+    if (order.status !== 'PENDING') {
       return NextResponse.json(
-        { success: false, error: "El pedido no está pendiente de pago" },
+        { success: false, error: 'El pedido no está pendiente de pago' },
         { status: 400 },
       );
     }
 
     // 5. Build line items for Stripe with VAT separated (transparent)
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
     // Calculate totals - BASE IMPONIBLE INCLUYE ENVÍO
     const itemsTotal = order.items.reduce(
@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
 
         // Stripe requires absolute URLs for images - convert relative to absolute
         let imageUrl: string | undefined = item.product?.images?.[0]?.url;
-        if (imageUrl && imageUrl.startsWith("/")) {
+        if (imageUrl && imageUrl.startsWith('/')) {
           imageUrl = `${baseUrl}${imageUrl}`;
         }
 
@@ -136,9 +136,9 @@ export async function POST(req: NextRequest) {
 
         return {
           price_data: {
-            currency: "eur",
+            currency: 'eur',
             product_data: {
-              name: translatedName + (discount > 0 ? " (con descuento)" : ""),
+              name: translatedName + (discount > 0 ? ' (con descuento)' : ''),
               description: item.description || undefined,
               images: imageUrl ? [imageUrl] : undefined,
             },
@@ -152,10 +152,10 @@ export async function POST(req: NextRequest) {
     if (shipping > 0) {
       lineItems.push({
         price_data: {
-          currency: "eur",
+          currency: 'eur',
           product_data: {
-            name: "Envío",
-            description: "Gastos de envío",
+            name: 'Envío',
+            description: 'Gastos de envío',
           },
           unit_amount: Math.round(shipping * 100),
         },
@@ -170,16 +170,16 @@ export async function POST(req: NextRequest) {
       console.error(
         `Total mismatch: calculated ${calculatedTotal}, order ${orderTotal}`,
       );
-      throw new Error("El total calculado no coincide con el pedido");
+      throw new Error('El total calculado no coincide con el pedido');
     }
 
     // Add VAT as separate line item (transparency) - CALCULADO SOBRE (productos + envío)
     lineItems.push({
       price_data: {
-        currency: "eur",
+        currency: 'eur',
         product_data: {
-          name: "IVA (21%)",
-          description: "Impuesto sobre el Valor Añadido",
+          name: 'IVA (21%)',
+          description: 'Impuesto sobre el Valor Añadido',
         },
         unit_amount: Math.round(vatAmount * 100), // Convert to cents
       },
@@ -188,13 +188,13 @@ export async function POST(req: NextRequest) {
 
     // 6. Create Stripe Checkout session
     const stripeSession = await stripe.checkout.sessions.create({
-      mode: "payment",
+      mode: 'payment',
       success_url: `${baseUrl}/checkout/success?orderId=${order.id}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/checkout?orderId=${order.id}&cancelled=true`,
       line_items: lineItems,
       metadata: {
         orderId: order.id,
-        paymentId: paymentId || "",
+        paymentId: paymentId || '',
         userId: user.id,
         userEmail: user.email,
       },
@@ -206,7 +206,7 @@ export async function POST(req: NextRequest) {
         },
       },
       // Add order number to the description
-      submit_type: "pay",
+      submit_type: 'pay',
     });
 
     // 7. Update order with stripeSessionId
@@ -214,7 +214,7 @@ export async function POST(req: NextRequest) {
       where: { id: order.id },
       data: {
         stripeSessionId: stripeSession.id,
-        paymentMethod: "CARD",
+        paymentMethod: 'CARD',
       },
     });
 
@@ -224,7 +224,7 @@ export async function POST(req: NextRequest) {
         where: { id: paymentId },
         data: {
           stripeSessionId: stripeSession.id,
-          status: "PROCESSING",
+          status: 'PROCESSING',
         },
       });
     }
@@ -236,7 +236,7 @@ export async function POST(req: NextRequest) {
       sessionId: stripeSession.id,
     });
   } catch (error) {
-    console.error("Error creating Stripe checkout session:", error);
+    console.error('Error creating Stripe checkout session:', error);
 
     // Create alert for failed payment
     try {
@@ -251,12 +251,12 @@ export async function POST(req: NextRequest) {
           await createPaymentFailedAlert(
             orderId,
             order.orderNumber,
-            error instanceof Error ? error.message : "Error desconocido",
+            error instanceof Error ? error.message : 'Error desconocido',
           );
         }
       }
     } catch (alertError) {
-      console.error("Error creating payment failed alert:", alertError);
+      console.error('Error creating payment failed alert:', alertError);
     }
 
     // Handle Stripe-specific errors
@@ -273,7 +273,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: translateErrorMessage("Error al crear sesión de pago"),
+        error: translateErrorMessage('Error al crear sesión de pago'),
       },
       { status: 500 },
     );
