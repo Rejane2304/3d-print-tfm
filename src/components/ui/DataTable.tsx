@@ -212,7 +212,7 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
       if (column.render) {
         return column.render(value as unknown, row);
       }
-      return value != null ? String(value) : null;
+      return value !== null && value !== undefined ? String(value) : null;
     },
     [],
   );
@@ -345,16 +345,23 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
 
       {/* Table */}
       <div className="overflow-x-auto">
-        {loading ? (
-          <div className="p-12 text-center">
-            <Loader2 className="h-8 w-8 animate-spin text-indigo-600 mx-auto mb-4" />
-            <p className="text-gray-500">Loading...</p>
-          </div>
-        ) : paginatedData.length === 0 ? (
-          <div className="p-12 text-center text-gray-500">
-            {searchQuery ? noResultsMessage : emptyMessage}
-          </div>
-        ) : (
+        {(() => {
+          if (loading) {
+            return (
+              <div className="p-12 text-center">
+                <Loader2 className="h-8 w-8 animate-spin text-indigo-600 mx-auto mb-4" />
+                <p className="text-gray-500">Loading...</p>
+              </div>
+            );
+          }
+          if (paginatedData.length === 0) {
+            return (
+              <div className="p-12 text-center text-gray-500">
+                {searchQuery ? noResultsMessage : emptyMessage}
+              </div>
+            );
+          }
+          return (
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -384,13 +391,17 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
                   >
                     <div className="flex items-center gap-1">
                       {column.header}
-                      {column.sortable && sortColumn === column.key && (
-                        sortDirection === 'asc'
-                          ? <ChevronUp className="h-4 w-4" />
-                          : sortDirection === 'desc'
-                            ? <ChevronDown className="h-4 w-4" />
-                            : null
-                      )}
+                      {(() => {
+                         const isSorted = column.sortable && sortColumn === column.key;
+                         if (!isSorted) return null;
+                         if (sortDirection === 'asc') {
+                           return <ChevronUp className="h-4 w-4" />;
+                         }
+                         if (sortDirection === 'desc') {
+                           return <ChevronDown className="h-4 w-4" />;
+                         }
+                         return null;
+                       })()}
                     </div>
                   </th>
                 ))}
@@ -438,7 +449,8 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
               })}
             </tbody>
           </table>
-        )}
+          );
+        })()}
       </div>
 
       {/* Pagination */}
