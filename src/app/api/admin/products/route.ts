@@ -4,7 +4,8 @@
  *
  * Requiere: Rol ADMIN
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
@@ -24,18 +25,17 @@ const imageSchema = z.object({
     .string()
     .min(1, 'La URL de la imagen es obligatoria')
     .refine(
-      (url) => {
+      url => {
         // Permitir URLs blob: temporales (para preview) o URLs con extensión válida
         if (url.startsWith('blob:') || url.startsWith('data:')) {
           return true;
         }
         const validExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
         const lowercaseUrl = url.toLowerCase();
-        return validExtensions.some((ext) => lowercaseUrl.endsWith(ext));
+        return validExtensions.some(ext => lowercaseUrl.endsWith(ext));
       },
       {
-        message:
-          'La URL debe terminar en .jpg, .jpeg, .png, .webp o .gif o ser una URL temporal válida',
+        message: 'La URL debe terminar en .jpg, .jpeg, .png, .webp o .gif o ser una URL temporal válida',
       },
     ),
   isMain: z.boolean().default(false),
@@ -61,7 +61,7 @@ const productSchema = z.object({
   images: z
     .array(imageSchema)
     .min(1, 'Debe agregar al menos una imagen')
-    .refine((images) => images.some((img) => img.isMain), {
+    .refine(images => images.some(img => img.isMain), {
       message: 'Debe marcar al menos una imagen como principal',
     }),
 });
@@ -76,10 +76,7 @@ export async function GET() {
       session = null;
     }
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: translateErrorMessage('No autenticado') },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: translateErrorMessage('No autenticado') }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -87,10 +84,7 @@ export async function GET() {
     });
 
     if (user?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: translateErrorMessage('No autorizado') },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: translateErrorMessage('No autorizado') }, { status: 401 });
     }
 
     const products = await prisma.product.findMany({
@@ -105,20 +99,16 @@ export async function GET() {
 
     // Translate products to Spanish for admin panel
     // Admin should see data in Spanish following project UI standard
-    const productosTraducidos = products.map((product) => ({
+    const productosTraducidos = products.map(product => ({
       id: product.id,
       slug: product.slug,
       nombre: translateProductName(product.slug),
       descripcion: translateProductDescription(product.slug),
       descripcionCorta: translateProductShortDescription(product.slug),
       precio: Number(product.price),
-      precioAnterior: product.previousPrice
-        ? Number(product.previousPrice)
-        : null,
+      precioAnterior: product.previousPrice ? Number(product.previousPrice) : null,
       stock: product.stock,
-      categoria: product.category
-        ? translateCategoryName(product.category.slug)
-        : 'Sin categoría',
+      categoria: product.category ? translateCategoryName(product.category.slug) : 'Sin categoría',
       material: product.material,
       anchoCm: product.widthCm,
       altoCm: product.heightCm,
@@ -133,17 +123,12 @@ export async function GET() {
     }));
 
     // Sort by translated Spanish name alphabetically
-    productosTraducidos.sort((a, b) =>
-      a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' }),
-    );
+    productosTraducidos.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' }));
 
     return NextResponse.json({ success: true, productos: productosTraducidos });
   } catch (error) {
     console.error('Error listando productos:', error);
-    return NextResponse.json(
-      { success: false, error: translateErrorMessage('Internal error') },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: translateErrorMessage('Internal error') }, { status: 500 });
   }
 }
 
@@ -157,10 +142,7 @@ export async function POST(req: NextRequest) {
       session = null;
     }
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: translateErrorMessage('No autenticado') },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: translateErrorMessage('No autenticado') }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -168,10 +150,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (user?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: translateErrorMessage('No autorizado') },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: translateErrorMessage('No autorizado') }, { status: 401 });
     }
 
     const body = await req.json();
@@ -187,7 +166,7 @@ export async function POST(req: NextRequest) {
       .replaceAll(/(^-|-$)/g, '');
 
     // Crear producto e imágenes en una transacción
-    const product = await prisma.$transaction(async(tx) => {
+    const product = await prisma.$transaction(async tx => {
       // Crear el producto - usar spread para construir el objeto dinámicamente
       const newProduct = await tx.product.create({
         data: {
@@ -238,15 +217,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, product }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { success: false, error: error.errors[0].message },
-        { status: 400 },
-      );
+      return NextResponse.json({ success: false, error: error.errors[0].message }, { status: 400 });
     }
     console.error('Error creando producto:', error);
-    return NextResponse.json(
-      { success: false, error: translateErrorMessage('Internal error') },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: translateErrorMessage('Internal error') }, { status: 500 });
   }
 }

@@ -8,17 +8,9 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import {
-  AlertCircle,
-  CheckCircle2,
-  Filter,
-  Loader2,
-  MessageSquare,
-  Star,
-  Trash2,
-  XCircle,
-} from 'lucide-react';
-import { BulkAction, Column, DataTable } from '@/components/ui/DataTable';
+import { AlertCircle, CheckCircle2, Filter, Loader2, MessageSquare, Star, Trash2, XCircle } from 'lucide-react';
+import type { BulkAction, Column } from '@/components/ui/DataTable';
+import { DataTable } from '@/components/ui/DataTable';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { BulkDeleteModal } from '@/components/ui/BulkDeleteModal';
 
@@ -73,7 +65,7 @@ export default function AdminReviewsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, session, router]);
 
-  const loadResenas = async() => {
+  const loadResenas = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -97,9 +89,7 @@ export default function AdminReviewsPage() {
       let filtered = data.resenas || [];
       if (filters.product) {
         const productFilter = filters.product.toLowerCase();
-        filtered = filtered.filter((r: Resena) =>
-          r.productoNombre.toLowerCase().includes(productFilter),
-        );
+        filtered = filtered.filter((r: Resena) => r.productoNombre.toLowerCase().includes(productFilter));
       }
 
       setResenas(filtered);
@@ -119,7 +109,7 @@ export default function AdminReviewsPage() {
     loadResenas();
   };
 
-  const toggleVerification = async(resena: Resena) => {
+  const toggleVerification = async (resena: Resena) => {
     try {
       const response = await fetch(`/api/admin/reviews/${resena.id}`, {
         method: 'PATCH',
@@ -128,22 +118,16 @@ export default function AdminReviewsPage() {
       });
 
       if (response.ok) {
-        setResenas(
-          resenas.map((r) =>
-            r.id === resena.id ? { ...r, verificado: !r.verificado } : r,
-          ),
-        );
+        setResenas(resenas.map(r => (r.id === resena.id ? { ...r, verificado: !r.verificado } : r)));
       } else {
         throw new Error('Error actualizando reseña');
       }
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Error actualizando reseña',
-      );
+      setError(err instanceof Error ? err.message : 'Error actualizando reseña');
     }
   };
 
-  const toggleApproval = async(resena: Resena) => {
+  const toggleApproval = async (resena: Resena) => {
     try {
       const response = await fetch(`/api/admin/reviews/${resena.id}`, {
         method: 'PATCH',
@@ -152,18 +136,12 @@ export default function AdminReviewsPage() {
       });
 
       if (response.ok) {
-        setResenas(
-          resenas.map((r) =>
-            r.id === resena.id ? { ...r, aprobado: !r.aprobado } : r,
-          ),
-        );
+        setResenas(resenas.map(r => (r.id === resena.id ? { ...r, aprobado: !r.aprobado } : r)));
       } else {
         throw new Error('Error actualizando reseña');
       }
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Error actualizando reseña',
-      );
+      setError(err instanceof Error ? err.message : 'Error actualizando reseña');
     }
   };
 
@@ -172,7 +150,7 @@ export default function AdminReviewsPage() {
     setModalOpen(true);
   };
 
-  const confirmDelete = async() => {
+  const confirmDelete = async () => {
     if (!resenaToDelete) {
       return;
     }
@@ -185,7 +163,7 @@ export default function AdminReviewsPage() {
       const data = await response.json();
 
       if (response.ok) {
-        setResenas(resenas.filter((r) => r.id !== resenaToDelete.id));
+        setResenas(resenas.filter(r => r.id !== resenaToDelete.id));
       } else {
         throw new Error(data.error || 'Error eliminando reseña');
       }
@@ -202,7 +180,7 @@ export default function AdminReviewsPage() {
     setBulkDeleteModalOpen(true);
   };
 
-  const confirmBulkDelete = async() => {
+  const confirmBulkDelete = async () => {
     try {
       const response = await fetch('/api/admin/reviews', {
         method: 'DELETE',
@@ -211,7 +189,7 @@ export default function AdminReviewsPage() {
       });
 
       if (response.ok) {
-        setResenas(resenas.filter((r) => !selectedIdsToDelete.includes(r.id)));
+        setResenas(resenas.filter(r => !selectedIdsToDelete.includes(r.id)));
       } else {
         throw new Error('Error eliminando reseñas');
       }
@@ -224,13 +202,10 @@ export default function AdminReviewsPage() {
   };
 
   // Calculate statistics
-  const avgRating =
-    resenas.length > 0
-      ? resenas.reduce((sum, r) => sum + r.puntuacion, 0) / resenas.length
-      : 0;
+  const avgRating = resenas.length > 0 ? resenas.reduce((sum, r) => sum + r.puntuacion, 0) / resenas.length : 0;
 
-  const verifiedCount = resenas.filter((r) => r.verificado).length;
-  const approvedCount = resenas.filter((r) => r.aprobado).length;
+  const verifiedCount = resenas.filter(r => r.verificado).length;
+  const approvedCount = resenas.filter(r => r.aprobado).length;
 
   const columns: Column<Resena>[] = [
     {
@@ -240,13 +215,11 @@ export default function AdminReviewsPage() {
       className: '',
       render: (_, resena) => (
         <div className="flex flex-col min-w-0">
-          <span className="text-sm font-medium text-gray-900 truncate">
-            {resena.productoNombre}
-          </span>
+          <span className="text-sm font-medium text-gray-900 truncate">{resena.productoNombre}</span>
           <Link
             href={`/products/${resena.productoSlug}`}
             className="text-xs text-indigo-600 hover:text-indigo-800 truncate hidden sm:block"
-            onClick={(e) => e.stopPropagation()}
+            onClick={e => e.stopPropagation()}
           >
             Ver producto
           </Link>
@@ -260,12 +233,8 @@ export default function AdminReviewsPage() {
       className: 'hidden sm:table-cell',
       render: (_, resena) => (
         <div className="flex flex-col min-w-0">
-          <span className="text-sm font-medium text-gray-900 truncate">
-            {resena.usuarioNombre}
-          </span>
-          <span className="text-xs text-gray-500 truncate hidden md:block">
-            {resena.usuarioEmail}
-          </span>
+          <span className="text-sm font-medium text-gray-900 truncate">{resena.usuarioNombre}</span>
+          <span className="text-xs text-gray-500 truncate hidden md:block">{resena.usuarioEmail}</span>
         </div>
       ),
     },
@@ -276,9 +245,7 @@ export default function AdminReviewsPage() {
       className: '',
       render: (_, resena) => (
         <div className="flex items-center gap-1">
-          <span className="text-sm font-bold text-gray-900">
-            {resena.puntuacion}
-          </span>
+          <span className="text-sm font-bold text-gray-900">{resena.puntuacion}</span>
           <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
         </div>
       ),
@@ -290,9 +257,7 @@ export default function AdminReviewsPage() {
       className: 'hidden md:table-cell',
       render: (_, resena) => (
         <div className="flex flex-col min-w-0">
-          <span className="text-sm font-medium text-gray-900 truncate">
-            {resena.titulo}
-          </span>
+          <span className="text-sm font-medium text-gray-900 truncate">{resena.titulo}</span>
           <span className="text-xs text-gray-500 line-clamp-2">
             {resena.comentario.substring(0, 80)}
             {resena.comentario.length > 80 ? '...' : ''}
@@ -309,9 +274,7 @@ export default function AdminReviewsPage() {
         <div className="flex flex-col gap-1">
           <span
             className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium ${
-              resena.aprobado
-                ? 'bg-green-100 text-green-800'
-                : 'bg-yellow-100 text-yellow-800'
+              resena.aprobado ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
             }`}
           >
             {resena.aprobado ? (
@@ -343,7 +306,7 @@ export default function AdminReviewsPage() {
       header: 'Fecha',
       sortable: true,
       className: 'hidden xl:table-cell',
-      render: (value) => (
+      render: value => (
         <span className="text-xs text-gray-600 whitespace-nowrap">
           {new Date(value as string).toLocaleDateString('es-ES', {
             day: '2-digit',
@@ -360,39 +323,31 @@ export default function AdminReviewsPage() {
       render: (_, resena) => (
         <div className="flex items-center gap-0.5">
           <button
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               toggleVerification(resena);
             }}
             className={`p-1 rounded transition-colors ${
-              resena.verificado
-                ? 'text-green-600 hover:bg-green-50'
-                : 'text-gray-400 hover:bg-gray-50'
+              resena.verificado ? 'text-green-600 hover:bg-green-50' : 'text-gray-400 hover:bg-gray-50'
             }`}
             title={resena.verificado ? 'Quitar verificación' : 'Verificar'}
           >
             <CheckCircle2 className="h-4 w-4" />
           </button>
           <button
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               toggleApproval(resena);
             }}
             className={`p-1 rounded transition-colors ${
-              resena.aprobado
-                ? 'text-green-600 hover:bg-green-50'
-                : 'text-yellow-600 hover:bg-yellow-50'
+              resena.aprobado ? 'text-green-600 hover:bg-green-50' : 'text-yellow-600 hover:bg-yellow-50'
             }`}
             title={resena.aprobado ? 'Ocultar' : 'Mostrar'}
           >
-            {resena.aprobado ? (
-              <XCircle className="h-4 w-4" />
-            ) : (
-              <CheckCircle2 className="h-4 w-4" />
-            )}
+            {resena.aprobado ? <XCircle className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
           </button>
           <button
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               handleDelete(resena);
             }}
@@ -435,14 +390,9 @@ export default function AdminReviewsPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <MessageSquare className="h-8 w-8 text-indigo-600" />
-              <h1 className="text-2xl font-bold text-gray-900">
-                Gestión de Reseñas
-              </h1>
+              <h1 className="text-2xl font-bold text-gray-900">Gestión de Reseñas</h1>
             </div>
-            <Link
-              href="/admin/dashboard"
-              className="text-indigo-600 hover:text-indigo-800 font-medium"
-            >
+            <Link href="/admin/dashboard" className="text-indigo-600 hover:text-indigo-800 font-medium">
               ← Volver al Panel
             </Link>
           </div>
@@ -454,10 +404,7 @@ export default function AdminReviewsPage() {
         <nav className="flex mb-6" aria-label="Breadcrumb">
           <ol className="flex items-center space-x-2">
             <li>
-              <Link
-                href="/admin/dashboard"
-                className="text-gray-500 hover:text-gray-700"
-              >
+              <Link href="/admin/dashboard" className="text-gray-500 hover:text-gray-700">
                 Panel
               </Link>
             </li>
@@ -485,9 +432,7 @@ export default function AdminReviewsPage() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <p className="text-sm text-gray-500">Puntuación Media</p>
             <div className="flex items-center gap-2">
-              <p className="text-2xl font-bold text-indigo-600">
-                {avgRating.toFixed(1)}
-              </p>
+              <p className="text-2xl font-bold text-indigo-600">{avgRating.toFixed(1)}</p>
               <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
             </div>
           </div>
@@ -516,9 +461,7 @@ export default function AdminReviewsPage() {
                 id="filter-product"
                 type="text"
                 value={filters.product}
-                onChange={(e) =>
-                  setFilters({ ...filters, product: e.target.value })
-                }
+                onChange={e => setFilters({ ...filters, product: e.target.value })}
                 placeholder="Buscar por nombre..."
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm \
                   focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
@@ -531,9 +474,7 @@ export default function AdminReviewsPage() {
               <select
                 id="filter-rating"
                 value={filters.rating}
-                onChange={(e) =>
-                  setFilters({ ...filters, rating: e.target.value })
-                }
+                onChange={e => setFilters({ ...filters, rating: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm \
                   focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               >
@@ -552,9 +493,7 @@ export default function AdminReviewsPage() {
               <select
                 id="filter-verified"
                 value={filters.verified}
-                onChange={(e) =>
-                  setFilters({ ...filters, verified: e.target.value })
-                }
+                onChange={e => setFilters({ ...filters, verified: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm \
                   focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               >
@@ -587,12 +526,7 @@ export default function AdminReviewsPage() {
           columns={columns}
           rowKey="id"
           searchable={true}
-          searchKeys={[
-            'productoNombre',
-            'usuarioNombre',
-            'titulo',
-            'comentario',
-          ]}
+          searchKeys={['productoNombre', 'usuarioNombre', 'titulo', 'comentario']}
           searchPlaceholder="Buscar reseñas..."
           pagination={true}
           pageSizeOptions={[10, 25, 50, 100]}

@@ -4,15 +4,13 @@
  *
  * Requiere: Rol ADMIN
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
-import {
-  faqCategoryTranslations,
-  faqTranslations,
-} from '@/lib/i18n/faq-translations';
+import { faqCategoryTranslations, faqTranslations } from '@/lib/i18n/faq-translations';
 
 // Mapeo de categorías en inglés → español
 const categoryTranslations: Record<string, string> = {
@@ -27,30 +25,15 @@ const categoryTranslations: Record<string, string> = {
 
 // Schema de validación
 const faqUpdateSchema = z.object({
-  question: z
-    .string()
-    .min(1, 'La pregunta es obligatoria')
-    .max(500, 'Máximo 500 caracteres')
-    .optional(),
-  answer: z
-    .string()
-    .min(1, 'La respuesta es obligatoria')
-    .max(5000, 'Máximo 5000 caracteres')
-    .optional(),
-  category: z
-    .string()
-    .min(1, 'La categoría es obligatoria')
-    .max(100, 'Máximo 100 caracteres')
-    .optional(),
+  question: z.string().min(1, 'La pregunta es obligatoria').max(500, 'Máximo 500 caracteres').optional(),
+  answer: z.string().min(1, 'La respuesta es obligatoria').max(5000, 'Máximo 5000 caracteres').optional(),
+  category: z.string().min(1, 'La categoría es obligatoria').max(100, 'Máximo 100 caracteres').optional(),
   displayOrder: z.number().int().min(0).optional(),
   isActive: z.boolean().optional(),
 });
 
 // GET - Obtener FAQ
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 
@@ -61,10 +44,7 @@ export async function GET(
       session = null;
     }
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -72,10 +52,7 @@ export async function GET(
     });
 
     if (user?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 });
     }
 
     const faq = await prisma.fAQ.findUnique({
@@ -83,10 +60,7 @@ export async function GET(
     });
 
     if (!faq) {
-      return NextResponse.json(
-        { success: false, error: 'FAQ no encontrada' },
-        { status: 404 },
-      );
+      return NextResponse.json({ success: false, error: 'FAQ no encontrada' }, { status: 404 });
     }
 
     // Formatear para el panel admin (traducir inglés → español)
@@ -100,10 +74,7 @@ export async function GET(
       _ref: ref,
       pregunta: translation?.question || faq.question,
       respuesta: translation?.answer || faq.answer,
-      categoria:
-        faqCategoryTranslations[faq.category] ||
-        categoryTranslations[faq.category] ||
-        faq.category,
+      categoria: faqCategoryTranslations[faq.category] || categoryTranslations[faq.category] || faq.category,
       ordenVisualizacion: faq.displayOrder,
       activo: faq.isActive,
       creadoEn: faq.createdAt,
@@ -113,18 +84,12 @@ export async function GET(
     return NextResponse.json({ success: true, faq: faqFormateada });
   } catch (error) {
     console.error('Error obteniendo FAQ:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error interno' },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: 'Error interno' }, { status: 500 });
   }
 }
 
 // PATCH - Actualizar FAQ
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 
@@ -135,10 +100,7 @@ export async function PATCH(
       session = null;
     }
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -146,10 +108,7 @@ export async function PATCH(
     });
 
     if (user?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 });
     }
 
     // Verificar que la FAQ existe
@@ -158,10 +117,7 @@ export async function PATCH(
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { success: false, error: 'FAQ no encontrada' },
-        { status: 404 },
-      );
+      return NextResponse.json({ success: false, error: 'FAQ no encontrada' }, { status: 404 });
     }
 
     const body = await request.json();
@@ -184,24 +140,15 @@ export async function PATCH(
     return NextResponse.json({ success: true, faq });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { success: false, error: error.errors[0].message },
-        { status: 400 },
-      );
+      return NextResponse.json({ success: false, error: error.errors[0].message }, { status: 400 });
     }
     console.error('Error actualizando FAQ:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error interno' },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: 'Error interno' }, { status: 500 });
   }
 }
 
 // DELETE - Eliminar FAQ
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 
@@ -212,10 +159,7 @@ export async function DELETE(
       session = null;
     }
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -223,10 +167,7 @@ export async function DELETE(
     });
 
     if (user?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 });
     }
 
     // Verificar que la FAQ existe
@@ -235,10 +176,7 @@ export async function DELETE(
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { success: false, error: 'FAQ no encontrada' },
-        { status: 404 },
-      );
+      return NextResponse.json({ success: false, error: 'FAQ no encontrada' }, { status: 404 });
     }
 
     // Eliminar FAQ
@@ -252,9 +190,6 @@ export async function DELETE(
     });
   } catch (error) {
     console.error('Error eliminando FAQ:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error interno' },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: 'Error interno' }, { status: 500 });
   }
 }

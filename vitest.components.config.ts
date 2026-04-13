@@ -26,10 +26,7 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./tests/setup.components.ts'],
     include: ['tests/unit/components/**/*.{test,spec}.{js,jsx,ts,tsx}'],
-    exclude: [
-      '**/node_modules/**',
-      '**/dist/**',
-    ],
+    exclude: ['**/node_modules/**', '**/dist/**'],
     testTimeout: 10000,
   },
   resolve: {

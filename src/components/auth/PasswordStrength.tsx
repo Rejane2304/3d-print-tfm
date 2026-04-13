@@ -206,10 +206,7 @@ function getStrengthIcon(strength: number) {
 }
 
 export default function PasswordStrength({ password }: Readonly<PasswordStrengthProps>) {
-  const analysis = useMemo(
-    () => calculatePasswordStrength(password),
-    [password],
-  );
+  const analysis = useMemo(() => calculatePasswordStrength(password), [password]);
   const colors = getStrengthColor(analysis.strength);
 
   // Don't render if password is empty
@@ -220,9 +217,7 @@ export default function PasswordStrength({ password }: Readonly<PasswordStrength
   return (
     <div className="mt-3 space-y-3">
       {/* Progress bar section */}
-      <div
-        className={`p-3 rounded-lg ${colors.bg} transition-colors duration-300`}
-      >
+      <div className={`p-3 rounded-lg ${colors.bg} transition-colors duration-300`}>
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             {getStrengthIcon(analysis.strength)}
@@ -230,9 +225,7 @@ export default function PasswordStrength({ password }: Readonly<PasswordStrength
               Fortaleza: {getStrengthLabel(analysis.strength)}
             </span>
           </div>
-          <span className={`text-sm font-bold ${colors.text}`}>
-            {analysis.strength}%
-          </span>
+          <span className={`text-sm font-bold ${colors.text}`}>{analysis.strength}%</span>
         </div>
 
         {/* Progress bar */}
@@ -248,13 +241,11 @@ export default function PasswordStrength({ password }: Readonly<PasswordStrength
 
       {/* Requirements checklist */}
       <div className="space-y-1.5">
-        {analysis.requirements.map((req) => (
+        {analysis.requirements.map(req => (
           <div
             key={req.id}
             className={`flex items-center gap-2 text-sm transition-colors duration-200 ${
-              req.met
-                ? 'text-green-600 dark:text-green-400'
-                : 'text-gray-500 dark:text-gray-400'
+              req.met ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'
             }`}
           >
             <span
@@ -264,11 +255,7 @@ export default function PasswordStrength({ password }: Readonly<PasswordStrength
                 req.met ? 'bg-green-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-400',
               ].join(' ')}
             >
-              {req.met ? (
-                <Check className="h-3 w-3" strokeWidth={3} />
-              ) : (
-                <X className="h-3 w-3" strokeWidth={3} />
-              )}
+              {req.met ? <Check className="h-3 w-3" strokeWidth={3} /> : <X className="h-3 w-3" strokeWidth={3} />}
             </span>
             <span className={req.met ? 'font-medium' : ''}>{req.label}</span>
           </div>
@@ -281,5 +268,5 @@ export default function PasswordStrength({ password }: Readonly<PasswordStrength
 // Export helper to check if password meets all requirements
 export function isPasswordValid(password: string): boolean {
   const analysis = calculatePasswordStrength(password);
-  return analysis.requirements.every((req) => req.met);
+  return analysis.requirements.every(req => req.met);
 }

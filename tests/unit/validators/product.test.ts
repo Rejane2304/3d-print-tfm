@@ -3,16 +3,14 @@
  * Tests for actual Zod schemas from @/lib/validators
  */
 import { describe, it, expect } from 'vitest';
-import {
-  productSchema,
-  productUpdateSchema,
-} from '@/lib/validators';
+import { productSchema, productUpdateSchema } from '@/lib/validators';
 import { Material } from '@/types/prisma-enums';
 
 describe('Product Validators', () => {
   const validProduct = {
     name: 'Florero Decorativo Moderno',
-    description: 'Elegante florero impreso en 3D con diseño geométrico contemporáneo. Perfecto para decorar salones, oficinas y espacios modernos. Material PLA de alta calidad.',
+    description:
+      'Elegante florero impreso en 3D con diseño geométrico contemporáneo. Perfecto para decorar salones, oficinas y espacios modernos. Material PLA de alta calidad.',
     shortDescription: 'Florero 3D moderno',
     price: 24.99,
     previousPrice: null as number | null,

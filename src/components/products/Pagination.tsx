@@ -12,10 +12,7 @@ interface PaginationProps {
   readonly totalPages: number;
 }
 
-export default function Pagination({
-  currentPage,
-  totalPages,
-}: Readonly<PaginationProps>) {
+export default function Pagination({ currentPage, totalPages }: Readonly<PaginationProps>) {
   const currentSearchParams = useSearchParams();
 
   const buildPageUrl = (page: number) => {
@@ -71,10 +68,7 @@ export default function Pagination({
   }
 
   return (
-    <nav
-      className="flex items-center justify-center gap-2"
-      aria-label="Paginación"
-    >
+    <nav className="flex items-center justify-center gap-2" aria-label="Paginación">
       {/* Botón Anterior */}
       {currentPage > 1 ? (
         <Link
@@ -84,9 +78,7 @@ export default function Pagination({
           ← Anterior
         </Link>
       ) : (
-        <span className="px-3 py-2 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
-          ← Anterior
-        </span>
+        <span className="px-3 py-2 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">← Anterior</span>
       )}
 
       {/* Números de página */}
@@ -97,10 +89,7 @@ export default function Pagination({
             const prev = pageNumbers[index - 1] ?? 'start';
             const next = pageNumbers[index + 1] ?? 'end';
             return (
-              <span
-                key={`ellipsis-${prev}-${next}`}
-                className="px-3 py-2 text-gray-500"
-              >
+              <span key={`ellipsis-${prev}-${next}`} className="px-3 py-2 text-gray-500">
                 ...
               </span>
             );
@@ -113,9 +102,7 @@ export default function Pagination({
               key={page}
               href={buildPageUrl(page as number)}
               className={`px-3 py-2 rounded-md transition-colors ${
-                isCurrent
-                  ? 'bg-indigo-600 text-white'
-                  : 'border border-gray-300 hover:bg-gray-50 text-gray-700'
+                isCurrent ? 'bg-indigo-600 text-white' : 'border border-gray-300 hover:bg-gray-50 text-gray-700'
               }`}
             >
               {page}

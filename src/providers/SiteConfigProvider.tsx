@@ -5,15 +5,8 @@
 
 'use client';
 
-import React, {
-  ReactNode,
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import type { ReactNode } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 interface SiteConfig {
   _ref: string;
@@ -37,16 +30,14 @@ interface SiteConfigContextType {
   refetch: () => Promise<void>;
 }
 
-const SiteConfigContext = createContext<SiteConfigContextType | undefined>(
-  undefined,
-);
+const SiteConfigContext = createContext<SiteConfigContextType | undefined>(undefined);
 
 export function SiteConfigProvider({ children }: Readonly<{ children: ReactNode }>) {
   const [config, setConfig] = useState<SiteConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchConfig = useCallback(async() => {
+  const fetchConfig = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -55,9 +46,7 @@ export function SiteConfigProvider({ children }: Readonly<{ children: ReactNode 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          data.error || 'Error al cargar configuración del sitio',
-        );
+        throw new Error(data.error || 'Error al cargar configuración del sitio');
       }
 
       setConfig(data.config);
@@ -73,13 +62,12 @@ export function SiteConfigProvider({ children }: Readonly<{ children: ReactNode 
     fetchConfig();
   }, [fetchConfig]);
 
-  const value = useMemo(() => ({ config, loading, error, refetch: fetchConfig }), [config, loading, error, fetchConfig]);
-
-  return (
-    <SiteConfigContext.Provider value={value}>
-      {children}
-    </SiteConfigContext.Provider>
+  const value = useMemo(
+    () => ({ config, loading, error, refetch: fetchConfig }),
+    [config, loading, error, fetchConfig],
   );
+
+  return <SiteConfigContext.Provider value={value}>{children}</SiteConfigContext.Provider>;
 }
 
 export function useSiteConfig() {
@@ -91,10 +79,7 @@ export function useSiteConfig() {
 }
 
 // Hook to get config value with fallback
-export function useConfigValue<K extends keyof SiteConfig>(
-  key: K,
-  fallback: SiteConfig[K],
-): SiteConfig[K] {
+export function useConfigValue<K extends keyof SiteConfig>(key: K, fallback: SiteConfig[K]): SiteConfig[K] {
   const { config } = useSiteConfig();
   return config?.[key] ?? fallback;
 }

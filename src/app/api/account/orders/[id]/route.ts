@@ -3,7 +3,8 @@
  * GET /api/account/orders/[id]
  * Devuelve el detalle completo de un pedido específico del usuario
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
@@ -14,7 +15,7 @@ import {
   translatePaymentStatus,
   translateProductName,
 } from '@/lib/i18n';
-import { Invoice, Order, OrderItem, OrderMessage, Payment } from '@prisma/client';
+import type { Invoice, Order, OrderItem, OrderMessage, Payment } from '@prisma/client';
 
 interface OrderWithRelations extends Order {
   items: (OrderItem & {
@@ -102,41 +103,37 @@ function transformOrder(pedido: OrderWithRelations, couponInfo: CouponInfo | nul
     ciudadEnvio: pedido.shippingCity,
     provinciaEnvio: pedido.shippingProvince,
     paisEnvio: pedido.shippingCountry,
-    metodoPago: pedido.paymentMethod
-      ? translatePaymentMethod(pedido.paymentMethod)
-      : null,
+    metodoPago: pedido.paymentMethod ? translatePaymentMethod(pedido.paymentMethod) : null,
     numeroSeguimiento: pedido.trackingNumber,
     transportista: pedido.carrier,
     notasCliente: pedido.customerNotes,
-    items: pedido.items.map((item) => ({
+    items: pedido.items.map(item => ({
       id: item.id,
       quantity: item.quantity,
       unitPrice: Number(item.price),
       subtotal: Number(item.subtotal),
       producto: {
-        nombre: item.product?.slug
-          ? translateProductName(item.product.slug)
-          : '',
+        nombre: item.product?.slug ? translateProductName(item.product.slug) : '',
         slug: item.product?.slug || '',
         images: item.product?.images || [],
       },
     })),
     factura: pedido.invoice
       ? {
-        id: pedido.invoice.id,
-        numeroFactura: pedido.invoice.invoiceNumber,
-        anulada: pedido.invoice.isCancelled,
-        emitidaEn: pedido.invoice.issuedAt,
-      }
+          id: pedido.invoice.id,
+          numeroFactura: pedido.invoice.invoiceNumber,
+          anulada: pedido.invoice.isCancelled,
+          emitidaEn: pedido.invoice.issuedAt,
+        }
       : undefined,
     pago: pedido.payment
       ? {
-        estado: translatePaymentStatus(pedido.payment.status),
-        metodo: translatePaymentMethod(pedido.payment.method),
-        createdAt: pedido.payment.createdAt,
-      }
+          estado: translatePaymentStatus(pedido.payment.status),
+          metodo: translatePaymentMethod(pedido.payment.method),
+          createdAt: pedido.payment.createdAt,
+        }
       : undefined,
-    messages: pedido.messages.map((msg) => ({
+    messages: pedido.messages.map(msg => ({
       id: msg.id,
       mensaje: msg.message,
       tipoRemitente: msg.isFromCustomer ? 'CLIENTE' : 'ADMIN',
@@ -145,10 +142,7 @@ function transformOrder(pedido: OrderWithRelations, couponInfo: CouponInfo | nul
   };
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const auth = await authenticateUser();
     if ('error' in auth) {
@@ -206,10 +200,7 @@ export async function GET(
     });
 
     if (!pedido) {
-      return NextResponse.json(
-        { error: translateErrorMessage('Pedido not found') },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: translateErrorMessage('Pedido not found') }, { status: 404 });
     }
 
     const couponInfo = await getCouponInfo(pedido.couponId);
@@ -218,9 +209,6 @@ export async function GET(
     return NextResponse.json({ pedido: pedidoTransformado });
   } catch (error) {
     console.error('Error al obtener pedido:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener pedido' },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: 'Error al obtener pedido' }, { status: 500 });
   }
 }

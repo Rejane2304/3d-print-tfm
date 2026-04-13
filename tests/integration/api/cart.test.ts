@@ -1,7 +1,7 @@
 /**
  * Integration Tests - Cart API
  * Testing real database and API endpoints
- * 
+ *
  * Endpoints:
  * - GET /api/cart - get current cart
  * - POST /api/cart - add item
@@ -25,7 +25,13 @@ import { getServerSession } from 'next-auth';
 
 describe('Cart API', () => {
   let customerUser: { id: string; email: string; name: string };
-  let testProduct: { id: string; name: string; slug: string; stock: number; price: number };
+  let testProduct: {
+    id: string;
+    name: string;
+    slug: string;
+    stock: number;
+    price: number;
+  };
   let testCategory: { id: string };
 
   beforeEach(async () => {
@@ -37,14 +43,14 @@ describe('Cart API', () => {
       where: { user: { email: { startsWith: 'cart-test-' } } },
     });
     await prisma.product.deleteMany({
-      where: { slug: { startsWith: 'cart-test-' } } },
-    );
+      where: { slug: { startsWith: 'cart-test-' } },
+    });
     await prisma.category.deleteMany({
-      where: { slug: { startsWith: 'cart-test-' } } },
-    );
+      where: { slug: { startsWith: 'cart-test-' } },
+    });
     await prisma.user.deleteMany({
-      where: { email: { startsWith: 'cart-test-' } } },
-    );
+      where: { email: { startsWith: 'cart-test-' } },
+    });
 
     // Create test user
     const hashedPassword = await bcrypt.hash('TestPass123!', 10);
@@ -71,7 +77,7 @@ describe('Cart API', () => {
       },
     });
 
-    testProduct = await prisma.product.create({
+    testProduct = (await prisma.product.create({
       data: {
         id: randomUUID(),
         name: 'Test Product',
@@ -84,7 +90,13 @@ describe('Cart API', () => {
         isActive: true,
         updatedAt: new Date(),
       },
-    }) as unknown as { id: string; name: string; slug: string; stock: number; price: number };
+    })) as unknown as {
+      id: string;
+      name: string;
+      slug: string;
+      stock: number;
+      price: number;
+    };
 
     // Reset mocks
     vi.mocked(getServerSession).mockReset();
@@ -99,14 +111,14 @@ describe('Cart API', () => {
       where: { user: { email: { startsWith: 'cart-test-' } } },
     });
     await prisma.product.deleteMany({
-      where: { slug: { startsWith: 'cart-test-' } } },
-    );
+      where: { slug: { startsWith: 'cart-test-' } },
+    });
     await prisma.category.deleteMany({
-      where: { slug: { startsWith: 'cart-test-' } } },
-    );
+      where: { slug: { startsWith: 'cart-test-' } },
+    });
     await prisma.user.deleteMany({
-      where: { email: { startsWith: 'cart-test-' } } },
-    );
+      where: { email: { startsWith: 'cart-test-' } },
+    });
   });
 
   describe('GET /api/cart', () => {
@@ -301,18 +313,22 @@ describe('Cart API', () => {
         user: { email: customerUser.email, name: customerUser.name },
       });
 
-      await addToCart(new NextRequest('http://localhost:3000/api/cart', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId: testProduct.id, quantity: 1 }),
-      }));
+      await addToCart(
+        new NextRequest('http://localhost:3000/api/cart', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId: testProduct.id, quantity: 1 }),
+        }),
+      );
 
       // Add same product again
-      await addToCart(new NextRequest('http://localhost:3000/api/cart', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId: testProduct.id, quantity: 2 }),
-      }));
+      await addToCart(
+        new NextRequest('http://localhost:3000/api/cart', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId: testProduct.id, quantity: 2 }),
+        }),
+      );
 
       // Verify quantity is updated
       const cart = await prisma.cart.findUnique({
@@ -388,7 +404,9 @@ describe('Cart API', () => {
         body: JSON.stringify({ quantity: 3 }),
       });
 
-      const res = await updateCartItem(req, { params: { itemId: cartItem.id } });
+      const res = await updateCartItem(req, {
+        params: { itemId: cartItem.id },
+      });
       const body = await res.json();
 
       expect(res.status).toBe(200);
@@ -412,7 +430,9 @@ describe('Cart API', () => {
         body: JSON.stringify({ quantity: 0 }),
       });
 
-      const res = await updateCartItem(req, { params: { itemId: cartItem.id } });
+      const res = await updateCartItem(req, {
+        params: { itemId: cartItem.id },
+      });
       const body = await res.json();
 
       expect(res.status).toBe(200);
@@ -436,7 +456,9 @@ describe('Cart API', () => {
         body: JSON.stringify({ quantity: 100 }),
       });
 
-      const res = await updateCartItem(req, { params: { itemId: cartItem.id } });
+      const res = await updateCartItem(req, {
+        params: { itemId: cartItem.id },
+      });
       expect(res.status).toBe(400);
     });
   });
@@ -503,7 +525,9 @@ describe('Cart API', () => {
         method: 'DELETE',
       });
 
-      const res = await deleteCartItem(req, { params: { itemId: cartItem.id } });
+      const res = await deleteCartItem(req, {
+        params: { itemId: cartItem.id },
+      });
       const body = await res.json();
 
       expect(res.status).toBe(200);
@@ -523,7 +547,9 @@ describe('Cart API', () => {
         method: 'DELETE',
       });
 
-      const res = await deleteCartItem(req, { params: { itemId: cartItem.id } });
+      const res = await deleteCartItem(req, {
+        params: { itemId: cartItem.id },
+      });
       expect(res.status).toBe(401);
     });
 
@@ -536,7 +562,9 @@ describe('Cart API', () => {
         method: 'DELETE',
       });
 
-      const res = await deleteCartItem(req, { params: { itemId: 'non-existent-id' } });
+      const res = await deleteCartItem(req, {
+        params: { itemId: 'non-existent-id' },
+      });
       expect(res.status).toBe(404);
     });
   });

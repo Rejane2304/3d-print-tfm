@@ -5,14 +5,15 @@
  * Creates a Stripe Checkout session for order payment
  * Requires authentication
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
 import { translateErrorMessage, translateProductName } from '@/lib/i18n';
 import { createPaymentFailedAlert } from '@/lib/alerts/alert-service';
 import Stripe from 'stripe';
-import { Decimal } from '@prisma/client/runtime/library';
+import type { Decimal } from '@prisma/client/runtime/library';
 
 // Initialize Stripe with TEST mode
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
@@ -21,7 +22,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
 
 // Get absolute URL from relative URL
 function getAbsoluteImageUrl(relativeUrl: string | undefined, baseUrl: string): string | undefined {
-  if (!relativeUrl) return undefined;
+  if (!relativeUrl) {
+    return undefined;
+  }
   if (relativeUrl.startsWith('/')) {
     return `${baseUrl}${relativeUrl}`;
   }
@@ -30,20 +33,23 @@ function getAbsoluteImageUrl(relativeUrl: string | undefined, baseUrl: string): 
 
 // Build line item for a product with discount
 function buildProductLineItem(
-  item: { name: string; quantity: number; price: Decimal; description: string | null; product: { slug: string; images: { url: string }[] } | null },
+  item: {
+    name: string;
+    quantity: number;
+    price: Decimal;
+    description: string | null;
+    product: { slug: string; images: { url: string }[] } | null;
+  },
   discountRatio: number,
   baseUrl: string,
 ): Stripe.Checkout.SessionCreateParams.LineItem {
-  const translatedName = item.product
-    ? translateProductName(item.product.slug) || item.name
-    : item.name;
+  const translatedName = item.product ? translateProductName(item.product.slug) || item.name : item.name;
 
   const imageUrl = getAbsoluteImageUrl(item.product?.images?.[0]?.url, baseUrl);
   const hasDiscount = discountRatio > 0;
 
   const originalPrice = Number(item.price);
-  const discountedPrice =
-    Math.round(originalPrice * (1 - discountRatio) * 100) / 100;
+  const discountedPrice = Math.round(originalPrice * (1 - discountRatio) * 100) / 100;
 
   return {
     price_data: {
@@ -100,11 +106,13 @@ interface OrderTotals {
   discountRatio: number;
 }
 
-function calculateOrderTotals(order: { items: Array<{ price: Decimal; quantity: number }>; discount: Decimal | null; shipping: Decimal | null; total: Decimal }): OrderTotals {
-  const itemsTotal = order.items.reduce(
-    (sum, item) => sum + Number(item.price) * item.quantity,
-    0,
-  );
+function calculateOrderTotals(order: {
+  items: Array<{ price: Decimal; quantity: number }>;
+  discount: Decimal | null;
+  shipping: Decimal | null;
+  total: Decimal;
+}): OrderTotals {
+  const itemsTotal = order.items.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0);
   const discount = Number(order.discount || 0);
   const discountedItems = Math.max(0, itemsTotal - discount);
   const shipping = Number(order.shipping || 0);
@@ -113,7 +121,15 @@ function calculateOrderTotals(order: { items: Array<{ price: Decimal; quantity: 
   const calculatedTotal = discountedItems + shipping + vatAmount;
   const discountRatio = itemsTotal > 0 ? discount / itemsTotal : 0;
 
-  return { itemsTotal, discount, discountedItems, shipping, vatAmount, calculatedTotal, discountRatio };
+  return {
+    itemsTotal,
+    discount,
+    discountedItems,
+    shipping,
+    vatAmount,
+    calculatedTotal,
+    discountRatio,
+  };
 }
 
 // Create alert for failed payment
@@ -132,20 +148,16 @@ async function createFailedPaymentAlert(orderId: string, errorMessage: string) {
 }
 
 // Verify authentication and get session
-type AuthResult =
-  | { success: true; email: string }
-  | { success: false; response: NextResponse };
+type AuthResult = { success: true; email: string } | { success: false; response: NextResponse };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function verifyAuthSession(req: NextRequest): Promise<AuthResult> {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.email) {
     return {
       success: false,
-      response: NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      ),
+      response: NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 }),
     };
   }
 
@@ -178,7 +190,24 @@ async function getUserForPayment(email: string): Promise<UserResult> {
 
 // Get order with items
 type OrderResult =
-  | { success: true; order: { id: string; orderNumber: string; status: string; total: Decimal; discount: Decimal | null; shipping: Decimal | null; items: Array<{ name: string; description: string | null; quantity: number; price: Decimal; product: { slug: string; images: { url: string }[] } | null }> } }
+  | {
+      success: true;
+      order: {
+        id: string;
+        orderNumber: string;
+        status: string;
+        total: Decimal;
+        discount: Decimal | null;
+        shipping: Decimal | null;
+        items: Array<{
+          name: string;
+          description: string | null;
+          quantity: number;
+          price: Decimal;
+          product: { slug: string; images: { url: string }[] } | null;
+        }>;
+      };
+    }
   | { success: false; response: NextResponse };
 
 async function getOrderForPayment(orderId: string, userId: string): Promise<OrderResult> {
@@ -220,10 +249,7 @@ async function getOrderForPayment(orderId: string, userId: string): Promise<Orde
   if (order.status !== 'PENDING') {
     return {
       success: false,
-      response: NextResponse.json(
-        { success: false, error: 'El pedido no está pendiente de pago' },
-        { status: 400 },
-      ),
+      response: NextResponse.json({ success: false, error: 'El pedido no está pendiente de pago' }, { status: 400 }),
     };
   }
 
@@ -231,11 +257,7 @@ async function getOrderForPayment(orderId: string, userId: string): Promise<Orde
 }
 
 // Update order and payment with session ID
-async function updateOrderAndPayment(
-  orderId: string,
-  paymentId: string | undefined,
-  stripeSessionId: string,
-) {
+async function updateOrderAndPayment(orderId: string, paymentId: string | undefined, stripeSessionId: string) {
   await prisma.order.update({
     where: { id: orderId },
     data: {
@@ -268,10 +290,7 @@ export async function POST(req: NextRequest) {
     const { orderId, paymentId } = body;
 
     if (!orderId || typeof orderId !== 'string') {
-      return NextResponse.json(
-        { success: false, error: 'El ID de pedido es requerido' },
-        { status: 400 },
-      );
+      return NextResponse.json({ success: false, error: 'El ID de pedido es requerido' }, { status: 400 });
     }
 
     // 3. Get user from database
@@ -294,8 +313,9 @@ export async function POST(req: NextRequest) {
     const totals = calculateOrderTotals(order);
 
     // Build line items
-    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] =
-      order.items.map((item) => buildProductLineItem(item, totals.discountRatio, baseUrl));
+    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = order.items.map(item =>
+      buildProductLineItem(item, totals.discountRatio, baseUrl),
+    );
 
     // Add shipping line item
     if (totals.shipping > 0) {
@@ -305,9 +325,7 @@ export async function POST(req: NextRequest) {
     // VALIDACIÓN CRÍTICA: Verify calculated total matches order.total
     const orderTotal = Number(order.total);
     if (Math.abs(totals.calculatedTotal - orderTotal) > 0.01) {
-      console.error(
-        `Total mismatch: calculated ${totals.calculatedTotal}, order ${orderTotal}`,
-      );
+      console.error(`Total mismatch: calculated ${totals.calculatedTotal}, order ${orderTotal}`);
       throw new Error('El total calculado no coincide con el pedido');
     }
 

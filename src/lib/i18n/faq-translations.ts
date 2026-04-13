@@ -4,10 +4,7 @@
  * Inglés (CSV/BD) → Español (UI)
  */
 
-export const faqTranslations: Record<
-  string,
-  { question: string; answer: string }
-> = {
+export const faqTranslations: Record<string, { question: string; answer: string }> = {
   // FAQ-0001 - Materials
   'FAQ-0001': {
     question: '¿Qué materiales utilizáis para las impresiones 3D?',
@@ -60,8 +57,7 @@ export const faqTranslations: Record<
   // FAQ-0008 - Shipping
   'FAQ-0008': {
     question: '¿Hacéis envíos internacionales?',
-    answer:
-      'Actualmente solo enviamos dentro de España. El envío internacional estará disponible próximamente.',
+    answer: 'Actualmente solo enviamos dentro de España. El envío internacional estará disponible próximamente.',
   },
 };
 

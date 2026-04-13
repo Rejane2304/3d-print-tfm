@@ -2,7 +2,8 @@
  * API de Perfil de Usuario
  * Gestión de datos personales del usuario autenticado
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
@@ -22,10 +23,7 @@ const profileSchema = z.object({
 /**
  * Verifica si la nueva contraseña coincide con alguna de las últimas 5 contraseñas
  */
-async function checkPasswordHistory(
-  userId: string,
-  newPassword: string,
-): Promise<boolean> {
+async function checkPasswordHistory(userId: string, newPassword: string): Promise<boolean> {
   const passwordHistory = await prisma.passwordHistory.findMany({
     where: { userId },
     orderBy: { createdAt: 'desc' },
@@ -45,10 +43,7 @@ async function checkPasswordHistory(
 /**
  * Guarda el hash de la contraseña actual en el historial
  */
-async function savePasswordToHistory(
-  userId: string,
-  passwordHash: string,
-): Promise<void> {
+async function savePasswordToHistory(userId: string, passwordHash: string): Promise<void> {
   await prisma.passwordHistory.create({
     data: {
       id: crypto.randomUUID(),
@@ -63,10 +58,7 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: translateErrorMessage('No autenticado') },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: translateErrorMessage('No autenticado') }, { status: 401 });
     }
 
     const usuario = await prisma.user.findUnique({
@@ -83,19 +75,13 @@ export async function GET() {
     });
 
     if (!usuario) {
-      return NextResponse.json(
-        { success: false, error: translateErrorMessage('Usuario not found') },
-        { status: 404 },
-      );
+      return NextResponse.json({ success: false, error: translateErrorMessage('Usuario not found') }, { status: 404 });
     }
 
     return NextResponse.json({ success: true, usuario });
   } catch (error) {
     console.error('Error obteniendo perfil:', error);
-    return NextResponse.json(
-      { success: false, error: translateErrorMessage('Internal error') },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: translateErrorMessage('Internal error') }, { status: 500 });
   }
 }
 
@@ -104,10 +90,7 @@ export async function PATCH(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: translateErrorMessage('No autenticado') },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: translateErrorMessage('No autenticado') }, { status: 401 });
     }
 
     const body = await req.json();
@@ -139,29 +122,19 @@ export async function PATCH(req: NextRequest) {
       });
 
       // Verificar contraseña actual
-      const passwordValido = await bcrypt.compare(
-        passwordData.currentPassword,
-        usuario.password,
-      );
+      const passwordValido = await bcrypt.compare(passwordData.currentPassword, usuario.password);
 
       if (!passwordValido) {
-        return NextResponse.json(
-          { success: false, error: 'Contraseña actual incorrecta' },
-          { status: 400 },
-        );
+        return NextResponse.json({ success: false, error: 'Contraseña actual incorrecta' }, { status: 400 });
       }
 
       // Verificar que la nueva contraseña no coincida con las últimas 5
-      const isReused = await checkPasswordHistory(
-        usuario.id,
-        passwordData.newPassword,
-      );
+      const isReused = await checkPasswordHistory(usuario.id, passwordData.newPassword);
       if (isReused) {
         return NextResponse.json(
           {
             success: false,
-            error:
-              'La nueva contraseña no puede coincidir con ninguna de tus últimas 5 contraseñas',
+            error: 'La nueva contraseña no puede coincidir con ninguna de tus últimas 5 contraseñas',
           },
           { status: 400 },
         );
@@ -189,10 +162,7 @@ export async function PATCH(req: NextRequest) {
     });
 
     if (!usuario) {
-      return NextResponse.json(
-        { success: false, error: translateErrorMessage('Usuario not found') },
-        { status: 404 },
-      );
+      return NextResponse.json({ success: false, error: translateErrorMessage('Usuario not found') }, { status: 404 });
     }
 
     const profileData = profileSchema.parse(body);
@@ -216,15 +186,9 @@ export async function PATCH(req: NextRequest) {
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { success: false, error: error.errors[0].message },
-        { status: 400 },
-      );
+      return NextResponse.json({ success: false, error: error.errors[0].message }, { status: 400 });
     }
     console.error('Error actualizando perfil:', error);
-    return NextResponse.json(
-      { success: false, error: translateErrorMessage('Internal error') },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: translateErrorMessage('Internal error') }, { status: 500 });
   }
 }

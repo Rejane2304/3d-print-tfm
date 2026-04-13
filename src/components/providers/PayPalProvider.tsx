@@ -5,12 +5,11 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 // Dynamically import PayPal components to avoid SSR issues
 const DynamicPayPalScriptProvider = dynamic(
-  () =>
-    import('@paypal/react-paypal-js').then((mod) => mod.PayPalScriptProvider),
+  () => import('@paypal/react-paypal-js').then(mod => mod.PayPalScriptProvider),
   { ssr: false },
 );
 

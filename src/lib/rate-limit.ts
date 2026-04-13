@@ -4,7 +4,8 @@
  * All messages in Spanish as per project conventions
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 
 // Rate limit types with their configurations
 export type RateLimitType = 'login' | 'register' | 'passwordChange';
@@ -37,10 +38,7 @@ const RATE_LIMITS: Record<RateLimitType, RateLimitConfig> = {
 
 // In-memory store for rate limiting
 // Structure: { [ip]: { [type]: RateLimitEntry } }
-const rateLimitStore: Record<
-  string,
-  Record<RateLimitType, RateLimitEntry>
-> = {};
+const rateLimitStore: Record<string, Record<RateLimitType, RateLimitEntry>> = {};
 
 /**
  * Get client IP address from request
@@ -51,7 +49,7 @@ function getClientIp(request: NextRequest): string {
   const forwardedFor = request.headers.get('x-forwarded-for');
   if (forwardedFor) {
     // Get the first IP in the chain (original client)
-    const ips = forwardedFor.split(',').map((ip) => ip.trim());
+    const ips = forwardedFor.split(',').map(ip => ip.trim());
     return ips[0] || 'unknown';
   }
 
@@ -154,15 +152,9 @@ function getTimeRemaining(resetTime: number): string {
  * Returns a Response if rate limited, null if allowed
  * Disabled in test environment to allow automated testing
  */
-export function checkRateLimit(
-  request: NextRequest,
-  type: RateLimitType,
-): NextResponse | null {
+export function checkRateLimit(request: NextRequest, type: RateLimitType): NextResponse | null {
   // Skip rate limiting in test environment
-  if (
-    process.env.NODE_ENV === 'test' ||
-    process.env.VITEST_ENV === 'integration'
-  ) {
+  if (process.env.NODE_ENV === 'test' || process.env.VITEST_ENV === 'integration') {
     return null;
   }
 
@@ -189,9 +181,7 @@ export function checkRateLimit(
           'X-RateLimit-Limit': String(RATE_LIMITS[type].maxAttempts),
           'X-RateLimit-Remaining': '0',
           'X-RateLimit-Reset': String(Math.ceil(result.resetTime / 1000)),
-          'Retry-After': String(
-            Math.ceil((result.resetTime - Date.now()) / 1000),
-          ),
+          'Retry-After': String(Math.ceil((result.resetTime - Date.now()) / 1000)),
         },
       },
     );
@@ -217,10 +207,7 @@ export function resetRateLimit(ip: string, type: RateLimitType): void {
  * Get current rate limit status for an IP
  * Useful for displaying remaining attempts to the user
  */
-export function getRateLimitStatus(
-  ip: string,
-  type: RateLimitType,
-): { remaining: number; resetTime: number | null } {
+export function getRateLimitStatus(ip: string, type: RateLimitType): { remaining: number; resetTime: number | null } {
   const config = RATE_LIMITS[type];
   const entry = rateLimitStore[ip]?.[type];
 

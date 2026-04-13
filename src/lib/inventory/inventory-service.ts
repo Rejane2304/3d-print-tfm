@@ -18,7 +18,7 @@ export interface MovementData {
  * Crea un movimiento de inventario con validación de stock
  */
 export async function createInventoryMovement(data: MovementData) {
-  return await prisma.$transaction(async(tx) => {
+  return await prisma.$transaction(async tx => {
     // Obtener stock actual del producto
     const product = await tx.product.findUnique({
       where: { id: data.productId },
@@ -127,12 +127,7 @@ export async function recordStockReturn(
 /**
  * Ajuste manual de stock (admin)
  */
-export async function recordStockAdjustment(
-  productId: string,
-  newStock: number,
-  reason: string,
-  userId: string,
-) {
+export async function recordStockAdjustment(productId: string, newStock: number, reason: string, userId: string) {
   const product = await prisma.product.findUnique({
     where: { id: productId },
     select: { stock: true },
@@ -156,10 +151,7 @@ export async function recordStockAdjustment(
 /**
  * Obtiene el historial de movimientos de un producto
  */
-export async function getProductMovementHistory(
-  productId: string,
-  limit: number = 50,
-) {
+export async function getProductMovementHistory(productId: string, limit: number = 50) {
   return prisma.inventoryMovement.findMany({
     where: { productId },
     orderBy: { createdAt: 'desc' },
@@ -235,7 +227,7 @@ export async function reconcileInventory(): Promise<
     calculatedStock: number;
     discrepancy: number;
   }>
-  > {
+> {
   const products = await prisma.product.findMany({
     select: { id: true, name: true, stock: true },
   });

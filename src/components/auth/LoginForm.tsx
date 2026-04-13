@@ -6,13 +6,7 @@
 
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
-import {
-  ArrowRight,
-  Eye,
-  EyeOff,
-  Lock,
-  Mail,
-} from 'lucide-react';
+import { ArrowRight, Eye, EyeOff, Lock, Mail } from 'lucide-react';
 
 interface LoginFormProps {
   email: string;
@@ -61,10 +55,7 @@ export default function LoginForm({
     <form onSubmit={handleSubmit} data-testid="login-form" className="space-y-5">
       {/* Email Field */}
       <div>
-        <label
-          htmlFor="login-email"
-          className="block text-sm font-medium text-gray-700 mb-2"
-        >
+        <label htmlFor="login-email" className="block text-sm font-medium text-gray-700 mb-2">
           Correo electrónico
         </label>
         <div className="relative">
@@ -79,17 +70,14 @@ export default function LoginForm({
             className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
             placeholder="tu@email.com"
             value={email}
-            onChange={(e) => onEmailChange(e.target.value)}
+            onChange={e => onEmailChange(e.target.value)}
           />
         </div>
       </div>
 
       {/* Password Field */}
       <div>
-        <label
-          htmlFor="login-password"
-          className="block text-sm font-medium text-gray-700 mb-2"
-        >
+        <label htmlFor="login-password" className="block text-sm font-medium text-gray-700 mb-2">
           Contraseña
         </label>
         <div className="relative">
@@ -104,18 +92,14 @@ export default function LoginForm({
             className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
             placeholder="••••••••"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={e => setPassword(e.target.value)}
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
             className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
           >
-            {showPassword ? (
-              <EyeOff className="h-5 w-5" />
-            ) : (
-              <Eye className="h-5 w-5" />
-            )}
+            {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
           </button>
         </div>
       </div>
@@ -135,14 +119,7 @@ export default function LoginForm({
               fill="none"
               viewBox="0 0 24 24"
             >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path
                 className="opacity-75"
                 fill="currentColor"

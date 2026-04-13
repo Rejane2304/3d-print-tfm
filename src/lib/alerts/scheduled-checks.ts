@@ -3,7 +3,6 @@
  * Se ejecutan al cargar el panel de alertas, NO cada 15 min
  */
 
-import { AlertType } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 
 // Helper para generar UUID compatible
@@ -12,9 +11,9 @@ function generateUUID(): string {
     return crypto.randomUUID();
   }
   // Fallback manual
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replaceAll(/[xy]/g, function(c) {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replaceAll(/[xy]/g, function (c) {
     const r = Math.trunc(Math.random() * 16);
-    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 }
@@ -182,10 +181,5 @@ export async function checkUnpaidOrders() {
 
 // Ejecutar todas las verificaciones
 export async function runAllScheduledChecks() {
-  await Promise.all([
-    checkExpiringCoupons(),
-    checkLongPreparationOrders(),
-    checkDelayedOrders(),
-    checkUnpaidOrders(),
-  ]);
+  await Promise.all([checkExpiringCoupons(), checkLongPreparationOrders(), checkDelayedOrders(), checkUnpaidOrders()]);
 }

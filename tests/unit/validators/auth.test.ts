@@ -3,11 +3,7 @@
  * Tests for actual Zod schemas from @/lib/validators
  */
 import { describe, it, expect } from 'vitest';
-import {
-  loginSchema,
-  registerSchema,
-  changePasswordSchema,
-} from '@/lib/validators';
+import { loginSchema, registerSchema, changePasswordSchema } from '@/lib/validators';
 
 describe('Authentication Validators', () => {
   describe('loginSchema', () => {
@@ -238,9 +234,7 @@ describe('Authentication Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe(
-            'La contraseña debe contener al menos una letra mayúscula'
-          );
+          expect(result.error.errors[0].message).toBe('La contraseña debe contener al menos una letra mayúscula');
         }
       });
 
@@ -252,9 +246,7 @@ describe('Authentication Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe(
-            'La contraseña debe contener al menos una letra minúscula'
-          );
+          expect(result.error.errors[0].message).toBe('La contraseña debe contener al menos una letra minúscula');
         }
       });
 
@@ -266,9 +258,7 @@ describe('Authentication Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe(
-            'La contraseña debe contener al menos un número'
-          );
+          expect(result.error.errors[0].message).toBe('La contraseña debe contener al menos un número');
         }
       });
 
@@ -281,7 +271,7 @@ describe('Authentication Validators', () => {
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.error.errors[0].message).toBe(
-            'La contraseña debe contener al menos un carácter especial (!@#$%^&*)'
+            'La contraseña debe contener al menos un carácter especial (!@#$%^&*)',
           );
         }
       });
@@ -294,9 +284,7 @@ describe('Authentication Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe(
-            'Esta contraseña es muy común. Por favor elige una más segura.'
-          );
+          expect(result.error.errors[0].message).toBe('Esta contraseña es muy común. Por favor elige una más segura.');
         }
       });
 
@@ -317,9 +305,7 @@ describe('Authentication Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          const confirmError = result.error.errors.find(
-            (e) => e.path[0] === 'confirmPassword'
-          );
+          const confirmError = result.error.errors.find(e => e.path[0] === 'confirmPassword');
           expect(confirmError?.message).toBe('Las contraseñas no coinciden');
         }
       });
@@ -331,9 +317,7 @@ describe('Authentication Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          const confirmError = result.error.errors.find(
-            (e) => e.path[0] === 'confirmPassword'
-          );
+          const confirmError = result.error.errors.find(e => e.path[0] === 'confirmPassword');
           expect(confirmError?.message).toBe('Las contraseñas no coinciden');
         }
       });
@@ -371,9 +355,7 @@ describe('Authentication Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe(
-            'El teléfono debe estar en formato español: +34 600 123 456'
-          );
+          expect(result.error.errors[0].message).toBe('El teléfono debe estar en formato español: +34 600 123 456');
         }
       });
 
@@ -448,9 +430,7 @@ describe('Authentication Validators', () => {
       });
       expect(result.success).toBe(false);
       if (!result.success) {
-        const confirmError = result.error.errors.find(
-          (e) => e.path[0] === 'confirmPassword'
-        );
+        const confirmError = result.error.errors.find(e => e.path[0] === 'confirmPassword');
         expect(confirmError?.message).toBe('Las contraseñas no coinciden');
       }
     });
@@ -475,9 +455,7 @@ describe('Authentication Validators', () => {
       });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.errors[0].message).toBe(
-          'Esta contraseña es muy común. Por favor elige una más segura.'
-        );
+        expect(result.error.errors[0].message).toBe('Esta contraseña es muy común. Por favor elige una más segura.');
       }
     });
   });

@@ -4,7 +4,8 @@
  *
  * Devuelve solo cupones válidos y activos
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { translateCouponCode } from '@/lib/i18n';
 
@@ -19,16 +20,13 @@ export async function GET(_req: NextRequest) {
         isActive: true,
         validFrom: { lte: now },
         validUntil: { gte: now },
-        OR: [
-          { maxUses: null },
-          { usedCount: { lt: prisma.coupon.fields.maxUses } },
-        ],
+        OR: [{ maxUses: null }, { usedCount: { lt: prisma.coupon.fields.maxUses } }],
       },
       orderBy: { createdAt: 'desc' },
     });
 
     // Formatear respuesta
-    const formattedCoupons = coupons.map((coupon) => {
+    const formattedCoupons = coupons.map(coupon => {
       let description = '';
       if (coupon.type === 'PERCENTAGE') {
         description = `${coupon.value}% de descuento`;
@@ -49,18 +47,13 @@ export async function GET(_req: NextRequest) {
         description,
         type: coupon.type,
         value: Number(coupon.value),
-        minOrderAmount: coupon.minOrderAmount
-          ? Number(coupon.minOrderAmount)
-          : null,
+        minOrderAmount: coupon.minOrderAmount ? Number(coupon.minOrderAmount) : null,
       };
     });
 
     return NextResponse.json({ success: true, coupons: formattedCoupons });
   } catch (error) {
     console.error('Error fetching coupons:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error interno' },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: 'Error interno' }, { status: 500 });
   }
 }

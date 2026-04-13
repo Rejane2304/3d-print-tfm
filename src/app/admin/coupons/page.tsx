@@ -8,19 +8,9 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import {
-  Activity,
-  AlertCircle,
-  Edit,
-  Euro,
-  Loader2,
-  Percent,
-  Plus,
-  Ticket,
-  Trash2,
-  Truck,
-} from 'lucide-react';
-import { BulkAction, Column, DataTable } from '@/components/ui/DataTable';
+import { Activity, AlertCircle, Edit, Euro, Loader2, Percent, Plus, Ticket, Trash2, Truck } from 'lucide-react';
+import type { BulkAction, Column } from '@/components/ui/DataTable';
+import { DataTable } from '@/components/ui/DataTable';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { BulkDeleteModal } from '@/components/ui/BulkDeleteModal';
 
@@ -75,7 +65,7 @@ export default function AdminCouponsPage() {
   }, [status, session, router]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const loadCoupons = async() => {
+  const loadCoupons = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -100,7 +90,7 @@ export default function AdminCouponsPage() {
     setModalOpen(true);
   };
 
-  const confirmDelete = async() => {
+  const confirmDelete = async () => {
     if (!couponToDelete) {
       return;
     }
@@ -113,7 +103,7 @@ export default function AdminCouponsPage() {
       const data = await response.json();
 
       if (response.ok) {
-        setCoupons(coupons.filter((c) => c.id !== couponToDelete.id));
+        setCoupons(coupons.filter(c => c.id !== couponToDelete.id));
       } else {
         throw new Error(data.error || 'Error eliminando cupón');
       }
@@ -130,7 +120,7 @@ export default function AdminCouponsPage() {
     setIsBulkDeleteModalOpen(true);
   };
 
-  const confirmBulkDelete = async() => {
+  const confirmBulkDelete = async () => {
     if (selectedIdsForBulkDelete.length === 0) {
       return;
     }
@@ -140,7 +130,7 @@ export default function AdminCouponsPage() {
       let hasError = false;
 
       await Promise.all(
-        selectedIdsForBulkDelete.map(async(id) => {
+        selectedIdsForBulkDelete.map(async id => {
           const response = await fetch(`/api/admin/coupons/${id}`, {
             method: 'DELETE',
           });
@@ -154,7 +144,7 @@ export default function AdminCouponsPage() {
         setError('Algunos cupones no pudieron ser eliminados');
       }
 
-      setCoupons(coupons.filter((c) => !selectedIdsForBulkDelete.includes(c.id)));
+      setCoupons(coupons.filter(c => !selectedIdsForBulkDelete.includes(c.id)));
     } catch {
       setError('Error eliminando cupones');
     } finally {
@@ -165,11 +155,9 @@ export default function AdminCouponsPage() {
   };
 
   // Estadísticas
-  const activeCoupons = coupons.filter((c) => c.estado === 'Activo').length;
+  const activeCoupons = coupons.filter(c => c.estado === 'Activo').length;
   const totalUses = coupons.reduce((sum, c) => sum + c.usosActuales, 0);
-  const percentageCoupons = coupons.filter(
-    (c) => c.tipoRaw === 'PERCENTAGE',
-  ).length;
+  const percentageCoupons = coupons.filter(c => c.tipoRaw === 'PERCENTAGE').length;
 
   const getTypeIcon = (tipoRaw: string) => {
     switch (tipoRaw) {
@@ -210,9 +198,7 @@ export default function AdminCouponsPage() {
       render: (_, coupon) => (
         <div className="flex items-center gap-2">
           {getTypeIcon(coupon.tipoRaw)}
-          <span className="font-mono font-medium text-gray-900 text-sm">
-            {coupon.codigo}
-          </span>
+          <span className="font-mono font-medium text-gray-900 text-sm">{coupon.codigo}</span>
         </div>
       ),
     },
@@ -224,9 +210,7 @@ export default function AdminCouponsPage() {
       render: (_, coupon) => (
         <div className="flex flex-col">
           <span className="text-xs text-gray-500">{coupon.tipo}</span>
-          <span className="font-medium text-indigo-600 text-sm">
-            {coupon.valor}
-          </span>
+          <span className="font-medium text-indigo-600 text-sm">{coupon.valor}</span>
         </div>
       ),
     },
@@ -235,11 +219,9 @@ export default function AdminCouponsPage() {
       header: 'Mín.',
       sortable: true,
       className: 'hidden sm:table-cell',
-      render: (value) =>
+      render: value =>
         value ? (
-          <span className="text-sm text-gray-600">
-            {Number(value).toFixed(0)}€
-          </span>
+          <span className="text-sm text-gray-600">{Number(value).toFixed(0)}€</span>
         ) : (
           <span className="text-xs text-gray-400">-</span>
         ),
@@ -253,14 +235,10 @@ export default function AdminCouponsPage() {
         <div className="flex flex-col">
           <span className="text-sm text-gray-900">
             {coupon.usosActuales}
-            {coupon.usosMaximos !== null && (
-              <span className="text-gray-400">/{coupon.usosMaximos}</span>
-            )}
+            {coupon.usosMaximos !== null && <span className="text-gray-400">/{coupon.usosMaximos}</span>}
           </span>
           {coupon.usosRestantes !== null && coupon.usosRestantes > 0 && (
-            <span className="text-[10px] text-gray-500">
-              {coupon.usosRestantes} rest.
-            </span>
+            <span className="text-[10px] text-gray-500">{coupon.usosRestantes} rest.</span>
           )}
         </div>
       ),
@@ -270,15 +248,13 @@ export default function AdminCouponsPage() {
       header: 'Expira',
       sortable: true,
       className: 'hidden lg:table-cell',
-      render: (value) => {
+      render: value => {
         const date = new Date(value as string);
         const now = new Date();
         const isExpired = date < now;
         return (
           <div className="flex items-center gap-1">
-            <span
-              className={`text-xs ${isExpired ? 'text-red-600' : 'text-gray-600'}`}
-            >
+            <span className={`text-xs ${isExpired ? 'text-red-600' : 'text-gray-600'}`}>
               {date.toLocaleDateString('es-ES', {
                 day: '2-digit',
                 month: '2-digit',
@@ -293,7 +269,7 @@ export default function AdminCouponsPage() {
       header: 'Estado',
       sortable: true,
       className: 'hidden xl:table-cell',
-      render: (value) => (
+      render: value => (
         <span
           className={`px-2 py-0.5 inline-flex text-[10px] leading-4 font-semibold rounded-full ${getStatusColor(value as string)}`}
         >
@@ -315,7 +291,7 @@ export default function AdminCouponsPage() {
             <Edit className="h-3.5 w-3.5" />
           </Link>
           <button
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               handleDelete(coupon);
             }}
@@ -358,15 +334,10 @@ export default function AdminCouponsPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Ticket className="h-8 w-8 text-indigo-600" />
-              <h1 className="text-2xl font-bold text-gray-900">
-                Gestión de Cupones
-              </h1>
+              <h1 className="text-2xl font-bold text-gray-900">Gestión de Cupones</h1>
             </div>
             <div className="flex items-center gap-4">
-              <Link
-                href="/admin/dashboard"
-                className="text-indigo-600 hover:text-indigo-800 font-medium"
-              >
+              <Link href="/admin/dashboard" className="text-indigo-600 hover:text-indigo-800 font-medium">
                 ← Volver al Panel
               </Link>
               <Link
@@ -386,10 +357,7 @@ export default function AdminCouponsPage() {
         <nav className="flex mb-6" aria-label="Breadcrumb">
           <ol className="flex items-center space-x-2">
             <li>
-              <Link
-                href="/admin/dashboard"
-                className="text-gray-500 hover:text-gray-700"
-              >
+              <Link href="/admin/dashboard" className="text-gray-500 hover:text-gray-700">
                 Panel
               </Link>
             </li>
@@ -417,9 +385,7 @@ export default function AdminCouponsPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-500">Total Cupones</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {coupons.length}
-                </p>
+                <p className="text-2xl font-bold text-gray-900">{coupons.length}</p>
               </div>
             </div>
           </div>
@@ -430,9 +396,7 @@ export default function AdminCouponsPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-500">Activos</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {activeCoupons}
-                </p>
+                <p className="text-2xl font-bold text-green-600">{activeCoupons}</p>
               </div>
             </div>
           </div>
@@ -443,9 +407,7 @@ export default function AdminCouponsPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-500">De Porcentaje</p>
-                <p className="text-2xl font-bold text-blue-600">
-                  {percentageCoupons}
-                </p>
+                <p className="text-2xl font-bold text-blue-600">{percentageCoupons}</p>
               </div>
             </div>
           </div>
@@ -456,9 +418,7 @@ export default function AdminCouponsPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-500">Usos Totales</p>
-                <p className="text-2xl font-bold text-purple-600">
-                  {totalUses}
-                </p>
+                <p className="text-2xl font-bold text-purple-600">{totalUses}</p>
               </div>
             </div>
           </div>
@@ -482,7 +442,7 @@ export default function AdminCouponsPage() {
           loading={loading}
           emptyMessage="No se encontraron cupones"
           noResultsMessage="Ningún cupón coincide con tu búsqueda"
-          onRowClick={(coupon) => router.push(`/admin/coupons/${coupon.id}`)}
+          onRowClick={coupon => router.push(`/admin/coupons/${coupon.id}`)}
         />
       </div>
 

@@ -3,6 +3,7 @@
 ## E-commerce 3D Print - Base de Datos PostgreSQL
 
 ### Resumen de Entidades
+
 - **19 entidades principales**
 - **Relaciones definidas por claves foráneas**
 - **Índices optimizados para consultas frecuentes**
@@ -22,19 +23,19 @@ erDiagram
     USER ||--o{ ALERT : "resuelve"
     USER ||--o{ CART : "posee"
     USER ||--o{ ORDER_MESSAGE : "envía"
-    
+
     CATEGORY ||--o{ PRODUCT : "contiene"
-    
+
     PRODUCT ||--o{ PRODUCT_IMAGE : "tiene"
     PRODUCT ||--o{ CART_ITEM : "en"
     PRODUCT ||--o{ ORDER_ITEM : "en"
     PRODUCT ||--o{ INVENTORY_MOVEMENT : "afecta"
     PRODUCT ||--o{ ALERT : "genera"
     PRODUCT ||--o{ REVIEW : "recibe"
-    
+
     CART ||--o{ CART_ITEM : "contiene"
     CART ||--|| ADDRESS : "envío_a"
-    
+
     ORDER ||--o{ ORDER_ITEM : "contiene"
     ORDER ||--o{ ORDER_MESSAGE : "tiene"
     ORDER ||--|| INVOICE : "genera"
@@ -42,20 +43,20 @@ erDiagram
     ORDER ||--|| PAYMENT : "tiene"
     ORDER ||--o{ ALERT : "genera"
     ORDER ||--|| ADDRESS : "envío_a"
-    
+
     ADDRESS ||--o{ ORDER : "destino"
     ADDRESS ||--o{ CART : "guarda"
-    
+
     SHIPPING_CONFIG ||--o{ ORDER : "configura"
-    
+
     COUPON ||--o{ ORDER : "aplica"
-    
+
     FAQ }o--o{ FAQ : "categoría"
-    
+
     SITE_CONFIG ||--o{ SITE_CONFIG : "singleton"
-    
+
     WEBHOOK_EVENT ||--o{ WEBHOOK_EVENT : "cola"
-    
+
     EVENT_STORE ||--o{ EVENT_STORE : "stream"
 
     USER {
@@ -277,42 +278,43 @@ erDiagram
 
 ## Resumen de Relaciones
 
-| Entidad Padre | Entidad Hija | Tipo | Descripción |
-|--------------|--------------|------|-------------|
-| User | Address | 1:N | Un usuario puede tener múltiples direcciones |
-| User | Order | 1:N | Un usuario puede realizar múltiples pedidos |
-| User | Cart | 1:1 | Un usuario tiene un carrito único |
-| User | Review | 1:N | Un usuario puede escribir múltiples reseñas |
-| Category | Product | 1:N | Una categoría contiene múltiples productos |
-| Product | ProductImage | 1:N | Un producto tiene múltiples imágenes |
-| Product | Review | 1:N | Un producto recibe múltiples reseñas |
-| Cart | CartItem | 1:N | Un carrito contiene múltiples items |
-| Order | OrderItem | 1:N | Un pedido contiene múltiples items |
-| Order | Payment | 1:1 | Un pedido tiene un único pago |
-| Order | Invoice | 1:1 | Un pedido genera una única factura |
-| Order | OrderMessage | 1:N | Un pedido tiene múltiples mensajes |
-| Product | InventoryMovement | 1:N | Un producto tiene múltiples movimientos de inventario |
-| User | InventoryMovement | 1:N | Un usuario registra múltiples movimientos |
+| Entidad Padre | Entidad Hija      | Tipo | Descripción                                           |
+| ------------- | ----------------- | ---- | ----------------------------------------------------- |
+| User          | Address           | 1:N  | Un usuario puede tener múltiples direcciones          |
+| User          | Order             | 1:N  | Un usuario puede realizar múltiples pedidos           |
+| User          | Cart              | 1:1  | Un usuario tiene un carrito único                     |
+| User          | Review            | 1:N  | Un usuario puede escribir múltiples reseñas           |
+| Category      | Product           | 1:N  | Una categoría contiene múltiples productos            |
+| Product       | ProductImage      | 1:N  | Un producto tiene múltiples imágenes                  |
+| Product       | Review            | 1:N  | Un producto recibe múltiples reseñas                  |
+| Cart          | CartItem          | 1:N  | Un carrito contiene múltiples items                   |
+| Order         | OrderItem         | 1:N  | Un pedido contiene múltiples items                    |
+| Order         | Payment           | 1:1  | Un pedido tiene un único pago                         |
+| Order         | Invoice           | 1:1  | Un pedido genera una única factura                    |
+| Order         | OrderMessage      | 1:N  | Un pedido tiene múltiples mensajes                    |
+| Product       | InventoryMovement | 1:N  | Un producto tiene múltiples movimientos de inventario |
+| User          | InventoryMovement | 1:N  | Un usuario registra múltiples movimientos             |
 
 ---
 
 ## Índices Principales
 
-| Tabla | Columna(s) | Tipo | Propósito |
-|-------|-----------|------|-----------|
-| users | email | UNIQUE | Búsqueda por email |
-| users | role | INDEX | Filtrado por rol |
-| products | slug | UNIQUE | Búsqueda SEO friendly |
-| products | categoryId | INDEX | Filtrado por categoría |
-| orders | userId | INDEX | Pedidos por usuario |
-| orders | status | INDEX | Filtrado por estado |
-| orders | orderNumber | UNIQUE | Búsqueda por número |
-| payments | orderId | UNIQUE | Un pago por pedido |
-| inventory_movements | productId | INDEX | Movimientos por producto |
+| Tabla               | Columna(s)  | Tipo   | Propósito                |
+| ------------------- | ----------- | ------ | ------------------------ |
+| users               | email       | UNIQUE | Búsqueda por email       |
+| users               | role        | INDEX  | Filtrado por rol         |
+| products            | slug        | UNIQUE | Búsqueda SEO friendly    |
+| products            | categoryId  | INDEX  | Filtrado por categoría   |
+| orders              | userId      | INDEX  | Pedidos por usuario      |
+| orders              | status      | INDEX  | Filtrado por estado      |
+| orders              | orderNumber | UNIQUE | Búsqueda por número      |
+| payments            | orderId     | UNIQUE | Un pago por pedido       |
+| inventory_movements | productId   | INDEX  | Movimientos por producto |
 
 ---
 
 ## Generado desde Prisma Schema
+
 - **Fecha**: Abril 2025
 - **Herramienta**: Prisma ORM
 - **Base de datos**: PostgreSQL 15+

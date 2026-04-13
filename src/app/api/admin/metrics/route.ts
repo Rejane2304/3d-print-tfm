@@ -16,10 +16,7 @@ export async function GET() {
     // Verificar autenticación
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
     }
 
     // Verificar rol admin
@@ -28,10 +25,7 @@ export async function GET() {
     });
 
     if (usuario?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 403 },
-      );
+      return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 403 });
     }
 
     // Calcular métricas - EXCLUIR pedidos CANCELLED
@@ -78,9 +72,6 @@ export async function GET() {
     });
   } catch (error) {
     console.error('Error obteniendo métricas:', error);
-    return NextResponse.json(
-      { success: false, error: 'Internal error' },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: 'Internal error' }, { status: 500 });
   }
 }

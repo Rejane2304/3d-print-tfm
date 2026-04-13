@@ -1,6 +1,6 @@
 /**
  * Integration Test Helpers
- * 
+ *
  * Shared utilities for integration tests using real database
  */
 
@@ -126,7 +126,10 @@ export async function createTestUser(options: {
  */
 export async function createTestCategory(name?: string): Promise<{ id: string; name: string; slug: string }> {
   const categoryName = name || `Test Category ${Date.now()}`;
-  const slug = categoryName.toLowerCase().replaceAll(' ', '-').replaceAll(/[^a-z0-9-]/g, '');
+  const slug = categoryName
+    .toLowerCase()
+    .replaceAll(' ', '-')
+    .replaceAll(/[^a-z0-9-]/g, '');
 
   const category = await prisma.category.create({
     data: {
@@ -207,7 +210,7 @@ export async function addCartItem(
   cartId: string,
   productId: string,
   quantity: number,
-  unitPrice: number
+  unitPrice: number,
 ): Promise<TestCartItem> {
   const item = await prisma.cartItem.create({
     data: {
@@ -229,10 +232,7 @@ export async function addCartItem(
   });
 
   if (cart) {
-    const newSubtotal = cart.items.reduce(
-      (sum, i) => sum + Number(i.unitPrice) * i.quantity,
-      0
-    );
+    const newSubtotal = cart.items.reduce((sum, i) => sum + Number(i.unitPrice) * i.quantity, 0);
     await prisma.cart.update({
       where: { id: cartId },
       data: { subtotal: newSubtotal },
@@ -288,11 +288,19 @@ export async function createTestAddress(userId: string, options?: Partial<TestAd
 /**
  * Create a test order
  */
-export async function createTestOrder(userId: string, options?: {
-  status?: OrderStatus;
-  total?: number;
-  shippingAddressId?: string;
-}): Promise<{ id: string; orderNumber: string; status: OrderStatus; total: number }> {
+export async function createTestOrder(
+  userId: string,
+  options?: {
+    status?: OrderStatus;
+    total?: number;
+    shippingAddressId?: string;
+  },
+): Promise<{
+  id: string;
+  orderNumber: string;
+  status: OrderStatus;
+  total: number;
+}> {
   const year = new Date().getFullYear();
   const count = await prisma.order.count();
   const orderNumber = `P-${year}${String(count + 1).padStart(6, '0')}`;
@@ -405,12 +413,12 @@ export function createAuthHeaders(userId?: string): Record<string, string> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
-  
+
   if (userId) {
     // For integration tests, we mock the session in the request
     headers['x-test-user-id'] = userId;
   }
-  
+
   return headers;
 }
 
@@ -429,7 +437,10 @@ const entityConfigs: EntityConfig[] = [
   { name: 'carts', deleteFn: prisma.cart.delete.bind(prisma.cart) },
   { name: 'addresses', deleteFn: prisma.address.delete.bind(prisma.address) },
   { name: 'products', deleteFn: prisma.product.delete.bind(prisma.product) },
-  { name: 'categories', deleteFn: prisma.category.delete.bind(prisma.category) },
+  {
+    name: 'categories',
+    deleteFn: prisma.category.delete.bind(prisma.category),
+  },
   { name: 'users', deleteFn: prisma.user.delete.bind(prisma.user) },
 ];
 

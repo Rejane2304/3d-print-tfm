@@ -66,7 +66,7 @@ export default function RegisterForm({
   const [isSuccess, setIsSuccess] = useState(false);
 
   const updateField = (field: keyof RegisterData, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData(prev => ({ ...prev, [field]: value }));
     if (field === 'email') {
       onEmailChange(value);
     }
@@ -81,12 +81,7 @@ export default function RegisterForm({
       return 'La contraseña no cumple con todos los requisitos de seguridad';
     }
 
-    if (
-      !formData.direccion ||
-      !formData.codigoPostal ||
-      !formData.ciudad ||
-      !formData.provincia
-    ) {
+    if (!formData.direccion || !formData.codigoPostal || !formData.ciudad || !formData.provincia) {
       return 'Por favor, completa todos los campos de dirección obligatorios';
     }
 
@@ -152,9 +147,7 @@ export default function RegisterForm({
     return (
       <div className="text-center py-8">
         <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-4" />
-        <h3 className="text-xl font-bold text-gray-900 mb-2">
-          ¡Registro exitoso!
-        </h3>
+        <h3 className="text-xl font-bold text-gray-900 mb-2">¡Registro exitoso!</h3>
         <p className="text-gray-600">Redirigiendo al login...</p>
       </div>
     );
@@ -171,10 +164,7 @@ export default function RegisterForm({
 
         {/* Nombre */}
         <div className="mb-4">
-          <label
-            htmlFor="register-nombre"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
+          <label htmlFor="register-nombre" className="block text-sm font-medium text-gray-700 mb-2">
             Nombre completo *
           </label>
           <div className="relative">
@@ -190,17 +180,14 @@ export default function RegisterForm({
               className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
               placeholder="Tu nombre completo"
               value={formData.nombre}
-              onChange={(e) => updateField('nombre', e.target.value)}
+              onChange={e => updateField('nombre', e.target.value)}
             />
           </div>
         </div>
 
         {/* Email */}
         <div className="mb-4">
-          <label
-            htmlFor="register-email"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
+          <label htmlFor="register-email" className="block text-sm font-medium text-gray-700 mb-2">
             Correo electrónico *
           </label>
           <div className="relative">
@@ -216,19 +203,15 @@ export default function RegisterForm({
               className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
               placeholder="tu@email.com"
               value={formData.email}
-              onChange={(e) => updateField('email', e.target.value)}
+              onChange={e => updateField('email', e.target.value)}
             />
           </div>
         </div>
 
         {/* Teléfono */}
         <div className="mb-4">
-          <label
-            htmlFor="register-telefono"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            Teléfono{' '}
-            <span className="text-gray-400 font-normal">(opcional)</span>
+          <label htmlFor="register-telefono" className="block text-sm font-medium text-gray-700 mb-2">
+            Teléfono <span className="text-gray-400 font-normal">(opcional)</span>
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -241,17 +224,14 @@ export default function RegisterForm({
               className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
               placeholder="+34 600 123 456"
               value={formData.telefono}
-              onChange={(e) => updateField('telefono', e.target.value)}
+              onChange={e => updateField('telefono', e.target.value)}
             />
           </div>
         </div>
 
         {/* Password */}
         <div className="mb-4">
-          <label
-            htmlFor="register-password"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
+          <label htmlFor="register-password" className="block text-sm font-medium text-gray-700 mb-2">
             Contraseña *
           </label>
           <div className="relative">
@@ -267,18 +247,14 @@ export default function RegisterForm({
               className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
               placeholder="Mínimo 10 caracteres"
               value={formData.password}
-              onChange={(e) => updateField('password', e.target.value)}
+              onChange={e => updateField('password', e.target.value)}
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
             >
-              {showPassword ? (
-                <EyeOff className="h-5 w-5" />
-              ) : (
-                <Eye className="h-5 w-5" />
-              )}
+              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
             </button>
           </div>
           <PasswordStrength password={formData.password} />
@@ -286,10 +262,7 @@ export default function RegisterForm({
 
         {/* Confirm Password */}
         <div>
-          <label
-            htmlFor="register-confirm"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
+          <label htmlFor="register-confirm" className="block text-sm font-medium text-gray-700 mb-2">
             Confirmar contraseña *
           </label>
           <div className="relative">
@@ -305,18 +278,14 @@ export default function RegisterForm({
               className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
               placeholder="Repite tu contraseña"
               value={formData.confirmarPassword}
-              onChange={(e) => updateField('confirmarPassword', e.target.value)}
+              onChange={e => updateField('confirmarPassword', e.target.value)}
             />
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
             >
-              {showConfirmPassword ? (
-                <EyeOff className="h-5 w-5" />
-              ) : (
-                <Eye className="h-5 w-5" />
-              )}
+              {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
             </button>
           </div>
         </div>
@@ -331,10 +300,7 @@ export default function RegisterForm({
 
         {/* Dirección */}
         <div className="mb-4">
-          <label
-            htmlFor="register-direccion"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
+          <label htmlFor="register-direccion" className="block text-sm font-medium text-gray-700 mb-2">
             Calle y número *
           </label>
           <div className="relative">
@@ -349,19 +315,15 @@ export default function RegisterForm({
               className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
               placeholder="Calle Mayor 123"
               value={formData.direccion}
-              onChange={(e) => updateField('direccion', e.target.value)}
+              onChange={e => updateField('direccion', e.target.value)}
             />
           </div>
         </div>
 
         {/* Complemento */}
         <div className="mb-4">
-          <label
-            htmlFor="register-complemento"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            Piso, puerta, escalera{' '}
-            <span className="text-gray-400 font-normal">(opcional)</span>
+          <label htmlFor="register-complemento" className="block text-sm font-medium text-gray-700 mb-2">
+            Piso, puerta, escalera <span className="text-gray-400 font-normal">(opcional)</span>
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -374,17 +336,14 @@ export default function RegisterForm({
               className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
               placeholder="2º A"
               value={formData.complemento}
-              onChange={(e) => updateField('complemento', e.target.value)}
+              onChange={e => updateField('complemento', e.target.value)}
             />
           </div>
         </div>
 
         {/* Código Postal */}
         <div className="mb-4">
-          <label
-            htmlFor="register-cp"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
+          <label htmlFor="register-cp" className="block text-sm font-medium text-gray-700 mb-2">
             Código Postal *
           </label>
           <div className="relative">
@@ -401,7 +360,7 @@ export default function RegisterForm({
               className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
               placeholder="28001"
               value={formData.codigoPostal}
-              onChange={(e) => updateField('codigoPostal', e.target.value)}
+              onChange={e => updateField('codigoPostal', e.target.value)}
             />
           </div>
         </div>
@@ -410,10 +369,7 @@ export default function RegisterForm({
         <div className="grid grid-cols-2 gap-4">
           {/* Ciudad */}
           <div>
-            <label
-              htmlFor="register-ciudad"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
+            <label htmlFor="register-ciudad" className="block text-sm font-medium text-gray-700 mb-2">
               Ciudad *
             </label>
             <input
@@ -424,16 +380,13 @@ export default function RegisterForm({
               className="block w-full px-3 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
               placeholder="Madrid"
               value={formData.ciudad}
-              onChange={(e) => updateField('ciudad', e.target.value)}
+              onChange={e => updateField('ciudad', e.target.value)}
             />
           </div>
 
           {/* Provincia */}
           <div>
-            <label
-              htmlFor="register-provincia"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
+            <label htmlFor="register-provincia" className="block text-sm font-medium text-gray-700 mb-2">
               Provincia *
             </label>
             <input
@@ -444,7 +397,7 @@ export default function RegisterForm({
               className="block w-full px-3 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
               placeholder="Madrid"
               value={formData.provincia}
-              onChange={(e) => updateField('provincia', e.target.value)}
+              onChange={e => updateField('provincia', e.target.value)}
             />
           </div>
         </div>
@@ -465,14 +418,7 @@ export default function RegisterForm({
               fill="none"
               viewBox="0 0 24 24"
             >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path
                 className="opacity-75"
                 fill="currentColor"

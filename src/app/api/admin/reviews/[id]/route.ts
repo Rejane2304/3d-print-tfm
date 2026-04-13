@@ -4,7 +4,8 @@
  *
  * Requiere: Rol ADMIN
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
@@ -17,10 +18,7 @@ const reviewUpdateSchema = z.object({
 });
 
 // PATCH - Actualizar reseña
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 
@@ -31,10 +29,7 @@ export async function PATCH(
       session = null;
     }
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -42,10 +37,7 @@ export async function PATCH(
     });
 
     if (user?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 });
     }
 
     // Verificar que la reseña existe
@@ -54,10 +46,7 @@ export async function PATCH(
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { success: false, error: 'Reseña no encontrada' },
-        { status: 404 },
-      );
+      return NextResponse.json({ success: false, error: 'Reseña no encontrada' }, { status: 404 });
     }
 
     const body = await request.json();
@@ -106,24 +95,15 @@ export async function PATCH(
     return NextResponse.json({ success: true, resena: resenaFormateada });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { success: false, error: error.errors[0].message },
-        { status: 400 },
-      );
+      return NextResponse.json({ success: false, error: error.errors[0].message }, { status: 400 });
     }
     console.error('Error actualizando reseña:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error interno' },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: 'Error interno' }, { status: 500 });
   }
 }
 
 // DELETE - Eliminar reseña
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 
@@ -134,10 +114,7 @@ export async function DELETE(
       session = null;
     }
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -145,10 +122,7 @@ export async function DELETE(
     });
 
     if (user?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 });
     }
 
     // Verificar que la reseña existe
@@ -157,10 +131,7 @@ export async function DELETE(
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { success: false, error: 'Reseña no encontrada' },
-        { status: 404 },
-      );
+      return NextResponse.json({ success: false, error: 'Reseña no encontrada' }, { status: 404 });
     }
 
     // Eliminar reseña
@@ -174,9 +145,6 @@ export async function DELETE(
     });
   } catch (error) {
     console.error('Error eliminando reseña:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error interno' },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: 'Error interno' }, { status: 500 });
   }
 }

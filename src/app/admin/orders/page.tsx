@@ -4,24 +4,15 @@
  */
 'use client';
 
+import { showConfirm } from '@/lib/dialogs';
 import { useCallback, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import {
-  AlertCircle,
-  Box,
-  CheckCircle2,
-  Clock,
-  Eye,
-  Loader2,
-  Package,
-  Trash2,
-  Truck,
-  XCircle,
-} from 'lucide-react';
+import { AlertCircle, Box, CheckCircle2, Clock, Eye, Loader2, Package, Trash2, Truck, XCircle } from 'lucide-react';
 // RealTimeNotifications and DashboardMetricsUpdater removed - unused
-import { BulkAction, Column, DataTable } from '@/components/ui/DataTable';
+import type { BulkAction, Column } from '@/components/ui/DataTable';
+import { DataTable } from '@/components/ui/DataTable';
 
 interface Order {
   id: string;
@@ -36,10 +27,7 @@ interface Order {
   items: Array<{ id: string }>;
 }
 
-const orderStatuses: Record<
-  string,
-  { color: string; icon: React.ElementType; label: string }
-> = {
+const orderStatuses: Record<string, { color: string; icon: React.ElementType; label: string }> = {
   Pendiente: {
     color: 'bg-yellow-100 text-yellow-800',
     icon: Clock,
@@ -80,7 +68,7 @@ export default function AdminOrdersPage() {
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState('');
 
-  const loadOrders = useCallback(async() => {
+  const loadOrders = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -118,7 +106,7 @@ export default function AdminOrdersPage() {
     }
   }, [status, session, router, loadOrders]);
 
-  const updateStatus = async(id: string, nuevoEstado: string) => {
+  const updateStatus = async (id: string, nuevoEstado: string) => {
     try {
       const response = await fetch('/api/admin/orders', {
         method: 'PATCH',
@@ -134,21 +122,13 @@ export default function AdminOrdersPage() {
     }
   };
 
-  const handleDeleteOrders = async(selectedIds: string[]) => {
-    if (
-      !confirm(
-        `¿Estás seguro de que deseas eliminar ${selectedIds.length} pedido(s)?`,
-      )
-    ) {
+  const handleDeleteOrders = async (selectedIds: string[]) => {
+    if (!showConfirm(`¿Estás seguro de que deseas eliminar ${selectedIds.length} pedido(s)?`)) {
       return;
     }
 
     try {
-      await Promise.all(
-        selectedIds.map((id) =>
-          fetch(`/api/admin/orders/${id}`, { method: 'DELETE' }),
-        ),
-      );
+      await Promise.all(selectedIds.map(id => fetch(`/api/admin/orders/${id}`, { method: 'DELETE' })));
       await loadOrders();
     } catch (error) {
       console.error('Error al eliminar pedidos:', error);
@@ -161,26 +141,18 @@ export default function AdminOrdersPage() {
       header: 'Nº Pedido',
       sortable: true,
       className: 'font-medium text-gray-900',
-      render: (value) => (
-        <span className="text-sm font-mono font-semibold text-indigo-600">
-          {value as string}
-        </span>
-      ),
+      render: value => <span className="text-sm font-mono font-semibold text-indigo-600">{value as string}</span>,
     },
     {
       key: 'usuario',
       header: 'Cliente',
       className: '',
-      render: (value) => {
+      render: value => {
         const user = value as { nombre: string; email: string };
         return (
           <div>
-            <div className="text-sm font-medium text-gray-900 truncate">
-              {user.nombre}
-            </div>
-            <div className="text-sm text-gray-500 hidden sm:block">
-              {user.email}
-            </div>
+            <div className="text-sm font-medium text-gray-900 truncate">{user.nombre}</div>
+            <div className="text-sm text-gray-500 hidden sm:block">{user.email}</div>
           </div>
         );
       },
@@ -190,18 +162,14 @@ export default function AdminOrdersPage() {
       header: 'Total',
       sortable: true,
       className: '',
-      render: (value) => (
-        <span className="text-sm text-gray-900 font-medium">
-          {Number(value).toFixed(2)} €
-        </span>
-      ),
+      render: value => <span className="text-sm text-gray-900 font-medium">{Number(value).toFixed(2)} €</span>,
     },
     {
       key: 'estado',
       header: 'Estado',
       sortable: true,
       className: '',
-      render: (value) => {
+      render: value => {
         const statusConfig = orderStatuses[value as string] || {
           color: 'bg-gray-100 text-gray-800',
           icon: Package,
@@ -223,10 +191,8 @@ export default function AdminOrdersPage() {
       header: 'Fecha',
       sortable: true,
       className: 'hidden lg:table-cell',
-      render: (value) => (
-        <span className="text-sm text-gray-500">
-          {new Date(value as string).toLocaleDateString('es-ES')}
-        </span>
+      render: value => (
+        <span className="text-sm text-gray-500">{new Date(value as string).toLocaleDateString('es-ES')}</span>
       ),
     },
     {
@@ -234,9 +200,7 @@ export default function AdminOrdersPage() {
       header: 'Productos',
       sortable: true,
       className: 'hidden md:table-cell',
-      render: (_, row) => (
-        <span className="text-sm text-gray-600">{row.items.length}</span>
-      ),
+      render: (_, row) => <span className="text-sm text-gray-600">{row.items.length}</span>,
     },
     {
       key: 'actions',
@@ -253,7 +217,7 @@ export default function AdminOrdersPage() {
           </Link>
           {row.estado === 'Confirmado' && (
             <button
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation();
                 updateStatus(row.id, 'En preparación');
               }}
@@ -265,7 +229,7 @@ export default function AdminOrdersPage() {
           )}
           {row.estado === 'En preparación' && (
             <button
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation();
                 updateStatus(row.id, 'Enviado');
               }}
@@ -309,14 +273,9 @@ export default function AdminOrdersPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Package className="h-8 w-8 text-indigo-600" />
-              <h1 className="text-2xl font-bold text-gray-900">
-                Gestión de Pedidos
-              </h1>
+              <h1 className="text-2xl font-bold text-gray-900">Gestión de Pedidos</h1>
             </div>
-            <Link
-              href="/admin/dashboard"
-              className="text-indigo-600 hover:text-indigo-800 font-medium"
-            >
+            <Link href="/admin/dashboard" className="text-indigo-600 hover:text-indigo-800 font-medium">
               &larr; Volver al Panel
             </Link>
           </div>
@@ -338,7 +297,7 @@ export default function AdminOrdersPage() {
             <div className="flex items-center gap-2">
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                onChange={e => setStatusFilter(e.target.value)}
                 className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               >
                 <option value="">Todos los estados</option>

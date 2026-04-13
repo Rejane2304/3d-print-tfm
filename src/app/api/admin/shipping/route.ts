@@ -4,7 +4,8 @@
  *
  * Requiere: Rol ADMIN
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
@@ -12,34 +13,18 @@ import { z } from 'zod';
 
 // Schema de validación
 const shippingZoneSchema = z.object({
-  name: z
-    .string()
-    .min(2, 'El nombre debe tener al menos 2 caracteres')
-    .max(100, 'Máximo 100 caracteres'),
-  country: z
-    .string()
-    .min(2, 'El país es obligatorio')
-    .max(100, 'Máximo 100 caracteres'),
+  name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres').max(100, 'Máximo 100 caracteres'),
+  country: z.string().min(2, 'El país es obligatorio').max(100, 'Máximo 100 caracteres'),
   regions: z.array(z.string()).min(1, 'Debe incluir al menos una región'),
-  postalCodePrefixes: z
-    .array(z.string())
-    .min(1, 'Debe incluir al menos un prefijo de código postal'),
+  postalCodePrefixes: z.array(z.string()).min(1, 'Debe incluir al menos un prefijo de código postal'),
   baseCost: z.number().min(0, 'El costo base debe ser mayor o igual a 0'),
   freeShippingThreshold: z
     .number()
     .min(0, 'El mínimo para envío gratis debe ser mayor o igual a 0')
     .optional()
     .nullable(),
-  estimatedDaysMin: z
-    .number()
-    .int()
-    .min(1, 'Los días estimados mínimos deben ser al menos 1')
-    .default(3),
-  estimatedDaysMax: z
-    .number()
-    .int()
-    .min(1, 'Los días estimados máximos deben ser al menos 1')
-    .default(5),
+  estimatedDaysMin: z.number().int().min(1, 'Los días estimados mínimos deben ser al menos 1').default(3),
+  estimatedDaysMax: z.number().int().min(1, 'Los días estimados máximos deben ser al menos 1').default(5),
   isActive: z.boolean().default(true),
   displayOrder: z.number().int().min(0).default(0),
 });
@@ -54,10 +39,7 @@ export async function GET() {
       session = null;
     }
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -65,10 +47,7 @@ export async function GET() {
     });
 
     if (user?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 });
     }
 
     const zones = await prisma.shippingZone.findMany({
@@ -76,7 +55,7 @@ export async function GET() {
     });
 
     // Formatear para el panel admin (español)
-    const zonesFormateadas = zones.map((zone) => {
+    const zonesFormateadas = zones.map(zone => {
       return {
         id: zone.id,
         nombre: zone.name,
@@ -87,12 +66,8 @@ export async function GET() {
         prefijosCPTexto: zone.postalCodePrefixes.join(', '),
         costoBase: Number(zone.baseCost),
         costoBaseTexto: `${Number(zone.baseCost).toFixed(2)}€`,
-        envioGratisDesde: zone.freeShippingThreshold
-          ? Number(zone.freeShippingThreshold)
-          : null,
-        envioGratisDesdeTexto: zone.freeShippingThreshold
-          ? `${Number(zone.freeShippingThreshold).toFixed(2)}€`
-          : null,
+        envioGratisDesde: zone.freeShippingThreshold ? Number(zone.freeShippingThreshold) : null,
+        envioGratisDesdeTexto: zone.freeShippingThreshold ? `${Number(zone.freeShippingThreshold).toFixed(2)}€` : null,
         diasEstimadosMin: zone.estimatedDaysMin,
         diasEstimadosMax: zone.estimatedDaysMax,
         diasEstimadosTexto: `${zone.estimatedDaysMin}-${zone.estimatedDaysMax} días`,
@@ -107,10 +82,7 @@ export async function GET() {
     return NextResponse.json({ success: true, zones: zonesFormateadas });
   } catch (error) {
     console.error('Error listando zonas de envío:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error interno' },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: 'Error interno' }, { status: 500 });
   }
 }
 
@@ -124,10 +96,7 @@ export async function POST(req: NextRequest) {
       session = null;
     }
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -135,10 +104,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (user?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 });
     }
 
     const body = await req.json();
@@ -149,8 +115,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error:
-            'Los días estimados mínimos no pueden ser mayores que los máximos',
+          error: 'Los días estimados mínimos no pueden ser mayores que los máximos',
         },
         { status: 400 },
       );
@@ -177,15 +142,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, zone }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { success: false, error: error.errors[0].message },
-        { status: 400 },
-      );
+      return NextResponse.json({ success: false, error: error.errors[0].message }, { status: 400 });
     }
     console.error('Error creando zona de envío:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error interno' },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: 'Error interno' }, { status: 500 });
   }
 }

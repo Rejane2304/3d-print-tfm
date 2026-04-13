@@ -90,8 +90,7 @@ export default function Footer() {
             </div>
 
             <p className="text-gray-300 text-sm sm:text-base leading-relaxed mb-6 max-w-md">
-              E-commerce especializado en productos impresos en 3D de alta
-              calidad.
+              E-commerce especializado en productos impresos en 3D de alta calidad.
             </p>
 
             {/* Social Links - Wrap on small screens */}
@@ -162,9 +161,7 @@ export default function Footer() {
                       className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-2 \
                         group min-h-[24px]"
                     >
-                      <span
-                        className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-indigo-400 transition-colors flex-shrink-0"
-                      />
+                      <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-indigo-400 transition-colors flex-shrink-0" />
                       <span className="truncate">Catálogo</span>
                     </Link>
                   </li>
@@ -314,13 +311,9 @@ export default function Footer() {
               className="text-gray-400 text-sm text-center sm:text-left flex \
                 items-center justify-center sm:justify-start gap-1 flex-wrap"
             >
-              <span className="whitespace-nowrap">
-                © {currentYear} 3D Print.
-              </span>
+              <span className="whitespace-nowrap">© {currentYear} 3D Print.</span>
               <span className="flex items-center gap-1 whitespace-nowrap">
-                Hecho con{' '}
-                <Heart className="h-4 w-4 text-red-500 fill-red-500" /> en
-                Barcelona
+                Hecho con <Heart className="h-4 w-4 text-red-500 fill-red-500" /> en Barcelona
               </span>
             </p>
             <p className="text-gray-500 text-xs text-center sm:text-right">

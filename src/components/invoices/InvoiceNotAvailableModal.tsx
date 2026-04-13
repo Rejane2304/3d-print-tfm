@@ -19,16 +19,14 @@ const reasonConfig = {
   not_completed: {
     icon: Clock,
     title: 'Factura Pendiente',
-    message:
-      'Tu factura se generará automáticamente cuando el pedido sea entregado.',
+    message: 'Tu factura se generará automáticamente cuando el pedido sea entregado.',
     action: 'Estado actual: En proceso de envío o preparación.',
   },
   not_generated: {
     icon: FileText,
     title: 'Factura en Proceso',
     message: 'Tu pedido ha sido entregado y la factura está siendo generada.',
-    action:
-      'Esto suele tardar unos minutos. Por favor, inténtalo de nuevo en breve.',
+    action: 'Esto suele tardar unos minutos. Por favor, inténtalo de nuevo en breve.',
   },
   payment_pending: {
     icon: AlertCircle,
@@ -81,9 +79,7 @@ export function InvoiceNotAvailableModal({
               <Icon className="h-8 w-8 text-amber-600" />
             </div>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 text-center">
-            {config.title}
-          </h2>
+          <h2 className="text-2xl font-bold text-gray-900 text-center">{config.title}</h2>
         </div>
 
         {/* Content */}
@@ -91,16 +87,12 @@ export function InvoiceNotAvailableModal({
           {orderNumber && (
             <div className="mb-4 text-center">
               <span className="text-sm text-gray-500">Pedido</span>
-              <p className="text-lg font-semibold text-indigo-600">
-                {orderNumber}
-              </p>
+              <p className="text-lg font-semibold text-indigo-600">{orderNumber}</p>
             </div>
           )}
 
           <div className="bg-indigo-50 rounded-xl p-4 mb-4 border border-indigo-100">
-            <p className="text-gray-800 text-center font-medium">
-              {config.message}
-            </p>
+            <p className="text-gray-800 text-center font-medium">{config.message}</p>
           </div>
 
           <div className="bg-gray-50 rounded-xl p-4 mb-4">
@@ -108,8 +100,7 @@ export function InvoiceNotAvailableModal({
           </div>
 
           <p className="text-sm text-gray-500 text-center mb-6">
-            Una vez entregado el pedido, podrás descargar tu factura desde esta
-            página.
+            Una vez entregado el pedido, podrás descargar tu factura desde esta página.
           </p>
 
           {/* Actions */}
@@ -128,10 +119,7 @@ export function InvoiceNotAvailableModal({
         <div className="bg-gray-50 px-6 py-4 border-t border-gray-100">
           <p className="text-xs text-gray-400 text-center">
             ¿Necesitas ayuda? Contacta a nuestro equipo de soporte en{' '}
-            <a
-              href="mailto:support@3dprint.com"
-              className="text-indigo-600 hover:underline"
-            >
+            <a href="mailto:support@3dprint.com" className="text-indigo-600 hover:underline">
               support@3dprint.com
             </a>
           </p>

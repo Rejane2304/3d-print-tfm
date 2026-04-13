@@ -2,7 +2,7 @@
  * Order State Machine
  * Gestiona las transiciones válidas entre estados de pedidos
  */
-import { OrderStatus } from '@prisma/client';
+import type { OrderStatus } from '@prisma/client';
 
 // Definición de transiciones válidas entre estados
 const VALID_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
@@ -27,10 +27,7 @@ export const STATUS_TIMESTAMPS: Record<OrderStatus, string> = {
 /**
  * Verifica si una transición de estado es válida
  */
-export function isValidStatusTransition(
-  fromStatus: OrderStatus,
-  toStatus: OrderStatus,
-): boolean {
+export function isValidStatusTransition(fromStatus: OrderStatus, toStatus: OrderStatus): boolean {
   // No permitir cambio al mismo estado
   if (fromStatus === toStatus) {
     return false;
@@ -121,21 +118,12 @@ export function prepareStatusUpdate(
 /**
  * Obtiene el orden secuencial de los estados para validación
  */
-export const STATUS_SEQUENCE: OrderStatus[] = [
-  'PENDING',
-  'CONFIRMED',
-  'PREPARING',
-  'SHIPPED',
-  'DELIVERED',
-];
+export const STATUS_SEQUENCE: OrderStatus[] = ['PENDING', 'CONFIRMED', 'PREPARING', 'SHIPPED', 'DELIVERED'];
 
 /**
  * Verifica si un estado es posterior a otro
  */
-export function isStatusAfter(
-  statusToCheck: OrderStatus,
-  referenceStatus: OrderStatus,
-): boolean {
+export function isStatusAfter(statusToCheck: OrderStatus, referenceStatus: OrderStatus): boolean {
   const checkIndex = STATUS_SEQUENCE.indexOf(statusToCheck);
   const refIndex = STATUS_SEQUENCE.indexOf(referenceStatus);
 

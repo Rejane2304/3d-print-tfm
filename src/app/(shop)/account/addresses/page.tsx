@@ -8,19 +8,7 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import {
-  AlertCircle,
-  CheckCircle2,
-  Edit2,
-  Loader2,
-  MapPin,
-  Phone,
-  Plus,
-  Star,
-  Trash2,
-  User,
-  X,
-} from 'lucide-react';
+import { AlertCircle, CheckCircle2, Edit2, Loader2, MapPin, Phone, Plus, Star, Trash2, User, X } from 'lucide-react';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
 interface Address {
@@ -88,7 +76,7 @@ export default function MyAddressesPage() {
     }
   }, [status, router]);
 
-  const loadAddresses = async() => {
+  const loadAddresses = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -108,7 +96,7 @@ export default function MyAddressesPage() {
     }
   };
 
-  const handleSubmit = async(e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setError(null);
@@ -116,9 +104,7 @@ export default function MyAddressesPage() {
     try {
       const url = '/api/account/addresses';
       const method = editingAddress ? 'PATCH' : 'POST';
-      const body = editingAddress
-        ? { id: editingAddress.id, ...formData }
-        : formData;
+      const body = editingAddress ? { id: editingAddress.id, ...formData } : formData;
 
       const response = await fetch(url, {
         method,
@@ -141,18 +127,15 @@ export default function MyAddressesPage() {
     }
   };
 
-  const deleteAddress = async() => {
+  const deleteAddress = async () => {
     if (!addressToDelete) {
       return;
     }
 
     try {
-      const response = await fetch(
-        `/api/account/addresses?id=${addressToDelete.id}`,
-        {
-          method: 'DELETE',
-        },
-      );
+      const response = await fetch(`/api/account/addresses?id=${addressToDelete.id}`, {
+        method: 'DELETE',
+      });
 
       if (!response.ok) {
         const data = await response.json();
@@ -167,7 +150,7 @@ export default function MyAddressesPage() {
     }
   };
 
-  const setAsPrimary = async(id: string) => {
+  const setAsPrimary = async (id: string) => {
     try {
       const response = await fetch('/api/account/addresses', {
         method: 'PATCH',
@@ -249,17 +232,10 @@ export default function MyAddressesPage() {
         <div className="max-w-[1920px] 3xl:max-w-[2200px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                Mis Direcciones
-              </h1>
-              <p className="mt-2 text-gray-600">
-                {addresses.length} de 2 direcciones guardadas
-              </p>
+              <h1 className="text-3xl font-bold text-gray-900">Mis Direcciones</h1>
+              <p className="mt-2 text-gray-600">{addresses.length} de 2 direcciones guardadas</p>
             </div>
-            <Link
-              href="/account"
-              className="text-indigo-600 hover:text-indigo-800 font-medium"
-            >
+            <Link href="/account" className="text-indigo-600 hover:text-indigo-800 font-medium">
               ← Volver a mi cuenta
             </Link>
           </div>
@@ -279,12 +255,8 @@ export default function MyAddressesPage() {
         {addresses.length === 0 ? (
           <div className="bg-white rounded-lg shadow-sm border p-12 text-center">
             <MapPin className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No tienes direcciones guardadas
-            </h3>
-            <p className="text-gray-500 mb-6">
-              Agrega una dirección para poder realizar pedidos
-            </p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No tienes direcciones guardadas</h3>
+            <p className="text-gray-500 mb-6">Agrega una dirección para poder realizar pedidos</p>
             <button
               onClick={openNewModal}
               className="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium \
@@ -297,13 +269,11 @@ export default function MyAddressesPage() {
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-              {addresses.map((address) => (
+              {addresses.map(address => (
                 <div
                   key={address.id}
                   className={`bg-white rounded-lg shadow-sm border overflow-hidden ${
-                    address.isDefault
-                      ? 'border-indigo-500 ring-1 ring-indigo-500'
-                      : ''
+                    address.isDefault ? 'border-indigo-500 ring-1 ring-indigo-500' : ''
                   }`}
                 >
                   {/* Header de la dirección */}
@@ -352,23 +322,15 @@ export default function MyAddressesPage() {
                     <div className="flex items-start gap-3">
                       <User className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 mt-0.5 flex-shrink-0" />
                       <div className="min-w-0">
-                        <p className="font-medium text-gray-900 text-sm sm:text-base">
-                          {address.recipient}
-                        </p>
+                        <p className="font-medium text-gray-900 text-sm sm:text-base">{address.recipient}</p>
                       </div>
                     </div>
 
                     <div className="flex items-start gap-3">
                       <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 mt-0.5 flex-shrink-0" />
                       <div className="text-xs sm:text-sm min-w-0">
-                        <p className="text-gray-900 break-words">
-                          {address.address}
-                        </p>
-                        {address.complement && (
-                          <p className="text-gray-600 break-words">
-                            {address.complement}
-                          </p>
-                        )}
+                        <p className="text-gray-900 break-words">{address.address}</p>
+                        {address.complement && <p className="text-gray-600 break-words">{address.complement}</p>}
                         <p className="text-gray-900">
                           {address.postalCode} {address.city}
                         </p>
@@ -378,9 +340,7 @@ export default function MyAddressesPage() {
 
                     <div className="flex items-center gap-3">
                       <Phone className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0" />
-                      <span className="text-xs sm:text-sm text-gray-700">
-                        {address.phone}
-                      </span>
+                      <span className="text-xs sm:text-sm text-gray-700">{address.phone}</span>
                     </div>
                   </div>
 
@@ -459,19 +419,14 @@ export default function MyAddressesPage() {
 
               <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
                 <div>
-                  <label
-                    htmlFor="addressName"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
+                  <label htmlFor="addressName" className="block text-sm font-medium text-gray-700 mb-1">
                     Nombre de la dirección *
                   </label>
                   <input
                     id="addressName"
                     type="text"
                     value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
+                    onChange={e => setFormData({ ...formData, name: e.target.value })}
                     placeholder="Ej: Casa, Trabajo, Casa de mis padres"
                     className="w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:py-2 \
                       focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 \
@@ -482,19 +437,14 @@ export default function MyAddressesPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
-                    <label
-                      htmlFor="recipient"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
+                    <label htmlFor="recipient" className="block text-sm font-medium text-gray-700 mb-1">
                       Destinatario *
                     </label>
                     <input
                       id="recipient"
                       type="text"
                       value={formData.recipient}
-                      onChange={(e) =>
-                        setFormData({ ...formData, recipient: e.target.value })
-                      }
+                      onChange={e => setFormData({ ...formData, recipient: e.target.value })}
                       placeholder="Nombre y apellidos"
                       className="w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:py-2 \
                         focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 \
@@ -503,16 +453,16 @@ export default function MyAddressesPage() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Teléfono *</label>
+                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                      Teléfono *
+                    </label>
                     <input
                       id="phone"
                       type="tel"
                       inputMode="tel"
                       autoComplete="tel"
                       value={formData.phone}
-                      onChange={(e) =>
-                        setFormData({ ...formData, phone: e.target.value })
-                      }
+                      onChange={e => setFormData({ ...formData, phone: e.target.value })}
                       placeholder="612345678"
                       className={
                         'w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:py-2 ' +
@@ -525,10 +475,7 @@ export default function MyAddressesPage() {
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="addressLine"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
+                  <label htmlFor="addressLine" className="block text-sm font-medium text-gray-700 mb-1">
                     Dirección *
                   </label>
                   <input
@@ -536,9 +483,7 @@ export default function MyAddressesPage() {
                     type="text"
                     autoComplete="street-address"
                     value={formData.address}
-                    onChange={(e) =>
-                      setFormData({ ...formData, address: e.target.value })
-                    }
+                    onChange={e => setFormData({ ...formData, address: e.target.value })}
                     placeholder="Calle, número, piso..."
                     className={
                       'w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:py-2 ' +
@@ -557,9 +502,7 @@ export default function MyAddressesPage() {
                     id="complement"
                     type="text"
                     value={formData.complement}
-                    onChange={(e) =>
-                      setFormData({ ...formData, complement: e.target.value })
-                    }
+                    onChange={e => setFormData({ ...formData, complement: e.target.value })}
                     placeholder="Piso, puerta, escalera..."
                     className={
                       'w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:py-2 ' +
@@ -580,74 +523,68 @@ export default function MyAddressesPage() {
                       inputMode="numeric"
                       autoComplete="postal-code"
                       value={formData.postalCode}
-                      onChange={(e) =>
-                        setFormData({ ...formData, postalCode: e.target.value })
-                      }
+                      onChange={e => setFormData({ ...formData, postalCode: e.target.value })}
                       placeholder="28001"
                       maxLength={5}
-                      className={
-                        [
-                          'w-full',
-                          'border',
-                          'border-gray-300',
-                          'rounded-lg',
-                          'px-3',
-                          'py-2.5',
-                          'sm:py-2',
-                          'focus:ring-2',
-                          'focus:ring-indigo-500',
-                          'focus:border-indigo-500',
-                          'text-sm',
-                          'sm:text-base',
-                          'min-h-[44px]',
-                        ].join(' ')
-                      }
+                      className={[
+                        'w-full',
+                        'border',
+                        'border-gray-300',
+                        'rounded-lg',
+                        'px-3',
+                        'py-2.5',
+                        'sm:py-2',
+                        'focus:ring-2',
+                        'focus:ring-indigo-500',
+                        'focus:border-indigo-500',
+                        'text-sm',
+                        'sm:text-base',
+                        'min-h-[44px]',
+                      ].join(' ')}
                       required
                     />
                   </div>
                   <div>
-                    <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">Ciudad *</label>
+                    <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
+                      Ciudad *
+                    </label>
                     <input
                       id="city"
                       type="text"
                       autoComplete="address-level2"
                       value={formData.city}
-                      onChange={(e) =>
-                        setFormData({ ...formData, city: e.target.value })
-                      }
+                      onChange={e => setFormData({ ...formData, city: e.target.value })}
                       placeholder="Madrid"
-                      className={
-                        [
-                          'w-full',
-                          'border',
-                          'border-gray-300',
-                          'rounded-lg',
-                          'px-3',
-                          'py-2.5',
-                          'sm:py-2',
-                          'focus:ring-2',
-                          'focus:ring-indigo-500',
-                          'focus:border-indigo-500',
-                          'text-sm',
-                          'sm:text-base',
-                          'min-h-[44px]',
-                        ].join(' ')
-                      }
+                      className={[
+                        'w-full',
+                        'border',
+                        'border-gray-300',
+                        'rounded-lg',
+                        'px-3',
+                        'py-2.5',
+                        'sm:py-2',
+                        'focus:ring-2',
+                        'focus:ring-indigo-500',
+                        'focus:border-indigo-500',
+                        'text-sm',
+                        'sm:text-base',
+                        'min-h-[44px]',
+                      ].join(' ')}
                       required
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="province" className="block text-sm font-medium text-gray-700 mb-1">Provincia *</label>
+                  <label htmlFor="province" className="block text-sm font-medium text-gray-700 mb-1">
+                    Provincia *
+                  </label>
                   <input
                     id="province"
                     type="text"
                     autoComplete="address-level1"
                     value={formData.province}
-                    onChange={(e) =>
-                      setFormData({ ...formData, province: e.target.value })
-                    }
+                    onChange={e => setFormData({ ...formData, province: e.target.value })}
                     placeholder="Madrid"
                     className={[
                       'w-full',
@@ -674,7 +611,7 @@ export default function MyAddressesPage() {
                       type="checkbox"
                       id="isDefault"
                       checked={formData.isDefault}
-                      onChange={(e) =>
+                      onChange={e =>
                         setFormData({
                           ...formData,
                           isDefault: e.target.checked,
@@ -691,10 +628,7 @@ export default function MyAddressesPage() {
                         'rounded',
                       ].join(' ')}
                     />
-                    <label
-                      htmlFor="isDefault"
-                      className="text-sm text-gray-700"
-                    >
+                    <label htmlFor="isDefault" className="text-sm text-gray-700">
                       Establecer como dirección principal
                     </label>
                   </div>

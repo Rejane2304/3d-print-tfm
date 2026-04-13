@@ -4,11 +4,12 @@
  *
  * GET /api/account/invoices/[id]/pdf
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 import { COMPANY_CONFIG, generatePDF } from '@/lib/invoices/pdf-generator';
 import { generateInvoiceHTML } from '@/lib/invoices/invoice-template';
 import { existsSync, readFileSync } from 'node:fs';
@@ -68,17 +69,11 @@ async function getImageAsBase64(imageUrl: string): Promise<string | undefined> {
   }
 }
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
     }
 
     const usuario = await prisma.user.findUnique({
@@ -86,10 +81,7 @@ export async function GET(
     });
 
     if (!usuario) {
-      return NextResponse.json(
-        { success: false, error: 'Usuario no encontrado' },
-        { status: 404 },
-      );
+      return NextResponse.json({ success: false, error: 'Usuario no encontrado' }, { status: 404 });
     }
 
     const factura = await prisma.invoice.findUnique({
@@ -112,27 +104,19 @@ export async function GET(
     });
 
     if (!factura) {
-      return NextResponse.json(
-        { success: false, error: 'Factura no encontrada' },
-        { status: 404 },
-      );
+      return NextResponse.json({ success: false, error: 'Factura no encontrada' }, { status: 404 });
     }
 
     // Verificar que la factura pertenece al usuario
     if (factura.order?.userId !== usuario.id) {
-      return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 403 },
-      );
+      return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 403 });
     }
 
     // Procesar items y convertir imágenes a base64
     const itemsWithBase64Images = await Promise.all(
       factura.order?.items.map(async item => {
         const imageUrl = item.product?.images?.[0]?.url;
-        const base64Image = imageUrl
-          ? await getImageAsBase64(imageUrl)
-          : undefined;
+        const base64Image = imageUrl ? await getImageAsBase64(imageUrl) : undefined;
 
         return {
           name: item.name,
@@ -145,10 +129,7 @@ export async function GET(
     );
 
     // Calcular subtotal (total de productos sin envío)
-    const subtotal = itemsWithBase64Images.reduce(
-      (sum, item) => sum + item.subtotal,
-      0,
-    );
+    const subtotal = itemsWithBase64Images.reduce((sum, item) => sum + item.subtotal, 0);
 
     // Calcular envío (diferencia entre total de orden y subtotal)
     const orderTotal = Number(factura.order?.total || 0);
@@ -206,9 +187,6 @@ export async function GET(
     });
   } catch (error) {
     console.error('Error generando PDF:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error al generar el PDF' },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: 'Error al generar el PDF' }, { status: 500 });
   }
 }

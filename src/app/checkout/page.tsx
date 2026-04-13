@@ -38,12 +38,7 @@ function CancelledOrderAlert({
     <div className="mb-4 sm:mb-6 p-4 sm:p-6 bg-orange-50 border border-orange-200 rounded-lg">
       <div className="flex flex-col sm:flex-row sm:items-start gap-4">
         <div className="flex-shrink-0">
-          <svg
-            className="h-8 w-8 text-orange-600"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
+          <svg className="h-8 w-8 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -55,8 +50,7 @@ function CancelledOrderAlert({
         <div className="flex-1">
           <p className="text-orange-800 font-semibold text-base sm:text-lg">Pago no completado</p>
           <p className="text-orange-700 text-sm mt-1 mb-4">
-            Has vuelto desde la página de pago. Tu carrito está vacío pero puedes restaurarlo para
-            volver a intentarlo.
+            Has vuelto desde la página de pago. Tu carrito está vacío pero puedes restaurarlo para volver a intentarlo.
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
             <button
@@ -139,27 +133,12 @@ export default function CheckoutPage() {
   const { status } = useSession();
   const [showConfirmation, setShowConfirmation] = useState(false);
 
-  const {
-    loading,
-    error,
-    setError,
-    addresses,
-    selectedAddressId,
-    setSelectedAddressId,
-    cart,
-    setCart,
-    appliedCoupon,
-  } = useCheckoutData();
+  const { loading, error, setError, addresses, selectedAddressId, setSelectedAddressId, cart, setCart, appliedCoupon } =
+    useCheckoutData();
 
   const { cancelledOrderId, restoreCart, dismissCancelledOrder } = useCancelledOrder(setCart);
 
-  const {
-    processing,
-    error: paymentError,
-    paymentMethod,
-    setPaymentMethod,
-    processPayment,
-  } = usePaymentProcessing();
+  const { processing, error: paymentError, paymentMethod, setPaymentMethod, processPayment } = usePaymentProcessing();
 
   // Combined error from checkout data and payment processing
   const displayError = error || paymentError;
@@ -191,10 +170,10 @@ export default function CheckoutPage() {
   // Helper function to get payment method name
   const getPaymentMethodName = (method: string): string => {
     const methodNames: Record<string, string> = {
-      'CARD': 'Tarjeta de crédito/débito',
-      'PAYPAL': 'PayPal',
-      'BIZUM': 'Bizum',
-      'TRANSFER': 'Transferencia bancaria',
+      CARD: 'Tarjeta de crédito/débito',
+      PAYPAL: 'PayPal',
+      BIZUM: 'Bizum',
+      TRANSFER: 'Transferencia bancaria',
     };
     return methodNames[method] ?? 'Otro método';
   };
@@ -205,7 +184,7 @@ export default function CheckoutPage() {
     setShowConfirmation(true);
   };
 
-  const handlePayment = async() => {
+  const handlePayment = async () => {
     const result = await processPayment(selectedAddressId);
     if (result.success) {
       // Payment started successfully, will redirect or open external window
@@ -216,7 +195,7 @@ export default function CheckoutPage() {
     setShowConfirmation(false);
   };
 
-  const handleRestoreCart = async() => {
+  const handleRestoreCart = async () => {
     await restoreCart();
   };
 
@@ -235,12 +214,8 @@ export default function CheckoutPage() {
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 sm:mb-4">
-            Finalizar Compra
-          </h1>
-          <p className="text-gray-600 text-sm sm:text-base">
-            Revisa tu pedido, elige método de pago y confirma
-          </p>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 sm:mb-4">Finalizar Compra</h1>
+          <p className="text-gray-600 text-sm sm:text-base">Revisa tu pedido, elige método de pago y confirma</p>
         </div>
 
         {/* Cancelled Order Alert */}
@@ -268,9 +243,7 @@ export default function CheckoutPage() {
               onSelectAddress={handleSelectAddress}
             />
 
-            {cart?.items && cart.items.length > 0 && (
-              <OrderItems items={cart.items} />
-            )}
+            {cart?.items && cart.items.length > 0 && <OrderItems items={cart.items} />}
           </div>
 
           {/* Right Column: Payment & Summary */}
@@ -278,10 +251,7 @@ export default function CheckoutPage() {
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 lg:sticky lg:top-24">
               <h2 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6">Método de pago</h2>
 
-              <PaymentMethodSelector
-                paymentMethod={paymentMethod}
-                onSelectMethod={handleSelectPaymentMethod}
-              />
+              <PaymentMethodSelector paymentMethod={paymentMethod} onSelectMethod={handleSelectPaymentMethod} />
 
               {/* Order Summary */}
               <OrderTotals subtotal={subtotal} coupon={appliedCoupon} />

@@ -12,18 +12,7 @@ async function main() {
 
   try {
     // Contar registros en cada tabla principal
-    const tables = [
-      'User',
-      'Product',
-      'Order',
-      'Invoice',
-      'Category',
-      'Address',
-      'Cart',
-      'Payment',
-      'Alert',
-      'Review',
-    ];
+    const tables = ['User', 'Product', 'Order', 'Invoice', 'Category', 'Address', 'Cart', 'Payment', 'Alert', 'Review'];
 
     for (const table of tables) {
       try {
@@ -36,7 +25,6 @@ async function main() {
 
     console.log('\n📊 Estado de la base de datos:');
     console.log('✅ Todas las tablas existen y son accesibles');
-
   } catch (error) {
     console.error('❌ Error:', error.message);
   } finally {

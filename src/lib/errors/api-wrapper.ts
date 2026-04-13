@@ -2,7 +2,8 @@
  * Wrapper for handling errors in Next.js API routes
  * Ensures errors don't reach the client unhandled
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { ApiError, ErrorCode, handleError } from './index';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -14,7 +15,7 @@ type RouteHandler = (req: NextRequest, ...args: any[]) => Promise<NextResponse>;
  */
 export function withErrorHandler(handler: RouteHandler): RouteHandler {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return async(req: NextRequest, ...args: any[]) => {
+  return async (req: NextRequest, ...args: any[]) => {
     try {
       return await handler(req, ...args);
     } catch (error) {
@@ -41,18 +42,13 @@ export function withErrorHandler(handler: RouteHandler): RouteHandler {
  * Wrapper for Zod input validation
  * Throws ApiError if validation fails
  */
-export function validateInput<T>(
-  schema: { parse: (data: unknown) => T },
-  data: unknown,
-  context: string = 'input',
-): T {
+export function validateInput<T>(schema: { parse: (data: unknown) => T }, data: unknown, context: string = 'input'): T {
   try {
     return schema.parse(data);
   } catch (error: unknown) {
     // Extract error message from Zod
     const zodError = error as { errors?: [{ message?: string }] };
-    const message =
-      zodError.errors?.[0]?.message || `Validation error in ${context}`;
+    const message = zodError.errors?.[0]?.message || `Validation error in ${context}`;
     throw new ApiError(ErrorCode.VALIDATION_INVALID_INPUT, message, 400);
   }
 }
@@ -61,10 +57,7 @@ export function validateInput<T>(
  * Wrapper for database operations
  * Converts Prisma errors to ApiErrors
  */
-export async function withDbOperation<T>(
-  operation: () => Promise<T>,
-  context: string,
-): Promise<T> {
+export async function withDbOperation<T>(operation: () => Promise<T>, context: string): Promise<T> {
   try {
     return await operation();
   } catch (error: unknown) {
@@ -76,12 +69,7 @@ export async function withDbOperation<T>(
     if (prismaError.code === 'P2002') {
       // Unique constraint violation
       const field = prismaError.meta?.target?.[0] || 'field';
-      throw new ApiError(
-        ErrorCode.DB_DUPLICATE_ENTRY,
-        `A record already exists with that ${field}`,
-        409,
-        field,
-      );
+      throw new ApiError(ErrorCode.DB_DUPLICATE_ENTRY, `A record already exists with that ${field}`, 409, field);
     }
 
     if (prismaError.code === 'P2025') {
@@ -91,11 +79,7 @@ export async function withDbOperation<T>(
 
     if (prismaError.code === 'P2003') {
       // Foreign key constraint
-      throw new ApiError(
-        ErrorCode.VALIDATION_INVALID_INPUT,
-        `Invalid reference in ${context}`,
-        400,
-      );
+      throw new ApiError(ErrorCode.VALIDATION_INVALID_INPUT, `Invalid reference in ${context}`, 400);
     }
 
     // Re-throw other errors

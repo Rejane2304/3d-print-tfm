@@ -36,6 +36,7 @@ model WebSocketConnection {
 **Archivo**: `src/lib/realtime/event-service.ts`
 
 Funciones disponibles:
+
 - `emitEvent()` - Emisión genérica de eventos
 - `emitNewOrder()` - Nuevo pedido creado
 - `emitOrderStatusUpdated()` - Cambio de estado
@@ -51,6 +52,7 @@ Funciones disponibles:
 **Archivo**: `src/hooks/useRealTime.ts`
 
 Hooks exportados:
+
 - `useRealTime()` - Hook genérico con polling
 - `useAdminRealTime()` - Para panel de administración
 - `useUserRealTime()` - Para usuarios individuales
@@ -61,12 +63,12 @@ Hooks exportados:
 
 ### ✅ Completamente Funcionales
 
-| Evento | Emisor | Receptores | Acción |
-|--------|--------|------------|--------|
-| **order:new** | /api/checkout | Admin Dashboard | Notificación de nuevo pedido |
-| **order:status:updated** | /api/admin/orders | Cliente (su cuenta) | Estado del pedido actualizado |
-| **stock:updated** | /api/admin/inventory/[id]/adjust | Admin Dashboard | Stock actualizado |
-| **stock:low** | /api/admin/inventory/[id]/adjust | Admin Dashboard | Alerta stock < 5 unidades |
+| Evento                   | Emisor                           | Receptores          | Acción                        |
+| ------------------------ | -------------------------------- | ------------------- | ----------------------------- |
+| **order:new**            | /api/checkout                    | Admin Dashboard     | Notificación de nuevo pedido  |
+| **order:status:updated** | /api/admin/orders                | Cliente (su cuenta) | Estado del pedido actualizado |
+| **stock:updated**        | /api/admin/inventory/[id]/adjust | Admin Dashboard     | Stock actualizado             |
+| **stock:low**            | /api/admin/inventory/[id]/adjust | Admin Dashboard     | Alerta stock < 5 unidades     |
 
 ### 🔄 Flujo de Datos
 
@@ -109,11 +111,7 @@ await emitNewOrder({
 ```typescript
 // Después de actualizar estado
 if (pedido.user?.id) {
-  await emitOrderStatusUpdated(
-    pedido.id,
-    estado,
-    pedido.user.id
-  );
+  await emitOrderStatusUpdated(pedido.id, estado, pedido.user.id);
 }
 ```
 
@@ -125,11 +123,7 @@ if (pedido.user?.id) {
 
 ```typescript
 // Después de ajustar inventario
-await emitStockUpdated(
-  result.product.id,
-  result.product.stock,
-  previousStock
-);
+await emitStockUpdated(result.product.id, result.product.stock, previousStock);
 
 // Si stock bajo, emitir alerta
 if (result.product.stock <= 5) {
@@ -196,15 +190,15 @@ if (result.product.stock <= 5) {
 
 ## 📊 MÉTRICAS DEL SISTEMA
 
-| Métrica | Valor |
-|---------|-------|
-| Frecuencia de polling | 3 segundos |
-| Retención de eventos | 7 días |
-| Límite de eventos por consulta | 100 |
-| Timeout de conexión WebSocket | 60 segundos |
-| Reconexión automática | Sí |
-| Multi-tab support | Sí |
-| Offline support | Sí (acumulación) |
+| Métrica                        | Valor            |
+| ------------------------------ | ---------------- |
+| Frecuencia de polling          | 3 segundos       |
+| Retención de eventos           | 7 días           |
+| Límite de eventos por consulta | 100              |
+| Timeout de conexión WebSocket  | 60 segundos      |
+| Reconexión automática          | Sí               |
+| Multi-tab support              | Sí               |
+| Offline support                | Sí (acumulación) |
 
 ## ✅ ESTADO DE IMPLEMENTACIÓN
 

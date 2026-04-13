@@ -4,7 +4,8 @@
  *
  * Requiere: Autenticación
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
@@ -12,29 +13,13 @@ import { z } from 'zod';
 
 // Schema de validación
 const reviewUpdateSchema = z.object({
-  rating: z
-    .number()
-    .int()
-    .min(1)
-    .max(5, 'La puntuación debe estar entre 1 y 5')
-    .optional(),
-  title: z
-    .string()
-    .min(1, 'El título es obligatorio')
-    .max(200, 'Máximo 200 caracteres')
-    .optional(),
-  comment: z
-    .string()
-    .min(1, 'El comentario es obligatorio')
-    .max(2000, 'Máximo 2000 caracteres')
-    .optional(),
+  rating: z.number().int().min(1).max(5, 'La puntuación debe estar entre 1 y 5').optional(),
+  title: z.string().min(1, 'El título es obligatorio').max(200, 'Máximo 200 caracteres').optional(),
+  comment: z.string().min(1, 'El comentario es obligatorio').max(2000, 'Máximo 2000 caracteres').optional(),
 });
 
 // GET - Obtener reseña propia del usuario
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 
@@ -45,10 +30,7 @@ export async function GET(
       session = null;
     }
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -56,10 +38,7 @@ export async function GET(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { success: false, error: 'Usuario no encontrado' },
-        { status: 404 },
-      );
+      return NextResponse.json({ success: false, error: 'Usuario no encontrado' }, { status: 404 });
     }
 
     // Si el id es 'my-review', buscar por productId en query params
@@ -102,18 +81,12 @@ export async function GET(
     }
 
     if (!review) {
-      return NextResponse.json(
-        { success: false, error: 'Reseña no encontrada' },
-        { status: 404 },
-      );
+      return NextResponse.json({ success: false, error: 'Reseña no encontrada' }, { status: 404 });
     }
 
     // Verificar que la reseña pertenece al usuario (a menos que sea admin)
     if (review.userId !== user.id && user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 403 },
-      );
+      return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 403 });
     }
 
     return NextResponse.json({
@@ -133,18 +106,12 @@ export async function GET(
     });
   } catch (error) {
     console.error('Error obteniendo reseña:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error interno' },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: 'Error interno' }, { status: 500 });
   }
 }
 
 // PATCH - Actualizar reseña propia
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 
@@ -155,10 +122,7 @@ export async function PATCH(
       session = null;
     }
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -166,10 +130,7 @@ export async function PATCH(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { success: false, error: 'Usuario no encontrado' },
-        { status: 404 },
-      );
+      return NextResponse.json({ success: false, error: 'Usuario no encontrado' }, { status: 404 });
     }
 
     // Verificar que la reseña existe
@@ -178,18 +139,12 @@ export async function PATCH(
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { success: false, error: 'Reseña no encontrada' },
-        { status: 404 },
-      );
+      return NextResponse.json({ success: false, error: 'Reseña no encontrada' }, { status: 404 });
     }
 
     // Verificar que la reseña pertenece al usuario
     if (existing.userId !== user.id) {
-      return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 403 },
-      );
+      return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 403 });
     }
 
     const body = await request.json();
@@ -227,24 +182,15 @@ export async function PATCH(
     return NextResponse.json({ success: true, resena: resenaFormateada });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { success: false, error: error.errors[0].message },
-        { status: 400 },
-      );
+      return NextResponse.json({ success: false, error: error.errors[0].message }, { status: 400 });
     }
     console.error('Error actualizando reseña:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error interno' },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: 'Error interno' }, { status: 500 });
   }
 }
 
 // DELETE - Eliminar reseña propia
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 
@@ -255,10 +201,7 @@ export async function DELETE(
       session = null;
     }
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -266,10 +209,7 @@ export async function DELETE(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { success: false, error: 'Usuario no encontrado' },
-        { status: 404 },
-      );
+      return NextResponse.json({ success: false, error: 'Usuario no encontrado' }, { status: 404 });
     }
 
     // Verificar que la reseña existe
@@ -278,18 +218,12 @@ export async function DELETE(
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { success: false, error: 'Reseña no encontrada' },
-        { status: 404 },
-      );
+      return NextResponse.json({ success: false, error: 'Reseña no encontrada' }, { status: 404 });
     }
 
     // Verificar que la reseña pertenece al usuario (o es admin)
     if (existing.userId !== user.id && user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 403 },
-      );
+      return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 403 });
     }
 
     // Eliminar reseña
@@ -303,9 +237,6 @@ export async function DELETE(
     });
   } catch (error) {
     console.error('Error eliminando reseña:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error interno' },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: 'Error interno' }, { status: 500 });
   }
 }

@@ -48,7 +48,7 @@ export function useCartPersistence() {
       resetInactivityTimer();
 
       // Add listeners
-      activityEvents.forEach((event) => {
+      activityEvents.forEach(event => {
         document.addEventListener(event, resetInactivityTimer);
       });
 
@@ -73,7 +73,7 @@ export function useCartPersistence() {
 
       return () => {
         clearTimeout(inactivityTimer);
-        activityEvents.forEach((event) => {
+        activityEvents.forEach(event => {
           document.removeEventListener(event, resetInactivityTimer);
         });
         globalThis.removeEventListener('beforeunload', handleBeforeUnload);

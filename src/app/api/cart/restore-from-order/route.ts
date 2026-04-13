@@ -3,7 +3,8 @@
  * POST /api/cart/restore-from-order
  * Restaura el carrito desde un pedido cancelado
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
@@ -20,10 +21,7 @@ export async function POST(req: NextRequest) {
     const { orderId } = body;
 
     if (!orderId) {
-      return NextResponse.json(
-        { error: 'Order ID requerido' },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'Order ID requerido' }, { status: 400 });
     }
 
     // Buscar el pedido (puede ser PENDING o CANCELLED)
@@ -43,10 +41,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!order) {
-      return NextResponse.json(
-        { error: 'Pedido no encontrado o ya procesado' },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: 'Pedido no encontrado o ya procesado' }, { status: 404 });
     }
 
     // Buscar o crear carrito del usuario
@@ -72,9 +67,7 @@ export async function POST(req: NextRequest) {
       }
 
       // Verificar si el producto ya esta en el carrito
-      const existingItem = cart.items.find(
-        (item) => item.productId === orderItem.productId,
-      );
+      const existingItem = cart.items.find(item => item.productId === orderItem.productId);
 
       if (existingItem) {
         // Actualizar cantidad
@@ -105,9 +98,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error('Error restoring cart:', error);
-    return NextResponse.json(
-      { error: 'Error al restaurar carrito' },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: 'Error al restaurar carrito' }, { status: 500 });
   }
 }

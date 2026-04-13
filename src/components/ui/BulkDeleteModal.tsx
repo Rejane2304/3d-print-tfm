@@ -57,7 +57,7 @@ export function BulkDeleteModal(props: Readonly<BulkDeleteModalProps>) {
         onClose();
       }
     },
-    [onClose, isLoading]
+    [onClose, isLoading],
   );
 
   useEffect(() => {
@@ -99,9 +99,7 @@ export function BulkDeleteModal(props: Readonly<BulkDeleteModalProps>) {
 
       {/* Modal Container */}
       <div className="flex min-h-full items-center justify-center p-4 text-center">
-        <div
-          className="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all duration-300 w-full max-w-md sm:max-w-lg mx-auto scale-100"
-        >
+        <div className="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all duration-300 w-full max-w-md sm:max-w-lg mx-auto scale-100">
           {/* Header con gradiente de advertencia */}
           <div className="bg-gradient-to-r from-red-50 to-orange-50 px-6 py-4 border-b border-red-100">
             <div className="flex items-center gap-3">
@@ -109,15 +107,10 @@ export function BulkDeleteModal(props: Readonly<BulkDeleteModalProps>) {
                 <Trash2 className="h-5 w-5 text-red-600" />
               </div>
               <div>
-                <h3
-                  className="text-lg font-bold text-gray-900"
-                  id="modal-title"
-                >
+                <h3 className="text-lg font-bold text-gray-900" id="modal-title">
                   Eliminar {selectedCount} {selectedCount === 1 ? itemName : itemNamePlural}
                 </h3>
-                <p className="text-sm text-gray-600 mt-0.5">
-                  Esta acción no se puede deshacer
-                </p>
+                <p className="text-sm text-gray-600 mt-0.5">Esta acción no se puede deshacer</p>
               </div>
             </div>
           </div>
@@ -142,16 +135,12 @@ export function BulkDeleteModal(props: Readonly<BulkDeleteModalProps>) {
                 </div>
                 <div className="flex-1">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-bold text-gray-900">
-                      {selectedCount}
-                    </span>
+                    <span className="text-3xl font-bold text-gray-900">{selectedCount}</span>
                     <span className="text-sm font-medium text-gray-600">
                       {selectedCount === 1 ? itemName : itemNamePlural} seleccionados
                     </span>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Se eliminarán permanentemente de la base de datos
-                  </p>
+                  <p className="text-xs text-gray-500 mt-1">Se eliminarán permanentemente de la base de datos</p>
                 </div>
               </div>
             </div>
@@ -168,8 +157,8 @@ export function BulkDeleteModal(props: Readonly<BulkDeleteModalProps>) {
                       Atención: Hay {associatedItemCount} {associatedItemType} asociados
                     </p>
                     <p className="text-sm text-yellow-700 mt-1">
-                      Algunos {itemNamePlural} no se pueden eliminar porque tienen {associatedItemType} vinculados.
-                      Los elementos que no puedan eliminarse permanecerán en la lista.
+                      Algunos {itemNamePlural} no se pueden eliminar porque tienen {associatedItemType} vinculados. Los
+                      elementos que no puedan eliminarse permanecerán en la lista.
                     </p>
                   </div>
                 </div>
@@ -182,9 +171,7 @@ export function BulkDeleteModal(props: Readonly<BulkDeleteModalProps>) {
                 onClick={() => setShowDetails(!showDetails)}
                 className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors"
               >
-                <span className="text-sm font-medium text-gray-700">
-                  ¿Qué sucederá al eliminar?
-                </span>
+                <span className="text-sm font-medium text-gray-700">¿Qué sucederá al eliminar?</span>
                 <svg
                   className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
                     showDetails ? 'rotate-180' : ''
@@ -193,12 +180,7 @@ export function BulkDeleteModal(props: Readonly<BulkDeleteModalProps>) {
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
               {showDetails && (
@@ -215,7 +197,9 @@ export function BulkDeleteModal(props: Readonly<BulkDeleteModalProps>) {
                     {hasAssociatedItems && (
                       <li className="flex items-start gap-2">
                         <span className="text-yellow-500 mt-0.5">•</span>
-                        <span>Los {itemNamePlural} con {associatedItemType} no se eliminarán</span>
+                        <span>
+                          Los {itemNamePlural} con {associatedItemType} no se eliminarán
+                        </span>
                       </li>
                     )}
                     <li className="flex items-start gap-2">
@@ -253,14 +237,7 @@ export function BulkDeleteModal(props: Readonly<BulkDeleteModalProps>) {
                       fill="none"
                       viewBox="0 0 24 24"
                     >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path
                         className="opacity-75"
                         fill="currentColor"

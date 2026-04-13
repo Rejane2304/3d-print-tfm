@@ -43,7 +43,7 @@ export default function FAQsPage() {
     loadFAQs();
   }, []);
 
-  const loadFAQs = async() => {
+  const loadFAQs = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -72,20 +72,18 @@ export default function FAQsPage() {
     const query = searchQuery.toLowerCase().trim();
 
     return categories
-      .map((category) => ({
+      .map(category => ({
         ...category,
         faqs: category.faqs.filter(
-          (faq) =>
-            faq.pregunta.toLowerCase().includes(query) ||
-            faq.respuesta.toLowerCase().includes(query),
+          faq => faq.pregunta.toLowerCase().includes(query) || faq.respuesta.toLowerCase().includes(query),
         ),
       }))
-      .filter((category) => category.faqs.length > 0);
+      .filter(category => category.faqs.length > 0);
   }, [categories, searchQuery]);
 
   // Expandir/colapsar item
   const toggleItem = (id: string) => {
-    setExpandedItems((prev) => {
+    setExpandedItems(prev => {
       const newSet = new Set(prev);
       if (newSet.has(id)) {
         newSet.delete(id);
@@ -98,11 +96,11 @@ export default function FAQsPage() {
 
   // Expandir todos de una categoría
   const expandCategory = (categoryName: string) => {
-    const category = categories.find((c) => c.nombre === categoryName);
+    const category = categories.find(c => c.nombre === categoryName);
     if (category) {
-      setExpandedItems((prev) => {
+      setExpandedItems(prev => {
         const newSet = new Set(prev);
-        category.faqs.forEach((faq) => newSet.add(faq.id));
+        category.faqs.forEach(faq => newSet.add(faq.id));
         return newSet;
       });
     }
@@ -116,8 +114,8 @@ export default function FAQsPage() {
   // Expandir todos
   const expandAll = () => {
     const allIds = new Set<string>();
-    filteredCategories.forEach((cat) => {
-      cat.faqs.forEach((faq) => allIds.add(faq.id));
+    filteredCategories.forEach(cat => {
+      cat.faqs.forEach(faq => allIds.add(faq.id));
     });
     setExpandedItems(allIds);
   };
@@ -159,12 +157,9 @@ export default function FAQsPage() {
           <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-16 md:py-24">
             <div className="text-center max-w-3xl mx-auto">
               <HelpCircle className="h-16 w-16 mx-auto mb-6 opacity-80" />
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">
-                Preguntas Frecuentes
-              </h1>
+              <h1 className="text-4xl md:text-5xl font-bold mb-4">Preguntas Frecuentes</h1>
               <p className="text-xl text-indigo-100 mb-8">
-                Encuentra respuestas a tus dudas sobre nuestros productos,
-                envíos y más
+                Encuentra respuestas a tus dudas sobre nuestros productos, envíos y más
               </p>
 
               {/* Search Box */}
@@ -174,7 +169,7 @@ export default function FAQsPage() {
                   type="text"
                   placeholder="Buscar en las FAQs..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={e => setSearchQuery(e.target.value)}
                   className="w-full pl-12 pr-4 py-4 rounded-xl text-gray-900 placeholder-gray-500 focus:ring-4 \
                     focus:ring-white/30 focus:outline-none"
                 />
@@ -204,12 +199,8 @@ export default function FAQsPage() {
           {!loading && !error && filteredCategories.length === 0 && (
             <div className="text-center py-16">
               <HelpCircle className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                No se encontraron resultados
-              </h3>
-              <p className="text-gray-600 mb-6">
-                No hay FAQs que coincidan con tu búsqueda.
-              </p>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">No se encontraron resultados</h3>
+              <p className="text-gray-600 mb-6">No hay FAQs que coincidan con tu búsqueda.</p>
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
@@ -226,25 +217,19 @@ export default function FAQsPage() {
               {/* Sidebar - Category Navigation */}
               <div className="lg:col-span-1">
                 <div className="sticky top-8">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                    Categorías
-                  </h2>
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Categorías</h2>
                   <nav className="space-y-1">
-                    {categories.map((category) => (
+                    {categories.map(category => (
                       <button
                         key={category.nombre}
                         onClick={() => scrollToCategory(category.nombre)}
                         className={`w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center \
   justify-between ${
-                      activeCategory === category.nombre
-                        ? 'bg-indigo-50 text-indigo-700'
-                        : 'hover:bg-gray-100 text-gray-700'
-                      }`}
+    activeCategory === category.nombre ? 'bg-indigo-50 text-indigo-700' : 'hover:bg-gray-100 text-gray-700'
+  }`}
                       >
                         <span>{category.nombre}</span>
-                        <span className="text-sm text-gray-400">
-                          {category.faqs.length}
-                        </span>
+                        <span className="text-sm text-gray-400">{category.faqs.length}</span>
                       </button>
                     ))}
                   </nav>
@@ -252,12 +237,8 @@ export default function FAQsPage() {
                   {/* Contact CTA */}
                   <div className="mt-8 p-4 bg-white rounded-lg shadow-sm border border-gray-200">
                     <MessageCircle className="h-8 w-8 text-indigo-600 mb-3" />
-                    <h3 className="font-medium text-gray-900 mb-2">
-                      ¿No encuentras tu respuesta?
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-4">
-                      Contáctanos y te ayudaremos con tu consulta.
-                    </p>
+                    <h3 className="font-medium text-gray-900 mb-2">¿No encuentras tu respuesta?</h3>
+                    <p className="text-sm text-gray-600 mb-4">Contáctanos y te ayudaremos con tu consulta.</p>
                     <Link
                       href="/contact"
                       className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-medium \
@@ -275,24 +256,14 @@ export default function FAQsPage() {
                 {/* Controls */}
                 <div className="flex items-center justify-between mb-6">
                   <p className="text-sm text-gray-600">
-                    {filteredCategories.reduce(
-                      (acc, cat) => acc + cat.faqs.length,
-                      0,
-                    )}{' '}
-                    preguntas encontradas
+                    {filteredCategories.reduce((acc, cat) => acc + cat.faqs.length, 0)} preguntas encontradas
                   </p>
                   <div className="flex gap-2">
-                    <button
-                      onClick={expandAll}
-                      className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
-                    >
+                    <button onClick={expandAll} className="text-sm text-indigo-600 hover:text-indigo-800 font-medium">
                       Expandir todo
                     </button>
                     <span className="text-gray-300">|</span>
-                    <button
-                      onClick={collapseAll}
-                      className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
-                    >
+                    <button onClick={collapseAll} className="text-sm text-indigo-600 hover:text-indigo-800 font-medium">
                       Colapsar todo
                     </button>
                   </div>
@@ -300,7 +271,7 @@ export default function FAQsPage() {
 
                 {/* FAQs by Category */}
                 <div className="space-y-8">
-                  {filteredCategories.map((category) => (
+                  {filteredCategories.map(category => (
                     <div
                       key={category.nombre}
                       id={`category-${category.nombre}`}
@@ -309,9 +280,7 @@ export default function FAQsPage() {
                       {/* Category Header */}
                       <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
                         <div className="flex items-center justify-between">
-                          <h2 className="text-lg font-semibold text-gray-900">
-                            {category.nombre}
-                          </h2>
+                          <h2 className="text-lg font-semibold text-gray-900">{category.nombre}</h2>
                           <button
                             onClick={() => expandCategory(category.nombre)}
                             className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
@@ -323,19 +292,14 @@ export default function FAQsPage() {
 
                       {/* FAQs Accordion */}
                       <div className="divide-y divide-gray-200">
-                        {category.faqs.map((faq) => (
-                          <div
-                            key={faq.id}
-                            className="border-b border-gray-100 last:border-b-0"
-                          >
+                        {category.faqs.map(faq => (
+                          <div key={faq.id} className="border-b border-gray-100 last:border-b-0">
                             <button
                               onClick={() => toggleItem(faq.id)}
                               className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 \
                                 transition-colors text-left"
                             >
-                              <span className="font-medium text-gray-900 pr-4">
-                                {faq.pregunta}
-                              </span>
+                              <span className="font-medium text-gray-900 pr-4">{faq.pregunta}</span>
                               {expandedItems.has(faq.id) ? (
                                 <ChevronUp className="h-5 w-5 text-gray-400 flex-shrink-0" />
                               ) : (
@@ -347,16 +311,14 @@ export default function FAQsPage() {
                             {expandedItems.has(faq.id) && (
                               <div className="px-6 pb-4">
                                 <div className="prose prose-indigo max-w-none text-gray-600">
-                                  {faq.respuesta
-                                    .split('\n')
-                                    .map((paragraph) => {
-                                      const key = `${faq.id}-${paragraph.slice(0, 16)}`;
-                                      return (
-                                        <p key={key} className="mb-2 last:mb-0">
-                                          {paragraph}
-                                        </p>
-                                      );
-                                    })}
+                                  {faq.respuesta.split('\n').map(paragraph => {
+                                    const key = `${faq.id}-${paragraph.slice(0, 16)}`;
+                                    return (
+                                      <p key={key} className="mb-2 last:mb-0">
+                                        {paragraph}
+                                      </p>
+                                    );
+                                  })}
                                 </div>
                               </div>
                             )}

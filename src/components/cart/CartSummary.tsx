@@ -1,4 +1,3 @@
-
 'use client';
 /**
  * Updated CartSummary Component with Coupon Support
@@ -78,9 +77,7 @@ const CartSummary: React.FC<Readonly<CartSummaryProps>> = ({
             <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-gray-50 rounded-lg">
               <div className="flex items-center gap-2 mb-2 sm:mb-3">
                 <Tag className="h-4 w-4 text-indigo-600 flex-shrink-0" />
-                <span className="text-sm font-medium text-gray-700">
-                  Código de descuento
-                </span>
+                <span className="text-sm font-medium text-gray-700">Código de descuento</span>
               </div>
               <CouponSelector
                 onApply={onApplyCoupon}
@@ -103,23 +100,15 @@ const CartSummary: React.FC<Readonly<CartSummaryProps>> = ({
           {/* Descuento por cupón */}
           {couponDiscount > 0 && (
             <div className="flex justify-between py-2 border-b border-gray-100 text-sm sm:text-base">
-              <span className="text-green-600">
-                Descuento {appliedCoupon?.code && `(${appliedCoupon.code})`}
-              </span>
-              <span className="font-medium text-green-600">
-                -{couponDiscount.toFixed(2)} €
-              </span>
+              <span className="text-green-600">Descuento {appliedCoupon?.code && `(${appliedCoupon.code})`}</span>
+              <span className="font-medium text-green-600">-{couponDiscount.toFixed(2)} €</span>
             </div>
           )}
 
           {/* Envío */}
           <div className="flex justify-between py-2 border-b border-gray-100 text-sm sm:text-base">
             <span className="text-gray-600">Envío</span>
-            <span
-              className={
-                isFreeShipping ? 'text-green-600 font-medium' : 'font-medium'
-              }
-            >
+            <span className={isFreeShipping ? 'text-green-600 font-medium' : 'font-medium'}>
               {isFreeShipping ? 'Gratis' : `${shipping.toFixed(2)} €`}
             </span>
           </div>
@@ -127,8 +116,7 @@ const CartSummary: React.FC<Readonly<CartSummaryProps>> = ({
           {/* Info envío gratis */}
           {!isFreeShipping && subtotal > 0 && (
             <div className="text-xs sm:text-sm text-blue-600 mt-2">
-              Te falta {(freeShippingFrom - subtotal).toFixed(2)} € para envío
-              gratis
+              Te falta {(freeShippingFrom - subtotal).toFixed(2)} € para envío gratis
             </div>
           )}
 
@@ -140,12 +128,8 @@ const CartSummary: React.FC<Readonly<CartSummaryProps>> = ({
 
           {/* Total Final */}
           <div className="flex justify-between py-3 sm:py-4 mt-3 sm:mt-4 border-t-2 border-gray-200">
-            <span className="text-base sm:text-lg font-bold text-gray-900">
-              Total a pagar
-            </span>
-            <span className="text-xl sm:text-2xl font-bold text-indigo-600">
-              {total.toFixed(2)} €
-            </span>
+            <span className="text-base sm:text-lg font-bold text-gray-900">Total a pagar</span>
+            <span className="text-xl sm:text-2xl font-bold text-indigo-600">{total.toFixed(2)} €</span>
           </div>
 
           {/* Botones de acción */}
@@ -188,12 +172,8 @@ const CartSummary: React.FC<Readonly<CartSummaryProps>> = ({
         /* Carrito vacío */
         <div className="text-center py-6 sm:py-8">
           <ShoppingCart className="h-12 w-12 sm:h-16 sm:w-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">
-            Tu carrito está vacío
-          </h3>
-          <p className="text-sm sm:text-base text-gray-500 mb-4 sm:mb-6">
-            Añade algunos productos para continuar
-          </p>
+          <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">Tu carrito está vacío</h3>
+          <p className="text-sm sm:text-base text-gray-500 mb-4 sm:mb-6">Añade algunos productos para continuar</p>
           <button
             type="button"
             onClick={onContinueShopping}

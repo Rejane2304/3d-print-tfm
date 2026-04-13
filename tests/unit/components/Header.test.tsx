@@ -1,7 +1,7 @@
 /**
  * Tests de Componentes - Header
  * Tests para el componente de navegación principal
- * 
+ *
  * CAMBIOS REALIZADOS:
  * - Carrito ahora visible para usuarios no autenticados (invitados)
  * - El carrito funciona con localStorage para invitados y API para autenticados
@@ -32,7 +32,9 @@ vi.mock('next/image', () => ({
 vi.mock('next/link', () => ({
   __esModule: true,
   default: ({ children, href, ...props }: { children: React.ReactNode; href: string; [key: string]: any }) => (
-    <a href={href} {...props}>{children}</a>
+    <a href={href} {...props}>
+      {children}
+    </a>
   ),
 }));
 
@@ -169,7 +171,9 @@ describe('Header Component', () => {
       const userMenuButton = screen.getByTestId('user-menu-button');
       fireEvent.click(userMenuButton);
 
-      const pedidosLink = screen.getByRole('menuitem', { name: /mis pedidos/i });
+      const pedidosLink = screen.getByRole('menuitem', {
+        name: /mis pedidos/i,
+      });
       expect(pedidosLink).toHaveAttribute('href', '/account/orders');
     });
 
@@ -219,7 +223,9 @@ describe('Header Component', () => {
       const userMenuButton = screen.getByTestId('user-menu-button');
       fireEvent.click(userMenuButton);
 
-      const logoutButton = screen.getByRole('menuitem', { name: /cerrar sesión/i });
+      const logoutButton = screen.getByRole('menuitem', {
+        name: /cerrar sesión/i,
+      });
       fireEvent.click(logoutButton);
 
       expect(mockSignOut).toHaveBeenCalledWith({ callbackUrl: '/' });

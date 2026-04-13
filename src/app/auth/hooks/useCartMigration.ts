@@ -45,7 +45,7 @@ export function useCartMigration() {
     sessionStorage.removeItem('migratingCart');
   }, []);
 
-  const migrateItem = async(item: CartItem): Promise<MigrationResult> => {
+  const migrateItem = async (item: CartItem): Promise<MigrationResult> => {
     try {
       const response = await fetch('/api/cart', {
         method: 'POST',
@@ -70,7 +70,7 @@ export function useCartMigration() {
     }
   };
 
-  const migrateCart = async(): Promise<void> => {
+  const migrateCart = async (): Promise<void> => {
     const items = getLocalCart();
     if (!items) {
       return;

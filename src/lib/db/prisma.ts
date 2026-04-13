@@ -3,6 +3,7 @@
  * Optimized for serverless environments with connection limits
  */
 import { PrismaClient } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -16,10 +17,8 @@ const prismaClientSingleton = () => {
         url: process.env.DATABASE_URL,
       },
     },
-    // Log queries only in development
-    log: process.env.NODE_ENV === 'development'
-      ? ['query', 'error', 'warn']
-      : ['error'],
+    // Solo log queries en development cuando se habilita explícitamente
+    log: process.env.PRISMA_LOG_QUERIES === 'true' ? ['query', 'error', 'warn'] : ['error'],
   });
 };
 
@@ -33,19 +32,20 @@ if (process.env.NODE_ENV !== 'production') {
 // Función para cerrar conexiones limpiamente
 export async function disconnectPrisma(): Promise<void> {
   await prisma.$disconnect();
+  logger.info('Prisma disconnected cleanly');
 }
 
-// Manejar cierre graceful
-process.on('beforeExit', async() => {
+// Manejar cierre graceful con logger
+process.on('beforeExit', async () => {
   await prisma.$disconnect();
 });
 
-process.on('SIGINT', async() => {
+process.on('SIGINT', async () => {
   await prisma.$disconnect();
   process.exit(0);
 });
 
-process.on('SIGTERM', async() => {
+process.on('SIGTERM', async () => {
   await prisma.$disconnect();
   process.exit(0);
 });

@@ -47,9 +47,7 @@ async function checkCancelledOrders(): Promise<Issue | null> {
   }
 
   const orderIds = orders.map(o => o.id);
-  const details = orders.map(o =>
-    `${o.orderNumber} -> Factura ${o.invoice?.invoiceNumber || 'N/A'}`
-  ).join(', ');
+  const details = orders.map(o => `${o.orderNumber} -> Factura ${o.invoice?.invoiceNumber || 'N/A'}`).join(', ');
 
   return {
     category: 'Pedidos Cancelados',
@@ -113,10 +111,12 @@ async function checkOldPending(): Promise<Issue | null> {
   }
 
   const orderIds = orders.map(o => o.id);
-  const details = orders.map(o => {
-    const date = o.createdAt.toISOString().split('T')[0];
-    return `${o.orderNumber} (${date})`;
-  }).join(', ');
+  const details = orders
+    .map(o => {
+      const date = o.createdAt.toISOString().split('T')[0];
+      return `${o.orderNumber} (${date})`;
+    })
+    .join(', ');
 
   return {
     category: 'Pedidos Huérfanos',
@@ -125,7 +125,7 @@ async function checkOldPending(): Promise<Issue | null> {
     count: orders.length,
     details,
     sql:
-      '-- Cancelar: UPDATE orders SET status=\'CANCELLED\',cancelled_at=NOW()' +
+      "-- Cancelar: UPDATE orders SET status='CANCELLED',cancelled_at=NOW()" +
       ` WHERE id IN (${generateInClause(orderIds)});`,
   };
 }
@@ -184,7 +184,11 @@ async function checkStockMismatch(): Promise<Issue | null> {
     }
 
     if (calculated !== product.stock) {
-      mismatches.push({ name: product.name, current: product.stock, calculated });
+      mismatches.push({
+        name: product.name,
+        current: product.stock,
+        calculated,
+      });
     }
   }
 
@@ -346,7 +350,7 @@ async function auditDatabase() {
   await prisma.$disconnect();
 }
 
-auditDatabase().catch(async(error) => {
+auditDatabase().catch(async error => {
   console.error('Error:', error);
   await prisma.$disconnect();
   process.exit(1);

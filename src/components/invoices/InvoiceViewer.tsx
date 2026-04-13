@@ -506,10 +506,10 @@ export function InvoiceViewer({ data }: Readonly<InvoiceViewerProps>) {
 
   const fechaEmision = data.issuedAt
     ? new Date(data.issuedAt).toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric',
-    })
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+      })
     : 'Fecha no disponible';
 
   const formatCurrency = (amount: number) =>
@@ -532,18 +532,18 @@ export function InvoiceViewer({ data }: Readonly<InvoiceViewerProps>) {
   // Generar HTML de items
   const itemsHTML = data.items
     .map(
-      (item) => `
+      item => `
     <tr>
       <td>
         <div class="product-cell">
           ${
-  item.image
-    ? `
+            item.image
+              ? `
             <div class="product-image-container">
               <img src="${item.image}" alt="${item.name}">
             </div>
           `
-    : `
+              : `
             <div class="product-image-placeholder">
               <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 // eslint-disable-next-line max-len, max-len, max-len
@@ -556,7 +556,7 @@ export function InvoiceViewer({ data }: Readonly<InvoiceViewerProps>) {
               </svg>
             </div>
           `
-}
+          }
           <div class="product-info">
             <span class="product-name">${item.name}</span>
             ${item.description ? `<span class="product-description">${item.description}</span>` : ''}
@@ -615,25 +615,25 @@ export function InvoiceViewer({ data }: Readonly<InvoiceViewerProps>) {
                 ${data.clientCountry || 'España'}
               </div>
               ${(() => {
-    if (!data.clientEmail && !data.clientPhone) {
-      return '';
-    }
-    let contact = '';
-    if (data.clientEmail) {
-      contact += `✉ ${data.clientEmail}`;
-    }
-    if (data.clientEmail && data.clientPhone) {
-      contact += ' · ';
-    }
-    if (data.clientPhone) {
-      contact += `📞 ${data.clientPhone}`;
-    }
-    return `
+                if (!data.clientEmail && !data.clientPhone) {
+                  return '';
+                }
+                let contact = '';
+                if (data.clientEmail) {
+                  contact += `✉ ${data.clientEmail}`;
+                }
+                if (data.clientEmail && data.clientPhone) {
+                  contact += ' · ';
+                }
+                if (data.clientPhone) {
+                  contact += `📞 ${data.clientPhone}`;
+                }
+                return `
               <div class="client-contact">
                 ${contact}
               </div>
               `;
-  })()}
+              })()}
 }
             </div>
 
@@ -711,8 +711,8 @@ export function InvoiceViewer({ data }: Readonly<InvoiceViewerProps>) {
               </div>
             </div>
             ${
-  data.orderNumber
-    ? `
+              data.orderNumber
+                ? `
             <div class="footer-block">
               <div class="footer-icon">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -730,8 +730,8 @@ export function InvoiceViewer({ data }: Readonly<InvoiceViewerProps>) {
               </div>
             </div>
             `
-    : ''
-}
+                : ''
+            }
           </div>
 
           <div class="footer-note">
@@ -828,7 +828,7 @@ export function useInvoiceData(invoiceData: {
     clientEmail: invoiceData.clienteEmail,
     clientPhone: invoiceData.clienteTelefono,
     items:
-      invoiceData.order?.items?.map((item) => ({
+      invoiceData.order?.items?.map(item => ({
         id: item.id,
         name: item.name || item.nombre || '',
         quantity: item.quantity,

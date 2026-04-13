@@ -18,7 +18,10 @@ describe('Authentication Validations', () => {
     });
 
     it('should validate email format', () => {
-      const result = validateLogin({ email: 'invalid-email', password: 'password123' });
+      const result = validateLogin({
+        email: 'invalid-email',
+        password: 'password123',
+      });
       expect(result.valid).toBe(false);
       expect(result.errors).toContain('Invalid email format');
     });
@@ -30,13 +33,19 @@ describe('Authentication Validations', () => {
     });
 
     it('should validate minimum password length', () => {
-      const result = validateLogin({ email: 'test@example.com', password: '123' });
+      const result = validateLogin({
+        email: 'test@example.com',
+        password: '123',
+      });
       expect(result.valid).toBe(false);
       expect(result.errors).toContain('Password must be at least 8 characters long');
     });
 
     it('should accept valid credentials', () => {
-      const result = validateLogin({ email: 'test@example.com', password: 'Password123!' });
+      const result = validateLogin({
+        email: 'test@example.com',
+        password: 'Password123!',
+      });
       expect(result.valid).toBe(true);
       expect(result.errors).toHaveLength(0);
     });
@@ -316,13 +325,13 @@ describe('User Validations', () => {
 
 function validateLogin(data: { email: string; password: string }) {
   const errors: string[] = [];
-  
+
   if (!data.email) errors.push('Email is required');
   else if (!data.email.includes('@')) errors.push('Invalid email format');
-  
+
   if (!data.password) errors.push('Password is required');
   else if (data.password.length < 8) errors.push('Password must be at least 8 characters long');
-  
+
   return { valid: errors.length === 0, errors };
 }
 
@@ -334,21 +343,24 @@ function validateRegistration(data: {
   phone: string;
 }) {
   const errors: string[] = [];
-  
+
   if (!data.name) errors.push('Name is required');
   else if (data.name.length < 3) errors.push('Name must be at least 3 characters long');
-  
+
   if (data.password !== data.confirmPassword) errors.push('Passwords do not match');
-  
+
   const phoneRegex = /^\+34\s?\d{3}\s?\d{3}\s?\d{3}$/;
   if (data.phone && !phoneRegex.test(data.phone)) {
     errors.push('Invalid phone format');
   }
-  
+
   // Login validations also apply
-  const loginValidation = validateLogin({ email: data.email, password: data.password });
+  const loginValidation = validateLogin({
+    email: data.email,
+    password: data.password,
+  });
   errors.push(...loginValidation.errors);
-  
+
   return { valid: errors.length === 0, errors };
 }
 
@@ -363,20 +375,20 @@ function validateProduct(data: {
   const errors: string[] = [];
   const validCategories = ['DECORATION', 'ACCESSORIES', 'FUNCTIONAL', 'ARTICULATED', 'TOYS'];
   const validMaterials = ['PLA', 'PETG', 'ABS', 'TPU'];
-  
+
   if (!data.name) errors.push('Product name is required');
   else if (data.name.length > 200) errors.push('Name cannot exceed 200 characters');
-  
+
   if (!data.description) errors.push('Description is required');
-  
+
   if (data.price <= 0) errors.push('Price must be greater than 0');
   else if (data.price > 99999.99) errors.push('Maximum allowed price is 99999.99');
-  
+
   if (data.stock < 0) errors.push('Stock cannot be negative');
-  
+
   if (!validCategories.includes(data.category)) errors.push('Invalid category');
   if (!validMaterials.includes(data.material)) errors.push('Invalid material');
-  
+
   return { valid: errors.length === 0, errors };
 }
 
@@ -386,7 +398,7 @@ function validateOrder(data: {
   notes?: string;
 }) {
   const errors: string[] = [];
-  
+
   if (!data.items || data.items.length === 0) {
     errors.push('Order must contain at least one product');
   } else {
@@ -395,40 +407,49 @@ function validateOrder(data: {
       if (item.quantity > 100) errors.push('Maximum quantity per product is 100 units');
     }
   }
-  
+
   if (!data.shippingAddressId) errors.push('Shipping address is required');
-  
+
   if (data.notes && data.notes.length > 1000) {
     errors.push('Notes cannot exceed 1000 characters');
   }
-  
+
   return { valid: errors.length === 0, errors };
 }
 
 function validateStatusChange(currentStatus: string, newStatus: string) {
   const validTransitions: Record<string, string[]> = {
-    'PENDING': ['CONFIRMED', 'CANCELLED'],
-    'CONFIRMED': ['PREPARING', 'CANCELLED'],
-    'PREPARING': ['SHIPPED'],
-    'SHIPPED': ['DELIVERED'],
-    'DELIVERED': [],
-    'CANCELLED': [],
+    PENDING: ['CONFIRMED', 'CANCELLED'],
+    CONFIRMED: ['PREPARING', 'CANCELLED'],
+    PREPARING: ['SHIPPED'],
+    SHIPPED: ['DELIVERED'],
+    DELIVERED: [],
+    CANCELLED: [],
   };
-  
+
   if (currentStatus === newStatus) {
-    return { valid: false, error: 'New status must be different from current status' };
+    return {
+      valid: false,
+      error: 'New status must be different from current status',
+    };
   }
-  
+
   if (!validTransitions[currentStatus]?.includes(newStatus)) {
     if (newStatus === 'CANCELLED' && ['SHIPPED', 'DELIVERED'].includes(currentStatus)) {
-      return { valid: false, error: 'Cannot cancel an order that has already been shipped or delivered' };
+      return {
+        valid: false,
+        error: 'Cannot cancel an order that has already been shipped or delivered',
+      };
     }
     if (validTransitions[currentStatus] && newStatus < currentStatus) {
       return { valid: false, error: 'Cannot revert order status' };
     }
-    return { valid: false, error: `Invalid transition from ${currentStatus} to ${newStatus}` };
+    return {
+      valid: false,
+      error: `Invalid transition from ${currentStatus} to ${newStatus}`,
+    };
   }
-  
+
   return { valid: true, error: null };
 }
 
@@ -444,11 +465,11 @@ function validatePayment(data: { amount: number; method: string }) {
 
 function validateUser(data: { name: string; email: string; phone?: string; nif?: string }) {
   const errors: string[] = [];
-  
+
   if (data.nif) {
     const nifRegex = /^\d{8}[A-Z]$/;
     if (!nifRegex.test(data.nif)) errors.push('Invalid NIF format');
   }
-  
+
   return { valid: errors.length === 0, errors };
 }

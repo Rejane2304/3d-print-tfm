@@ -8,15 +8,9 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import {
-  AlertCircle,
-  Edit,
-  HelpCircle,
-  Loader2,
-  Plus,
-  Trash2,
-} from 'lucide-react';
-import { BulkAction, Column, DataTable } from '@/components/ui/DataTable';
+import { AlertCircle, Edit, HelpCircle, Loader2, Plus, Trash2 } from 'lucide-react';
+import type { BulkAction, Column } from '@/components/ui/DataTable';
+import { DataTable } from '@/components/ui/DataTable';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { BulkDeleteModal } from '@/components/ui/BulkDeleteModal';
 
@@ -61,7 +55,7 @@ export default function AdminFAQsPage() {
     }
   }, [status, session, router]);
 
-  const loadFAQs = async() => {
+  const loadFAQs = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -86,7 +80,7 @@ export default function AdminFAQsPage() {
     setModalOpen(true);
   };
 
-  const confirmDelete = async() => {
+  const confirmDelete = async () => {
     if (!faqToDelete) {
       return;
     }
@@ -99,7 +93,7 @@ export default function AdminFAQsPage() {
       const data = await response.json();
 
       if (response.ok) {
-        setFaqs(faqs.filter((f) => f.id !== faqToDelete.id));
+        setFaqs(faqs.filter(f => f.id !== faqToDelete.id));
       } else {
         throw new Error(data.error || 'Error eliminando FAQ');
       }
@@ -116,12 +110,12 @@ export default function AdminFAQsPage() {
     setBulkDeleteModalOpen(true);
   };
 
-  const confirmBulkDelete = async() => {
+  const confirmBulkDelete = async () => {
     try {
       let hasError = false;
 
       await Promise.all(
-        selectedIdsToDelete.map(async(id) => {
+        selectedIdsToDelete.map(async id => {
           const response = await fetch(`/api/admin/faqs/${id}`, {
             method: 'DELETE',
           });
@@ -135,7 +129,7 @@ export default function AdminFAQsPage() {
         setError('Algunas FAQs no pudieron ser eliminadas');
       }
 
-      setFaqs(faqs.filter((f) => !selectedIdsToDelete.includes(f.id)));
+      setFaqs(faqs.filter(f => !selectedIdsToDelete.includes(f.id)));
     } catch {
       setError('Error eliminando FAQs');
     } finally {
@@ -145,7 +139,7 @@ export default function AdminFAQsPage() {
   };
 
   // Extraer categorías únicas para estadísticas
-  const categories = Array.from(new Set(faqs.map((f) => f.categoria)));
+  const categories = Array.from(new Set(faqs.map(f => f.categoria)));
 
   const columns: Column<FAQ>[] = [
     {
@@ -155,9 +149,7 @@ export default function AdminFAQsPage() {
       className: '',
       render: (_, faq) => (
         <div className="flex flex-col min-w-0">
-          <span className="text-sm font-medium text-gray-900 line-clamp-2 max-w-md">
-            {faq.pregunta}
-          </span>
+          <span className="text-sm font-medium text-gray-900 line-clamp-2 max-w-md">{faq.pregunta}</span>
           <span className="text-xs text-gray-500 mt-1 line-clamp-1 max-w-md hidden sm:block">
             {faq.respuesta.substring(0, 100)}...
           </span>
@@ -169,7 +161,7 @@ export default function AdminFAQsPage() {
       header: 'Categoría',
       sortable: true,
       className: 'hidden sm:table-cell',
-      render: (value) => (
+      render: value => (
         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
           {value as string}
         </span>
@@ -180,7 +172,7 @@ export default function AdminFAQsPage() {
       header: 'Orden',
       sortable: true,
       className: 'hidden md:table-cell',
-      render: (value) => (
+      render: value => (
         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
           {value as number}
         </span>
@@ -191,7 +183,7 @@ export default function AdminFAQsPage() {
       header: 'Estado',
       sortable: true,
       className: 'hidden lg:table-cell',
-      render: (value) => (
+      render: value => (
         <span
           className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
             value ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
@@ -215,7 +207,7 @@ export default function AdminFAQsPage() {
             <Edit className="h-4 w-4" />
           </Link>
           <button
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               handleDelete(faq);
             }}
@@ -258,15 +250,10 @@ export default function AdminFAQsPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <HelpCircle className="h-8 w-8 text-indigo-600" />
-              <h1 className="text-2xl font-bold text-gray-900">
-                Gestión de FAQs
-              </h1>
+              <h1 className="text-2xl font-bold text-gray-900">Gestión de FAQs</h1>
             </div>
             <div className="flex items-center gap-4">
-              <Link
-                href="/admin/dashboard"
-                className="text-indigo-600 hover:text-indigo-800 font-medium"
-              >
+              <Link href="/admin/dashboard" className="text-indigo-600 hover:text-indigo-800 font-medium">
                 ← Volver al Panel
               </Link>
               <Link
@@ -286,10 +273,7 @@ export default function AdminFAQsPage() {
         <nav className="flex mb-6" aria-label="Breadcrumb">
           <ol className="flex items-center space-x-2">
             <li>
-              <Link
-                href="/admin/dashboard"
-                className="text-gray-500 hover:text-gray-700"
-              >
+              <Link href="/admin/dashboard" className="text-gray-500 hover:text-gray-700">
                 Panel
               </Link>
             </li>
@@ -316,21 +300,15 @@ export default function AdminFAQsPage() {
           </div>
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <p className="text-sm text-gray-500">Activas</p>
-            <p className="text-2xl font-bold text-green-600">
-              {faqs.filter((f) => f.activo).length}
-            </p>
+            <p className="text-2xl font-bold text-green-600">{faqs.filter(f => f.activo).length}</p>
           </div>
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <p className="text-sm text-gray-500">Inactivas</p>
-            <p className="text-2xl font-bold text-gray-600">
-              {faqs.filter((f) => !f.activo).length}
-            </p>
+            <p className="text-2xl font-bold text-gray-600">{faqs.filter(f => !f.activo).length}</p>
           </div>
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <p className="text-sm text-gray-500">Categorías</p>
-            <p className="text-2xl font-bold text-blue-600">
-              {categories.length}
-            </p>
+            <p className="text-2xl font-bold text-blue-600">{categories.length}</p>
           </div>
         </div>
 
@@ -352,7 +330,7 @@ export default function AdminFAQsPage() {
           loading={loading}
           emptyMessage="No se encontraron FAQs"
           noResultsMessage="Ninguna FAQ coincide con tu búsqueda"
-          onRowClick={(faq) => router.push(`/admin/faqs/${faq.id}`)}
+          onRowClick={faq => router.push(`/admin/faqs/${faq.id}`)}
         />
       </div>
 

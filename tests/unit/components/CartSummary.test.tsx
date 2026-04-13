@@ -58,29 +58,14 @@ describe('CartSummary', () => {
   });
 
   it('debe mostrar envío gratis si supera el mínimo', () => {
-    render(
-      <CartSummary 
-        items={mockItems} 
-        subtotal={60} 
-        shippingCost={0} 
-        freeShippingFrom={50}
-        {...mockHandlers} 
-      />
-    );
+    render(<CartSummary items={mockItems} subtotal={60} shippingCost={0} freeShippingFrom={50} {...mockHandlers} />);
 
     expect(screen.getByText('Envío')).toBeInTheDocument();
     expect(screen.getByText('Gratis')).toBeInTheDocument();
   });
 
   it('debe calcular y mostrar total correctamente', () => {
-    render(
-      <CartSummary 
-        items={mockItems} 
-        subtotal={109.97} 
-        shippingCost={5.99}
-        {...mockHandlers} 
-      />
-    );
+    render(<CartSummary items={mockItems} subtotal={109.97} shippingCost={5.99} {...mockHandlers} />);
 
     // Total = 109.97 + 5.99 = 115.96
     expect(screen.getByText('Total')).toBeInTheDocument();
@@ -90,21 +75,27 @@ describe('CartSummary', () => {
   it('debe habilitar botón de checkout con items', () => {
     render(<CartSummary items={mockItems} subtotal={109.97} {...mockHandlers} />);
 
-    const checkoutButton = screen.getByRole('button', { name: /proceder al pago/i });
+    const checkoutButton = screen.getByRole('button', {
+      name: /proceder al pago/i,
+    });
     expect(checkoutButton).toBeEnabled();
   });
 
   it('debe deshabilitar botón de checkout sin items', () => {
     render(<CartSummary items={[]} subtotal={0} {...mockHandlers} />);
 
-    const checkoutButton = screen.getByRole('button', { name: /proceder al pago/i });
+    const checkoutButton = screen.getByRole('button', {
+      name: /proceder al pago/i,
+    });
     expect(checkoutButton).toBeDisabled();
   });
 
   it('debe llamar onCheckout al hacer clic', () => {
     render(<CartSummary items={mockItems} subtotal={109.97} {...mockHandlers} />);
 
-    const checkoutButton = screen.getByRole('button', { name: /proceder al pago/i });
+    const checkoutButton = screen.getByRole('button', {
+      name: /proceder al pago/i,
+    });
     fireEvent.click(checkoutButton);
 
     expect(mockHandlers.onCheckout).toHaveBeenCalled();
@@ -120,7 +111,9 @@ describe('CartSummary', () => {
   it('debe tener botón para seguir comprando', () => {
     render(<CartSummary items={mockItems} subtotal={109.97} {...mockHandlers} />);
 
-    const continueButton = screen.getByRole('button', { name: /seguir comprando/i });
+    const continueButton = screen.getByRole('button', {
+      name: /seguir comprando/i,
+    });
     fireEvent.click(continueButton);
 
     expect(mockHandlers.onContinueShopping).toHaveBeenCalled();

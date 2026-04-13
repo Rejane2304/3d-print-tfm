@@ -72,15 +72,13 @@ export function useRealTime(options: UseRealTimeOptions = {}) {
   const userId = session?.user?.id;
 
   // Polling function to fetch events from server
-  const pollEvents = useCallback(async() => {
+  const pollEvents = useCallback(async () => {
     if (!userId) {
       return;
     }
 
     try {
-      const response = await fetch(
-        `/api/events?userId=${userId}&lastEventId=${lastEventIdRef.current || ''}`,
-      );
+      const response = await fetch(`/api/events?userId=${userId}&lastEventId=${lastEventIdRef.current || ''}`);
       if (!response.ok) {
         throw new Error('Failed to fetch events');
       }
@@ -89,12 +87,7 @@ export function useRealTime(options: UseRealTimeOptions = {}) {
 
       if (data.events && data.events.length > 0) {
         const newEvents = data.events.map(
-          (e: {
-            id: string;
-            type: string;
-            payload: Record<string, unknown>;
-            timestamp: Date;
-          }) => ({
+          (e: { id: string; type: string; payload: Record<string, unknown>; timestamp: Date }) => ({
             type: e.type as EventType,
             payload: e.payload,
             timestamp: e.timestamp,
@@ -109,14 +102,12 @@ export function useRealTime(options: UseRealTimeOptions = {}) {
 
         // Filter events by type if specified
         const filteredEvents = options.eventTypes
-          ? newEvents.filter((e: { type: EventType }) =>
-            options.eventTypes?.includes(e.type),
-          )
+          ? newEvents.filter((e: { type: EventType }) => options.eventTypes?.includes(e.type))
           : newEvents;
 
         if (filteredEvents.length > 0) {
-          setEvents((prev) => [...prev, ...filteredEvents]);
-          setPendingEvents((prev) => [...prev, ...filteredEvents]);
+          setEvents(prev => [...prev, ...filteredEvents]);
+          setPendingEvents(prev => [...prev, ...filteredEvents]);
 
           // Call onEvent callback for each event
           filteredEvents.forEach((event: RealTimeEvent) => {
@@ -155,7 +146,7 @@ export function useRealTime(options: UseRealTimeOptions = {}) {
 
   // Subscribe to specific rooms
   const subscribe = useCallback(
-    async(room: string) => {
+    async (room: string) => {
       if (!userId) {
         return;
       }
@@ -175,7 +166,7 @@ export function useRealTime(options: UseRealTimeOptions = {}) {
 
   // Unsubscribe from room
   const unsubscribe = useCallback(
-    async(room: string) => {
+    async (room: string) => {
       if (!userId) {
         return;
       }
@@ -200,7 +191,7 @@ export function useRealTime(options: UseRealTimeOptions = {}) {
   }, []);
 
   // Acknowledge specific events
-  const acknowledgeEvents = useCallback(async(eventIds: string[]) => {
+  const acknowledgeEvents = useCallback(async (eventIds: string[]) => {
     try {
       await fetch('/api/events/acknowledge', {
         method: 'POST',
@@ -209,9 +200,7 @@ export function useRealTime(options: UseRealTimeOptions = {}) {
       });
 
       // Remove acknowledged events from pending
-      setPendingEvents((prev) =>
-        prev.filter((e) => !eventIds.includes(e.timestamp)),
-      );
+      setPendingEvents(prev => prev.filter(e => !eventIds.includes(e.timestamp)));
     } catch (error) {
       console.error('Error acknowledging events:', error);
     }
@@ -230,9 +219,7 @@ export function useRealTime(options: UseRealTimeOptions = {}) {
 }
 
 // Hook específico para dashboard de admin
-export function useAdminRealTime(
-  options: Omit<UseRealTimeOptions, 'rooms'> = {},
-) {
+export function useAdminRealTime(options: Omit<UseRealTimeOptions, 'rooms'> = {}) {
   const baseOptions: UseRealTimeOptions = {
     ...options,
     rooms: ['admin'],
@@ -242,10 +229,7 @@ export function useAdminRealTime(
 }
 
 // Hook específico para cuenta de usuario
-export function useUserRealTime(
-  userId: string,
-  options: Omit<UseRealTimeOptions, 'rooms'> = {},
-) {
+export function useUserRealTime(userId: string, options: Omit<UseRealTimeOptions, 'rooms'> = {}) {
   const baseOptions: UseRealTimeOptions = {
     ...options,
     rooms: [`user:${userId}`],
@@ -255,10 +239,7 @@ export function useUserRealTime(
 }
 
 // Hook específico para detalle de producto
-export function useProductRealTime(
-  productId: string,
-  options: Omit<UseRealTimeOptions, 'rooms'> = {},
-) {
+export function useProductRealTime(productId: string, options: Omit<UseRealTimeOptions, 'rooms'> = {}) {
   const baseOptions: UseRealTimeOptions = {
     ...options,
     rooms: [`product:${productId}`],
@@ -324,18 +305,18 @@ export function useNotificationToast() {
       timestamp: new Date(),
     };
 
-    setNotifications((prev) => [...prev, notification]);
+    setNotifications(prev => [...prev, notification]);
 
     // Auto-remove after 5 seconds
     const filterOutNotification = (n: typeof notification) => n.id !== id;
     const removeNotificationById = () => {
-      setNotifications((prev) => prev.filter(filterOutNotification));
+      setNotifications(prev => prev.filter(filterOutNotification));
     };
     setTimeout(removeNotificationById, 5000);
   }, []);
 
   const removeNotification = useCallback((id: string) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
+    setNotifications(prev => prev.filter(n => n.id !== id));
   }, []);
 
   const clearAllNotifications = useCallback(() => {

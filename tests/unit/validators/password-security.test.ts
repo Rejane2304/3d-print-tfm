@@ -32,7 +32,7 @@ describe('Password Security Module', () => {
         'contraseña',
       ];
 
-      commonPasswords.forEach((pwd) => {
+      commonPasswords.forEach(pwd => {
         expect(isCommonPassword(pwd)).toBe(true);
       });
     });
@@ -58,15 +58,9 @@ describe('Password Security Module', () => {
     });
 
     it('should return false for strong passwords', () => {
-      const strongPasswords = [
-        'MyS3cur3P@ss!',
-        'G7#kL9mP2$vQ',
-        'Un1qu3Str0ngPwd',
-        'Xk9#mP2$L7nQr',
-        'Zebra$789Tree',
-      ];
+      const strongPasswords = ['MyS3cur3P@ss!', 'G7#kL9mP2$vQ', 'Un1qu3Str0ngPwd', 'Xk9#mP2$L7nQr', 'Zebra$789Tree'];
 
-      strongPasswords.forEach((pwd) => {
+      strongPasswords.forEach(pwd => {
         expect(isCommonPassword(pwd)).toBe(false);
       });
     });

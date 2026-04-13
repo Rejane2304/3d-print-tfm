@@ -2,13 +2,56 @@
 
 > Este archivo contiene información para agentes de IA que trabajan en este proyecto.
 
+## 🚨 REGLAS CRÍTICAS DE SEGURIDAD - LECTURA OBLIGATORIA
+
+### ⚠️ PROHIBIDO: Usar BD de Desarrollo/Producción para Tests
+
+**Esta prohibición es INQUEBRANTABLE:**
+
+- ❌ **NUNCA** usar `DATABASE_URL` de `.env` (Supabase) para tests
+- ❌ **NUNCA** permitir que tests E2E toquen datos reales de usuarios
+- ❌ **NUNCA** ejecutar `prisma migrate` o seed en BD de dev/prod
+- ✅ **SIEMPRE** usar `DATABASE_URL` de `.env.test` (localhost:5433)
+- ✅ **SIEMPRE** verificar que `DATABASE_URL` contiene "test" o "localhost" antes de ejecutar tests
+
+### Estructura de Bases de Datos
+
+| Entorno  | Base de Datos      | Ubicación               | Uso                    |
+| -------- | ------------------ | ----------------------- | ---------------------- |
+| **Test** | `3dprint_tfm_test` | localhost:5433 (Docker) | Tests E2E, Integración |
+| **Dev**  | Supabase           | Cloud (PostgreSQL)      | Desarrollo local       |
+| **Prod** | Supabase           | Cloud (PostgreSQL)      | Producción             |
+
+### Verificación Automática
+
+Los tests E2E verifican automáticamente:
+
+```typescript
+if (!databaseUrl.includes('test') && !databaseUrl.includes('localhost')) {
+  console.error('❌ ERROR: DATABASE_URL does not point to a test database!');
+  process.exit(1);
+}
+```
+
+### Configuración Correcta
+
+1. Tests unitarios: Usan mocks, no necesitan BD
+2. Tests integración: Usan `localhost:5433` (Docker)
+3. Tests E2E: Usan `localhost:5433` (Docker + Next.js en test mode)
+
+### Historial de Incidentes
+
+**2024-XX-XX**: Tests E2E crearon productos en BD de desarrollo por configuración incorrecta de `DATABASE_URL`. Se implementaron validaciones adicionales.
+
+---
+
 ## Información del Proyecto
 
-- **Nombre**: 3D Print e-commerce
+- **Nombre**: 3D Print
 - **Framework**: Next.js 14 con App Router
 - **Base de datos**: PostgreSQL con Prisma ORM
 - **Autenticación**: NextAuth.js
-- **Testing**: Vitest (unitarios) + Playwright (e2e)
+- **Testing**: Vitest (unitarios) + Vitest (integración) + Playwright (e2e)
 - **Idioma UI**: Español (backend traduce todo antes de enviar al frontend)
 
 ## Arquitectura de Traducción
@@ -33,6 +76,7 @@ Este proyecto usa un sistema **100% backend translation**:
 Ubicación: `/src/lib/i18n/index.ts`
 
 Diccionarios disponibles:
+
 - `productTranslations`: Traducciones de productos por slug
 - `categoryTranslations`: Traducciones de categorías por slug
 - `enumTranslations`: Traducciones de enums (estados, métodos, etc.)
@@ -41,6 +85,7 @@ Diccionarios disponibles:
 - `shippingTranslations`: Traducciones de métodos de envío
 
 Funciones helpers:
+
 - `translateProductName(slug)` → Nombre español
 - `translateProductDescription(slug)` → Descripción española
 - `translateCategoryName(slug)` → Nombre español
@@ -159,6 +204,7 @@ Para forzar el uso de un subagente específico:
 ```
 
 Ejemplos:
+
 ```
 /delegate explore Buscar todos los archivos de configuración
 /delegate general Refactorizar el módulo de autenticación
@@ -176,9 +222,34 @@ Ejemplos:
 
 ### Tests de Integración
 
-- **Framework**: Vitest con testcontainers
+- **Framework**: Vitest + PostgreSQL real
 - **Ubicación**: `tests/integration/`
-- **Características**: Usan BD PostgreSQL real en contenedor Docker
+- **Base de datos**: `localhost:5433` (Docker)
+- **Comando**: `npm run test:integration`
+
+#### Cobertura de Tests de Integración (96 tests)
+
+| Módulo                | Tests | Descripción                         |
+| --------------------- | ----- | ----------------------------------- |
+| **Invoices API**      | 30    | Facturas, PDFs, autenticación admin |
+| **Addresses API**     | 18    | CRUD de direcciones, validaciones   |
+| **Cart API**          | 20    | Carrito, items, control de stock    |
+| **Products API**      | 19    | Productos, filtros, búsqueda, admin |
+| **Checkout API**      | 16    | Pedidos, pagos, webhooks de Stripe  |
+| **Auth API**          | 13    | Registro, login, hash de passwords  |
+| **Admin Clients API** | 7     | Gestión de clientes para admins     |
+
+#### Validación de Seguridad
+
+Cada test de integración valida:
+
+```
+✅ Database Validation: PASSED
+   Database: 3dprint_tfm_test
+   Environment: test
+```
+
+**IMPORTANTE**: Los tests de integración limpian la BD antes de cada ejecución (`TRUNCATE TABLE ... CASCADE`) y nunca tocan datos de dev/prod.
 
 ### Tests E2E
 
@@ -191,6 +262,7 @@ Ejemplos:
 ### Variables de Entorno Sensibles
 
 NUNCA hagas commit de:
+
 - `.env`
 - `.env.local`
 - `.env.test`
@@ -211,7 +283,7 @@ NUNCA hagas commit de:
 ## Contacto y Soporte
 
 - **Autor**: Rejane Rodrigues
-- **Proyecto**: TFM - Máster en Desarrollo de Software
+- **Proyecto**: TFM - Máster de Desarrollo con IA
 
 ---
 

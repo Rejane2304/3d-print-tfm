@@ -26,11 +26,7 @@ interface AddToCartButtonProps {
   product: ProductInfo;
 }
 
-export default function AddToCartButton({
-  productId,
-  stock,
-  product,
-}: Readonly<AddToCartButtonProps>) {
+export default function AddToCartButton({ productId, stock, product }: Readonly<AddToCartButtonProps>) {
   const { data: session } = useSession();
   const { addItem } = useCart();
 
@@ -42,7 +38,7 @@ export default function AddToCartButton({
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleAddToCart = async() => {
+  const handleAddToCart = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -85,18 +81,8 @@ export default function AddToCartButton({
             aria-label="Decrementar quantity"
             data-testid="decrease-quantity"
           >
-            <svg
-              className="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M20 12H4"
-              />
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
             </svg>
           </button>
 
@@ -105,7 +91,7 @@ export default function AddToCartButton({
             id="quantity"
             data-testid="quantity-input"
             value={quantity}
-            onChange={(e) => {
+            onChange={e => {
               const value = Number.parseInt(e.target.value, 10);
               if (!Number.isNaN(value)) {
                 setQuantity(Math.max(1, Math.min(value, stock)));
@@ -125,18 +111,8 @@ export default function AddToCartButton({
             aria-label="Incrementar quantity"
             data-testid="increase-quantity"
           >
-            <svg
-              className="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
           </button>
         </div>
@@ -150,20 +126,46 @@ export default function AddToCartButton({
         } else if (isDisabled) {
           btnClass = 'bg-gray-400 cursor-not-allowed';
         } else {
-          btnClass = 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2';
+          btnClass =
+            'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2';
         }
 
         let content;
         if (loading) {
-          content = <><Loader2 className="h-5 w-5 animate-spin" />Añadiendo...</>;
+          content = (
+            <>
+              <Loader2 className="h-5 w-5 animate-spin" />
+              Añadiendo...
+            </>
+          );
         } else if (success) {
-          content = <><Check className="h-5 w-5" />¡Añadido!</>;
+          content = (
+            <>
+              <Check className="h-5 w-5" />
+              ¡Añadido!
+            </>
+          );
         } else if (isAdmin) {
-          content = <><ShoppingCart className="h-5 w-5" />No disponible para admins</>;
+          content = (
+            <>
+              <ShoppingCart className="h-5 w-5" />
+              No disponible para admins
+            </>
+          );
         } else if (isOutOfStock) {
-          content = <><ShoppingCart className="h-5 w-5" />Agotado</>;
+          content = (
+            <>
+              <ShoppingCart className="h-5 w-5" />
+              Agotado
+            </>
+          );
         } else {
-          content = <><ShoppingCart className="h-5 w-5" />Añadir al carrito</>;
+          content = (
+            <>
+              <ShoppingCart className="h-5 w-5" />
+              Añadir al carrito
+            </>
+          );
         }
         return (
           <button
@@ -188,13 +190,8 @@ export default function AddToCartButton({
       {/* Enlace al carrito */}
       {success && (
         <div className="p-3 bg-green-50 border border-green-200 rounded-md">
-          <p className="text-sm text-green-700 mb-2">
-            Producto añadido correctamente
-          </p>
-          <a
-            href="/cart"
-            className="text-sm font-medium text-green-700 hover:text-green-800 underline"
-          >
+          <p className="text-sm text-green-700 mb-2">Producto añadido correctamente</p>
+          <a href="/cart" className="text-sm font-medium text-green-700 hover:text-green-800 underline">
             Ver carrito →
           </a>
         </div>

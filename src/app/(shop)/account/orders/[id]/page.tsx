@@ -120,7 +120,7 @@ export default function OrderDetailPage() {
     'not_completed' | 'not_generated' | 'payment_pending' | 'cancelled'
   >('not_generated');
 
-  const loadOrder = useCallback(async() => {
+  const loadOrder = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -166,7 +166,7 @@ export default function OrderDetailPage() {
     }
   };
 
-  const printOrder = async() => {
+  const printOrder = async () => {
     if (order?.factura && !order.factura.anulada) {
       try {
         window.open(`/api/account/invoices/${order.factura.id}/pdf`, '_blank');
@@ -195,9 +195,7 @@ export default function OrderDetailPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="text-center">
           <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin text-indigo-600 mx-auto mb-4" />
-          <p className="text-gray-600 text-sm sm:text-base">
-            Cargando pedido...
-          </p>
+          <p className="text-gray-600 text-sm sm:text-base">Cargando pedido...</p>
         </div>
       </div>
     );
@@ -208,13 +206,8 @@ export default function OrderDetailPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="text-center">
           <AlertCircle className="h-10 w-10 sm:h-12 sm:w-12 text-red-600 mx-auto mb-4" />
-          <p className="text-gray-900 font-medium text-sm sm:text-base">
-            Pedido no encontrado
-          </p>
-          <Link
-            href="/account/orders"
-            className="text-indigo-600 hover:text-indigo-800 mt-2 inline-block text-sm"
-          >
+          <p className="text-gray-900 font-medium text-sm sm:text-base">Pedido no encontrado</p>
+          <Link href="/account/orders" className="text-indigo-600 hover:text-indigo-800 mt-2 inline-block text-sm">
             ← Volver a mis pedidos
           </Link>
         </div>
@@ -229,16 +222,11 @@ export default function OrderDetailPage() {
         <div className="max-w-[1920px] 3xl:max-w-[2200px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
             <div className="flex items-center gap-3 sm:gap-4">
-              <Link
-                href="/account/orders"
-                className="text-gray-500 hover:text-gray-700 transition-colors"
-              >
+              <Link href="/account/orders" className="text-gray-500 hover:text-gray-700 transition-colors">
                 <ArrowLeft className="h-5 w-5 sm:h-6 sm:w-6" />
               </Link>
               <div>
-                <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
-                  Pedido {order.orderNumber}
-                </h1>
+                <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Pedido {order.orderNumber}</h1>
                 <p className="text-xs sm:text-sm text-gray-500">
                   Realizado el{' '}
                   {new Date(order.createdAt).toLocaleDateString('es-ES', {
@@ -293,7 +281,7 @@ export default function OrderDetailPage() {
                 </h2>
               </div>
               <div className="divide-y">
-                {order.items.map((item) => (
+                {order.items.map(item => (
                   <div key={item.id} className="p-4 sm:p-6 flex gap-3 sm:gap-4">
                     {/* Imagen */}
                     <div className="w-16 h-16 sm:w-24 sm:h-24 bg-gray-100 flex-shrink-0 overflow-hidden relative rounded">
@@ -350,9 +338,7 @@ export default function OrderDetailPage() {
                       <span className="flex items-center gap-1">
                         Descuento
                         {order.cupon && (
-                          <span className="text-xs bg-green-100 px-2 py-0.5 rounded">
-                            {order.cupon.code}
-                          </span>
+                          <span className="text-xs bg-green-100 px-2 py-0.5 rounded">{order.cupon.code}</span>
                         )}
                       </span>
                       <span>-{Number(order.descuento).toFixed(2)} €</span>
@@ -360,9 +346,7 @@ export default function OrderDetailPage() {
                   )}
                   <div className="flex justify-between text-base sm:text-lg font-semibold pt-2 border-t">
                     <span className="text-gray-900">Total</span>
-                    <span className="text-indigo-600">
-                      {Number(order.total).toFixed(2)} €
-                    </span>
+                    <span className="text-indigo-600">{Number(order.total).toFixed(2)} €</span>
                   </div>
                 </div>
               </div>
@@ -378,7 +362,7 @@ export default function OrderDetailPage() {
                   </h2>
                 </div>
                 <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
-                  {order.messages.map((message) => (
+                  {order.messages.map(message => (
                     <div
                       key={message.id}
                       className={`p-3 sm:p-4 rounded-lg ${
@@ -390,23 +374,17 @@ export default function OrderDetailPage() {
                       <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
                         <span
                           className={`text-xs sm:text-sm font-medium ${
-                            message.tipoRemitente === 'ADMIN'
-                              ? 'text-indigo-700'
-                              : 'text-gray-700'
+                            message.tipoRemitente === 'ADMIN' ? 'text-indigo-700' : 'text-gray-700'
                           }`}
                         >
-                          {message.tipoRemitente === 'ADMIN'
-                            ? 'Administrador'
-                            : 'Tú'}
+                          {message.tipoRemitente === 'ADMIN' ? 'Administrador' : 'Tú'}
                         </span>
                         <span className="text-xs text-gray-400">
-                          {new Date(message.createdAt).toLocaleDateString(
-                            'es-ES',
-                          )}{' '}
-                          {new Date(message.createdAt).toLocaleTimeString(
-                            'es-ES',
-                            { hour: '2-digit', minute: '2-digit' },
-                          )}
+                          {new Date(message.createdAt).toLocaleDateString('es-ES')}{' '}
+                          {new Date(message.createdAt).toLocaleTimeString('es-ES', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
                         </span>
                       </div>
                       <p className="text-sm text-gray-700">{message.mensaje}</p>
@@ -422,23 +400,15 @@ export default function OrderDetailPage() {
             {/* Acciones rápidas */}
             {order.factura && !order.factura.anulada && (
               <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-6">
-                <h3 className="font-semibold text-gray-900 mb-4 text-sm sm:text-base">
-                  Factura
-                </h3>
+                <h3 className="font-semibold text-gray-900 mb-4 text-sm sm:text-base">Factura</h3>
                 <div className="space-y-2 sm:space-y-3">
                   <div className="flex justify-between text-xs sm:text-sm">
                     <span className="text-gray-600">Número:</span>
-                    <span className="font-mono">
-                      {order.factura.invoiceNumber}
-                    </span>
+                    <span className="font-mono">{order.factura.invoiceNumber}</span>
                   </div>
                   <div className="flex justify-between text-xs sm:text-sm">
                     <span className="text-gray-600">Fecha:</span>
-                    <span>
-                      {new Date(order.factura.emitidaEn).toLocaleDateString(
-                        'es-ES',
-                      )}
-                    </span>
+                    <span>{new Date(order.factura.emitidaEn).toLocaleDateString('es-ES')}</span>
                   </div>
                   <button
                     onClick={downloadInvoice}
@@ -458,13 +428,9 @@ export default function OrderDetailPage() {
                 Dirección de envío
               </h3>
               <div className="space-y-1 text-xs sm:text-sm">
-                <p className="font-medium text-gray-900">
-                  {translateAddressName(order.nombreEnvio)}
-                </p>
+                <p className="font-medium text-gray-900">{translateAddressName(order.nombreEnvio)}</p>
                 <p className="text-gray-600">{order.shippingAddress}</p>
-                {order.complementoEnvio && (
-                  <p className="text-gray-600">{order.complementoEnvio}</p>
-                )}
+                {order.complementoEnvio && <p className="text-gray-600">{order.complementoEnvio}</p>}
                 <p className="text-gray-600">
                   {order.postalCodeEnvio} {order.ciudadEnvio}
                 </p>
@@ -488,9 +454,7 @@ export default function OrderDetailPage() {
                 <div className="flex justify-between text-xs sm:text-sm">
                   <span className="text-gray-600">Método:</span>
                   <span className="font-medium">
-                    {metodosPago[order.metodoPago] ||
-                      order.metodoPago ||
-                      'No disponible'}
+                    {metodosPago[order.metodoPago] || order.metodoPago || 'No disponible'}
                   </span>
                 </div>
                 {order.pago && (
@@ -499,23 +463,15 @@ export default function OrderDetailPage() {
                       <span className="text-gray-600">Estado:</span>
                       <span
                         className={`font-medium ${
-                          order.pago.estado === 'COMPLETADO'
-                            ? 'text-green-600'
-                            : 'text-yellow-600'
+                          order.pago.estado === 'COMPLETADO' ? 'text-green-600' : 'text-yellow-600'
                         }`}
                       >
-                        {order.pago.estado === 'COMPLETADO'
-                          ? 'Pagado'
-                          : order.pago.estado}
+                        {order.pago.estado === 'COMPLETADO' ? 'Pagado' : order.pago.estado}
                       </span>
                     </div>
                     <div className="flex justify-between text-xs sm:text-sm">
                       <span className="text-gray-600">Fecha:</span>
-                      <span>
-                        {new Date(order.pago.createdAt).toLocaleDateString(
-                          'es-ES',
-                        )}
-                      </span>
+                      <span>{new Date(order.pago.createdAt).toLocaleDateString('es-ES')}</span>
                     </div>
                   </>
                 )}
@@ -524,9 +480,7 @@ export default function OrderDetailPage() {
 
             {/* Información del pedido */}
             <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-6">
-              <h3 className="font-semibold text-gray-900 mb-3 sm:mb-4 text-sm sm:text-base">
-                Información
-              </h3>
+              <h3 className="font-semibold text-gray-900 mb-3 sm:mb-4 text-sm sm:text-base">Información</h3>
               <div className="space-y-2 text-xs sm:text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Número:</span>
@@ -534,15 +488,11 @@ export default function OrderDetailPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Fecha:</span>
-                  <span>
-                    {new Date(order.createdAt).toLocaleDateString('es-ES')}
-                  </span>
+                  <span>{new Date(order.createdAt).toLocaleDateString('es-ES')}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Actualizado:</span>
-                  <span>
-                    {new Date(order.updatedAt).toLocaleDateString('es-ES')}
-                  </span>
+                  <span>{new Date(order.updatedAt).toLocaleDateString('es-ES')}</span>
                 </div>
               </div>
             </div>

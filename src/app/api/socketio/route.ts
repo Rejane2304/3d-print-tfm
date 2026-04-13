@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { translateErrorMessage } from '@/lib/i18n';
 
@@ -13,10 +14,7 @@ export async function GET(req: NextRequest) {
     const lastEventId = searchParams.get('lastEventId');
 
     if (!userId) {
-      return NextResponse.json(
-        { error: translateErrorMessage('User ID required') },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: translateErrorMessage('User ID required') }, { status: 400 });
     }
 
     // Get pending events for user
@@ -25,11 +23,11 @@ export async function GET(req: NextRequest) {
         OR: [{ room: `user:${userId}` }, { room: 'admin' }],
         ...(lastEventId
           ? {
-            id: { gt: lastEventId },
-          }
+              id: { gt: lastEventId },
+            }
           : {
-            delivered: false,
-          }),
+              delivered: false,
+            }),
       },
       orderBy: { timestamp: 'asc' },
       take: 100,
@@ -39,7 +37,7 @@ export async function GET(req: NextRequest) {
     if (events.length > 0) {
       await prisma.eventStore.updateMany({
         where: {
-          id: { in: events.map((e) => e.id) },
+          id: { in: events.map(e => e.id) },
         },
         data: {
           delivered: true,
@@ -51,10 +49,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ events });
   } catch (error) {
     console.error('Error fetching events:', error);
-    return NextResponse.json(
-      { error: translateErrorMessage('Internal server error') },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: translateErrorMessage('Internal server error') }, { status: 500 });
   }
 }
 
@@ -65,10 +60,7 @@ export async function POST(req: NextRequest) {
     const { type, payload, room, userId } = body;
 
     if (!type || !payload || !room) {
-      return NextResponse.json(
-        { error: translateErrorMessage('Missing required fields') },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: translateErrorMessage('Missing required fields') }, { status: 400 });
     }
 
     // Store event
@@ -87,9 +79,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, eventId: event.id });
   } catch (error) {
     console.error('Error emitting event:', error);
-    return NextResponse.json(
-      { error: translateErrorMessage('Internal server error') },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: translateErrorMessage('Internal server error') }, { status: 500 });
   }
 }

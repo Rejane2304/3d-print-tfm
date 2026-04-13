@@ -1,7 +1,7 @@
 /**
  * Setup for Vitest tests
  * Database Safety Configuration
- * 
+ *
  * SAFETY FIRST:
  * - Validates test database before any operations
  * - Ensures NODE_ENV=test is set
@@ -9,13 +9,7 @@
  */
 import { vi, afterAll, beforeAll, afterEach } from 'vitest';
 import '@testing-library/jest-dom';
-import { 
-  prisma, 
-  cleanupDB, 
-  validateTestDB,
-  resetTestDatabase,
-  validateTestDBSync 
-} from './helpers';
+import { prisma, cleanupDB, validateTestDB, resetTestDatabase, validateTestDBSync } from './helpers';
 
 // CRITICAL: Validate environment before any tests run
 // This will throw a fatal error if not properly configured
@@ -65,17 +59,17 @@ if (typeof window !== 'undefined') {
 beforeAll(async () => {
   // Skip if not running integration tests
   if (process.env.VITEST_ENV !== 'integration') return;
-  
+
   // Skip if explicitly disabled
   if (process.env.SKIP_DB_TESTS === 'true') return;
-  
+
   // MANDATORY: Validate database before any operations
   // This will throw if database is not properly configured
   await validateTestDB();
-  
+
   // Reset database to clean state with seeded data
   await resetTestDatabase();
-  
+
   console.log('✅ Setup completed - Database validated and reset');
 });
 
@@ -83,7 +77,7 @@ beforeAll(async () => {
 afterEach(async () => {
   if (process.env.VITEST_ENV !== 'integration') return;
   if (process.env.SKIP_DB_TESTS === 'true') return;
-  
+
   // Clean up data between tests for complete isolation
   // Note: This runs outside transactions for test files that don't use withTestTransaction
   // Tests using withTestTransaction() don't need this as they rollback automatically

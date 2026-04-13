@@ -3,7 +3,8 @@
  * POST /api/checkout/confirm-payment
  * Immediately confirms payment for demo purposes
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
@@ -20,10 +21,7 @@ export async function POST(req: NextRequest) {
     const { orderId, paymentMethod } = body;
 
     if (!orderId) {
-      return NextResponse.json(
-        { error: 'El ID de pedido es requerido' },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'El ID de pedido es requerido' }, { status: 400 });
     }
 
     // Get user
@@ -33,10 +31,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Usuario no encontrado' },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
 
     // Get order
@@ -45,10 +40,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!order) {
-      return NextResponse.json(
-        { error: 'Pedido no encontrado' },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: 'Pedido no encontrado' }, { status: 404 });
     }
 
     // Update order status to CONFIRMED
@@ -93,9 +85,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error('Error confirming payment:', error);
-    return NextResponse.json(
-      { error: 'Error al confirmar el pago' },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: 'Error al confirmar el pago' }, { status: 500 });
   }
 }

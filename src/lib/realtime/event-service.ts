@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import type { Server as SocketIOServer } from 'socket.io';
 
@@ -35,12 +35,7 @@ interface EventStoreRecord {
   expiresAt: Date;
 }
 
-export async function emitEvent(
-  type: EventType,
-  payload: EventPayload,
-  room: string,
-  userId?: string,
-): Promise<void> {
+export async function emitEvent(type: EventType, payload: EventPayload, room: string, userId?: string): Promise<void> {
   try {
     // Store event in database - serialize payload properly
     const serializedPayload = structuredClone(payload) as Prisma.InputJsonValue;
@@ -58,8 +53,18 @@ export async function emitEvent(
 
     // Also emit to any connected WebSocket clients (if server-side)
     // This will be handled by the socket.io server
+    // eslint-disable-next-line max-len
     if (typeof globalThis !== 'undefined' && (globalThis as unknown as { io?: unknown }).io) {
-      const io = (globalThis as unknown as { io: { to: (room: string) => { emit: (type: string, payload: EventPayload) => void } } }).io;
+      // eslint-disable-next-line max-len
+      const io = (
+        globalThis as unknown as {
+          io: {
+            to: (room: string) => {
+              emit: (type: string, payload: EventPayload) => void;
+            };
+          };
+        }
+      ).io;
       io.to(room).emit(type, payload);
     }
   } catch (error) {
@@ -71,9 +76,7 @@ export async function emitEvent(
 export async function getPendingEvents(
   userId: string,
   userRole?: string,
-): Promise<
-  Array<{ id: string; type: string; payload: EventPayload; timestamp: Date }>
-> {
+): Promise<Array<{ id: string; type: string; payload: EventPayload; timestamp: Date }>> {
   const rooms = [`user:${userId}`];
   if (userRole === 'ADMIN') {
     rooms.push('admin');
@@ -117,11 +120,7 @@ export async function emitNewOrder(order: unknown): Promise<void> {
   await emitEvent('order:new', { order }, 'admin');
 }
 
-export async function emitOrderStatusUpdated(
-  orderId: string,
-  status: string,
-  userId: string,
-): Promise<void> {
+export async function emitOrderStatusUpdated(orderId: string, status: string, userId: string): Promise<void> {
   await emitEvent(
     'order:status:updated',
     { orderId, status, timestamp: new Date().toISOString() },
@@ -130,11 +129,7 @@ export async function emitOrderStatusUpdated(
   );
 }
 
-export async function emitPaymentConfirmed(
-  orderId: string,
-  payment: unknown,
-  userId: string,
-): Promise<void> {
+export async function emitPaymentConfirmed(orderId: string, payment: unknown, userId: string): Promise<void> {
   await emitEvent(
     'payment:confirmed',
     { orderId, payment, timestamp: new Date().toISOString() },
@@ -144,22 +139,11 @@ export async function emitPaymentConfirmed(
   await emitEvent('payment:confirmed', { orderId, payment }, 'admin');
 }
 
-export async function emitStockLow(
-  productId: string,
-  stock: number,
-): Promise<void> {
-  await emitEvent(
-    'stock:low',
-    { productId, stock, timestamp: new Date().toISOString() },
-    'admin',
-  );
+export async function emitStockLow(productId: string, stock: number): Promise<void> {
+  await emitEvent('stock:low', { productId, stock, timestamp: new Date().toISOString() }, 'admin');
 }
 
-export async function emitStockUpdated(
-  productId: string,
-  newStock: number,
-  previousStock: number,
-): Promise<void> {
+export async function emitStockUpdated(productId: string, newStock: number, previousStock: number): Promise<void> {
   await emitEvent(
     'stock:updated',
     { productId, newStock, previousStock, timestamp: new Date().toISOString() },
@@ -173,28 +157,13 @@ export async function emitStockUpdated(
 }
 
 export async function emitNewAlert(alert: unknown): Promise<void> {
-  await emitEvent(
-    'alert:new',
-    { alert, timestamp: new Date().toISOString() },
-    'admin',
-  );
+  await emitEvent('alert:new', { alert, timestamp: new Date().toISOString() }, 'admin');
 }
 
-export async function emitNewReview(
-  review: unknown,
-  productId: string,
-): Promise<void> {
-  await emitEvent(
-    'review:new',
-    { review, productId, timestamp: new Date().toISOString() },
-    'admin',
-  );
+export async function emitNewReview(review: unknown, productId: string): Promise<void> {
+  await emitEvent('review:new', { review, productId, timestamp: new Date().toISOString() }, 'admin');
 }
 
 export async function emitMetricsUpdate(metrics: unknown): Promise<void> {
-  await emitEvent(
-    'metrics:update',
-    { metrics, timestamp: new Date().toISOString() },
-    'admin',
-  );
+  await emitEvent('metrics:update', { metrics, timestamp: new Date().toISOString() }, 'admin');
 }

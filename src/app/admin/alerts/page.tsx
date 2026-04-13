@@ -25,7 +25,8 @@ import {
   TrendingUp,
   XCircle,
 } from 'lucide-react';
-import { BulkAction, Column, DataTable } from '@/components/ui/DataTable';
+import type { BulkAction, Column } from '@/components/ui/DataTable';
+import { DataTable } from '@/components/ui/DataTable';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { BulkDeleteModal } from '@/components/ui/BulkDeleteModal';
 
@@ -99,10 +100,7 @@ const categoryIcons: Record<string, React.ElementType> = {
   payments: AlertCircle,
 };
 
-const categoryColors: Record<
-  string,
-  { bg: string; text: string; border: string }
-> = {
+const categoryColors: Record<string, { bg: string; text: string; border: string }> = {
   orders: {
     bg: 'bg-blue-50',
     text: 'text-blue-700',
@@ -192,7 +190,7 @@ export default function AdminAlertsPage() {
   const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
   const [selectedIdsToDelete, setSelectedIdsToDelete] = useState<string[]>([]);
 
-  const loadAlerts = useCallback(async() => {
+  const loadAlerts = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -210,9 +208,8 @@ export default function AdminAlertsPage() {
 
       // Si hay filtro de categoría, agregar los tipos correspondientes
       if (categoryFilter) {
-        const types =
-          alertCategories[categoryFilter as keyof typeof alertCategories];
-        types.forEach((type) => params.append('types', type));
+        const types = alertCategories[categoryFilter as keyof typeof alertCategories];
+        types.forEach(type => params.append('types', type));
       }
 
       const response = await fetch(`/api/admin/alerts?${params.toString()}`);
@@ -233,21 +230,11 @@ export default function AdminAlertsPage() {
       // Calcular estadísticas por categoría
       const alerts = data.alertas || [];
       setCategoryStats({
-        orders: alerts.filter((a: Alert) =>
-          alertCategories.orders.includes(a.type),
-        ).length,
-        stock: alerts.filter((a: Alert) =>
-          alertCategories.stock.includes(a.type),
-        ).length,
-        coupons: alerts.filter((a: Alert) =>
-          alertCategories.coupons.includes(a.type),
-        ).length,
-        messages: alerts.filter((a: Alert) =>
-          alertCategories.messages.includes(a.type),
-        ).length,
-        payments: alerts.filter((a: Alert) =>
-          alertCategories.payments.includes(a.type),
-        ).length,
+        orders: alerts.filter((a: Alert) => alertCategories.orders.includes(a.type)).length,
+        stock: alerts.filter((a: Alert) => alertCategories.stock.includes(a.type)).length,
+        coupons: alerts.filter((a: Alert) => alertCategories.coupons.includes(a.type)).length,
+        messages: alerts.filter((a: Alert) => alertCategories.messages.includes(a.type)).length,
+        payments: alerts.filter((a: Alert) => alertCategories.payments.includes(a.type)).length,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
@@ -272,7 +259,7 @@ export default function AdminAlertsPage() {
     }
   }, [status, session, router, loadAlerts]);
 
-  const updateStatus = async(id: string, nuevoEstado: string) => {
+  const updateStatus = async (id: string, nuevoEstado: string) => {
     try {
       const response = await fetch('/api/admin/alerts', {
         method: 'PATCH',
@@ -303,7 +290,7 @@ export default function AdminAlertsPage() {
     setDeleteModalOpen(true);
   };
 
-  const confirmDeleteAlert = async() => {
+  const confirmDeleteAlert = async () => {
     if (!alertToDelete) {
       return;
     }
@@ -338,13 +325,9 @@ export default function AdminAlertsPage() {
     setBulkDeleteModalOpen(true);
   };
 
-  const confirmBulkDelete = async() => {
+  const confirmBulkDelete = async () => {
     try {
-      await Promise.all(
-        selectedIdsToDelete.map((id) =>
-          fetch(`/api/admin/alerts/${id}`, { method: 'DELETE' }),
-        ),
-      );
+      await Promise.all(selectedIdsToDelete.map(id => fetch(`/api/admin/alerts/${id}`, { method: 'DELETE' })));
       await loadAlerts();
     } catch (error) {
       console.error('Error al eliminar alertas:', error);
@@ -354,10 +337,10 @@ export default function AdminAlertsPage() {
     }
   };
 
-  const handleBulkResolve = async(selectedIds: string[]) => {
+  const handleBulkResolve = async (selectedIds: string[]) => {
     try {
       await Promise.all(
-        selectedIds.map((id) =>
+        selectedIds.map(id =>
           fetch('/api/admin/alerts', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
@@ -371,10 +354,10 @@ export default function AdminAlertsPage() {
     }
   };
 
-  const handleBulkIgnore = async(selectedIds: string[]) => {
+  const handleBulkIgnore = async (selectedIds: string[]) => {
     try {
       await Promise.all(
-        selectedIds.map((id) =>
+        selectedIds.map(id =>
           fetch('/api/admin/alerts', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
@@ -400,9 +383,7 @@ export default function AdminAlertsPage() {
         return (
           <div className="flex items-center gap-2">
             <TipoIcon className="h-5 w-5 text-gray-600" />
-            <span className="text-sm font-medium text-gray-900">
-              {typeLabels[typeValue] || typeValue}
-            </span>
+            <span className="text-sm font-medium text-gray-900">{typeLabels[typeValue] || typeValue}</span>
           </div>
         );
       },
@@ -440,13 +421,9 @@ export default function AdminAlertsPage() {
                 {value as string}
               </Link>
             ) : (
-              <div className="text-sm font-medium text-gray-900 truncate">
-                {value as string}
-              </div>
+              <div className="text-sm font-medium text-gray-900 truncate">{value as string}</div>
             )}
-            <div className="text-sm text-gray-500 max-w-xs sm:max-w-md truncate">
-              {row.message}
-            </div>
+            <div className="text-sm text-gray-500 max-w-xs sm:max-w-md truncate">{row.message}</div>
           </div>
         </div>
       ),
@@ -482,10 +459,8 @@ export default function AdminAlertsPage() {
       header: 'Fecha',
       sortable: true,
       className: 'hidden lg:table-cell',
-      render: (value) => (
-        <span className="text-sm text-gray-500">
-          {new Date(value as string).toLocaleDateString('es-ES')}
-        </span>
+      render: value => (
+        <span className="text-sm text-gray-500">{new Date(value as string).toLocaleDateString('es-ES')}</span>
       ),
     },
     {
@@ -497,7 +472,7 @@ export default function AdminAlertsPage() {
           {row.status === 'PENDING' && (
             <>
               <button
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation();
                   updateStatus(row.id, 'IN_PROGRESS');
                 }}
@@ -507,7 +482,7 @@ export default function AdminAlertsPage() {
                 <Clock className="h-4 w-4" />
               </button>
               <button
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation();
                   openResolveModal(row);
                 }}
@@ -517,7 +492,7 @@ export default function AdminAlertsPage() {
                 <CheckCircle2 className="h-4 w-4" />
               </button>
               <button
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation();
                   updateStatus(row.id, 'IGNORED');
                 }}
@@ -530,7 +505,7 @@ export default function AdminAlertsPage() {
           )}
           {row.status === 'IN_PROGRESS' && (
             <button
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation();
                 openResolveModal(row);
               }}
@@ -541,7 +516,7 @@ export default function AdminAlertsPage() {
             </button>
           )}
           <button
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               deleteAlert(row.id);
             }}
@@ -609,12 +584,9 @@ export default function AdminAlertsPage() {
                 )}
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  Alertas del Sistema
-                </h1>
+                <h1 className="text-2xl font-bold text-gray-900">Alertas del Sistema</h1>
                 <p className="text-sm text-gray-500">
-                  {stats.pending} pendientes · {stats.critical} críticas ·{' '}
-                  {stats.high} altas
+                  {stats.pending} pendientes · {stats.critical} críticas · {stats.high} altas
                 </p>
               </div>
             </div>
@@ -627,10 +599,7 @@ export default function AdminAlertsPage() {
                 <RefreshCw className="h-5 w-5" />
                 <span className="hidden sm:inline">Actualizar</span>
               </button>
-              <Link
-                href="/admin/dashboard"
-                className="text-indigo-600 hover:text-indigo-800 font-medium"
-              >
+              <Link href="/admin/dashboard" className="text-indigo-600 hover:text-indigo-800 font-medium">
                 &larr; Volver al Panel
               </Link>
             </div>
@@ -641,9 +610,7 @@ export default function AdminAlertsPage() {
       <div className="max-w-[1920px] 3xl:max-w-[2200px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Category Statistics Cards */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
-          {(
-            Object.keys(categoryStats) as Array<keyof typeof categoryStats>
-          ).map((category) => {
+          {(Object.keys(categoryStats) as Array<keyof typeof categoryStats>).map(category => {
             const Icon = categoryIcons[category];
             const colors = categoryColors[category];
             const isActive = categoryFilter === category;
@@ -670,9 +637,7 @@ export default function AdminAlertsPage() {
                   )}
                 </div>
                 <div className="mt-2">
-                  <p className="text-sm text-gray-500 font-medium">
-                    {categoryLabels[category]}
-                  </p>
+                  <p className="text-sm text-gray-500 font-medium">{categoryLabels[category]}</p>
                   <p className={`text-2xl font-bold ${colors.text}`}>{count}</p>
                 </div>
               </button>
@@ -689,9 +654,7 @@ export default function AdminAlertsPage() {
               </div>
               <div>
                 <div className="text-sm text-gray-500">Total</div>
-                <div className="text-2xl font-bold text-gray-900">
-                  {stats.total}
-                </div>
+                <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
               </div>
             </div>
           </div>
@@ -702,9 +665,7 @@ export default function AdminAlertsPage() {
               </div>
               <div>
                 <div className="text-sm text-gray-500">Pendientes</div>
-                <div className="text-2xl font-bold text-red-600">
-                  {stats.pending}
-                </div>
+                <div className="text-2xl font-bold text-red-600">{stats.pending}</div>
               </div>
             </div>
           </div>
@@ -715,9 +676,7 @@ export default function AdminAlertsPage() {
               </div>
               <div>
                 <div className="text-sm text-gray-500">Críticas</div>
-                <div className="text-2xl font-bold text-red-700">
-                  {stats.critical}
-                </div>
+                <div className="text-2xl font-bold text-red-700">{stats.critical}</div>
               </div>
             </div>
           </div>
@@ -728,9 +687,7 @@ export default function AdminAlertsPage() {
               </div>
               <div>
                 <div className="text-sm text-gray-500">Altas</div>
-                <div className="text-2xl font-bold text-orange-600">
-                  {stats.high}
-                </div>
+                <div className="text-2xl font-bold text-orange-600">{stats.high}</div>
               </div>
             </div>
           </div>
@@ -749,7 +706,7 @@ export default function AdminAlertsPage() {
           <div className="flex flex-col lg:flex-row gap-4">
             <select
               value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
+              onChange={e => setCategoryFilter(e.target.value)}
               className="border border-gray-300 rounded-lg px-4 py-2 \
                 focus:ring-2 focus:ring-indigo-500 \
                 focus:border-indigo-500"
@@ -763,7 +720,7 @@ export default function AdminAlertsPage() {
             </select>
             <select
               value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
+              onChange={e => setTypeFilter(e.target.value)}
               className="border border-gray-300 rounded-lg px-4 py-2 \
                 focus:ring-2 focus:ring-indigo-500 \
                 focus:border-indigo-500"
@@ -782,7 +739,7 @@ export default function AdminAlertsPage() {
             </select>
             <select
               value={severityFilter}
-              onChange={(e) => setSeverityFilter(e.target.value)}
+              onChange={e => setSeverityFilter(e.target.value)}
               className="border border-gray-300 rounded-lg px-4 py-2 \
                 focus:ring-2 focus:ring-indigo-500 \
                 focus:border-indigo-500"
@@ -795,7 +752,7 @@ export default function AdminAlertsPage() {
             </select>
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={e => setStatusFilter(e.target.value)}
               className="border border-gray-300 rounded-lg px-4 py-2 \
                 focus:ring-2 focus:ring-indigo-500 \
                 focus:border-indigo-500"
@@ -835,22 +792,17 @@ export default function AdminAlertsPage() {
               <div className="p-2 bg-green-100 rounded-full">
                 <CheckCircle2 className="h-6 w-6 text-green-600" />
               </div>
-              <h2 className="text-xl font-bold text-gray-900">
-                Resolver Alerta
-              </h2>
+              <h2 className="text-xl font-bold text-gray-900">Resolver Alerta</h2>
             </div>
             <p className="text-gray-600 mb-4">{selectedAlert.title}</p>
             <div className="mb-4">
-              <label
-                htmlFor="resolutionNotes"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
+              <label htmlFor="resolutionNotes" className="block text-sm font-medium text-gray-700 mb-1">
                 Notas de Resolución (opcional)
               </label>
               <textarea
                 id="resolutionNotes"
                 value={resolutionNotes}
-                onChange={(e) => setResolutionNotes(e.target.value)}
+                onChange={e => setResolutionNotes(e.target.value)}
                 placeholder="Describe cómo se resolvió la alerta..."
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 \
                   focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"

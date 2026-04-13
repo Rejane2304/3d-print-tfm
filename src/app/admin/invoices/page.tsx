@@ -4,22 +4,14 @@
  */
 'use client';
 
+import { showConfirm } from '@/lib/dialogs';
 import { useCallback, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import {
-  AlertTriangle,
-  CheckCircle2,
-  Eye,
-  FileText,
-  Loader2,
-  Plus,
-  Printer,
-  Trash2,
-  XCircle,
-} from 'lucide-react';
-import { BulkAction, Column, DataTable } from '@/components/ui/DataTable';
+import { AlertTriangle, CheckCircle2, Eye, FileText, Loader2, Plus, Printer, Trash2, XCircle } from 'lucide-react';
+import type { BulkAction, Column } from '@/components/ui/DataTable';
+import { DataTable } from '@/components/ui/DataTable';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 
 interface Invoice {
@@ -51,7 +43,7 @@ export default function AdminInvoicesPage() {
   const [invoiceToCancel, setInvoiceToCancel] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const loadInvoices = useCallback(async() => {
+  const loadInvoices = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -97,7 +89,7 @@ export default function AdminInvoicesPage() {
     }
   }, [status, session, router, loadInvoices]);
 
-  const generateInvoice = async() => {
+  const generateInvoice = async () => {
     if (!orderIdInput.trim()) {
       setError('Introduce el número de pedido');
       return;
@@ -106,9 +98,7 @@ export default function AdminInvoicesPage() {
     try {
       setError(null);
 
-      const searchResponse = await fetch(
-        `/api/admin/orders?search=${encodeURIComponent(orderIdInput.trim())}`,
-      );
+      const searchResponse = await fetch(`/api/admin/orders?search=${encodeURIComponent(orderIdInput.trim())}`);
       const searchData = await searchResponse.json();
 
       if (!searchResponse.ok) {
@@ -116,8 +106,7 @@ export default function AdminInvoicesPage() {
       }
 
       const pedido = searchData.pedidos?.find(
-        (p: { orderNumber: string }) =>
-          p.orderNumber.toLowerCase() === orderIdInput.trim().toLowerCase(),
+        (p: { orderNumber: string }) => p.orderNumber.toLowerCase() === orderIdInput.trim().toLowerCase(),
       );
 
       if (!pedido) {
@@ -146,12 +135,12 @@ export default function AdminInvoicesPage() {
     }
   };
 
-  const cancelInvoice = async(id: string) => {
+  const cancelInvoice = async (id: string) => {
     setInvoiceToCancel(id);
     setCancelModalOpen(true);
   };
 
-  const confirmCancel = async() => {
+  const confirmCancel = async () => {
     if (!invoiceToCancel) {
       return;
     }
@@ -175,21 +164,13 @@ export default function AdminInvoicesPage() {
     window.open(`/api/admin/invoices/${id}/pdf`, '_blank');
   };
 
-  const handleDeleteInvoices = async(selectedIds: string[]) => {
-    if (
-      !confirm(
-        `¿Estás seguro de que deseas eliminar ${selectedIds.length} factura(s)?`,
-      )
-    ) {
+  const handleDeleteInvoices = async (selectedIds: string[]) => {
+    if (!showConfirm(`¿Estás seguro de que deseas eliminar ${selectedIds.length} factura(s)?`)) {
       return;
     }
 
     try {
-      await Promise.all(
-        selectedIds.map((id) =>
-          fetch(`/api/admin/invoices/${id}`, { method: 'DELETE' }),
-        ),
-      );
+      await Promise.all(selectedIds.map(id => fetch(`/api/admin/invoices/${id}`, { method: 'DELETE' })));
       await loadInvoices();
     } catch (error) {
       console.error('Error al eliminar facturas:', error);
@@ -202,29 +183,21 @@ export default function AdminInvoicesPage() {
       header: 'Factura #',
       sortable: true,
       className: '',
-      render: (value) => (
-        <div className="text-sm font-medium text-indigo-600">
-          {value as string}
-        </div>
-      ),
+      render: value => <div className="text-sm font-medium text-indigo-600">{value as string}</div>,
     },
     {
       key: 'pedido',
       header: 'Cliente',
       className: '',
-      render: (value) => {
+      render: value => {
         const pedido = value as {
           usuario: { nombre: string; email: string; nif: string | null };
           orderNumber: string;
         };
         return (
           <div>
-            <div className="text-sm font-medium text-gray-900 truncate">
-              {pedido.usuario.nombre}
-            </div>
-            <div className="text-sm text-gray-500 hidden sm:block">
-              {pedido.orderNumber}
-            </div>
+            <div className="text-sm font-medium text-gray-900 truncate">{pedido.usuario.nombre}</div>
+            <div className="text-sm text-gray-500 hidden sm:block">{pedido.orderNumber}</div>
           </div>
         );
       },
@@ -234,22 +207,16 @@ export default function AdminInvoicesPage() {
       header: 'Total',
       sortable: true,
       className: '',
-      render: (value) => (
-        <span className="text-sm text-gray-900 font-medium">
-          {Number(value).toFixed(2)} €
-        </span>
-      ),
+      render: value => <span className="text-sm text-gray-900 font-medium">{Number(value).toFixed(2)} €</span>,
     },
     {
       key: 'emitidaEn',
       header: 'Fecha',
       sortable: true,
       className: 'hidden md:table-cell',
-      render: (value) => (
+      render: value => (
         <span className="text-sm text-gray-500">
-          {value
-            ? new Date(value as string).toLocaleDateString('es-ES')
-            : 'N/A'}
+          {value ? new Date(value as string).toLocaleDateString('es-ES') : 'N/A'}
         </span>
       ),
     },
@@ -258,7 +225,7 @@ export default function AdminInvoicesPage() {
       header: 'Estado',
       sortable: true,
       className: 'hidden lg:table-cell',
-      render: (value) =>
+      render: value =>
         value ? (
           <span className="px-2 inline-flex items-center gap-1 text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
             <XCircle className="h-3 w-3" />
@@ -285,7 +252,7 @@ export default function AdminInvoicesPage() {
             <Eye className="h-4 w-4" />
           </Link>
           <button
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               openPDF(row.id);
             }}
@@ -297,7 +264,7 @@ export default function AdminInvoicesPage() {
           </button>
           {!row.anulada && (
             <button
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation();
                 cancelInvoice(row.id);
               }}
@@ -341,15 +308,10 @@ export default function AdminInvoicesPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <FileText className="h-8 w-8 text-indigo-600" />
-              <h1 className="text-2xl font-bold text-gray-900">
-                Gestión de Facturas
-              </h1>
+              <h1 className="text-2xl font-bold text-gray-900">Gestión de Facturas</h1>
             </div>
             <div className="flex items-center gap-4">
-              <Link
-                href="/admin/dashboard"
-                className="text-indigo-600 hover:text-indigo-800 font-medium"
-              >
+              <Link href="/admin/dashboard" className="text-indigo-600 hover:text-indigo-800 font-medium">
                 &larr; Volver al Panel
               </Link>
               <button
@@ -390,7 +352,7 @@ export default function AdminInvoicesPage() {
           <div className="flex flex-col sm:flex-row gap-4">
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={e => setStatusFilter(e.target.value)}
               className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             >
               <option value="">Todas las facturas</option>
@@ -406,11 +368,7 @@ export default function AdminInvoicesPage() {
           columns={columns}
           rowKey="id"
           searchable
-          searchKeys={[
-            'invoiceNumber',
-            'pedido.usuario.nombre',
-            'pedido.orderNumber',
-          ]}
+          searchKeys={['invoiceNumber', 'pedido.usuario.nombre', 'pedido.orderNumber']}
           searchPlaceholder="Buscar por número de factura..."
           pagination
           selectable
@@ -426,24 +384,17 @@ export default function AdminInvoicesPage() {
       {showGenerateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
-              Generar Nueva Factura
-            </h2>
-            <p className="text-sm text-gray-600 mb-4">
-              Introduce el ID del pedido entregado para generar una factura.
-            </p>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Generar Nueva Factura</h2>
+            <p className="text-sm text-gray-600 mb-4">Introduce el ID del pedido entregado para generar una factura.</p>
             <div className="mb-4">
-              <label
-                htmlFor="orderIdInput"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
+              <label htmlFor="orderIdInput" className="block text-sm font-medium text-gray-700 mb-1">
                 Número de Pedido
               </label>
               <input
                 type="text"
                 id="orderIdInput"
                 value={orderIdInput}
-                onChange={(e) => setOrderIdInput(e.target.value)}
+                onChange={e => setOrderIdInput(e.target.value)}
                 placeholder="Ej: ORD-2024-0001"
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               />

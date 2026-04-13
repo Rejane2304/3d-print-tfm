@@ -4,15 +4,13 @@
  *
  * Requiere: Rol ADMIN
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
-import {
-  faqCategoryTranslations,
-  faqTranslations,
-} from '@/lib/i18n/faq-translations';
+import { faqCategoryTranslations, faqTranslations } from '@/lib/i18n/faq-translations';
 
 // Mapeo de categorías en inglés → español
 const categoryTranslations: Record<string, string> = {
@@ -27,18 +25,9 @@ const categoryTranslations: Record<string, string> = {
 
 // Schema de validación
 const faqSchema = z.object({
-  question: z
-    .string()
-    .min(1, 'La pregunta es obligatoria')
-    .max(500, 'Máximo 500 caracteres'),
-  answer: z
-    .string()
-    .min(1, 'La respuesta es obligatoria')
-    .max(5000, 'Máximo 5000 caracteres'),
-  category: z
-    .string()
-    .min(1, 'La categoría es obligatoria')
-    .max(100, 'Máximo 100 caracteres'),
+  question: z.string().min(1, 'La pregunta es obligatoria').max(500, 'Máximo 500 caracteres'),
+  answer: z.string().min(1, 'La respuesta es obligatoria').max(5000, 'Máximo 5000 caracteres'),
+  category: z.string().min(1, 'La categoría es obligatoria').max(100, 'Máximo 100 caracteres'),
   displayOrder: z.number().int().min(0).default(0),
   isActive: z.boolean().default(true),
 });
@@ -53,10 +42,7 @@ export async function GET() {
       session = null;
     }
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -64,10 +50,7 @@ export async function GET() {
     });
 
     if (user?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 });
     }
 
     const faqs = await prisma.fAQ.findMany({
@@ -75,7 +58,7 @@ export async function GET() {
     });
 
     // Formatear para el panel admin (traducir inglés → español)
-    const faqsFormateadas = faqs.map((faq) => {
+    const faqsFormateadas = faqs.map(faq => {
       const ref = faq.id.slice(0, 8).toUpperCase();
 
       // Buscar traducción en el diccionario
@@ -86,10 +69,7 @@ export async function GET() {
         _ref: ref,
         pregunta: translation?.question || faq.question,
         respuesta: translation?.answer || faq.answer,
-        categoria:
-          faqCategoryTranslations[faq.category] ||
-          categoryTranslations[faq.category] ||
-          faq.category,
+        categoria: faqCategoryTranslations[faq.category] || categoryTranslations[faq.category] || faq.category,
         ordenVisualizacion: faq.displayOrder,
         activo: faq.isActive,
         creadoEn: faq.createdAt,
@@ -100,10 +80,7 @@ export async function GET() {
     return NextResponse.json({ success: true, faqs: faqsFormateadas });
   } catch (error) {
     console.error('Error listando FAQs:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error interno' },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: 'Error interno' }, { status: 500 });
   }
 }
 
@@ -117,10 +94,7 @@ export async function POST(req: NextRequest) {
       session = null;
     }
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -128,10 +102,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (user?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 });
     }
 
     const body = await req.json();
@@ -153,15 +124,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, faq }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { success: false, error: error.errors[0].message },
-        { status: 400 },
-      );
+      return NextResponse.json({ success: false, error: error.errors[0].message }, { status: 400 });
     }
     console.error('Error creando FAQ:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error interno' },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: 'Error interno' }, { status: 500 });
   }
 }

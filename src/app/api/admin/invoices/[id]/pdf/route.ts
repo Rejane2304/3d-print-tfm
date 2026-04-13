@@ -4,11 +4,12 @@
  *
  * Requiere: Rol ADMIN
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 import { generateInvoiceHTML } from '@/lib/invoices/invoice-template';
 import { COMPANY_CONFIG, generatePDF } from '@/lib/invoices/pdf-generator';
 import { existsSync, readFileSync } from 'node:fs';
@@ -70,17 +71,11 @@ async function getImageAsBase64(imageUrl: string): Promise<string | undefined> {
   }
 }
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
     }
 
     const usuario = await prisma.user.findUnique({
@@ -88,10 +83,7 @@ export async function GET(
     });
 
     if (usuario?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 403 },
-      );
+      return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 403 });
     }
 
     const factura = await prisma.invoice.findUnique({
@@ -120,19 +112,14 @@ export async function GET(
     });
 
     if (!factura) {
-      return NextResponse.json(
-        { success: false, error: 'Factura no encontrada' },
-        { status: 404 },
-      );
+      return NextResponse.json({ success: false, error: 'Factura no encontrada' }, { status: 404 });
     }
 
     // Procesar items y convertir imágenes a base64
     const itemsWithBase64Images = await Promise.all(
       (factura.order?.items || []).map(async item => {
         const imageUrl = item.product?.images?.[0]?.url;
-        const base64Image = imageUrl
-          ? await getImageAsBase64(imageUrl)
-          : undefined;
+        const base64Image = imageUrl ? await getImageAsBase64(imageUrl) : undefined;
 
         return {
           name: item.name,
@@ -141,7 +128,7 @@ export async function GET(
           subtotal: Number(item.subtotal),
           image: base64Image,
         };
-      })
+      }),
     );
 
     // Mapear datos al formato del template usando los datos CORRECTOS de la empresa
@@ -197,9 +184,6 @@ export async function GET(
     });
   } catch (error) {
     console.error('Error generando PDF:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error al generar el PDF' },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: 'Error al generar el PDF' }, { status: 500 });
   }
 }

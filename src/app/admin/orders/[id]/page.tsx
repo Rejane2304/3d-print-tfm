@@ -82,10 +82,7 @@ const translateAddressName = (name: string): string => {
   return translations[lowerName] || name;
 };
 
-const orderStatuses: Record<
-  string,
-  { color: string; icon: React.ElementType; label: string }
-> = {
+const orderStatuses: Record<string, { color: string; icon: React.ElementType; label: string }> = {
   Pendiente: {
     color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
     icon: Clock,
@@ -130,11 +127,9 @@ export default function AdminPedidoDetallePage() {
   const [numeroSeguimiento, setNumeroSeguimiento] = useState('');
   const [transportista, setTransportista] = useState('');
   const [showStatusForm, setShowStatusForm] = useState(false);
-  const [statusSuccessMessage, setStatusSuccessMessage] = useState<
-    string | null
-  >(null);
+  const [statusSuccessMessage, setStatusSuccessMessage] = useState<string | null>(null);
 
-  const loadOrder = useCallback(async() => {
+  const loadOrder = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -174,7 +169,7 @@ export default function AdminPedidoDetallePage() {
     }
   }, [status, session, router, loadOrder]);
 
-  const updateStatus = async() => {
+  const updateStatus = async () => {
     try {
       const response = await fetch('/api/admin/orders', {
         method: 'PATCH',
@@ -219,10 +214,7 @@ export default function AdminPedidoDetallePage() {
         <div className="text-center">
           <AlertCircle className="h-12 w-12 text-red-600 mx-auto mb-4" />
           <p className="text-gray-900 font-medium">Pedido no encontrado</p>
-          <Link
-            href="/admin/orders"
-            className="text-indigo-600 hover:text-indigo-800 mt-2 inline-block"
-          >
+          <Link href="/admin/orders" className="text-indigo-600 hover:text-indigo-800 mt-2 inline-block">
             ← Volver a pedidos
           </Link>
         </div>
@@ -244,16 +236,11 @@ export default function AdminPedidoDetallePage() {
         <div className="max-w-[1920px] 3xl:max-w-[2200px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Link
-                href="/admin/orders"
-                className="text-gray-500 hover:text-gray-700"
-              >
+              <Link href="/admin/orders" className="text-gray-500 hover:text-gray-700">
                 <ArrowLeft className="h-6 w-6" />
               </Link>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  Pedido {order.orderNumber}
-                </h1>
+                <h1 className="text-2xl font-bold text-gray-900">Pedido {order.orderNumber}</h1>
                 <p className="text-sm text-gray-500">
                   {new Date(order.createdAt).toLocaleDateString('es-ES')} -{' '}
                   {new Date(order.createdAt).toLocaleTimeString('es-ES')}
@@ -268,10 +255,7 @@ export default function AdminPedidoDetallePage() {
                 {statusConfig.label}
               </span>
             </div>
-            <Link
-              href="/admin/dashboard"
-              className="text-indigo-600 hover:text-indigo-800 font-medium"
-            >
+            <Link href="/admin/dashboard" className="text-indigo-600 hover:text-indigo-800 font-medium">
               ← Volver al Panel
             </Link>
           </div>
@@ -319,7 +303,7 @@ export default function AdminPedidoDetallePage() {
                 </h2>
               </div>
               <div className="divide-y divide-gray-200">
-                {order.items.map((item) => (
+                {order.items.map(item => (
                   <div key={item.id} className="p-6 flex items-center gap-4">
                     {item.imagenUrl ? (
                       <div className="w-24 h-24 bg-gray-100 flex-shrink-0 overflow-hidden relative">
@@ -339,17 +323,11 @@ export default function AdminPedidoDetallePage() {
                     )}
                     <div className="flex-1">
                       <p className="font-medium text-gray-900">{item.nombre}</p>
-                      <p className="text-sm text-gray-500">
-                        Cantidad: {item.quantity}
-                      </p>
+                      <p className="text-sm text-gray-500">Cantidad: {item.quantity}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium text-gray-900">
-                        {Number(item.price).toFixed(2)} €
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {Number(item.subtotal).toFixed(2)} €
-                      </p>
+                      <p className="font-medium text-gray-900">{Number(item.price).toFixed(2)} €</p>
+                      <p className="text-sm text-gray-500">{Number(item.subtotal).toFixed(2)} €</p>
                     </div>
                   </div>
                 ))}
@@ -358,21 +336,15 @@ export default function AdminPedidoDetallePage() {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Subtotal</span>
-                    <span className="font-medium">
-                      {Number(order.subtotal).toFixed(2)} €
-                    </span>
+                    <span className="font-medium">{Number(order.subtotal).toFixed(2)} €</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Envío</span>
-                    <span className="font-medium">
-                      {Number(order.envio).toFixed(2)} €
-                    </span>
+                    <span className="font-medium">{Number(order.envio).toFixed(2)} €</span>
                   </div>
                   <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-200">
                     <span className="text-gray-900">Total</span>
-                    <span className="text-gray-900">
-                      {Number(order.total).toFixed(2)} €
-                    </span>
+                    <span className="text-gray-900">{Number(order.total).toFixed(2)} €</span>
                   </div>
                 </div>
               </div>
@@ -387,21 +359,14 @@ export default function AdminPedidoDetallePage() {
                 </h2>
               </div>
               <div className="p-6">
-                <p className="font-medium text-gray-900">
-                  {translateAddressName(order.nombreEnvio)}
-                </p>
+                <p className="font-medium text-gray-900">{translateAddressName(order.nombreEnvio)}</p>
                 <p className="text-gray-600">{order.direccionEnvio}</p>
-                {order.complementoEnvio && (
-                  <p className="text-gray-600">{order.complementoEnvio}</p>
-                )}
+                {order.complementoEnvio && <p className="text-gray-600">{order.complementoEnvio}</p>}
                 <p className="text-gray-600">
-                  {order.postalCodeEnvio} {order.ciudadEnvio},{' '}
-                  {order.provinciaEnvio}
+                  {order.postalCodeEnvio} {order.ciudadEnvio}, {order.provinciaEnvio}
                 </p>
                 <p className="text-gray-600">{order.paisEnvio}</p>
-                <p className="text-gray-600 mt-2">
-                  Teléfono: {order.telefonoEnvio}
-                </p>
+                <p className="text-gray-600 mt-2">Teléfono: {order.telefonoEnvio}</p>
               </div>
             </div>
           </div>
@@ -417,9 +382,7 @@ export default function AdminPedidoDetallePage() {
                 </h2>
               </div>
               <div className="p-6">
-                <p className="font-medium text-gray-900">
-                  {order.usuario.nombre}
-                </p>
+                <p className="font-medium text-gray-900">{order.usuario.nombre}</p>
                 <p className="text-sm text-gray-600">{order.usuario.email}</p>
               </div>
             </div>
@@ -462,16 +425,13 @@ export default function AdminPedidoDetallePage() {
                 ) : (
                   <div className="space-y-4">
                     <div>
-                      <label
-                        htmlFor="orderStatus"
-                        className="block text-sm font-medium text-gray-700 mb-1"
-                      >
+                      <label htmlFor="orderStatus" className="block text-sm font-medium text-gray-700 mb-1">
                         Estado
                       </label>
                       <select
                         id="orderStatus"
                         value={newStatus}
-                        onChange={(e) => setNewStatus(e.target.value)}
+                        onChange={e => setNewStatus(e.target.value)}
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 \
                         focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         data-testid="status-dropdown"
@@ -488,36 +448,28 @@ export default function AdminPedidoDetallePage() {
                     {newStatus === 'Enviado' && (
                       <>
                         <div>
-                          <label
-                            htmlFor="trackingNumber"
-                            className="block text-sm font-medium text-gray-700 mb-1"
-                          >
+                          <label htmlFor="trackingNumber" className="block text-sm font-medium text-gray-700 mb-1">
                             Número de seguimiento
                           </label>
                           <input
                             type="text"
                             id="trackingNumber"
                             value={numeroSeguimiento}
-                            onChange={(e) =>
-                              setNumeroSeguimiento(e.target.value)
-                            }
+                            onChange={e => setNumeroSeguimiento(e.target.value)}
                             className="w-full border border-gray-300 rounded-lg px-3 py-2 \
                             focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="Ej: ABC123456"
                           />
                         </div>
                         <div>
-                          <label
-                            htmlFor="carrier"
-                            className="block text-sm font-medium text-gray-700 mb-1"
-                          >
+                          <label htmlFor="carrier" className="block text-sm font-medium text-gray-700 mb-1">
                             Transportista
                           </label>
                           <input
                             type="text"
                             id="carrier"
                             value={transportista}
-                            onChange={(e) => setTransportista(e.target.value)}
+                            onChange={e => setTransportista(e.target.value)}
                             className="w-full border border-gray-300 rounded-lg px-3 py-2 \
                             focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="Ej: Correos Express"
@@ -527,16 +479,13 @@ export default function AdminPedidoDetallePage() {
                     )}
 
                     <div>
-                      <label
-                        htmlFor="internalNotes"
-                        className="block text-sm font-medium text-gray-700 mb-1"
-                      >
+                      <label htmlFor="internalNotes" className="block text-sm font-medium text-gray-700 mb-1">
                         Notas internas
                       </label>
                       <textarea
                         id="internalNotes"
                         value={notas}
-                        onChange={(e) => setNotas(e.target.value)}
+                        onChange={e => setNotas(e.target.value)}
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 \
                         focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         rows={3}

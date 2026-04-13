@@ -8,14 +8,7 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import {
-  AlertCircle,
-  ArrowLeft,
-  CheckCircle2,
-  HelpCircle,
-  Loader2,
-  Save,
-} from 'lucide-react';
+import { AlertCircle, ArrowLeft, CheckCircle2, HelpCircle, Loader2, Save } from 'lucide-react';
 
 // Categorías predefinidas comunes
 const PREDEFINED_CATEGORIES = [
@@ -58,16 +51,11 @@ export default function NuevaFAQPage() {
     }
   }, [status, session, router]);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      [name]:
-        type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
     }));
   };
 
@@ -75,10 +63,10 @@ export default function NuevaFAQPage() {
     const value = e.target.value;
     if (value === 'custom') {
       setCustomCategory(true);
-      setFormData((prev) => ({ ...prev, category: '' }));
+      setFormData(prev => ({ ...prev, category: '' }));
     } else {
       setCustomCategory(false);
-      setFormData((prev) => ({ ...prev, category: value }));
+      setFormData(prev => ({ ...prev, category: value }));
     }
   };
 
@@ -101,7 +89,7 @@ export default function NuevaFAQPage() {
     return null;
   };
 
-  const handleSubmit = async(e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const validationError = validateForm();
@@ -161,10 +149,7 @@ export default function NuevaFAQPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link
-                href="/admin/faqs"
-                className="text-gray-500 hover:text-gray-700 transition-colors"
-              >
+              <Link href="/admin/faqs" className="text-gray-500 hover:text-gray-700 transition-colors">
                 <ArrowLeft className="h-6 w-6" />
               </Link>
               <div>
@@ -172,19 +157,13 @@ export default function NuevaFAQPage() {
                 <nav className="flex mt-1" aria-label="Breadcrumb">
                   <ol className="flex items-center space-x-2 text-sm">
                     <li>
-                      <Link
-                        href="/admin/dashboard"
-                        className="text-gray-500 hover:text-gray-700"
-                      >
+                      <Link href="/admin/dashboard" className="text-gray-500 hover:text-gray-700">
                         Panel
                       </Link>
                     </li>
                     <li className="text-gray-400">/</li>
                     <li>
-                      <Link
-                        href="/admin/faqs"
-                        className="text-gray-500 hover:text-gray-700"
-                      >
+                      <Link href="/admin/faqs" className="text-gray-500 hover:text-gray-700">
                         FAQs
                       </Link>
                     </li>
@@ -196,10 +175,7 @@ export default function NuevaFAQPage() {
                 </nav>
               </div>
             </div>
-            <Link
-              href="/admin/dashboard"
-              className="text-indigo-600 hover:text-indigo-800 font-medium"
-            >
+            <Link href="/admin/dashboard" className="text-indigo-600 hover:text-indigo-800 font-medium">
               ← Volver al Panel
             </Link>
           </div>
@@ -217,9 +193,7 @@ export default function NuevaFAQPage() {
         {success && (
           <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
             <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
-            <p className="text-green-700">
-              FAQ creada exitosamente. Redirigiendo...
-            </p>
+            <p className="text-green-700">FAQ creada exitosamente. Redirigiendo...</p>
           </div>
         )}
 
@@ -234,10 +208,7 @@ export default function NuevaFAQPage() {
 
               <div className="space-y-4">
                 <div>
-                  <label
-                    htmlFor="question"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
+                  <label htmlFor="question" className="block text-sm font-medium text-gray-700 mb-1">
                     Pregunta *
                   </label>
                   <input
@@ -250,16 +221,11 @@ export default function NuevaFAQPage() {
                     placeholder="Ej: ¿Cuánto tarda el envío?"
                     required
                   />
-                  <p className="mt-1 text-xs text-gray-500">
-                    Máximo 500 caracteres
-                  </p>
+                  <p className="mt-1 text-xs text-gray-500">Máximo 500 caracteres</p>
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="answer"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
+                  <label htmlFor="answer" className="block text-sm font-medium text-gray-700 mb-1">
                     Respuesta *
                   </label>
                   <textarea
@@ -273,17 +239,13 @@ export default function NuevaFAQPage() {
                     required
                   />
                   <p className="mt-1 text-xs text-gray-500">
-                    Máximo 5000 caracteres. Puedes usar texto simple o formato
-                    HTML básico.
+                    Máximo 5000 caracteres. Puedes usar texto simple o formato HTML básico.
                   </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label
-                      htmlFor="category"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
+                    <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
                       Categoría *
                     </label>
                     {customCategory === true ? (
@@ -301,7 +263,7 @@ export default function NuevaFAQPage() {
                           type="button"
                           onClick={() => {
                             setCustomCategory(false);
-                            setFormData((prev) => ({ ...prev, category: '' }));
+                            setFormData(prev => ({ ...prev, category: '' }));
                           }}
                           className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
                         >
@@ -318,7 +280,7 @@ export default function NuevaFAQPage() {
                         required
                       >
                         <option value="">Selecciona una categoría</option>
-                        {PREDEFINED_CATEGORIES.map((cat) => (
+                        {PREDEFINED_CATEGORIES.map(cat => (
                           <option key={cat} value={cat}>
                             {cat}
                           </option>
@@ -329,10 +291,7 @@ export default function NuevaFAQPage() {
                   </div>
 
                   <div>
-                    <label
-                      htmlFor="displayOrder"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
+                    <label htmlFor="displayOrder" className="block text-sm font-medium text-gray-700 mb-1">
                       Orden de visualización
                     </label>
                     <input
@@ -345,9 +304,7 @@ export default function NuevaFAQPage() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       placeholder="0"
                     />
-                    <p className="mt-1 text-xs text-gray-500">
-                      Menor número = aparece primero
-                    </p>
+                    <p className="mt-1 text-xs text-gray-500">Menor número = aparece primero</p>
                   </div>
                 </div>
               </div>
@@ -355,9 +312,7 @@ export default function NuevaFAQPage() {
 
             {/* Configuración */}
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                Configuración
-              </h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Configuración</h2>
 
               <div className="flex items-center gap-3">
                 <input
@@ -368,10 +323,7 @@ export default function NuevaFAQPage() {
                   onChange={handleInputChange}
                   className="h-4 w-4 text-indigo-600 rounded focus:ring-indigo-500"
                 />
-                <label
-                  htmlFor="isActive"
-                  className="text-sm text-gray-700 cursor-pointer"
-                >
+                <label htmlFor="isActive" className="text-sm text-gray-700 cursor-pointer">
                   FAQ activa (visible en la página de ayuda)
                 </label>
               </div>

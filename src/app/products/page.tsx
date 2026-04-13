@@ -10,7 +10,7 @@ import FilterSidebar from '@/components/products/FilterSidebar';
 import Pagination from '@/components/products/Pagination';
 import SearchBar from '@/components/products/SearchBar';
 import SortSelector from '@/components/products/SortSelector';
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 import { Package, Shield, Sparkles, Truck } from 'lucide-react';
 
 interface ProductsPageProps {
@@ -100,7 +100,7 @@ async function getProducts(searchParams: ProductsPageProps['searchParams']) {
     prisma.product.count({ where }),
   ]);
 
-  const translatedProducts = products.map((product) => ({
+  const translatedProducts = products.map(product => ({
     ...product,
     name: translateProductName(product.slug),
     description: translateProductDescription(product.slug),
@@ -132,9 +132,7 @@ async function getProducts(searchParams: ProductsPageProps['searchParams']) {
   };
 }
 
-export default async function ProductsPage({
-  searchParams,
-}: Readonly<ProductsPageProps>) {
+export default async function ProductsPage({ searchParams }: Readonly<ProductsPageProps>) {
   const { products, total, totalPages, page } = await getProducts(searchParams);
 
   return (
@@ -152,17 +150,15 @@ export default async function ProductsPage({
               style={{ maxWidth: '100%' }}
             >
               <Sparkles className="h-4 w-4 text-yellow-300" />
-              <span className="text-sm font-medium text-white/90">
-                Impresión 3D de Alta Calidad
-              </span>
+              <span className="text-sm font-medium text-white/90">Impresión 3D de Alta Calidad</span>
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 tracking-tight">
               Catálogo de Productos
             </h1>
             <p className="text-lg sm:text-xl text-white/80 max-w-2xl mx-auto mb-8">
-              Descubre nuestra colección única de productos impresos en 3D.
-              Diseños exclusivos fabricados con los mejores materiales.
+              Descubre nuestra colección única de productos impresos en 3D. Diseños exclusivos fabricados con los
+              mejores materiales.
             </p>
 
             {/* Features Bar */}
@@ -171,11 +167,8 @@ export default async function ProductsPage({
                 { icon: Package, text: 'Materiales Premium' },
                 { icon: Shield, text: 'Garantía de Calidad' },
                 { icon: Truck, text: 'Envío Rápido' },
-              ].map((feature) => (
-                <div
-                  key={feature.text}
-                  className="flex items-center gap-2 text-white/90"
-                >
+              ].map(feature => (
+                <div key={feature.text} className="flex items-center gap-2 text-white/90">
                   <feature.icon className="h-5 w-5" />
                   <span className="text-sm font-medium">{feature.text}</span>
                 </div>
@@ -212,13 +205,9 @@ export default async function ProductsPage({
               style={{ maxWidth: '100%' }}
             >
               <div>
-                <p className="text-sm text-gray-500 mb-1">
-                  Mostrando resultados
-                </p>
+                <p className="text-sm text-gray-500 mb-1">Mostrando resultados</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {products.length}{' '}
-                  <span className="text-gray-400 font-normal">de</span> {total}{' '}
-                  productos
+                  {products.length} <span className="text-gray-400 font-normal">de</span> {total} productos
                 </p>
               </div>
               <SortSelector />
@@ -227,16 +216,9 @@ export default async function ProductsPage({
             {products.length > 0 ? (
               <>
                 {/* Grid de Productos Moderno */}
-                <div
-                  data-testid="product-grid"
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-                >
+                <div data-testid="product-grid" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {products.map((product, index) => (
-                    <div
-                      key={product.id}
-                      className="animate-fade-in"
-                      style={{ animationDelay: `${index * 50}ms` }}
-                    >
+                    <div key={product.id} className="animate-fade-in" style={{ animationDelay: `${index * 50}ms` }}>
                       <ProductCard product={product} />
                     </div>
                   ))}
@@ -245,10 +227,7 @@ export default async function ProductsPage({
                 {/* Pagination Moderno */}
                 {totalPages > 1 && (
                   <div className="mt-12 sm:mt-16 pt-8 border-t border-gray-200">
-                    <Pagination
-                      currentPage={page}
-                      totalPages={totalPages}
-                    />
+                    <Pagination currentPage={page} totalPages={totalPages} />
                   </div>
                 )}
               </>
@@ -258,12 +237,9 @@ export default async function ProductsPage({
                 <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
                   <Package className="h-10 w-10 text-gray-400" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  No se encontraron productos
-                </h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">No se encontraron productos</h3>
                 <p className="text-gray-500 max-w-md mx-auto">
-                  Intenta ajustar los filtros o términos de búsqueda para
-                  encontrar lo que buscas
+                  Intenta ajustar los filtros o términos de búsqueda para encontrar lo que buscas
                 </p>
               </div>
             )}

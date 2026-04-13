@@ -89,7 +89,7 @@ export default function AdminClientDetailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, session, router, params.id]);
 
-  const fetchClientDetail = async() => {
+  const fetchClientDetail = async () => {
     try {
       setLoading(true);
       const response = await fetch(`/api/admin/clients/${params.id}`);
@@ -150,10 +150,7 @@ export default function AdminClientDetailPage() {
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-600">Cliente no encontrado</p>
-          <Link
-            href="/admin/clients"
-            className="text-indigo-600 hover:text-indigo-900 mt-4 inline-block"
-          >
+          <Link href="/admin/clients" className="text-indigo-600 hover:text-indigo-900 mt-4 inline-block">
             Volver al listado
           </Link>
         </div>
@@ -168,23 +165,15 @@ export default function AdminClientDetailPage() {
         <div className="max-w-[1920px] 3xl:max-w-[2200px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Link
-                href="/admin/clients"
-                className="text-gray-500 hover:text-gray-700"
-              >
+              <Link href="/admin/clients" className="text-gray-500 hover:text-gray-700">
                 <ArrowLeft className="h-6 w-6" />
               </Link>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  {client.nombre}
-                </h1>
+                <h1 className="text-2xl font-bold text-gray-900">{client.nombre}</h1>
                 <p className="text-sm text-gray-500">Detalle del cliente</p>
               </div>
             </div>
-            <Link
-              href="/admin/dashboard"
-              className="text-indigo-600 hover:text-indigo-800 font-medium"
-            >
+            <Link href="/admin/dashboard" className="text-indigo-600 hover:text-indigo-800 font-medium">
               ← Volver al Panel
             </Link>
           </div>
@@ -200,14 +189,10 @@ export default function AdminClientDetailPage() {
                 <User className="h-8 w-8 text-indigo-600" />
               </div>
               <div className="ml-4">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  {client.nombre}
-                </h2>
+                <h2 className="text-xl font-semibold text-gray-900">{client.nombre}</h2>
                 <span
                   className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                    client.activo
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-red-100 text-red-800'
+                    client.activo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                   }`}
                 >
                   {client.activo ? 'Activo' : 'Inactivo'}
@@ -241,12 +226,8 @@ export default function AdminClientDetailPage() {
               <div className="flex items-center">
                 <ShoppingBag className="h-8 w-8 text-indigo-500" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">
-                    Total Pedidos
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {client.estadisticas?.totalPedidos ?? 0}
-                  </p>
+                  <p className="text-sm font-medium text-gray-600">Total Pedidos</p>
+                  <p className="text-2xl font-bold text-gray-900">{client.estadisticas?.totalPedidos ?? 0}</p>
                 </div>
               </div>
             </div>
@@ -255,9 +236,7 @@ export default function AdminClientDetailPage() {
               <div className="flex items-center">
                 <DollarSign className="h-8 w-8 text-green-500" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">
-                    Total Gastado
-                  </p>
+                  <p className="text-sm font-medium text-gray-600">Total Gastado</p>
                   <p className="text-2xl font-bold text-gray-900">
                     {formatCurrency(client.estadisticas?.totalGastado ?? 0)}
                   </p>
@@ -269,12 +248,8 @@ export default function AdminClientDetailPage() {
               <div className="flex items-center">
                 <Package className="h-8 w-8 text-blue-500" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">
-                    Completados
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {client.estadisticas?.pedidosCompletados ?? 0}
-                  </p>
+                  <p className="text-sm font-medium text-gray-600">Completados</p>
+                  <p className="text-2xl font-bold text-gray-900">{client.estadisticas?.pedidosCompletados ?? 0}</p>
                 </div>
               </div>
             </div>
@@ -283,9 +258,7 @@ export default function AdminClientDetailPage() {
               <div className="flex items-center">
                 <DollarSign className="h-8 w-8 text-purple-500" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">
-                    Ticket Medio
-                  </p>
+                  <p className="text-sm font-medium text-gray-600">Ticket Medio</p>
                   <p className="text-2xl font-bold text-gray-900">
                     {formatCurrency(client.estadisticas?.valorPromedio ?? 0)}
                   </p>
@@ -306,19 +279,12 @@ export default function AdminClientDetailPage() {
             <p className="text-gray-500">No hay direcciones registradas</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {client.addresses.map((address) => (
-                <div
-                  key={address.id}
-                  className="border border-gray-200 rounded-lg p-4"
-                >
+              {client.addresses.map(address => (
+                <div key={address.id} className="border border-gray-200 rounded-lg p-4">
                   <div className="flex justify-between items-start mb-2">
-                    <span className="font-medium text-gray-900">
-                      {translateAddressName(address.name)}
-                    </span>
+                    <span className="font-medium text-gray-900">{translateAddressName(address.name)}</span>
                     {address.isDefault && (
-                      <span className="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">
-                        Principal
-                      </span>
+                      <span className="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">Principal</span>
                     )}
                   </div>
                   <p className="text-gray-600">{address.recipient}</p>
@@ -341,9 +307,7 @@ export default function AdminClientDetailPage() {
           </h3>
 
           {client.orders.length === 0 ? (
-            <div className="p-6 text-center text-gray-500">
-              No hay pedidos registrados
-            </div>
+            <div className="p-6 text-center text-gray-500">No hay pedidos registrados</div>
           ) : (
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -369,35 +333,27 @@ export default function AdminClientDetailPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {client.orders.map((order) => (
+                {client.orders.map(order => (
                   <tr key={order.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       #{order.numeroPedido}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {formatDate(order.createdAt)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {order.itemCount} items
-                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(order.createdAt)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.itemCount} items</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {formatCurrency(order.total)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
                         className={
-                          'inline-flex px-2 py-1 text-xs font-semibold rounded-full ' +
-                          getStatusBadge(order.estado)
+                          'inline-flex px-2 py-1 text-xs font-semibold rounded-full ' + getStatusBadge(order.estado)
                         }
                       >
                         {order.estado}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <Link
-                        href={`/admin/orders/${order.id}`}
-                        className="text-indigo-600 hover:text-indigo-900"
-                      >
+                      <Link href={`/admin/orders/${order.id}`} className="text-indigo-600 hover:text-indigo-900">
                         Ver pedido
                       </Link>
                     </td>

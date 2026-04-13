@@ -12,7 +12,7 @@ export default function PayPalTestPage() {
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
 
-  const createOrder = async() => {
+  const createOrder = async () => {
     const response = await fetch('/api/paypal/create-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -25,7 +25,7 @@ export default function PayPalTestPage() {
     return data.paypalOrderId;
   };
 
-  const onApprove = async(data: { orderID: string }) => {
+  const onApprove = async (data: { orderID: string }) => {
     const response = await fetch('/api/paypal/capture-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -61,7 +61,7 @@ export default function PayPalTestPage() {
             <PayPalButtons
               createOrder={createOrder}
               onApprove={onApprove}
-              onError={(err) => {
+              onError={err => {
                 setStatus('error');
                 setMessage(err instanceof Error ? err.message : 'PayPal error');
               }}

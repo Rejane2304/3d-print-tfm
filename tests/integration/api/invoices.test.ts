@@ -1,7 +1,7 @@
 /**
  * Integration Tests - Invoice API
  * Testing real database and API endpoints
- * 
+ *
  * Endpoints:
  * - POST /api/admin/invoices - create invoice
  * - GET /api/admin/invoices/[id]/pdf - generate PDF
@@ -39,11 +39,11 @@ describe('Invoices API', () => {
       where: { user: { email: { startsWith: 'invoice-test-' } } },
     });
     await prisma.address.deleteMany({
-      where: { user: { email: { startsWith: 'invoice-test-' } } } },
-    );
+      where: { user: { email: { startsWith: 'invoice-test-' } } },
+    });
     await prisma.user.deleteMany({
-      where: { email: { startsWith: 'invoice-test-' } } },
-    );
+      where: { email: { startsWith: 'invoice-test-' } },
+    });
 
     // Create admin user
     const adminPassword = await bcrypt.hash('AdminPass123!', 10);
@@ -125,11 +125,11 @@ describe('Invoices API', () => {
       where: { user: { email: { startsWith: 'invoice-test-' } } },
     });
     await prisma.address.deleteMany({
-      where: { user: { email: { startsWith: 'invoice-test-' } } } },
-    );
+      where: { user: { email: { startsWith: 'invoice-test-' } } },
+    });
     await prisma.user.deleteMany({
-      where: { email: { startsWith: 'invoice-test-' } } },
-    );
+      where: { email: { startsWith: 'invoice-test-' } },
+    });
   });
 
   describe('POST /api/admin/invoices', () => {
@@ -184,7 +184,9 @@ describe('Invoices API', () => {
       const req = new NextRequest('http://localhost:3000/api/admin/invoices', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: '00000000-0000-0000-0000-000000000000' }),
+        body: JSON.stringify({
+          orderId: '00000000-0000-0000-0000-000000000000',
+        }),
       });
 
       const res = await createInvoice(req);
@@ -210,7 +212,7 @@ describe('Invoices API', () => {
       expect(body.factura).toBeDefined();
       expect(body.factura.invoiceNumber).toMatch(/^F-\d{4}-\d{6}$/);
       expect(body.factura.orderId).toBe(testOrder.id);
-      
+
       // Verify VAT calculation (21% on products only, not shipping)
       const subtotal = Number(body.factura.subtotal);
       const vatAmount = Number(body.factura.vatAmount);
@@ -245,11 +247,13 @@ describe('Invoices API', () => {
       });
 
       // Create first invoice
-      await createInvoice(new NextRequest('http://localhost:3000/api/admin/invoices', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: freshOrder.id }),
-      }));
+      await createInvoice(
+        new NextRequest('http://localhost:3000/api/admin/invoices', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId: freshOrder.id }),
+        }),
+      );
 
       // Try to create duplicate
       const req = new NextRequest('http://localhost:3000/api/admin/invoices', {
@@ -331,11 +335,13 @@ describe('Invoices API', () => {
         user: { email: adminUser.email, name: adminUser.name },
       });
 
-      await createInvoice(new NextRequest('http://localhost:3000/api/admin/invoices', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: testOrder.id }),
-      }));
+      await createInvoice(
+        new NextRequest('http://localhost:3000/api/admin/invoices', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId: testOrder.id }),
+        }),
+      );
     });
 
     it('should list invoices', async () => {
@@ -396,15 +402,17 @@ describe('Invoices API', () => {
           shippingCountry: 'Spain',
           updatedAt: new Date(),
           items: {
-            create: [{
-              id: randomUUID(),
-              name: 'Test Product',
-              price: 50,
-              quantity: 1,
-              subtotal: 50,
-              category: 'Test',
-              material: 'PLA',
-            }],
+            create: [
+              {
+                id: randomUUID(),
+                name: 'Test Product',
+                price: 50,
+                quantity: 1,
+                subtotal: 50,
+                category: 'Test',
+                material: 'PLA',
+              },
+            ],
           },
         },
       });
@@ -414,11 +422,13 @@ describe('Invoices API', () => {
         user: { email: adminUser.email, name: adminUser.name },
       });
 
-      const res = await createInvoice(new NextRequest('http://localhost:3000/api/admin/invoices', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: pdfTestOrder.id }),
-      }));
+      const res = await createInvoice(
+        new NextRequest('http://localhost:3000/api/admin/invoices', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId: pdfTestOrder.id }),
+        }),
+      );
       const body = await res.json();
       invoiceId = body.factura.id;
     });
@@ -450,7 +460,9 @@ describe('Invoices API', () => {
       });
 
       const req = new NextRequest('http://localhost:3000/api/admin/invoices/non-existent-id/pdf');
-      const res = await generateInvoicePDF(req, { params: { id: 'non-existent-id' } });
+      const res = await generateInvoicePDF(req, {
+        params: { id: 'non-existent-id' },
+      });
       expect(res.status).toBe(404);
     });
   });
@@ -476,15 +488,17 @@ describe('Invoices API', () => {
           shippingCountry: 'Spain',
           updatedAt: new Date(),
           items: {
-            create: [{
-              id: randomUUID(),
-              name: 'Test Product',
-              price: 100,
-              quantity: 1,
-              subtotal: 100,
-              category: 'Test',
-              material: 'PLA',
-            }],
+            create: [
+              {
+                id: randomUUID(),
+                name: 'Test Product',
+                price: 100,
+                quantity: 1,
+                subtotal: 100,
+                category: 'Test',
+                material: 'PLA',
+              },
+            ],
           },
         },
       });
@@ -511,10 +525,10 @@ describe('Invoices API', () => {
       const shipping = Number(body.factura.shipping);
       const vatAmount = Number(body.factura.vatAmount);
       const total = Number(body.factura.total);
-      
+
       // Verificar que el IVA es solo sobre productos
       expect(vatAmount).toBeCloseTo(subtotal * 0.21, 2);
-      
+
       // Verificar el total
       const expectedTotal = subtotal * 1.21 + shipping;
       expect(total).toBeCloseTo(expectedTotal, 2);
@@ -540,15 +554,17 @@ describe('Invoices API', () => {
           shippingCountry: 'Spain',
           updatedAt: new Date(),
           items: {
-            create: [{
-              id: randomUUID(),
-              name: 'Test Product',
-              price: 50,
-              quantity: 1,
-              subtotal: 50,
-              category: 'Test',
-              material: 'PLA',
-            }],
+            create: [
+              {
+                id: randomUUID(),
+                name: 'Test Product',
+                price: 50,
+                quantity: 1,
+                subtotal: 50,
+                category: 'Test',
+                material: 'PLA',
+              },
+            ],
           },
         },
       });

@@ -23,7 +23,7 @@ export function useCancelledOrder(setCart: (cart: Cart | null) => void): UseCanc
         globalThis.history.replaceState({}, '', '/checkout');
 
         // Cancelar el pedido en el backend
-        void (async() => {
+        void (async () => {
           try {
             await fetch('/api/orders/cancel-and-restore', {
               method: 'POST',
@@ -40,7 +40,7 @@ export function useCancelledOrder(setCart: (cart: Cart | null) => void): UseCanc
     checkCancelledPayment();
   }, []);
 
-  const restoreCart = async() => {
+  const restoreCart = async () => {
     if (!cancelledOrderId) {
       return;
     }

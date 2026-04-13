@@ -1,7 +1,7 @@
 /**
  * Integration Tests - Addresses API
  * Testing real database and API endpoints
- * 
+ *
  * Endpoints:
  * - GET /api/account/addresses - list addresses
  * - POST /api/account/addresses - create address
@@ -28,11 +28,11 @@ describe('Addresses API', () => {
   beforeEach(async () => {
     // Clean up
     await prisma.address.deleteMany({
-      where: { user: { email: { startsWith: 'address-test-' } } } },
-    );
+      where: { user: { email: { startsWith: 'address-test-' } } },
+    });
     await prisma.user.deleteMany({
-      where: { email: { startsWith: 'address-test-' } } },
-    );
+      where: { email: { startsWith: 'address-test-' } },
+    });
 
     // Create test user
     const hashedPassword = await bcrypt.hash('TestPass123!', 10);
@@ -55,11 +55,11 @@ describe('Addresses API', () => {
   afterEach(async () => {
     // Clean up
     await prisma.address.deleteMany({
-      where: { user: { email: { startsWith: 'address-test-' } } } },
-    );
+      where: { user: { email: { startsWith: 'address-test-' } } },
+    });
     await prisma.user.deleteMany({
-      where: { email: { startsWith: 'address-test-' } } },
-    );
+      where: { email: { startsWith: 'address-test-' } },
+    });
   });
 
   describe('GET /api/account/addresses', () => {
@@ -478,7 +478,7 @@ describe('Addresses API', () => {
       const otherUser = await prisma.user.create({
         data: {
           id: randomUUID(),
-        email: `address-test-other-${Date.now()}@test.com`,
+          email: `address-test-other-${Date.now()}@test.com`,
           password: await bcrypt.hash('Pass123!', 10),
           name: 'Other User',
           role: 'CUSTOMER',

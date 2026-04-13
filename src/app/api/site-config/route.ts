@@ -13,10 +13,7 @@ export async function GET() {
     const config = await getSiteConfig();
 
     if (!config) {
-      return NextResponse.json(
-        { success: false, error: 'Configuración no disponible' },
-        { status: 500 },
-      );
+      return NextResponse.json({ success: false, error: 'Configuración no disponible' }, { status: 500 });
     }
 
     // Return formatted response for frontend
@@ -39,9 +36,6 @@ export async function GET() {
     });
   } catch (error) {
     console.error('Error getting site config:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error interno' },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: 'Error interno' }, { status: 500 });
   }
 }

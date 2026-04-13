@@ -4,7 +4,8 @@
  *
  * Requiere: Rol ADMIN
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
@@ -20,10 +21,7 @@ export async function GET(req: NextRequest) {
       session = null;
     }
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -31,10 +29,7 @@ export async function GET(req: NextRequest) {
     });
 
     if (user?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 });
     }
 
     // Get query params for filtering
@@ -81,16 +76,14 @@ export async function GET(req: NextRequest) {
     // Filter by product name if provided (after translation)
     let filteredReviews = reviews;
     if (productFilter) {
-      filteredReviews = reviews.filter((review) => {
-        const productName = translateProductName(
-          review.product.slug,
-        ).toLowerCase();
+      filteredReviews = reviews.filter(review => {
+        const productName = translateProductName(review.product.slug).toLowerCase();
         return productName.includes(productFilter.toLowerCase());
       });
     }
 
     // Formatear para el panel admin (español)
-    const resenasFormateadas = filteredReviews.map((review) => ({
+    const resenasFormateadas = filteredReviews.map(review => ({
       id: review.id,
       _ref: review.id.slice(0, 8).toUpperCase(),
       productoId: review.productId,
@@ -111,10 +104,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: true, resenas: resenasFormateadas });
   } catch (error) {
     console.error('Error listando reseñas:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error interno' },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: 'Error interno' }, { status: 500 });
   }
 }
 
@@ -128,10 +118,7 @@ export async function DELETE(req: NextRequest) {
       session = null;
     }
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -139,20 +126,14 @@ export async function DELETE(req: NextRequest) {
     });
 
     if (user?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 });
     }
 
     const body = await req.json();
     const { ids } = body;
 
     if (!Array.isArray(ids) || ids.length === 0) {
-      return NextResponse.json(
-        { success: false, error: 'IDs de reseñas requeridos' },
-        { status: 400 },
-      );
+      return NextResponse.json({ success: false, error: 'IDs de reseñas requeridos' }, { status: 400 });
     }
 
     // Delete reviews
@@ -170,9 +151,6 @@ export async function DELETE(req: NextRequest) {
     });
   } catch (error) {
     console.error('Error eliminando reseñas:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error interno' },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: 'Error interno' }, { status: 500 });
   }
 }

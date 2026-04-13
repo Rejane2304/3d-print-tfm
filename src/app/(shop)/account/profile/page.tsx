@@ -8,21 +8,8 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import {
-  AlertCircle,
-  CheckCircle2,
-  CreditCard,
-  Eye,
-  EyeOff,
-  Loader2,
-  Lock,
-  Phone,
-  Save,
-  User,
-} from 'lucide-react';
-import PasswordStrength, {
-  isPasswordValid,
-} from '@/components/auth/PasswordStrength';
+import { AlertCircle, CheckCircle2, CreditCard, Eye, EyeOff, Loader2, Lock, Phone, Save, User } from 'lucide-react';
+import PasswordStrength, { isPasswordValid } from '@/components/auth/PasswordStrength';
 
 interface ProfileData {
   name: string;
@@ -65,7 +52,7 @@ export default function ProfilePage() {
     }
   }, [status, router]);
 
-  const loadProfile = async() => {
+  const loadProfile = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -90,7 +77,7 @@ export default function ProfilePage() {
     }
   };
 
-  const saveProfile = async(e: React.FormEvent) => {
+  const saveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
@@ -104,9 +91,7 @@ export default function ProfilePage() {
           throw new Error('Las contraseñas no coinciden');
         }
         if (!isPasswordValid(newPassword)) {
-          throw new Error(
-            'La contraseña no cumple con todos los requisitos de seguridad',
-          );
+          throw new Error('La contraseña no cumple con todos los requisitos de seguridad');
         }
       }
 
@@ -162,9 +147,7 @@ export default function ProfilePage() {
       <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
         <div className="text-center">
           <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin text-indigo-600 mx-auto mb-4" />
-          <p className="text-gray-600 text-sm sm:text-base">
-            Cargando perfil...
-          </p>
+          <p className="text-gray-600 text-sm sm:text-base">Cargando perfil...</p>
         </div>
       </div>
     );
@@ -175,9 +158,7 @@ export default function ProfilePage() {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-            Mi Perfil
-          </h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Mi Perfil</h1>
           <p className="text-sm sm:text-base text-gray-600 mt-2">
             Gestiona tus datos personales y preferencias de cuenta
           </p>
@@ -209,15 +190,11 @@ export default function ProfilePage() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nombre completo
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre completo</label>
                 <input
                   type="text"
                   value={profile.name}
-                  onChange={(e) =>
-                    setProfile({ ...profile, name: e.target.value })
-                  }
+                  onChange={e => setProfile({ ...profile, name: e.target.value })}
                   className="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-sm sm:text-base focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   required
                   minLength={2}
@@ -225,32 +202,24 @@ export default function ProfilePage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                 <input
                   type="email"
                   value={profile.email}
                   disabled
                   className="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-sm sm:text-base bg-gray-100 text-gray-500"
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  El email no se puede modificar
-                </p>
+                <p className="text-xs text-gray-500 mt-1">El email no se puede modificar</p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Teléfono
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                   <input
                     type="tel"
                     value={profile.phone}
-                    onChange={(e) =>
-                      setProfile({ ...profile, phone: e.target.value })
-                    }
+                    onChange={e => setProfile({ ...profile, phone: e.target.value })}
                     placeholder="+34 600 123 456"
                     className="w-full pl-9 sm:pl-10 pr-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   />
@@ -258,15 +227,13 @@ export default function ProfilePage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  NIF / DNI
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">NIF / DNI</label>
                 <div className="relative">
                   <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                   <input
                     type="text"
                     value={profile.taxId}
-                    onChange={(e) =>
+                    onChange={e =>
                       setProfile({
                         ...profile,
                         taxId: e.target.value.toUpperCase(),
@@ -293,34 +260,28 @@ export default function ProfilePage() {
                 <input
                   type="checkbox"
                   checked={changePassword}
-                  onChange={(e) => setChangePassword(e.target.checked)}
+                  onChange={e => setChangePassword(e.target.checked)}
                   className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4"
                 />
-                <span className="text-sm text-gray-700">
-                  Cambiar contraseña
-                </span>
+                <span className="text-sm text-gray-700">Cambiar contraseña</span>
               </label>
             </div>
 
             {changePassword && (
               <div className="space-y-4 border-t border-gray-200 pt-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Contraseña actual
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña actual</label>
                   <div className="relative">
                     <input
                       type={showCurrentPassword ? 'text' : 'password'}
                       value={currentPassword}
-                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      onChange={e => setCurrentPassword(e.target.value)}
                       className="w-full pr-10 border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-sm sm:text-base focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                       required={changePassword}
                     />
                     <button
                       type="button"
-                      onClick={() =>
-                        setShowCurrentPassword(!showCurrentPassword)
-                      }
+                      onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
                     >
                       {showCurrentPassword ? (
@@ -333,14 +294,12 @@ export default function ProfilePage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nueva contraseña
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nueva contraseña</label>
                   <div className="relative">
                     <input
                       type={showNewPassword ? 'text' : 'password'}
                       value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
+                      onChange={e => setNewPassword(e.target.value)}
                       minLength={10}
                       className="w-full pr-10 border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-sm sm:text-base focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                       required={changePassword}
@@ -357,29 +316,23 @@ export default function ProfilePage() {
                       )}
                     </button>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Mínimo 10 caracteres
-                  </p>
+                  <p className="text-xs text-gray-500 mt-1">Mínimo 10 caracteres</p>
                   <PasswordStrength password={newPassword} />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Confirmar nueva contraseña
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar nueva contraseña</label>
                   <div className="relative">
                     <input
                       type={showConfirmPassword ? 'text' : 'password'}
                       value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      onChange={e => setConfirmPassword(e.target.value)}
                       className="w-full pr-10 border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-sm sm:text-base focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                       required={changePassword}
                     />
                     <button
                       type="button"
-                      onClick={() =>
-                        setShowConfirmPassword(!showConfirmPassword)
-                      }
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
                     >
                       {showConfirmPassword ? (

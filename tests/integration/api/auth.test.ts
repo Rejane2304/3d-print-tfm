@@ -1,7 +1,7 @@
 /**
  * Integration Tests - Authentication API
  * Testing real database and API endpoints
- * 
+ *
  * Endpoints:
  * - POST /api/auth/register - user creation
  * - POST /api/auth/login - session creation (via NextAuth)
@@ -53,7 +53,7 @@ describe('Authentication API', () => {
       expect(body.user).toBeDefined();
       expect(body.user.email).toBe(testUser.email.toLowerCase());
       expect(body.user.password).toBeUndefined(); // Never return password
-      
+
       // Verify user exists in database
       const dbUser = await prisma.user.findUnique({
         where: { email: testUser.email.toLowerCase() },
@@ -70,7 +70,7 @@ describe('Authentication API', () => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(testUser),
-        })
+        }),
       );
 
       // Attempt duplicate
@@ -103,7 +103,7 @@ describe('Authentication API', () => {
 
       expect(dbUser!.password).not.toBe(testUser.password);
       expect(dbUser!.password).toMatch(/^\$2[aby]\$/); // bcrypt hash format
-      
+
       const isValid = await bcrypt.compare(testUser.password, dbUser!.password);
       expect(isValid).toBe(true);
     });
@@ -198,7 +198,7 @@ describe('Authentication API', () => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(testUser),
-        })
+        }),
       );
 
       // Verify credential validation logic
@@ -207,7 +207,7 @@ describe('Authentication API', () => {
       });
 
       expect(dbUser).toBeTruthy();
-      
+
       const isValidPassword = await bcrypt.compare(testUser.password, dbUser!.password);
       expect(isValidPassword).toBe(true);
     });
@@ -219,7 +219,7 @@ describe('Authentication API', () => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(testUser),
-        })
+        }),
       );
 
       const dbUser = await prisma.user.findUnique({

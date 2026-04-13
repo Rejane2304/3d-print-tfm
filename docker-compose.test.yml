@@ -15,67 +15,67 @@ services:
   postgres-test:
     image: postgres:16-alpine
     container_name: 3dprint-test-db
-    
+
     environment:
       # Usuario y contraseña para PostgreSQL
       POSTGRES_USER: testuser
       POSTGRES_PASSWORD: testpassword123
       POSTGRES_DB: 3dprint_tfm_test
       # Configuración de inicialización
-      POSTGRES_INITDB_ARGS: "-c password_encryption=scram-sha-256"
+      POSTGRES_INITDB_ARGS: '-c password_encryption=scram-sha-256'
       # Optimizaciones para tests (reducir deadlocks)
-      POSTGRES_HOST_AUTH_METHOD: "md5"
-    
+      POSTGRES_HOST_AUTH_METHOD: 'md5'
+
     command:
-      - "postgres"
-      - "-c"
-      - "max_connections=200"
-      - "-c"
-      - "shared_buffers=256MB"
-      - "-c"
-      - "effective_cache_size=1GB"
-      - "-c"
-      - "work_mem=10MB"
-      - "-c"
-      - "maintenance_work_mem=64MB"
-      - "-c"
-      - "default_transaction_isolation=read committed"
-      - "-c"
-      - "max_locks_per_transaction=256"
-      - "-c"
-      - "deadlock_timeout=10s"
-      - "-c"
-      - "statement_timeout=60000"
-      - "-c"
-      - "log_lock_waits=on"
-    
+      - 'postgres'
+      - '-c'
+      - 'max_connections=200'
+      - '-c'
+      - 'shared_buffers=256MB'
+      - '-c'
+      - 'effective_cache_size=1GB'
+      - '-c'
+      - 'work_mem=10MB'
+      - '-c'
+      - 'maintenance_work_mem=64MB'
+      - '-c'
+      - 'default_transaction_isolation=read committed'
+      - '-c'
+      - 'max_locks_per_transaction=256'
+      - '-c'
+      - 'deadlock_timeout=10s'
+      - '-c'
+      - 'statement_timeout=60000'
+      - '-c'
+      - 'log_lock_waits=on'
+
     ports:
       # Mapear puerto 5433 localmente para evitar conflictos
       # Puerto interno 5432 -> Puerto externo 5433
-      - "5433:5432"
-    
+      - '5433:5432'
+
     volumes:
       # Volumen anónimo para datos (se limpia al eliminar container)
       - postgres_test_data:/var/lib/postgresql/data
-    
+
     healthcheck:
       # Verificar que PostgreSQL está listo
-      test: ["CMD-SHELL", "pg_isready -U testuser"]
+      test: ['CMD-SHELL', 'pg_isready -U testuser']
       interval: 5s
       timeout: 5s
       retries: 10
       start_period: 5s
-    
+
     # No reiniciar automáticamente
     restart: unless-stopped
-    
+
     # Logs
     logging:
-      driver: "json-file"
+      driver: 'json-file'
       options:
-        max-size: "10m"
-        max-file: "3"
-    
+        max-size: '10m'
+        max-file: '3'
+
     networks:
       - test-network
 

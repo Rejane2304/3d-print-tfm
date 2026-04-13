@@ -14,6 +14,7 @@ Esta versión representa la entrega final del Trabajo de Fin de Máster - E-comm
 ### ✨ Características Implementadas
 
 #### 🏪 Tienda Pública
+
 - **Página de Inicio** con productos destacados y hero section
 - **Catálogo de Productos** con filtros avanzados (categoría, material, precio, stock)
 - **Búsqueda de Productos** por nombre y descripción
@@ -25,6 +26,7 @@ Esta versión representa la entrega final del Trabajo de Fin de Máster - E-comm
 - **Autenticación Unificada** (`/auth`) con tabs de login/registro
 
 #### 👔 Panel de Administración (13 Módulos)
+
 1. **Dashboard** - Métricas y estadísticas del negocio
 2. **Productos** - CRUD completo con imágenes y traducciones
 3. **Categorías** - CRUD con imágenes y orden de visualización
@@ -40,17 +42,20 @@ Esta versión representa la entrega final del Trabajo de Fin de Máster - E-comm
 13. **Alertas** - Sistema de alertas automáticas
 
 #### 👤 Cuenta de Usuario
+
 - **Mis Pedidos** - Historial completo con facturas
 - **Mis Reseñas** - Gestión de reseñas del usuario
 - **Mis Direcciones** - Gestión de direcciones de envío
 - **Mi Perfil** - Edición de datos personales y cambio de contraseña
 
 #### 🔧 Sistema de Traducción
+
 - **Backend Translation** - BD en inglés, UI en español
 - **Diccionarios** de productos, categorías, enums, FAQs
 - **Traducción automática** en API routes
 
 #### ⚡ Sistema de Tiempo Real
+
 - **EventStore** - Persistencia de eventos PostgreSQL (7 días retención)
 - **WebSocket** - Notificaciones instantáneas con polling (3s)
 - **Eventos**: order:new, order:status:updated, stock:updated, stock:low
@@ -163,6 +168,7 @@ Cobertura: 80%+ objetivo alcanzado
 ### 📄 Páginas Legales
 
 Creación de todas las páginas legales requeridas:
+
 - **Términos y Condiciones** (`/terms`)
 - **Política de Privacidad** (`/privacy`)
 - **Política de Cookies** (`/cookies`)
@@ -186,6 +192,7 @@ Creación de todas las páginas legales requeridas:
 ## Historial de Desarrollo
 
 ### Fase 1: Fundamentos (Abril 2026)
+
 - Setup Next.js 14 + TypeScript
 - Configuración Prisma + PostgreSQL
 - Modelo de datos (18 entidades)
@@ -193,12 +200,14 @@ Creación de todas las páginas legales requeridas:
 - 37 tests unitarios
 
 ### Fase 2: Autenticación y Navegación (Abril 2026)
+
 - Página de login/registro unificada (/auth)
 - Middleware de autorización
 - Header y Footer responsive
 - 16 tests E2E iniciales
 
 ### Fase 3: Catálogo de Productos (Abril 2026)
+
 - Grid de productos con filtros
 - Página de detalle de producto
 - Búsqueda y paginación
@@ -206,6 +215,7 @@ Creación de todas las páginas legales requeridas:
 - 33 tests de integración
 
 ### Fase 4: Checkout y Pagos (Abril 2026)
+
 - Checkout completo
 - Sistema de pagos simulado
 - Webhooks de confirmación
@@ -213,12 +223,14 @@ Creación de todas las páginas legales requeridas:
 - 31 tests de integración
 
 ### Fase 5: Panel de Administración (Abril 2026)
+
 - Dashboard con métricas
 - CRUD de productos
 - Gestión de pedidos
 - 41 tests de admin
 
 ### Fase 6: Funcionalidades Avanzadas (Abril 2026)
+
 - Sistema de facturación con PDFs
 - Sistema de alertas automáticas
 - Mensajería en pedidos
@@ -226,6 +238,7 @@ Creación de todas las páginas legales requeridas:
 - 82 tests adicionales
 
 ### Fase 7: Módulos Adicionales (Abril 2026)
+
 - Sistema de categorías con imágenes
 - Sistema de cupones de descuento
 - Sistema de reseñas con moderación
@@ -235,6 +248,7 @@ Creación de todas las páginas legales requeridas:
 - Control de inventario
 
 ### Fase 8: Calidad y Documentación (Abril 2026)
+
 - Optimización de performance
 - Accesibilidad WCAG 2.1 AA
 - Testing multi-dispositivo (114 tests E2E)

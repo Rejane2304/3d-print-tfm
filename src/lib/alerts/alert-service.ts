@@ -3,7 +3,7 @@
  * Manages automatic creation of system alerts
  */
 import { prisma } from '@/lib/db/prisma';
-import { AlertSeverity, AlertType } from '@prisma/client';
+import type { AlertSeverity, AlertType } from '@prisma/client';
 import { getLowStockThreshold } from '@/lib/site-config';
 import { emitNewAlert } from '@/lib/realtime/event-service';
 import { translateOrderStatus } from '@/lib/i18n';
@@ -106,7 +106,7 @@ export async function createStockAlert(productId: string, currentStock: number, 
  */
 export async function checkAllStockAlerts(config?: AlertConfig) {
   // Load config from DB if not provided
-  const alertConfig = config || await getAlertConfig();
+  const alertConfig = config || (await getAlertConfig());
 
   const products = await prisma.product.findMany({
     where: {
@@ -176,9 +176,7 @@ export async function createUnpaidOrderAlerts(hoursThreshold: number = 24) {
   });
 
   // Filter only those that are not paid
-  const ordersNotPaid = unpaidOrders.filter(order =>
-    order.payment?.status !== 'COMPLETED'
-  );
+  const ordersNotPaid = unpaidOrders.filter(order => order.payment?.status !== 'COMPLETED');
 
   const alerts = [];
   for (const order of ordersNotPaid) {
@@ -378,9 +376,7 @@ export async function createCouponExpiringAlert(couponId: string, daysThreshold:
   });
 
   if (!existingAlert) {
-    const usageText = coupon.maxUses
-      ? ` (${coupon.usedCount}/${coupon.maxUses} usados)`
-      : '';
+    const usageText = coupon.maxUses ? ` (${coupon.usedCount}/${coupon.maxUses} usados)` : '';
     return await prisma.alert.create({
       data: {
         id: crypto.randomUUID(),
@@ -511,7 +507,7 @@ export async function createOrderStatusChangedAlert(
   orderId: string,
   orderNumber: string,
   oldStatus: string,
-  newStatus: string
+  newStatus: string,
 ) {
   try {
     // Crear alerta
@@ -540,11 +536,7 @@ export async function createOrderStatusChangedAlert(
 /**
  * Create alert for failed payment
  */
-export async function createPaymentFailedAlert(
-  orderId: string,
-  orderNumber: string,
-  errorMessage: string
-) {
+export async function createPaymentFailedAlert(orderId: string, orderNumber: string, errorMessage: string) {
   try {
     // Verificar si ya existe alerta
     const existing = await prisma.alert.findFirst({
@@ -584,11 +576,7 @@ export async function createPaymentFailedAlert(
 /**
  * Create alert for new review
  */
-export async function createNewReviewAlert(
-  reviewId: string,
-  rating: number,
-  productName: string
-) {
+export async function createNewReviewAlert(reviewId: string, rating: number, productName: string) {
   try {
     // Verificar si ya existe alerta
     const existing = await prisma.alert.findFirst({
@@ -631,11 +619,7 @@ export async function createNewReviewAlert(
 /**
  * Create alert for new message
  */
-export async function createNewMessageAlert(
-  messageId: string,
-  orderId: string,
-  userName: string
-) {
+export async function createNewMessageAlert(messageId: string, orderId: string, userName: string) {
   try {
     // Obtener el orderNumber del pedido
     const order = await prisma.order.findUnique({

@@ -54,10 +54,7 @@ interface Order {
   };
 }
 
-const estadosConfig: Record<
-  string,
-  { color: string; icon: React.ElementType; label: string }
-> = {
+const estadosConfig: Record<string, { color: string; icon: React.ElementType; label: string }> = {
   Pendiente: {
     color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
     icon: Clock,
@@ -101,9 +98,7 @@ export default function MyOrdersPage() {
   const [invoiceModalReason, setInvoiceModalReason] = useState<
     'not_completed' | 'not_generated' | 'payment_pending' | 'cancelled'
   >('not_generated');
-  const [selectedOrderNumber, setSelectedOrderNumber] = useState<
-    string | undefined
-  >(undefined);
+  const [selectedOrderNumber, setSelectedOrderNumber] = useState<string | undefined>(undefined);
   const [restoringOrder, setRestoringOrder] = useState<string | null>(null);
   const [restoredMessage, setRestoredMessage] = useState<string | null>(null);
   const [hiddenOrders, setHiddenOrders] = useState<Set<string>>(new Set());
@@ -115,7 +110,7 @@ export default function MyOrdersPage() {
     }
   }, [status]);
 
-  const loadOrders = async() => {
+  const loadOrders = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -137,9 +132,9 @@ export default function MyOrdersPage() {
   };
 
   // Recalcular pedidos cancelados
-  const cancelledOrders = orders.filter((o) => o.estado === 'Cancelado');
+  const cancelledOrders = orders.filter(o => o.estado === 'Cancelado');
 
-  const handleRestoreCart = async(orderId: string) => {
+  const handleRestoreCart = async (orderId: string) => {
     try {
       setRestoringOrder(orderId);
       const response = await fetch('/api/cart/restore-from-order', {
@@ -155,7 +150,7 @@ export default function MyOrdersPage() {
       setRestoredMessage('Carrito restaurado correctamente');
 
       // Ocultar el pedido inmediatamente
-      setHiddenOrders((prev) => {
+      setHiddenOrders(prev => {
         const newSet = new Set(prev);
         newSet.add(orderId);
         return newSet;
@@ -176,19 +171,15 @@ export default function MyOrdersPage() {
   // Convert hiddenOrders Set to Array for compatibility
   const hiddenOrdersArray = Array.from(hiddenOrders);
   const filteredOrders = statusFilter
-    ? orders.filter(
-      (o) => o.estado === statusFilter && !hiddenOrdersArray.includes(o.id),
-    )
-    : orders.filter((o) => !hiddenOrdersArray.includes(o.id));
+    ? orders.filter(o => o.estado === statusFilter && !hiddenOrdersArray.includes(o.id))
+    : orders.filter(o => !hiddenOrdersArray.includes(o.id));
 
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="text-center">
           <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin text-indigo-600 mx-auto mb-4" />
-          <p className="text-gray-600 text-sm sm:text-base">
-            Cargando pedidos...
-          </p>
+          <p className="text-gray-600 text-sm sm:text-base">Cargando pedidos...</p>
         </div>
       </div>
     );
@@ -201,12 +192,9 @@ export default function MyOrdersPage() {
         <div className="max-w-[1920px] 3xl:max-w-[2200px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                Mis Pedidos
-              </h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Mis Pedidos</h1>
               <p className="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">
-                {orders.length} {orders.length === 1 ? 'pedido' : 'pedidos'} en
-                total
+                {orders.length} {orders.length === 1 ? 'pedido' : 'pedidos'} en total
               </p>
             </div>
           </div>
@@ -226,32 +214,26 @@ export default function MyOrdersPage() {
         <div className="bg-white rounded-lg shadow-sm border p-3 sm:p-4 mb-4 sm:mb-6 overflow-x-auto">
           <div className="flex items-center gap-2 mb-3">
             <Filter className="h-4 w-4 text-gray-500 flex-shrink-0" />
-            <span className="font-medium text-gray-700 text-sm whitespace-nowrap">
-              Filtrar por estado:
-            </span>
+            <span className="font-medium text-gray-700 text-sm whitespace-nowrap">Filtrar por estado:</span>
           </div>
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setStatusFilter('')}
               className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
-                statusFilter === ''
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                statusFilter === '' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
               Todos
             </button>
             {Object.entries(estadosConfig).map(([estado, config]) => {
               const Icon = config.icon;
-              const count = orders.filter((o) => o.estado === estado).length;
+              const count = orders.filter(o => o.estado === estado).length;
               return (
                 <button
                   key={estado}
                   onClick={() => setStatusFilter(estado)}
                   className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-colors flex items-center gap-1.5 sm:gap-2 whitespace-nowrap ${
-                    statusFilter === estado
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    statusFilter === estado ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
                   <Icon className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -259,9 +241,7 @@ export default function MyOrdersPage() {
                   {count > 0 && (
                     <span
                       className={`ml-0.5 sm:ml-1 px-1.5 sm:px-2 py-0.5 rounded-full text-xs ${
-                        statusFilter === estado
-                          ? 'bg-indigo-500 text-white'
-                          : 'bg-gray-300 text-gray-700'
+                        statusFilter === estado ? 'bg-indigo-500 text-white' : 'bg-gray-300 text-gray-700'
                       }`}
                     >
                       {count}
@@ -285,13 +265,10 @@ export default function MyOrdersPage() {
               <div className="flex-1">
                 <h3 className="font-semibold text-orange-900 text-sm sm:text-base">
                   Tienes {cancelledOrders.length}{' '}
-                  {cancelledOrders.length === 1
-                    ? 'pedido cancelado'
-                    : 'pedidos cancelados'}
+                  {cancelledOrders.length === 1 ? 'pedido cancelado' : 'pedidos cancelados'}
                 </h3>
                 <p className="text-orange-700 text-xs sm:text-sm mt-0.5">
-                  Puedes restaurar el carrito de cualquier pedido cancelado para
-                  volver a intentar la compra.
+                  Puedes restaurar el carrito de cualquier pedido cancelado para volver a intentar la compra.
                 </p>
               </div>
             </div>
@@ -312,9 +289,7 @@ export default function MyOrdersPage() {
             ) : (
               <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 flex-shrink-0" />
             )}
-            <p
-              className={`text-sm ${restoredMessage.includes('Error') ? 'text-red-700' : 'text-green-700'}`}
-            >
+            <p className={`text-sm ${restoredMessage.includes('Error') ? 'text-red-700' : 'text-green-700'}`}>
               {restoredMessage}
             </p>
           </div>
@@ -325,9 +300,7 @@ export default function MyOrdersPage() {
           <div className="bg-white rounded-lg shadow-sm border p-8 sm:p-12 text-center">
             <Package className="h-12 w-12 sm:h-16 sm:w-16 text-gray-300 mx-auto mb-3 sm:mb-4" />
             <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">
-              {statusFilter
-                ? 'No hay pedidos con este estado'
-                : 'No tienes pedidos'}
+              {statusFilter ? 'No hay pedidos con este estado' : 'No tienes pedidos'}
             </h3>
             <p className="text-sm text-gray-500 mb-4 sm:mb-6">
               {statusFilter
@@ -344,9 +317,8 @@ export default function MyOrdersPage() {
           </div>
         ) : (
           <div className="space-y-3 sm:space-y-4">
-            {filteredOrders.map((order) => {
-              const statusConfig =
-                estadosConfig[order.estado] || estadosConfig.PENDING;
+            {filteredOrders.map(order => {
+              const statusConfig = estadosConfig[order.estado] || estadosConfig.PENDING;
               const StatusIcon = statusConfig.icon;
               const firstItem = order.items?.[0];
               const firstImage = firstItem?.producto?.images?.[0]?.url;
@@ -386,24 +358,17 @@ export default function MyOrdersPage() {
                               className={`px-2 py-0.5 rounded-full text-xs font-medium border flex items-center gap-1 ${statusConfig.color}`}
                             >
                               <StatusIcon className="h-3 w-3" />
-                              <span className="whitespace-nowrap">
-                                {statusConfig.label}
-                              </span>
+                              <span className="whitespace-nowrap">{statusConfig.label}</span>
                             </span>
                           </div>
                           <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-500">
                             <span className="flex items-center gap-1">
                               <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
-                              {new Date(order.createdAt).toLocaleDateString(
-                                'es-ES',
-                              )}
+                              {new Date(order.createdAt).toLocaleDateString('es-ES')}
                             </span>
                             <span className="flex items-center gap-1">
                               <Package className="h-3 w-3 sm:h-4 sm:w-4" />
-                              {order.items?.length || 0}{' '}
-                              {order.items?.length === 1
-                                ? 'producto'
-                                : 'productos'}
+                              {order.items?.length || 0} {order.items?.length === 1 ? 'producto' : 'productos'}
                             </span>
                           </div>
                         </div>
@@ -429,15 +394,10 @@ export default function MyOrdersPage() {
                   {/* Productos */}
                   <div className="p-4 sm:p-6 bg-gray-50">
                     <div className="space-y-2 sm:space-y-3">
-                      {order.items?.slice(0, 3).map((item) => (
-                        <div
-                          key={item.id}
-                          className="flex items-center justify-between text-xs sm:text-sm"
-                        >
+                      {order.items?.slice(0, 3).map(item => (
+                        <div key={item.id} className="flex items-center justify-between text-xs sm:text-sm">
                           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                            <span className="font-medium text-gray-900">
-                              {item.quantity}x
-                            </span>
+                            <span className="font-medium text-gray-900">{item.quantity}x</span>
                             <Link
                               href={`/products/${item.producto?.slug || '#'}`}
                               className="text-gray-700 hover:text-indigo-600 truncate"
@@ -446,10 +406,7 @@ export default function MyOrdersPage() {
                             </Link>
                           </div>
                           <span className="text-gray-600 whitespace-nowrap ml-2">
-                            {(item.quantity * Number(item.unitPrice)).toFixed(
-                              2,
-                            )}{' '}
-                            €
+                            {(item.quantity * Number(item.unitPrice)).toFixed(2)} €
                           </span>
                         </div>
                       ))}
@@ -493,9 +450,7 @@ export default function MyOrdersPage() {
                       )}
 
                       {order.estado === 'SHIPPED' && (
-                        <span className="text-xs sm:text-sm text-purple-600">
-                          Pedido en camino
-                        </span>
+                        <span className="text-xs sm:text-sm text-purple-600">Pedido en camino</span>
                       )}
 
                       {order.estado === 'DELIVERED' && (

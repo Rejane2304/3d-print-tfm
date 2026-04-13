@@ -4,38 +4,26 @@
  *
  * Requiere: Rol ADMIN
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
-import { Coupon, CouponType } from '@prisma/client';
+import type { Coupon, CouponType } from '@prisma/client';
 import { translateCouponCode } from '@/lib/i18n';
 
 // Schema de validación
 const couponUpdateSchema = z.object({
-  code: z
-    .string()
-    .min(3, 'El código debe tener al menos 3 caracteres')
-    .max(50, 'Máximo 50 caracteres')
-    .optional(),
+  code: z.string().min(3, 'El código debe tener al menos 3 caracteres').max(50, 'Máximo 50 caracteres').optional(),
   type: z
     .enum(['FIXED', 'PERCENTAGE', 'FREE_SHIPPING'], {
       errorMap: () => ({ message: 'Tipo inválido' }),
     })
     .optional(),
   value: z.number().min(0, 'El valor debe ser mayor o igual a 0').optional(),
-  minOrderAmount: z
-    .number()
-    .min(0, 'El mínimo debe ser mayor o igual a 0')
-    .optional()
-    .nullable(),
-  maxUses: z
-    .number()
-    .int()
-    .min(1, 'El máximo de usos debe ser al menos 1')
-    .optional()
-    .nullable(),
+  minOrderAmount: z.number().min(0, 'El mínimo debe ser mayor o igual a 0').optional().nullable(),
+  maxUses: z.number().int().min(1, 'El máximo de usos debe ser al menos 1').optional().nullable(),
   validFrom: z.string().datetime('Fecha de inicio inválida').optional(),
   validUntil: z.string().datetime('Fecha de fin inválida').optional(),
   isActive: z.boolean().optional(),
@@ -164,28 +152,19 @@ function construirDatosActualizacion(data: z.infer<typeof couponUpdateSchema>) {
 }
 
 // GET - Obtener Cupón
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 
     const auth = await authenticateAdmin();
     if ('error' in auth) {
-      return NextResponse.json(
-        { success: false, error: auth.error },
-        { status: auth.status },
-      );
+      return NextResponse.json({ success: false, error: auth.error }, { status: auth.status });
     }
 
     const coupon = await prisma.coupon.findUnique({ where: { id } });
 
     if (!coupon) {
-      return NextResponse.json(
-        { success: false, error: 'Cupón no encontrado' },
-        { status: 404 },
-      );
+      return NextResponse.json({ success: false, error: 'Cupón no encontrado' }, { status: 404 });
     }
 
     const couponFormateado = formatearCupón(coupon);
@@ -193,18 +172,12 @@ export async function GET(
     return NextResponse.json({ success: true, coupon: couponFormateado });
   } catch (error) {
     console.error('Error obteniendo cupón:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error interno' },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: 'Error interno' }, { status: 500 });
   }
 }
 
 // Helper para verificar si el código ya existe
-async function checkDuplicateCode(
-  code: string,
-  existingCode: string,
-): Promise<string | null> {
+async function checkDuplicateCode(code: string, existingCode: string): Promise<string | null> {
   if (code === existingCode) {
     return null;
   }
@@ -227,12 +200,8 @@ function validateDates(
   existingValidFrom: Date,
   existingValidUntil: Date,
 ): { error: string | null; validFrom: Date; validUntil: Date } {
-  const validFrom = newValidFrom
-    ? new Date(newValidFrom)
-    : existingValidFrom;
-  const validUntil = newValidUntil
-    ? new Date(newValidUntil)
-    : existingValidUntil;
+  const validFrom = newValidFrom ? new Date(newValidFrom) : existingValidFrom;
+  const validUntil = newValidUntil ? new Date(newValidUntil) : existingValidUntil;
 
   if (validUntil <= validFrom) {
     return {
@@ -246,27 +215,18 @@ function validateDates(
 }
 
 // PATCH - Actualizar Cupón
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 
     const auth = await authenticateAdmin();
     if ('error' in auth) {
-      return NextResponse.json(
-        { success: false, error: auth.error },
-        { status: auth.status },
-      );
+      return NextResponse.json({ success: false, error: auth.error }, { status: auth.status });
     }
 
     const existing = await prisma.coupon.findUnique({ where: { id } });
     if (!existing) {
-      return NextResponse.json(
-        { success: false, error: 'Cupón no encontrado' },
-        { status: 404 },
-      );
+      return NextResponse.json({ success: false, error: 'Cupón no encontrado' }, { status: 404 });
     }
 
     const body = await request.json();
@@ -276,10 +236,7 @@ export async function PATCH(
     if (data.code) {
       const duplicateError = await checkDuplicateCode(data.code, existing.code);
       if (duplicateError) {
-        return NextResponse.json(
-          { success: false, error: duplicateError },
-          { status: 400 },
-        );
+        return NextResponse.json({ success: false, error: duplicateError }, { status: 400 });
       }
     }
 
@@ -293,10 +250,7 @@ export async function PATCH(
       );
 
       if (dateError) {
-        return NextResponse.json(
-          { success: false, error: dateError },
-          { status: 400 },
-        );
+        return NextResponse.json({ success: false, error: dateError }, { status: 400 });
       }
     }
 
@@ -308,41 +262,26 @@ export async function PATCH(
     return NextResponse.json({ success: true, coupon });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { success: false, error: error.errors[0].message },
-        { status: 400 },
-      );
+      return NextResponse.json({ success: false, error: error.errors[0].message }, { status: 400 });
     }
     console.error('Error actualizando cupón:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error interno' },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: 'Error interno' }, { status: 500 });
   }
 }
 
 // DELETE - Eliminar Cupón
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 
     const auth = await authenticateAdmin();
     if ('error' in auth) {
-      return NextResponse.json(
-        { success: false, error: auth.error },
-        { status: auth.status },
-      );
+      return NextResponse.json({ success: false, error: auth.error }, { status: auth.status });
     }
 
     const existing = await prisma.coupon.findUnique({ where: { id } });
     if (!existing) {
-      return NextResponse.json(
-        { success: false, error: 'Cupón no encontrado' },
-        { status: 404 },
-      );
+      return NextResponse.json({ success: false, error: 'Cupón no encontrado' }, { status: 404 });
     }
 
     await prisma.coupon.delete({ where: { id } });
@@ -353,9 +292,6 @@ export async function DELETE(
     });
   } catch (error) {
     console.error('Error eliminando cupón:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error interno' },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: 'Error interno' }, { status: 500 });
   }
 }

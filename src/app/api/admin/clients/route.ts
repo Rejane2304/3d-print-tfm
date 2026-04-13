@@ -5,21 +5,19 @@ export const dynamic = 'force-dynamic';
  * GET /api/admin/clients
  * Supports pagination, search, and filtering
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
     }
 
     // Verify admin role
@@ -29,10 +27,7 @@ export async function GET(req: NextRequest) {
     });
 
     if (adminUser?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'Acceso denegado' },
-        { status: 403 },
-      );
+      return NextResponse.json({ success: false, error: 'Acceso denegado' }, { status: 403 });
     }
 
     // Get query parameters
@@ -96,17 +91,16 @@ export async function GET(req: NextRequest) {
     });
 
     // Calculate total spent per client
-    const clientsWithStats = clients.map((client) => {
+    const clientsWithStats = clients.map(client => {
       const totalSpent = client.orders
-        .filter((o) => o.status !== 'CANCELLED')
+        .filter(o => o.status !== 'CANCELLED')
         .reduce((sum, o) => sum + Number(o.total), 0);
 
       let lastOrder = null;
       if (client.orders.length > 0) {
-        lastOrder = client.orders
-          .toSorted(
-            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-          )[0];
+        lastOrder = client.orders.toSorted(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        )[0];
       }
 
       return {
@@ -119,9 +113,7 @@ export async function GET(req: NextRequest) {
         ultimoAcceso: client.lastAccess,
         totalPedidos: client._count.orders,
         totalGastado: totalSpent.toFixed(2),
-        fechaUltimoPedido: lastOrder
-          ? new Date(lastOrder.createdAt).toISOString()
-          : null,
+        fechaUltimoPedido: lastOrder ? new Date(lastOrder.createdAt).toISOString() : null,
       };
     });
 
@@ -137,9 +129,6 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching clients:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error al obtener clientes' },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: 'Error al obtener clientes' }, { status: 500 });
   }
 }

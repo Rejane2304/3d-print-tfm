@@ -10,15 +10,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  ChevronUp,
-  Download,
-  Loader2,
-  Search,
-} from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Download, Loader2, Search } from 'lucide-react';
 
 // SortIcon component extracted outside DataTable to avoid nested function definition
 interface SortIconProps {
@@ -80,10 +72,7 @@ export interface DataTableProps<T> {
   defaultPageSize?: number;
   selectable?: boolean;
   bulkActions?: BulkAction[];
-  onBulkAction?: (
-    actionKey: string,
-    selectedIds: string[],
-  ) => void | Promise<void>;
+  onBulkAction?: (actionKey: string, selectedIds: string[]) => void | Promise<void>;
   exportable?: boolean;
   exportFilename?: string;
   loading?: boolean;
@@ -140,10 +129,10 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
     }
 
     const query = searchQuery.toLowerCase().trim();
-    const keysToSearch = searchKeys || columns.map((col) => col.key);
+    const keysToSearch = searchKeys || columns.map(col => col.key);
 
-    return data.filter((row) => {
-      return keysToSearch.some((key) => {
+    return data.filter(row => {
+      return keysToSearch.some(key => {
         const value = row[key as keyof T];
         if (value === null || value === undefined) {
           return false;
@@ -192,7 +181,7 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
   const handleSort = useCallback(
     (columnKey: keyof T | string) => {
       if (sortColumn === columnKey) {
-        setSortDirection((prev) => {
+        setSortDirection(prev => {
           if (prev === 'asc') {
             return 'desc';
           }
@@ -213,7 +202,7 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
   );
 
   const toggleRowSelection = useCallback((rowId: string) => {
-    setSelectedRows((prev) => {
+    setSelectedRows(prev => {
       const newSet = new Set(prev);
       const isSelected = newSet.has(rowId);
       if (isSelected) {
@@ -226,32 +215,29 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
   }, []);
 
   const toggleAllSelection = useCallback(() => {
-    setSelectedRows((prev) => {
+    setSelectedRows(prev => {
       if (prev.size === paginatedData.length) {
         return new Set();
       }
-      return new Set(paginatedData.map((row) => String(row[rowKey])));
+      return new Set(paginatedData.map(row => String(row[rowKey])));
     });
   }, [paginatedData, rowKey]);
 
-  const getCellValue = useCallback(
-    (row: T, column: Column<T>): React.ReactNode => {
-      const value = row[column.key as keyof T];
-      if (column.render) {
-        return column.render(value as unknown, row);
-      }
-      return value !== null && value !== undefined ? String(value) : null;
-    },
-    [],
-  );
+  const getCellValue = useCallback((row: T, column: Column<T>): React.ReactNode => {
+    const value = row[column.key as keyof T];
+    if (column.render) {
+      return column.render(value as unknown, row);
+    }
+    return value !== null && value !== undefined ? String(value) : null;
+  }, []);
 
-  const exportToCSV = useCallback(async() => {
+  const exportToCSV = useCallback(async () => {
     setIsExporting(true);
     try {
-      const headers = columns.map((col) => col.header).join(',');
-      const rows = filteredData.map((row) =>
+      const headers = columns.map(col => col.header).join(',');
+      const rows = filteredData.map(row =>
         columns
-          .map((col) => {
+          .map(col => {
             const value = row[col.key as keyof T];
             if (value === null || value === undefined) {
               return '';
@@ -279,7 +265,7 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
   }, [columns, filteredData, exportFilename]);
 
   const handleBulkAction = useCallback(
-    async(action: BulkAction) => {
+    async (action: BulkAction) => {
       setBulkActionLoading(action.key);
       try {
         const selectedIds = Array.from(selectedRows);
@@ -309,7 +295,7 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
                 type="text"
                 placeholder={searchPlaceholder}
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               />
             </div>
@@ -323,11 +309,7 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
                 disabled={isExporting || filteredData.length === 0}
                 className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isExporting ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Download className="h-4 w-4" />
-                )}
+                {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
                 Export CSV
               </button>
             )}
@@ -337,11 +319,9 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
         {/* Bulk Actions */}
         {selectable && selectedRows.size > 0 && (
           <div className="mt-4 flex items-center gap-3 p-3 bg-indigo-50 rounded-lg">
-            <span className="text-sm font-medium text-indigo-900">
-              {selectedRows.size} selected
-            </span>
+            <span className="text-sm font-medium text-indigo-900">{selectedRows.size} selected</span>
             <div className="flex gap-2">
-              {bulkActions.map((action) => {
+              {bulkActions.map(action => {
                 let variantClass = 'bg-gray-100 text-gray-700 hover:bg-gray-200';
                 if (action.variant === 'danger') {
                   variantClass = 'bg-red-100 text-red-700 hover:bg-red-200';
@@ -378,11 +358,7 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
           }
           if (paginatedData.length === 0) {
             const emptyText = searchQuery ? noResultsMessage : emptyMessage;
-            return (
-              <div className="p-12 text-center text-gray-500">
-                {emptyText}
-              </div>
-            );
+            return <div className="p-12 text-center text-gray-500">{emptyText}</div>;
           }
           return (
             <table className="min-w-full divide-y divide-gray-200">
@@ -393,17 +369,14 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
                       <input
                         type="checkbox"
                         checked={
-                          paginatedData.length > 0 &&
-                        paginatedData.every((row) =>
-                          selectedRows.has(String(row[rowKey])),
-                        )
+                          paginatedData.length > 0 && paginatedData.every(row => selectedRows.has(String(row[rowKey])))
                         }
                         onChange={toggleAllSelection}
                         className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                       />
                     </th>
                   )}
-                  {columns.map((column) => (
+                  {columns.map(column => (
                     <th
                       key={String(column.key)}
                       className={`px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
@@ -427,7 +400,7 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {paginatedData.map((row) => {
+                {paginatedData.map(row => {
                   const rowId = String(row[rowKey]);
                   const isSelected = selectedRows.has(rowId);
 
@@ -440,10 +413,7 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
                       onClick={() => onRowClick?.(row)}
                     >
                       {selectable && (
-                        <td
-                          className="px-4 py-3"
-                          onClick={(e) => e.stopPropagation()}
-                        >
+                        <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
                           <input
                             type="checkbox"
                             checked={isSelected}
@@ -452,7 +422,7 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
                           />
                         </td>
                       )}
-                      {columns.map((column) => (
+                      {columns.map(column => (
                         <td
                           key={String(column.key)}
                           className={`px-4 py-3 text-sm text-gray-900 ${
@@ -478,19 +448,18 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-4 text-xs sm:text-sm">
               <span className="text-gray-700 whitespace-nowrap">
-                Mostrando {(currentPage - 1) * pageSize + 1} a{' '}
-                {Math.min(currentPage * pageSize, sortedData.length)} de{' '}
+                Mostrando {(currentPage - 1) * pageSize + 1} a {Math.min(currentPage * pageSize, sortedData.length)} de{' '}
                 {sortedData.length} resultados
               </span>
               <select
                 value={pageSize}
-                onChange={(e) => {
+                onChange={e => {
                   setPageSize(Number(e.target.value));
                   setCurrentPage(1);
                 }}
                 className="border border-gray-300 rounded-lg px-2 py-1 text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               >
-                {pageSizeOptions.map((size) => (
+                {pageSizeOptions.map(size => (
                   <option key={size} value={size}>
                     {size} / pág
                   </option>
@@ -500,7 +469,7 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
 
             <div className="flex items-center gap-1 sm:gap-2">
               <button
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
                 className="p-1.5 sm:p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="Página anterior"
@@ -511,9 +480,7 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
                 Pág. {currentPage} de {totalPages}
               </span>
               <button
-                onClick={() =>
-                  setCurrentPage((p) => Math.min(totalPages, p + 1))
-                }
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
                 className="p-1.5 sm:p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="Página siguiente"

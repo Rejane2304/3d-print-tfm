@@ -5,7 +5,8 @@
  *
  * Now supports: couponCode in request body
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { withErrorHandler } from '@/lib/errors/api-wrapper';
 import { getServerSession } from 'next-auth';
@@ -112,23 +113,24 @@ function validateStock(items: CartItemWithProduct[]): string | null {
 }
 
 // Validate and calculate coupon discount
-async function validateCoupon(
-  couponCode: string | undefined,
-  subtotal: number,
-): Promise<CouponValidationResult> {
+async function validateCoupon(couponCode: string | undefined, subtotal: number): Promise<CouponValidationResult> {
   const result: CouponValidationResult = {
     couponId: null,
     couponDiscount: 0,
     hasFreeShipping: false,
   };
 
-  if (!couponCode) return result;
+  if (!couponCode) {
+    return result;
+  }
 
   const coupon = await prisma.coupon.findUnique({
     where: { code: couponCode.toUpperCase() },
   });
 
-  if (!coupon) return result;
+  if (!coupon) {
+    return result;
+  }
 
   const now = new Date();
   const isValid =
@@ -138,7 +140,9 @@ async function validateCoupon(
     (coupon.maxUses === null || coupon.usedCount < coupon.maxUses) &&
     (coupon.minOrderAmount === null || subtotal >= Number(coupon.minOrderAmount));
 
-  if (!isValid) return result;
+  if (!isValid) {
+    return result;
+  }
 
   result.couponId = coupon.id;
 
@@ -156,11 +160,7 @@ async function validateCoupon(
 }
 
 // Calculate order totals
-function calculateTotals(
-  subtotal: number,
-  couponDiscount: number,
-  hasFreeShipping: boolean,
-): TotalsResult {
+function calculateTotals(subtotal: number, couponDiscount: number, hasFreeShipping: boolean): TotalsResult {
   const taxRate = DEFAULT_VAT_RATE;
   const shippingCost = subtotal >= 50 || hasFreeShipping ? 0 : 5.99;
   const discountedSubtotal = Math.max(0, subtotal - couponDiscount);
@@ -199,14 +199,15 @@ async function createOrderTransaction(params: OrderTransactionParams) {
     paymentMethod,
     couponId,
     orderNumber,
-    userName,
-    userEmail,
+    // userName and userEmail available in params but not needed here
   } = params;
 
   const address = await getShippingAddress(addressId);
-  if (!address) throw new Error('Address not found');
+  if (!address) {
+    throw new Error('Address not found');
+  }
 
-  return prisma.$transaction(async (tx) => {
+  return prisma.$transaction(async tx => {
     // 1. Create the order
     const order = await tx.order.create({
       data: {
@@ -311,7 +312,9 @@ async function createPaymentRecord(
     include: { user: true },
   });
 
-  if (!order) throw new Error('Order not found');
+  if (!order) {
+    throw new Error('Order not found');
+  }
 
   return tx.payment.create({
     data: {
@@ -331,20 +334,14 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   // 1. Verify authentication
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
-    return NextResponse.json(
-      { success: false, error: 'No autenticado' },
-      { status: 401 },
-    );
+    return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
   }
 
   // 2. Parse and validate request body
   const body = await req.json();
   const validation = validateRequest(body);
   if (!validation) {
-    return NextResponse.json(
-      { success: false, error: 'Datos de solicitud inválidos' },
-      { status: 400 },
-    );
+    return NextResponse.json({ success: false, error: 'Datos de solicitud inválidos' }, { status: 400 });
   }
 
   const { shippingAddressId, paymentMethod, couponCode } = validation;
@@ -352,18 +349,12 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   // 3. Get user with cart
   const user = await getUserWithCart(session.user.email);
   if (!user) {
-    return NextResponse.json(
-      { success: false, error: translateErrorMessage('Usuario not found') },
-      { status: 404 },
-    );
+    return NextResponse.json({ success: false, error: translateErrorMessage('Usuario not found') }, { status: 404 });
   }
 
   // 4. Verify cart has items
   if (!user.cart || user.cart.items.length === 0) {
-    return NextResponse.json(
-      { success: false, error: 'El carrito está vacío' },
-      { status: 400 },
-    );
+    return NextResponse.json({ success: false, error: 'El carrito está vacío' }, { status: 400 });
   }
 
   const cartItems = user.cart.items as CartItemWithProduct[];
@@ -371,10 +362,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   // 5. Validate stock
   const stockError = validateStock(cartItems);
   if (stockError) {
-    return NextResponse.json(
-      { success: false, error: stockError },
-      { status: 400 },
-    );
+    return NextResponse.json({ success: false, error: stockError }, { status: 400 });
   }
 
   // 6. Calculate subtotal
@@ -413,11 +401,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   // 12. Create alert
   try {
-    await createNewOrderAlert(
-      result.order.id,
-      result.order.orderNumber,
-      Number(result.order.total),
-    );
+    await createNewOrderAlert(result.order.id, result.order.orderNumber, Number(result.order.total));
   } catch (alertError) {
     console.error('Error creating new order alert:', alertError);
   }

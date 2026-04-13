@@ -125,10 +125,8 @@ export const addressNameTranslations: TranslationMap = {
 export const errorMessages: TranslationMap = {
   // Auth errors
   'Invalid email or password': 'Email o contraseña incorrectos',
-  'Session expired, please log in again':
-    'Sesión expirada, por favor inicia sesión de nuevo',
-  'You do not have permission to perform this action':
-    'No tienes permiso para realizar esta acción',
+  'Session expired, please log in again': 'Sesión expirada, por favor inicia sesión de nuevo',
+  'You do not have permission to perform this action': 'No tienes permiso para realizar esta acción',
   'No autenticado': 'No autenticado',
   'No autorizado': 'No autorizado',
   Unauthorized: 'No autorizado',
@@ -147,27 +145,22 @@ export const errorMessages: TranslationMap = {
   'Item not found': 'Artículo no encontrado',
   'Mensaje not found': 'Mensaje no encontrado',
   'Factura not found': 'Factura no encontrado',
-  'Already exists a record with that ${field}':
-    'Ya existe un registro con ese ${field}',
-  'Already exists una factura para este pedido':
-    'Ya existe una factura para este pedido',
+  'Already exists a record with that ${field}': 'Ya existe un registro con ese ${field}',
+  'Already exists una factura para este pedido': 'Ya existe una factura para este pedido',
   'Invalid reference in ${context}': 'Referencia inválida en ${context}',
 
   // Business errors
   'Insufficient stock for ${product}': 'Stock insuficiente para ${product}',
   'Insufficient stock': 'Stock insuficiente',
-  'Insufficient stock para la cantidad total':
-    'Stock insuficiente para la cantidad total',
-  'Cannot ${action} in state ${state}':
-    'No se puede ${action} en estado ${state}',
+  'Insufficient stock para la cantidad total': 'Stock insuficiente para la cantidad total',
+  'Cannot ${action} in state ${state}': 'No se puede ${action} en estado ${state}',
   'Payment failed: ${reason}': 'Pago fallido: ${reason}',
 
   // Server errors
   'Internal error of the server': 'Error interno del servidor',
   'Internal error': 'Error interno del servidor',
   'Internal server error': 'Error interno del servidor',
-  'Service unavailable, try again later':
-    'Servicio no disponible, inténtalo más tarde',
+  'Service unavailable, try again later': 'Servicio no disponible, inténtalo más tarde',
   'Webhook processing failed': 'Procesamiento de webhook fallido',
 
   // General
@@ -188,91 +181,65 @@ export const errorMessages: TranslationMap = {
   'Email is required': 'El email es obligatorio',
   'Invalid email format': 'Formato de email inválido',
   'Password is required': 'La contraseña es obligatoria',
-  'Password must be at least 8 characters':
-    'La contraseña debe tener al menos 8 caracteres',
+  'Password must be at least 8 characters': 'La contraseña debe tener al menos 8 caracteres',
   'Password must contain at least one uppercase, one lowercase and one number':
     'La contraseña debe contener al menos una mayúscula, una minúscula y un número',
   'Passwords do not match': 'Las contraseñas no coinciden',
   'Current password is required': 'La contraseña actual es obligatoria',
-  'New password must be at least 8 characters':
-    'La nueva contraseña debe tener al menos 8 caracteres',
+  'New password must be at least 8 characters': 'La nueva contraseña debe tener al menos 8 caracteres',
   'Name is required': 'El nombre es obligatorio',
-  'Name must be at least 3 characters':
-    'El nombre debe tener al menos 3 caracteres',
-  'Name cannot exceed 100 characters':
-    'El nombre no puede exceder 100 caracteres',
-  'Phone must be in Spanish format: +34 600 123 456':
-    'El teléfono debe estar en formato español: +34 600 123 456',
-  'Tax ID must have 8 numbers and one uppercase letter':
-    'El NIF debe tener 8 números y una letra mayúscula',
-  'Fiscal name cannot exceed 200 characters':
-    'El nombre fiscal no puede exceder 200 caracteres',
+  'Name must be at least 3 characters': 'El nombre debe tener al menos 3 caracteres',
+  'Name cannot exceed 100 characters': 'El nombre no puede exceder 100 caracteres',
+  'Phone must be in Spanish format: +34 600 123 456': 'El teléfono debe estar en formato español: +34 600 123 456',
+  'Tax ID must have 8 numbers and one uppercase letter': 'El NIF debe tener 8 números y una letra mayúscula',
+  'Fiscal name cannot exceed 200 characters': 'El nombre fiscal no puede exceder 200 caracteres',
   'Address name is required': 'El nombre de la dirección es obligatorio',
   'Recipient name is required': 'El nombre del destinatario es obligatorio',
-  'Recipient cannot exceed 100 characters':
-    'El destinatario no puede exceder 100 caracteres',
+  'Recipient cannot exceed 100 characters': 'El destinatario no puede exceder 100 caracteres',
   'Address is required': 'La dirección es obligatoria',
-  'Address cannot exceed 255 characters':
-    'La dirección no puede exceder 255 caracteres',
-  'Complement cannot exceed 100 characters':
-    'El complemento no puede exceder 100 caracteres',
+  'Address cannot exceed 255 characters': 'La dirección no puede exceder 255 caracteres',
+  'Complement cannot exceed 100 characters': 'El complemento no puede exceder 100 caracteres',
   'Postal code must have 5 digits': 'El código postal debe tener 5 dígitos',
   'City is required': 'La ciudad es obligatoria',
-  'City cannot exceed 100 characters':
-    'La ciudad no puede exceder 100 caracteres',
+  'City cannot exceed 100 characters': 'La ciudad no puede exceder 100 caracteres',
   'Province is required': 'La provincia es obligatoria',
-  'Province cannot exceed 100 characters':
-    'La provincia no puede exceder 100 caracteres',
+  'Province cannot exceed 100 characters': 'La provincia no puede exceder 100 caracteres',
   'Country is required': 'El país es obligatorio',
-  'Country cannot exceed 50 characters':
-    'El país no puede exceder 50 caracteres',
+  'Country cannot exceed 50 characters': 'El país no puede exceder 50 caracteres',
   'Product name is required': 'El nombre del producto es obligatorio',
-  'Name cannot exceed 200 characters':
-    'El nombre no puede exceder 200 caracteres',
+  'Name cannot exceed 200 characters': 'El nombre no puede exceder 200 caracteres',
   'Description is required': 'La descripción es obligatoria',
-  'Description cannot exceed 5000 characters':
-    'La descripción no puede exceder 5000 caracteres',
-  'Short description cannot exceed 255 characters':
-    'La descripción corta no puede exceder 255 caracteres',
+  'Description cannot exceed 5000 characters': 'La descripción no puede exceder 5000 caracteres',
+  'Short description cannot exceed 255 characters': 'La descripción corta no puede exceder 255 caracteres',
   'Price must be greater than 0': 'El precio debe ser mayor que 0',
   'Maximum price allowed is 99999.99': 'El precio máximo permitido es 99999.99',
-  'Previous price cannot be negative':
-    'El precio anterior no puede ser negativo',
+  'Previous price cannot be negative': 'El precio anterior no puede ser negativo',
   'Maximum previous price is 99999.99': 'El precio anterior máximo es 99999.99',
   'Stock must be an integer': 'El stock debe ser un número entero',
   'Stock cannot be negative': 'El stock no puede ser negativo',
   'Minimum stock must be at least 1': 'El stock mínimo debe ser al menos 1',
   'Invalid category ID': 'ID de categoría inválido',
-  'Dimensions cannot exceed 50 characters':
-    'Las dimensiones no pueden exceder 50 caracteres',
+  'Dimensions cannot exceed 50 characters': 'Las dimensiones no pueden exceder 50 caracteres',
   'Weight cannot be negative': 'El peso no puede ser negativo',
   'Time must be at least 1 minute': 'El tiempo debe ser de al menos 1 minuto',
-  'Meta title cannot exceed 200 characters':
-    'El meta título no puede exceder 200 caracteres',
-  'Meta description cannot exceed 300 characters':
-    'La meta descripción no puede exceder 300 caracteres',
+  'Meta title cannot exceed 200 characters': 'El meta título no puede exceder 200 caracteres',
+  'Meta description cannot exceed 300 characters': 'La meta descripción no puede exceder 300 caracteres',
   'Invalid product ID': 'ID de producto inválido',
   'Quantity must be an integer': 'La cantidad debe ser un número entero',
   'Quantity must be at least 1': 'La cantidad debe ser al menos 1',
-  'Maximum quantity per product is 100':
-    'La cantidad máxima por producto es 100',
-  'Order must contain at least one product':
-    'El pedido debe contener al menos un producto',
+  'Maximum quantity per product is 100': 'La cantidad máxima por producto es 100',
+  'Order must contain at least one product': 'El pedido debe contener al menos un producto',
   'Invalid shipping address': 'Dirección de envío inválida',
-  'Notes cannot exceed 1000 characters':
-    'Las notas no pueden exceder 1000 caracteres',
+  'Notes cannot exceed 1000 characters': 'Las notas no pueden exceder 1000 caracteres',
   'Cancellation reason is required': 'El motivo de cancelación es obligatorio',
-  'Reason cannot exceed 500 characters':
-    'El motivo no puede exceder 500 caracteres',
+  'Reason cannot exceed 500 characters': 'El motivo no puede exceder 500 caracteres',
   'Reason is required': 'El motivo es obligatorio',
-  'Reason cannot exceed 255 characters':
-    'El motivo no puede exceder 255 caracteres',
+  'Reason cannot exceed 255 characters': 'El motivo no puede exceder 255 caracteres',
   'Invalid order ID': 'ID de pedido inválido',
   'Quantity cannot be 0': 'La cantidad no puede ser 0',
   'Invalid image URL': 'URL de imagen inválida',
   'Filename is required': 'El nombre de archivo es obligatorio',
-  'Alt text cannot exceed 255 characters':
-    'El texto alternativo no puede exceder 255 caracteres',
+  'Alt text cannot exceed 255 characters': 'El texto alternativo no puede exceder 255 caracteres',
   'Maximum 5 images per product': 'Máximo 5 imágenes por producto',
   'Price cannot be negative': 'El precio no puede ser negativo',
 
@@ -282,12 +249,10 @@ export const errorMessages: TranslationMap = {
   'Validation error in ${context}': 'Error de validación en ${context}',
   'No userId in session metadata': 'No hay userId en los metadatos de sesión',
   'Order not found for session:': 'Pedido no encontrado para sesión:',
-  'Unhandled event type: ${event.type}':
-    'Tipo de evento no manejado: ${event.type}',
+  'Unhandled event type: ${event.type}': 'Tipo de evento no manejado: ${event.type}',
   'Invalid signature': 'Firma inválida',
   'PayPal credentials not configured': 'Credenciales de PayPal no configuradas',
-  'Failed to get PayPal access token':
-    'Error al obtener token de acceso de PayPal',
+  'Failed to get PayPal access token': 'Error al obtener token de acceso de PayPal',
   'Error loading cart': 'Error al cargar el carrito',
   'Error adding to cart': 'Error al añadir al carrito',
   'Error updating': 'Error al actualizar',
@@ -326,10 +291,7 @@ export const couponTranslations: Record<string, string> = {
 // SHIPPING ZONE TRANSLATIONS (for zones)
 // ============================================================================
 
-export const shippingTranslations: Record<
-  string,
-  { name: string; description: string }
-> = {
+export const shippingTranslations: Record<string, { name: string; description: string }> = {
   'SHIP-0001': {
     name: 'Envío Estándar',
     description: 'Entrega estándar en 3-5 días hábiles',
@@ -344,10 +306,7 @@ export const shippingTranslations: Record<
   },
 };
 
-export const shippingZoneTranslations: Record<
-  string,
-  { name: string; country: string }
-> = {
+export const shippingZoneTranslations: Record<string, { name: string; country: string }> = {
   'ZONA-PENINSULA': {
     name: 'Península',
     country: 'España',
@@ -370,34 +329,24 @@ export const shippingZoneTranslations: Record<
 // ALERT TRANSLATIONS
 // ============================================================================
 
-export const alertTranslations: Record<
-  string,
-  { title: string; message: string }
-> = {
+export const alertTranslations: Record<string, { title: string; message: string }> = {
   'ALRT-0001': {
     title: 'Stock bajo',
     message: 'Lámpara Lunar 3D tiene stock bajo (2 unidades)',
   },
   'ALRT-0002': {
     title: 'Stock bajo',
-    message:
-      'Figura Articulada de Dinosaurio Rex tiene stock bajo (4 unidades)',
+    message: 'Figura Articulada de Dinosaurio Rex tiene stock bajo (4 unidades)',
   },
 };
 
 // FAQ translation helpers removed - unused
 
-export function translateShipping(
-  ref: string,
-  field: 'name' | 'description',
-): string {
+export function translateShipping(ref: string, field: 'name' | 'description'): string {
   return shippingTranslations?.[ref]?.[field] || '';
 }
 
-export function translateAlert(
-  ref: string,
-  field: 'title' | 'message',
-): string {
+export function translateAlert(ref: string, field: 'title' | 'message'): string {
   return alertTranslations[ref]?.[field] || '';
 }
 
@@ -405,10 +354,7 @@ export function translateAlert(
 // PRODUCT & CATEGORY TRANSLATIONS
 // ============================================================================
 
-export const productTranslations: Record<
-  string,
-  { name: string; description: string; shortDescription: string }
-> = {
+export const productTranslations: Record<string, { name: string; description: string; shortDescription: string }> = {
   'floral-decorative-vase': {
     name: 'Jarrón Decorativo Floral',
     description:
@@ -471,10 +417,7 @@ export const productTranslations: Record<
   },
 };
 
-export const categoryTranslations: Record<
-  string,
-  { name: string; description: string }
-> = {
+export const categoryTranslations: Record<string, { name: string; description: string }> = {
   decoration: {
     name: 'Decoración',
     description: 'Piezas decorativas para embellecer tu hogar u oficina',
@@ -511,15 +454,13 @@ export function translateProductName(slug: string): string {
   }
 
   // Try with normalized characters (remove accents for fallback)
-  const normalizedSlug = cleanSlug
-    .normalize('NFD')
-    .replaceAll(/[\u0300-\u036f]/g, '');
+  const normalizedSlug = cleanSlug.normalize('NFD').replaceAll(/[\u0300-\u036f]/g, '');
   if (productTranslations[normalizedSlug]) {
     return productTranslations[normalizedSlug].name;
   }
 
   // If no translation found, format the slug nicely
-  return cleanSlug.replaceAll('-', ' ').replaceAll(/\b\w/g, (c) => c.toUpperCase());
+  return cleanSlug.replaceAll('-', ' ').replaceAll(/\b\w/g, c => c.toUpperCase());
 }
 
 export function translateProductDescription(slug: string): string {
@@ -617,10 +558,7 @@ export function translateAddressName(name: string): string {
   return addressNameTranslations[name.toLowerCase()] || name;
 }
 
-export function translateShippingName(
-  ref: string,
-  field: 'name' | 'description',
-): string {
+export function translateShippingName(ref: string, field: 'name' | 'description'): string {
   return shippingTranslations[ref]?.[field] || '';
 }
 

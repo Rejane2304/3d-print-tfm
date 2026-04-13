@@ -9,12 +9,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
-import {
-  translateOrderStatus,
-  translatePaymentMethod,
-  translatePaymentStatus,
-  translateProductName,
-} from '@/lib/i18n';
+import { translateOrderStatus, translatePaymentMethod, translatePaymentStatus, translateProductName } from '@/lib/i18n';
 
 export async function GET() {
   try {
@@ -31,10 +26,7 @@ export async function GET() {
     });
 
     if (!usuario) {
-      return NextResponse.json(
-        { error: 'Usuario no encontrado' },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
 
     // Obtener pedidos del usuario
@@ -75,45 +67,40 @@ export async function GET() {
 
     // Transformar a formato español esperado por el frontend
     // Traducir enums de inglés (BD) a español (UI)
-    const pedidos = pedidosRaw.map((pedido) => ({
+    const pedidos = pedidosRaw.map(pedido => ({
       id: pedido.id,
       numeroPedido: pedido.orderNumber,
       estado: translateOrderStatus(pedido.status),
       total: pedido.total,
       createdAt: pedido.createdAt,
-      items: pedido.items.map((item) => ({
+      items: pedido.items.map(item => ({
         id: item.id,
         quantity: item.quantity,
         unitPrice: item.price,
         producto: {
-          nombre: item.product?.slug
-            ? translateProductName(item.product.slug)
-            : 'Producto',
+          nombre: item.product?.slug ? translateProductName(item.product.slug) : 'Producto',
           slug: item.product?.slug || '',
           images: item.product?.images || [],
         },
       })),
       factura: pedido.invoice
         ? {
-          id: pedido.invoice.id,
-          numeroFactura: pedido.invoice.invoiceNumber,
-          anulada: pedido.invoice.isCancelled,
-        }
+            id: pedido.invoice.id,
+            numeroFactura: pedido.invoice.invoiceNumber,
+            anulada: pedido.invoice.isCancelled,
+          }
         : undefined,
       pago: pedido.payment
         ? {
-          estado: translatePaymentStatus(pedido.payment.status),
-          metodo: translatePaymentMethod(pedido.payment.method),
-        }
+            estado: translatePaymentStatus(pedido.payment.status),
+            metodo: translatePaymentMethod(pedido.payment.method),
+          }
         : undefined,
     }));
 
     return NextResponse.json({ pedidos });
   } catch (error) {
     console.error('Error al obtener pedidos:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener pedidos' },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: 'Error al obtener pedidos' }, { status: 500 });
   }
 }

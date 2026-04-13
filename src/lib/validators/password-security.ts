@@ -143,12 +143,9 @@ const COMMON_PASSWORDS = new Set([
 // ============================================
 
 export const PASSWORD_SECURITY_ERRORS = {
-  COMMON_PASSWORD:
-    'Esta contraseña es muy común. Por favor elige una más segura.',
-  PWNED_PASSWORD:
-    'Esta contraseña ha aparecido en brechas de seguridad. Por favor elige otra.',
-  PWNED_API_ERROR:
-    'No se pudo verificar la seguridad de la contraseña. Por favor intenta con otra.',
+  COMMON_PASSWORD: 'Esta contraseña es muy común. Por favor elige una más segura.',
+  PWNED_PASSWORD: 'Esta contraseña ha aparecido en brechas de seguridad. Por favor elige otra.',
+  PWNED_API_ERROR: 'No se pudo verificar la seguridad de la contraseña. Por favor intenta con otra.',
 } as const;
 
 // ============================================
@@ -179,7 +176,7 @@ export function isCommonPassword(password: string): boolean {
     normalizedPassword.replace(/[\d!@#$%^&*]+$/, ''), // Remove trailing numbers and symbols
   ];
 
-  return baseVariations.some((variation) => COMMON_PASSWORDS.has(variation));
+  return baseVariations.some(variation => COMMON_PASSWORDS.has(variation));
 }
 
 /**
@@ -198,7 +195,7 @@ export async function checkPwnedPassword(
     const hashBuffer = await crypto.subtle.digest('SHA-1', data);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const hash = hashArray
-      .map((b) => b.toString(16).padStart(2, '0'))
+      .map(b => b.toString(16).padStart(2, '0'))
       .join('')
       .toUpperCase();
 
@@ -207,15 +204,12 @@ export async function checkPwnedPassword(
     const suffix = hash.slice(5);
 
     // Call HIBP API
-    const response = await fetch(
-      `https://api.pwnedpasswords.com/range/${prefix}`,
-      {
-        method: 'GET',
-        headers: {
-          'User-Agent': '3D-Print-TFM-Password-Checker',
-        },
+    const response = await fetch(`https://api.pwnedpasswords.com/range/${prefix}`, {
+      method: 'GET',
+      headers: {
+        'User-Agent': '3D-Print-TFM-Password-Checker',
       },
-    );
+    });
 
     if (!response.ok) {
       return {
@@ -324,9 +318,7 @@ export async function validatePasswordSecurity(
  * @param password - The password to validate
  * @returns Validation result
  */
-export function validatePasswordSecuritySync(
-  password: string,
-): PasswordValidationResult {
+export function validatePasswordSecuritySync(password: string): PasswordValidationResult {
   if (isCommonPassword(password)) {
     return {
       isValid: false,
@@ -353,10 +345,8 @@ export function validatePasswordSecuritySync(
  * @param enablePwnedCheck - Whether to enable HIBP checking
  * @returns Refinement function for Zod
  */
-export function createPasswordSecurityRefinement(
-  enablePwnedCheck: boolean = false,
-) {
-  return async(password: string): Promise<boolean> => {
+export function createPasswordSecurityRefinement(enablePwnedCheck: boolean = false) {
+  return async (password: string): Promise<boolean> => {
     const result = await validatePasswordSecurity(password, enablePwnedCheck);
     return result.isValid;
   };

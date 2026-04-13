@@ -9,15 +9,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import {
-  AlertCircle,
-  ArrowLeft,
-  CheckCircle2,
-  HelpCircle,
-  Loader2,
-  Save,
-  Trash2,
-} from 'lucide-react';
+import { AlertCircle, ArrowLeft, CheckCircle2, HelpCircle, Loader2, Save, Trash2 } from 'lucide-react';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
 interface FAQ {
@@ -82,7 +74,7 @@ export default function EditarFAQPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, session, router, faqId]);
 
-  const loadFAQ = useCallback(async() => {
+  const loadFAQ = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -115,16 +107,11 @@ export default function EditarFAQPage() {
     }
   }, [faqId]);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      [name]:
-        type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
     }));
   };
 
@@ -132,10 +119,10 @@ export default function EditarFAQPage() {
     const value = e.target.value;
     if (value === 'custom') {
       setCustomCategory(true);
-      setFormData((prev) => ({ ...prev, category: '' }));
+      setFormData(prev => ({ ...prev, category: '' }));
     } else {
       setCustomCategory(false);
-      setFormData((prev) => ({ ...prev, category: value }));
+      setFormData(prev => ({ ...prev, category: value }));
     }
   };
 
@@ -158,7 +145,7 @@ export default function EditarFAQPage() {
     return null;
   };
 
-  const handleSubmit = async(e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const validationError = validateForm();
@@ -200,7 +187,7 @@ export default function EditarFAQPage() {
     }
   };
 
-  const handleDelete = async() => {
+  const handleDelete = async () => {
     try {
       const response = await fetch(`/api/admin/faqs/${faqId}`, {
         method: 'DELETE',
@@ -236,10 +223,7 @@ export default function EditarFAQPage() {
         <div className="text-center">
           <AlertCircle className="h-12 w-12 text-red-600 mx-auto mb-4" />
           <p className="text-gray-600">FAQ no encontrada</p>
-          <Link
-            href="/admin/faqs"
-            className="mt-4 inline-block text-indigo-600 hover:text-indigo-800"
-          >
+          <Link href="/admin/faqs" className="mt-4 inline-block text-indigo-600 hover:text-indigo-800">
             ← Volver a FAQs
           </Link>
         </div>
@@ -254,10 +238,7 @@ export default function EditarFAQPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link
-                href="/admin/faqs"
-                className="text-gray-500 hover:text-gray-700 transition-colors"
-              >
+              <Link href="/admin/faqs" className="text-gray-500 hover:text-gray-700 transition-colors">
                 <ArrowLeft className="h-6 w-6" />
               </Link>
               <div>
@@ -265,37 +246,26 @@ export default function EditarFAQPage() {
                 <nav className="flex mt-1" aria-label="Breadcrumb">
                   <ol className="flex items-center space-x-2 text-sm">
                     <li>
-                      <Link
-                        href="/admin/dashboard"
-                        className="text-gray-500 hover:text-gray-700"
-                      >
+                      <Link href="/admin/dashboard" className="text-gray-500 hover:text-gray-700">
                         Panel
                       </Link>
                     </li>
                     <li className="text-gray-400">/</li>
                     <li>
-                      <Link
-                        href="/admin/faqs"
-                        className="text-gray-500 hover:text-gray-700"
-                      >
+                      <Link href="/admin/faqs" className="text-gray-500 hover:text-gray-700">
                         FAQs
                       </Link>
                     </li>
                     <li className="text-gray-400">/</li>
                     <li>
-                      <span className="text-gray-900 truncate max-w-xs">
-                        {faq?.pregunta.substring(0, 30)}...
-                      </span>
+                      <span className="text-gray-900 truncate max-w-xs">{faq?.pregunta.substring(0, 30)}...</span>
                     </li>
                   </ol>
                 </nav>
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <Link
-                href="/admin/dashboard"
-                className="text-indigo-600 hover:text-indigo-800 font-medium"
-              >
+              <Link href="/admin/dashboard" className="text-indigo-600 hover:text-indigo-800 font-medium">
                 ← Volver al Panel
               </Link>
               <button
@@ -338,10 +308,7 @@ export default function EditarFAQPage() {
 
               <div className="space-y-4">
                 <div>
-                  <label
-                    htmlFor="question"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
+                  <label htmlFor="question" className="block text-sm font-medium text-gray-700 mb-1">
                     Pregunta *
                   </label>
                   <input
@@ -355,16 +322,11 @@ export default function EditarFAQPage() {
                     placeholder="Ej: ¿Cuánto tarda el envío?"
                     required
                   />
-                  <p className="mt-1 text-xs text-gray-500">
-                    Máximo 500 caracteres
-                  </p>
+                  <p className="mt-1 text-xs text-gray-500">Máximo 500 caracteres</p>
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="answer"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
+                  <label htmlFor="answer" className="block text-sm font-medium text-gray-700 mb-1">
                     Respuesta *
                   </label>
                   <textarea
@@ -379,17 +341,13 @@ export default function EditarFAQPage() {
                     required
                   />
                   <p className="mt-1 text-xs text-gray-500">
-                    Máximo 5000 caracteres. Puedes usar texto simple o formato
-                    HTML básico.
+                    Máximo 5000 caracteres. Puedes usar texto simple o formato HTML básico.
                   </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label
-                      htmlFor="category"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
+                    <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
                       Categoría *
                     </label>
                     {customCategory === false ? (
@@ -403,7 +361,7 @@ export default function EditarFAQPage() {
                         required
                       >
                         <option value="">Selecciona una categoría</option>
-                        {PREDEFINED_CATEGORIES.map((cat) => (
+                        {PREDEFINED_CATEGORIES.map(cat => (
                           <option key={cat} value={cat}>
                             {cat}
                           </option>
@@ -426,7 +384,7 @@ export default function EditarFAQPage() {
                           type="button"
                           onClick={() => {
                             setCustomCategory(false);
-                            setFormData((prev) => ({ ...prev, category: '' }));
+                            setFormData(prev => ({ ...prev, category: '' }));
                           }}
                           className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
                         >
@@ -437,10 +395,7 @@ export default function EditarFAQPage() {
                   </div>
 
                   <div>
-                    <label
-                      htmlFor="displayOrder"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
+                    <label htmlFor="displayOrder" className="block text-sm font-medium text-gray-700 mb-1">
                       Orden de visualización
                     </label>
                     <input
@@ -454,9 +409,7 @@ export default function EditarFAQPage() {
                       focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       placeholder="0"
                     />
-                    <p className="mt-1 text-xs text-gray-500">
-                      Menor número = aparece primero
-                    </p>
+                    <p className="mt-1 text-xs text-gray-500">Menor número = aparece primero</p>
                   </div>
                 </div>
               </div>
@@ -464,9 +417,7 @@ export default function EditarFAQPage() {
 
             {/* Configuración */}
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                Configuración
-              </h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Configuración</h2>
 
               <div className="flex items-center gap-3">
                 <input
@@ -477,10 +428,7 @@ export default function EditarFAQPage() {
                   onChange={handleInputChange}
                   className="h-4 w-4 text-indigo-600 rounded focus:ring-indigo-500"
                 />
-                <label
-                  htmlFor="isActive"
-                  className="text-sm text-gray-700 cursor-pointer"
-                >
+                <label htmlFor="isActive" className="text-sm text-gray-700 cursor-pointer">
                   FAQ activa (visible en la página de ayuda)
                 </label>
               </div>

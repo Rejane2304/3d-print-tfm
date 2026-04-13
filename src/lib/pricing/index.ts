@@ -31,10 +31,7 @@ function convertPriceToNumber(price: PriceValue): number | null {
  * Format price WITHOUT VAT for display in product cards
  * Shows the base price as stored in database
  */
-export function formatPrice(
-  price: PriceValue,
-  options: { showSymbol?: boolean; decimals?: number } = {},
-): string {
+export function formatPrice(price: PriceValue, options: { showSymbol?: boolean; decimals?: number } = {}): string {
   const { showSymbol = true, decimals = 2 } = options;
   if (price === undefined || price === null) {
     return showSymbol ? '0 €' : '0';
@@ -55,10 +52,7 @@ export function formatPrice(
  * When storing in DB, prices are without VAT
  * When displaying to customers, prices include VAT
  */
-export function addVat(
-  price: PriceValue,
-  vatRate: number = DEFAULT_VAT_RATE,
-): number {
+export function addVat(price: PriceValue, vatRate: number = DEFAULT_VAT_RATE): number {
   const numPrice = convertPriceToNumber(price);
 
   if (numPrice === null || Number.isNaN(numPrice)) {
@@ -70,10 +64,7 @@ export function addVat(
 /**
  * Remove VAT from a price (to get base price from VAT-inclusive price)
  */
-export function removeVat(
-  price: number | string | undefined,
-  vatRate: number = DEFAULT_VAT_RATE,
-): number {
+export function removeVat(price: number | string | undefined, vatRate: number = DEFAULT_VAT_RATE): number {
   const numPrice = convertPriceToNumber(price);
 
   if (numPrice === null || Number.isNaN(numPrice)) {
@@ -99,10 +90,7 @@ export function formatPriceWithVat(
 /**
  * Calculate VAT amount from base price
  */
-export function calculateVatAmount(
-  price: number | string | undefined,
-  vatRate: number = DEFAULT_VAT_RATE,
-): number {
+export function calculateVatAmount(price: number | string | undefined, vatRate: number = DEFAULT_VAT_RATE): number {
   const numPrice = convertPriceToNumber(price);
 
   if (numPrice === null || Number.isNaN(numPrice)) {

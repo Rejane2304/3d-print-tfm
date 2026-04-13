@@ -87,32 +87,28 @@ export function generateInvoiceHTML(data: InvoiceData): string {
 
   const itemsHTML = data.items
     .map(
-      (item) => `
+      item => `
     <tr>
       <td>
         <div class="product-cell">
           ${
-  item.image
-    ? `
+            item.image
+              ? `
             <div class="product-image-container">
               <img src="${item.image}" alt="${item.name}">
             </div>
           `
-    : `
+              : `
             <div class="product-image-placeholder">
               <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
               </svg>
             </div>
           `
-}
+          }
           <div class="product-info">
             <span class="product-name">${item.name}</span>
-            ${
-  item.description
-    ? `<span class="product-description">${item.description}</span>`
-    : ''
-}
+            ${item.description ? `<span class="product-description">${item.description}</span>` : ''}
           </div>
         </div>
       </td>
@@ -682,8 +678,8 @@ export function generateInvoiceHTML(data: InvoiceData): string {
               </div>
             </div>
             ${
-  data.orderNumber
-    ? `
+              data.orderNumber
+                ? `
             <div class="footer-block">
               <div class="footer-icon">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -696,8 +692,8 @@ export function generateInvoiceHTML(data: InvoiceData): string {
               </div>
             </div>
             `
-    : ''
-}
+                : ''
+            }
           </div>
 
           <div class="footer-note">

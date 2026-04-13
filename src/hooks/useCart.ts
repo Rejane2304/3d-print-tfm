@@ -48,14 +48,8 @@ function loadCartFromLocalStorage(): CartData {
   const cartData = localStorage.getItem(CART_STORAGE_KEY);
   if (cartData) {
     const items: CartItem[] = JSON.parse(cartData);
-    const totalItems = items.reduce(
-      (sum, item) => sum + item.quantity,
-      0,
-    );
-    const subtotal = items.reduce(
-      (sum, item) => sum + item.unitPrice * item.quantity,
-      0,
-    );
+    const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+    const subtotal = items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
     return {
       id: null,
       items,
@@ -93,13 +87,17 @@ function saveLocalCartItems(items: CartItem[]): void {
   localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
 }
 
-function createCartItem(productId: string, quantity: number, productInfo: {
-  price?: number;
-  name?: string;
-  slug?: string;
-  stock?: number;
-  image?: string | null;
-}): CartItem {
+function createCartItem(
+  productId: string,
+  quantity: number,
+  productInfo: {
+    price?: number;
+    name?: string;
+    slug?: string;
+    stock?: number;
+    image?: string | null;
+  },
+): CartItem {
   return {
     id: `local-${Date.now()}`,
     productId,
@@ -131,14 +129,16 @@ async function updateItemInApi(itemId: string, quantity: number): Promise<void> 
 
 function updateItemInLocalStorage(itemId: string, quantity: number): void {
   const cartData = localStorage.getItem(CART_STORAGE_KEY);
-  if (!cartData) return;
+  if (!cartData) {
+    return;
+  }
 
   let items: CartItem[] = JSON.parse(cartData);
 
   if (quantity <= 0) {
-    items = items.filter((item) => item.id !== itemId);
+    items = items.filter(item => item.id !== itemId);
   } else {
-    const item = items.find((i) => i.id === itemId);
+    const item = items.find(i => i.id === itemId);
     if (item) {
       item.quantity = quantity;
     }
@@ -160,10 +160,12 @@ async function removeItemFromApi(itemId: string): Promise<void> {
 
 function removeItemFromLocalStorage(itemId: string): void {
   const cartData = localStorage.getItem(CART_STORAGE_KEY);
-  if (!cartData) return;
+  if (!cartData) {
+    return;
+  }
 
   const items: CartItem[] = JSON.parse(cartData);
-  const filteredItems = items.filter((item) => item.id !== itemId);
+  const filteredItems = items.filter(item => item.id !== itemId);
   localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(filteredItems));
 }
 
@@ -179,7 +181,7 @@ export function useCart() {
 
   // Load cart
   const loadCart = useCallback(
-    async(force = false) => {
+    async (force = false) => {
       if (isLoadingSession) {
         return;
       }
@@ -211,7 +213,7 @@ export function useCart() {
 
   // Add item to cart
   const addItem = useCallback(
-    async(
+    async (
       productId: string,
       quantity: number,
       productInfo: {
@@ -227,9 +229,7 @@ export function useCart() {
           await addItemToApi(productId, quantity);
         } else {
           const items = getLocalCartItems();
-          const existingItem = items.find(
-            (item) => item.productId === productId,
-          );
+          const existingItem = items.find(item => item.productId === productId);
 
           if (existingItem) {
             existingItem.quantity += quantity;
@@ -255,7 +255,7 @@ export function useCart() {
 
   // Update item quantity
   const updateQuantity = useCallback(
-    async(itemId: string, quantity: number) => {
+    async (itemId: string, quantity: number) => {
       try {
         if (isAuthenticated) {
           await updateItemInApi(itemId, quantity);
@@ -279,7 +279,7 @@ export function useCart() {
 
   // Remove item from cart
   const removeItem = useCallback(
-    async(itemId: string) => {
+    async (itemId: string) => {
       try {
         if (isAuthenticated) {
           await removeItemFromApi(itemId);
@@ -302,7 +302,7 @@ export function useCart() {
   );
 
   // Clear cart (useful for checkout)
-  const clearCart = useCallback(async() => {
+  const clearCart = useCallback(async () => {
     try {
       if (!isAuthenticated) {
         localStorage.removeItem(CART_STORAGE_KEY);
@@ -321,7 +321,7 @@ export function useCart() {
   }, [isAuthenticated, loadCart]);
 
   // Migrate cart from localStorage to API (useful when logging in)
-  const migrateCart = useCallback(async() => {
+  const migrateCart = useCallback(async () => {
     if (!isAuthenticated) {
       return { success: false, error: 'Not authenticated' };
     }

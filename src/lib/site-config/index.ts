@@ -4,7 +4,7 @@
  */
 
 import { prisma } from '@/lib/db/prisma';
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 
 const SITE_CONFIG_ID = 'site-config';
 
@@ -50,9 +50,7 @@ export async function getSiteConfig(): Promise<SiteConfig | null> {
 /**
  * Update site configuration
  */
-export async function updateSiteConfig(
-  data: Omit<SiteConfig, 'id' | 'updatedAt'>,
-): Promise<SiteConfig | null> {
+export async function updateSiteConfig(data: Omit<SiteConfig, 'id' | 'updatedAt'>): Promise<SiteConfig | null> {
   try {
     const config = await prisma.siteConfig.upsert({
       where: { id: SITE_CONFIG_ID },

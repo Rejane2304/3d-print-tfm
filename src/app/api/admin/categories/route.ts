@@ -4,26 +4,18 @@
  *
  * Requiere: Rol ADMIN
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
-import {
-  translateCategoryDescription,
-  translateCategoryName,
-} from '@/lib/i18n';
+import { translateCategoryDescription, translateCategoryName } from '@/lib/i18n';
 
 // Schema de validación
 const categorySchema = z.object({
-  name: z
-    .string()
-    .min(1, 'El nombre es obligatorio')
-    .max(100, 'Máximo 100 caracteres'),
-  slug: z
-    .string()
-    .min(1, 'El slug es obligatorio')
-    .max(100, 'Máximo 100 caracteres'),
+  name: z.string().min(1, 'El nombre es obligatorio').max(100, 'Máximo 100 caracteres'),
+  slug: z.string().min(1, 'El slug es obligatorio').max(100, 'Máximo 100 caracteres'),
   description: z.string().max(500, 'Máximo 500 caracteres').optional(),
   image: z.string().max(500, 'URL muy larga').optional().nullable(),
   displayOrder: z.number().int().min(0).default(0),
@@ -40,10 +32,7 @@ export async function GET() {
       session = null;
     }
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -51,10 +40,7 @@ export async function GET() {
     });
 
     if (user?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 });
     }
 
     const categories = await prisma.category.findMany({
@@ -67,7 +53,7 @@ export async function GET() {
     });
 
     // Translate categories to Spanish for admin panel
-    const categoriasTraducidas = categories.map((category) => ({
+    const categoriasTraducidas = categories.map(category => ({
       id: category.id,
       _ref: category.id.slice(0, 8).toUpperCase(),
       nombre: translateCategoryName(category.slug),
@@ -87,10 +73,7 @@ export async function GET() {
     });
   } catch (error) {
     console.error('Error listando categorías:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error interno' },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: 'Error interno' }, { status: 500 });
   }
 }
 
@@ -104,10 +87,7 @@ export async function POST(req: NextRequest) {
       session = null;
     }
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -115,10 +95,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (user?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 });
     }
 
     const body = await req.json();
@@ -130,10 +107,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (existing) {
-      return NextResponse.json(
-        { success: false, error: 'Ya existe una categoría con ese slug' },
-        { status: 400 },
-      );
+      return NextResponse.json({ success: false, error: 'Ya existe una categoría con ese slug' }, { status: 400 });
     }
 
     // Crear categoría
@@ -153,15 +127,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, category }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { success: false, error: error.errors[0].message },
-        { status: 400 },
-      );
+      return NextResponse.json({ success: false, error: error.errors[0].message }, { status: 400 });
     }
     console.error('Error creando categoría:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error interno' },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: 'Error interno' }, { status: 500 });
   }
 }

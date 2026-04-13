@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
@@ -29,11 +30,11 @@ export async function GET(req: NextRequest) {
         room: { in: rooms },
         ...(lastEventId
           ? {
-            id: { gt: lastEventId },
-          }
+              id: { gt: lastEventId },
+            }
           : {
-            delivered: false,
-          }),
+              delivered: false,
+            }),
       },
       orderBy: { timestamp: 'asc' },
       take: 100,
@@ -42,10 +43,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ events });
   } catch (error) {
     console.error('Error fetching events:', error);
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }
 
@@ -61,10 +59,7 @@ export async function POST(req: NextRequest) {
     const { eventIds } = body;
 
     if (!eventIds || !Array.isArray(eventIds) || eventIds.length === 0) {
-      return NextResponse.json(
-        { error: 'IDs de eventos inválidos' },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'IDs de eventos inválidos' }, { status: 400 });
     }
 
     await prisma.eventStore.updateMany({
@@ -80,9 +75,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error acknowledging events:', error);
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }

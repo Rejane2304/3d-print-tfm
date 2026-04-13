@@ -3,7 +3,7 @@
 
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Loader2, User, LogIn, UserPlus } from 'lucide-react';
+import { Loader2, LogIn, User, UserPlus } from 'lucide-react';
 
 import LoginForm from '@/components/auth/LoginForm';
 import RegisterForm from '@/components/auth/RegisterForm';
@@ -101,9 +101,7 @@ function AuthContent() {
             <User className="h-8 w-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Bienvenido</h1>
-          <p className="text-sm text-gray-600">
-            Accede a tu cuenta o crea una nueva
-          </p>
+          <p className="text-sm text-gray-600">Accede a tu cuenta o crea una nueva</p>
         </div>
 
         {/* Main Card */}
@@ -143,11 +141,7 @@ function AuthContent() {
               <div className="mb-6 bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
                 <div className="flex">
                   <div className="flex-shrink-0">
-                    <svg
-                      className="h-5 w-5 text-green-400"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
+                    <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
                       <path
                         fillRule="evenodd"
                         d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -156,9 +150,7 @@ function AuthContent() {
                     </svg>
                   </div>
                   <div className="ml-3">
-                    <p className="text-sm text-green-700">
-                      ¡Registro exitoso! Ahora puedes iniciar sesión.
-                    </p>
+                    <p className="text-sm text-green-700">¡Registro exitoso! Ahora puedes iniciar sesión.</p>
                   </div>
                 </div>
               </div>
@@ -167,16 +159,11 @@ function AuthContent() {
             {/* Login Form */}
             <div
               className={`transition-all duration-500 ease-in-out ${
-                isLoginTab
-                  ? 'opacity-100 translate-x-0'
-                  : 'opacity-0 translate-x-10 absolute pointer-events-none'
+                isLoginTab ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10 absolute pointer-events-none'
               }`}
             >
               {loginError && (
-                <div
-                  data-testid="login-error"
-                  className="mb-4 bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg"
-                >
+                <div data-testid="login-error" className="mb-4 bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg">
                   <p className="text-sm text-red-700">{loginError}</p>
                 </div>
               )}
@@ -214,20 +201,10 @@ function AuthContent() {
 
         {/* Test Credentials */}
         <div className="mt-6 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl p-4 shadow-sm">
-          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
-            Usuarios de prueba
-          </h3>
+          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Usuarios de prueba</h3>
           <div className="space-y-2 text-xs text-gray-600">
-            <TestCredential
-              title="Admin"
-              email="admin@3dprint.com"
-              password="AdminTFM2024!"
-            />
-            <TestCredential
-              title="Cliente"
-              email="juan@example.com"
-              password="JuanTFM2024!"
-            />
+            <TestCredential title="Admin" email="admin@3dprint.com" password="AdminTFM2024!" />
+            <TestCredential title="Cliente" email="juan@example.com" password="JuanTFM2024!" />
           </div>
         </div>
       </div>
@@ -238,14 +215,14 @@ function AuthContent() {
 export default function AuthPage() {
   return (
     <Suspense
-      fallback={(
+      fallback={
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-indigo-50">
           <div className="text-center">
             <Loader2 className="h-12 w-12 animate-spin text-indigo-600 mx-auto mb-4" />
             <p className="text-gray-600">Cargando...</p>
           </div>
         </div>
-      )}
+      }
     >
       <AuthContent />
     </Suspense>

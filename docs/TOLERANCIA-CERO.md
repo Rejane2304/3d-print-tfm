@@ -18,25 +18,29 @@
 ## 🚫 REGLAS ESTRICTAS
 
 ### 1. TypeScript
+
 ```typescript
 // ❌ PROHIBIDO
 catch (err: any) { }
 
-// ✅ PERMITIDO  
+// ✅ PERMITIDO
 catch (err: unknown) { }
 ```
 
 ### 2. ESLint
+
 - Variables no usadas: ERROR (no warning)
 - Imports no usados: ERROR
 - `console.log` en API: ERROR
 - Tipos `any`: ERROR
 
 ### 3. Prettier
+
 - Todo el código debe estar formateado
 - No se aceptan archivos sin formato
 
 ### 4. Carpetas
+
 - No se permiten carpetas vacías
 - Todo código debe tener propósito
 
@@ -64,6 +68,7 @@ scripts/
 ## ⚙️ CONFIGURACIÓN
 
 ### .eslintrc.json
+
 ```json
 {
   "extends": ["next/core-web-vitals", "next/typescript"],
@@ -76,6 +81,7 @@ scripts/
 ```
 
 ### pre-commit hook
+
 ```bash
 #!/bin/bash
 ./scripts/zero-tolerance-check.js || exit 1
@@ -96,5 +102,5 @@ scripts/
 
 ---
 
-*Documento creado: Abril 2025*
-*Tolerancia: CERO*
+_Documento creado: Abril 2025_
+_Tolerancia: CERO_

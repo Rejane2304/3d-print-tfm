@@ -3,7 +3,8 @@
  * POST /api/payments/transfer/init
  * Simulates bank transfer payment initialization with fake bank details
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
@@ -32,10 +33,7 @@ export async function POST(req: NextRequest) {
 
     // Validate required fields
     if (!orderId || !paymentId) {
-      return NextResponse.json(
-        { error: 'El ID de pedido y el ID de pago son requeridos' },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'El ID de pedido y el ID de pago son requeridos' }, { status: 400 });
     }
 
     // Get user
@@ -45,10 +43,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Usuario no encontrado' },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
 
     // Verify order exists and belongs to user
@@ -58,10 +53,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (order?.userId !== user.id) {
-      return NextResponse.json(
-        { error: 'Pedido no encontrado' },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: 'Pedido no encontrado' }, { status: 404 });
     }
 
     // Verify payment exists and belongs to user
@@ -74,10 +66,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!payment) {
-      return NextResponse.json(
-        { error: 'Pago no encontrado' },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: 'Pago no encontrado' }, { status: 404 });
     }
 
     // Generate unique transfer reference
@@ -107,9 +96,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error('Error initializing transfer payment:', error);
-    return NextResponse.json(
-      { error: 'Error al inicializar el pago por transferencia' },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: 'Error al inicializar el pago por transferencia' }, { status: 500 });
   }
 }

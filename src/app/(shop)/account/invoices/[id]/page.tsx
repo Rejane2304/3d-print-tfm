@@ -9,19 +9,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import {
-  AlertCircle,
-  ArrowLeft,
-  Download,
-  FileText,
-  Loader2,
-  Printer,
-  XCircle,
-} from 'lucide-react';
-import {
-  InvoiceViewer,
-  useInvoiceData,
-} from '@/components/invoices/InvoiceViewer';
+import { AlertCircle, ArrowLeft, Download, FileText, Loader2, Printer, XCircle } from 'lucide-react';
+import { InvoiceViewer, useInvoiceData } from '@/components/invoices/InvoiceViewer';
 
 interface InvoiceDetail {
   id: string;
@@ -80,7 +69,7 @@ export default function UserInvoiceDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadInvoice = useCallback(async() => {
+  const loadInvoice = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -148,10 +137,7 @@ export default function UserInvoiceDetailPage() {
         <div className="text-center">
           <AlertCircle className="h-12 w-12 text-red-600 mx-auto mb-4" />
           <p className="text-gray-900 font-medium">Factura no encontrada</p>
-          <Link
-            href="/account/orders"
-            className="text-indigo-600 hover:text-indigo-800 mt-2 inline-block"
-          >
+          <Link href="/account/orders" className="text-indigo-600 hover:text-indigo-800 mt-2 inline-block">
             ← Volver a mis pedidos
           </Link>
         </div>
@@ -166,18 +152,13 @@ export default function UserInvoiceDetailPage() {
         <div className="max-w-[1920px] 3xl:max-w-[2200px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-4">
-              <Link
-                href="/account/orders"
-                className="text-gray-500 hover:text-gray-700 transition-colors"
-              >
+              <Link href="/account/orders" className="text-gray-500 hover:text-gray-700 transition-colors">
                 <ArrowLeft className="h-6 w-6" />
               </Link>
               <div>
                 <div className="flex items-center gap-3">
                   <FileText className="h-6 w-6 text-indigo-600" />
-                  <h1 className="text-2xl font-bold text-gray-900">
-                    Factura {invoice.invoiceNumber}
-                  </h1>
+                  <h1 className="text-2xl font-bold text-gray-900">Factura {invoice.invoiceNumber}</h1>
                 </div>
                 <p className="text-sm text-gray-500 mt-1">
                   Emitida el{' '}
@@ -206,11 +187,7 @@ export default function UserInvoiceDetailPage() {
                 disabled={invoice.isCancelled}
                 className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium \
                   hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                title={
-                  invoice.isCancelled
-                    ? 'Factura anulada - no disponible'
-                    : 'Descargar factura PDF'
-                }
+                title={invoice.isCancelled ? 'Factura anulada - no disponible' : 'Descargar factura PDF'}
               >
                 <Download className="h-4 w-4" />
                 Descargar PDF
@@ -228,8 +205,7 @@ export default function UserInvoiceDetailPage() {
             <div className="ml-3">
               <p className="text-sm text-red-700">
                 <strong>FACTURA ANULADA</strong> - Esta factura fue anulada el{' '}
-                {invoice.cancelledAt &&
-                  new Date(invoice.cancelledAt).toLocaleDateString('es-ES')}
+                {invoice.cancelledAt && new Date(invoice.cancelledAt).toLocaleDateString('es-ES')}
               </p>
             </div>
           </div>
@@ -247,9 +223,7 @@ export default function UserInvoiceDetailPage() {
       )}
 
       {/* Invoice Viewer */}
-      <div className="py-8 px-4 print:p-0">
-        {invoiceData && <InvoiceViewer data={invoiceData} />}
-      </div>
+      <div className="py-8 px-4 print:p-0">{invoiceData && <InvoiceViewer data={invoiceData} />}</div>
     </div>
   );
 }

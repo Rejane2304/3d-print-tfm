@@ -48,11 +48,8 @@ export function OrderItems({ items }: Readonly<{ items: CartItem[] }>) {
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
       <h2 className="text-lg sm:text-xl font-semibold mb-4">Resumen del pedido</h2>
 
-      {items.map((item) => (
-        <div
-          key={item.id}
-          className="flex items-center gap-3 sm:gap-4 py-3 border-b border-gray-100 last:border-0"
-        >
+      {items.map(item => (
+        <div key={item.id} className="flex items-center gap-3 sm:gap-4 py-3 border-b border-gray-100 last:border-0">
           <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 flex-shrink-0 overflow-hidden relative rounded">
             {item.product.image ? (
               <Image
@@ -68,9 +65,7 @@ export function OrderItems({ items }: Readonly<{ items: CartItem[] }>) {
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-medium text-sm sm:text-base truncate">
-              {item.product.name}
-            </p>
+            <p className="font-medium text-sm sm:text-base truncate">{item.product.name}</p>
             <p className="text-sm text-gray-600">
               {item.quantity} x {(item.unitPrice || 0).toFixed(2)} €
             </p>
@@ -93,9 +88,7 @@ export function OrderTotals({ subtotal, coupon }: Readonly<OrderTotalsProps>) {
 
   return (
     <div className="border-t pt-4 sm:pt-6 mb-4 sm:mb-6">
-      <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
-        Resumen del pedido
-      </h3>
+      <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Resumen del pedido</h3>
 
       <div className="space-y-2 sm:space-y-3">
         {/* Subtotal */}

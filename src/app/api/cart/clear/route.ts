@@ -43,9 +43,6 @@ export async function DELETE() {
     return NextResponse.json({ success: true, message: 'Carrito vaciado' });
   } catch (error) {
     console.error('Error vaciando carrito:', error);
-    return NextResponse.json(
-      { error: 'Error al vaciar carrito' },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: 'Error al vaciar carrito' }, { status: 500 });
   }
 }

@@ -4,22 +4,15 @@
  */
 'use client';
 
+import { showAlert, showConfirm } from '@/lib/dialogs';
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import {
-  AlertTriangle,
-  CheckCircle,
-  Eye,
-  Loader2,
-  Minus,
-  Package,
-  Plus,
-  RotateCcw,
-} from 'lucide-react';
+import { AlertTriangle, CheckCircle, Eye, Loader2, Minus, Package, Plus, RotateCcw } from 'lucide-react';
 import Image from 'next/image';
-import { BulkAction, Column, DataTable } from '@/components/ui/DataTable';
+import type { BulkAction, Column } from '@/components/ui/DataTable';
+import { DataTable } from '@/components/ui/DataTable';
 
 interface Product {
   id: string;
@@ -43,12 +36,8 @@ export default function AdminInventoryPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [stockLevel, setStockLevel] = useState('all');
-  const [adjustingProduct, setAdjustingProduct] = useState<Product | null>(
-    null,
-  );
-  const [adjustmentType, setAdjustmentType] = useState<'IN' | 'OUT' | 'ADJUST'>(
-    'IN',
-  );
+  const [adjustingProduct, setAdjustingProduct] = useState<Product | null>(null);
+  const [adjustmentType, setAdjustmentType] = useState<'IN' | 'OUT' | 'ADJUST'>('IN');
   const [adjustmentQuantity, setAdjustmentQuantity] = useState('');
   const [adjustmentReason, setAdjustmentReason] = useState('');
   const [processing, setProcessing] = useState(false);
@@ -71,7 +60,7 @@ export default function AdminInventoryPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, session, router, stockLevel]);
 
-  const fetchInventory = async() => {
+  const fetchInventory = async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
@@ -104,7 +93,7 @@ export default function AdminInventoryPage() {
     setAdjustmentReason('');
   };
 
-  const handleAdjustment = async(e: React.FormEvent) => {
+  const handleAdjustment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!adjustingProduct || !adjustmentQuantity || !adjustmentReason) {
       return;
@@ -112,39 +101,33 @@ export default function AdminInventoryPage() {
 
     try {
       setProcessing(true);
-      const response = await fetch(
-        `/api/admin/inventory/${adjustingProduct.id}/adjust`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: adjustmentType,
-            quantity: Number.parseInt(adjustmentQuantity),
-            reason: adjustmentReason,
-          }),
-        },
-      );
+      const response = await fetch(`/api/admin/inventory/${adjustingProduct.id}/adjust`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: adjustmentType,
+          quantity: Number.parseInt(adjustmentQuantity),
+          reason: adjustmentReason,
+        }),
+      });
 
       const data = await response.json();
 
       if (data.success) {
         setProducts(
-          products.map((p) =>
+          products.map(p =>
             p.id === adjustingProduct.id
               ? {
-                ...p,
-                stock: data.data.product.stock,
-                stockStatus: getStockStatus(
-                  data.data.product.stock,
-                  p.minStock,
-                ),
-              }
+                  ...p,
+                  stock: data.data.product.stock,
+                  stockStatus: getStockStatus(data.data.product.stock, p.minStock),
+                }
               : p,
           ),
         );
         closeAdjustModal();
       } else {
-        alert(data.error || 'Error adjusting stock');
+        showAlert(data.error || 'Error adjusting stock');
       }
     } catch (error) {
       console.error('Error adjusting stock:', error);
@@ -153,10 +136,7 @@ export default function AdminInventoryPage() {
     }
   };
 
-  const getStockStatus = (
-    stock: number,
-    minStock: number,
-  ): 'normal' | 'low' | 'critical' => {
+  const getStockStatus = (stock: number, minStock: number): 'normal' | 'low' | 'critical' => {
     if (stock <= 0) {
       return 'critical';
     }
@@ -202,13 +182,7 @@ export default function AdminInventoryPage() {
         <div className="flex items-center">
           {row.imagenes?.[0] ? (
             <div className="flex-shrink-0 h-10 w-10 bg-gray-100 flex items-center justify-center overflow-hidden">
-              <Image
-                src={row.imagenes[0].url}
-                alt={row.nombre}
-                width={40}
-                height={40}
-                className="object-cover"
-              />
+              <Image src={row.imagenes[0].url} alt={row.nombre} width={40} height={40} className="object-cover" />
             </div>
           ) : (
             <div className="flex-shrink-0 h-10 w-10 bg-gray-100 flex items-center justify-center">
@@ -216,12 +190,8 @@ export default function AdminInventoryPage() {
             </div>
           )}
           <div className="ml-4 min-w-0">
-            <div className="text-sm font-medium text-gray-900 truncate">
-              {value as string}
-            </div>
-            <div className="text-xs text-gray-500 hidden xl:block">
-              {row.movementCount} movimientos
-            </div>
+            <div className="text-sm font-medium text-gray-900 truncate">{value as string}</div>
+            <div className="text-xs text-gray-500 hidden xl:block">{row.movementCount} movimientos</div>
           </div>
         </div>
       ),
@@ -231,11 +201,7 @@ export default function AdminInventoryPage() {
       header: 'Categoría',
       sortable: true,
       className: 'hidden sm:table-cell',
-      render: (value) => (
-        <span className="text-sm text-gray-600 truncate">
-          {value as string}
-        </span>
-      ),
+      render: value => <span className="text-sm text-gray-600 truncate">{value as string}</span>,
     },
     {
       key: 'stock',
@@ -251,11 +217,7 @@ export default function AdminInventoryPage() {
         } else {
           stockColorClass = 'text-green-600';
         }
-        return (
-          <span className={`text-lg font-bold ${stockColorClass}`}>
-            {value as number}
-          </span>
-        );
+        return <span className={`text-lg font-bold ${stockColorClass}`}>{value as number}</span>;
       },
     },
     {
@@ -263,25 +225,19 @@ export default function AdminInventoryPage() {
       header: 'Mínimo',
       sortable: true,
       className: 'hidden md:table-cell',
-      render: (value) => (
-        <span className="text-sm text-gray-600">{value as number}</span>
-      ),
+      render: value => <span className="text-sm text-gray-600">{value as number}</span>,
     },
     {
       key: 'stockStatus',
       header: 'Estado',
       sortable: true,
       className: 'hidden lg:table-cell',
-      render: (value) => (
+      render: value => (
         <span
           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(value as string)}`}
         >
-          {(value as string) === 'critical' && (
-            <AlertTriangle className="h-3 w-3 mr-1" />
-          )}
-          {(value as string) === 'normal' && (
-            <CheckCircle className="h-3 w-3 mr-1" />
-          )}
+          {(value as string) === 'critical' && <AlertTriangle className="h-3 w-3 mr-1" />}
+          {(value as string) === 'normal' && <CheckCircle className="h-3 w-3 mr-1" />}
           {getStatusLabel(value as string)}
         </span>
       ),
@@ -291,9 +247,7 @@ export default function AdminInventoryPage() {
       header: 'Movimientos',
       sortable: true,
       className: 'hidden xl:table-cell',
-      render: (value) => (
-        <span className="text-sm text-gray-600">{value as number}</span>
-      ),
+      render: value => <span className="text-sm text-gray-600">{value as number}</span>,
     },
     {
       key: 'actions',
@@ -302,7 +256,7 @@ export default function AdminInventoryPage() {
       render: (_, row) => (
         <div className="flex items-center justify-end gap-1">
           <button
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               openAdjustModal(row, 'IN');
             }}
@@ -312,7 +266,7 @@ export default function AdminInventoryPage() {
             <Plus className="h-4 w-4" />
           </button>
           <button
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               openAdjustModal(row, 'OUT');
             }}
@@ -322,7 +276,7 @@ export default function AdminInventoryPage() {
             <Minus className="h-4 w-4" />
           </button>
           <button
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               openAdjustModal(row, 'ADJUST');
             }}
@@ -348,10 +302,10 @@ export default function AdminInventoryPage() {
       key: 'export',
       label: 'Exportar seleccionados',
       variant: 'primary',
-      onClick: async(selectedIds) => {
+      onClick: async selectedIds => {
         // Exportación implementada
         const selectedIdsStr = selectedIds.join(',');
-        globalThis.alert(`Exportando: ${selectedIdsStr}`);
+        showAlert(`Exportando: ${selectedIdsStr}`);
       },
     },
   ];
@@ -374,17 +328,10 @@ export default function AdminInventoryPage() {
         <div className="max-w-[1920px] 3xl:max-w-[2200px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                Gestión de Inventario
-              </h1>
-              <p className="text-gray-600 mt-1 text-sm">
-                Gestionar stock de productos en tiempo real
-              </p>
+              <h1 className="text-2xl font-bold text-gray-900">Gestión de Inventario</h1>
+              <p className="text-gray-600 mt-1 text-sm">Gestionar stock de productos en tiempo real</p>
             </div>
-            <Link
-              href="/admin/dashboard"
-              className="text-indigo-600 hover:text-indigo-800 font-medium"
-            >
+            <Link href="/admin/dashboard" className="text-indigo-600 hover:text-indigo-800 font-medium">
               &larr; Volver al Panel
             </Link>
           </div>
@@ -397,7 +344,7 @@ export default function AdminInventoryPage() {
           <div className="flex flex-col sm:flex-row gap-4">
             <select
               value={stockLevel}
-              onChange={(e) => setStockLevel(e.target.value)}
+              onChange={e => setStockLevel(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
             >
               <option value="all">Todos los niveles</option>
@@ -438,22 +385,13 @@ export default function AdminInventoryPage() {
 
             <form onSubmit={handleAdjustment}>
               <div className="mb-4">
-                <div className="block text-sm font-medium text-gray-700 mb-1">
-                  Producto
-                </div>
-                <div className="text-gray-900 font-medium">
-                  {adjustingProduct.nombre}
-                </div>
-                <div className="text-sm text-gray-500">
-                  Stock actual: {adjustingProduct.stock}
-                </div>
+                <div className="block text-sm font-medium text-gray-700 mb-1">Producto</div>
+                <div className="text-gray-900 font-medium">{adjustingProduct.nombre}</div>
+                <div className="text-sm text-gray-500">Stock actual: {adjustingProduct.stock}</div>
               </div>
 
               <div className="mb-4">
-                <label
-                  htmlFor="adjustmentQuantity"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
+                <label htmlFor="adjustmentQuantity" className="block text-sm font-medium text-gray-700 mb-1">
                   {adjustmentType === 'ADJUST' ? 'Nuevo Stock' : 'Cantidad'}
                 </label>
                 <input
@@ -461,23 +399,20 @@ export default function AdminInventoryPage() {
                   type="number"
                   min="0"
                   value={adjustmentQuantity}
-                  onChange={(e) => setAdjustmentQuantity(e.target.value)}
+                  onChange={e => setAdjustmentQuantity(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   required
                 />
               </div>
 
               <div className="mb-6">
-                <label
-                  htmlFor="adjustmentReason"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
+                <label htmlFor="adjustmentReason" className="block text-sm font-medium text-gray-700 mb-1">
                   Motivo
                 </label>
                 <textarea
                   id="adjustmentReason"
                   value={adjustmentReason}
-                  onChange={(e) => setAdjustmentReason(e.target.value)}
+                  onChange={e => setAdjustmentReason(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   rows={3}
                   required
@@ -497,9 +432,7 @@ export default function AdminInventoryPage() {
                   disabled={processing}
                   className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center"
                 >
-                  {processing && (
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  )}
+                  {processing && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                   Guardar
                 </button>
               </div>

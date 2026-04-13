@@ -10,16 +10,12 @@ interface CouponSectionProps {
   onRemoveCoupon: () => void;
 }
 
-export function CouponSection({
-  appliedCoupon,
-  onApplyCoupon,
-  onRemoveCoupon,
-}: Readonly<CouponSectionProps>) {
+export function CouponSection({ appliedCoupon, onApplyCoupon, onRemoveCoupon }: Readonly<CouponSectionProps>) {
   const [couponCode, setCouponCode] = useState('');
   const [applying, setApplying] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleApply = async() => {
+  const handleApply = async () => {
     if (!couponCode.trim()) {
       return;
     }
@@ -53,10 +49,7 @@ export function CouponSection({
               Cupón <span className="font-semibold">{appliedCoupon.code}</span> aplicado
             </span>
           </div>
-          <button
-            onClick={handleRemove}
-            className="text-xs text-green-700 hover:text-green-900 underline"
-          >
+          <button onClick={handleRemove} className="text-xs text-green-700 hover:text-green-900 underline">
             Quitar
           </button>
         </div>
@@ -74,10 +67,10 @@ export function CouponSection({
         <input
           type="text"
           value={couponCode}
-          onChange={(e) => setCouponCode(e.target.value)}
+          onChange={e => setCouponCode(e.target.value)}
           placeholder="Introduce tu código"
           className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-          onKeyDown={(e) => {
+          onKeyDown={e => {
             if (e.key === 'Enter') {
               void handleApply();
             }
@@ -88,16 +81,10 @@ export function CouponSection({
           disabled={applying || !couponCode.trim()}
           className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          {applying ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            'Aplicar'
-          )}
+          {applying ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Aplicar'}
         </button>
       </div>
-      {error && (
-        <p className="text-xs text-red-600 mt-2">{error}</p>
-      )}
+      {error && <p className="text-xs text-red-600 mt-2">{error}</p>}
     </div>
   );
 }

@@ -107,9 +107,7 @@ export function ConfirmModal(props: Readonly<ConfirmModalProps>) {
 
       {/* Modal Container */}
       <div className="flex min-h-full items-center justify-center p-3 sm:p-4 text-center">
-        <div
-          className="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all w-full max-w-sm sm:max-w-lg mx-auto"
-        >
+        <div className="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all w-full max-w-sm sm:max-w-lg mx-auto">
           {/* Close Button */}
           <button
             onClick={onClose}
@@ -126,24 +124,16 @@ export function ConfirmModal(props: Readonly<ConfirmModalProps>) {
               <div
                 className={`mx-auto sm:mx-0 flex-shrink-0 h-12 w-12 sm:h-14 sm:w-14 flex items-center justify-center rounded-full ${config.iconBg}`}
               >
-                <Icon
-                  className={`h-6 w-6 sm:h-7 sm:w-7 ${config.iconColor}`}
-                  aria-hidden="true"
-                />
+                <Icon className={`h-6 w-6 sm:h-7 sm:w-7 ${config.iconColor}`} aria-hidden="true" />
               </div>
 
               {/* Text */}
               <div className="flex-1 text-center sm:text-left min-w-0">
-                <h3
-                  className="text-lg sm:text-xl font-semibold leading-tight text-gray-900 pr-8"
-                  id="modal-title"
-                >
+                <h3 className="text-lg sm:text-xl font-semibold leading-tight text-gray-900 pr-8" id="modal-title">
                   {title}
                 </h3>
                 <div className="mt-2 sm:mt-3">
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    {description}
-                  </p>
+                  <p className="text-sm text-gray-600 leading-relaxed">{description}</p>
                 </div>
               </div>
             </div>
@@ -164,14 +154,7 @@ export function ConfirmModal(props: Readonly<ConfirmModalProps>) {
                       fill="none"
                       viewBox="0 0 24 24"
                     >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path
                         className="opacity-75"
                         fill="currentColor"

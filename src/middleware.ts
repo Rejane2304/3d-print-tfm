@@ -12,9 +12,7 @@ const PROTECTED_CLIENT_ROUTES = ['/checkout', '/account'];
 const AUTH_ROUTES = ['/login', '/auth'];
 
 // Helper: Check rate limiting
-function checkRateLimitIfNeeded(
-  request: NextRequest,
-): NextResponse | null {
+function checkRateLimitIfNeeded(request: NextRequest): NextResponse | null {
   if (request.nextUrl.pathname === '/api/auth/callback/credentials') {
     return checkRateLimit(request, 'login');
   }
@@ -22,9 +20,7 @@ function checkRateLimitIfNeeded(
 }
 
 // Helper: Handle legacy redirects
-function handleLegacyRedirects(
-  request: NextRequest,
-): NextResponse | null {
+function handleLegacyRedirects(request: NextRequest): NextResponse | null {
   const { pathname, search } = request.nextUrl;
 
   if (pathname === '/login') {
@@ -62,10 +58,7 @@ function isShopOnlyRoute(pathname: string): boolean {
 }
 
 // Helper: Handle admin access restrictions
-function handleAdminRestrictions(
-  request: NextRequest,
-  userRole: string,
-): NextResponse | null {
+function handleAdminRestrictions(request: NextRequest, userRole: string): NextResponse | null {
   if (userRole !== 'ADMIN') {
     return null;
   }
@@ -84,11 +77,7 @@ function handleAdminRestrictions(
 }
 
 // Helper: Handle admin routes
-function handleAdminRoutes(
-  request: NextRequest,
-  isAuthenticated: boolean,
-  userRole: string,
-): NextResponse | null {
+function handleAdminRoutes(request: NextRequest, isAuthenticated: boolean, userRole: string): NextResponse | null {
   const { pathname } = request.nextUrl;
 
   if (!pathname.startsWith('/admin')) {
@@ -107,16 +96,10 @@ function handleAdminRoutes(
 }
 
 // Helper: Handle protected client routes
-function handleProtectedRoutes(
-  request: NextRequest,
-  isAuthenticated: boolean,
-  userRole: string,
-): NextResponse | null {
+function handleProtectedRoutes(request: NextRequest, isAuthenticated: boolean, userRole: string): NextResponse | null {
   const { pathname } = request.nextUrl;
 
-  const isProtected = PROTECTED_CLIENT_ROUTES.some((route) =>
-    pathname.startsWith(route),
-  );
+  const isProtected = PROTECTED_CLIENT_ROUTES.some(route => pathname.startsWith(route));
 
   if (!isProtected) {
     return null;
@@ -124,9 +107,7 @@ function handleProtectedRoutes(
 
   if (!isAuthenticated) {
     const callbackUrl = encodeURIComponent(pathname);
-    return NextResponse.redirect(
-      new URL(`/auth?callbackUrl=${callbackUrl}`, request.url),
-    );
+    return NextResponse.redirect(new URL(`/auth?callbackUrl=${callbackUrl}`, request.url));
   }
 
   if (userRole === 'ADMIN') {
@@ -137,14 +118,10 @@ function handleProtectedRoutes(
 }
 
 // Helper: Handle auth routes
-function handleAuthRoutes(
-  request: NextRequest,
-  isAuthenticated: boolean,
-  userRole: string,
-): NextResponse | null {
+function handleAuthRoutes(request: NextRequest, isAuthenticated: boolean, userRole: string): NextResponse | null {
   const { pathname } = request.nextUrl;
 
-  const isAuthRoute = AUTH_ROUTES.some((route) => pathname.startsWith(route));
+  const isAuthRoute = AUTH_ROUTES.some(route => pathname.startsWith(route));
 
   if (!isAuthRoute || !isAuthenticated) {
     return null;
@@ -191,21 +168,13 @@ export async function middleware(request: NextRequest) {
   }
 
   // Rule 2: Admin routes
-  const adminRouteResponse = handleAdminRoutes(
-    request,
-    isAuthenticated,
-    userRole,
-  );
+  const adminRouteResponse = handleAdminRoutes(request, isAuthenticated, userRole);
   if (adminRouteResponse) {
     return adminRouteResponse;
   }
 
   // Rule 3: Protected client routes
-  const protectedResponse = handleProtectedRoutes(
-    request,
-    isAuthenticated,
-    userRole,
-  );
+  const protectedResponse = handleProtectedRoutes(request, isAuthenticated, userRole);
   if (protectedResponse) {
     return protectedResponse;
   }

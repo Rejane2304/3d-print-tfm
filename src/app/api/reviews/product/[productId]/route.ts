@@ -2,14 +2,12 @@
  * API de Reseñas por Producto
  * Obtener reseñas públicas de un producto específico
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 
 // GET - Obtener reseñas de un producto
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ productId: string }> },
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ productId: string }> }) {
   try {
     const { productId } = await params;
 
@@ -25,10 +23,7 @@ export async function GET(
     });
 
     if (!product) {
-      return NextResponse.json(
-        { success: false, error: 'Producto no encontrado' },
-        { status: 404 },
-      );
+      return NextResponse.json({ success: false, error: 'Producto no encontrado' }, { status: 404 });
     }
 
     // Construir orden
@@ -90,7 +85,7 @@ export async function GET(
     const ratingCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
     let totalRating = 0;
 
-    allReviews.forEach((review) => {
+    allReviews.forEach(review => {
       ratingCounts[review.rating as 1 | 2 | 3 | 4 | 5]++;
       totalRating += review.rating;
     });
@@ -98,7 +93,7 @@ export async function GET(
     const averageRating = totalCount > 0 ? totalRating / totalCount : 0;
 
     // Formatear reseñas para el frontend
-    const resenasFormateadas = reviews.map((review) => ({
+    const resenasFormateadas = reviews.map(review => ({
       id: review.id,
       usuarioNombre: review.user.name,
       puntuacion: review.rating,
@@ -125,9 +120,6 @@ export async function GET(
     });
   } catch (error) {
     console.error('Error obteniendo reseñas:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error interno' },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: 'Error interno' }, { status: 500 });
   }
 }

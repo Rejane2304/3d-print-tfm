@@ -7,13 +7,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
-import {
-  ChevronRight,
-  MapPin,
-  MessageSquare,
-  Package,
-  User,
-} from 'lucide-react';
+import { ChevronRight, MapPin, MessageSquare, Package, User } from 'lucide-react';
 
 interface CuentaLayoutProps {
   children: React.ReactNode;
@@ -32,11 +26,11 @@ export default async function CuentaLayout({ children }: CuentaLayoutProps) {
   const menuItems = isAdmin
     ? [{ href: '/account/profile', label: 'Mi Perfil', icon: User }]
     : [
-      { href: '/account/orders', label: 'Mis Pedidos', icon: Package },
-      { href: '/account/reviews', label: 'Mis Reseñas', icon: MessageSquare },
-      { href: '/account/addresses', label: 'Mis Direcciones', icon: MapPin },
-      { href: '/account/profile', label: 'Mi Perfil', icon: User },
-    ];
+        { href: '/account/orders', label: 'Mis Pedidos', icon: Package },
+        { href: '/account/reviews', label: 'Mis Reseñas', icon: MessageSquare },
+        { href: '/account/addresses', label: 'Mis Direcciones', icon: MapPin },
+        { href: '/account/profile', label: 'Mi Perfil', icon: User },
+      ];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -45,7 +39,7 @@ export default async function CuentaLayout({ children }: CuentaLayoutProps) {
           {/* Mobile Horizontal Tabs */}
           <div className="lg:hidden">
             <nav className="flex overflow-x-auto gap-2 pb-2 scrollbar-hide">
-              {menuItems.map((item) => {
+              {menuItems.map(item => {
                 const Icon = item.icon;
                 return (
                   <Link
@@ -68,7 +62,7 @@ export default async function CuentaLayout({ children }: CuentaLayoutProps) {
                 <h2 className="font-semibold text-gray-900">Mi Cuenta</h2>
               </div>
               <nav className="divide-y">
-                {menuItems.map((item) => {
+                {menuItems.map(item => {
                   const Icon = item.icon;
                   return (
                     <Link
@@ -78,9 +72,7 @@ export default async function CuentaLayout({ children }: CuentaLayoutProps) {
                     >
                       <div className="flex items-center gap-3">
                         <Icon className="h-5 w-5 text-gray-400 group-hover:text-indigo-600" />
-                        <span className="text-gray-700 group-hover:text-gray-900">
-                          {item.label}
-                        </span>
+                        <span className="text-gray-700 group-hover:text-gray-900">{item.label}</span>
                       </div>
                       <ChevronRight className="h-4 w-4 text-gray-300" />
                     </Link>

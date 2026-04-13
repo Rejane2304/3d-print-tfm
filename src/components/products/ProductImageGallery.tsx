@@ -15,10 +15,7 @@ interface ProductImageGalleryProps {
   productName: string;
 }
 
-export default function ProductImageGallery({
-  images,
-  productName,
-}: Readonly<ProductImageGalleryProps>) {
+export default function ProductImageGallery({ images, productName }: Readonly<ProductImageGalleryProps>) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -26,12 +23,12 @@ export default function ProductImageGallery({
 
   // Navigate to next image
   const nextImage = useCallback(() => {
-    setSelectedIndex((prev) => (prev + 1) % images.length);
+    setSelectedIndex(prev => (prev + 1) % images.length);
   }, [images.length]);
 
   // Navigate to previous image
   const prevImage = useCallback(() => {
-    setSelectedIndex((prev) => (prev - 1 + images.length) % images.length);
+    setSelectedIndex(prev => (prev - 1 + images.length) % images.length);
   }, [images.length]);
 
   // Open modal
@@ -77,9 +74,7 @@ export default function ProductImageGallery({
   if (images.length === 0) {
     return (
       <div className="relative aspect-square bg-gray-200 overflow-hidden">
-        <div className="flex items-center justify-center h-full text-gray-400">
-          Sin imagen
-        </div>
+        <div className="flex items-center justify-center h-full text-gray-400">Sin imagen</div>
       </div>
     );
   }
@@ -127,9 +122,7 @@ export default function ProductImageGallery({
                 >
                   <Image
                     src={image.url}
-                    alt={
-                      image.altText || `${productName} - imagen ${index + 1}`
-                    }
+                    alt={image.altText || `${productName} - imagen ${index + 1}`}
                     fill
                     sizes="(max-width: 640px) 112px, (max-width: 768px) 25vw, (max-width: 1200px) 15vw, 12vw"
                     className="object-contain bg-gray-50"
@@ -166,7 +159,7 @@ export default function ProductImageGallery({
           {/* Navigation - Previous */}
           {images.length > 1 && (
             <button
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation();
                 prevImage();
               }}
@@ -197,7 +190,7 @@ export default function ProductImageGallery({
           {/* Navigation - Next */}
           {images.length > 1 && (
             <button
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation();
                 nextImage();
               }}
@@ -219,20 +212,12 @@ export default function ProductImageGallery({
                   key={image.id}
                   onClick={() => setSelectedIndex(index)}
                   className={`relative w-12 h-12 sm:w-16 sm:h-16 flex-shrink-0 bg-gray-800 rounded overflow-hidden transition-all ${
-                    selectedIndex === index
-                      ? 'ring-2 ring-white'
-                      : 'opacity-60 hover:opacity-100'
+                    selectedIndex === index ? 'ring-2 ring-white' : 'opacity-60 hover:opacity-100'
                   }`}
                   aria-label={`Ir a imagen ${index + 1}`}
                   aria-current={selectedIndex === index ? 'true' : undefined}
                 >
-                  <Image
-                    src={image.url}
-                    alt={`Miniatura ${index + 1}`}
-                    fill
-                    sizes="64px"
-                    className="object-cover"
-                  />
+                  <Image src={image.url} alt={`Miniatura ${index + 1}`} fill sizes="64px" className="object-cover" />
                 </button>
               ))}
             </section>

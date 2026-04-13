@@ -4,22 +4,17 @@
  *
  * Requires: ADMIN Role
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
     }
 
     const usuario = await prisma.user.findUnique({
@@ -27,10 +22,7 @@ export async function DELETE(
     });
 
     if (usuario?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 403 },
-      );
+      return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 403 });
     }
 
     // Check that the alert exists
@@ -39,10 +31,7 @@ export async function DELETE(
     });
 
     if (!alerta) {
-      return NextResponse.json(
-        { success: false, error: 'Alerta no encontrada' },
-        { status: 404 },
-      );
+      return NextResponse.json({ success: false, error: 'Alerta no encontrada' }, { status: 404 });
     }
 
     // Delete the alert
@@ -53,9 +42,6 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error eliminando alerta:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error interno del servidor' },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: 'Error interno del servidor' }, { status: 500 });
   }
 }

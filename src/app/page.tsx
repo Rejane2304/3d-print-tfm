@@ -38,7 +38,7 @@ async function getFeaturedProducts() {
   });
 
   // Traducir productos destacados al español
-  const translatedProducts = featuredProducts.map((product) => ({
+  const translatedProducts = featuredProducts.map(product => ({
     ...product,
     name: translateProductName(product.slug),
     description: translateProductDescription(product.slug),
@@ -58,7 +58,7 @@ async function getCategories() {
     },
   });
 
-  return categories.map((category) => ({
+  return categories.map(category => ({
     ...category,
     name: translateCategoryName(category.slug),
   }));
@@ -98,9 +98,7 @@ export default async function HomePage() {
                 rounded-full px-4 py-2 mb-6"
             >
               <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-              <span className="text-sm font-medium text-white/90">
-                Impresión 3D Profesional
-              </span>
+              <span className="text-sm font-medium text-white/90">Impresión 3D Profesional</span>
             </div>
 
             {/* Title */}
@@ -114,9 +112,8 @@ export default async function HomePage() {
 
             {/* Description */}
             <p className="text-lg sm:text-xl lg:text-2xl text-white/80 mb-8 max-w-2xl leading-relaxed">
-              Descubre nuestra colección de productos impresos en 3D con los
-              mejores materiales PLA y PETG. Calidad profesional, precios
-              competitivos.
+              Descubre nuestra colección de productos impresos en 3D con los mejores materiales PLA y PETG. Calidad
+              profesional, precios competitivos.
             </p>
 
             {/* CTA Button */}
@@ -127,12 +124,7 @@ export default async function HomePage() {
                   text-indigo-900 bg-white hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl \
                   transform hover:-translate-y-0.5"
               >
-                <svg
-                  className="w-5 h-5 mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -149,18 +141,8 @@ export default async function HomePage() {
         {/* Scroll indicator */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10 hidden lg:block">
           <div className="animate-bounce">
-            <svg
-              className="w-6 h-6 text-white/60"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 14l-7 7m0 0l-7-7m7 7V3"
-              />
+            <svg className="w-6 h-6 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
             </svg>
           </div>
         </div>
@@ -174,7 +156,7 @@ export default async function HomePage() {
           </h2>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-6">
-            {categories.map((category) => (
+            {categories.map(category => (
               <Link
                 key={category.slug}
                 href={`/products?category=${category.slug.toUpperCase()}`}
@@ -224,12 +206,8 @@ export default async function HomePage() {
 
           {featuredProducts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
-              {featuredProducts.map((product) => (
-                <Link
-                  key={product.id}
-                  href={`/products/${product.slug}`}
-                  className="group block"
-                >
+              {featuredProducts.map(product => (
+                <Link key={product.id} href={`/products/${product.slug}`} className="group block">
                   <div
                     className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all \
                       duration-500 border border-gray-100 h-full flex flex-col"
@@ -249,12 +227,7 @@ export default async function HomePage() {
                         />
                       ) : (
                         <div className="flex items-center justify-center h-full text-gray-400">
-                          <svg
-                            className="w-16 h-16"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
+                          <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -291,21 +264,14 @@ export default async function HomePage() {
                             {Number(product.price).toFixed(2)}
                             <span className="text-lg text-indigo-400">€</span>
                           </span>
-                          <span className="block text-xs text-gray-400">
-                            sin IVA
-                          </span>
+                          <span className="block text-xs text-gray-400">sin IVA</span>
                         </div>
 
                         <span
                           className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-50 \
                             text-green-600 group-hover:bg-green-600 group-hover:text-white transition-all duration-300"
                         >
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -323,12 +289,7 @@ export default async function HomePage() {
           ) : (
             <div className="text-center py-16 bg-white rounded-2xl">
               <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg
-                  className="w-10 h-10 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -338,12 +299,8 @@ export default async function HomePage() {
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                No hay productos destacados
-              </h3>
-              <p className="text-gray-500">
-                Los productos más vendidos aparecerán aquí
-              </p>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No hay productos destacados</h3>
+              <p className="text-gray-500">Los productos más vendidos aparecerán aquí</p>
             </div>
           )}
 
@@ -355,18 +312,8 @@ export default async function HomePage() {
                 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors"
             >
               Ver todos los productos
-              <svg
-                className="w-5 h-5 ml-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 8l4 4m0 0l-4 4m4-4H3"
-                />
+              <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
             </Link>
           </div>
@@ -381,32 +328,25 @@ export default async function HomePage() {
               {
                 icon: '🏆',
                 title: 'Calidad Premium',
-                description:
-                  'Productos impresos con los mejores materiales PLA y PETG de alta calidad.',
+                description: 'Productos impresos con los mejores materiales PLA y PETG de alta calidad.',
               },
               {
                 icon: '📦',
                 title: 'Envío Rápido',
-                description:
-                  'Entrega en 3-5 días laborables. Envío gratis en pedidos superiores a 50€.',
+                description: 'Entrega en 3-5 días laborables. Envío gratis en pedidos superiores a 50€.',
               },
               {
                 icon: '💬',
                 title: 'Soporte Personalizado',
-                description:
-                  'Atención al cliente especializada. Resolvemos tus dudas en 24 horas.',
+                description: 'Atención al cliente especializada. Resolvemos tus dudas en 24 horas.',
               },
-            ].map((feature) => (
+            ].map(feature => (
               <div key={feature.title} className="text-center px-2 sm:px-0">
-                <span className="text-3xl sm:text-4xl lg:text-5xl mb-3 sm:mb-4 block">
-                  {feature.icon}
-                </span>
+                <span className="text-3xl sm:text-4xl lg:text-5xl mb-3 sm:mb-4 block">{feature.icon}</span>
                 <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900 mb-2 sm:mb-3">
                   {feature.title}
                 </h3>
-                <p className="text-sm sm:text-base text-gray-600">
-                  {feature.description}
-                </p>
+                <p className="text-sm sm:text-base text-gray-600">{feature.description}</p>
               </div>
             ))}
           </div>

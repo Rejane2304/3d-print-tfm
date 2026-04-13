@@ -8,13 +8,11 @@ interface DashboardMetricsUpdaterProps {
   onMetricsUpdate: () => void;
 }
 
-export default function DashboardMetricsUpdater({
-  onMetricsUpdate,
-}: DashboardMetricsUpdaterProps) {
+export default function DashboardMetricsUpdater({ onMetricsUpdate }: DashboardMetricsUpdaterProps) {
   useSession();
 
   const { pendingEvents, acknowledgeEvents } = useAdminRealTime({
-    onEvent: (event) => {
+    onEvent: event => {
       // Update metrics when there are relevant events
       if (
         event.type === 'order:new' ||
@@ -30,7 +28,7 @@ export default function DashboardMetricsUpdater({
   // Acknowledge processed events
   useEffect(() => {
     if (pendingEvents.length > 0) {
-      const eventIds = pendingEvents.map((e) => e.timestamp);
+      const eventIds = pendingEvents.map(e => e.timestamp);
       acknowledgeEvents(eventIds);
     }
   }, [pendingEvents, acknowledgeEvents]);

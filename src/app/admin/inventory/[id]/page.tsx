@@ -54,29 +54,27 @@ interface HistoryData {
   pagination: Pagination;
 }
 
-const tipoMovimientoConfig: Record<
-  string,
-  { color: string; bgColor: string; icon: React.ElementType; label: string }
-> = {
-  IN: {
-    color: 'text-green-700',
-    bgColor: 'bg-green-100',
-    icon: Plus,
-    label: 'Entrada',
-  },
-  OUT: {
-    color: 'text-red-700',
-    bgColor: 'bg-red-100',
-    icon: Minus,
-    label: 'Salida',
-  },
-  ADJUST: {
-    color: 'text-blue-700',
-    bgColor: 'bg-blue-100',
-    icon: RotateCcw,
-    label: 'Ajuste',
-  },
-};
+const tipoMovimientoConfig: Record<string, { color: string; bgColor: string; icon: React.ElementType; label: string }> =
+  {
+    IN: {
+      color: 'text-green-700',
+      bgColor: 'bg-green-100',
+      icon: Plus,
+      label: 'Entrada',
+    },
+    OUT: {
+      color: 'text-red-700',
+      bgColor: 'bg-red-100',
+      icon: Minus,
+      label: 'Salida',
+    },
+    ADJUST: {
+      color: 'text-blue-700',
+      bgColor: 'bg-blue-100',
+      icon: RotateCcw,
+      label: 'Ajuste',
+    },
+  };
 
 export default function InventoryHistoryPage() {
   const { data: session, status } = useSession();
@@ -112,7 +110,7 @@ export default function InventoryHistoryPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, session, router, productId, pagination.page]);
 
-  const fetchHistory = async() => {
+  const fetchHistory = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -122,9 +120,7 @@ export default function InventoryHistoryPage() {
         limit: pagination.limit.toString(),
       });
 
-      const response = await fetch(
-        `/api/admin/inventory/${productId}/history?${params}`,
-      );
+      const response = await fetch(`/api/admin/inventory/${productId}/history?${params}`);
       const result = await response.json();
 
       if (!response.ok) {
@@ -183,13 +179,8 @@ export default function InventoryHistoryPage() {
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="h-12 w-12 text-red-600 mx-auto mb-4" />
-          <p className="text-gray-900 font-medium">
-            {error || 'Producto no encontrado'}
-          </p>
-          <Link
-            href="/admin/inventory"
-            className="text-indigo-600 hover:text-indigo-900 mt-4 inline-flex items-center"
-          >
+          <p className="text-gray-900 font-medium">{error || 'Producto no encontrado'}</p>
+          <Link href="/admin/inventory" className="text-indigo-600 hover:text-indigo-900 mt-4 inline-flex items-center">
             <ArrowLeft className="h-4 w-4 mr-1" />
             Volver a inventario
           </Link>
@@ -207,23 +198,15 @@ export default function InventoryHistoryPage() {
         <div className="max-w-[1920px] 3xl:max-w-[2200px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Link
-                href="/admin/inventory"
-                className="text-gray-500 hover:text-gray-700"
-              >
+              <Link href="/admin/inventory" className="text-gray-500 hover:text-gray-700">
                 <ArrowLeft className="h-6 w-6" />
               </Link>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  Historial de Inventario
-                </h1>
+                <h1 className="text-2xl font-bold text-gray-900">Historial de Inventario</h1>
                 <p className="text-sm text-gray-500">{producto.nombre}</p>
               </div>
             </div>
-            <Link
-              href="/admin/dashboard"
-              className="text-indigo-600 hover:text-indigo-800 font-medium"
-            >
+            <Link href="/admin/dashboard" className="text-indigo-600 hover:text-indigo-800 font-medium">
               ← Volver al Panel
             </Link>
           </div>
@@ -253,17 +236,11 @@ export default function InventoryHistoryPage() {
 
             {/* Información del producto */}
             <div className="flex-1">
-              <h1 className="text-2xl font-bold text-gray-900">
-                {producto.nombre}
-              </h1>
+              <h1 className="text-2xl font-bold text-gray-900">{producto.nombre}</h1>
               <div className="mt-2 flex items-center gap-4">
                 <div className="flex items-center gap-2">
                   <span className="text-gray-600">Stock actual:</span>
-                  <span
-                    className={`text-2xl font-bold ${getStockStatusColor(
-                      producto.stockActual,
-                    )}`}
-                  >
+                  <span className={`text-2xl font-bold ${getStockStatusColor(producto.stockActual)}`}>
                     {producto.stockActual}
                   </span>
                 </div>
@@ -280,12 +257,8 @@ export default function InventoryHistoryPage() {
         {/* Tabla de movimientos */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Historial de Movimientos
-            </h2>
-            <p className="text-sm text-gray-600 mt-1">
-              Total: {pagination.total} movimientos
-            </p>
+            <h2 className="text-lg font-semibold text-gray-900">Historial de Movimientos</h2>
+            <p className="text-sm text-gray-600 mt-1">Total: {pagination.total} movimientos</p>
           </div>
 
           {movimientos.length === 0 ? (
@@ -319,21 +292,15 @@ export default function InventoryHistoryPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {movimientos.map((movimiento) => {
-                    const tipoConfig =
-                      tipoMovimientoConfig[movimiento.tipo] ||
-                      tipoMovimientoConfig.ADJUST;
+                  {movimientos.map(movimiento => {
+                    const tipoConfig = tipoMovimientoConfig[movimiento.tipo] || tipoMovimientoConfig.ADJUST;
                     const TipoIcon = tipoConfig.icon;
 
                     return (
                       <tr key={movimiento.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
-                            {formatDate(movimiento.fecha)}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {formatTime(movimiento.fecha)}
-                          </div>
+                          <div className="text-sm text-gray-900">{formatDate(movimiento.fecha)}</div>
+                          <div className="text-xs text-gray-500">{formatTime(movimiento.fecha)}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span
@@ -368,28 +335,18 @@ export default function InventoryHistoryPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">
-                            <span className="text-gray-400">
-                              {movimiento.stockAnterior}
-                            </span>
+                            <span className="text-gray-400">{movimiento.stockAnterior}</span>
                             <span className="mx-2">→</span>
-                            <span
-                              className={`font-medium ${getStockStatusColor(
-                                movimiento.stockNuevo,
-                              )}`}
-                            >
+                            <span className={`font-medium ${getStockStatusColor(movimiento.stockNuevo)}`}>
                               {movimiento.stockNuevo}
                             </span>
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="text-sm text-gray-900 max-w-xs truncate">
-                            {movimiento.razon}
-                          </div>
+                          <div className="text-sm text-gray-900 max-w-xs truncate">{movimiento.razon}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
-                            {movimiento.usuario}
-                          </div>
+                          <div className="text-sm text-gray-900">{movimiento.usuario}</div>
                         </td>
                       </tr>
                     );
@@ -405,13 +362,12 @@ export default function InventoryHistoryPage() {
           <div className="mt-6 flex items-center justify-between">
             <p className="text-sm text-gray-700">
               Mostrando {(pagination.page - 1) * pagination.limit + 1} a{' '}
-              {Math.min(pagination.page * pagination.limit, pagination.total)}{' '}
-              de {pagination.total} movimientos
+              {Math.min(pagination.page * pagination.limit, pagination.total)} de {pagination.total} movimientos
             </p>
             <div className="flex gap-2">
               <button
                 onClick={() =>
-                  setPagination((prev) => ({
+                  setPagination(prev => ({
                     ...prev,
                     page: prev.page - 1,
                   }))
@@ -425,7 +381,7 @@ export default function InventoryHistoryPage() {
               </button>
               <button
                 onClick={() =>
-                  setPagination((prev) => ({
+                  setPagination(prev => ({
                     ...prev,
                     page: prev.page + 1,
                   }))

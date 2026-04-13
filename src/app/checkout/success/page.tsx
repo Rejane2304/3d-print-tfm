@@ -25,7 +25,7 @@ function CheckoutSuccessContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const verificarPagoStripe = useCallback(async(sid: string) => {
+  const verificarPagoStripe = useCallback(async (sid: string) => {
     try {
       const response = await fetch(`/api/checkout/verify?session_id=${sid}`);
       if (response.ok) {
@@ -39,7 +39,7 @@ function CheckoutSuccessContent() {
     }
   }, []);
 
-  const verificarPedidoPorId = useCallback(async(oid: string) => {
+  const verificarPedidoPorId = useCallback(async (oid: string) => {
     try {
       const response = await fetch(`/api/account/orders/${oid}`);
       if (response.ok) {
@@ -53,26 +53,21 @@ function CheckoutSuccessContent() {
     }
   }, []);
 
-  const verificarPagoPayPal = useCallback(
-    async(paypalOrderId: string, payerId: string) => {
-      try {
-        // Usar la misma API que Stripe - verifica y captura en un solo paso
-        const response = await fetch(
-          `/api/paypal/verify?token=${paypalOrderId}&PayerID=${payerId}`,
-        );
-        if (response.ok) {
-          const data = await response.json();
-          return data.order;
-        }
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Error verificando pago de PayPal');
-      } catch (err) {
-        console.error('Error verificando pago PayPal:', err);
-        throw err;
+  const verificarPagoPayPal = useCallback(async (paypalOrderId: string, payerId: string) => {
+    try {
+      // Usar la misma API que Stripe - verifica y captura en un solo paso
+      const response = await fetch(`/api/paypal/verify?token=${paypalOrderId}&PayerID=${payerId}`);
+      if (response.ok) {
+        const data = await response.json();
+        return data.order;
       }
-    },
-    [],
-  );
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Error verificando pago de PayPal');
+    } catch (err) {
+      console.error('Error verificando pago PayPal:', err);
+      throw err;
+    }
+  }, []);
 
   const clearCart = useCallback(() => {
     localStorage.removeItem('cart');
@@ -83,7 +78,7 @@ function CheckoutSuccessContent() {
   }, []);
 
   useEffect(() => {
-    const verifyPayment = async() => {
+    const verifyPayment = async () => {
       setLoading(true);
       setError(null);
 
@@ -112,9 +107,7 @@ function CheckoutSuccessContent() {
         }
       } catch (err: unknown) {
         console.error('Error en verificación de pago:', err);
-        setError(
-          'Tu pedido ha sido registrado. Verifica el estado en "Mis Pedidos".',
-        );
+        setError('Tu pedido ha sido registrado. Verifica el estado en "Mis Pedidos".');
       } finally {
         setLoading(false);
       }
@@ -138,9 +131,7 @@ function CheckoutSuccessContent() {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 text-center">
             <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin text-indigo-600 mx-auto mb-4" />
-            <p className="text-gray-600 text-sm sm:text-base">
-              Verificando tu pago...
-            </p>
+            <p className="text-gray-600 text-sm sm:text-base">Verificando tu pago...</p>
           </div>
         </div>
       </div>
@@ -153,18 +144,12 @@ function CheckoutSuccessContent() {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 text-center">
             <div className="mb-4 sm:mb-6">
-              <div
-                className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-red-100 rounded-full"
-              >
+              <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-red-100 rounded-full">
                 <span className="text-2xl sm:text-4xl text-red-600">⚠️</span>
               </div>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
-              Error en la verificación
-            </h1>
-            <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8">
-              {error}
-            </p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">Error en la verificación</h1>
+            <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8">{error}</p>
             <Link
               href="/account/orders"
               className="inline-flex items-center justify-center gap-2 bg-indigo-600 text-white py-3 px-6 rounded-lg
@@ -187,20 +172,15 @@ function CheckoutSuccessContent() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 text-center">
           {/* Icono de éxito */}
           <div className="mb-4 sm:mb-6">
-            <div
-              className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-green-100 rounded-full"
-            >
+            <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-green-100 rounded-full">
               <CheckCircle className="h-8 w-8 sm:h-10 sm:w-10 text-green-600" />
             </div>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
-            ¡Pago completado!
-          </h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">¡Pago completado!</h1>
 
           <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8">
-            Tu pedido ha sido procesado correctamente. Te enviaremos un email
-            con los detalles.
+            Tu pedido ha sido procesado correctamente. Te enviaremos un email con los detalles.
           </p>
 
           {pedido && (
@@ -213,15 +193,11 @@ function CheckoutSuccessContent() {
               <div className="space-y-2 text-sm sm:text-base">
                 <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
                   <span className="text-gray-600">Número de pedido:</span>
-                  <span className="font-medium">
-                    {pedido.orderNumber || pedido.numeroPedido}
-                  </span>
+                  <span className="font-medium">{pedido.orderNumber || pedido.numeroPedido}</span>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
                   <span className="text-gray-600">Total:</span>
-                  <span className="font-medium">
-                    {Number(pedido.total).toFixed(2)} €
-                  </span>
+                  <span className="font-medium">{Number(pedido.total).toFixed(2)} €</span>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
                   <span className="text-gray-600">Estado:</span>
@@ -266,7 +242,7 @@ function CheckoutSuccessContent() {
 export default function CheckoutSuccessPage() {
   return (
     <Suspense
-      fallback={(
+      fallback={
         <div className="min-h-screen bg-gray-50 py-12">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
@@ -275,7 +251,7 @@ export default function CheckoutSuccessPage() {
             </div>
           </div>
         </div>
-      )}
+      }
     >
       <CheckoutSuccessContent />
     </Suspense>

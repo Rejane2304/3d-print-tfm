@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -28,7 +27,7 @@ export function CouponInput({
   const [error, setError] = useState<string | null>(null);
   const [validating, setValidating] = useState(false);
 
-  const handleValidate = async() => {
+  const handleValidate = async () => {
     if (!code.trim()) {
       return;
     }
@@ -70,7 +69,7 @@ export function CouponInput({
     }
   };
 
-  const handleSubmit = async(e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!code.trim() || loading) {
       return;
@@ -101,12 +100,8 @@ export function CouponInput({
           <div className="flex items-center gap-2 min-w-0">
             <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
             <div className="min-w-0">
-              <p className="text-xs sm:text-sm font-medium text-green-800">
-                Cupón aplicado
-              </p>
-              <p className="text-base sm:text-lg font-bold text-green-900 truncate">
-                {appliedCoupon.code}
-              </p>
+              <p className="text-xs sm:text-sm font-medium text-green-800">Cupón aplicado</p>
+              <p className="text-base sm:text-lg font-bold text-green-900 truncate">{appliedCoupon.code}</p>
             </div>
           </div>
           <button
@@ -125,9 +120,7 @@ export function CouponInput({
           <div className="mt-2 pt-2 border-t border-green-200">
             <div className="flex justify-between text-sm">
               <span className="text-green-700">Descuento aplicado:</span>
-              <span className="font-medium text-green-800">
-                -{appliedCoupon.discount.toFixed(2)}€
-              </span>
+              <span className="font-medium text-green-800">-{appliedCoupon.discount.toFixed(2)}€</span>
             </div>
           </div>
         )}

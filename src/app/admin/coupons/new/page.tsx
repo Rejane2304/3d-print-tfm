@@ -8,17 +8,7 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import {
-  AlertCircle,
-  ArrowLeft,
-  CheckCircle2,
-  Euro,
-  Loader2,
-  Percent,
-  Save,
-  Ticket,
-  Truck,
-} from 'lucide-react';
+import { AlertCircle, ArrowLeft, CheckCircle2, Euro, Loader2, Percent, Save, Ticket, Truck } from 'lucide-react';
 
 const COUPON_TYPES = [
   {
@@ -72,14 +62,11 @@ export default function NuevoCuponPage() {
     }
   }, [status, session, router]);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      [name]:
-        type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
     }));
   };
 
@@ -117,7 +104,7 @@ export default function NuevoCuponPage() {
     return null;
   };
 
-  const handleSubmit = async(e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const validationError = validateForm();
@@ -137,9 +124,7 @@ export default function NuevoCuponPage() {
           code: formData.code.toUpperCase(),
           type: formData.type,
           value: formData.type === 'FREE_SHIPPING' ? 0 : Number(formData.value),
-          minOrderAmount: formData.minOrderAmount
-            ? Number(formData.minOrderAmount)
-            : undefined,
+          minOrderAmount: formData.minOrderAmount ? Number(formData.minOrderAmount) : undefined,
           maxUses: formData.maxUses ? Number(formData.maxUses) : undefined,
           validFrom: new Date(formData.validFrom).toISOString(),
           validUntil: new Date(formData.validUntil + 'T23:59:59').toISOString(),
@@ -195,32 +180,21 @@ export default function NuevoCuponPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link
-                href="/admin/coupons"
-                className="text-gray-500 hover:text-gray-700 transition-colors"
-              >
+              <Link href="/admin/coupons" className="text-gray-500 hover:text-gray-700 transition-colors">
                 <ArrowLeft className="h-6 w-6" />
               </Link>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">
-                  Nuevo Cupón
-                </h1>
+                <h1 className="text-3xl font-bold text-gray-900">Nuevo Cupón</h1>
                 <nav className="flex mt-1" aria-label="Breadcrumb">
                   <ol className="flex items-center space-x-2 text-sm">
                     <li>
-                      <Link
-                        href="/admin/dashboard"
-                        className="text-gray-500 hover:text-gray-700"
-                      >
+                      <Link href="/admin/dashboard" className="text-gray-500 hover:text-gray-700">
                         Panel
                       </Link>
                     </li>
                     <li className="text-gray-400">/</li>
                     <li>
-                      <Link
-                        href="/admin/coupons"
-                        className="text-gray-500 hover:text-gray-700"
-                      >
+                      <Link href="/admin/coupons" className="text-gray-500 hover:text-gray-700">
                         Cupones
                       </Link>
                     </li>
@@ -232,10 +206,7 @@ export default function NuevoCuponPage() {
                 </nav>
               </div>
             </div>
-            <Link
-              href="/admin/dashboard"
-              className="text-indigo-600 hover:text-indigo-800 font-medium"
-            >
+            <Link href="/admin/dashboard" className="text-indigo-600 hover:text-indigo-800 font-medium">
               ← Volver al Panel
             </Link>
           </div>
@@ -253,9 +224,7 @@ export default function NuevoCuponPage() {
         {success && (
           <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
             <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
-            <p className="text-green-700">
-              Cupón creado exitosamente. Redirigiendo...
-            </p>
+            <p className="text-green-700">Cupón creado exitosamente. Redirigiendo...</p>
           </div>
         )}
 
@@ -270,10 +239,7 @@ export default function NuevoCuponPage() {
 
               <div className="space-y-4">
                 <div>
-                  <label
-                    htmlFor="code"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
+                  <label htmlFor="code" className="block text-sm font-medium text-gray-700 mb-1">
                     Código del Cupón *
                   </label>
                   <input
@@ -287,28 +253,24 @@ export default function NuevoCuponPage() {
                     required
                   />
                   <p className="mt-1 text-xs text-gray-500">
-                    Mínimo 3 caracteres. Solo letras, números, guiones y guiones
-                    bajos.
+                    Mínimo 3 caracteres. Solo letras, números, guiones y guiones bajos.
                   </p>
                 </div>
 
                 <div>
-                  <span className="block text-sm font-medium text-gray-700 mb-2">
-                    Tipo de Descuento *
-                  </span>
+                  <span className="block text-sm font-medium text-gray-700 mb-2">Tipo de Descuento *</span>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    {COUPON_TYPES.map((type) => {
+                    {COUPON_TYPES.map(type => {
                       const Icon = type.icon;
                       return (
                         <button
                           key={type.value}
                           type="button"
                           onClick={() =>
-                            setFormData((prev) => ({
+                            setFormData(prev => ({
                               ...prev,
                               type: type.value,
-                              value:
-                                type.value === 'FREE_SHIPPING' ? 0 : prev.value,
+                              value: type.value === 'FREE_SHIPPING' ? 0 : prev.value,
                             }))
                           }
                           className={`p-3 border rounded-lg text-left transition-colors ${
@@ -321,9 +283,7 @@ export default function NuevoCuponPage() {
                             <Icon className="h-4 w-4" />
                             <span className="font-medium">{type.label}</span>
                           </div>
-                          <p className="text-xs text-gray-500">
-                            {type.description}
-                          </p>
+                          <p className="text-xs text-gray-500">{type.description}</p>
                         </button>
                       );
                     })}
@@ -332,12 +292,8 @@ export default function NuevoCuponPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label
-                      htmlFor="value"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                      {getValueLabel()}{' '}
-                      {formData.type !== 'FREE_SHIPPING' && '*'}
+                    <label htmlFor="value" className="block text-sm font-medium text-gray-700 mb-1">
+                      {getValueLabel()} {formData.type !== 'FREE_SHIPPING' && '*'}
                     </label>
                     <input
                       type="number"
@@ -350,28 +306,19 @@ export default function NuevoCuponPage() {
                       max={formData.type === 'PERCENTAGE' ? 100 : undefined}
                       step={formData.type === 'PERCENTAGE' ? 1 : 0.01}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-                      placeholder={
-                        formData.type === 'PERCENTAGE' ? '10' : '5.00'
-                      }
+                      placeholder={formData.type === 'PERCENTAGE' ? '10' : '5.00'}
                       required={formData.type !== 'FREE_SHIPPING'}
                     />
                     {formData.type === 'PERCENTAGE' && (
-                      <p className="mt-1 text-xs text-gray-500">
-                        Ingresa el porcentaje sin el símbolo %
-                      </p>
+                      <p className="mt-1 text-xs text-gray-500">Ingresa el porcentaje sin el símbolo %</p>
                     )}
                     {formData.type === 'FIXED' && (
-                      <p className="mt-1 text-xs text-gray-500">
-                        Ingresa el monto en euros
-                      </p>
+                      <p className="mt-1 text-xs text-gray-500">Ingresa el monto en euros</p>
                     )}
                   </div>
 
                   <div>
-                    <label
-                      htmlFor="minOrderAmount"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
+                    <label htmlFor="minOrderAmount" className="block text-sm font-medium text-gray-700 mb-1">
                       Compra Mínima (€)
                     </label>
                     <input
@@ -385,9 +332,7 @@ export default function NuevoCuponPage() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       placeholder="Opcional"
                     />
-                    <p className="mt-1 text-xs text-gray-500">
-                      Monto mínimo del pedido para aplicar el cupón
-                    </p>
+                    <p className="mt-1 text-xs text-gray-500">Monto mínimo del pedido para aplicar el cupón</p>
                   </div>
                 </div>
               </div>
@@ -395,16 +340,11 @@ export default function NuevoCuponPage() {
 
             {/* Límites y Fechas */}
             <div className="pt-6 border-t border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                Límites y Vigencia
-              </h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Límites y Vigencia</h2>
 
               <div className="space-y-4">
                 <div>
-                  <label
-                    htmlFor="maxUses"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
+                  <label htmlFor="maxUses" className="block text-sm font-medium text-gray-700 mb-1">
                     Usos Máximos
                   </label>
                   <input
@@ -417,17 +357,12 @@ export default function NuevoCuponPage() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     placeholder="Sin límite"
                   />
-                  <p className="mt-1 text-xs text-gray-500">
-                    Deja vacío para usos ilimitados
-                  </p>
+                  <p className="mt-1 text-xs text-gray-500">Deja vacío para usos ilimitados</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label
-                      htmlFor="validFrom"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
+                    <label htmlFor="validFrom" className="block text-sm font-medium text-gray-700 mb-1">
                       Válido desde *
                     </label>
                     <input
@@ -442,10 +377,7 @@ export default function NuevoCuponPage() {
                   </div>
 
                   <div>
-                    <label
-                      htmlFor="validUntil"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
+                    <label htmlFor="validUntil" className="block text-sm font-medium text-gray-700 mb-1">
                       Válido hasta *
                     </label>
                     <input
@@ -464,9 +396,7 @@ export default function NuevoCuponPage() {
 
             {/* Configuración */}
             <div className="pt-6 border-t border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                Configuración
-              </h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Configuración</h2>
 
               <div className="flex items-center gap-3">
                 <input
@@ -477,10 +407,7 @@ export default function NuevoCuponPage() {
                   onChange={handleInputChange}
                   className="h-4 w-4 text-indigo-600 rounded focus:ring-indigo-500"
                 />
-                <label
-                  htmlFor="isActive"
-                  className="text-sm text-gray-700 cursor-pointer"
-                >
+                <label htmlFor="isActive" className="text-sm text-gray-700 cursor-pointer">
                   Cupón activo (disponible para usar)
                 </label>
               </div>

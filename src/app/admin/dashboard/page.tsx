@@ -28,43 +28,43 @@ import {
 } from 'lucide-react';
 
 interface AnalyticsData {
-      salesSummary: {
-        // Nuevas métricas de gestoría
-        gross: {
-          today: number;
-          thisWeek: number;
-          thisMonth: number;
-          lastMonth: number;
-          total: number;
-        };
-        net: {
-          today: number;
-          thisWeek: number;
-          thisMonth: number;
-          lastMonth: number;
-          total: number;
-        };
-        delivered: {
-          today: number;
-          thisWeek: number;
-          thisMonth: number;
-          lastMonth: number;
-          total: number;
-        };
-        cancelled: {
-          today: number;
-          thisWeek: number;
-          thisMonth: number;
-          lastMonth: number;
-          total: number;
-        };
-        // Legacy
-        today: number;
-        thisWeek: number;
-        thisMonth: number;
-        lastMonth: number;
-        total: number;
-      };
+  salesSummary: {
+    // Nuevas métricas de gestoría
+    gross: {
+      today: number;
+      thisWeek: number;
+      thisMonth: number;
+      lastMonth: number;
+      total: number;
+    };
+    net: {
+      today: number;
+      thisWeek: number;
+      thisMonth: number;
+      lastMonth: number;
+      total: number;
+    };
+    delivered: {
+      today: number;
+      thisWeek: number;
+      thisMonth: number;
+      lastMonth: number;
+      total: number;
+    };
+    cancelled: {
+      today: number;
+      thisWeek: number;
+      thisMonth: number;
+      lastMonth: number;
+      total: number;
+    };
+    // Legacy
+    today: number;
+    thisWeek: number;
+    thisMonth: number;
+    lastMonth: number;
+    total: number;
+  };
   orderStats: {
     total: number;
     today: number;
@@ -127,7 +127,7 @@ export default function AdminPanelPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, session, router, dateRange]);
 
-  const fetchAnalytics = async() => {
+  const fetchAnalytics = async () => {
     try {
       setLoading(true);
       const response = await fetch(`/api/admin/analytics?range=${dateRange}`);
@@ -202,14 +202,12 @@ export default function AdminPanelPage() {
         <div className="mb-8 flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Panel</h1>
-            <p className="text-gray-600 mt-2">
-              Resumen de la tienda y estadísticas
-            </p>
+            <p className="text-gray-600 mt-2">Resumen de la tienda y estadísticas</p>
           </div>
           <div className="relative">
             <select
               value={dateRange}
-              onChange={(e) => setDateRange(e.target.value as DateRange)}
+              onChange={e => setDateRange(e.target.value as DateRange)}
               className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-10 \
                 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             >
@@ -219,9 +217,7 @@ export default function AdminPanelPage() {
               <option value="lastMonth">Mes anterior</option>
               <option value="year">Este año</option>
             </select>
-            <ChevronDown
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none"
-            />
+            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
           </div>
         </div>
 
@@ -254,18 +250,15 @@ export default function AdminPanelPage() {
                     <span>{formatCurrency(analytics.salesSummary.delivered.thisMonth)}</span>
                   </div>
                 </div>
-                {dateRange === 'month' &&
-                  analytics.salesSummary.net.lastMonth > 0 && (
+                {dateRange === 'month' && analytics.salesSummary.net.lastMonth > 0 && (
                   <p
                     className={`text-sm mt-2 ${
-                      analytics.salesSummary.net.thisMonth >=
-                        analytics.salesSummary.net.lastMonth
+                      analytics.salesSummary.net.thisMonth >= analytics.salesSummary.net.lastMonth
                         ? 'text-green-600'
                         : 'text-red-600'
                     }`}
                   >
-                    vs {formatCurrency(analytics.salesSummary.net.lastMonth)} mes
-                    ant.
+                    vs {formatCurrency(analytics.salesSummary.net.lastMonth)} mes ant.
                   </p>
                 )}
               </div>
@@ -280,12 +273,8 @@ export default function AdminPanelPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Pedidos</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {analytics.orderStats.thisMonth}
-                </p>
-                <p className="text-sm text-gray-500 mt-1">
-                  {analytics.orderStats.today} hoy
-                </p>
+                <p className="text-2xl font-bold text-gray-900">{analytics.orderStats.thisMonth}</p>
+                <p className="text-sm text-gray-500 mt-1">{analytics.orderStats.today} hoy</p>
               </div>
               <div className="p-3 bg-blue-100 rounded-lg">
                 <ShoppingBag className="h-6 w-6 text-blue-600" />
@@ -298,12 +287,8 @@ export default function AdminPanelPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Clientes</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {analytics.customerStats.total}
-                </p>
-                <p className="text-sm text-green-600 mt-1">
-                  +{analytics.customerStats.newThisMonth} nuevos
-                </p>
+                <p className="text-2xl font-bold text-gray-900">{analytics.customerStats.total}</p>
+                <p className="text-sm text-green-600 mt-1">+{analytics.customerStats.newThisMonth} nuevos</p>
               </div>
               <div className="p-3 bg-purple-100 rounded-lg">
                 <Users className="h-6 w-6 text-purple-600" />
@@ -315,14 +300,11 @@ export default function AdminPanelPage() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">
-                  Ticket Medio Neto
-                </p>
+                <p className="text-sm font-medium text-gray-600">Ticket Medio Neto</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {formatCurrency(
                     analytics.orderStats.thisMonth > 0
-                      ? analytics.salesSummary.net.thisMonth /
-                          analytics.orderStats.thisMonth
+                      ? analytics.salesSummary.net.thisMonth / analytics.orderStats.thisMonth
                       : 0,
                   )}
                 </p>
@@ -332,8 +314,7 @@ export default function AdminPanelPage() {
                     <span>
                       {formatCurrency(
                         analytics.orderStats.thisMonth > 0
-                          ? analytics.salesSummary.gross.thisMonth /
-                              analytics.orderStats.thisMonth
+                          ? analytics.salesSummary.gross.thisMonth / analytics.orderStats.thisMonth
                           : 0,
                       )}
                     </span>
@@ -359,9 +340,7 @@ export default function AdminPanelPage() {
             </div>
             <div className="p-6">
               {analytics.topProducts.length === 0 ? (
-                <p className="text-gray-500 text-center py-4">
-                  No hay datos de ventas
-                </p>
+                <p className="text-gray-500 text-center py-4">No hay datos de ventas</p>
               ) : (
                 <div className="space-y-4">
                   {analytics.topProducts.map((product, index) => (
@@ -373,13 +352,9 @@ export default function AdminPanelPage() {
                         {index + 1}
                       </div>
                       <div className="ml-4 flex-1">
-                        <p className="text-sm font-medium text-gray-900">
-                          {product.nombre}
-                        </p>
+                        <p className="text-sm font-medium text-gray-900">{product.nombre}</p>
                         <div className="flex items-center text-xs text-gray-500 mt-1">
-                          <span className="mr-3">
-                            {product.vendido} vendidos
-                          </span>
+                          <span className="mr-3">{product.vendido} vendidos</span>
                           <span>{formatCurrency(product.ingresos)}</span>
                         </div>
                       </div>
@@ -422,25 +397,17 @@ export default function AdminPanelPage() {
             </div>
             <div className="divide-y divide-gray-200">
               {analytics.recentOrders.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">
-                  No hay pedidos recientes
-                </p>
+                <p className="text-gray-500 text-center py-8">No hay pedidos recientes</p>
               ) : (
-                analytics.recentOrders.map((order) => (
+                analytics.recentOrders.map(order => (
                   <div key={order.id} className="px-6 py-4 hover:bg-gray-50">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-900">
-                          #{order.numeroPedido}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {order.clienteNombre}
-                        </p>
+                        <p className="text-sm font-medium text-gray-900">#{order.numeroPedido}</p>
+                        <p className="text-xs text-gray-500">{order.clienteNombre}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-medium text-gray-900">
-                          {formatCurrency(order.total)}
-                        </p>
+                        <p className="text-sm font-medium text-gray-900">{formatCurrency(order.total)}</p>
                         <span
                           className={`inline-flex px-2 py-0.5 text-xs rounded-full ${getStatusBadge(order.estado)}`}
                         >
@@ -448,18 +415,13 @@ export default function AdminPanelPage() {
                         </span>
                       </div>
                     </div>
-                    <p className="text-xs text-gray-400 mt-1">
-                      {formatDate(order.creadoEn)}
-                    </p>
+                    <p className="text-xs text-gray-400 mt-1">{formatDate(order.creadoEn)}</p>
                   </div>
                 ))
               )}
             </div>
             <div className="px-6 py-4 border-t border-gray-200">
-              <Link
-                href="/admin/orders"
-                className="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
-              >
+              <Link href="/admin/orders" className="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
                 Ver todos los pedidos →
               </Link>
             </div>

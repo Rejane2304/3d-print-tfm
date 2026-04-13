@@ -16,13 +16,11 @@ interface AppliedCoupon {
 }
 
 export function useCoupon() {
-  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(
-    null,
-  );
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const applyCoupon = useCallback(async(code: string) => {
+  const applyCoupon = useCallback(async (code: string) => {
     setLoading(true);
     setError(null);
 
@@ -55,8 +53,7 @@ export function useCoupon() {
         totalAfterDiscount: data.cartSummary.totalAfterDiscount,
       };
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Error aplicando cupón';
+      const message = err instanceof Error ? err.message : 'Error aplicando cupón';
       setError(message);
       throw err;
     } finally {
@@ -69,31 +66,28 @@ export function useCoupon() {
     setError(null);
   }, []);
 
-  const validateCoupon = useCallback(
-    async(code: string, orderAmount: number) => {
-      try {
-        const response = await fetch('/api/coupons/validate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ code, orderAmount }),
-        });
+  const validateCoupon = useCallback(async (code: string, orderAmount: number) => {
+    try {
+      const response = await fetch('/api/coupons/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, orderAmount }),
+      });
 
-        const data = await response.json();
+      const data = await response.json();
 
-        return {
-          valid: data.success && data.valid,
-          coupon: data.coupon,
-          error: data.error,
-        };
-      } catch {
-        return {
-          valid: false,
-          error: 'Error validando cupón',
-        };
-      }
-    },
-    [],
-  );
+      return {
+        valid: data.success && data.valid,
+        coupon: data.coupon,
+        error: data.error,
+      };
+    } catch {
+      return {
+        valid: false,
+        error: 'Error validando cupón',
+      };
+    }
+  }, []);
 
   const calculateDiscount = useCallback(
     (subtotal: number): number => {

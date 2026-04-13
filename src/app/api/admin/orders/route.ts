@@ -4,31 +4,22 @@
  *
  * Requires: ADMIN role
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
-import { OrderStatus, Prisma } from '@prisma/client';
+import type { OrderStatus, Prisma } from '@prisma/client';
 import { translateErrorMessage, translateOrderStatus } from '@/lib/i18n';
 import { createOrderStatusChangedAlert } from '@/lib/alerts/alert-service';
 import { emitOrderStatusUpdated } from '@/lib/realtime/event-service';
-import {
-  prepareStatusUpdate,
-  validateStatusTransition,
-} from '@/lib/orders/status-machine';
+import { prepareStatusUpdate, validateStatusTransition } from '@/lib/orders/status-machine';
 
 // Validation schema for update
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const actualizarPedidoSchema = z.object({
-  status: z.enum([
-    'PENDING',
-    'CONFIRMED',
-    'PREPARING',
-    'SHIPPED',
-    'DELIVERED',
-    'CANCELLED',
-  ]),
+  status: z.enum(['PENDING', 'CONFIRMED', 'PREPARING', 'SHIPPED', 'DELIVERED', 'CANCELLED']),
   internalNotes: z.string().optional(),
   shippedAt: z.string().datetime().optional(),
   trackingNumber: z.string().optional(),
@@ -50,10 +41,7 @@ export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
     }
 
     const usuario = await prisma.user.findUnique({
@@ -61,10 +49,7 @@ export async function GET(req: NextRequest) {
     });
 
     if (usuario?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 403 },
-      );
+      return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 403 });
     }
 
     const { searchParams } = new URL(req.url);
@@ -107,7 +92,7 @@ export async function GET(req: NextRequest) {
 
     // Translate order data before sending to frontend
     // Transform to Spanish response format matching frontend expectations
-    const pedidosTraducidos = pedidos.map((pedido) => ({
+    const pedidosTraducidos = pedidos.map(pedido => ({
       id: pedido.id,
       numeroPedido: pedido.orderNumber,
       estado: translateOrderStatus(pedido.status),
@@ -117,7 +102,7 @@ export async function GET(req: NextRequest) {
         nombre: pedido.user.name,
         email: pedido.user.email,
       },
-      items: pedido.items.map((item) => ({ id: item.id })),
+      items: pedido.items.map(item => ({ id: item.id })),
     }));
 
     return NextResponse.json({
@@ -130,10 +115,7 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error('Error listing orders:', error);
-    return NextResponse.json(
-      { success: false, error: translateErrorMessage('Internal error') },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: translateErrorMessage('Internal error') }, { status: 500 });
   }
 }
 
@@ -142,10 +124,7 @@ export async function PATCH(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
     }
 
     const usuario = await prisma.user.findUnique({
@@ -153,30 +132,20 @@ export async function PATCH(req: NextRequest) {
     });
 
     if (usuario?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 403 },
-      );
+      return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 403 });
     }
 
     const body = await req.json();
-    const { id, estado, notasInternas, numeroSeguimiento, transportista } =
-      body;
+    const { id, estado, notasInternas, numeroSeguimiento, transportista } = body;
 
     if (!id) {
-      return NextResponse.json(
-        { success: false, error: 'ID requerido' },
-        { status: 400 },
-      );
+      return NextResponse.json({ success: false, error: 'ID requerido' }, { status: 400 });
     }
 
     // Convert status from Spanish to English
     const englishStatus = estadoToEnglish[estado];
     if (!englishStatus) {
-      return NextResponse.json(
-        { success: false, error: 'Estado inválido' },
-        { status: 400 },
-      );
+      return NextResponse.json({ success: false, error: 'Estado inválido' }, { status: 400 });
     }
 
     // Get current order to obtain old status
@@ -190,37 +159,23 @@ export async function PATCH(req: NextRequest) {
     });
 
     if (!existingOrder) {
-      return NextResponse.json(
-        { success: false, error: 'Pedido no encontrado' },
-        { status: 404 },
-      );
+      return NextResponse.json({ success: false, error: 'Pedido no encontrado' }, { status: 404 });
     }
 
     const oldStatus = existingOrder.status;
 
     // VALIDACIÓN DE TRANSICIÓN DE ESTADO
-    const validation = validateStatusTransition(
-      oldStatus,
-      englishStatus as OrderStatus,
-    );
+    const validation = validateStatusTransition(oldStatus, englishStatus as OrderStatus);
     if (!validation.valid) {
-      return NextResponse.json(
-        { success: false, error: validation.error },
-        { status: 400 },
-      );
+      return NextResponse.json({ success: false, error: validation.error }, { status: 400 });
     }
 
     // VALIDACIÓN: No se puede cancelar si hay factura activa
-    if (
-      englishStatus === 'CANCELLED' &&
-      existingOrder.invoice &&
-      !existingOrder.invoice.isCancelled
-    ) {
+    if (englishStatus === 'CANCELLED' && existingOrder.invoice && !existingOrder.invoice.isCancelled) {
       return NextResponse.json(
         {
           success: false,
-          error:
-            'No se puede cancelar un pedido con factura emitida. Anule la factura primero.',
+          error: 'No se puede cancelar un pedido con factura emitida. Anule la factura primero.',
         },
         { status: 400 },
       );
@@ -254,12 +209,7 @@ export async function PATCH(req: NextRequest) {
 
     // Create alert for order status change
     try {
-      await createOrderStatusChangedAlert(
-        id,
-        existingOrder.orderNumber,
-        oldStatus,
-        englishStatus,
-      );
+      await createOrderStatusChangedAlert(id, existingOrder.orderNumber, oldStatus, englishStatus);
     } catch (alertError) {
       console.error('Error creating order status changed alert:', alertError);
     }
@@ -267,15 +217,9 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ success: true, pedido });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { success: false, error: error.errors[0].message },
-        { status: 400 },
-      );
+      return NextResponse.json({ success: false, error: error.errors[0].message }, { status: 400 });
     }
     console.error('Error updating order:', error);
-    return NextResponse.json(
-      { success: false, error: translateErrorMessage('Internal error') },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: translateErrorMessage('Internal error') }, { status: 500 });
   }
 }

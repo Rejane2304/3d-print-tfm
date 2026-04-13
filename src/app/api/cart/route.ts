@@ -6,7 +6,8 @@
  *
  * Requires authentication (session token)
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { withErrorHandler } from '@/lib/errors/api-wrapper';
 import { getServerSession } from 'next-auth';
@@ -14,15 +15,12 @@ import { authOptions } from '@/lib/auth/auth-options';
 import { translateErrorMessage, translateProductName } from '@/lib/i18n';
 
 // GET /api/cart - Get user's cart
-export const GET = withErrorHandler(async() => {
+export const GET = withErrorHandler(async () => {
   // Verify authentication
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.email) {
-    return NextResponse.json(
-      { success: false, error: 'No autenticado' },
-      { status: 401 },
-    );
+    return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
   }
 
   // Find user and their cart
@@ -49,10 +47,7 @@ export const GET = withErrorHandler(async() => {
   });
 
   if (!user) {
-    return NextResponse.json(
-      { success: false, error: 'Usuario no encontrado' },
-      { status: 404 },
-    );
+    return NextResponse.json({ success: false, error: 'Usuario no encontrado' }, { status: 404 });
   }
 
   // If no cart, return empty structure
@@ -71,16 +66,13 @@ export const GET = withErrorHandler(async() => {
   // Calculate totals
   const cart = user.cart;
   const totalItems = cart.items.reduce((sum, item) => sum + item.quantity, 0);
-  const subtotal = cart.items.reduce(
-    (sum, item) => sum + Number(item.unitPrice) * item.quantity,
-    0,
-  );
+  const subtotal = cart.items.reduce((sum, item) => sum + Number(item.unitPrice) * item.quantity, 0);
 
   return NextResponse.json({
     success: true,
     cart: {
       id: cart.id,
-      items: cart.items.map((item) => ({
+      items: cart.items.map(item => ({
         id: item.id,
         productId: item.productId,
         quantity: item.quantity,
@@ -101,15 +93,12 @@ export const GET = withErrorHandler(async() => {
 });
 
 // POST /api/cart - Add product to cart
-export const POST = withErrorHandler(async(req: NextRequest) => {
+export const POST = withErrorHandler(async (req: NextRequest) => {
   // Verify authentication
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.email) {
-    return NextResponse.json(
-      { success: false, error: 'No autenticado' },
-      { status: 401 },
-    );
+    return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
   }
 
   // Get data from request body
@@ -118,17 +107,11 @@ export const POST = withErrorHandler(async(req: NextRequest) => {
 
   // Validations
   if (!productId) {
-    return NextResponse.json(
-      { success: false, error: 'El producto es requerido' },
-      { status: 400 },
-    );
+    return NextResponse.json({ success: false, error: 'El producto es requerido' }, { status: 400 });
   }
 
   if (quantity <= 0) {
-    return NextResponse.json(
-      { success: false, error: 'La cantidad debe ser mayor a 0' },
-      { status: 400 },
-    );
+    return NextResponse.json({ success: false, error: 'La cantidad debe ser mayor a 0' }, { status: 400 });
   }
 
   // Find user
@@ -138,10 +121,7 @@ export const POST = withErrorHandler(async(req: NextRequest) => {
   });
 
   if (!user) {
-    return NextResponse.json(
-      { success: false, error: 'Usuario no encontrado' },
-      { status: 404 },
-    );
+    return NextResponse.json({ success: false, error: 'Usuario no encontrado' }, { status: 404 });
   }
 
   // Find product
@@ -150,24 +130,15 @@ export const POST = withErrorHandler(async(req: NextRequest) => {
   });
 
   if (!product) {
-    return NextResponse.json(
-      { success: false, error: translateErrorMessage('Producto not found') },
-      { status: 404 },
-    );
+    return NextResponse.json({ success: false, error: translateErrorMessage('Producto not found') }, { status: 404 });
   }
 
   if (!product.isActive) {
-    return NextResponse.json(
-      { success: false, error: 'Producto no disponible' },
-      { status: 400 },
-    );
+    return NextResponse.json({ success: false, error: 'Producto no disponible' }, { status: 400 });
   }
 
   if (product.stock < quantity) {
-    return NextResponse.json(
-      { success: false, error: translateErrorMessage('Insufficient stock') },
-      { status: 400 },
-    );
+    return NextResponse.json({ success: false, error: translateErrorMessage('Insufficient stock') }, { status: 400 });
   }
 
   // Create cart if it doesn't exist
@@ -197,9 +168,7 @@ export const POST = withErrorHandler(async(req: NextRequest) => {
       return NextResponse.json(
         {
           success: false,
-          error: translateErrorMessage(
-            'Insufficient stock para la cantidad total',
-          ),
+          error: translateErrorMessage('Insufficient stock para la cantidad total'),
         },
         { status: 400 },
       );
@@ -229,10 +198,7 @@ export const POST = withErrorHandler(async(req: NextRequest) => {
     include: { product: true },
   });
 
-  const newSubtotal = items.reduce(
-    (sum, item) => sum + Number(item.unitPrice) * item.quantity,
-    0,
-  );
+  const newSubtotal = items.reduce((sum, item) => sum + Number(item.unitPrice) * item.quantity, 0);
 
   await prisma.cart.update({
     where: { id: cart.id },

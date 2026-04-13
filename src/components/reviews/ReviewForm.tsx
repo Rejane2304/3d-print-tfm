@@ -10,11 +10,7 @@ import { AlertCircle, Loader2 } from 'lucide-react';
 
 interface ReviewFormProps {
   productName: string;
-  onSubmit: (data: {
-    rating: number;
-    title: string;
-    comment: string;
-  }) => Promise<void>;
+  onSubmit: (data: { rating: number; title: string; comment: string }) => Promise<void>;
   onCancel?: () => void;
   initialData?: {
     rating: number;
@@ -37,7 +33,7 @@ export function ReviewForm({
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async(e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -67,9 +63,7 @@ export function ReviewForm({
         setComment('');
       }
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Error al enviar la reseña',
-      );
+      setError(err instanceof Error ? err.message : 'Error al enviar la reseña');
     } finally {
       setLoading(false);
     }
@@ -79,9 +73,7 @@ export function ReviewForm({
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Product name */}
       <div>
-        <p className="text-sm text-gray-500">
-          {mode === 'create' ? 'Reseñando:' : 'Editando reseña de:'}
-        </p>
+        <p className="text-sm text-gray-500">{mode === 'create' ? 'Reseñando:' : 'Editando reseña de:'}</p>
         <p className="font-medium text-gray-900">{productName}</p>
       </div>
 
@@ -98,65 +90,45 @@ export function ReviewForm({
         <label htmlFor="review-rating" className="block text-sm font-medium text-gray-700 mb-2">
           Puntuación *
         </label>
-        <input
-          type="hidden" id="review-rating" value={rating}
-          readOnly
-        />
-        <StarRating
-          rating={rating}
-          mode="interactive"
-          size="lg"
-          onRatingChange={setRating}
-        />
+        <input type="hidden" id="review-rating" value={rating} readOnly />
+        <StarRating rating={rating} mode="interactive" size="lg" onRatingChange={setRating} />
         <p className="text-sm text-gray-500 mt-1">
-          {rating > 0
-            ? `${rating} de 5 estrellas`
-            : 'Selecciona una puntuación'}
+          {rating > 0 ? `${rating} de 5 estrellas` : 'Selecciona una puntuación'}
         </p>
       </div>
 
       {/* Title */}
       <div>
-        <label
-          htmlFor="title"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
+        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
           Título *
         </label>
         <input
           type="text"
           id="title"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={e => setTitle(e.target.value)}
           placeholder="Resume tu experiencia"
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           maxLength={200}
         />
-        <p className="text-xs text-gray-500 mt-1">
-          {title.length}/200 caracteres
-        </p>
+        <p className="text-xs text-gray-500 mt-1">{title.length}/200 caracteres</p>
       </div>
 
       {/* Comment */}
       <div>
-        <label
-          htmlFor="comment"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
+        <label htmlFor="comment" className="block text-sm font-medium text-gray-700 mb-1">
           Comentario *
         </label>
         <textarea
           id="comment"
           value={comment}
-          onChange={(e) => setComment(e.target.value)}
+          onChange={e => setComment(e.target.value)}
           placeholder="Comparte detalles sobre tu experiencia con el producto"
           rows={4}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none"
           maxLength={2000}
         />
-        <p className="text-xs text-gray-500 mt-1">
-          {comment.length}/2000 caracteres
-        </p>
+        <p className="text-xs text-gray-500 mt-1">{comment.length}/2000 caracteres</p>
       </div>
 
       {/* Actions */}

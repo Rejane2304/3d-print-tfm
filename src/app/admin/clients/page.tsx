@@ -4,19 +4,14 @@
  */
 'use client';
 
+import { showConfirm } from '@/lib/dialogs';
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import {
-  DollarSign,
-  Eye,
-  Loader2,
-  ShoppingBag,
-  Trash2,
-  User,
-} from 'lucide-react';
-import { BulkAction, Column, DataTable } from '@/components/ui/DataTable';
+import { DollarSign, Eye, Loader2, ShoppingBag, Trash2, User } from 'lucide-react';
+import type { BulkAction, Column } from '@/components/ui/DataTable';
+import { DataTable } from '@/components/ui/DataTable';
 
 interface Client {
   id: string;
@@ -56,7 +51,7 @@ export default function AdminClientsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, session, router, statusFilter]);
 
-  const fetchClients = async() => {
+  const fetchClients = async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
@@ -76,21 +71,13 @@ export default function AdminClientsPage() {
     }
   };
 
-  const handleDeleteClients = async(selectedIds: string[]) => {
-    if (
-      !confirm(
-        `¿Estás seguro de que deseas eliminar ${selectedIds.length} cliente(s)?`,
-      )
-    ) {
+  const handleDeleteClients = async (selectedIds: string[]) => {
+    if (!showConfirm(`¿Estás seguro de que deseas eliminar ${selectedIds.length} cliente(s)?`)) {
       return;
     }
 
     try {
-      await Promise.all(
-        selectedIds.map((id) =>
-          fetch(`/api/admin/clients/${id}`, { method: 'DELETE' }),
-        ),
-      );
+      await Promise.all(selectedIds.map(id => fetch(`/api/admin/clients/${id}`, { method: 'DELETE' })));
       await fetchClients();
     } catch (error) {
       console.error('Error al eliminar clientes:', error);
@@ -120,12 +107,8 @@ export default function AdminClientsPage() {
             <User className="h-5 w-5 text-indigo-600" />
           </div>
           <div className="ml-4 min-w-0">
-            <div className="text-sm font-medium text-gray-900 truncate">
-              {row.nombre}
-            </div>
-            <div className="text-sm text-gray-500 hidden sm:block">
-              {row.email}
-            </div>
+            <div className="text-sm font-medium text-gray-900 truncate">{row.nombre}</div>
+            <div className="text-sm text-gray-500 hidden sm:block">{row.email}</div>
           </div>
         </div>
       ),
@@ -135,11 +118,7 @@ export default function AdminClientsPage() {
       header: 'Email',
       sortable: true,
       className: 'hidden sm:table-cell',
-      render: (value) => (
-        <span className="text-sm text-gray-600 truncate">
-          {value as string}
-        </span>
-      ),
+      render: value => <span className="text-sm text-gray-600 truncate">{value as string}</span>,
     },
     {
       key: 'totalPedidos',
@@ -158,7 +137,7 @@ export default function AdminClientsPage() {
       header: 'Total',
       sortable: true,
       className: 'hidden lg:table-cell',
-      render: (value) => (
+      render: value => (
         <div className="flex items-center text-sm font-medium text-gray-900">
           <DollarSign className="h-4 w-4 mr-1 text-green-500" />
           {formatCurrency(value as string)}
@@ -170,11 +149,7 @@ export default function AdminClientsPage() {
       header: 'Último',
       sortable: true,
       className: 'hidden xl:table-cell',
-      render: (value) => (
-        <span className="text-sm text-gray-500">
-          {formatDate(value as string)}
-        </span>
-      ),
+      render: value => <span className="text-sm text-gray-500">{formatDate(value as string)}</span>,
     },
     {
       key: 'actions',
@@ -222,17 +197,10 @@ export default function AdminClientsPage() {
         <div className="max-w-[1920px] 3xl:max-w-[2200px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                Gestión de Clientes
-              </h1>
-              <p className="text-gray-600 mt-1 text-sm">
-                Gestionar clientes registrados de la tienda
-              </p>
+              <h1 className="text-2xl font-bold text-gray-900">Gestión de Clientes</h1>
+              <p className="text-gray-600 mt-1 text-sm">Gestionar clientes registrados de la tienda</p>
             </div>
-            <Link
-              href="/admin/dashboard"
-              className="text-indigo-600 hover:text-indigo-800 font-medium"
-            >
+            <Link href="/admin/dashboard" className="text-indigo-600 hover:text-indigo-800 font-medium">
               &larr; Volver al Panel
             </Link>
           </div>
@@ -245,7 +213,7 @@ export default function AdminClientsPage() {
           <div className="flex flex-col sm:flex-row gap-4">
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={e => setStatusFilter(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
             >
               <option value="all">Todos los estados</option>

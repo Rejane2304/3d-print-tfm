@@ -6,13 +6,14 @@
  * Body: { code: string }
  * Requiere autenticación
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
 import { translateCouponCode } from '@/lib/i18n';
-import { Coupon } from '@prisma/client';
+import type { Coupon } from '@prisma/client';
 
 const applySchema = z.object({
   code: z.string().min(1, 'El código es obligatorio'),
@@ -112,11 +113,7 @@ function validateMinOrderAmount(coupon: Coupon, subtotal: number): ValidationRes
 /**
  * Valida un cupón contra todas las reglas de negocio
  */
-function validateCoupon(
-  coupon: Coupon,
-  subtotal: number,
-  now: Date
-): ValidationResult {
+function validateCoupon(coupon: Coupon, subtotal: number, now: Date): ValidationResult {
   const statusValidation = validateCouponStatus(coupon, now);
   if (!statusValidation.valid) {
     return statusValidation;
@@ -173,12 +170,12 @@ function getCouponTypeText(type: string): string {
  * Calcula el subtotal del carrito
  */
 function calculateCartSubtotal(
-  items: Array<{ unitPrice: { toNumber: () => number } | number | string; quantity: number }>
+  items: Array<{
+    unitPrice: { toNumber: () => number } | number | string;
+    quantity: number;
+  }>,
 ): number {
-  return items.reduce(
-    (sum, item) => sum + Number(item.unitPrice) * item.quantity,
-    0
-  );
+  return items.reduce((sum, item) => sum + Number(item.unitPrice) * item.quantity, 0);
 }
 
 /**
@@ -210,10 +207,7 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
     }
 
     const body = await req.json();
@@ -231,53 +225,34 @@ export async function POST(req: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { success: false, error: 'Usuario no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: 'Usuario no encontrado' }, { status: 404 });
     }
 
     if (!user.cart || user.cart.items.length === 0) {
-      return NextResponse.json(
-        { success: false, error: 'El carrito está vacío' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: 'El carrito está vacío' }, { status: 400 });
     }
 
     const coupon = await findCoupon(data.code);
 
     if (!coupon) {
-      return NextResponse.json(
-        { success: false, error: 'Cupón no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: 'Cupón no encontrado' }, { status: 404 });
     }
 
     const subtotal = calculateCartSubtotal(user.cart.items);
     const validation = validateCoupon(coupon, subtotal, new Date());
 
     if (!validation.valid) {
-      return NextResponse.json(
-        { success: false, error: validation.error },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: validation.error }, { status: 400 });
     }
 
     const discount = calculateDiscount(coupon, subtotal);
     return createSuccessResponse(coupon, subtotal, discount);
-
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { success: false, error: error.errors[0].message },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: error.errors[0].message }, { status: 400 });
     }
 
     console.error('Error aplicando cupón:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error interno' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: 'Error interno' }, { status: 500 });
   }
 }

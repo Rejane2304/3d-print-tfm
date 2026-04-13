@@ -9,16 +9,26 @@ import * as bcrypt from 'bcrypt';
 import * as dotenv from 'dotenv';
 import * as path from 'node:path';
 
+// ============================================
+// CRITICAL: Force test database - NEVER use dev/prod
+// ============================================
+// Explicitly override any DATABASE_URL from parent environment
+process.env.DATABASE_URL = 'postgresql://testuser:testpassword123@localhost:5433/3dprint_tfm_test';
+
 // Load test environment variables explicitly
 // This ensures we use the test database, not production
 dotenv.config({ path: path.resolve(__dirname, '../../.env.test') });
 
-// Verify we're using test database
+// But override DATABASE_URL again to be absolutely sure
+process.env.DATABASE_URL = 'postgresql://testuser:testpassword123@localhost:5433/3dprint_tfm_test';
+
+// Verify we're using test database - HARD FAIL if not
 const databaseUrl = process.env.DATABASE_URL || '';
-if (!databaseUrl.includes('test') && !databaseUrl.includes('localhost')) {
-  console.error('❌ ERROR: DATABASE_URL does not point to a test database!');
+if (!databaseUrl.includes('test') || !databaseUrl.includes('localhost:5433')) {
+  console.error('❌ CRITICAL ERROR: DATABASE_URL does not point to a test database!');
   console.error('   Current:', databaseUrl.substring(0, 50) + '...');
-  console.error('   E2E tests must use a test database only.');
+  console.error('   E2E tests must use the test database ONLY.');
+  console.error('   NEVER use dev/prod databases for tests!');
   process.exit(1);
 }
 
@@ -118,9 +128,9 @@ async function ensureTestUsers(): Promise<void> {
     // Create default address for juan@example.com (for checkout tests)
     if (user.role === Role.CUSTOMER && user.email === 'juan@example.com') {
       const existingAddress = await prisma.address.findFirst({
-        where: { userId: createdUser.id }
+        where: { userId: createdUser.id },
       });
-      
+
       if (existingAddress) {
         console.log(`  ✓ ${user.email} (${user.role}) - Address exists`);
       } else {

@@ -303,7 +303,6 @@ const idMaps = {
 // ============================================
 
 async function seedUsers(): Promise<number> {
-
   const usersCSV = parseCSV<UserCSV>('users.csv');
 
   for (const user of usersCSV) {
@@ -390,29 +389,125 @@ async function seedShippingConfig(): Promise<number> {
 }
 
 async function seedShippingZones(): Promise<number> {
-
   const defaultZones = [
     {
       name: 'Península',
       country: 'España',
       regions: [
-        'Madrid', 'Barcelona', 'Valencia', 'Sevilla', 'Zaragoza', 'Málaga', 'Murcia', 'Palma',
-        'Las Palmas', 'Bilbao', 'Alicante', 'Córdoba', 'Valladolid', 'Vigo', 'Gijón', 'LHospitalet',
-        'Vitoria', 'La Coruña', 'Elche', 'Granada', 'Terrassa', 'Tarragona', 'Pamplona', 'León',
-        'Albacete', 'Cádiz', 'Logroño', 'Huelva', 'Salamanca', 'Burgos', 'Almería',
-        'Castellón de la Plana', 'Alcorcón', 'Gasteiz/Vitoria', 'Guadalajara',
-        'San Cristóbal de La Laguna', 'Badalona', 'Santander', 'Torrejón de Ardoz',
-        'Sabadell', 'San Sebastián', 'Cartagena', 'Móstoles', 'Fuenlabrada', 'Getafe',
-        'Leganés', 'Baracaldo', 'Getxo', 'Badajoz', 'Algeciras', 'Marbella',
-        'Santiago de Compostela', 'Cáceres', 'Segovia', 'Ciudad Real', 'Toledo', 'Huesca',
-        'Soria', 'Zamora', 'Ávila', 'Palencia', 'Cuenca',
+        'Madrid',
+        'Barcelona',
+        'Valencia',
+        'Sevilla',
+        'Zaragoza',
+        'Málaga',
+        'Murcia',
+        'Palma',
+        'Las Palmas',
+        'Bilbao',
+        'Alicante',
+        'Córdoba',
+        'Valladolid',
+        'Vigo',
+        'Gijón',
+        'LHospitalet',
+        'Vitoria',
+        'La Coruña',
+        'Elche',
+        'Granada',
+        'Terrassa',
+        'Tarragona',
+        'Pamplona',
+        'León',
+        'Albacete',
+        'Cádiz',
+        'Logroño',
+        'Huelva',
+        'Salamanca',
+        'Burgos',
+        'Almería',
+        'Castellón de la Plana',
+        'Alcorcón',
+        'Gasteiz/Vitoria',
+        'Guadalajara',
+        'San Cristóbal de La Laguna',
+        'Badalona',
+        'Santander',
+        'Torrejón de Ardoz',
+        'Sabadell',
+        'San Sebastián',
+        'Cartagena',
+        'Móstoles',
+        'Fuenlabrada',
+        'Getafe',
+        'Leganés',
+        'Baracaldo',
+        'Getxo',
+        'Badajoz',
+        'Algeciras',
+        'Marbella',
+        'Santiago de Compostela',
+        'Cáceres',
+        'Segovia',
+        'Ciudad Real',
+        'Toledo',
+        'Huesca',
+        'Soria',
+        'Zamora',
+        'Ávila',
+        'Palencia',
+        'Cuenca',
       ],
       postalCodePrefixes: [
-        '01', '02', '03', '04', '05', '06', '07', '08', '09', '10',
-        '11', '12', '13', '14', '15', '16', '17', '18', '19', '20',
-        '21', '22', '23', '24', '25', '26', '27', '28', '29', '30',
-        '31', '32', '33', '34', '35', '36', '37', '38', '39', '40',
-        '41', '42', '43', '44', '45', '46', '47', '48', '49', '50',
+        '01',
+        '02',
+        '03',
+        '04',
+        '05',
+        '06',
+        '07',
+        '08',
+        '09',
+        '10',
+        '11',
+        '12',
+        '13',
+        '14',
+        '15',
+        '16',
+        '17',
+        '18',
+        '19',
+        '20',
+        '21',
+        '22',
+        '23',
+        '24',
+        '25',
+        '26',
+        '27',
+        '28',
+        '29',
+        '30',
+        '31',
+        '32',
+        '33',
+        '34',
+        '35',
+        '36',
+        '37',
+        '38',
+        '39',
+        '40',
+        '41',
+        '42',
+        '43',
+        '44',
+        '45',
+        '46',
+        '47',
+        '48',
+        '49',
+        '50',
       ],
       baseCost: 5.99,
       freeShippingThreshold: 50,
@@ -855,14 +950,12 @@ async function seedInvoices(): Promise<number> {
 }
 
 async function cleanDatabase(): Promise<void> {
-
   await prisma.$executeRaw`TRUNCATE TABLE
     "reviews", "order_messages", "inventory_movements", "payments",
     "order_items", "orders", "invoices", "product_images", "products",
     "categories", "addresses", "users", "shipping_configs",
     "shipping_zones", "site_configs", "sessions", "verification_tokens", "audit_logs",
     "carts", "cart_items", "coupons", "faqs" CASCADE`;
-
 }
 
 // ============================================
@@ -908,6 +1001,6 @@ main()
     console.error('❌ Error during seed:', e);
     process.exit(1);
   })
-  .finally(async() => {
+  .finally(async () => {
     await prisma.$disconnect();
   });

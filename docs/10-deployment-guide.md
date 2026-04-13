@@ -125,6 +125,7 @@ STRIPE_WEBHOOK_SECRET=...
 ## 🔒 Security Configuration
 
 ### HTTPS/SSL
+
 - ✅ Automatic in Vercel
 - ✅ Free SSL certificates (Let's Encrypt)
 
@@ -163,6 +164,7 @@ async headers() {
 ### Rate Limiting
 
 Configured in middleware for:
+
 - Login: 5 attempts / minute
 - General API: 100 requests / minute
 
@@ -180,6 +182,7 @@ Configured in middleware for:
 ### Logs
 
 Access in Vercel Dashboard:
+
 - Functions Logs
 - Build Logs
 - Edge Network Logs
@@ -201,18 +204,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-          
+
       - name: Install dependencies
         run: npm ci
-        
+
       - name: Run tests
         run: npm run test:unit
-        
+
       - name: Deploy to Vercel
         uses: vercel/action-deploy@v1
         with:
@@ -260,6 +263,7 @@ jobs:
 ### Error: "relation does not exist"
 
 **Solution**: Run migrations
+
 ```bash
 npx prisma migrate deploy
 ```
@@ -267,6 +271,7 @@ npx prisma migrate deploy
 ### Error: Stripe webhook not working
 
 **Verify**:
+
 1. Correct webhook URL
 2. Secret configured
 3. Subscribed events
@@ -274,6 +279,7 @@ npx prisma migrate deploy
 ### Error: Build fails
 
 **Verify**:
+
 1. Environment variables configured
 2. Valid `next.config.js`
 3. Dependencies installed
@@ -281,6 +287,7 @@ npx prisma migrate deploy
 ### Error: 404 on dynamic routes
 
 **Verify**:
+
 1. Rewrites configuration in `next.config.js`
 2. ISR configured correctly
 
@@ -326,6 +333,7 @@ Before launch:
 ---
 
 **Note**: This is an academic project. For real production, consider:
+
 - Appropriate hosting plan
 - Advanced monitoring (Sentry, LogRocket)
 - Load tests

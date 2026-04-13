@@ -50,19 +50,19 @@ Aplicación web de comercio electrónico especializada en productos impresos en 
 
 ## Tecnologías
 
-| Categoría | Tecnologías |
-|-----------|-------------|
-| **Frontend** | Next.js 14.2.35 (App Router), React ^18, TypeScript ^5 |
-| **Estilos** | Tailwind CSS ^3.4.1, Lucide React (iconos) |
-| **Backend** | Next.js API Routes, Server Actions |
-| **Base de datos** | PostgreSQL (Supabase), Prisma ORM ^5.22.0 |
-| **Autenticación** | NextAuth.js ^4.24.13 (Credentials + JWT) |
-| **Pagos** | Stripe (Checkout real), PayPal (Smart Buttons), Bizum (simulado), Transferencia |
-| **Real-time** | Socket.io + PostgreSQL EventStore |
-| **Testing** | Vitest (unit/integration), Playwright (E2E), Testing Library |
-| **Seguridad** | bcrypt (12 rounds), rate limiting, account lockout, input validation (Zod) |
-| **PDFs** | html2canvas, jsPDF (facturas) |
-| **Deployment** | Vercel (serverless), CI/CD ready |
+| Categoría         | Tecnologías                                                                     |
+| ----------------- | ------------------------------------------------------------------------------- |
+| **Frontend**      | Next.js 14.2.35 (App Router), React ^18, TypeScript ^5                          |
+| **Estilos**       | Tailwind CSS ^3.4.1, Lucide React (iconos)                                      |
+| **Backend**       | Next.js API Routes, Server Actions                                              |
+| **Base de datos** | PostgreSQL (Supabase), Prisma ORM ^5.22.0                                       |
+| **Autenticación** | NextAuth.js ^4.24.13 (Credentials + JWT)                                        |
+| **Pagos**         | Stripe (Checkout real), PayPal (Smart Buttons), Bizum (simulado), Transferencia |
+| **Real-time**     | Socket.io + PostgreSQL EventStore                                               |
+| **Testing**       | Vitest (unit/integration), Playwright (E2E), Testing Library                    |
+| **Seguridad**     | bcrypt (12 rounds), rate limiting, account lockout, input validation (Zod)      |
+| **PDFs**          | html2canvas, jsPDF (facturas)                                                   |
+| **Deployment**    | Vercel (serverless), CI/CD ready                                                |
 
 ---
 
@@ -77,23 +77,27 @@ Aplicación web de comercio electrónico especializada en productos impresos en 
 ### Pasos
 
 1. **Clonar el repositorio**
+
    ```bash
    git clone https://github.com/your-user/3d-print-tfm.git
    cd 3d-print-tfm
    ```
 
 2. **Instalar dependencias**
+
    ```bash
    npm install
    ```
 
 3. **Configurar variables de entorno**
+
    ```bash
    cp .env.example .env.local
    # Editar .env.local con tus valores
    ```
 
 4. **Configurar base de datos**
+
    ```bash
    npx prisma generate
    npx prisma migrate dev --name init
@@ -113,18 +117,18 @@ La aplicación estará disponible en [http://localhost:3000](http://localhost:30
 
 ### Variables de Entorno Requeridas
 
-| Variable | Descripción | Ejemplo |
-|----------|-------------|---------|
-| `DATABASE_URL` | URL de conexión PostgreSQL | `postgresql://user:pass@localhost:5432/db` |
-| `NEXTAUTH_SECRET` | Secreto JWT (generar con `openssl rand -base64 32`) | - |
-| `NEXTAUTH_URL` | URL base de la app | `http://localhost:3000` |
-| `NEXT_PUBLIC_APP_URL` | URL pública de la app | `http://localhost:3000` |
-| `STRIPE_SECRET_KEY` | Clave secreta de Stripe (modo test/live) | `sk_test_...` |
-| `STRIPE_WEBHOOK_SECRET` | Secreto del webhook de Stripe | `whsec_...` |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Clave pública de Stripe | `pk_test_...` |
-| `PAYPAL_CLIENT_ID` | ID de cliente PayPal (sandbox/live) | - |
-| `PAYPAL_CLIENT_SECRET` | Secreto de cliente PayPal | - |
-| `NEXT_PUBLIC_PAYPAL_CLIENT_ID` | ID público de PayPal | - |
+| Variable                             | Descripción                                         | Ejemplo                                    |
+| ------------------------------------ | --------------------------------------------------- | ------------------------------------------ |
+| `DATABASE_URL`                       | URL de conexión PostgreSQL                          | `postgresql://user:pass@localhost:5432/db` |
+| `NEXTAUTH_SECRET`                    | Secreto JWT (generar con `openssl rand -base64 32`) | -                                          |
+| `NEXTAUTH_URL`                       | URL base de la app                                  | `http://localhost:3000`                    |
+| `NEXT_PUBLIC_APP_URL`                | URL pública de la app                               | `http://localhost:3000`                    |
+| `STRIPE_SECRET_KEY`                  | Clave secreta de Stripe (modo test/live)            | `sk_test_...`                              |
+| `STRIPE_WEBHOOK_SECRET`              | Secreto del webhook de Stripe                       | `whsec_...`                                |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Clave pública de Stripe                             | `pk_test_...`                              |
+| `PAYPAL_CLIENT_ID`                   | ID de cliente PayPal (sandbox/live)                 | -                                          |
+| `PAYPAL_CLIENT_SECRET`               | Secreto de cliente PayPal                           | -                                          |
+| `NEXT_PUBLIC_PAYPAL_CLIENT_ID`       | ID público de PayPal                                | -                                          |
 
 ---
 
@@ -132,10 +136,10 @@ La aplicación estará disponible en [http://localhost:3000](http://localhost:30
 
 ### Usuarios de Prueba
 
-| Rol | Email | Contraseña |
-|-----|-------|------------|
-| Admin | admin@3dprint.com | AdminTFM2024! |
-| Cliente | juan@example.com | JuanTFM2024! |
+| Rol     | Email             | Contraseña    |
+| ------- | ----------------- | ------------- |
+| Admin   | admin@3dprint.com | AdminTFM2024! |
+| Cliente | juan@example.com  | JuanTFM2024!  |
 
 ### Comandos Disponibles
 
@@ -241,23 +245,27 @@ npm run test:e2e         # Tests E2E con Playwright
 ## Funcionalidades Destacadas
 
 ### 💳 Sistema de Pagos
+
 - **Stripe:** Checkout real con tarjetas de prueba
 - **PayPal:** Smart Buttons integrados
 - **Bizum:** Simulación para mercado español
 - **Transferencia:** Con referencia única
 
 ### 🎟️ Sistema de Cupones
+
 - Descuentos por porcentaje (ej: 10% off)
 - Descuentos fijos (ej: -10€)
 - Envío gratis
 - Fechas de validez, usos máximos, monto mínimo
 
 ### 📧 Notificaciones en Tiempo Real
+
 - Alertas de stock bajo
 - Nuevos pedidos (panel admin)
 - Actualizaciones de estado de pedido
 
 ### 📄 Facturación
+
 - Generación automática de facturas en PDF
 - Numeración correlativa
 - Datos fiscales completos
@@ -267,6 +275,7 @@ npm run test:e2e         # Tests E2E con Playwright
 ## Soporte
 
 Para preguntas o soporte:
+
 - 📧 Email: support@3dprint.com
 - 📚 Documentación: Ver carpeta `/docs/`
 - 🐛 Issues: GitHub Issues

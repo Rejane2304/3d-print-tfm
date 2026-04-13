@@ -43,14 +43,17 @@ Each test is automatically wrapped in a transaction that rolls back after comple
 import { withTestTransaction } from './helpers';
 
 // Wrap a single test
-it('should create a user', withTestTransaction(async (tx) => {
-  const user = await tx.user.create({
-    data: { email: 'test@test.com', name: 'Test User' }
-  });
-  
-  expect(user.email).toBe('test@test.com');
-  // Transaction rolls back automatically - user never saved
-}));
+it(
+  'should create a user',
+  withTestTransaction(async tx => {
+    const user = await tx.user.create({
+      data: { email: 'test@test.com', name: 'Test User' },
+    });
+
+    expect(user.email).toBe('test@test.com');
+    // Transaction rolls back automatically - user never saved
+  }),
+);
 ```
 
 #### Using with beforeEach
@@ -60,10 +63,12 @@ import { withTestTransaction, cleanupDB } from './helpers';
 
 describe('User API', () => {
   // Fresh data for each test
-  beforeEach(withTestTransaction(async (tx) => {
-    await tx.user.create({ data: { email: 'setup@test.com' } });
-  }));
-  
+  beforeEach(
+    withTestTransaction(async tx => {
+      await tx.user.create({ data: { email: 'setup@test.com' } });
+    }),
+  );
+
   it('has isolated data', async () => {
     // Each test starts fresh with data from beforeEach
     // All changes roll back after the test
@@ -84,6 +89,7 @@ beforeAll(async () => {
 ```
 
 This will:
+
 - Validate the test database
 - Truncate all tables in dependency order
 - Reset sequences
@@ -119,11 +125,13 @@ TEST_PERSISTENCE=false  # Set to true to disable rollback (NOT recommended)
 ### Database Naming Requirements
 
 ✅ **Valid database names:**
+
 - `myapp_test`
 - `TEST_DATABASE`
 - `3dprint_tfm_test`
 
 ❌ **Invalid database names (will fail validation):**
+
 - `myapp` (no "test")
 - `postgres` (production pattern)
 - `production` (production pattern)
@@ -163,6 +171,7 @@ DATABASE_URL=postgresql://.../production NODE_ENV=test npm run test
 **Cause:** Running tests without `NODE_ENV=test`
 
 **Solution:**
+
 ```bash
 NODE_ENV=test npm run test
 ```
@@ -172,6 +181,7 @@ NODE_ENV=test npm run test
 **Cause:** Database URL doesn't have "test" in the database name
 
 **Solution:**
+
 1. Create a test database with "test" in the name
 2. Update `.env.test`:
    ```bash
@@ -183,6 +193,7 @@ NODE_ENV=test npm run test
 **Cause:** URL matches production patterns
 
 **Solution:**
+
 - Don't use default Supabase URLs (`/postgres?`)
 - Use a dedicated test database
 - Ensure URL contains "test" in database name
@@ -311,24 +322,31 @@ beforeAll(async () => {
 ## Helper Functions Reference
 
 ### `validateTestDB()`
+
 Validates database safety. **Mandatory** - throws if checks fail.
 
 ### `validateTestDBSync()`
+
 Synchronous validation for immediate feedback.
 
 ### `withTestTransaction(testFn, options?)`
+
 Wraps test in auto-rollback transaction.
 
 ### `cleanupDB(options?)`
+
 Truncates all tables. Use for cleanup.
 
 ### `resetTestDatabase()`
+
 Complete database reset with seeding.
 
 ### `getDBInfo()`
+
 Returns database information (safe, read-only).
 
 ### `isTestEnvironment()`
+
 Quick check if running in test environment.
 
 ## Safety Checklist
@@ -345,6 +363,7 @@ Before running tests:
 ## Contact
 
 If you encounter issues:
+
 1. Check this README first
 2. Review error messages carefully
 3. Verify your `.env.test` configuration

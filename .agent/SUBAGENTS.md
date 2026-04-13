@@ -7,6 +7,7 @@ Este sistema permite la delegación automática de tareas a subagentes especiali
 ## Tipos de Subagentes Disponibles
 
 ### 1. **explore** (Búsqueda y Exploración)
+
 - **Cuándo usar**: Cuando necesitas encontrar archivos, explorar la estructura del código, buscar patrones específicos
 - **Ejemplos**:
   - "Encuentra todos los componentes React"
@@ -14,6 +15,7 @@ Este sistema permite la delegación automática de tareas a subagentes especiali
   - "Explora la estructura de la base de datos"
 
 ### 2. **general** (Propósito General)
+
 - **Cuándo usar**: Para tareas complejas de investigación, análisis de código, o ejecutar múltiples pasos
 - **Ejemplos**:
   - "Analiza el rendimiento de la aplicación"
@@ -21,6 +23,7 @@ Este sistema permite la delegación automática de tareas a subagentes especiali
   - "Genera documentación para la API"
 
 ### 3. **code-reviewer** (Revisión de Código)
+
 - **Cuándo usar**: Después de escribir código significativo, para revisar calidad y encontrar bugs
 - **Ejemplos**:
   - "Revisa esta función que acabo de escribir"
@@ -28,6 +31,7 @@ Este sistema permite la delegación automática de tareas a subagentes especiali
   - "Comprueba la cobertura de tests"
 
 ### 4. **test-runner** (Ejecución de Tests)
+
 - **Cuándo usar**: Para ejecutar tests específicos o suites completas
 - **Ejemplos**:
   - "Ejecuta todos los tests unitarios"
@@ -35,6 +39,7 @@ Este sistema permite la delegación automática de tareas a subagentes especiali
   - "Verifica que nada se rompió"
 
 ### 5. **translator** (Traducción)
+
 - **Cuándo usar**: Para tareas de traducción de código, documentación o contenido
 - **Ejemplos**:
   - "Traduce todos los mensajes de error a español"
@@ -68,6 +73,7 @@ Si quieres forzar el uso de un subagente específico, puedes usar el comando `/d
 ```
 
 Ejemplos:
+
 ```
 /delegate explore Buscar todos los archivos de configuración
 /delegate general Refactorizar el módulo de autenticación
@@ -90,6 +96,7 @@ npx agent status
 ```
 
 Esto mostrará:
+
 - Subagentes activos
 - Tareas en cola
 - Resultados pendientes

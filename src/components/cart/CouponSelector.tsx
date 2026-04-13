@@ -7,15 +7,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import {
-  CheckCircle2,
-  ChevronDown,
-  Loader2,
-  Tag,
-  Ticket,
-  X,
-  XCircle,
-} from 'lucide-react';
+import { CheckCircle2, ChevronDown, Loader2, Tag, Ticket, X, XCircle } from 'lucide-react';
 
 interface AvailableCoupon {
   id: string;
@@ -49,9 +41,7 @@ export function CouponSelector({
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [availableCoupons, setAvailableCoupons] = useState<AvailableCoupon[]>(
-    [],
-  );
+  const [availableCoupons, setAvailableCoupons] = useState<AvailableCoupon[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
 
   // Cargar cupones disponibles al montar el componente
@@ -59,7 +49,7 @@ export function CouponSelector({
     loadAvailableCoupons();
   }, []);
 
-  const loadAvailableCoupons = async() => {
+  const loadAvailableCoupons = async () => {
     try {
       const response = await fetch('/api/coupons');
       const data = await response.json();
@@ -72,11 +62,9 @@ export function CouponSelector({
   };
 
   // Filtrar cupones válidos para el subtotal actual
-  const validCoupons = availableCoupons.filter(
-    (coupon) => !coupon.minOrderAmount || subtotal >= coupon.minOrderAmount,
-  );
+  const validCoupons = availableCoupons.filter(coupon => !coupon.minOrderAmount || subtotal >= coupon.minOrderAmount);
 
-  const handleSubmit = async(e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!code.trim() || loading) {
       return;
@@ -94,10 +82,7 @@ export function CouponSelector({
     }
   };
 
-  const handleSelectCoupon = async(
-    couponCode: string,
-    couponCodeRaw: string,
-  ) => {
+  const handleSelectCoupon = async (couponCode: string, couponCodeRaw: string) => {
     setLoading(true);
     setError(null);
     setShowDropdown(false);
@@ -124,12 +109,8 @@ export function CouponSelector({
           <div className="flex items-center gap-2 min-w-0">
             <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
             <div className="min-w-0">
-              <p className="text-xs sm:text-sm font-medium text-green-800">
-                Cupón aplicado
-              </p>
-              <p className="text-base sm:text-lg font-bold text-green-900 truncate">
-                {appliedCoupon.code}
-              </p>
+              <p className="text-xs sm:text-sm font-medium text-green-800">Cupón aplicado</p>
+              <p className="text-base sm:text-lg font-bold text-green-900 truncate">{appliedCoupon.code}</p>
             </div>
           </div>
           <button
@@ -148,9 +129,7 @@ export function CouponSelector({
           <div className="mt-2 pt-2 border-t border-green-200">
             <div className="flex justify-between text-sm">
               <span className="text-green-700">Descuento aplicado:</span>
-              <span className="font-medium text-green-800">
-                -{appliedCoupon.discount.toFixed(2)}€
-              </span>
+              <span className="font-medium text-green-800">-{appliedCoupon.discount.toFixed(2)}€</span>
             </div>
           </div>
         )}
@@ -178,9 +157,7 @@ export function CouponSelector({
                 {validCoupons.length === 1 ? '' : 's'}
               </span>
             </div>
-            <ChevronDown
-              className={`h-5 w-5 transition-transform ${showDropdown ? 'rotate-180' : ''}`}
-            />
+            <ChevronDown className={`h-5 w-5 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
           </button>
 
           {showDropdown && (
@@ -188,25 +165,19 @@ export function CouponSelector({
               className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg \
               max-h-60 overflow-auto"
             >
-              {validCoupons.map((coupon) => (
+              {validCoupons.map(coupon => (
                 <button
                   key={coupon.id}
                   type="button"
-                  onClick={() =>
-                    handleSelectCoupon(coupon.code, coupon.codeRaw)
-                  }
+                  onClick={() => handleSelectCoupon(coupon.code, coupon.codeRaw)}
                   disabled={loading}
                   className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-0 \
                     disabled:opacity-50"
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-semibold text-gray-900">
-                        {coupon.code}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        {coupon.description}
-                      </p>
+                      <p className="font-semibold text-gray-900">{coupon.code}</p>
+                      <p className="text-sm text-gray-600">{coupon.description}</p>
                     </div>
                     <Ticket className="h-5 w-5 text-indigo-600" />
                   </div>
@@ -226,7 +197,7 @@ export function CouponSelector({
           <input
             type="text"
             value={code}
-            onChange={(e) => {
+            onChange={e => {
               setCode(e.target.value.toUpperCase());
               setError(null);
             }}

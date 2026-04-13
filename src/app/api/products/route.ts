@@ -4,9 +4,10 @@ export const dynamic = 'force-dynamic';
  * API Route para catálogo de productos
  * GET /api/products - Listado con filtros y paginación
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
-import { Material, Prisma } from '@prisma/client';
+import type { Material, Prisma } from '@prisma/client';
 import { withErrorHandler } from '@/lib/errors/api-wrapper';
 import {
   translateCategoryName,
@@ -15,7 +16,7 @@ import {
   translateProductShortDescription,
 } from '@/lib/i18n';
 
-export const GET = withErrorHandler(async(req: NextRequest) => {
+export const GET = withErrorHandler(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
 
   // Pagination parameters
@@ -24,19 +25,13 @@ export const GET = withErrorHandler(async(req: NextRequest) => {
   const skip = (page - 1) * pageSize;
 
   // Filter parameters
-  const categorySlug =
-    searchParams.get('category') || searchParams.get('categoria');
+  const categorySlug = searchParams.get('category') || searchParams.get('categoria');
   const material = searchParams.get('material') as Material | null;
-  const minPrice =
-    searchParams.get('minPrice') || searchParams.get('minPrecio');
-  const maxPrice =
-    searchParams.get('maxPrice') || searchParams.get('maxPrecio');
-  const inStock =
-    (searchParams.get('inStock') || searchParams.get('enStock')) === 'true';
-  const sortBy =
-    searchParams.get('sortBy') || searchParams.get('ordenar') || 'name';
-  const sortOrder =
-    searchParams.get('sortOrder') || searchParams.get('orden') || 'asc';
+  const minPrice = searchParams.get('minPrice') || searchParams.get('minPrecio');
+  const maxPrice = searchParams.get('maxPrice') || searchParams.get('maxPrecio');
+  const inStock = (searchParams.get('inStock') || searchParams.get('enStock')) === 'true';
+  const sortBy = searchParams.get('sortBy') || searchParams.get('ordenar') || 'name';
+  const sortOrder = searchParams.get('sortOrder') || searchParams.get('orden') || 'asc';
   const search = searchParams.get('search') || searchParams.get('busqueda');
 
   // Build where clause
@@ -114,16 +109,16 @@ export const GET = withErrorHandler(async(req: NextRequest) => {
   const totalPages = Math.ceil(total / pageSize);
 
   // Translate products to Spanish
-  const translatedProducts = products.map((product) => ({
+  const translatedProducts = products.map(product => ({
     ...product,
     name: translateProductName(product.slug),
     description: translateProductDescription(product.slug),
     shortDescription: translateProductShortDescription(product.slug),
     category: product.category
       ? {
-        ...product.category,
-        name: translateCategoryName(product.category.slug),
-      }
+          ...product.category,
+          name: translateCategoryName(product.category.slug),
+        }
       : product.category,
   }));
 

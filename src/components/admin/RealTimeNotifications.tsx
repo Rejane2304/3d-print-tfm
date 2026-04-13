@@ -2,14 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import {
-  AlertCircle,
-  Bell,
-  CheckCircle,
-  Package,
-  TrendingUp,
-} from 'lucide-react';
-import { EventType, useAdminRealTime } from '@/hooks/useRealTime';
+import { AlertCircle, Bell, CheckCircle, Package, TrendingUp } from 'lucide-react';
+import type { EventType } from '@/hooks/useRealTime';
+import { useAdminRealTime } from '@/hooks/useRealTime';
 
 interface Notification {
   id: string;
@@ -27,7 +22,7 @@ export default function RealTimeNotifications() {
   const [unreadCount, setUnreadCount] = useState(0);
 
   const { isConnected } = useAdminRealTime({
-    onEvent: (event) => {
+    onEvent: event => {
       const notification: Notification = {
         id: `${event.type}-${Date.now()}`,
         type: event.type,
@@ -37,23 +32,21 @@ export default function RealTimeNotifications() {
         read: false,
       };
 
-      setNotifications((prev) => [notification, ...prev].slice(0, 50)); // Keep last 50
+      setNotifications(prev => [notification, ...prev].slice(0, 50)); // Keep last 50
     },
   });
 
   useEffect(() => {
-    const count = notifications.filter((n) => !n.read).length;
+    const count = notifications.filter(n => !n.read).length;
     setUnreadCount(count);
   }, [notifications]);
 
   const markAsRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
-    );
+    setNotifications(prev => prev.map(n => (n.id === id ? { ...n, read: true } : n)));
   };
 
   const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
   };
 
   const clearAll = () => {
@@ -103,9 +96,7 @@ export default function RealTimeNotifications() {
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
-        {!isConnected && (
-          <span className="absolute bottom-0 right-0 w-2 h-2 bg-yellow-400 rounded-full" />
-        )}
+        {!isConnected && <span className="absolute bottom-0 right-0 w-2 h-2 bg-yellow-400 rounded-full" />}
       </button>
 
       {/* Notification Panel */}
@@ -116,13 +107,18 @@ export default function RealTimeNotifications() {
             className="fixed inset-0 z-40"
             aria-label="Cerrar panel de notificaciones"
             onClick={() => setShowPanel(false)}
-            onKeyDown={(e) => {
+            onKeyDown={e => {
               if (e.key === 'Enter' || e.key === ' ') {
                 setShowPanel(false);
               }
             }}
             tabIndex={0}
-            style={{ background: 'transparent', border: 'none', padding: 0, margin: 0 }}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              padding: 0,
+              margin: 0,
+            }}
           />
           <div
             className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white rounded-lg shadow-lg \
@@ -132,24 +128,16 @@ export default function RealTimeNotifications() {
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
               <div>
                 <h3 className="font-semibold text-gray-900">Notificaciones</h3>
-                <p className="text-xs text-gray-500">
-                  {isConnected ? 'En tiempo real' : 'Modo offline'}
-                </p>
+                <p className="text-xs text-gray-500">{isConnected ? 'En tiempo real' : 'Modo offline'}</p>
               </div>
               <div className="flex gap-2">
                 {unreadCount > 0 && (
-                  <button
-                    onClick={markAllAsRead}
-                    className="text-xs text-blue-600 hover:text-blue-800"
-                  >
+                  <button onClick={markAllAsRead} className="text-xs text-blue-600 hover:text-blue-800">
                     Marcar leídas
                   </button>
                 )}
                 {notifications.length > 0 && (
-                  <button
-                    onClick={clearAll}
-                    className="text-xs text-gray-500 hover:text-gray-700"
-                  >
+                  <button onClick={clearAll} className="text-xs text-gray-500 hover:text-gray-700">
                     Limpiar
                   </button>
                 )}
@@ -164,35 +152,25 @@ export default function RealTimeNotifications() {
                   <p>No hay notificaciones</p>
                 </div>
               ) : (
-                notifications.map((notification) => (
+                notifications.map(notification => (
                   <button
                     type="button"
                     key={notification.id}
                     onClick={() => markAsRead(notification.id)}
                     aria-label="Marcar como leída"
                     className={`p-4 w-full text-left border-b border-gray-100 cursor-pointer hover:bg-gray-50 \
-                    transition-colors${
-                  notification.read ? '' : ' bg-blue-50'
-                  }`}
+                    transition-colors${notification.read ? '' : ' bg-blue-50'}`}
                   >
                     <div className="flex gap-3">
-                      <div className="flex-shrink-0">
-                        {getNotificationIcon(notification.type)}
-                      </div>
+                      <div className="flex-shrink-0">{getNotificationIcon(notification.type)}</div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm text-gray-900">
-                          {notification.title}
-                        </p>
-                        <p className="text-sm text-gray-600 mt-1">
-                          {notification.message}
-                        </p>
+                        <p className="font-medium text-sm text-gray-900">{notification.title}</p>
+                        <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
                         <p className="text-xs text-gray-400 mt-1">
                           {notification.timestamp.toLocaleTimeString('es-ES')}
                         </p>
                       </div>
-                      {!notification.read && (
-                        <div className="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full" />
-                      )}
+                      {!notification.read && <div className="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full" />}
                     </div>
                   </button>
                 ))
@@ -243,10 +221,7 @@ function getNotificationTitle(type: EventType): string {
   return titles[type] || 'Notificación';
 }
 
-function getNotificationMessage(event: {
-  type: EventType;
-  payload: Record<string, unknown>;
-}): string {
+function getNotificationMessage(event: { type: EventType; payload: Record<string, unknown> }): string {
   switch (event.type) {
     case 'order:new':
       return `Pedido #${event.payload.orderNumber} por €${event.payload.total}`;

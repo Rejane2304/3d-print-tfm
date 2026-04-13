@@ -19,7 +19,7 @@ function CheckoutCancelContent() {
   useEffect(() => {
     // Si hay orderId, cancelar el pedido
     if (orderId && !cancelled) {
-      const cancelOrder = async() => {
+      const cancelOrder = async () => {
         setCancelling(true);
         try {
           const response = await fetch('/api/orders/cancel', {
@@ -48,16 +48,12 @@ function CheckoutCancelContent() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 text-center">
           {/* Icono */}
           <div className="mb-4 sm:mb-6">
-            <div
-              className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-orange-100 rounded-full"
-            >
+            <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-orange-100 rounded-full">
               <XCircle className="h-8 w-8 sm:h-10 sm:w-10 text-orange-600" />
             </div>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
-            Pago cancelado
-          </h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">Pago cancelado</h1>
 
           {cancelling ? (
             <div className="mb-6">
@@ -66,8 +62,8 @@ function CheckoutCancelContent() {
             </div>
           ) : (
             <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8">
-              Has cancelado el proceso de pago. {cancelled && 'El pedido ha sido cancelado.'} Tu carrito sigue
-              guardado y puedes intentarlo de nuevo cuando quieras.
+              Has cancelado el proceso de pago. {cancelled && 'El pedido ha sido cancelado.'} Tu carrito sigue guardado
+              y puedes intentarlo de nuevo cuando quieras.
             </p>
           )}
 
@@ -100,7 +96,7 @@ function CheckoutCancelContent() {
 export default function CheckoutCancelPage() {
   return (
     <Suspense
-      fallback={(
+      fallback={
         <div className="min-h-screen bg-gray-50 py-12">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
@@ -109,7 +105,7 @@ export default function CheckoutCancelPage() {
             </div>
           </div>
         </div>
-      )}
+      }
     >
       <CheckoutCancelContent />
     </Suspense>

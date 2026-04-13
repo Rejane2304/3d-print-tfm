@@ -1,7 +1,7 @@
 /**
  * Tests Unitarios - Componente CartItem
  * TDD: Tests primero, implementación después
- * 
+ *
  * Los tests usan los nombres correctos de las props del componente.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -99,7 +99,10 @@ describe('CartItem', () => {
   });
 
   it('debe mostrar imagen placeholder si no hay imagen', () => {
-    const itemWithoutImage = { ...mockItem, product: { ...mockItem.product, image: null } };
+    const itemWithoutImage = {
+      ...mockItem,
+      product: { ...mockItem.product, image: null },
+    };
     render(<CartItem item={itemWithoutImage} {...mockHandlers} />);
 
     expect(screen.getByAltText('Producto Test')).toHaveAttribute('src', expect.stringContaining('placeholder'));

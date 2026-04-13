@@ -4,13 +4,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import {
-  AlertCircle,
-  ArrowLeft,
-  CheckCircle2,
-  Ticket,
-  Trash2,
-} from 'lucide-react';
+import { AlertCircle, ArrowLeft, CheckCircle2, Ticket, Trash2 } from 'lucide-react';
 import { MdAttachMoney, MdLocalShipping, MdPercent } from 'react-icons/md';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
@@ -81,7 +75,7 @@ const AdminCouponEditPage = () => {
     return null;
   };
 
-  const handleSubmit = async(e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const validationError = validateForm();
     if (validationError) {
@@ -114,9 +108,11 @@ const AdminCouponEditPage = () => {
     }
   };
 
-  const handleDelete = async() => {
+  const handleDelete = async () => {
     try {
-      const response = await fetch(`/api/admin/coupons/${couponId}`, { method: 'DELETE' });
+      const response = await fetch(`/api/admin/coupons/${couponId}`, {
+        method: 'DELETE',
+      });
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.error || 'Error al eliminar cupón');
@@ -140,48 +136,32 @@ const AdminCouponEditPage = () => {
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <Link
-                  href="/admin/coupons"
-                  className="text-gray-500 hover:text-gray-700 transition-colors"
-                >
+                <Link href="/admin/coupons" className="text-gray-500 hover:text-gray-700 transition-colors">
                   <ArrowLeft className="h-6 w-6" />
                 </Link>
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900">
-                    Editar Cupón
-                  </h1>
+                  <h1 className="text-3xl font-bold text-gray-900">Editar Cupón</h1>
                   <ol className="flex items-center space-x-2 text-sm">
                     <li>
-                      <Link
-                        href="/admin/dashboard"
-                        className="text-gray-500 hover:text-gray-700"
-                      >
+                      <Link href="/admin/dashboard" className="text-gray-500 hover:text-gray-700">
                         Panel
                       </Link>
                     </li>
                     <li className="text-gray-400">/</li>
                     <li>
-                      <Link
-                        href="/admin/coupons"
-                        className="text-gray-500 hover:text-gray-700"
-                      >
+                      <Link href="/admin/coupons" className="text-gray-500 hover:text-gray-700">
                         Cupones
                       </Link>
                     </li>
                     <li className="text-gray-400">/</li>
                     <li>
-                      <span className="text-gray-900 truncate max-w-xs">
-                        {coupon?.codigo}
-                      </span>
+                      <span className="text-gray-900 truncate max-w-xs">{coupon?.codigo}</span>
                     </li>
                   </ol>
                 </div>
               </div>
               <div className="flex items-center gap-4">
-                <Link
-                  href="/admin/dashboard"
-                  className="text-indigo-600 hover:text-indigo-800 font-medium"
-                >
+                <Link href="/admin/dashboard" className="text-indigo-600 hover:text-indigo-800 font-medium">
                   ← Volver al Panel
                 </Link>
                 <button
@@ -238,10 +218,7 @@ const AdminCouponEditPage = () => {
                 </h2>
                 <div className="space-y-4">
                   <div>
-                    <label
-                      htmlFor="code"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
+                    <label htmlFor="code" className="block text-sm font-medium text-gray-700 mb-1">
                       Código del Cupón
                     </label>
                     <input
@@ -276,7 +253,7 @@ const AdminCouponEditPage = () => {
           </p>
           {/* El siguiente bloque parece estar fuera de lugar, lo reubicamos correctamente */}
           <fieldset>
-            {couponTypes.map((type) => {
+            {couponTypes.map(type => {
               const Icon = type.icon;
               const isSelected = formData.type === type.value;
               return (
@@ -284,7 +261,7 @@ const AdminCouponEditPage = () => {
                   key={type.value}
                   type="button"
                   onClick={() =>
-                    setFormData((prev) => ({
+                    setFormData(prev => ({
                       ...prev,
                       type: type.value,
                       value: type.value === 'FREE_SHIPPING' ? 0 : prev.value,
@@ -314,16 +291,12 @@ const AdminCouponEditPage = () => {
         {/* Sidebar con estadísticas */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-8">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Estadísticas
-            </h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Estadísticas</h3>
             {coupon && (
               <div className="space-y-4">
                 <div>
                   <p className="text-sm text-gray-500">Usos Actuales</p>
-                  <p className="text-2xl font-bold text-indigo-600">
-                    {coupon?.usosActuales ?? 0}
-                  </p>
+                  <p className="text-2xl font-bold text-indigo-600">{coupon?.usosActuales ?? 0}</p>
                 </div>
                 {typeof coupon.usosMaximos === 'number' && (
                   <div>
@@ -336,8 +309,7 @@ const AdminCouponEditPage = () => {
                 <div className="pt-4 border-t border-gray-200">
                   <p className="text-sm text-gray-500">Vigencia</p>
                   <p className="text-sm text-gray-900">
-                    {coupon?.validoDesde ? new Date(coupon.validoDesde).toLocaleDateString('es-ES') : ''}{' '}
-                    -{' '}
+                    {coupon?.validoDesde ? new Date(coupon.validoDesde).toLocaleDateString('es-ES') : ''} -{' '}
                     {coupon?.validoHasta ? new Date(coupon.validoHasta).toLocaleDateString('es-ES') : ''}
                   </p>
                 </div>

@@ -69,7 +69,7 @@ export default function AdminInvoiceDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadInvoice = useCallback(async() => {
+  const loadInvoice = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -126,10 +126,7 @@ export default function AdminInvoiceDetailPage() {
         <div className="text-center">
           <AlertCircle className="h-12 w-12 text-red-600 mx-auto mb-4" />
           <p className="text-gray-900 font-medium">Factura no encontrada</p>
-          <Link
-            href="/admin/invoices"
-            className="text-indigo-600 hover:text-indigo-800 mt-2 inline-block"
-          >
+          <Link href="/admin/invoices" className="text-indigo-600 hover:text-indigo-800 mt-2 inline-block">
             ← Volver a facturas
           </Link>
         </div>
@@ -144,29 +141,19 @@ export default function AdminInvoiceDetailPage() {
         <div className="max-w-[1920px] 3xl:max-w-[2200px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Link
-                href="/admin/invoices"
-                className="text-gray-500 hover:text-gray-700"
-              >
+              <Link href="/admin/invoices" className="text-gray-500 hover:text-gray-700">
                 <ArrowLeft className="h-6 w-6" />
               </Link>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  Factura {invoice.invoiceNumber}
-                </h1>
+                <h1 className="text-2xl font-bold text-gray-900">Factura {invoice.invoiceNumber}</h1>
                 <p className="text-sm text-gray-500">
                   Emitida el{' '}
-                  {invoice.issuedAt
-                    ? new Date(invoice.issuedAt).toLocaleDateString('es-ES')
-                    : 'Fecha no disponible'}
+                  {invoice.issuedAt ? new Date(invoice.issuedAt).toLocaleDateString('es-ES') : 'Fecha no disponible'}
                 </p>
               </div>
             </div>
 
-            <Link
-              href="/admin/dashboard"
-              className="text-indigo-600 hover:text-indigo-800 font-medium"
-            >
+            <Link href="/admin/dashboard" className="text-indigo-600 hover:text-indigo-800 font-medium">
               ← Volver al Panel
             </Link>
           </div>

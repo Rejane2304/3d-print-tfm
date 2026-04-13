@@ -3,23 +3,20 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import {
-  AlertCircle,
-  ArrowRightLeft,
-  CheckCircle2,
-  Smartphone,
-} from 'lucide-react';
+import { AlertCircle, ArrowRightLeft, CheckCircle2, Smartphone } from 'lucide-react';
 
 function ProcessingContent({
   method,
   progress,
   reference,
-}: Readonly<{ method: 'bizum' | 'transfer'; progress: number; reference: string }>) {
+}: Readonly<{
+  method: 'bizum' | 'transfer';
+  progress: number;
+  reference: string;
+}>) {
   const isBizum = method === 'bizum';
   const Icon = isBizum ? Smartphone : ArrowRightLeft;
-  const title = isBizum
-    ? 'Conectando con Bizum...'
-    : 'Generando datos de transferencia...';
+  const title = isBizum ? 'Conectando con Bizum...' : 'Generando datos de transferencia...';
   return (
     <div className="text-center space-y-6">
       <div className="w-20 h-20 mx-auto relative">
@@ -106,7 +103,7 @@ export default function ProcessingPage() {
       return;
     }
 
-    const completePayment = async() => {
+    const completePayment = async () => {
       try {
         const response = await fetch('/api/payments/complete', {
           method: 'POST',
@@ -116,9 +113,7 @@ export default function ProcessingPage() {
         if (response.ok) {
           setStatus('success');
           setTimeout(() => {
-            router.push(
-              `/checkout/success?orderId=${orderId}&method=${method}&ref=${reference}`,
-            );
+            router.push(`/checkout/success?orderId=${orderId}&method=${method}&ref=${reference}`);
           }, 1500);
         } else {
           throw new Error('Error al completar el pago');
@@ -129,12 +124,9 @@ export default function ProcessingPage() {
       }
     };
 
-    const processFakePayment = async() => {
+    const processFakePayment = async () => {
       try {
-        const endpoint =
-          method === 'bizum'
-            ? '/api/payments/bizum/init'
-            : '/api/payments/transfer/init';
+        const endpoint = method === 'bizum' ? '/api/payments/bizum/init' : '/api/payments/transfer/init';
         const response = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

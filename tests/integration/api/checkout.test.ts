@@ -1,7 +1,7 @@
 /**
  * Integration Tests - Checkout API
  * Testing real database and API endpoints
- * 
+ *
  * Endpoints:
  * - POST /api/checkout - create checkout session
  * - Stripe webhook handling
@@ -67,31 +67,31 @@ describe('Checkout API', () => {
   beforeEach(async () => {
     // Clean up - IMPORTANT: Delete inventory movements first due to foreign key constraints
     await prisma.inventoryMovement.deleteMany({
-      where: { 
+      where: {
         OR: [
           { product: { slug: { startsWith: 'checkout-test-' } } },
-          { order: { user: { email: { startsWith: 'checkout-test-' } } } }
-        ]
+          { order: { user: { email: { startsWith: 'checkout-test-' } } } },
+        ],
       },
     });
     await prisma.orderItem.deleteMany({
-      where: { order: { user: { email: { startsWith: 'checkout-test-' } } } }
+      where: { order: { user: { email: { startsWith: 'checkout-test-' } } } },
     });
     await prisma.order.deleteMany({
       where: { user: { email: { startsWith: 'checkout-test-' } } },
     });
     await prisma.cartItem.deleteMany({
-      where: { cart: { user: { email: { startsWith: 'checkout-test-' } } } }
+      where: { cart: { user: { email: { startsWith: 'checkout-test-' } } } },
     });
     await prisma.product.deleteMany({
-      where: { slug: { startsWith: 'checkout-test-' } } },
-    );
+      where: { slug: { startsWith: 'checkout-test-' } },
+    });
     await prisma.category.deleteMany({
-      where: { slug: { startsWith: 'checkout-test-' } } },
-    );
+      where: { slug: { startsWith: 'checkout-test-' } },
+    });
     await prisma.user.deleteMany({
-      where: { email: { startsWith: 'checkout-test-' } } },
-    );
+      where: { email: { startsWith: 'checkout-test-' } },
+    });
 
     // Create test user
     const hashedPassword = await bcrypt.hash('TestPass123!', 10);
@@ -118,7 +118,7 @@ describe('Checkout API', () => {
       },
     });
 
-    testProduct = await prisma.product.create({
+    testProduct = (await prisma.product.create({
       data: {
         id: randomUUID(),
         name: 'Test Product',
@@ -131,7 +131,12 @@ describe('Checkout API', () => {
         isActive: true,
         updatedAt: new Date(),
       },
-    }) as unknown as { id: string; name: string; stock: number; price: number };
+    })) as unknown as {
+      id: string;
+      name: string;
+      stock: number;
+      price: number;
+    };
 
     // Create test address
     testAddress = await prisma.address.create({
@@ -162,33 +167,33 @@ describe('Checkout API', () => {
         OR: [
           { product: { slug: { startsWith: 'checkout-test-' } } },
           { order: { user: { email: { startsWith: 'checkout-test-' } } } },
-        ]
+        ],
       },
     });
     await prisma.orderItem.deleteMany({
-      where: { order: { user: { email: { startsWith: 'checkout-test-' } } } }
+      where: { order: { user: { email: { startsWith: 'checkout-test-' } } } },
     });
     await prisma.order.deleteMany({
       where: { user: { email: { startsWith: 'checkout-test-' } } },
     });
     await prisma.cartItem.deleteMany({
-      where: { cart: { user: { email: { startsWith: 'checkout-test-' } } } }
+      where: { cart: { user: { email: { startsWith: 'checkout-test-' } } } },
     });
     await prisma.cart.deleteMany({
-      where: { user: { email: { startsWith: 'checkout-test-' } } } }
-    );
+      where: { user: { email: { startsWith: 'checkout-test-' } } },
+    });
     await prisma.address.deleteMany({
-      where: { user: { email: { startsWith: 'checkout-test-' } } } }
-    );
+      where: { user: { email: { startsWith: 'checkout-test-' } } },
+    });
     await prisma.product.deleteMany({
-      where: { slug: { startsWith: 'checkout-test-' } } },
-    );
+      where: { slug: { startsWith: 'checkout-test-' } },
+    });
     await prisma.category.deleteMany({
-      where: { slug: { startsWith: 'checkout-test-' } } },
-    );
+      where: { slug: { startsWith: 'checkout-test-' } },
+    });
     await prisma.user.deleteMany({
-      where: { email: { startsWith: 'checkout-test-' } } },
-    );
+      where: { email: { startsWith: 'checkout-test-' } },
+    });
   });
 
   describe('POST /api/checkout', () => {

@@ -16,22 +16,14 @@ import Link from 'next/link';
 
 export default function CarritoPage() {
   const router = useRouter();
-  const {
-    cart,
-    loading,
-    error,
-    setError,
-    isAuthenticated,
-    updateQuantity,
-    removeItem,
-  } = useCart();
+  const { cart, loading, error, setError, isAuthenticated, updateQuantity, removeItem } = useCart();
 
   const { appliedCoupon, applyCoupon, removeCoupon } = useCoupon();
 
   const [updatingItem, setUpdatingItem] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleUpdateQuantity = async(itemId: string, quantity: number) => {
+  const handleUpdateQuantity = async (itemId: string, quantity: number) => {
     try {
       setUpdatingItem(itemId);
       const result = await updateQuantity(itemId, quantity);
@@ -45,7 +37,7 @@ export default function CarritoPage() {
     }
   };
 
-  const handleRemoveItem = async(itemId: string) => {
+  const handleRemoveItem = async (itemId: string) => {
     try {
       setUpdatingItem(itemId);
       const result = await removeItem(itemId);
@@ -59,7 +51,7 @@ export default function CarritoPage() {
     }
   };
 
-  const handleApplyCoupon = async(code: string) => {
+  const handleApplyCoupon = async (code: string) => {
     try {
       await applyCoupon(code);
     } catch (err) {
@@ -104,9 +96,7 @@ export default function CarritoPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="text-center">
           <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin text-indigo-600 mx-auto mb-4" />
-          <p className="text-gray-600 text-sm sm:text-base">
-            Cargando carrito...
-          </p>
+          <p className="text-gray-600 text-sm sm:text-base">Cargando carrito...</p>
         </div>
       </div>
     );
@@ -117,12 +107,8 @@ export default function CarritoPage() {
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 sm:mb-4">
-            Tu Carrito
-          </h1>
-          <p className="text-sm sm:text-base text-gray-600">
-            Revisa tus items y procede al pago cuando estés listo
-          </p>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 sm:mb-4">Tu Carrito</h1>
+          <p className="text-sm sm:text-base text-gray-600">Revisa tus items y procede al pago cuando estés listo</p>
         </div>
 
         {/* Error */}
@@ -133,10 +119,7 @@ export default function CarritoPage() {
           >
             <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-600 flex-shrink-0" />
             <p className="text-red-700 text-sm flex-1">{error}</p>
-            <button
-              onClick={() => setError(null)}
-              className="text-red-600 hover:text-red-800 text-sm"
-            >
+            <button onClick={() => setError(null)} className="text-red-600 hover:text-red-800 text-sm">
               Cerrar
             </button>
           </div>
@@ -151,8 +134,7 @@ export default function CarritoPage() {
             <Info className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 flex-shrink-0 mt-0.5 sm:mt-0" />
             <div className="flex-1">
               <p className="text-blue-700 text-sm">
-                Estás comprando como invitado. Para finalizar tu compra,
-                necesitarás iniciar sesión o registrarte.
+                Estás comprando como invitado. Para finalizar tu compra, necesitarás iniciar sesión o registrarte.
               </p>
             </div>
             <Link
@@ -170,7 +152,7 @@ export default function CarritoPage() {
           <div className="lg:col-span-2">
             {cart?.items && cart.items.length > 0 ? (
               <div className="space-y-3 sm:space-y-4">
-                {cart.items.map((item) => (
+                {cart.items.map(item => (
                   <CartItem
                     key={item.id}
                     item={item}
@@ -201,9 +183,7 @@ export default function CarritoPage() {
                     />
                   </svg>
                 </div>
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
-                  Tu carrito está vacío
-                </h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Tu carrito está vacío</h2>
                 <p className="text-sm sm:text-base text-gray-600 mb-6">
                   Añade algunos productos para comenzar tu compra
                 </p>
@@ -226,11 +206,7 @@ export default function CarritoPage() {
               isProcessing={isProcessing}
               onCheckout={handleCheckout}
               onContinueShopping={handleContinueShopping}
-              onApplyCoupon={
-                isAuthenticated && (cart?.items?.length || 0) > 0
-                  ? handleApplyCoupon
-                  : undefined
-              }
+              onApplyCoupon={isAuthenticated && (cart?.items?.length || 0) > 0 ? handleApplyCoupon : undefined}
               onRemoveCoupon={handleRemoveCoupon}
               appliedCoupon={appliedCoupon}
             />

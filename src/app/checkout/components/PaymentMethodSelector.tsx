@@ -67,9 +67,7 @@ function MethodLabel({ method, isSelected, onSelect }: Readonly<MethodLabelProps
     <label
       htmlFor={`payment-${method.id}`}
       className={`flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-all min-h-[44px] ${
-        isSelected
-          ? `${method.borderColor} ${method.bgColor}`
-          : 'border-gray-200 hover:border-gray-300'
+        isSelected ? `${method.borderColor} ${method.bgColor}` : 'border-gray-200 hover:border-gray-300'
       }`}
     >
       <input
@@ -85,22 +83,17 @@ function MethodLabel({ method, isSelected, onSelect }: Readonly<MethodLabelProps
         <Icon className={`h-5 w-5 sm:h-6 sm:w-6 ${method.color}`} />
       </div>
       <div className="flex-1 min-w-0">
-        <span className="font-medium text-gray-900 text-sm sm:text-base block">
-          {method.name}
-        </span>
+        <span className="font-medium text-gray-900 text-sm sm:text-base block">{method.name}</span>
         <p className="text-xs sm:text-sm text-gray-500">{method.description}</p>
       </div>
     </label>
   );
 }
 
-export function PaymentMethodSelector({
-  paymentMethod,
-  onSelectMethod,
-}: Readonly<PaymentMethodSelectorProps>) {
+export function PaymentMethodSelector({ paymentMethod, onSelectMethod }: Readonly<PaymentMethodSelectorProps>) {
   return (
     <div className="space-y-2 sm:space-y-3">
-      {paymentMethodsConfig.map((method) => (
+      {paymentMethodsConfig.map(method => (
         <MethodLabel
           key={method.id}
           method={method}

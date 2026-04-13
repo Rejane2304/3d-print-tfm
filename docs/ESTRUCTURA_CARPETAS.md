@@ -336,18 +336,18 @@
 
 ## 📊 Estadísticas del Proyecto
 
-| Métrica | Valor |
-|---------|-------|
-| **Lenguaje Principal** | TypeScript |
-| **Framework** | Next.js 14 (App Router) |
-| **Base de Datos** | PostgreSQL + Prisma ORM |
-| **Estilos** | Tailwind CSS |
-| **Tests** | Vitest (unitarios) + Playwright (e2e) |
-| **Entidades BD** | 24+ |
-| **Rutas API** | 62+ |
-| **Páginas Admin** | 15+ módulos |
-| **Archivos Git** | 315+ |
-| **Archivos Fuente** | 166 (TS/TSX) |
+| Métrica                | Valor                                 |
+| ---------------------- | ------------------------------------- |
+| **Lenguaje Principal** | TypeScript                            |
+| **Framework**          | Next.js 14 (App Router)               |
+| **Base de Datos**      | PostgreSQL + Prisma ORM               |
+| **Estilos**            | Tailwind CSS                          |
+| **Tests**              | Vitest (unitarios) + Playwright (e2e) |
+| **Entidades BD**       | 24+                                   |
+| **Rutas API**          | 62+                                   |
+| **Páginas Admin**      | 15+ módulos                           |
+| **Archivos Git**       | 315+                                  |
+| **Archivos Fuente**    | 166 (TS/TSX)                          |
 
 ---
 

@@ -31,12 +31,7 @@ interface CartItemProps {
   isUpdating?: boolean;
 }
 
-export default function CartItem({
-  item,
-  onUpdateQuantity,
-  onRemove,
-  isUpdating = false,
-}: Readonly<CartItemProps>) {
+export default function CartItem({ item, onUpdateQuantity, onRemove, isUpdating = false }: Readonly<CartItemProps>) {
   const [quantity, setQuantity] = useState(item.quantity);
   const [modalOpen, setModalOpen] = useState(false);
   const subtotal = item.unitPrice * item.quantity * 1.21; // IVA incluido
@@ -48,9 +43,7 @@ export default function CartItem({
         <div className="flex items-center justify-between">
           <div>
             <p className="text-gray-500">Producto no disponible</p>
-            <p className="text-sm text-gray-400">
-              Este producto ya no está en catálogo
-            </p>
+            <p className="text-sm text-gray-400">Este producto ya no está en catálogo</p>
           </div>
           <button
             type="button"
@@ -103,10 +96,7 @@ export default function CartItem({
   return (
     <div className="flex flex-col sm:flex-row gap-4 p-4 bg-white rounded-lg shadow-sm border border-gray-200">
       {/* Imagen del producto */}
-      <Link
-        href={`/products/${product.slug}`}
-        className="relative w-full sm:w-32 h-32 flex-shrink-0"
-      >
+      <Link href={`/products/${product.slug}`} className="relative w-full sm:w-32 h-32 flex-shrink-0">
         <Image
           src={product.image || '/images/placeholder.jpg'}
           alt={product.name}
@@ -125,9 +115,7 @@ export default function CartItem({
           >
             {product.name}
           </Link>
-          <p className="text-sm text-gray-500 mt-1">
-            {(item.unitPrice * 1.21).toFixed(2)} € / unidad (IVA incluido)
-          </p>
+          <p className="text-sm text-gray-500 mt-1">{(item.unitPrice * 1.21).toFixed(2)} € / unidad (IVA incluido)</p>
         </div>
 
         {/* Controles de cantidad */}
@@ -173,23 +161,17 @@ export default function CartItem({
             </button>
 
             {/* Indicador de stock */}
-            {quantity >= product.stock && (
-              <span className="text-xs text-orange-600 ml-2">Stock máximo</span>
-            )}
+            {quantity >= product.stock && <span className="text-xs text-orange-600 ml-2">Stock máximo</span>}
           </div>
 
           {/* Subtotal y botón eliminar */}
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <p className="text-lg font-semibold text-gray-900">
-                {subtotal.toFixed(2)} €
-              </p>
+              <p className="text-lg font-semibold text-gray-900">{subtotal.toFixed(2)} €</p>
               <p className="text-sm text-gray-500">
                 {item.quantity} x {item.unitPrice.toFixed(2)} €
               </p>
-              {isUpdating && (
-                <p className="text-xs text-gray-400 mt-1">Actualizando...</p>
-              )}
+              {isUpdating && <p className="text-xs text-gray-400 mt-1">Actualizando...</p>}
             </div>
 
             <button
@@ -200,11 +182,7 @@ export default function CartItem({
               data-testid="remove-item-button"
               className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors disabled:opacity-50"
             >
-              {isUpdating ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <Trash2 className="h-5 w-5" />
-              )}
+              {isUpdating ? <Loader2 className="h-5 w-5 animate-spin" /> : <Trash2 className="h-5 w-5" />}
             </button>
           </div>
         </div>

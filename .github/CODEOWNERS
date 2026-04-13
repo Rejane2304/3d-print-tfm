@@ -1,0 +1,30 @@
+# CODEOWNERS
+# Define quién debe revisar y aprobar cada parte del código
+# Más info: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global owner - aplica a todo el repo
+* @rejanerodrigues
+
+# Configuración de CI/CD y workflows
+/.github/ @rejanerodrigues
+/.husky/ @rejanerodrigues
+
+# Cambios de base de datos (muy sensibles)
+/prisma/ @rejanerodrigues
+
+# API Routes (backend)
+/src/app/api/ @rejanerodrigues
+/src/lib/auth/ @rejanerodrigues
+/src/lib/db/ @rejanerodrigues
+
+# Lógica de negocio crítica
+/src/lib/alerts/ @rejanerodrigues
+/src/lib/payments/ @rejanerodrigues
+
+# Tests (garantizan calidad)
+/tests/ @rejanerodrigues
+
+# Configuración del proyecto
+/package.json @rejanerodrigues
+/tsconfig.json @rejanerodrigues
+/next.config.js @rejanerodrigues

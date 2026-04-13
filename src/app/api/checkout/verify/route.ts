@@ -6,13 +6,14 @@ export const dynamic = 'force-dynamic';
  * GET /api/checkout/verify?session_id=xxx
  * Verifica el estado del pago con Stripe
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import Stripe from 'stripe';
 import { translateOrderStatus, translatePaymentStatus } from '@/lib/i18n';
-import { Order, OrderItem, Prisma } from '@prisma/client';
+import type { Order, OrderItem, Prisma } from '@prisma/client';
 
 // Tipo para el pedido incluyendo items y producto
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -195,19 +196,13 @@ export async function GET(req: NextRequest) {
     const sessionId = searchParams.get('session_id');
 
     if (!sessionId) {
-      return NextResponse.json(
-        { error: 'El ID de sesión es requerido' },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'El ID de sesión es requerido' }, { status: 400 });
     }
 
     const stripeSession = await verifyStripePayment(sessionId);
 
     if (!stripeSession) {
-      return NextResponse.json(
-        { error: 'Error al verificar sesión de pago' },
-        { status: 500 },
-      );
+      return NextResponse.json({ error: 'Error al verificar sesión de pago' }, { status: 500 });
     }
 
     if (stripeSession.payment_status !== 'paid') {
@@ -220,18 +215,11 @@ export async function GET(req: NextRequest) {
       return buildPendingResponse(stripeSession.payment_status);
     }
 
-    await updateOrderStatus(
-      order,
-      stripeSession.payment_intent as string,
-      userEmail,
-    );
+    await updateOrderStatus(order, stripeSession.payment_intent as string, userEmail);
 
     return buildSuccessResponse(order);
   } catch (error) {
     console.error('Error verifying checkout:', error);
-    return NextResponse.json(
-      { error: 'Error al verificar pago' },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: 'Error al verificar pago' }, { status: 500 });
   }
 }

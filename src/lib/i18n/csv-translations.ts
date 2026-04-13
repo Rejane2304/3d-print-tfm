@@ -82,14 +82,10 @@ export const productTranslations: Record<
 // REVIEW TRANSLATIONS (from reviews.csv)
 // ============================================================================
 
-export const reviewTranslations: Record<
-  string,
-  { title: string; comment: string }
-> = {
+export const reviewTranslations: Record<string, { title: string; comment: string }> = {
   'REV-0001': {
     title: 'Perfecto para mi escritorio',
-    comment:
-      'Exactamente lo que necesitaba para organizar mis bolígrafos y suministros. ¡Gran calidad!',
+    comment: 'Exactamente lo que necesitaba para organizar mis bolígrafos y suministros. ¡Gran calidad!',
   },
   'REV-0002': {
     title: 'Buena calidad',
@@ -105,23 +101,19 @@ export const reviewTranslations: Record<
   },
   'REV-0005': {
     title: '¡A mi hijo le encanta!',
-    comment:
-      'Las articulaciones están muy bien hechas. Regalo perfecto para fans de dinosaurios.',
+    comment: 'Las articulaciones están muy bien hechas. Regalo perfecto para fans de dinosaurios.',
   },
   'REV-0006': {
     title: 'Coleccionable genial',
-    comment:
-      'Muy detallado y divertido de posar. Faltan algunos detalles menores pero en general excelente.',
+    comment: 'Muy detallado y divertido de posar. Faltan algunos detalles menores pero en general excelente.',
   },
   'REV-0007': {
     title: 'Artesanía impresionante',
-    comment:
-      'Las ruedas realmente giran y las puertas se abren. ¡Atención al detalle asombrosa!',
+    comment: 'Las ruedas realmente giran y las puertas se abren. ¡Atención al detalle asombrosa!',
   },
   'REV-0008': {
     title: 'Calidad de coleccionista',
-    comment:
-      'Mejor de lo esperado. Definitivamente compraré más de esta tienda.',
+    comment: 'Mejor de lo esperado. Definitivamente compraré más de esta tienda.',
   },
   'REV-0009': {
     title: 'Lámpara hermosa',
@@ -129,8 +121,7 @@ export const reviewTranslations: Record<
   },
   'REV-0010': {
     title: 'Regalo increíble',
-    comment:
-      'Compré esto como regalo y quedaron encantados. La textura lunar es increíble.',
+    comment: 'Compré esto como regalo y quedaron encantados. La textura lunar es increíble.',
   },
   'REV-0011': {
     title: 'Genial pero frágil',
@@ -146,13 +137,11 @@ export const reviewTranslations: Record<
   },
   'REV-0014': {
     title: 'Detalle increíble',
-    comment:
-      'El nivel de detalle en esta miniatura es impresionante. Vale cada euro.',
+    comment: 'El nivel de detalle en esta miniatura es impresionante. Vale cada euro.',
   },
   'REV-0015': {
     title: 'Caja puzzle divertida',
-    comment:
-      'Me tomó 10 minutos descubrir cómo abrirla. ¡Gran pieza de conversación!',
+    comment: 'Me tomó 10 minutos descubrir cómo abrirla. ¡Gran pieza de conversación!',
   },
 };
 
@@ -174,18 +163,14 @@ export const siteConfigTranslations: Record<string, { value: string }> = {
 // ALERT TRANSLATIONS (from alerts.csv)
 // ============================================================================
 
-export const alertTranslations: Record<
-  string,
-  { title: string; message: string }
-> = {
+export const alertTranslations: Record<string, { title: string; message: string }> = {
   'ALRT-0001': {
     title: 'Stock bajo',
     message: 'Lámpara Lunar 3D tiene stock bajo (2 unidades restantes)',
   },
   'ALRT-0002': {
     title: 'Stock bajo',
-    message:
-      'Figura Articulada de Dinosaurio Rex tiene stock bajo (4 unidades restantes)',
+    message: 'Figura Articulada de Dinosaurio Rex tiene stock bajo (4 unidades restantes)',
   },
   'ALRT-0003': {
     title: 'Pedido retrasado',
@@ -205,10 +190,7 @@ export const alertTranslations: Record<
 // SHIPPING CONFIG TRANSLATIONS (from shipping_config.csv)
 // ============================================================================
 
-export const shippingConfigTranslations: Record<
-  string,
-  { name: string; description: string }
-> = {
+export const shippingConfigTranslations: Record<string, { name: string; description: string }> = {
   'SHIP-0001': {
     name: 'Envío Estándar',
     description: 'Entrega estándar en 3-5 días hábiles',
@@ -239,9 +221,7 @@ export function translateProductShortDescription(ref: string): string {
   return productTranslations[ref]?.shortDescription || '';
 }
 
-export function translateReview(
-  ref: string,
-): { title: string; comment: string } | null {
+export function translateReview(ref: string): { title: string; comment: string } | null {
   return reviewTranslations[ref] || null;
 }
 
@@ -249,14 +229,10 @@ export function translateSiteConfig(key: string): string {
   return siteConfigTranslations[key]?.value || '';
 }
 
-export function translateAlert(
-  ref: string,
-): { title: string; message: string } | null {
+export function translateAlert(ref: string): { title: string; message: string } | null {
   return alertTranslations[ref] || null;
 }
 
-export function translateShippingConfig(
-  ref: string,
-): { name: string; description: string } | null {
+export function translateShippingConfig(ref: string): { name: string; description: string } | null {
   return shippingConfigTranslations[ref] || null;
 }

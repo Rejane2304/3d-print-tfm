@@ -21,7 +21,7 @@ export async function GET() {
     });
 
     // Translate to Spanish
-    const categoriesTranslated = categories.map((cat) => ({
+    const categoriesTranslated = categories.map(cat => ({
       id: cat.id,
       nombre: translateCategoryName(cat.slug),
       slug: cat.slug,
@@ -34,9 +34,6 @@ export async function GET() {
     });
   } catch (error) {
     console.error('Error fetching categories:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error al cargar categorías' },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: 'Error al cargar categorías' }, { status: 500 });
   }
 }

@@ -3,12 +3,7 @@
  * Tests for actual Zod schemas from @/lib/validators
  */
 import { describe, it, expect } from 'vitest';
-import {
-  orderItemSchema,
-  createOrderSchema,
-  updateOrderStatusSchema,
-  cancelOrderSchema,
-} from '@/lib/validators';
+import { orderItemSchema, createOrderSchema, updateOrderStatusSchema, cancelOrderSchema } from '@/lib/validators';
 import { OrderStatus } from '@/types/prisma-enums';
 
 describe('Order Validators', () => {
@@ -144,9 +139,7 @@ describe('Order Validators', () => {
     it('should reject invalid product in items', () => {
       const result = createOrderSchema.safeParse({
         ...validOrder,
-        items: [
-          { productId: 'invalid-uuid', quantity: 2 },
-        ],
+        items: [{ productId: 'invalid-uuid', quantity: 2 }],
       });
       expect(result.success).toBe(false);
     });
@@ -154,9 +147,7 @@ describe('Order Validators', () => {
     it('should reject multiple items with total quantity exceeding 100 per product', () => {
       const result = createOrderSchema.safeParse({
         ...validOrder,
-        items: [
-          { productId: '550e8400-e29b-41d4-a716-446655440000', quantity: 101 },
-        ],
+        items: [{ productId: '550e8400-e29b-41d4-a716-446655440000', quantity: 101 }],
       });
       expect(result.success).toBe(false);
     });

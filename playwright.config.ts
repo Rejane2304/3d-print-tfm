@@ -16,10 +16,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: [
-    ['html', { open: 'never' }],
-    ['list'],
-  ],
+  reporter: [['html', { open: 'never' }], ['list']],
   use: {
     baseURL: process.env.BASE_URL || 'http://localhost:3000',
     trace: 'on-first-retry',
@@ -82,12 +79,14 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'NODE_ENV=test npx next dev',
+    command: 'NODE_ENV=test npm run dev',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120000,
     env: {
       NODE_ENV: 'test',
+      // Force using test database - NEVER use dev/prod databases for tests
+      DATABASE_URL: 'postgresql://testuser:testpassword123@localhost:5433/3dprint_tfm_test',
     },
   },
 });

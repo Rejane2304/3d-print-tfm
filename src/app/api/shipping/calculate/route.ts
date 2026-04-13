@@ -2,7 +2,8 @@
  * API de Cálculo de Envío
  * Calcula el costo de envío basado en la dirección y el total del carrito
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { z } from 'zod';
 import type { ShippingZone } from '@prisma/client';
@@ -12,9 +13,7 @@ const calculateShippingSchema = z.object({
   country: z.string().min(1, 'El país es obligatorio'),
   region: z.string().min(1, 'La región es obligatoria'),
   postalCode: z.string().min(1, 'El código postal es obligatorio'),
-  cartTotal: z
-    .number()
-    .min(0, 'El total del carrito debe ser mayor o igual a 0'),
+  cartTotal: z.number().min(0, 'El total del carrito debe ser mayor o igual a 0'),
 });
 
 // Tipo para los datos validados
@@ -59,24 +58,15 @@ async function fetchShippingZones(country: string): Promise<ShippingZone[]> {
 /**
  * Encuentra la zona que coincide con el prefijo del código postal
  */
-function findZoneByPostalCode(
-  zones: ShippingZone[],
-  postalCode: string,
-): ShippingZone | undefined {
-  return zones.find((zone) =>
-    zone.postalCodePrefixes.some((prefix) => postalCode.startsWith(prefix)),
-  );
+function findZoneByPostalCode(zones: ShippingZone[], postalCode: string): ShippingZone | undefined {
+  return zones.find(zone => zone.postalCodePrefixes.some(prefix => postalCode.startsWith(prefix)));
 }
 
 /**
  * Busca la zona por defecto (España)
  */
 function findDefaultZone(zones: ShippingZone[]): ShippingZone | undefined {
-  return zones.find(
-    (z) =>
-      z.country.toLowerCase().includes('spain') ||
-      z.country.toLowerCase().includes('españa'),
-  );
+  return zones.find(z => z.country.toLowerCase().includes('spain') || z.country.toLowerCase().includes('españa'));
 }
 
 /**
@@ -92,18 +82,14 @@ function calculateShippingCost(
   amountToFreeShipping: number | null;
 } {
   const baseCost = Number(zone.baseCost);
-  const freeThreshold = zone.freeShippingThreshold
-    ? Number(zone.freeShippingThreshold)
-    : null;
+  const freeThreshold = zone.freeShippingThreshold ? Number(zone.freeShippingThreshold) : null;
   const isFree = freeThreshold ? cartTotal >= freeThreshold : false;
 
   return {
     shippingCost: isFree ? 0 : baseCost,
     isFreeShipping: isFree,
     freeShippingThreshold: freeThreshold,
-    amountToFreeShipping: freeThreshold
-      ? Math.max(0, freeThreshold - cartTotal)
-      : null,
+    amountToFreeShipping: freeThreshold ? Math.max(0, freeThreshold - cartTotal) : null,
   };
 }
 
@@ -170,15 +156,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(buildShippingResponse(defaultZone, data, false));
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { success: false, error: error.errors[0].message },
-        { status: 400 },
-      );
+      return NextResponse.json({ success: false, error: error.errors[0].message }, { status: 400 });
     }
     console.error('Error calculando envío:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error interno' },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: 'Error interno' }, { status: 500 });
   }
 }

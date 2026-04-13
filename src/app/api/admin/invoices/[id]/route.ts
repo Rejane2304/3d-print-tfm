@@ -4,23 +4,18 @@
  *
  * Requiere: Rol ADMIN
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { translateErrorMessage } from '@/lib/i18n';
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: translateErrorMessage('No autenticado') },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: translateErrorMessage('No autenticado') }, { status: 401 });
     }
 
     const usuario = await prisma.user.findUnique({
@@ -28,10 +23,7 @@ export async function GET(
     });
 
     if (usuario?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: translateErrorMessage('No autorizado') },
-        { status: 403 },
-      );
+      return NextResponse.json({ success: false, error: translateErrorMessage('No autorizado') }, { status: 403 });
     }
 
     const factura = await prisma.invoice.findUnique({
@@ -63,10 +55,7 @@ export async function GET(
     });
 
     if (!factura) {
-      return NextResponse.json(
-        { success: false, error: translateErrorMessage('Factura not found') },
-        { status: 404 },
-      );
+      return NextResponse.json({ success: false, error: translateErrorMessage('Factura not found') }, { status: 404 });
     }
 
     // Transformar datos al formato esperado por el componente
@@ -105,7 +94,7 @@ export async function GET(
         numeroPedido: factura.order?.orderNumber || '',
         metodoPago: factura.order?.paymentMethod || 'CARD',
         items:
-          factura.order?.items.map((item) => ({
+          factura.order?.items.map(item => ({
             id: item.id,
             name: item.name,
             quantity: item.quantity,
@@ -125,24 +114,15 @@ export async function GET(
     return NextResponse.json({ success: true, factura: facturaFormateada });
   } catch (error) {
     console.error('Error obteniendo factura:', error);
-    return NextResponse.json(
-      { success: false, error: translateErrorMessage('Internal error') },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: translateErrorMessage('Internal error') }, { status: 500 });
   }
 }
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: translateErrorMessage('No autenticado') },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: translateErrorMessage('No autenticado') }, { status: 401 });
     }
 
     const usuario = await prisma.user.findUnique({
@@ -150,10 +130,7 @@ export async function DELETE(
     });
 
     if (usuario?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: translateErrorMessage('No autorizado') },
-        { status: 403 },
-      );
+      return NextResponse.json({ success: false, error: translateErrorMessage('No autorizado') }, { status: 403 });
     }
 
     // Anular la factura (no eliminar)
@@ -168,9 +145,6 @@ export async function DELETE(
     return NextResponse.json({ success: true, factura });
   } catch (error) {
     console.error('Error anulando factura:', error);
-    return NextResponse.json(
-      { success: false, error: translateErrorMessage('Internal error') },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: translateErrorMessage('Internal error') }, { status: 500 });
   }
 }

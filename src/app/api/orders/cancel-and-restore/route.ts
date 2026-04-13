@@ -3,7 +3,8 @@
  * POST /api/orders/cancel-and-restore
  * Cancela un pedido pendiente y restaura el stock reservado
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
@@ -21,10 +22,7 @@ export async function POST(req: NextRequest) {
     const { orderId } = body;
 
     if (!orderId) {
-      return NextResponse.json(
-        { error: 'Order ID requerido' },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'Order ID requerido' }, { status: 400 });
     }
 
     // Buscar el pedido
@@ -46,10 +44,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!order) {
-      return NextResponse.json(
-        { error: 'Pedido no encontrado o ya procesado' },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: 'Pedido no encontrado o ya procesado' }, { status: 404 });
     }
 
     // Get user for inventory movement
@@ -59,14 +54,11 @@ export async function POST(req: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Usuario no encontrado' },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
 
     // Ejecutar en transacción: restaurar stock + cancelar pedido + movimientos
-    await prisma.$transaction(async(tx) => {
+    await prisma.$transaction(async tx => {
       // 1. Restaurar stock de cada producto Y registrar movimiento
       for (const item of order.items) {
         if (!item.productId) {
@@ -132,9 +124,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error('Error cancelling order:', error);
-    return NextResponse.json(
-      { error: 'Error al cancelar el pedido' },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: 'Error al cancelar el pedido' }, { status: 500 });
   }
 }

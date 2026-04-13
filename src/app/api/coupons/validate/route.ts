@@ -5,18 +5,16 @@
  * POST /api/coupons/validate
  * Body: { code: string, orderAmount: number }
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { z } from 'zod';
 import { couponTranslations } from '@/lib/i18n';
-import { Decimal } from '@prisma/client/runtime/library';
+import type { Decimal } from '@prisma/client/runtime/library';
 
 const validateSchema = z.object({
   code: z.string().min(1, 'El código es obligatorio'),
-  orderAmount: z
-    .number()
-    .min(0, 'El monto debe ser mayor o igual a 0')
-    .default(0),
+  orderAmount: z.number().min(0, 'El monto debe ser mayor o igual a 0').default(0),
 });
 
 // Build reverse translation map for Spanish to English coupon codes
@@ -71,7 +69,11 @@ function validateCouponConstraints(
   }
 
   if (coupon.validFrom > now) {
-    return { valid: false, error: 'Este cupón aún no está disponible', status: 400 };
+    return {
+      valid: false,
+      error: 'Este cupón aún no está disponible',
+      status: 400,
+    };
   }
 
   if (coupon.validUntil < now) {
@@ -79,7 +81,11 @@ function validateCouponConstraints(
   }
 
   if (coupon.maxUses !== null && coupon.usedCount >= coupon.maxUses) {
-    return { valid: false, error: 'Este cupón ha alcanzado el límite de usos', status: 400 };
+    return {
+      valid: false,
+      error: 'Este cupón ha alcanzado el límite de usos',
+      status: 400,
+    };
   }
 
   const minAmount = coupon.minOrderAmount === null ? null : Number(coupon.minOrderAmount);
@@ -95,11 +101,7 @@ function validateCouponConstraints(
 }
 
 // Calculate discount based on coupon type
-function calculateDiscount(
-  couponType: string,
-  couponValue: number,
-  orderAmount: number,
-): number {
+function calculateDiscount(couponType: string, couponValue: number, orderAmount: number): number {
   if (couponType === 'PERCENTAGE') {
     return orderAmount * (couponValue / 100);
   }
@@ -129,18 +131,12 @@ export async function POST(req: NextRequest) {
     const coupon = await findCouponByCode(searchCode);
 
     if (!coupon) {
-      return NextResponse.json(
-        { success: false, error: 'Cupón no encontrado' },
-        { status: 404 },
-      );
+      return NextResponse.json({ success: false, error: 'Cupón no encontrado' }, { status: 404 });
     }
 
     const validation = validateCouponConstraints(coupon, data.orderAmount);
     if (!validation.valid) {
-      return NextResponse.json(
-        { success: false, error: validation.error },
-        { status: validation.status },
-      );
+      return NextResponse.json({ success: false, error: validation.error }, { status: validation.status });
     }
 
     const discount = calculateDiscount(coupon.type, Number(coupon.value), data.orderAmount);
@@ -161,15 +157,9 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { success: false, error: error.errors[0].message },
-        { status: 400 },
-      );
+      return NextResponse.json({ success: false, error: error.errors[0].message }, { status: 400 });
     }
     console.error('Error validando cupón:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error interno' },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: 'Error interno' }, { status: 500 });
   }
 }

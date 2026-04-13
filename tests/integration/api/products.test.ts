@@ -1,7 +1,7 @@
 /**
  * Integration Tests - Products API
  * Testing real database and API endpoints
- * 
+ *
  * Endpoints:
  * - GET /api/products - listing with filters
  * - GET /api/products/[slug] - product detail
@@ -56,7 +56,7 @@ describe('Products API', () => {
     // Create test products
     const timestamp = Date.now();
     testProducts = [];
-    
+
     const product1 = await prisma.product.create({
       data: {
         id: randomUUID(),
@@ -71,7 +71,7 @@ describe('Products API', () => {
         updatedAt: new Date(),
       },
     });
-    
+
     const product2 = await prisma.product.create({
       data: {
         id: randomUUID(),
@@ -238,7 +238,9 @@ describe('Products API', () => {
       if (!activeProduct) return;
 
       const req = new NextRequest(`http://localhost:3000/api/products/${activeProduct.slug}`);
-      const res = await getProductDetail(req, { params: { slug: activeProduct.slug } });
+      const res = await getProductDetail(req, {
+        params: { slug: activeProduct.slug },
+      });
       const body = await res.json();
 
       expect(res.status).toBe(200);
@@ -251,7 +253,9 @@ describe('Products API', () => {
 
     it('should return 404 for non-existent product', async () => {
       const req = new NextRequest('http://localhost:3000/api/products/non-existent-product-12345');
-      const res = await getProductDetail(req, { params: { slug: 'non-existent-product-12345' } });
+      const res = await getProductDetail(req, {
+        params: { slug: 'non-existent-product-12345' },
+      });
 
       expect(res.status).toBe(404);
     });
@@ -261,7 +265,9 @@ describe('Products API', () => {
       if (!inactiveProduct) return;
 
       const req = new NextRequest(`http://localhost:3000/api/products/${inactiveProduct.slug}`);
-      const res = await getProductDetail(req, { params: { slug: inactiveProduct.slug } });
+      const res = await getProductDetail(req, {
+        params: { slug: inactiveProduct.slug },
+      });
 
       expect(res.status).toBe(404);
     });
@@ -274,7 +280,7 @@ describe('Products API', () => {
       await prisma.productImage.create({
         data: {
           id: randomUUID(),
-        productId: activeProduct.id,
+          productId: activeProduct.id,
           url: 'https://example.com/image.jpg',
           filename: 'image.jpg',
           altText: 'Test Image',
@@ -285,7 +291,9 @@ describe('Products API', () => {
       });
 
       const req = new NextRequest(`http://localhost:3000/api/products/${activeProduct.slug}`);
-      const res = await getProductDetail(req, { params: { slug: activeProduct.slug } });
+      const res = await getProductDetail(req, {
+        params: { slug: activeProduct.slug },
+      });
       const body = await res.json();
 
       expect(res.status).toBe(200);
@@ -298,7 +306,9 @@ describe('Products API', () => {
       if (!activeProduct) return;
 
       const req = new NextRequest(`http://localhost:3000/api/products/${activeProduct.slug}`);
-      const res = await getProductDetail(req, { params: { slug: activeProduct.slug } });
+      const res = await getProductDetail(req, {
+        params: { slug: activeProduct.slug },
+      });
       const body = await res.json();
 
       expect(res.status).toBe(200);
@@ -355,7 +365,7 @@ describe('Products API', () => {
       const customer = await prisma.user.create({
         data: {
           id: randomUUID(),
-        email: `customer-${Date.now()}@test.com`,
+          email: `customer-${Date.now()}@test.com`,
           password: hashedPassword,
           name: 'Customer User',
           role: 'CUSTOMER',

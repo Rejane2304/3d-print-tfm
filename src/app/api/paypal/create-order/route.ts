@@ -3,7 +3,8 @@
  * POST /api/paypal/create-order
  * Creates a PayPal order for payment
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
@@ -11,9 +12,7 @@ import { translateErrorMessage } from '@/lib/i18n';
 
 // PayPal API base URLs
 const PAYPAL_API =
-  process.env.NODE_ENV === 'production'
-    ? 'https://api-m.paypal.com'
-    : 'https://api-m.sandbox.paypal.com';
+  process.env.NODE_ENV === 'production' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com';
 
 async function getPayPalAccessToken(): Promise<string> {
   const clientId = process.env.PAYPAL_CLIENT_ID;
@@ -46,20 +45,14 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { error: translateErrorMessage('No autenticado') },
-        { status: 401 },
-      );
+      return NextResponse.json({ error: translateErrorMessage('No autenticado') }, { status: 401 });
     }
 
     const body = await req.json();
     const { total, orderId } = body;
 
     if (!total || !orderId) {
-      return NextResponse.json(
-        { error: translateErrorMessage('Missing required fields') },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: translateErrorMessage('Missing required fields') }, { status: 400 });
     }
 
     // Verify order exists and belongs to user
@@ -69,10 +62,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (order?.user?.email !== session.user.email) {
-      return NextResponse.json(
-        { error: translateErrorMessage('Pedido not found') },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: translateErrorMessage('Pedido not found') }, { status: 404 });
     }
 
     const accessToken = await getPayPalAccessToken();
@@ -125,9 +115,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ paypalOrderId: paypalOrder.id });
   } catch (error) {
     console.error('Error creating PayPal order:', error);
-    return NextResponse.json(
-      { error: 'Error al crear orden de PayPal' },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: 'Error al crear orden de PayPal' }, { status: 500 });
   }
 }

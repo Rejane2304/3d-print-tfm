@@ -4,12 +4,13 @@
  *
  * Requires: ADMIN role
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
-import { AlertSeverity, AlertStatus, AlertType, Prisma } from '@prisma/client';
+import type { AlertSeverity, AlertStatus, AlertType, Prisma } from '@prisma/client';
 import {
   translateAlertSeverity,
   translateAlertStatus,
@@ -31,10 +32,7 @@ export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
     }
 
     const usuario = await prisma.user.findUnique({
@@ -42,10 +40,7 @@ export async function GET(req: NextRequest) {
     });
 
     if (usuario?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 403 },
-      );
+      return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 403 });
     }
 
     // Ejecutar verificaciones programadas al cargar el panel
@@ -125,11 +120,9 @@ export async function GET(req: NextRequest) {
     ]);
 
     // Translate only for UI, keep original values
-    const translatedAlertas = alertas.map((alerta) => {
+    const translatedAlertas = alertas.map(alerta => {
       // Traducir nombre del producto si existe
-      const productNameTranslated = alerta.product
-        ? translateProductName(alerta.product.slug)
-        : null;
+      const productNameTranslated = alerta.product ? translateProductName(alerta.product.slug) : null;
 
       // Reconstruir título y mensaje con nombre traducido
       const titleTranslated = productNameTranslated
@@ -154,13 +147,13 @@ export async function GET(req: NextRequest) {
         resolutionNotes: alerta.resolutionNotes,
         product: alerta.product
           ? {
-            id: alerta.product.id,
-            name: productNameTranslated || alerta.product.name,
-            slug: alerta.product.slug,
-            stock: alerta.product.stock,
-            minStock: alerta.product.minStock,
-            image: alerta.product.images[0]?.url || null,
-          }
+              id: alerta.product.id,
+              name: productNameTranslated || alerta.product.name,
+              slug: alerta.product.slug,
+              stock: alerta.product.stock,
+              minStock: alerta.product.minStock,
+              image: alerta.product.images[0]?.url || null,
+            }
           : null,
         resolvedByUser: alerta.resolvedByUser,
       };
@@ -179,10 +172,7 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error('Error listing alerts:', error);
-    return NextResponse.json(
-      { success: false, error: translateErrorMessage('Internal error') },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: translateErrorMessage('Internal error') }, { status: 500 });
   }
 }
 
@@ -191,10 +181,7 @@ export async function PATCH(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
     }
 
     const usuario = await prisma.user.findUnique({
@@ -202,10 +189,7 @@ export async function PATCH(req: NextRequest) {
     });
 
     if (usuario?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 403 },
-      );
+      return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 403 });
     }
 
     const body = await req.json();
@@ -263,9 +247,6 @@ export async function PATCH(req: NextRequest) {
       );
     }
     console.error('Error updating alert:', error);
-    return NextResponse.json(
-      { success: false, error: translateErrorMessage('Internal error') },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: translateErrorMessage('Internal error') }, { status: 500 });
   }
 }

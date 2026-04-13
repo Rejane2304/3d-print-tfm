@@ -5,7 +5,8 @@ export const dynamic = 'force-dynamic';
  * GET /api/admin/analytics
  * Returns sales, orders, customer statistics
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
@@ -16,10 +17,7 @@ export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
     }
 
     // Verify admin role
@@ -29,10 +27,7 @@ export async function GET(req: NextRequest) {
     });
 
     if (adminUser?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'Acceso denegado' },
-        { status: 403 },
-      );
+      return NextResponse.json({ success: false, error: 'Acceso denegado' }, { status: 403 });
     }
 
     // Get date range from query
@@ -46,11 +41,7 @@ export async function GET(req: NextRequest) {
     weekAgo.setDate(weekAgo.getDate() - 7);
     const monthAgo = new Date(today);
     monthAgo.setMonth(monthAgo.getMonth() - 1);
-    const lastMonthStart = new Date(
-      today.getFullYear(),
-      today.getMonth() - 1,
-      1,
-    );
+    const lastMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
     const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
     const yearStart = new Date(today.getFullYear(), 0, 1);
 
@@ -306,9 +297,7 @@ export async function GET(req: NextRequest) {
         });
         return {
           id: item.productId,
-          nombre: product?.slug
-            ? translateProductName(product.slug)
-            : 'Producto eliminado',
+          nombre: product?.slug ? translateProductName(product.slug) : 'Producto eliminado',
           vendido: item._sum.quantity || 0,
           ingresos: Number(item._sum.subtotal || 0),
           stock: product?.stock || 0,
@@ -415,14 +404,14 @@ export async function GET(req: NextRequest) {
         },
         orderStats: {
           // Métricas de gestoría completas
-          totalHistoric: orderStats[0],           // Todos los pedidos (incluye cancelados)
-          totalActive: orderStats[1],            // Pedidos no cancelados
-          totalToday: orderStats[2],             // Pedidos creados hoy
-          totalThisWeek: orderStats[3],          // Pedidos de la semana
-          totalThisMonth: orderStats[4],         // Pedidos del mes
-          totalCancelled: orderStats[5],         // Pedidos cancelados
-          totalPending: orderStats[6],           // Pedidos pendientes de pago
-          totalPaid: orderStats[7],              // Pedidos pagados/confirmados
+          totalHistoric: orderStats[0], // Todos los pedidos (incluye cancelados)
+          totalActive: orderStats[1], // Pedidos no cancelados
+          totalToday: orderStats[2], // Pedidos creados hoy
+          totalThisWeek: orderStats[3], // Pedidos de la semana
+          totalThisMonth: orderStats[4], // Pedidos del mes
+          totalCancelled: orderStats[5], // Pedidos cancelados
+          totalPending: orderStats[6], // Pedidos pendientes de pago
+          totalPaid: orderStats[7], // Pedidos pagados/confirmados
           // Legacy (para compatibilidad)
           total: orderStats[1],
           today: orderStats[2],
@@ -437,7 +426,7 @@ export async function GET(req: NextRequest) {
         },
         topProducts: topProductsWithDetails,
         topCustomers: topCustomersWithDetails,
-        recentOrders: recentOrders.map((o) => ({
+        recentOrders: recentOrders.map(o => ({
           id: o.id,
           numeroPedido: o.orderNumber,
           clienteNombre: o.user?.name || 'N/A',
@@ -449,9 +438,6 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching analytics:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error al obtener analytics' },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: 'Error al obtener analytics' }, { status: 500 });
   }
 }

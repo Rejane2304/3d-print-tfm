@@ -16,39 +16,46 @@
 ## 🎯 Fases Completadas
 
 ### Fase 1: Fundamentos ✅
+
 - Configuración del proyecto
 - Configuración de Prisma + NextAuth
 - Tests base (unitarios)
 
 ### Fase 2: Autenticación ✅
+
 - Login/Registro (página /auth unificada)
 - Middleware de autorización
 - Tests E2E (múltiples dispositivos)
 
 ### Fase 3: Catálogo de Productos ✅
+
 - Grid con filtros, búsqueda, paginación
 - Detalle de producto con reseñas
 - Tests de API y componentes
 
 ### Fase 4: Checkout ✅
+
 - Carrito de compras persistente
 - Pagos simulados (CARD, PAYPAL, BIZUM, TRANSFER)
 - Sistema de confirmación
 - Tests de integración
 
 ### Fase 5: Panel de Administración ✅
+
 - Dashboard con métricas en tiempo real
 - Gestión de productos completa
 - Gestión de pedidos con estados
 - Tests de administración
 
 ### Fase 6: Funcionalidades Avanzadas ✅
+
 - **Facturación**: Sistema PDF completo
 - **Alertas**: 10 tipos de alertas automáticas
 - **Mensajería**: Chat de pedidos
 - **Perfiles**: Edición de datos personales
 
 ### Fase 7: Módulos Adicionales ✅
+
 - **Categorías**: CRUD completo con imágenes
 - **Cupones**: Códigos de descuento (PERCENTAGE, FIXED, FREE_SHIPPING)
 - **Reseñas**: Valoraciones de clientes con moderación
@@ -57,6 +64,7 @@
 - **Configuración del Sitio**: Datos de empresa editables
 
 ### Fase 8: Calidad ✅
+
 - Auditoría de cobertura
 - Optimización de rendimiento
 - Accesibilidad WCAG 2.1 AA
@@ -85,26 +93,26 @@ Cobertura de dispositivos E2E:
 
 ### Cobertura de Código
 
-| Componente | Tests | Cobertura |
-|-----------|-------|----------|
-| API Auth | Validaciones + endpoints | 85%+ |
-| API Products | CRUD + filtros | 90%+ |
-| API Cart | Operaciones de carrito | 95%+ |
-| API Checkout | Proceso completo | 85%+ |
-| API Admin | Panel de administración | 80%+ |
-| Middleware | Rate limiting + auth | 90%+ |
-| Validadores | Esquemas Zod | 100% |
+| Componente   | Tests                    | Cobertura |
+| ------------ | ------------------------ | --------- |
+| API Auth     | Validaciones + endpoints | 85%+      |
+| API Products | CRUD + filtros           | 90%+      |
+| API Cart     | Operaciones de carrito   | 95%+      |
+| API Checkout | Proceso completo         | 85%+      |
+| API Admin    | Panel de administración  | 80%+      |
+| Middleware   | Rate limiting + auth     | 90%+      |
+| Validadores  | Esquemas Zod             | 100%      |
 
 ### Rendimiento (Lighthouse)
 
-| Página | Rendimiento | Accesibilidad | Mejores Prácticas | SEO |
-|--------|-------------|---------------|-------------------|-----|
-| Inicio | 92 | 98 | 100 | 100 |
-| Productos | 90 | 95 | 100 | 100 |
-| Detalle Producto | 88 | 96 | 100 | 100 |
-| Carrito | 94 | 97 | 100 | 100 |
-| Checkout | 89 | 95 | 100 | 100 |
-| Admin Dashboard | 86 | 92 | 100 | N/A |
+| Página           | Rendimiento | Accesibilidad | Mejores Prácticas | SEO |
+| ---------------- | ----------- | ------------- | ----------------- | --- |
+| Inicio           | 92          | 98            | 100               | 100 |
+| Productos        | 90          | 95            | 100               | 100 |
+| Detalle Producto | 88          | 96            | 100               | 100 |
+| Carrito          | 94          | 97            | 100               | 100 |
+| Checkout         | 89          | 95            | 100               | 100 |
+| Admin Dashboard  | 86          | 92            | 100               | N/A |
 
 ### Core Web Vitals
 
@@ -184,6 +192,7 @@ BD (Inglés) → Traducción API → Frontend (Español)
 ## 🎨 Funcionalidades Implementadas
 
 ### Públicas (Tienda)
+
 - ✅ Inicio con hero y productos destacados
 - ✅ Catálogo con filtros (categoría, material, precio, stock)
 - ✅ Búsqueda por texto
@@ -195,6 +204,7 @@ BD (Inglés) → Traducción API → Frontend (Español)
 - ✅ Autenticación unificada `/auth` con pestañas
 
 ### Panel de Administración (15+ Módulos)
+
 - ✅ Dashboard con métricas en tiempo real
 - ✅ CRUD completo de productos con imágenes
 - ✅ Gestión de categorías con imágenes
@@ -212,6 +222,7 @@ BD (Inglés) → Traducción API → Frontend (Español)
 - ✅ Panel de alertas en tiempo real
 
 ### Cuenta de Usuario
+
 - ✅ Registro/Login (página /auth unificada)
 - ✅ Perfil editable
 - ✅ Historial de pedidos con facturas
@@ -225,23 +236,27 @@ BD (Inglés) → Traducción API → Frontend (Español)
 ## 🔐 Seguridad
 
 ### Autenticación
+
 - JWT con tokens de refresco
 - Sesiones httpOnly, secure, sameSite
 - Rate limiting en login
 - Hash de contraseñas bcrypt (salt 12)
 
 ### Autorización
+
 - RBAC (CUSTOMER/ADMIN)
 - Protección por middleware
 - Verificación de propiedad de recursos
 
 ### Validación
+
 - Zod para todas las entradas
 - Sanitización de inputs
 - Prevención de inyección SQL (Prisma)
 - Prevención de XSS
 
 ### Headers de Seguridad
+
 - X-Frame-Options: DENY
 - X-Content-Type-Options: nosniff
 - Content-Security-Policy configurado
@@ -251,24 +266,25 @@ BD (Inglés) → Traducción API → Frontend (Español)
 
 ## 📦 Tecnologías
 
-| Categoría | Tecnología | Versión |
-|-----------|------------|---------|
-| Framework | Next.js | 14.2.35 |
-| React | React | 18 |
-| ORM | Prisma | 5.22.0 |
-| Auth | NextAuth.js | 4.24.13 |
-| BD | PostgreSQL (Supabase) | 15+ |
-| Testing | Vitest + Playwright | 1.6.1 |
-| Estilos | Tailwind CSS | 3.4.1 |
-| Validación | Zod | 3.23.8 |
-| PDF | @react-pdf/renderer | 4.3.2 |
-| Pagos | Stripe + PayPal | Latest |
+| Categoría  | Tecnología            | Versión |
+| ---------- | --------------------- | ------- |
+| Framework  | Next.js               | 14.2.35 |
+| React      | React                 | 18      |
+| ORM        | Prisma                | 5.22.0  |
+| Auth       | NextAuth.js           | 4.24.13 |
+| BD         | PostgreSQL (Supabase) | 15+     |
+| Testing    | Vitest + Playwright   | 1.6.1   |
+| Estilos    | Tailwind CSS          | 3.4.1   |
+| Validación | Zod                   | 3.23.8  |
+| PDF        | @react-pdf/renderer   | 4.3.2   |
+| Pagos      | Stripe + PayPal       | Latest  |
 
 ---
 
 ## 📚 Documentación
 
 ### Pública (docs/)
+
 - `PROJECT-SUMMARY.md` - Este archivo
 - `TESTING.md` - Guía de testing
 - `10-deployment-guide.md` - Instrucciones de despliegue
@@ -328,6 +344,7 @@ npm start
 ### Abril 2026: Todos los Módulos Completados
 
 **Nuevos Módulos de Administración:**
+
 - ✅ Categorías con subida de imágenes
 - ✅ Cupones (PERCENTAGE, FIXED, FREE_SHIPPING)
 - ✅ Reseñas con moderación
@@ -338,12 +355,14 @@ npm start
 - ✅ Sistema de alertas en tiempo real
 
 **Nuevas Funcionalidades de Usuario:**
+
 - ✅ Página Mis Reseñas
 - ✅ Aplicación de cupones
 - ✅ Cálculo de envío
 - ✅ Acceso a FAQs
 
 **Testing:**
+
 - ✅ Tests pasando
 - ✅ Cobertura multi-dispositivo E2E
 - ✅ Cobertura de código 80%+
@@ -366,6 +385,7 @@ Proyecto académico - Uso educativo únicamente.
 **Estado**: ✅ Completado y listo para entrega
 
 **Próximos pasos**:
+
 1. [ ] Desplegar en Vercel (despliegue en producción)
 2. [ ] Crear presentación del TFM
 3. [ ] Demo en vivo

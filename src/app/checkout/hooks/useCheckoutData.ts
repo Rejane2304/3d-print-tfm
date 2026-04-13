@@ -72,7 +72,7 @@ export function useCheckoutData(): CheckoutDataResult {
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
-  const migrateLocalCart = useCallback(async() => {
+  const migrateLocalCart = useCallback(async () => {
     const localCartData = localStorage.getItem('cart');
     if (!localCartData) {
       return;
@@ -126,7 +126,7 @@ export function useCheckoutData(): CheckoutDataResult {
     }
   }, []);
 
-  const loadData = useCallback(async() => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);

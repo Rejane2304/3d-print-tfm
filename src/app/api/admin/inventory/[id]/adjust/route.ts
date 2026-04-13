@@ -3,7 +3,8 @@
  * POST /api/admin/inventory/[id]/adjust
  * Creates inventory movement and updates stock
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
@@ -12,18 +13,12 @@ import { translateErrorMessage, translateMovementType } from '@/lib/i18n';
 import { emitStockLow, emitStockUpdated } from '@/lib/realtime/event-service';
 import { createStockAlert } from '@/lib/alerts/alert-service';
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
     }
 
     // Verify admin role
@@ -33,10 +28,7 @@ export async function POST(
     });
 
     if (adminUser?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'Acceso denegado' },
-        { status: 403 },
-      );
+      return NextResponse.json({ success: false, error: 'Acceso denegado' }, { status: 403 });
     }
 
     const { id } = params;
@@ -45,24 +37,15 @@ export async function POST(
 
     // Validate input
     if (!type || !['IN', 'OUT', 'ADJUST'].includes(type)) {
-      return NextResponse.json(
-        { success: false, error: 'Tipo de movimiento inválido' },
-        { status: 400 },
-      );
+      return NextResponse.json({ success: false, error: 'Tipo de movimiento inválido' }, { status: 400 });
     }
 
     if (!quantity || quantity <= 0) {
-      return NextResponse.json(
-        { success: false, error: 'Cantidad debe ser mayor a 0' },
-        { status: 400 },
-      );
+      return NextResponse.json({ success: false, error: 'Cantidad debe ser mayor a 0' }, { status: 400 });
     }
 
     if (!reason || reason.length < 3) {
-      return NextResponse.json(
-        { success: false, error: 'Motivo requerido (mínimo 3 caracteres)' },
-        { status: 400 },
-      );
+      return NextResponse.json({ success: false, error: 'Motivo requerido (mínimo 3 caracteres)' }, { status: 400 });
     }
 
     // Get current product stock
@@ -72,10 +55,7 @@ export async function POST(
     });
 
     if (!product) {
-      return NextResponse.json(
-        { success: false, error: 'Producto no encontrado' },
-        { status: 404 },
-      );
+      return NextResponse.json({ success: false, error: 'Producto no encontrado' }, { status: 404 });
     }
 
     const previousStock = product.stock;
@@ -97,18 +77,12 @@ export async function POST(
         movementType = MovementType.ADJUSTMENT;
         break;
       default:
-        return NextResponse.json(
-          { success: false, error: 'Tipo de movimiento no válido' },
-          { status: 400 },
-        );
+        return NextResponse.json({ success: false, error: 'Tipo de movimiento no válido' }, { status: 400 });
     }
 
     // Validate stock won't go negative
     if (newStock < 0) {
-      return NextResponse.json(
-        { success: false, error: 'El stock no puede ser negativo' },
-        { status: 400 },
-      );
+      return NextResponse.json({ success: false, error: 'El stock no puede ser negativo' }, { status: 400 });
     }
 
     // Execute transaction
@@ -120,8 +94,7 @@ export async function POST(
           productId: id,
           createdBy: adminUser.id,
           type: movementType,
-          quantity:
-            type === 'ADJUST' ? Math.abs(newStock - previousStock) : quantity,
+          quantity: type === 'ADJUST' ? Math.abs(newStock - previousStock) : quantity,
           previousStock,
           newStock,
           reason,
@@ -138,11 +111,7 @@ export async function POST(
     });
 
     // Emitir evento de stock actualizado en tiempo real
-    await emitStockUpdated(
-      result.product.id,
-      result.product.stock,
-      previousStock,
-    );
+    await emitStockUpdated(result.product.id, result.product.stock, previousStock);
 
     // Si el stock está bajo, emitir alerta
     if (result.product.stock <= 5) {

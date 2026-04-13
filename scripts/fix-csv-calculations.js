@@ -61,7 +61,7 @@ orders.rows = orders.rows.map(row => {
   if (Math.abs(oldTotal - total) > 0.01) {
     console.log(
       `  📝 ${row._ref}: ${oldTotal} → ${total} ` +
-      `(subtotal: ${subtotal}, shipping: ${shipping}, discount: ${discount})`
+        `(subtotal: ${subtotal}, shipping: ${shipping}, discount: ${discount})`,
     );
   }
 

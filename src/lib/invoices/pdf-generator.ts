@@ -31,10 +31,10 @@ export async function generatePDF({ html }: PDFOptions): Promise<Buffer> {
     await page.evaluate(() => {
       return Promise.all(
         Array.from(document.images)
-          .filter((img) => !img.complete)
+          .filter(img => !img.complete)
           .map(
-            (img) =>
-              new Promise((resolve) => {
+            img =>
+              new Promise(resolve => {
                 img.addEventListener('load', resolve);
                 img.addEventListener('error', resolve); // Resolve on error to not block
               }),

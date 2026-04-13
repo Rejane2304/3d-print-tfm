@@ -59,9 +59,8 @@ export function StarRating({
   return (
     <div className={`flex items-center gap-1 ${className}`}>
       <div className="flex items-center">
-        {Array.from({ length: maxRating }, (_, i) => i + 1).map((starIndex) => {
-          const displayRating =
-            mode === 'interactive' && hoverRating > 0 ? hoverRating : rating;
+        {Array.from({ length: maxRating }, (_, i) => i + 1).map(starIndex => {
+          const displayRating = mode === 'interactive' && hoverRating > 0 ? hoverRating : rating;
           const isFilled = starIndex <= displayRating;
 
           return (
@@ -76,18 +75,14 @@ export function StarRating({
             >
               <Star
                 className={`${sizeClasses[size]} ${
-                  isFilled
-                    ? 'fill-yellow-400 text-yellow-400'
-                    : 'fill-gray-200 text-gray-200'
+                  isFilled ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-200 text-gray-200'
                 }`}
               />
             </button>
           );
         })}
       </div>
-      {showValue && (
-        <span className="text-sm text-gray-600 ml-1">{rating.toFixed(1)}</span>
-      )}
+      {showValue && <span className="text-sm text-gray-600 ml-1">{rating.toFixed(1)}</span>}
     </div>
   );
 }

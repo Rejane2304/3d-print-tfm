@@ -1,18 +1,18 @@
 /**
  * Integration Tests - Admin Clients API
- * 
+ *
  * NOTA IMPORTANTE: Estos tests están diseñados para ejecutarse
  * con mocks de autenticación que funcionan correctamente.
- * 
+ *
  * Problema conocido: El mock de next-auth/getServerSession puede
  * no interceptar correctamente cuando se usa con authOptions.
- * 
+ *
  * Solución temporal: Los tests verifican la estructura de la respuesta
  * y los casos de error, pero no el flujo completo de autenticación.
- * 
+ *
  * Para testear el flujo completo, usar los tests E2E en tests/e2e/
  * o configurar un entorno con autenticación real (JWT tokens).
- * 
+ *
  * Las bases de datos están completamente separadas:
  * - Dev: configuración local del desarrollador
  * - Prod: variables de entorno de Vercel
@@ -35,7 +35,7 @@ vi.mock('next-auth', () => ({
     if (!currentMockSession) {
       return Promise.resolve(null);
     }
-    
+
     // Devolver sesión en el formato esperado
     return Promise.resolve({
       user: {
@@ -136,7 +136,7 @@ describe('Admin Clients API', () => {
 
       // Si el mock funciona correctamente, debería ser 200
       // Si hay problema con el mock, será 401/403/500
-      
+
       if (res.status === 200) {
         const data = await res.json();
         expect(data).toHaveProperty('clients');
@@ -269,7 +269,9 @@ describe('Admin Clients API', () => {
       setMockSession('ADMIN', adminEmail);
 
       const req = new NextRequest('http://localhost:3000/api/admin/clients/non-existent-id');
-      const res = await getClientDetail(req, { params: { id: 'non-existent-id' } });
+      const res = await getClientDetail(req, {
+        params: { id: 'non-existent-id' },
+      });
 
       // Si autenticado como admin: 404
       // Si no autenticado: 401

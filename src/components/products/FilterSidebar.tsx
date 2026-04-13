@@ -81,15 +81,13 @@ function FilterContent({
             className={`h-4 w-4 text-gray-400 transition-transform lg:hidden ${expandedSections.category ? 'rotate-180' : ''}`}
           />
         </button>
-        <div
-          className={`${expandedSections.category ? 'block' : 'hidden lg:block'}`}
-        >
+        <div className={`${expandedSections.category ? 'block' : 'hidden lg:block'}`}>
           <select
             value={searchParams.category || ''}
-            onChange={(e) => updateFilter('category', e.target.value)}
+            onChange={e => updateFilter('category', e.target.value)}
             className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white min-h-[44px]"
           >
-            {CATEGORIAS.map((cat) => (
+            {CATEGORIAS.map(cat => (
               <option key={cat.value} value={cat.value}>
                 {cat.label}
               </option>
@@ -109,15 +107,13 @@ function FilterContent({
             className={`h-4 w-4 text-gray-400 transition-transform lg:hidden ${expandedSections.material ? 'rotate-180' : ''}`}
           />
         </button>
-        <div
-          className={`${expandedSections.material ? 'block' : 'hidden lg:block'}`}
-        >
+        <div className={`${expandedSections.material ? 'block' : 'hidden lg:block'}`}>
           <select
             value={searchParams.material || ''}
-            onChange={(e) => updateFilter('material', e.target.value)}
+            onChange={e => updateFilter('material', e.target.value)}
             className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white min-h-[44px]"
           >
-            {MATERIALES.map((mat) => (
+            {MATERIALES.map(mat => (
               <option key={mat.value} value={mat.value}>
                 {mat.label}
               </option>
@@ -137,30 +133,32 @@ function FilterContent({
             className={`h-4 w-4 text-gray-400 transition-transform lg:hidden ${expandedSections.price ? 'rotate-180' : ''}`}
           />
         </button>
-        <div
-          className={`${expandedSections.price ? 'block' : 'hidden lg:block'}`}
-        >
+        <div className={`${expandedSections.price ? 'block' : 'hidden lg:block'}`}>
           <div className="flex gap-3">
             <div className="flex-1">
-              <label htmlFor="minPriceInput" className="text-xs text-gray-500 mb-1.5 block">Mín</label>
+              <label htmlFor="minPriceInput" className="text-xs text-gray-500 mb-1.5 block">
+                Mín
+              </label>
               <input
                 id="minPriceInput"
                 type="number"
                 placeholder="0"
                 value={searchParams.minPrice || ''}
-                onChange={(e) => updateFilter('minPrice', e.target.value)}
+                onChange={e => updateFilter('minPrice', e.target.value)}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 min-h-[44px]"
                 min="0"
               />
             </div>
             <div className="flex-1">
-              <label htmlFor="maxPriceInput" className="text-xs text-gray-500 mb-1.5 block">Máx</label>
+              <label htmlFor="maxPriceInput" className="text-xs text-gray-500 mb-1.5 block">
+                Máx
+              </label>
               <input
                 id="maxPriceInput"
                 type="number"
                 placeholder="∞"
                 value={searchParams.maxPrice || ''}
-                onChange={(e) => updateFilter('maxPrice', e.target.value)}
+                onChange={e => updateFilter('maxPrice', e.target.value)}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 min-h-[44px]"
                 min="0"
               />
@@ -175,24 +173,18 @@ function FilterContent({
           onClick={() => toggleSection('stock')}
           className="flex items-center justify-between w-full mb-3 text-left lg:hidden"
         >
-          <span className="text-sm font-medium text-gray-700">
-            Disponibilidad
-          </span>
+          <span className="text-sm font-medium text-gray-700">Disponibilidad</span>
           <ChevronDown
             className={`h-4 w-4 text-gray-400 transition-transform ${expandedSections.stock ? 'rotate-180' : ''}`}
           />
         </button>
-        <div
-          className={`${expandedSections.stock ? 'block' : 'hidden lg:block'}`}
-        >
+        <div className={`${expandedSections.stock ? 'block' : 'hidden lg:block'}`}>
           <label className="flex items-center gap-3 cursor-pointer p-2 -mx-2 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]">
             <input
               type="checkbox"
               id="inStockFilter"
               checked={searchParams.inStock === 'true'}
-              onChange={(e) =>
-                updateFilter('inStock', e.target.checked ? 'true' : '')
-              }
+              onChange={e => updateFilter('inStock', e.target.checked ? 'true' : '')}
               className="w-5 h-5 rounded text-indigo-600 focus:ring-indigo-500 border-gray-300"
             />
             <span className="text-sm text-gray-700">Solo en stock</span>
@@ -266,7 +258,7 @@ export default function FilterSidebar({ searchParams }: Readonly<FilterSidebarPr
   };
 
   const toggleSection = (section: 'category' | 'material' | 'price' | 'stock') => {
-    setExpandedSections((prev) => ({
+    setExpandedSections(prev => ({
       ...prev,
       [section]: !prev[section],
     }));

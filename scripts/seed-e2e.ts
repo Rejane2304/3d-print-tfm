@@ -228,14 +228,14 @@ async function createSampleProducts(): Promise<void> {
 }
 
 async function createSampleOrders(): Promise<void> {
+  console.log('📦 Creating sample orders...');
 
-  console.log('📦 Creating sample products...');
-  console.log('  ⚠️ No products found, skipping order creation');
-}
-
-// Obtener o crear un usuario de ejemplo para la orden
-const customer = await prisma.user.findFirst({ where: { email: 'customer@example.com' } })
-    || await prisma.user.create({
+  // Obtener o crear un usuario de ejemplo para la orden
+  const customer =
+    (await prisma.user.findFirst({
+      where: { email: 'customer@example.com' },
+    })) ||
+    (await prisma.user.create({
       data: {
         name: 'Cliente Ejemplo',
         email: 'customer@example.com',
@@ -248,22 +248,26 @@ const customer = await prisma.user.findFirst({ where: { email: 'customer@example
         role: 'CUSTOMER',
         isActive: true,
       },
-    });
+    }));
 
-// Obtener o crear una categoría de ejemplo para el producto
-const category = await prisma.category.findFirst({ where: { name: 'Decoración' } })
-    || await prisma.category.create({
+  // Obtener o crear una categoría de ejemplo para el producto
+  const category =
+    (await prisma.category.findFirst({ where: { name: 'Decoración' } })) ||
+    (await prisma.category.create({
       data: {
         name: 'Decoración',
         slug: 'decoracion',
         description: 'Productos decorativos',
         isActive: true,
       },
-    });
+    }));
 
-// Obtener o crear un producto de ejemplo para la orden
-const product = await prisma.product.findFirst({ where: { name: 'Producto Decorativo' } })
-    || await prisma.product.create({
+  // Obtener o crear un producto de ejemplo para la orden
+  const product =
+    (await prisma.product.findFirst({
+      where: { name: 'Producto Decorativo' },
+    })) ||
+    (await prisma.product.create({
       data: {
         name: 'Producto Decorativo',
         slug: 'producto-decorativo',
@@ -274,71 +278,72 @@ const product = await prisma.product.findFirst({ where: { name: 'Producto Decora
         material: 'PLA',
         stock: 10,
       },
-    });
+    }));
 
-const deliveredOrder = await prisma.order.create({
-  data: {
-    userId: customer.id,
-    orderNumber: 'ORD-2024-001',
-    status: 'DELIVERED',
-    subtotal: 24.99,
-    shipping: 5.99,
-    total: 36.23,
-    shippingName: customer.name,
-    shippingPhone: '+34 600 123 456',
-    shippingAddress: 'Calle Mayor 123',
-    shippingPostalCode: '28001',
-    shippingCity: 'Madrid',
-    shippingProvince: 'Madrid',
-    shippingCountry: 'Spain',
-    paymentMethod: 'CARD',
-    items: {
-      create: {
-        productId: product.id,
-        name: product.name,
-        price: 24.99,
-        quantity: 1,
-        subtotal: 24.99,
-        category: 'Decoración',
-        material: 'PLA',
+  const deliveredOrder = await prisma.order.create({
+    data: {
+      userId: customer.id,
+      orderNumber: 'ORD-2024-001',
+      status: 'DELIVERED',
+      subtotal: 24.99,
+      shipping: 5.99,
+      total: 36.23,
+      shippingName: customer.name,
+      shippingPhone: '+34 600 123 456',
+      shippingAddress: 'Calle Mayor 123',
+      shippingPostalCode: '28001',
+      shippingCity: 'Madrid',
+      shippingProvince: 'Madrid',
+      shippingCountry: 'Spain',
+      paymentMethod: 'CARD',
+      items: {
+        create: {
+          productId: product.id,
+          name: product.name,
+          price: 24.99,
+          quantity: 1,
+          subtotal: 24.99,
+          category: 'Decoración',
+          material: 'PLA',
+        },
       },
     },
-  },
-});
-console.log(`  ✓ DELIVERED order: ${deliveredOrder.orderNumber}`);
+  });
+  console.log(`  ✓ DELIVERED order: ${deliveredOrder.orderNumber}`);
 
-const confirmedOrder = await prisma.order.create({
-  data: {
-    userId: customer.id,
-    orderNumber: 'ORD-2024-002',
-    status: 'CONFIRMED',
-    subtotal: 18.5,
-    shipping: 5.99,
-    total: 28.38,
-    shippingName: customer.name,
-    shippingPhone: '+34 600 123 456',
-    shippingAddress: 'Calle Mayor 123',
-    shippingPostalCode: '28001',
-    shippingCity: 'Madrid',
-    shippingProvince: 'Madrid',
-    shippingCountry: 'Spain',
-    paymentMethod: 'PAYPAL',
-    items: {
-      create: {
-        productId: product.id,
-        name: product.name,
-        price: 18.5,
-        quantity: 1,
-        subtotal: 18.5,
-        category: 'Decoración',
-        material: 'PLA',
+  const confirmedOrder = await prisma.order.create({
+    data: {
+      userId: customer.id,
+      orderNumber: 'ORD-2024-002',
+      status: 'CONFIRMED',
+      subtotal: 18.5,
+      shipping: 5.99,
+      total: 28.38,
+      shippingName: customer.name,
+      shippingPhone: '+34 600 123 456',
+      shippingAddress: 'Calle Mayor 123',
+      shippingPostalCode: '28001',
+      shippingCity: 'Madrid',
+      shippingProvince: 'Madrid',
+      shippingCountry: 'Spain',
+      paymentMethod: 'PAYPAL',
+      items: {
+        create: {
+          productId: product.id,
+          name: product.name,
+          price: 18.5,
+          quantity: 1,
+          subtotal: 18.5,
+          category: 'Decoración',
+          material: 'PLA',
+        },
       },
     },
-  },
-});
-console.log(`  ✓ CONFIRMED order: ${confirmedOrder.orderNumber}`);
+  });
+  console.log(`  ✓ CONFIRMED order: ${confirmedOrder.orderNumber}`);
 
-console.log('✅ Sample orders created');
+  console.log('✅ Sample orders created');
+}
 
 async function main() {
   console.log('\n🌱 Seeding test database...\n');

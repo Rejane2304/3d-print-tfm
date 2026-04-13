@@ -3,10 +3,7 @@
  * Tests for actual Zod schemas from @/lib/validators
  */
 import { describe, it, expect } from 'vitest';
-import {
-  addressSchema,
-  addressUpdateSchema,
-} from '@/lib/validators';
+import { addressSchema, addressUpdateSchema } from '@/lib/validators';
 
 describe('Address Validators', () => {
   const validAddress = {
@@ -148,9 +145,7 @@ describe('Address Validators', () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe(
-            'El teléfono debe estar en formato español: +34 600 123 456'
-          );
+          expect(result.error.errors[0].message).toBe('El teléfono debe estar en formato español: +34 600 123 456');
         }
       });
 

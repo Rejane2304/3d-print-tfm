@@ -5,27 +5,20 @@ export const dynamic = 'force-dynamic';
  * GET /api/admin/inventory
  * Supports pagination, filtering by stock level
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
-import { Prisma } from '@prisma/client';
-import {
-  translateCategoryName,
-  translateErrorMessage,
-  translateMovementType,
-  translateProductName,
-} from '@/lib/i18n';
+import type { Prisma } from '@prisma/client';
+import { translateCategoryName, translateErrorMessage, translateMovementType, translateProductName } from '@/lib/i18n';
 
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
     }
 
     // Verify admin role
@@ -35,10 +28,7 @@ export async function GET(req: NextRequest) {
     });
 
     if (adminUser?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'Acceso denegado' },
-        { status: 403 },
-      );
+      return NextResponse.json({ success: false, error: 'Acceso denegado' }, { status: 403 });
     }
 
     // Get query parameters
@@ -112,7 +102,7 @@ export async function GET(req: NextRequest) {
     });
 
     // Determine stock status with translations
-    const productsWithStatus = products.map((product) => {
+    const productsWithStatus = products.map(product => {
       let stockStatus = 'normal';
       if (product.stock <= 0) {
         stockStatus = 'critical';
@@ -129,16 +119,12 @@ export async function GET(req: NextRequest) {
         stock: product.stock,
         minStock: product.minStock,
         price: product.price,
-        categoria: product.category
-          ? translateCategoryName(product.category.slug)
-          : 'Sin categoría',
+        categoria: product.category ? translateCategoryName(product.category.slug) : 'Sin categoría',
         isActive: product.isActive,
         stockStatus,
         movementCount: product._count.inventoryMovements,
         lastMovementAt: lastMovement?.createdAt || null,
-        ultimoMovimientoTipo: lastMovement?.type
-          ? translateMovementType(lastMovement.type)
-          : null,
+        ultimoMovimientoTipo: lastMovement?.type ? translateMovementType(lastMovement.type) : null,
         imagenes: product.images,
       };
     });

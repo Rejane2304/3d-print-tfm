@@ -2,7 +2,8 @@
  * API - Gestión de Direcciones del Usuario
  * CRUD completo de direcciones de envío
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
@@ -47,10 +48,7 @@ export async function GET() {
     return NextResponse.json({ addresses });
   } catch (error) {
     console.error('Error al obtener direcciones:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener direcciones' },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: 'Error al obtener direcciones' }, { status: 500 });
   }
 }
 
@@ -115,16 +113,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ address: newAddress }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Datos inválidos', details: error.errors },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'Datos inválidos', details: error.errors }, { status: 400 });
     }
     console.error('Error al crear dirección:', error);
-    return NextResponse.json(
-      { error: 'Error al crear dirección' },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: 'Error al crear dirección' }, { status: 500 });
   }
 }
 
@@ -149,10 +141,7 @@ export async function PATCH(request: NextRequest) {
     const { id, ...data } = await request.json();
 
     if (!id) {
-      return NextResponse.json(
-        { error: 'ID de dirección requerido' },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'ID de dirección requerido' }, { status: 400 });
     }
 
     // Verificar que la dirección pertenece al usuario
@@ -161,10 +150,7 @@ export async function PATCH(request: NextRequest) {
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Dirección no encontrada' },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: 'Dirección no encontrada' }, { status: 404 });
     }
 
     // Si se marca como principal, desmarcar las otras
@@ -183,10 +169,7 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ address: updatedAddress });
   } catch (error) {
     console.error('Error al actualizar dirección:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar dirección' },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: 'Error al actualizar dirección' }, { status: 500 });
   }
 }
 
@@ -212,10 +195,7 @@ export async function DELETE(request: NextRequest) {
     const id = searchParams.get('id');
 
     if (!id) {
-      return NextResponse.json(
-        { error: 'ID de dirección requerido' },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'ID de dirección requerido' }, { status: 400 });
     }
 
     // Verificar que la dirección pertenece al usuario
@@ -224,10 +204,7 @@ export async function DELETE(request: NextRequest) {
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Dirección no encontrada' },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: 'Dirección no encontrada' }, { status: 404 });
     }
 
     await prisma.address.delete({ where: { id } });
@@ -250,9 +227,6 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error al eliminar dirección:', error);
-    return NextResponse.json(
-      { error: 'Error al eliminar dirección' },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: 'Error al eliminar dirección' }, { status: 500 });
   }
 }

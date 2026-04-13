@@ -3,28 +3,19 @@
  * GET /api/admin/inventory/[id]/history
  * Returns inventory movement history for a specific product
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
-import {
-  translateErrorMessage,
-  translateMovementType,
-  translateProductName,
-} from '@/lib/i18n';
+import { translateErrorMessage, translateMovementType, translateProductName } from '@/lib/i18n';
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
     }
 
     // Verify admin role
@@ -34,10 +25,7 @@ export async function GET(
     });
 
     if (adminUser?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'Acceso denegado' },
-        { status: 403 },
-      );
+      return NextResponse.json({ success: false, error: 'Acceso denegado' }, { status: 403 });
     }
 
     const productId = params.id;
@@ -65,10 +53,7 @@ export async function GET(
     });
 
     if (!product) {
-      return NextResponse.json(
-        { success: false, error: 'Producto no encontrado' },
-        { status: 404 },
-      );
+      return NextResponse.json({ success: false, error: 'Producto no encontrado' }, { status: 404 });
     }
 
     // Get total count of movements
@@ -98,7 +83,7 @@ export async function GET(
     });
 
     // Transform movements to Spanish
-    const movementsTranslated = movements.map((movement) => ({
+    const movementsTranslated = movements.map(movement => ({
       id: movement.id,
       tipo: translateMovementType(movement.type),
       cantidad: movement.quantity,

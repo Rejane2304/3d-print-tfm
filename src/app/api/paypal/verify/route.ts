@@ -6,16 +6,15 @@ export const dynamic = 'force-dynamic';
  * GET /api/paypal/verify?token=xxx&PayerID=yyy
  * Verifica el estado del pago con PayPal y actualiza el pedido
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { translateOrderStatus, translatePaymentStatus } from '@/lib/i18n';
 
 const PAYPAL_API =
-  process.env.NODE_ENV === 'production'
-    ? 'https://api-m.paypal.com'
-    : 'https://api-m.sandbox.paypal.com';
+  process.env.NODE_ENV === 'production' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com';
 
 async function getPayPalAccessToken(): Promise<string> {
   const clientId = process.env.PAYPAL_CLIENT_ID;
@@ -56,10 +55,7 @@ export async function GET(req: NextRequest) {
     const payerId = searchParams.get('PayerID');
 
     if (!paypalOrderId || !payerId) {
-      return NextResponse.json(
-        { error: 'Token y PayerID son requeridos' },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'Token y PayerID son requeridos' }, { status: 400 });
     }
 
     // Buscar pedido asociado
@@ -88,10 +84,7 @@ export async function GET(req: NextRequest) {
     });
 
     if (!order) {
-      return NextResponse.json(
-        { error: 'Pedido no encontrado' },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: 'Pedido no encontrado' }, { status: 404 });
     }
 
     // Si ya está confirmado, devolver datos
@@ -113,23 +106,19 @@ export async function GET(req: NextRequest) {
     try {
       const accessToken = await getPayPalAccessToken();
 
-      const captureResponse = await fetch(
-        `${PAYPAL_API}/v2/checkout/orders/${paypalOrderId}/capture`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${accessToken}`,
-          },
+      const captureResponse = await fetch(`${PAYPAL_API}/v2/checkout/orders/${paypalOrderId}/capture`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
         },
-      );
+      });
 
       if (!captureResponse.ok) {
         const errorData = await captureResponse.json();
         console.error('PayPal capture error:', errorData);
         // Si ya está capturado, continuar
-        const alreadyCaptured =
-          errorData.details?.[0]?.issue === 'ORDER_ALREADY_CAPTURED';
+        const alreadyCaptured = errorData.details?.[0]?.issue === 'ORDER_ALREADY_CAPTURED';
         if (!alreadyCaptured) {
           throw new Error('Error al capturar pago de PayPal');
         }
@@ -204,9 +193,6 @@ export async function GET(req: NextRequest) {
     }
   } catch (error) {
     console.error('Error verifying PayPal payment:', error);
-    return NextResponse.json(
-      { error: 'Error al verificar pago de PayPal' },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: 'Error al verificar pago de PayPal' }, { status: 500 });
   }
 }

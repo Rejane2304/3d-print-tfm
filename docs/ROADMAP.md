@@ -7,6 +7,7 @@ Plan de desarrollo y mejoras del proyecto.
 ## ✅ Completado (Abril 2025)
 
 ### Core Features
+
 - ✅ Catálogo de productos con filtros y búsqueda
 - ✅ Carrito de compras persistente
 - ✅ Checkout con 4 métodos de pago (Stripe, PayPal, Bizum, Transferencia)
@@ -20,6 +21,7 @@ Plan de desarrollo y mejoras del proyecto.
 - ✅ Configuración del sitio editable
 
 ### Técnicas
+
 - ✅ 100% UI en español (traducción backend)
 - ✅ Diseño responsive (mobile → 4K)
 - ✅ Sistema de tiempo real con Socket.io
@@ -33,6 +35,7 @@ Plan de desarrollo y mejoras del proyecto.
 ## 🔄 En Progreso
 
 ### Mejoras de UX/UI
+
 - 🟡 Optimización de imágenes (WebP, lazy loading)
 - 🟡 Mejoras de accesibilidad (WCAG 2.1 AA)
 - 🟡 Animaciones y transiciones suaves
@@ -42,6 +45,7 @@ Plan de desarrollo y mejoras del proyecto.
 ## 📋 Próximos Pasos
 
 ### Alta Prioridad
+
 1. **Optimización de Performance**
    - Implementar Redis para caché de productos
    - Optimizar consultas de base de datos
@@ -58,6 +62,7 @@ Plan de desarrollo y mejoras del proyecto.
    - Alertas de stock para admin
 
 ### Media Prioridad
+
 4. **Analytics Dashboard**
    - Gráficos de ventas en tiempo real
    - Métricas de conversión
@@ -74,6 +79,7 @@ Plan de desarrollo y mejoras del proyecto.
    - Notificaciones push
 
 ### Baja Prioridad
+
 7. **Multi-idioma**
    - Soporte para inglés/portugués
    - Detección automática de idioma
@@ -93,13 +99,13 @@ Plan de desarrollo y mejoras del proyecto.
 
 ## 📊 Métricas Actuales
 
-| Métrica | Valor |
-|---------|-------|
-| Productos | 50+ |
-| Módulos Admin | 14+ |
-| APIs | 40+ endpoints |
-| Cobertura de Tests | 80%+ |
-| Lighthouse Score | 85+ |
+| Métrica            | Valor         |
+| ------------------ | ------------- |
+| Productos          | 50+           |
+| Módulos Admin      | 14+           |
+| APIs               | 40+ endpoints |
+| Cobertura de Tests | 80%+          |
+| Lighthouse Score   | 85+           |
 
 ---
 

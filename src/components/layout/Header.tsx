@@ -49,7 +49,7 @@ export default function Header() {
   const userName = session?.user?.name || '';
   const firstLetter = userName.charAt(0).toUpperCase();
 
-  const handleLogout = async() => {
+  const handleLogout = async () => {
     try {
       // Clear cart from database for authenticated users
       if (isAuthenticated) {
@@ -68,10 +68,7 @@ export default function Header() {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        userMenuRef.current &&
-        !userMenuRef.current.contains(event.target as Node)
-      ) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
         setUserMenuOpen(false);
       }
     };
@@ -181,12 +178,8 @@ export default function Header() {
                   >
                     {/* User Info */}
                     <div className="px-4 py-3 border-b border-gray-100 bg-indigo-50 rounded-t-lg sticky top-0">
-                      <p className="font-medium text-gray-900">
-                        {session?.user?.name}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {session?.user?.email}
-                      </p>
+                      <p className="font-medium text-gray-900">{session?.user?.name}</p>
+                      <p className="text-xs text-gray-500">{session?.user?.email}</p>
                     </div>
 
                     {/* Menu Links */}
@@ -394,9 +387,7 @@ export default function Header() {
                 title="Iniciar sesión"
               >
                 <User className="h-5 w-5 flex-shrink-0" />
-                <span className="text-sm font-medium hidden sm:block">
-                  Iniciar sesión
-                </span>
+                <span className="text-sm font-medium hidden sm:block">Iniciar sesión</span>
               </Link>
             )}
           </div>
@@ -408,11 +399,7 @@ export default function Header() {
             aria-label={mobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
             aria-expanded={mobileMenuOpen}
           >
-            {mobileMenuOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
+            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
       </div>
@@ -427,7 +414,12 @@ export default function Header() {
             aria-label="Cerrar menú móvil"
             onClick={() => setMobileMenuOpen(false)}
             tabIndex={0}
-            style={{ border: 'none', background: 'none', padding: 0, margin: 0 }}
+            style={{
+              border: 'none',
+              background: 'none',
+              padding: 0,
+              margin: 0,
+            }}
           />
           {/* Menu Content */}
           <div className="absolute top-0 left-0 right-0 max-h-[calc(100vh-64px)] bg-white border-t border-gray-100 shadow-2xl overflow-y-auto">

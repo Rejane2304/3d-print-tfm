@@ -8,20 +8,9 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import {
-  AlertCircle,
-  Clock,
-  Edit,
-  Euro,
-  Globe,
-  Loader2,
-  MapPin,
-  Package,
-  Plus,
-  Trash2,
-  Truck,
-} from 'lucide-react';
-import { BulkAction, Column, DataTable } from '@/components/ui/DataTable';
+import { AlertCircle, Clock, Edit, Euro, Globe, Loader2, MapPin, Package, Plus, Trash2, Truck } from 'lucide-react';
+import type { BulkAction, Column } from '@/components/ui/DataTable';
+import { DataTable } from '@/components/ui/DataTable';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { BulkDeleteModal } from '@/components/ui/BulkDeleteModal';
 
@@ -75,7 +64,7 @@ export default function AdminShippingPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, session, router]);
 
-  const loadZones = async() => {
+  const loadZones = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -100,7 +89,7 @@ export default function AdminShippingPage() {
     setModalOpen(true);
   };
 
-  const confirmDelete = async() => {
+  const confirmDelete = async () => {
     if (!zoneToDelete) {
       return;
     }
@@ -113,14 +102,12 @@ export default function AdminShippingPage() {
       const data = await response.json();
 
       if (response.ok) {
-        setZones(zones.filter((z) => z.id !== zoneToDelete.id));
+        setZones(zones.filter(z => z.id !== zoneToDelete.id));
       } else {
         throw new Error(data.error || 'Error eliminando zona de envío');
       }
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Error eliminando zona de envío',
-      );
+      setError(err instanceof Error ? err.message : 'Error eliminando zona de envío');
     } finally {
       setModalOpen(false);
       setZoneToDelete(null);
@@ -132,12 +119,12 @@ export default function AdminShippingPage() {
     setBulkDeleteModalOpen(true);
   };
 
-  const confirmBulkDelete = async() => {
+  const confirmBulkDelete = async () => {
     try {
       let hasError = false;
 
       await Promise.all(
-        bulkDeleteIds.map(async(id) => {
+        bulkDeleteIds.map(async id => {
           const response = await fetch(`/api/admin/shipping/${id}`, {
             method: 'DELETE',
           });
@@ -151,7 +138,7 @@ export default function AdminShippingPage() {
         setError('Algunas zonas de envío no pudieron ser eliminadas');
       }
 
-      setZones(zones.filter((z) => !bulkDeleteIds.includes(z.id)));
+      setZones(zones.filter(z => !bulkDeleteIds.includes(z.id)));
     } catch {
       setError('Error eliminando zonas de envío');
     } finally {
@@ -161,14 +148,9 @@ export default function AdminShippingPage() {
   };
 
   // Estadísticas
-  const activeZones = zones.filter((z) => z.activo).length;
-  const averageCost =
-    zones.length > 0
-      ? zones.reduce((sum, z) => sum + z.costoBase, 0) / zones.length
-      : 0;
-  const zonesWithFreeShipping = zones.filter(
-    (z) => z.envioGratisDesde !== null,
-  ).length;
+  const activeZones = zones.filter(z => z.activo).length;
+  const averageCost = zones.length > 0 ? zones.reduce((sum, z) => sum + z.costoBase, 0) / zones.length : 0;
+  const zonesWithFreeShipping = zones.filter(z => z.envioGratisDesde !== null).length;
 
   const getStatusColor = (estado: string) => {
     switch (estado) {
@@ -187,12 +169,10 @@ export default function AdminShippingPage() {
       header: 'Zona',
       sortable: true,
       className: '',
-      render: (value) => (
+      render: value => (
         <div className="flex items-center gap-2 min-w-0">
           <MapPin className="h-4 w-4 text-indigo-600 flex-shrink-0" />
-          <span className="font-medium text-gray-900 truncate">
-            {value as string}
-          </span>
+          <span className="font-medium text-gray-900 truncate">{value as string}</span>
         </div>
       ),
     },
@@ -201,7 +181,7 @@ export default function AdminShippingPage() {
       header: 'País',
       sortable: true,
       className: 'hidden sm:table-cell',
-      render: (value) => (
+      render: value => (
         <div className="flex items-center gap-1">
           <Globe className="h-3 w-3 text-gray-400 flex-shrink-0" />
           <span className="text-sm text-gray-600">{value as string}</span>
@@ -213,11 +193,7 @@ export default function AdminShippingPage() {
       header: 'Regiones',
       sortable: true,
       className: 'hidden md:table-cell',
-      render: (value) => (
-        <span className="text-sm text-gray-600 truncate max-w-[150px] block">
-          {value as string}
-        </span>
-      ),
+      render: value => <span className="text-sm text-gray-600 truncate max-w-[150px] block">{value as string}</span>,
     },
     {
       key: 'costoBase',
@@ -227,9 +203,7 @@ export default function AdminShippingPage() {
       render: (_, zone) => (
         <div className="flex items-center gap-1">
           <Euro className="h-3 w-3 text-gray-400 flex-shrink-0" />
-          <span className="font-medium text-gray-900">
-            {zone.costoBaseTexto}
-          </span>
+          <span className="font-medium text-gray-900">{zone.costoBaseTexto}</span>
         </div>
       ),
     },
@@ -238,11 +212,9 @@ export default function AdminShippingPage() {
       header: 'Envío Gratis',
       sortable: true,
       className: 'hidden xl:table-cell',
-      render: (value) =>
+      render: value =>
         value ? (
-          <span className="text-sm text-green-600 font-medium">
-            {value as string}€
-          </span>
+          <span className="text-sm text-green-600 font-medium">{value as string}€</span>
         ) : (
           <span className="text-sm text-gray-400">-</span>
         ),
@@ -252,7 +224,7 @@ export default function AdminShippingPage() {
       header: 'Entrega',
       sortable: true,
       className: 'hidden lg:table-cell',
-      render: (value) => (
+      render: value => (
         <div className="flex items-center gap-1">
           <Clock className="h-3 w-3 text-gray-400 flex-shrink-0" />
           <span className="text-sm text-gray-600">{value as string}</span>
@@ -264,7 +236,7 @@ export default function AdminShippingPage() {
       header: 'Estado',
       sortable: true,
       className: 'hidden md:table-cell',
-      render: (value) => (
+      render: value => (
         <span
           className={`px-2 py-0.5 inline-flex text-[10px] leading-4 font-semibold rounded-full ${getStatusColor(value as string)}`}
         >
@@ -286,7 +258,7 @@ export default function AdminShippingPage() {
             <Edit className="h-4 w-4" />
           </Link>
           <button
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               handleDelete(zone);
             }}
@@ -329,15 +301,10 @@ export default function AdminShippingPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Truck className="h-8 w-8 text-indigo-600" />
-              <h1 className="text-2xl font-bold text-gray-900">
-                Configuración de Envío
-              </h1>
+              <h1 className="text-2xl font-bold text-gray-900">Configuración de Envío</h1>
             </div>
             <div className="flex items-center gap-4">
-              <Link
-                href="/admin/dashboard"
-                className="text-indigo-600 hover:text-indigo-800 font-medium"
-              >
+              <Link href="/admin/dashboard" className="text-indigo-600 hover:text-indigo-800 font-medium">
                 ← Volver al Panel
               </Link>
               <Link
@@ -357,10 +324,7 @@ export default function AdminShippingPage() {
         <nav className="flex mb-6" aria-label="Breadcrumb">
           <ol className="flex items-center space-x-2">
             <li>
-              <Link
-                href="/admin/dashboard"
-                className="text-gray-500 hover:text-gray-700"
-              >
+              <Link href="/admin/dashboard" className="text-gray-500 hover:text-gray-700">
                 Panel
               </Link>
             </li>
@@ -388,9 +352,7 @@ export default function AdminShippingPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-500">Total Zonas</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {zones.length}
-                </p>
+                <p className="text-2xl font-bold text-gray-900">{zones.length}</p>
               </div>
             </div>
           </div>
@@ -401,9 +363,7 @@ export default function AdminShippingPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-500">Activas</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {activeZones}
-                </p>
+                <p className="text-2xl font-bold text-green-600">{activeZones}</p>
               </div>
             </div>
           </div>
@@ -414,9 +374,7 @@ export default function AdminShippingPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-500">Costo Promedio</p>
-                <p className="text-2xl font-bold text-blue-600">
-                  {averageCost.toFixed(2)}€
-                </p>
+                <p className="text-2xl font-bold text-blue-600">{averageCost.toFixed(2)}€</p>
               </div>
             </div>
           </div>
@@ -427,9 +385,7 @@ export default function AdminShippingPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-500">Con Envío Gratis</p>
-                <p className="text-2xl font-bold text-purple-600">
-                  {zonesWithFreeShipping}
-                </p>
+                <p className="text-2xl font-bold text-purple-600">{zonesWithFreeShipping}</p>
               </div>
             </div>
           </div>
@@ -453,7 +409,7 @@ export default function AdminShippingPage() {
           loading={loading}
           emptyMessage="No se encontraron zonas de envío"
           noResultsMessage="Ninguna zona coincide con tu búsqueda"
-          onRowClick={(zone) => router.push(`/admin/shipping/${zone.id}`)}
+          onRowClick={zone => router.push(`/admin/shipping/${zone.id}`)}
         />
       </div>
 

@@ -1,33 +1,19 @@
 import { z } from 'zod';
-import {
-  Material,
-  OrderStatus,
-  PaymentMethod,
-  Role,
-} from '@/types/prisma-enums';
-import {
-  PASSWORD_SECURITY_ERRORS,
-  isCommonPassword,
-} from './password-security';
+import { Material, OrderStatus, PaymentMethod, Role } from '@/types/prisma-enums';
+import { PASSWORD_SECURITY_ERRORS, isCommonPassword } from './password-security';
 
 // ============================================
 // AUTHENTICATION VALIDATIONS
 // ============================================
 
 export const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, 'El email es obligatorio')
-    .email('Formato de email inválido'),
+  email: z.string().min(1, 'El email es obligatorio').email('Formato de email inválido'),
   password: z
     .string()
     .min(1, 'La contraseña es obligatoria')
     .min(10, 'La contraseña debe tener al menos 10 caracteres')
     .max(128, 'La contraseña no puede exceder 128 caracteres')
-    .regex(
-      /[!@#$%^&*]/,
-      'La contraseña debe contener al menos un carácter especial (!@#$%^&*)',
-    ),
+    .regex(/[!@#$%^&*]/, 'La contraseña debe contener al menos un carácter especial (!@#$%^&*)'),
 });
 
 export const registerSchema = z
@@ -37,40 +23,28 @@ export const registerSchema = z
       .min(1, 'El nombre es obligatorio')
       .min(3, 'El nombre debe tener al menos 3 caracteres')
       .max(100, 'El nombre no puede exceder 100 caracteres'),
-    email: z
-      .string()
-      .min(1, 'El email es obligatorio')
-      .email('Formato de email inválido'),
+    email: z.string().min(1, 'El email es obligatorio').email('Formato de email inválido'),
     password: z
       .string()
       .min(1, 'La contraseña es obligatoria')
       .min(10, 'La contraseña debe tener al menos 10 caracteres')
       .max(128, 'La contraseña no puede exceder 128 caracteres')
-      .regex(
-        /^(?=.*[a-z])/,
-        'La contraseña debe contener al menos una letra minúscula',
-      )
-      .regex(
-        /^(?=.*[A-Z])/,
-        'La contraseña debe contener al menos una letra mayúscula',
-      )
+      .regex(/^(?=.*[a-z])/, 'La contraseña debe contener al menos una letra minúscula')
+      .regex(/^(?=.*[A-Z])/, 'La contraseña debe contener al menos una letra mayúscula')
       .regex(/^(?=.*\d)/, 'La contraseña debe contener al menos un número')
-      .regex(
-        /^(?=.*[!@#$%^&*])/,
-        'La contraseña debe contener al menos un carácter especial (!@#$%^&*)',
-      )
-      .refine((val) => !isCommonPassword(val), {
+      .regex(/^(?=.*[!@#$%^&*])/, 'La contraseña debe contener al menos un carácter especial (!@#$%^&*)')
+      .refine(val => !isCommonPassword(val), {
         message: PASSWORD_SECURITY_ERRORS.COMMON_PASSWORD,
       }),
     confirmPassword: z.string(),
     phone: z
       .string()
       .optional()
-      .refine((val) => !val || /^\+34\s?\d{3}\s?\d{3}\s?\d{3}$/.test(val), {
+      .refine(val => !val || /^\+34\s?\d{3}\s?\d{3}\s?\d{3}$/.test(val), {
         message: 'El teléfono debe estar en formato español: +34 600 123 456',
       }),
   })
-  .refine((data) => data.password === data.confirmPassword, {
+  .refine(data => data.password === data.confirmPassword, {
     message: 'Las contraseñas no coinciden',
     path: ['confirmPassword'],
   });
@@ -82,25 +56,16 @@ export const changePasswordSchema = z
       .string()
       .min(10, 'La nueva contraseña debe tener al menos 10 caracteres')
       .max(128, 'La contraseña no puede exceder 128 caracteres')
-      .regex(
-        /^(?=.*[a-z])/,
-        'La contraseña debe contener al menos una letra minúscula',
-      )
-      .regex(
-        /^(?=.*[A-Z])/,
-        'La contraseña debe contener al menos una letra mayúscula',
-      )
+      .regex(/^(?=.*[a-z])/, 'La contraseña debe contener al menos una letra minúscula')
+      .regex(/^(?=.*[A-Z])/, 'La contraseña debe contener al menos una letra mayúscula')
       .regex(/^(?=.*\d)/, 'La contraseña debe contener al menos un número')
-      .regex(
-        /^(?=.*[!@#$%^&*])/,
-        'La contraseña debe contener al menos un carácter especial (!@#$%^&*)',
-      )
-      .refine((val) => !isCommonPassword(val), {
+      .regex(/^(?=.*[!@#$%^&*])/, 'La contraseña debe contener al menos un carácter especial (!@#$%^&*)')
+      .refine(val => !isCommonPassword(val), {
         message: PASSWORD_SECURITY_ERRORS.COMMON_PASSWORD,
       }),
     confirmPassword: z.string(),
   })
-  .refine((data) => data.newPassword === data.confirmPassword, {
+  .refine(data => data.newPassword === data.confirmPassword, {
     message: 'Las contraseñas no coinciden',
     path: ['confirmPassword'],
   });
@@ -119,19 +84,16 @@ export const userSchema = z.object({
   phone: z
     .string()
     .optional()
-    .refine((val) => !val || /^\+34\s?\d{3}\s?\d{3}\s?\d{3}$/.test(val), {
+    .refine(val => !val || /^\+34\s?\d{3}\s?\d{3}\s?\d{3}$/.test(val), {
       message: 'El teléfono debe estar en formato español: +34 600 123 456',
     }),
   taxId: z
     .string()
     .optional()
-    .refine((val) => !val || /^\d{8}[A-Z]$/.test(val), {
+    .refine(val => !val || /^\d{8}[A-Z]$/.test(val), {
       message: 'El NIF debe tener 8 números y una letra mayúscula',
     }),
-  fiscalName: z
-    .string()
-    .max(200, 'El nombre fiscal no puede exceder 200 caracteres')
-    .optional(),
+  fiscalName: z.string().max(200, 'El nombre fiscal no puede exceder 200 caracteres').optional(),
   role: z.nativeEnum(Role).optional(),
   isActive: z.boolean().default(true),
 });
@@ -153,29 +115,12 @@ export const addressSchema = z.object({
     .max(100, 'El destinatario no puede exceder 100 caracteres'),
   phone: z
     .string()
-    .regex(
-      /^\+34\s?\d{3}\s?\d{3}\s?\d{3}$/,
-      'El teléfono debe estar en formato español: +34 600 123 456',
-    ),
-  address: z
-    .string()
-    .min(1, 'La dirección es obligatoria')
-    .max(255, 'La dirección no puede exceder 255 caracteres'),
-  complement: z
-    .string()
-    .max(100, 'El complemento no puede exceder 100 caracteres')
-    .optional(),
-  postalCode: z
-    .string()
-    .regex(/^\d{5}$/, 'El código postal debe tener 5 dígitos'),
-  city: z
-    .string()
-    .min(1, 'La ciudad es obligatoria')
-    .max(100, 'La ciudad no puede exceder 100 caracteres'),
-  province: z
-    .string()
-    .min(1, 'La provincia es obligatoria')
-    .max(100, 'La provincia no puede exceder 100 caracteres'),
+    .regex(/^\+34\s?\d{3}\s?\d{3}\s?\d{3}$/, 'El teléfono debe estar en formato español: +34 600 123 456'),
+  address: z.string().min(1, 'La dirección es obligatoria').max(255, 'La dirección no puede exceder 255 caracteres'),
+  complement: z.string().max(100, 'El complemento no puede exceder 100 caracteres').optional(),
+  postalCode: z.string().regex(/^\d{5}$/, 'El código postal debe tener 5 dígitos'),
+  city: z.string().min(1, 'La ciudad es obligatoria').max(100, 'La ciudad no puede exceder 100 caracteres'),
+  province: z.string().min(1, 'La provincia es obligatoria').max(100, 'La provincia no puede exceder 100 caracteres'),
   country: z
     .string()
     .min(1, 'El país es obligatorio')
@@ -199,10 +144,7 @@ export const productSchema = z.object({
     .string()
     .min(1, 'La descripción es obligatoria')
     .max(5000, 'La descripción no puede exceder 5000 caracteres'),
-  shortDescription: z
-    .string()
-    .max(255, 'La descripción corta no puede exceder 255 caracteres')
-    .optional(),
+  shortDescription: z.string().max(255, 'La descripción corta no puede exceder 255 caracteres').optional(),
   price: z
     .number({
       required_error: 'El precio es obligatorio',
@@ -230,10 +172,7 @@ export const productSchema = z.object({
     .default(5),
   categoryId: z.string().uuid('ID de categoría inválido').optional(),
   material: z.nativeEnum(Material).optional(),
-  dimensions: z
-    .string()
-    .max(50, 'Las dimensiones no pueden exceder 50 caracteres')
-    .optional(),
+  dimensions: z.string().max(50, 'Las dimensiones no pueden exceder 50 caracteres').optional(),
   weight: z
     .number({ invalid_type_error: 'El peso debe ser un número' })
     .min(0, 'El peso no puede ser negativo')
@@ -245,14 +184,8 @@ export const productSchema = z.object({
     .min(1, 'El tiempo debe ser de al menos 1 minuto')
     .optional()
     .nullable(),
-  metaTitle: z
-    .string()
-    .max(200, 'El meta título no puede exceder 200 caracteres')
-    .optional(),
-  metaDescription: z
-    .string()
-    .max(300, 'La meta descripción no puede exceder 300 caracteres')
-    .optional(),
+  metaTitle: z.string().max(200, 'El meta título no puede exceder 200 caracteres').optional(),
+  metaDescription: z.string().max(300, 'La meta descripción no puede exceder 300 caracteres').optional(),
   isActive: z.boolean().default(true),
   isFeatured: z.boolean().default(false),
 });
@@ -273,22 +206,14 @@ export const orderItemSchema = z.object({
 });
 
 export const createOrderSchema = z.object({
-  items: z
-    .array(orderItemSchema)
-    .min(1, 'El pedido debe contener al menos un producto'),
+  items: z.array(orderItemSchema).min(1, 'El pedido debe contener al menos un producto'),
   shippingAddressId: z.string().uuid('Dirección de envío inválida'),
-  customerNotes: z
-    .string()
-    .max(1000, 'Las notas no pueden exceder 1000 caracteres')
-    .optional(),
+  customerNotes: z.string().max(1000, 'Las notas no pueden exceder 1000 caracteres').optional(),
 });
 
 export const updateOrderStatusSchema = z.object({
   status: z.nativeEnum(OrderStatus).optional(),
-  adminNotes: z
-    .string()
-    .max(1000, 'Las notas no pueden exceder 1000 caracteres')
-    .optional(),
+  adminNotes: z.string().max(1000, 'Las notas no pueden exceder 1000 caracteres').optional(),
 });
 
 export const cancelOrderSchema = z.object({
@@ -316,11 +241,8 @@ export const inventoryMovementSchema = z.object({
   quantity: z
     .number()
     .int('La cantidad debe ser un número entero')
-    .refine((val) => val !== 0, 'La cantidad no puede ser 0'),
-  reason: z
-    .string()
-    .min(1, 'El motivo es obligatorio')
-    .max(255, 'El motivo no puede exceder 255 caracteres'),
+    .refine(val => val !== 0, 'La cantidad no puede ser 0'),
+  reason: z.string().min(1, 'El motivo es obligatorio').max(255, 'El motivo no puede exceder 255 caracteres'),
 });
 
 // ============================================
@@ -330,15 +252,9 @@ export const inventoryMovementSchema = z.object({
 export const productImageSchema = z.object({
   url: z.string().url('URL de imagen inválida'),
   filename: z.string().min(1, 'El nombre de archivo es obligatorio'),
-  altText: z
-    .string()
-    .max(255, 'El texto alternativo no puede exceder 255 caracteres'),
+  altText: z.string().max(255, 'El texto alternativo no puede exceder 255 caracteres'),
   isMain: z.boolean().default(false),
-  displayOrder: z
-    .number()
-    .int()
-    .min(0)
-    .max(4, 'Máximo 5 imágenes por producto'),
+  displayOrder: z.number().int().min(0).max(4, 'Máximo 5 imágenes por producto'),
 });
 
 // ============================================
@@ -361,28 +277,18 @@ export const siteConfigSchema = z.object({
     .string()
     .min(1, 'El nombre de la empresa es obligatorio')
     .max(200, 'El nombre no puede exceder 200 caracteres'),
-  companyTaxId: z
-    .string()
-    .min(1, 'El CIF/NIF es obligatorio')
-    .max(20, 'El CIF/NIF no puede exceder 20 caracteres'),
+  companyTaxId: z.string().min(1, 'El CIF/NIF es obligatorio').max(20, 'El CIF/NIF no puede exceder 20 caracteres'),
   companyAddress: z
     .string()
     .min(1, 'La dirección es obligatoria')
     .max(255, 'La dirección no puede exceder 255 caracteres'),
-  companyCity: z
-    .string()
-    .min(1, 'La ciudad es obligatoria')
-    .max(100, 'La ciudad no puede exceder 100 caracteres'),
+  companyCity: z.string().min(1, 'La ciudad es obligatoria').max(100, 'La ciudad no puede exceder 100 caracteres'),
   companyProvince: z
     .string()
     .min(1, 'La provincia es obligatoria')
     .max(100, 'La provincia no puede exceder 100 caracteres'),
-  companyPostalCode: z
-    .string()
-    .regex(/^\d{5}$/, 'El código postal debe tener 5 dígitos'),
-  companyPhone: z
-    .string()
-    .regex(/^\+?\d{9,20}$/, 'El teléfono debe tener entre 9 y 20 dígitos'),
+  companyPostalCode: z.string().regex(/^\d{5}$/, 'El código postal debe tener 5 dígitos'),
+  companyPhone: z.string().regex(/^\+?\d{9,20}$/, 'El teléfono debe tener entre 9 y 20 dígitos'),
   companyEmail: z
     .string()
     .min(1, 'El email es obligatorio')
@@ -414,20 +320,9 @@ export const categorySchema = z.object({
     .string()
     .min(1, 'El slug es obligatorio')
     .max(100, 'El slug no puede exceder 100 caracteres')
-    .regex(
-      /^[a-z0-9-]+$/,
-      'El slug solo puede contener letras minúsculas, números y guiones',
-    ),
-  description: z
-    .string()
-    .max(500, 'La descripción no puede exceder 500 caracteres')
-    .optional()
-    .nullable(),
-  image: z
-    .string()
-    .max(500, 'La URL de imagen es muy larga')
-    .optional()
-    .nullable(),
+    .regex(/^[a-z0-9-]+$/, 'El slug solo puede contener letras minúsculas, números y guiones'),
+  description: z.string().max(500, 'La descripción no puede exceder 500 caracteres').optional().nullable(),
+  image: z.string().max(500, 'La URL de imagen es muy larga').optional().nullable(),
   displayOrder: z
     .number()
     .int('El orden debe ser un número entero')

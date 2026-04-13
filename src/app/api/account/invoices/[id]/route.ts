@@ -3,15 +3,13 @@
  * GET /api/account/invoices/[id]
  * Devuelve el detalle completo de una factura específica del usuario
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -26,10 +24,7 @@ export async function GET(
     });
 
     if (!usuario) {
-      return NextResponse.json(
-        { error: 'Usuario no encontrado' },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
 
     // Obtener factura específica del usuario
@@ -70,10 +65,7 @@ export async function GET(
     });
 
     if (!factura) {
-      return NextResponse.json(
-        { error: 'Factura no encontrada' },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: 'Factura no encontrada' }, { status: 404 });
     }
 
     // Transformar datos al formato esperado por el componente InvoiceViewer
@@ -112,7 +104,7 @@ export async function GET(
         numeroPedido: factura.order?.orderNumber || '',
         metodoPago: factura.order?.paymentMethod || 'CARD',
         items:
-          factura.order?.items.map((item) => ({
+          factura.order?.items.map(item => ({
             id: item.id,
             name: item.name,
             quantity: item.quantity,
@@ -132,9 +124,6 @@ export async function GET(
     return NextResponse.json({ factura: facturaFormateada });
   } catch (error) {
     console.error('Error al obtener factura:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener factura' },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: 'Error al obtener factura' }, { status: 500 });
   }
 }

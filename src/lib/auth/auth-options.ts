@@ -81,10 +81,7 @@ export const authOptions: AuthOptions = {
             });
           }
 
-          const isValid = await bcrypt.compare(
-            credentials.password,
-            user.password,
-          );
+          const isValid = await bcrypt.compare(credentials.password, user.password);
           if (!isValid) {
             // Increment failed attempts
             const newFailedAttempts = user.failedAttempts + 1;
@@ -101,9 +98,7 @@ export const authOptions: AuthOptions = {
             // Lock account if max attempts reached
             if (newFailedAttempts >= MAX_FAILED_ATTEMPTS) {
               const lockedUntil = new Date();
-              lockedUntil.setMinutes(
-                lockedUntil.getMinutes() + LOCKOUT_DURATION_MINUTES,
-              );
+              lockedUntil.setMinutes(lockedUntil.getMinutes() + LOCKOUT_DURATION_MINUTES);
               updateData.lockedUntil = lockedUntil;
             }
 
@@ -142,10 +137,7 @@ export const authOptions: AuthOptions = {
         } catch (error) {
           console.error('Error in authorize:', error);
           // Re-throw lockout errors to be handled by NextAuth
-          if (
-            error instanceof Error &&
-            error.message.includes('Cuenta bloqueada')
-          ) {
+          if (error instanceof Error && error.message.includes('Cuenta bloqueada')) {
             throw error;
           }
           return null;

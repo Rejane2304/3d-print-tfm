@@ -38,6 +38,7 @@ Configuración para tests unitarios e integración.
 Configuración para tests E2E en múltiples navegadores y dispositivos.
 
 **Dispositivos soportados:**
+
 - Desktop Chrome/Firefox/Safari
 - Tablet iPad
 - Mobile iPhone
@@ -77,6 +78,7 @@ tests/
 Lógica pura, sin dependencias externas.
 
 **Ejemplos:**
+
 - Validadores Zod (auth, productos, órdenes, direcciones)
 - Seguridad de contraseñas (fuerza, patrones)
 - Formateo de datos
@@ -87,6 +89,7 @@ Lógica pura, sin dependencias externas.
 APIs con base de datos real (testcontainers).
 
 **Ejemplos:**
+
 - CRUD de productos
 - Operaciones de carrito
 - Proceso de checkout
@@ -97,6 +100,7 @@ APIs con base de datos real (testcontainers).
 Flujos completos de usuario.
 
 **Ejemplos:**
+
 - Registro → Login → Compra
 - Panel admin: crear producto → editar → eliminar
 - Aplicación de cupones en checkout
@@ -105,11 +109,11 @@ Flujos completos de usuario.
 
 ## 📊 Métricas Actuales
 
-| Tipo | Tests | Cobertura |
-|------|-------|-----------|
-| Unitarios | 25+ | 80%+ |
-| Integración | 290+ | 80%+ |
-| E2E | 19 | 6 dispositivos |
+| Tipo        | Tests | Cobertura      |
+| ----------- | ----- | -------------- |
+| Unitarios   | 25+   | 80%+           |
+| Integración | 290+  | 80%+           |
+| E2E         | 19    | 6 dispositivos |
 
 **Meta de cobertura:** 80%+
 
@@ -130,6 +134,7 @@ npm run test:integration
 ### Tests Intermitentes (Flaky)
 
 Si un test falla aleatoriamente:
+
 1. Verificar `await` en operaciones asíncronas
 2. Verificar limpieza de BD entre tests
 3. Aumentar timeout si es necesario: `it('...', async () => {}, 15000)`

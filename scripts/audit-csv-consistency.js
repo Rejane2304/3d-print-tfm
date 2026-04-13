@@ -30,7 +30,7 @@ function readCSV(filename) {
 }
 
 console.log('🔍 AUDITORÍA DE CONSISTENCIA CSV\n');
-console.log('=' .repeat(60));
+console.log('='.repeat(60));
 
 const issues = [];
 
@@ -65,14 +65,16 @@ files.orders.rows.forEach(order => {
   }
 
   const calculatedSubtotal = items.reduce((sum, item) => {
-    return sum + (Number.parseFloat(item.price) * Number.parseInt(item.quantity));
+    return sum + Number.parseFloat(item.price) * Number.parseInt(item.quantity);
   }, 0);
 
   const orderSubtotal = Number.parseFloat(order.subtotal);
   const diff = Math.abs(calculatedSubtotal - orderSubtotal);
 
   if (diff > 0.01) {
-    issues.push(`❌ ${orderRef}: Subtotal incorrecto. CSV=${orderSubtotal}, Calculado=${calculatedSubtotal.toFixed(2)}`);
+    issues.push(
+      `❌ ${orderRef}: Subtotal incorrecto. CSV=${orderSubtotal}, Calculado=${calculatedSubtotal.toFixed(2)}`,
+    );
     console.log(`❌ ${orderRef}: ${orderSubtotal} ≠ ${calculatedSubtotal.toFixed(2)} (diff: ${diff.toFixed(2)})`);
   } else {
     console.log(`✅ ${orderRef}: ${orderSubtotal.toFixed(2)} (${items.length} items)`);
@@ -125,7 +127,7 @@ files.invoices.rows.forEach(inv => {
   // Fórmula correcta: IVA solo sobre productos
   const expectedVat = (subtotal - discount) * (vatRate / 100);
   const expectedTotal = (subtotal - discount) * (1 + vatRate / 100) + shipping;
-  const expectedTaxable = (subtotal - discount) + shipping;
+  const expectedTaxable = subtotal - discount + shipping;
 
   const vatDiff = Math.abs(vatAmount - expectedVat);
   const totalDiff = Math.abs(total - expectedTotal);

@@ -4,7 +4,8 @@
  *
  * Recibe datos del usuario y opcionalmente una dirección inicial
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
 import { prisma } from '@/lib/db/prisma';
 import { withErrorHandler } from '@/lib/errors/api-wrapper';
@@ -12,7 +13,7 @@ import { addressSchema, registerSchema } from '@/lib/validators';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { createNewUserAlert } from '@/lib/alerts/alert-service';
 
-export const POST = withErrorHandler(async(req: NextRequest) => {
+export const POST = withErrorHandler(async (req: NextRequest) => {
   // Check rate limiting for registration
   const rateLimitResponse = checkRateLimit(req, 'register');
   if (rateLimitResponse) {
@@ -28,24 +29,16 @@ export const POST = withErrorHandler(async(req: NextRequest) => {
   if (!userValidationResult.success) {
     // Extraer el primer error para el mensaje
     const firstError = userValidationResult.error.errors[0];
-    return NextResponse.json(
-      { success: false, error: firstError.message },
-      { status: 400 },
-    );
+    return NextResponse.json({ success: false, error: firstError.message }, { status: 400 });
   }
 
   // Validar dirección si se proporciona (parcial, ya que algunos campos se completan automáticamente)
   let validatedAddress = null;
   if (addressData) {
-    const addressValidationResult = addressSchema
-      .partial()
-      .safeParse(addressData);
+    const addressValidationResult = addressSchema.partial().safeParse(addressData);
     if (!addressValidationResult.success) {
       const firstError = addressValidationResult.error.errors[0];
-      return NextResponse.json(
-        { success: false, error: `Dirección: ${firstError.message}` },
-        { status: 400 },
-      );
+      return NextResponse.json({ success: false, error: `Dirección: ${firstError.message}` }, { status: 400 });
     }
     validatedAddress = addressValidationResult.data;
   }
@@ -58,10 +51,7 @@ export const POST = withErrorHandler(async(req: NextRequest) => {
   });
 
   if (existingUser) {
-    return NextResponse.json(
-      { success: false, error: 'Ya existe un usuario con este email' },
-      { status: 409 },
-    );
+    return NextResponse.json({ success: false, error: 'Ya existe un usuario con este email' }, { status: 409 });
   }
 
   // Hash de la contraseña (solo después de validación exitosa)
@@ -84,21 +74,21 @@ export const POST = withErrorHandler(async(req: NextRequest) => {
       // Crear dirección si se proporcionan los datos
       addresses: validatedAddress
         ? {
-          create: {
-            id: crypto.randomUUID(),
-            name: validatedAddress.name || 'Principal',
-            recipient: validatedAddress.recipient || name,
-            phone: validatedAddress.phone || phone || '',
-            address: validatedAddress.address!,
-            complement: validatedAddress.complement,
-            postalCode: validatedAddress.postalCode!,
-            city: validatedAddress.city!,
-            province: validatedAddress.province!,
-            country: validatedAddress.country || 'Spain',
-            isDefault: validatedAddress.isDefault ?? true,
-            updatedAt: new Date(),
-          },
-        }
+            create: {
+              id: crypto.randomUUID(),
+              name: validatedAddress.name || 'Principal',
+              recipient: validatedAddress.recipient || name,
+              phone: validatedAddress.phone || phone || '',
+              address: validatedAddress.address!,
+              complement: validatedAddress.complement,
+              postalCode: validatedAddress.postalCode!,
+              city: validatedAddress.city!,
+              province: validatedAddress.province!,
+              country: validatedAddress.country || 'Spain',
+              isDefault: validatedAddress.isDefault ?? true,
+              updatedAt: new Date(),
+            },
+          }
         : undefined,
     },
     include: {

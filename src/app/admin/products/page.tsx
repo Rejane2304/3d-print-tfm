@@ -9,15 +9,9 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import {
-  AlertCircle,
-  Edit,
-  Loader2,
-  Package,
-  Plus,
-  Trash2,
-} from 'lucide-react';
-import { BulkAction, Column, DataTable } from '@/components/ui/DataTable';
+import { AlertCircle, Edit, Loader2, Package, Plus, Trash2 } from 'lucide-react';
+import type { BulkAction, Column } from '@/components/ui/DataTable';
+import { DataTable } from '@/components/ui/DataTable';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { BulkDeleteModal } from '@/components/ui/BulkDeleteModal';
 
@@ -61,7 +55,7 @@ export default function AdminProductsPage() {
     }
   }, [status, session, router]);
 
-  const loadProducts = async() => {
+  const loadProducts = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -86,7 +80,7 @@ export default function AdminProductsPage() {
     setModalOpen(true);
   };
 
-  const confirmDelete = async() => {
+  const confirmDelete = async () => {
     if (!productToDelete) {
       return;
     }
@@ -97,7 +91,7 @@ export default function AdminProductsPage() {
       });
 
       if (response.ok) {
-        setProducts(products.filter((p) => p.id !== productToDelete));
+        setProducts(products.filter(p => p.id !== productToDelete));
       }
     } catch {
       setError('Error al eliminar producto');
@@ -113,14 +107,10 @@ export default function AdminProductsPage() {
     setBulkDeleteModalOpen(true);
   };
 
-  const confirmBulkDelete = async() => {
+  const confirmBulkDelete = async () => {
     try {
-      await Promise.all(
-        selectedIdsToDelete.map((id) =>
-          fetch(`/api/admin/products/${id}`, { method: 'DELETE' }),
-        ),
-      );
-      setProducts(products.filter((p) => !selectedIdsToDelete.includes(p.id)));
+      await Promise.all(selectedIdsToDelete.map(id => fetch(`/api/admin/products/${id}`, { method: 'DELETE' })));
+      setProducts(products.filter(p => !selectedIdsToDelete.includes(p.id)));
     } catch {
       setError('Error al eliminar productos');
     } finally {
@@ -155,9 +145,7 @@ export default function AdminProductsPage() {
             )}
           </div>
           <div className="ml-4 min-w-0">
-            <div className="text-sm font-medium text-gray-900 truncate">
-              {product.nombre}
-            </div>
+            <div className="text-sm font-medium text-gray-900 truncate">{product.nombre}</div>
             <div className="text-xs text-gray-500">{product.material}</div>
           </div>
         </div>
@@ -174,25 +162,21 @@ export default function AdminProductsPage() {
       header: 'Precio',
       sortable: true,
       className: '',
-      render: (value) => `${Number(value).toFixed(2)} €`,
+      render: value => `${Number(value).toFixed(2)} €`,
     },
     {
       key: 'stock',
       header: 'Stock',
       sortable: true,
       className: 'hidden md:table-cell',
-      render: (value) => (
-        <span className={Number(value) <= 5 ? 'text-red-600 font-medium' : ''}>
-          {String(value)}
-        </span>
-      ),
+      render: value => <span className={Number(value) <= 5 ? 'text-red-600 font-medium' : ''}>{String(value)}</span>,
     },
     {
       key: 'activo',
       header: 'Estado',
       sortable: true,
       className: 'hidden lg:table-cell',
-      render: (value) => (
+      render: value => (
         <span
           className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
             value ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
@@ -212,12 +196,12 @@ export default function AdminProductsPage() {
             href={`/admin/products/${product.slug}/editar`}
             className="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-50 transition-colors"
             title="Editar"
-            onClick={(e) => e.stopPropagation()}
+            onClick={e => e.stopPropagation()}
           >
             <Edit className="h-4 w-4" />
           </Link>
           <button
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               handleDelete(product.id);
             }}
@@ -260,15 +244,10 @@ export default function AdminProductsPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Package className="h-8 w-8 text-indigo-600" />
-              <h1 className="text-2xl font-bold text-gray-900">
-                Gestión de Productos
-              </h1>
+              <h1 className="text-2xl font-bold text-gray-900">Gestión de Productos</h1>
             </div>
             <div className="flex items-center gap-4">
-              <Link
-                href="/admin/dashboard"
-                className="text-indigo-600 hover:text-indigo-800 font-medium"
-              >
+              <Link href="/admin/dashboard" className="text-indigo-600 hover:text-indigo-800 font-medium">
                 ← Volver al Panel
               </Link>
               <Link
@@ -310,9 +289,7 @@ export default function AdminProductsPage() {
           loading={loading}
           emptyMessage="No se encontraron productos"
           noResultsMessage="Ningún producto coincide con tu búsqueda"
-          onRowClick={(product) =>
-            router.push(`/admin/products/${product.slug}/editar`)
-          }
+          onRowClick={product => router.push(`/admin/products/${product.slug}/editar`)}
         />
       </div>
 

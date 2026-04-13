@@ -3,18 +3,17 @@
  * POST /api/payments/paypal/create
  * Creates a PayPal order for payment and stores paypalOrderId
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
 import { createPaymentFailedAlert } from '@/lib/alerts/alert-service';
-import { Decimal } from '@prisma/client/runtime/library';
+import type { Decimal } from '@prisma/client/runtime/library';
 
 // PayPal API base URLs
 const PAYPAL_API =
-  process.env.NODE_ENV === 'production'
-    ? 'https://api-m.paypal.com'
-    : 'https://api-m.sandbox.paypal.com';
+  process.env.NODE_ENV === 'production' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com';
 
 /**
  * Get PayPal OAuth access token
@@ -55,10 +54,7 @@ async function getPayPalAccessToken(): Promise<string> {
  * Create PayPal order via API
  */
 // Build PayPal items from order items
-function buildPayPalItems(
-  items: Array<{ name: string; quantity: number; unitPrice: number }>,
-  vatAmountStr: string,
-) {
+function buildPayPalItems(items: Array<{ name: string; quantity: number; unitPrice: number }>, vatAmountStr: string) {
   const productItems = items.map((item, index) => ({
     name: item.name.substring(0, 127),
     quantity: item.quantity.toString(),
@@ -85,7 +81,10 @@ function buildPayPalItems(
 }
 
 // Translate PayPal error response
-function translatePayPalError(errorData: { details?: Array<{ issue: string; field?: string; description?: string }>; message?: string }): string {
+function translatePayPalError(errorData: {
+  details?: Array<{ issue: string; field?: string; description?: string }>;
+  message?: string;
+}): string {
   if (!errorData.details || errorData.details.length === 0) {
     return errorData.message ?? 'Error al crear el pedido de PayPal';
   }
@@ -127,10 +126,7 @@ async function createPayPalOrder(
   },
 ): Promise<{ id: string; links: Array<{ rel: string; href: string }> }> {
   // Calcular totales con IVA separado (transparente) - BASE IMPONIBLE INCLUYE ENVÍO
-  const itemsTotal = orderData.items.reduce(
-    (sum, item) => sum + item.unitPrice * item.quantity,
-    0,
-  );
+  const itemsTotal = orderData.items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
 
   // Aplicar descuento antes de calcular IVA
   const discountedItems = Math.max(0, itemsTotal - (orderData.discount || 0));
@@ -224,7 +220,20 @@ async function createPayPalOrder(
 // Get order with verification
 interface OrderResult {
   success: boolean;
-  order?: { id: string; orderNumber: string; total: Decimal; shipping: Decimal; discount: Decimal | null; items: Array<{ name: string; quantity: number; price: Decimal }>; shippingName: string | null; shippingAddress: string; shippingCity: string; shippingPostalCode: string; shippingCountry: string; user: { name: string | null } };
+  order?: {
+    id: string;
+    orderNumber: string;
+    total: Decimal;
+    shipping: Decimal;
+    discount: Decimal | null;
+    items: Array<{ name: string; quantity: number; price: Decimal }>;
+    shippingName: string | null;
+    shippingAddress: string;
+    shippingCity: string;
+    shippingPostalCode: string;
+    shippingCountry: string;
+    user: { name: string | null };
+  };
   error?: string;
   status?: number;
 }
@@ -264,11 +273,7 @@ async function getOrderForPayPal(orderId: string, userEmail: string): Promise<Or
 }
 
 // Update payment and order with PayPal order ID
-async function updatePaymentWithPayPalOrder(
-  paymentId: string,
-  orderId: string,
-  paypalOrderId: string,
-) {
+async function updatePaymentWithPayPalOrder(paymentId: string, orderId: string, paypalOrderId: string) {
   await prisma.payment.update({
     where: { id: paymentId },
     data: {
@@ -312,19 +317,13 @@ export async function POST(req: NextRequest) {
     const { orderId, paymentId } = body;
 
     if (!orderId || !paymentId) {
-      return NextResponse.json(
-        { error: 'Faltan campos requeridos' },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
     }
 
     // 3. Get order data with verification
     const orderResult = await getOrderForPayPal(orderId, session.user.email);
     if (!orderResult.success || !orderResult.order) {
-      return NextResponse.json(
-        { error: orderResult.error },
-        { status: orderResult.status },
-      );
+      return NextResponse.json({ error: orderResult.error }, { status: orderResult.status });
     }
     const order = orderResult.order;
 
@@ -338,7 +337,7 @@ export async function POST(req: NextRequest) {
       total: Number(order.total),
       shipping: Number(order.shipping),
       discount: Number(order.discount || 0),
-      items: order.items.map((item) => ({
+      items: order.items.map(item => ({
         name: item.name,
         quantity: item.quantity,
         unitPrice: Number(item.price),
@@ -356,15 +355,11 @@ export async function POST(req: NextRequest) {
     await updatePaymentWithPayPalOrder(paymentId, orderId, paypalOrder.id);
 
     // 7. Get approval URL from PayPal response
-    const approvalLink = paypalOrder.links.find(
-      (link) => link.rel === 'approve',
-    );
+    const approvalLink = paypalOrder.links.find(link => link.rel === 'approve');
     const paypalApprovalUrl = approvalLink?.href;
 
     if (!paypalApprovalUrl) {
-      throw new Error(
-        'No se encontró la URL de aprobación en la respuesta de PayPal',
-      );
+      throw new Error('No se encontró la URL de aprobación en la respuesta de PayPal');
     }
 
     // 8. Return success with approval URL
@@ -384,8 +379,7 @@ export async function POST(req: NextRequest) {
       await createFailedPaymentAlert(orderId, errorMessage);
     }
 
-    const errorMessage =
-      error instanceof Error ? error.message : 'Error interno del servidor';
+    const errorMessage = error instanceof Error ? error.message : 'Error interno del servidor';
 
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }

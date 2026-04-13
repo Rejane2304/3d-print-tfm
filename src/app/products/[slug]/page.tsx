@@ -13,11 +13,7 @@ import { StarRating } from '@/components/ui/StarRating';
 import { ReviewFormClient } from '@/components/reviews/ReviewFormClient';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
-import {
-  translateCategoryName,
-  translateProductDescription,
-  translateProductName,
-} from '@/lib/i18n';
+import { translateCategoryName, translateProductDescription, translateProductName } from '@/lib/i18n';
 
 interface ProductDetailPageProps {
   params: {
@@ -44,9 +40,7 @@ interface ProductWithDimensions {
   category: { name: string } | null;
 }
 
-async function getProduct(
-  slug: string,
-): Promise<{
+async function getProduct(slug: string): Promise<{
   product: ProductWithDimensions;
   related: unknown[];
   reviews: unknown[];
@@ -81,15 +75,15 @@ async function getProduct(
     heightCm: product.heightCm,
     depthCm: product.depthCm,
     printTime: product.printTime,
-    images: product.images.map((img) => ({
+    images: product.images.map(img => ({
       id: img.id,
       url: img.url,
       altText: img.altText,
     })),
     category: product.category
       ? {
-        name: translateCategoryName(product.category.slug),
-      }
+          name: translateCategoryName(product.category.slug),
+        }
       : null,
   };
 
@@ -110,7 +104,7 @@ async function getProduct(
   });
 
   // Traducir productos relacionados
-  const translatedRelated = related.map((p) => ({
+  const translatedRelated = related.map(p => ({
     ...p,
     name: translateProductName(p.slug),
   }));
@@ -136,7 +130,7 @@ async function getProduct(
   });
 
   // Formatear reseñas
-  const formattedReviews = reviews.map((review) => ({
+  const formattedReviews = reviews.map(review => ({
     id: review.id,
     usuarioNombre: review.user.name,
     puntuacion: review.rating,
@@ -160,7 +154,7 @@ async function getProduct(
   const ratingCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
   let totalRating = 0;
 
-  allReviews.forEach((review) => {
+  allReviews.forEach(review => {
     ratingCounts[review.rating as 1 | 2 | 3 | 4 | 5]++;
     totalRating += review.rating;
   });
@@ -180,9 +174,7 @@ async function getProduct(
   };
 }
 
-export default async function ProductDetailPage({
-  params,
-}: Readonly<ProductDetailPageProps>) {
+export default async function ProductDetailPage({ params }: Readonly<ProductDetailPageProps>) {
   // Get session to check if user is admin or logged in
   const session = await getServerSession(authOptions);
   const isAdmin = session?.user?.role === 'ADMIN';
@@ -206,40 +198,26 @@ export default async function ProductDetailPage({
               Inicio
             </Link>
             <span className="mx-1">/</span>
-            <Link
-              href="/products"
-              className="hover:text-indigo-600 whitespace-nowrap"
-            >
+            <Link href="/products" className="hover:text-indigo-600 whitespace-nowrap">
               Productos
             </Link>
             <span className="mx-1">/</span>
-            <span className="text-gray-900 truncate max-w-[200px] sm:max-w-xs">
-              {product.name}
-            </span>
+            <span className="text-gray-900 truncate max-w-[200px] sm:max-w-xs">{product.name}</span>
           </div>
         </nav>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12">
           {/* Imágenes del Producto - Galería Interactiva */}
-          <ProductImageGallery
-            images={product.images}
-            productName={product.name}
-          />
+          <ProductImageGallery images={product.images} productName={product.name} />
 
           {/* Información del Producto */}
           <div className="space-y-4 sm:space-y-6">
             <div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
-                {product.name}
-              </h1>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">{product.name}</h1>
 
               <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600 mb-4">
-                <span className="bg-indigo-100 text-indigo-800 px-2 py-1 rounded">
-                  {product.category?.name}
-                </span>
-                <span className="bg-green-100 text-green-800 px-2 py-1 rounded">
-                  {product.material}
-                </span>
+                <span className="bg-indigo-100 text-indigo-800 px-2 py-1 rounded">{product.category?.name}</span>
+                <span className="bg-green-100 text-green-800 px-2 py-1 rounded">{product.material}</span>
               </div>
             </div>
 
@@ -259,9 +237,7 @@ export default async function ProductDetailPage({
             {/* Stock */}
             <div className="text-sm">
               {product.stock > 0 ? (
-                <span className="text-green-600 font-medium">
-                  ✅ En stock ({product.stock} unidades)
-                </span>
+                <span className="text-green-600 font-medium">✅ En stock ({product.stock} unidades)</span>
               ) : (
                 <span className="text-red-600 font-medium">❌ Agotado</span>
               )}
@@ -269,12 +245,8 @@ export default async function ProductDetailPage({
 
             {/* Descripción */}
             <div className="prose max-w-none">
-              <h3 className="text-base sm:text-lg font-semibold mb-2">
-                Descripción
-              </h3>
-              <p className="text-sm sm:text-base text-gray-600">
-                {product.description}
-              </p>
+              <h3 className="text-base sm:text-lg font-semibold mb-2">Descripción</h3>
+              <p className="text-sm sm:text-base text-gray-600">{product.description}</p>
             </div>
 
             {/* Rating Summary */}
@@ -285,19 +257,11 @@ export default async function ProductDetailPage({
                     <p className="text-2xl sm:text-3xl font-bold text-gray-900">
                       {(reviewStats as { promedio: number }).promedio}
                     </p>
-                    <StarRating
-                      rating={(reviewStats as { promedio: number }).promedio}
-                      size="sm"
-                    />
+                    <StarRating rating={(reviewStats as { promedio: number }).promedio} size="sm" />
                   </div>
                   <div className="border-l-0 sm:border-l pl-0 sm:pl-4">
-                    <p className="text-sm text-gray-600">
-                      {(reviewStats as { total: number }).total} reseñas
-                    </p>
-                    <Link
-                      href="#reviews"
-                      className="text-sm text-indigo-600 hover:text-indigo-800"
-                    >
+                    <p className="text-sm text-gray-600">{(reviewStats as { total: number }).total} reseñas</p>
+                    <Link href="#reviews" className="text-sm text-indigo-600 hover:text-indigo-800">
                       Ver todas las reseñas
                     </Link>
                   </div>
@@ -312,27 +276,20 @@ export default async function ProductDetailPage({
               Boolean(product.weight) ||
               Boolean(isAdmin && product.printTime)) && (
               <div className="border-t pt-4 sm:pt-6">
-                <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
-                  Especificaciones
-                </h3>
+                <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Especificaciones</h3>
                 <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm sm:text-base">
                   {(Boolean(product.widthCm) || Boolean(product.heightCm) || Boolean(product.depthCm)) && (
                     <>
                       <dt className="text-gray-600">Dimensiones:</dt>
                       <dd className="font-medium">
-                        {[product.widthCm, product.heightCm, product.depthCm]
-                          .filter(Boolean)
-                          .join(' x ')}{' '}
-                        cm
+                        {[product.widthCm, product.heightCm, product.depthCm].filter(Boolean).join(' x ')} cm
                       </dd>
                     </>
                   )}
                   {product.weight && (
                     <>
                       <dt className="text-gray-600">Peso:</dt>
-                      <dd className="font-medium">
-                        {Number(product.weight)} g
-                      </dd>
+                      <dd className="font-medium">{Number(product.weight)} g</dd>
                     </>
                   )}
                   {/* Tiempo de impresión solo visible para admins */}
@@ -374,9 +331,7 @@ export default async function ProductDetailPage({
 
         {/* Sección de Reseñas */}
         <div id="reviews" className="mt-12 sm:mt-16 pt-6 sm:pt-8 border-t">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">
-            Reseñas de Clientes
-          </h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">Reseñas de Clientes</h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
             {/* Reviews List */}
@@ -393,9 +348,7 @@ export default async function ProductDetailPage({
                 paginacion={{
                   pagina: 1,
                   porPagina: 10,
-                  totalPaginas: Math.ceil(
-                    ((reviewStats as { total: number })?.total || 0) / 10,
-                  ),
+                  totalPaginas: Math.ceil(((reviewStats as { total: number })?.total || 0) / 10),
                   total: (reviewStats as { total: number })?.total || 0,
                 }}
               />
@@ -404,22 +357,13 @@ export default async function ProductDetailPage({
             {/* Review Form */}
             {isLoggedIn ? (
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 h-fit">
-                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">
-                  Escribe una reseña
-                </h3>
-                <ReviewFormClient
-                  productId={product.id}
-                  productName={product.name}
-                />
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Escribe una reseña</h3>
+                <ReviewFormClient productId={product.id} productName={product.name} />
               </div>
             ) : (
               <div className="bg-gray-50 rounded-xl p-4 sm:p-6 h-fit">
-                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
-                  Escribe una reseña
-                </h3>
-                <p className="text-gray-600 text-sm mb-4">
-                  Inicia sesión para dejar una reseña sobre este producto.
-                </p>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">Escribe una reseña</h3>
+                <p className="text-gray-600 text-sm mb-4">Inicia sesión para dejar una reseña sobre este producto.</p>
                 <Link
                   href={`/login?callbackUrl=/products/${product.slug}`}
                   className="inline-flex items-center justify-center w-full px-4 py-2 bg-indigo-600 text-white \

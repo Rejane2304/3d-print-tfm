@@ -25,11 +25,7 @@ function translateAddressName(name: string): string {
   return addressTranslations[lowerName] || name;
 }
 
-export function AddressSelector({
-  addresses,
-  selectedAddressId,
-  onSelectAddress,
-}: Readonly<AddressSelectorProps>) {
+export function AddressSelector({ addresses, selectedAddressId, onSelectAddress }: Readonly<AddressSelectorProps>) {
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-2">
@@ -47,9 +43,7 @@ export function AddressSelector({
 
       {addresses.length === 0 ? (
         <div className="text-center py-6 sm:py-8">
-          <p className="text-gray-600 mb-4 text-sm sm:text-base">
-            No tienes direcciones guardadas
-          </p>
+          <p className="text-gray-600 mb-4 text-sm sm:text-base">No tienes direcciones guardadas</p>
           <a
             href="/account/addresses"
             className="inline-flex items-center bg-indigo-600 text-white px-4 py-2.5 rounded-lg hover:bg-indigo-700 transition-colors text-sm sm:text-base min-h-[44px]"
@@ -59,7 +53,7 @@ export function AddressSelector({
         </div>
       ) : (
         <div className="space-y-3">
-          {addresses.map((address) => (
+          {addresses.map(address => (
             <label
               key={address.id}
               htmlFor={`address-${address.id}`}
@@ -84,19 +78,11 @@ export function AddressSelector({
                     {translateAddressName(address.name)}
                   </span>
                   {address.isDefault && (
-                    <span className="text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded">
-                      Principal
-                    </span>
+                    <span className="text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded">Principal</span>
                   )}
                 </div>
-                <p className="text-sm text-gray-600 mt-1 truncate">
-                  {address.address}
-                </p>
-                {address.complement && (
-                  <p className="text-sm text-gray-600 truncate">
-                    {address.complement}
-                  </p>
-                )}
+                <p className="text-sm text-gray-600 mt-1 truncate">{address.address}</p>
+                {address.complement && <p className="text-sm text-gray-600 truncate">{address.complement}</p>}
                 <p className="text-sm text-gray-600">
                   {address.postalCode} {address.city}, {address.province}
                 </p>

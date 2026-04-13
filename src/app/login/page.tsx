@@ -3,7 +3,7 @@
  * Mantiene compatibilidad con URLs antiguas
  */
 import { redirect } from 'next/navigation';
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Iniciar sesión - Redirección',
@@ -17,9 +17,7 @@ interface LoginPageProps {
 export default function LoginPage({ searchParams }: LoginPageProps) {
   // Construir URL de redirección preservando query params
   const callbackUrl = searchParams.callbackUrl;
-  const redirectUrl = callbackUrl
-    ? `/auth?callbackUrl=${encodeURIComponent(String(callbackUrl))}`
-    : '/auth';
+  const redirectUrl = callbackUrl ? `/auth?callbackUrl=${encodeURIComponent(String(callbackUrl))}` : '/auth';
 
   redirect(redirectUrl);
 }

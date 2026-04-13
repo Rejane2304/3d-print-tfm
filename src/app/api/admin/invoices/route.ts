@@ -4,12 +4,13 @@
  *
  * Requires: ADMIN role
  */
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 import { getCompanyConfig } from '@/lib/invoices/pdf-generator';
 import { translateErrorMessage } from '@/lib/i18n';
 
@@ -23,10 +24,7 @@ export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: translateErrorMessage('No autenticado') },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: translateErrorMessage('No autenticado') }, { status: 401 });
     }
 
     const usuario = await prisma.user.findUnique({
@@ -34,10 +32,7 @@ export async function GET(req: NextRequest) {
     });
 
     if (usuario?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: translateErrorMessage('No autorizado') },
-        { status: 403 },
-      );
+      return NextResponse.json({ success: false, error: translateErrorMessage('No autorizado') }, { status: 403 });
     }
 
     const { searchParams } = new URL(req.url);
@@ -93,7 +88,7 @@ export async function GET(req: NextRequest) {
       prisma.invoice.count({ where }),
     ]);
 
-    const facturasTraducidas = facturas.map((factura) => ({
+    const facturasTraducidas = facturas.map(factura => ({
       id: factura.id,
       invoiceNumber: factura.invoiceNumber,
       anulada: factura.isCancelled,
@@ -118,10 +113,7 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error('Error listing invoices:', error);
-    return NextResponse.json(
-      { success: false, error: translateErrorMessage('Internal error') },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: translateErrorMessage('Internal error') }, { status: 500 });
   }
 }
 
@@ -130,10 +122,7 @@ export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: translateErrorMessage('No autenticado') },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: translateErrorMessage('No autenticado') }, { status: 401 });
     }
 
     const usuario = await prisma.user.findUnique({
@@ -141,10 +130,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (usuario?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: translateErrorMessage('No autorizado') },
-        { status: 403 },
-      );
+      return NextResponse.json({ success: false, error: translateErrorMessage('No autorizado') }, { status: 403 });
     }
 
     const body = await req.json();
@@ -160,10 +146,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!pedido) {
-      return NextResponse.json(
-        { success: false, error: translateErrorMessage('Pedido not found') },
-        { status: 404 },
-      );
+      return NextResponse.json({ success: false, error: translateErrorMessage('Pedido not found') }, { status: 404 });
     }
 
     // Verify the order is delivered
@@ -186,9 +169,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: translateErrorMessage(
-            'Already exists una factura para este pedido',
-          ),
+          error: translateErrorMessage('Already exists una factura para este pedido'),
         },
         { status: 400 },
       );
@@ -266,15 +247,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, factura }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { success: false, error: error.errors[0].message },
-        { status: 400 },
-      );
+      return NextResponse.json({ success: false, error: error.errors[0].message }, { status: 400 });
     }
     console.error('Error creating invoice:', error);
-    return NextResponse.json(
-      { success: false, error: translateErrorMessage('Internal error') },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: translateErrorMessage('Internal error') }, { status: 500 });
   }
 }
