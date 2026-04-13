@@ -8,15 +8,14 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 interface PaginationProps {
-  currentPage: number;
-  totalPages: number;
-  searchParams: Record<string, string | undefined>;
+  readonly currentPage: number;
+  readonly totalPages: number;
 }
 
 export default function Pagination({
   currentPage,
   totalPages,
-}: PaginationProps) {
+}: Readonly<PaginationProps>) {
   const currentSearchParams = useSearchParams();
 
   const buildPageUrl = (page: number) => {
@@ -92,9 +91,12 @@ export default function Pagination({
       <div className="flex gap-1">
         {pageNumbers.map((page, index) => {
           if (page === "...") {
+            // Usar una key única basada en la posición y el valor anterior/siguiente
+            const prev = pageNumbers[index - 1] ?? 'start';
+            const next = pageNumbers[index + 1] ?? 'end';
             return (
               <span
-                key={`ellipsis-${index}`}
+                key={`ellipsis-${prev}-${next}`}
                 className="px-3 py-2 text-gray-500"
               >
                 ...

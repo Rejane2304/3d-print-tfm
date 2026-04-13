@@ -30,7 +30,7 @@ export function ReviewForm({
   onCancel,
   initialData,
   mode = "create",
-}: ReviewFormProps) {
+}: Readonly<ReviewFormProps>) {
   const [rating, setRating] = useState(initialData?.rating || 0);
   const [title, setTitle] = useState(initialData?.title || "");
   const [comment, setComment] = useState(initialData?.comment || "");
@@ -95,9 +95,10 @@ export function ReviewForm({
 
       {/* Rating */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="review-rating" className="block text-sm font-medium text-gray-700 mb-2">
           Puntuación *
         </label>
+        <input type="hidden" id="review-rating" value={rating} readOnly />
         <StarRating
           rating={rating}
           mode="interactive"

@@ -9,9 +9,7 @@ import { useCartPersistence } from "@/hooks/useCartPersistence";
  */
 export function CartPersistenceProvider({
   children,
-}: {
-  children: React.ReactNode;
-}) {
+}: Readonly<{ children: React.ReactNode }>) {
   useCartPersistence();
   return <>{children}</>;
 }

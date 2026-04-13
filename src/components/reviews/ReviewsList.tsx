@@ -41,7 +41,7 @@ export function ReviewsList({
   paginacion,
   onSortChange,
   onPageChange,
-}: ReviewsListProps) {
+}: Readonly<ReviewsListProps>) {
   const [sortBy, setSortBy] = useState("newest");
 
   const handleSortChange = (value: string) => {

@@ -32,6 +32,61 @@ const categoryUpdateSchema = z.object({
   isActive: z.boolean().optional(),
 });
 
+// Helper: Verificar autenticación y autorización admin
+async function verifyAdminAuth(): Promise<NextResponse | null> {
+  let session;
+  try {
+    session = await getServerSession(authOptions);
+  } catch {
+    session = null;
+  }
+  if (!session?.user?.email) {
+    return NextResponse.json(
+      { success: false, error: 'No autenticado' },
+      { status: 401 },
+    );
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+  });
+
+  if (user?.role !== 'ADMIN') {
+    return NextResponse.json(
+      { success: false, error: 'No autorizado' },
+      { status: 401 },
+    );
+  }
+
+  return null;
+}
+
+// Helper: Traducir categoría al español
+function translateCategory(category: {
+  id: string;
+  slug: string;
+  image: string | null;
+  displayOrder: number;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  _count: { products: number };
+}) {
+  return {
+    id: category.id,
+    _ref: category.id.slice(0, 8).toUpperCase(),
+    nombre: translateCategoryName(category.slug),
+    slug: category.slug,
+    descripcion: translateCategoryDescription(category.slug),
+    imagen: category.image,
+    ordenVisualizacion: category.displayOrder,
+    activo: category.isActive,
+    totalProductos: category._count.products,
+    creadoEn: category.createdAt,
+    actualizadoEn: category.updatedAt,
+  };
+}
+
 // GET - Obtener categoría
 export async function GET(
   request: NextRequest,
@@ -40,29 +95,8 @@ export async function GET(
   try {
     const { id } = await params;
 
-    let session;
-    try {
-      session = await getServerSession(authOptions);
-    } catch {
-      session = null;
-    }
-    if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
-
-    if (user?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 401 },
-      );
-    }
+    const authError = await verifyAdminAuth();
+    if (authError) return authError;
 
     const category = await prisma.category.findUnique({
       where: { id },
@@ -80,22 +114,10 @@ export async function GET(
       );
     }
 
-    // Translate to Spanish
-    const categoriaTraducida = {
-      id: category.id,
-      _ref: category.id.slice(0, 8).toUpperCase(),
-      nombre: translateCategoryName(category.slug),
-      slug: category.slug,
-      descripcion: translateCategoryDescription(category.slug),
-      imagen: category.image,
-      ordenVisualizacion: category.displayOrder,
-      activo: category.isActive,
-      totalProductos: category._count.products,
-      creadoEn: category.createdAt,
-      actualizadoEn: category.updatedAt,
-    };
-
-    return NextResponse.json({ success: true, categoria: categoriaTraducida });
+    return NextResponse.json({
+      success: true,
+      categoria: translateCategory(category),
+    });
   } catch (error) {
     console.error('Error obteniendo categoría:', error);
     return NextResponse.json(
@@ -103,6 +125,25 @@ export async function GET(
       { status: 500 },
     );
   }
+}
+
+// Helper: Verificar que la categoría existe
+async function getCategoryOr404(id: string): Promise<
+  | NextResponse
+  | { id: string; slug: string; name: string | null; description: string | null }
+> {
+  const category = await prisma.category.findUnique({
+    where: { id },
+  });
+
+  if (!category) {
+    return NextResponse.json(
+      { success: false, error: 'Categoría no encontrada' },
+      { status: 404 },
+    );
+  }
+
+  return category;
 }
 
 // PATCH - Actualizar categoría
@@ -113,41 +154,11 @@ export async function PATCH(
   try {
     const { id } = await params;
 
-    let session;
-    try {
-      session = await getServerSession(authOptions);
-    } catch {
-      session = null;
-    }
-    if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
-    }
+    const authError = await verifyAdminAuth();
+    if (authError) return authError;
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
-
-    if (user?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 401 },
-      );
-    }
-
-    // Verificar que la categoría existe
-    const existing = await prisma.category.findUnique({
-      where: { id },
-    });
-
-    if (!existing) {
-      return NextResponse.json(
-        { success: false, error: 'Categoría no encontrada' },
-        { status: 404 },
-      );
-    }
+    const existing = await getCategoryOr404(id);
+    if (existing instanceof NextResponse) return existing;
 
     const body = await request.json();
     const data = categoryUpdateSchema.parse(body);
@@ -207,31 +218,9 @@ export async function DELETE(
   try {
     const { id } = await params;
 
-    let session;
-    try {
-      session = await getServerSession(authOptions);
-    } catch {
-      session = null;
-    }
-    if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
-    }
+    const authError = await verifyAdminAuth();
+    if (authError) return authError;
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
-
-    if (user?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 401 },
-      );
-    }
-
-    // Verificar que la categoría existe
     const existing = await prisma.category.findUnique({
       where: { id },
       include: {
@@ -248,7 +237,6 @@ export async function DELETE(
       );
     }
 
-    // Verificar que no tenga productos asociados
     if (existing._count.products > 0) {
       return NextResponse.json(
         {
@@ -259,7 +247,6 @@ export async function DELETE(
       );
     }
 
-    // Eliminar categoría
     await prisma.category.delete({
       where: { id },
     });

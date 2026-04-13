@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { z } from 'zod';
+import type { ShippingZone } from '@prisma/client';
 
 // Schema de validación
 const calculateShippingSchema = z.object({
@@ -16,109 +17,157 @@ const calculateShippingSchema = z.object({
     .min(0, 'El total del carrito debe ser mayor o igual a 0'),
 });
 
+// Tipo para los datos validados
+type ShippingRequestData = z.infer<typeof calculateShippingSchema>;
+
+// Tipo para la respuesta de envío
+type ShippingResponse = {
+  success: boolean;
+  shippingCost: number;
+  isFreeShipping: boolean;
+  freeShippingThreshold: number | null;
+  amountToFreeShipping: number | null;
+  estimatedDaysMin: number;
+  estimatedDaysMax: number;
+  estimatedDaysText: string;
+  zone: {
+    id: string;
+    name: string;
+    country: string;
+    regions?: string[];
+  };
+};
+
+/**
+ * Busca zonas de envío activas por país
+ */
+async function fetchShippingZones(country: string): Promise<ShippingZone[]> {
+  return prisma.shippingZone.findMany({
+    where: {
+      isActive: true,
+      country: {
+        contains: country,
+        mode: 'insensitive',
+      },
+    },
+    orderBy: {
+      displayOrder: 'asc',
+    },
+  });
+}
+
+/**
+ * Encuentra la zona que coincide con el prefijo del código postal
+ */
+function findZoneByPostalCode(
+  zones: ShippingZone[],
+  postalCode: string,
+): ShippingZone | undefined {
+  return zones.find((zone) =>
+    zone.postalCodePrefixes.some((prefix) => postalCode.startsWith(prefix)),
+  );
+}
+
+/**
+ * Busca la zona por defecto (España)
+ */
+function findDefaultZone(zones: ShippingZone[]): ShippingZone | undefined {
+  return zones.find(
+    (z) =>
+      z.country.toLowerCase().includes('spain') ||
+      z.country.toLowerCase().includes('españa'),
+  );
+}
+
+/**
+ * Calcula si aplica envío gratis y el costo final
+ */
+function calculateShippingCost(
+  zone: ShippingZone,
+  cartTotal: number,
+): {
+  shippingCost: number;
+  isFreeShipping: boolean;
+  freeShippingThreshold: number | null;
+  amountToFreeShipping: number | null;
+} {
+  const baseCost = Number(zone.baseCost);
+  const freeThreshold = zone.freeShippingThreshold
+    ? Number(zone.freeShippingThreshold)
+    : null;
+  const isFree = freeThreshold ? cartTotal >= freeThreshold : false;
+
+  return {
+    shippingCost: isFree ? 0 : baseCost,
+    isFreeShipping: isFree,
+    freeShippingThreshold: freeThreshold,
+    amountToFreeShipping: freeThreshold
+      ? Math.max(0, freeThreshold - cartTotal)
+      : null,
+  };
+}
+
+/**
+ * Construye la respuesta de envío
+ */
+function buildShippingResponse(
+  zone: ShippingZone,
+  data: ShippingRequestData,
+  includeRegions = false,
+): ShippingResponse {
+  const costDetails = calculateShippingCost(zone, data.cartTotal);
+
+  return {
+    success: true,
+    ...costDetails,
+    estimatedDaysMin: zone.estimatedDaysMin,
+    estimatedDaysMax: zone.estimatedDaysMax,
+    estimatedDaysText: `${zone.estimatedDaysMin}-${zone.estimatedDaysMax} días hábiles`,
+    zone: {
+      id: zone.id,
+      name: zone.name,
+      country: zone.country,
+      ...(includeRegions && { regions: zone.regions }),
+    },
+  };
+}
+
+/**
+ * Maneja el caso cuando no se encuentra zona de envío
+ */
+function handleNoZoneFound(): NextResponse {
+  return NextResponse.json(
+    {
+      success: false,
+      error: 'No se encontró una zona de envío para esta dirección',
+      shippingCost: 0,
+      isFreeShipping: false,
+      estimatedDays: null,
+    },
+    { status: 400 },
+  );
+}
+
 // POST - Calcular Costo de Envío
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const data = calculateShippingSchema.parse(body);
 
-    // Buscar zona de envío que corresponda al código postal
-    const zones = await prisma.shippingZone.findMany({
-      where: {
-        isActive: true,
-        country: {
-          contains: data.country,
-          mode: 'insensitive',
-        },
-      },
-      orderBy: {
-        displayOrder: 'asc',
-      },
-    });
+    const zones = await fetchShippingZones(data.country);
+    const matchingZone = findZoneByPostalCode(zones, data.postalCode);
 
-    // Encontrar la zona que coincide con el prefijo del código postal
-    const matchingZone = zones.find((zone) => {
-      return zone.postalCodePrefixes.some((prefix) =>
-        data.postalCode.startsWith(prefix),
-      );
-    });
-
-    if (!matchingZone) {
-      // Si no hay zona coincidente, buscar zona por defecto (España)
-      const defaultZone = zones.find(
-        (z) =>
-          z.country.toLowerCase().includes('spain') ||
-          z.country.toLowerCase().includes('españa'),
-      );
-
-      if (!defaultZone) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: 'No se encontró una zona de envío para esta dirección',
-            shippingCost: 0,
-            isFreeShipping: false,
-            estimatedDays: null,
-          },
-          { status: 400 },
-        );
-      }
-
-      // Usar zona por defecto
-      const shippingCost = Number(defaultZone.baseCost);
-      const freeShippingThreshold = defaultZone.freeShippingThreshold
-        ? Number(defaultZone.freeShippingThreshold)
-        : null;
-      const isFreeShipping = freeShippingThreshold
-        ? data.cartTotal >= freeShippingThreshold
-        : false;
-
-      return NextResponse.json({
-        success: true,
-        shippingCost: isFreeShipping ? 0 : shippingCost,
-        isFreeShipping,
-        freeShippingThreshold,
-        amountToFreeShipping: freeShippingThreshold
-          ? Math.max(0, freeShippingThreshold - data.cartTotal)
-          : null,
-        estimatedDaysMin: defaultZone.estimatedDaysMin,
-        estimatedDaysMax: defaultZone.estimatedDaysMax,
-        estimatedDaysText: `${defaultZone.estimatedDaysMin}-${defaultZone.estimatedDaysMax} días hábiles`,
-        zone: {
-          id: defaultZone.id,
-          name: defaultZone.name,
-          country: defaultZone.country,
-        },
-      });
+    if (matchingZone) {
+      return NextResponse.json(buildShippingResponse(matchingZone, data, true));
     }
 
-    // Calcular costo de envío
-    const shippingCost = Number(matchingZone.baseCost);
-    const freeShippingThreshold = matchingZone.freeShippingThreshold
-      ? Number(matchingZone.freeShippingThreshold)
-      : null;
-    const isFreeShipping = freeShippingThreshold
-      ? data.cartTotal >= freeShippingThreshold
-      : false;
+    const defaultZone = findDefaultZone(zones);
 
-    return NextResponse.json({
-      success: true,
-      shippingCost: isFreeShipping ? 0 : shippingCost,
-      isFreeShipping,
-      freeShippingThreshold,
-      amountToFreeShipping: freeShippingThreshold
-        ? Math.max(0, freeShippingThreshold - data.cartTotal)
-        : null,
-      estimatedDaysMin: matchingZone.estimatedDaysMin,
-      estimatedDaysMax: matchingZone.estimatedDaysMax,
-      estimatedDaysText: `${matchingZone.estimatedDaysMin}-${matchingZone.estimatedDaysMax} días hábiles`,
-      zone: {
-        id: matchingZone.id,
-        name: matchingZone.name,
-        country: matchingZone.country,
-        regions: matchingZone.regions,
-      },
-    });
+    if (!defaultZone) {
+      return handleNoZoneFound();
+    }
+
+    return NextResponse.json(buildShippingResponse(defaultZone, data, false));
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(

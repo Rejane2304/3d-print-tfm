@@ -5,7 +5,7 @@
 "use client";
 
 import { useEffect, useCallback, useState } from "react";
-import { AlertTriangle, X, Trash2, Package, Users, Tag, HelpCircle, MessageSquare, Bell, Truck } from "lucide-react";
+import { AlertTriangle, X, Trash2, Package, Tag, HelpCircle, MessageSquare, Bell, Truck } from "lucide-react";
 
 // Iconos por tipo de elemento
 const typeIcons: Record<string, React.ElementType> = {
@@ -33,7 +33,6 @@ interface BulkDeleteModalProps {
   isLoading?: boolean;
 }
 
-export function BulkDeleteModal({
   isOpen,
   onClose,
   onConfirm,
@@ -45,7 +44,21 @@ export function BulkDeleteModal({
   associatedItemCount = 0,
   associatedItemType = "elementos",
   isLoading = false,
-}: BulkDeleteModalProps) {
+}: Readonly<BulkDeleteModalProps>) {
+export function BulkDeleteModal(props: Readonly<BulkDeleteModalProps>) {
+  const {
+    isOpen,
+    onClose,
+    onConfirm,
+    selectedCount,
+    itemType = "items",
+    itemName = "elemento",
+    itemNamePlural = "elementos",
+    hasAssociatedItems = false,
+    associatedItemCount = 0,
+    associatedItemType = "elementos",
+    isLoading = false,
+  } = props;
   const [showDetails, setShowDetails] = useState(false);
 
   // Cerrar con ESC

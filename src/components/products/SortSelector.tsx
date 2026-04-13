@@ -14,7 +14,7 @@ interface SortSelectorProps {
 export default function SortSelector({
   initialSortBy = "nombre",
   initialSortOrder = "asc",
-}: SortSelectorProps) {
+}: Readonly<SortSelectorProps>) {
   const router = useRouter();
   const searchParams = useSearchParams();
 

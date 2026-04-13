@@ -18,7 +18,7 @@ interface ProductImageGalleryProps {
 export default function ProductImageGallery({
   images,
   productName,
-}: ProductImageGalleryProps) {
+}: Readonly<ProductImageGalleryProps>) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -50,8 +50,8 @@ export default function ProductImageGallery({
       if (e.key === "ArrowLeft") prevImage();
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    globalThis.addEventListener("keydown", handleKeyDown);
+    return () => globalThis.removeEventListener("keydown", handleKeyDown);
   }, [isModalOpen, nextImage, prevImage]);
 
   // Prevent body scroll when modal is open
@@ -80,9 +80,12 @@ export default function ProductImageGallery({
     <>
       <div className="space-y-6">
         {/* Main Image - Clickable */}
-        <div
-          className="relative aspect-[4/3] bg-gray-100 overflow-hidden cursor-zoom-in group rounded-xl"
+        <button
+          type="button"
+          className="relative aspect-[4/3] bg-gray-100 overflow-hidden cursor-zoom-in group rounded-xl p-0 border-0"
           onClick={openModal}
+          aria-label="Abrir galería de imágenes"
+          style={{ appearance: 'none' }}
         >
           <Image
             src={selectedImage.url}
@@ -96,7 +99,7 @@ export default function ProductImageGallery({
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
             <ZoomIn className="w-12 h-12 text-white drop-shadow-lg" />
           </div>
-        </div>
+        </button>
 
         {/* Thumbnails - Horizontal scroll on mobile */}
         {images.length > 1 && (
@@ -132,9 +135,11 @@ export default function ProductImageGallery({
 
       {/* Fullscreen Modal/Lightbox */}
       {isModalOpen && (
-        <div
-          className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
-          onClick={closeModal}
+        <dialog
+          open
+          className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-0 border-0 m-0"
+          aria-modal="true"
+          style={{ maxWidth: '100vw', maxHeight: '100vh' }}
         >
           {/* Close button */}
           <button
@@ -165,9 +170,9 @@ export default function ProductImageGallery({
           )}
 
           {/* Main image in modal */}
-          <div
+          <section
+            aria-label="Imagen ampliada"
             className="relative w-full h-full max-w-7xl max-h-screen mx-4 flex items-center justify-center px-12 sm:px-16"
-            onClick={(e) => e.stopPropagation()}
           >
             <div className="relative w-full h-full max-h-[85vh] sm:max-h-[90vh]">
               <Image
@@ -179,7 +184,7 @@ export default function ProductImageGallery({
                 priority
               />
             </div>
-          </div>
+          </section>
 
           {/* Navigation - Next */}
           {images.length > 1 && (
@@ -197,9 +202,9 @@ export default function ProductImageGallery({
 
           {/* Thumbnails at bottom */}
           {images.length > 1 && (
-            <div
+            <section
+              aria-label="Miniaturas de la galería"
               className="absolute bottom-16 sm:bottom-4 left-1/2 -translate-x-1/2 flex gap-2 px-4 py-2 bg-black/50 rounded-lg overflow-x-auto max-w-[calc(100vw-32px)] scrollbar-thin scrollbar-thumb-white/30 scrollbar-track-transparent"
-              onClick={(e) => e.stopPropagation()}
             >
               {images.map((image, index) => (
                 <button
@@ -222,14 +227,14 @@ export default function ProductImageGallery({
                   />
                 </button>
               ))}
-            </div>
+            </section>
           )}
 
           {/* Instructions - Hidden on small screens */}
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/60 text-xs sm:text-sm hidden sm:block">
             Usa ← → para navegar • ESC para cerrar • Click fuera para cerrar
           </div>
-        </div>
+        </dialog>
       )}
     </>
   );

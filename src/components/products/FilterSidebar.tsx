@@ -35,97 +35,11 @@ interface FilterSidebarProps {
   };
 }
 
-export default function FilterSidebar({ searchParams }: Readonly<FilterSidebarProps>) {
-  const router = useRouter();
-  const currentSearchParams = useSearchParams();
-  const [isOpen, setIsOpen] = useState(false);
-  const [expandedSections, setExpandedSections] = useState({
-    category: true,
-    material: true,
-    price: true,
-    stock: true,
-  });
-
-  // Prevent body scroll when mobile drawer is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen]);
-
-  // Close on escape key
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
-
-  const updateFilter = (key: string, value: string) => {
-    const params = new URLSearchParams(currentSearchParams.toString());
-
-    if (value) {
-      params.set(key, value);
-    } else {
-      params.delete(key);
-    }
-
-    // Reset page when changing filters
-    params.delete("page");
-
-    router.push(`/products?${params.toString()}`);
-  };
-
-  const clearFilters = () => {
-    router.push("/products");
-    setIsOpen(false);
-  };
-
-  const toggleSection = (section: keyof typeof expandedSections) => {
-    setExpandedSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
-  };
-
-  const hasActiveFilters =
-    searchParams.category ||
-    searchParams.material ||
-    searchParams.minPrice ||
-    searchParams.maxPrice ||
-    searchParams.inStock;
-
-  const activeFiltersCount = [
-    searchParams.category,
-    searchParams.material,
-    searchParams.minPrice,
-    searchParams.maxPrice,
-    searchParams.inStock,
-  ].filter(Boolean).length;
-
-
-
-// --- FilterContent moved to end of file ---
-// --- FilterContent moved to end of file ---
-
-// --- FilterContent moved to end of file ---
-
-
-// --- FilterContent moved to end of file ---
-
 interface FilterContentProps {
   hasActiveFilters: boolean;
   clearFilters: () => void;
   expandedSections: Record<string, boolean>;
-  toggleSection: (section: keyof typeof expandedSections) => void;
+  toggleSection: (section: "category" | "material" | "price" | "stock") => void;
   searchParams: FilterSidebarProps['searchParams'];
   updateFilter: (key: string, value: string) => void;
   setIsOpen: (open: boolean) => void;
@@ -296,6 +210,82 @@ function FilterContent({
     </>
   );
 }
+
+export default function FilterSidebar({ searchParams }: Readonly<FilterSidebarProps>) {
+  const router = useRouter();
+  const currentSearchParams = useSearchParams();
+  const [isOpen, setIsOpen] = useState(false);
+  const [expandedSections, setExpandedSections] = useState({
+    category: true,
+    material: true,
+    price: true,
+    stock: true,
+  });
+
+  // Prevent body scroll when mobile drawer is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
+
+  // Close on escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  const updateFilter = (key: string, value: string) => {
+    const params = new URLSearchParams(currentSearchParams.toString());
+
+    if (value) {
+      params.set(key, value);
+    } else {
+      params.delete(key);
+    }
+
+    // Reset page when changing filters
+    params.delete("page");
+
+    router.push(`/products?${params.toString()}`);
+  };
+
+  const clearFilters = () => {
+    router.push("/products");
+    setIsOpen(false);
+  };
+
+  const toggleSection = (section: "category" | "material" | "price" | "stock") => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  };
+
+  const hasActiveFilters =
+    searchParams.category ||
+    searchParams.material ||
+    searchParams.minPrice ||
+    searchParams.maxPrice ||
+    searchParams.inStock;
+
+  const activeFiltersCount = [
+    searchParams.category,
+    searchParams.material,
+    searchParams.minPrice,
+    searchParams.maxPrice,
+    searchParams.inStock,
+  ].filter(Boolean).length;
 
   return (
     <>

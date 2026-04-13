@@ -18,7 +18,7 @@ interface PayPalProviderProps {
   children: ReactNode;
 }
 
-export default function PayPalProvider({ children }: PayPalProviderProps) {
+export default function PayPalProvider({ children }: Readonly<PayPalProviderProps>) {
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
 
   if (!clientId) {

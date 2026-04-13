@@ -29,7 +29,7 @@ interface ProductCardProps {
   product: Product;
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product }: Readonly<ProductCardProps>) {
   const mainImage =
     product.images?.find((img) => img.isMain) || product.images?.[0];
   const hasRating =

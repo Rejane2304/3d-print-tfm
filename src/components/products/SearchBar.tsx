@@ -11,7 +11,7 @@ interface SearchBarProps {
   initialValue?: string;
 }
 
-export default function SearchBar({ initialValue = "" }: SearchBarProps) {
+export default function SearchBar({ initialValue = "" }: Readonly<SearchBarProps>) {
   const [searchTerm, setSearchTerm] = useState(initialValue);
   const router = useRouter();
   const searchParams = useSearchParams();

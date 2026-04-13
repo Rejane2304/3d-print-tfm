@@ -4,15 +4,16 @@ import { useState } from "react";
 import { CheckCircle2 } from "lucide-react";
 import { ReviewForm } from "@/components/reviews/ReviewForm";
 
+
 interface ReviewFormClientProps {
-  productId: string;
-  productName: string;
+  readonly productId: string;
+  readonly productName: string;
 }
 
 export function ReviewFormClient({
   productId,
   productName,
-}: ReviewFormClientProps) {
+}: Readonly<ReviewFormClientProps>) {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
 
@@ -38,7 +39,7 @@ export function ReviewFormClient({
       if (response.ok) {
         setSubmitted(true);
         // Refresh the page to show the new review
-        window.location.reload();
+        globalThis.location.reload();
       } else {
         setError(result.error || "Error al enviar la reseña");
         throw new Error(result.error || "Error al enviar la reseña");
