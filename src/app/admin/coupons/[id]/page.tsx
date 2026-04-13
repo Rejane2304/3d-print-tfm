@@ -1,4 +1,6 @@
 // Página de edición de cupón - Admin
+'use client';
+
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
