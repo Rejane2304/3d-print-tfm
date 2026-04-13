@@ -60,7 +60,7 @@ interface MethodLabelProps {
   onSelect: () => void;
 }
 
-function MethodLabel({ method, isSelected, onSelect }: MethodLabelProps) {
+function MethodLabel({ method, isSelected, onSelect }: Readonly<MethodLabelProps>) {
   const Icon = iconMap[method.iconName as keyof typeof iconMap];
 
   return (
@@ -97,7 +97,7 @@ function MethodLabel({ method, isSelected, onSelect }: MethodLabelProps) {
 export function PaymentMethodSelector({
   paymentMethod,
   onSelectMethod,
-}: PaymentMethodSelectorProps) {
+}: Readonly<PaymentMethodSelectorProps>) {
   return (
     <div className="space-y-2 sm:space-y-3">
       {paymentMethodsConfig.map((method) => (

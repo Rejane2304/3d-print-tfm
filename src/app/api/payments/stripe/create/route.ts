@@ -131,23 +131,143 @@ async function createFailedPaymentAlert(orderId: string, errorMessage: string) {
   }
 }
 
+// Verify authentication and get session
+type AuthResult =
+  | { success: true; email: string }
+  | { success: false; response: NextResponse };
+
+async function verifyAuthSession(req: NextRequest): Promise<AuthResult> {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user?.email) {
+    return {
+      success: false,
+      response: NextResponse.json(
+        { success: false, error: 'No autenticado' },
+        { status: 401 },
+      ),
+    };
+  }
+
+  return { success: true, email: session.user.email as string };
+}
+
+// Get user from database
+type UserResult =
+  | { success: true; user: { id: string; email: string; name: string | null } }
+  | { success: false; response: NextResponse };
+
+async function getUserForPayment(email: string): Promise<UserResult> {
+  const user = await prisma.user.findUnique({
+    where: { email },
+    select: { id: true, email: true, name: true },
+  });
+
+  if (!user) {
+    return {
+      success: false,
+      response: NextResponse.json(
+        { success: false, error: translateErrorMessage('Usuario not found') },
+        { status: 404 },
+      ),
+    };
+  }
+
+  return { success: true, user };
+}
+
+// Get order with items
+type OrderResult =
+  | { success: true; order: { id: string; orderNumber: string; status: string; total: Decimal; discount: Decimal | null; shipping: Decimal | null; items: Array<{ name: string; description: string | null; quantity: number; price: Decimal; product: { slug: string; images: { url: string }[] } | null }> } }
+  | { success: false; response: NextResponse };
+
+async function getOrderForPayment(orderId: string, userId: string): Promise<OrderResult> {
+  const order = await prisma.order.findFirst({
+    where: { id: orderId, userId },
+    include: {
+      items: {
+        include: {
+          product: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              images: {
+                where: { isMain: true },
+                take: 1,
+                select: { url: true },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!order) {
+    return {
+      success: false,
+      response: NextResponse.json(
+        {
+          success: false,
+          error: translateErrorMessage('Pedido no encontrado'),
+        },
+        { status: 404 },
+      ),
+    };
+  }
+
+  if (order.status !== 'PENDING') {
+    return {
+      success: false,
+      response: NextResponse.json(
+        { success: false, error: 'El pedido no está pendiente de pago' },
+        { status: 400 },
+      ),
+    };
+  }
+
+  return { success: true, order };
+}
+
+// Update order and payment with session ID
+async function updateOrderAndPayment(
+  orderId: string,
+  paymentId: string | undefined,
+  stripeSessionId: string,
+) {
+  await prisma.order.update({
+    where: { id: orderId },
+    data: {
+      stripeSessionId,
+      paymentMethod: 'CARD',
+    },
+  });
+
+  if (paymentId) {
+    await prisma.payment.update({
+      where: { id: paymentId },
+      data: {
+        stripeSessionId,
+        status: 'PROCESSING',
+      },
+    });
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     // 1. Verify authentication
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
+    const authResult = await verifyAuthSession(req);
+    if (!authResult.success) {
+      return authResult.response;
     }
 
     // 2. Get request body
     const body = await req.json();
     const { orderId, paymentId } = body;
 
-    if (!orderId) {
+    if (!orderId || typeof orderId !== 'string') {
       return NextResponse.json(
         { success: false, error: 'El ID de pedido es requerido' },
         { status: 400 },
@@ -155,61 +275,17 @@ export async function POST(req: NextRequest) {
     }
 
     // 3. Get user from database
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      select: { id: true, email: true, name: true },
-    });
-
-    if (!user) {
-      return NextResponse.json(
-        { success: false, error: translateErrorMessage('Usuario not found') },
-        { status: 404 },
-      );
+    const userResult = await getUserForPayment(authResult.email);
+    if (!userResult.success) {
+      return userResult.response;
     }
 
     // 4. Get order data with items
-    const order = await prisma.order.findFirst({
-      where: {
-        id: orderId,
-        userId: user.id,
-      },
-      include: {
-        items: {
-          include: {
-            product: {
-              select: {
-                id: true,
-                name: true,
-                slug: true,
-                images: {
-                  where: { isMain: true },
-                  take: 1,
-                  select: { url: true },
-                },
-              },
-            },
-          },
-        },
-      },
-    });
-
-    if (!order) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: translateErrorMessage('Pedido no encontrado'),
-        },
-        { status: 404 },
-      );
+    const orderResult = await getOrderForPayment(orderId as string, userResult.user.id);
+    if (!orderResult.success) {
+      return orderResult.response;
     }
-
-    // Check if order can be paid
-    if (order.status !== 'PENDING') {
-      return NextResponse.json(
-        { success: false, error: 'El pedido no está pendiente de pago' },
-        { status: 400 },
-      );
-    }
+    const order = orderResult.order;
 
     // 5. Build line items for Stripe with VAT separated (transparent)
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
@@ -247,40 +323,23 @@ export async function POST(req: NextRequest) {
       metadata: {
         orderId: order.id,
         paymentId: paymentId || '',
-        userId: user.id,
-        userEmail: user.email,
+        userId: userResult.user.id,
+        userEmail: userResult.user.email,
       },
-      customer_email: user.email,
+      customer_email: userResult.user.email,
       payment_intent_data: {
         metadata: {
           orderId: order.id,
-          userId: user.id,
+          userId: userResult.user.id,
         },
       },
       submit_type: 'pay',
     });
 
     // 7. Update order with stripeSessionId
-    await prisma.order.update({
-      where: { id: order.id },
-      data: {
-        stripeSessionId: stripeSession.id,
-        paymentMethod: 'CARD',
-      },
-    });
+    await updateOrderAndPayment(order.id, paymentId, stripeSession.id);
 
-    // 8. Update payment with stripeSessionId if paymentId provided
-    if (paymentId) {
-      await prisma.payment.update({
-        where: { id: paymentId },
-        data: {
-          stripeSessionId: stripeSession.id,
-          status: 'PROCESSING',
-        },
-      });
-    }
-
-    // 9. Return checkout URL
+    // 8. Return checkout URL
     return NextResponse.json({
       success: true,
       url: stripeSession.url,

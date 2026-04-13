@@ -43,7 +43,7 @@ function formatCurrency(value: number): string {
   return value.toFixed(2);
 }
 
-export function OrderItems({ items }: { items: CartItem[] }) {
+export function OrderItems({ items }: Readonly<{ items: CartItem[] }>) {
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
       <h2 className="text-lg sm:text-xl font-semibold mb-4">Resumen del pedido</h2>
@@ -84,7 +84,7 @@ export function OrderItems({ items }: { items: CartItem[] }) {
   );
 }
 
-export function OrderTotals({ subtotal, coupon }: OrderTotalsProps) {
+export function OrderTotals({ subtotal, coupon }: Readonly<OrderTotalsProps>) {
   const couponDiscount = calculateDiscount(subtotal, coupon);
   const finalShippingCost = calculateShipping(subtotal, coupon);
   const discountedSubtotal = Math.max(0, subtotal - couponDiscount);
@@ -136,7 +136,7 @@ export function OrderTotals({ subtotal, coupon }: OrderTotalsProps) {
   );
 }
 
-export function OrderSummary({ items, subtotal, appliedCoupon }: OrderSummaryProps) {
+export function OrderSummary({ items, subtotal, appliedCoupon }: Readonly<OrderSummaryProps>) {
   return (
     <>
       <OrderItems items={items} />

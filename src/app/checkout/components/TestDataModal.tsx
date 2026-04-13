@@ -68,7 +68,7 @@ const testDataConfigs: Record<PaymentMethod, TestDataConfig> = {
   },
 };
 
-export function TestDataModal({ paymentMethod, onClose }: TestDataModalProps) {
+export function TestDataModal({ paymentMethod, onClose }: Readonly<TestDataModalProps>) {
   const config = testDataConfigs[paymentMethod];
 
   return (
@@ -100,7 +100,7 @@ export function TestDataModal({ paymentMethod, onClose }: TestDataModalProps) {
   );
 }
 
-export function TestDataDisplay({ paymentMethod }: { paymentMethod: PaymentMethod }) {
+export function TestDataDisplay({ paymentMethod }: Readonly<{ paymentMethod: PaymentMethod }>) {
   const configs: Record<PaymentMethod, { title: string; content: React.ReactNode }> = {
     CARD: {
       title: 'Stripe',

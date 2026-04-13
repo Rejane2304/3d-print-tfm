@@ -14,7 +14,7 @@ export function CouponSection({
   appliedCoupon,
   onApplyCoupon,
   onRemoveCoupon,
-}: CouponSectionProps) {
+}: Readonly<CouponSectionProps>) {
   const [couponCode, setCouponCode] = useState('');
   const [applying, setApplying] = useState(false);
   const [error, setError] = useState<string | null>(null);

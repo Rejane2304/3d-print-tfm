@@ -82,7 +82,7 @@ function validateCouponConstraints(
     return { valid: false, error: 'Este cupón ha alcanzado el límite de usos', status: 400 };
   }
 
-  const minAmount = coupon.minOrderAmount !== null ? Number(coupon.minOrderAmount) : null;
+  const minAmount = coupon.minOrderAmount === null ? null : Number(coupon.minOrderAmount);
   if (minAmount !== null && orderAmount < minAmount) {
     return {
       valid: false,
