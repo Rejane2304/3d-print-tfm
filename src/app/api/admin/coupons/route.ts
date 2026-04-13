@@ -58,7 +58,7 @@ export async function GET() {
       where: { email: session.user.email },
     });
 
-    if (!user || user.role !== 'ADMIN') {
+    if (!user?.role || user.role !== 'ADMIN') {
       return NextResponse.json(
         { success: false, error: 'No autorizado' },
         { status: 401 },

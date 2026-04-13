@@ -105,7 +105,7 @@ export default function AdminClientsPage() {
   };
 
   const formatCurrency = (amount: string) => {
-    return `$${parseFloat(amount).toFixed(2)}`;
+    return `$${Number.parseFloat(amount).toFixed(2)}`;
   };
 
   const columns: Column<Client>[] = [

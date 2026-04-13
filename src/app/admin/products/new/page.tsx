@@ -116,8 +116,8 @@ export default function NuevoProductoPage() {
   const generateSlug = (name: string) => {
     return name
       .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
+      .replaceAll(/[^a-z0-9]+/g, '-')
+      .replaceAll(/(^-|-$)/g, '');
   };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -184,7 +184,7 @@ export default function NuevoProductoPage() {
     if (!formData.description.trim()) {
       return 'La descripción es obligatoria';
     }
-    if (!formData.price || parseFloat(formData.price) <= 0) {
+    if (!formData.price || Number.parseFloat(formData.price) <= 0) {
       return 'El precio debe ser mayor a 0';
     }
     if (!formData.categoryId) {
@@ -255,7 +255,7 @@ export default function NuevoProductoPage() {
       ];
       const payload: Record<string, unknown> = {
         ...formData,
-        price: parseFloat(formData.price),
+        price: Number.parseFloat(formData.price),
         stock: Number.parseInt(formData.stock) || 0,
         minStock: Number.parseInt(formData.minStock) || 5,
         images: uploadedImages,
@@ -267,7 +267,7 @@ export default function NuevoProductoPage() {
         if (value === '' || value === null || value === undefined) {
           payload[field] = undefined;
         } else {
-          payload[field] = parseFloat(value as string);
+          payload[field] = Number.parseFloat(value as string);
         }
       });
 
@@ -737,7 +737,7 @@ export default function NuevoProductoPage() {
                     <div className="grid grid-cols-2 gap-2">
                       {images.map((img, index) => (
                         <div
-                          key={index}
+                          key={`${img.url}-${index}`}
                           className={`relative aspect-square border-2 ${
                             img.isMain ? 'border-indigo-500' : 'border-gray-200'
                           }`}

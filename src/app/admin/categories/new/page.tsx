@@ -49,7 +49,6 @@ export default function NuevaCategoriaPage() {
     const user = session?.user as { role?: string } | undefined;
     if (status === 'authenticated' && user?.role !== 'ADMIN') {
       router.push('/');
-      return;
     }
   }, [status, session, router]);
 
@@ -57,9 +56,9 @@ export default function NuevaCategoriaPage() {
     return name
       .toLowerCase()
       .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
+      .replaceAll(/[\u0300-\u036f]/g, '')
+      .replaceAll(/[^a-z0-9]+/g, '-')
+      .replaceAll(/(^-|-$)/g, '');
   };
 
   const handleInputChange = (

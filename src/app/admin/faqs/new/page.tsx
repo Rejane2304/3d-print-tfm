@@ -55,7 +55,6 @@ export default function NuevaFAQPage() {
     const user = session?.user as { role?: string } | undefined;
     if (status === 'authenticated' && user?.role !== 'ADMIN') {
       router.push('/');
-      return;
     }
   }, [status, session, router]);
 
@@ -287,24 +286,7 @@ export default function NuevaFAQPage() {
                     >
                       Categoría *
                     </label>
-                    {!customCategory ? (
-                      <select
-                        id="category"
-                        name="category"
-                        value={formData.category}
-                        onChange={handleCategoryChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                        required
-                      >
-                        <option value="">Selecciona una categoría</option>
-                        {PREDEFINED_CATEGORIES.map((cat) => (
-                          <option key={cat} value={cat}>
-                            {cat}
-                          </option>
-                        ))}
-                        <option value="custom">+ Nueva categoría</option>
-                      </select>
-                    ) : (
+                    {customCategory === true ? (
                       <div className="flex gap-2">
                         <input
                           type="text"
@@ -326,6 +308,23 @@ export default function NuevaFAQPage() {
                           Cancelar
                         </button>
                       </div>
+                    ) : (
+                      <select
+                        id="category"
+                        name="category"
+                        value={formData.category}
+                        onChange={handleCategoryChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        required
+                      >
+                        <option value="">Selecciona una categoría</option>
+                        {PREDEFINED_CATEGORIES.map((cat) => (
+                          <option key={cat} value={cat}>
+                            {cat}
+                          </option>
+                        ))}
+                        <option value="custom">+ Nueva categoría</option>
+                      </select>
                     )}
                   </div>
 

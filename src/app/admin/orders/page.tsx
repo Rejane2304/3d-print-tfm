@@ -85,7 +85,8 @@ export default function AdminOrdersPage() {
       setLoading(true);
       setError(null);
 
-      const url = `/api/admin/orders${statusFilter ? `?estado=${statusFilter}` : ''}`;
+      const queryParams = statusFilter ? `?estado=${statusFilter}` : '';
+      const url = `/api/admin/orders${queryParams}`;
       const response = await fetch(url);
       const data = await response.json();
 

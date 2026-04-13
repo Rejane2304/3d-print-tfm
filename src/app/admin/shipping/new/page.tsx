@@ -56,7 +56,6 @@ export default function NuevaZonaEnvioPage() {
     const user = session?.user as { role?: string } | undefined;
     if (status === 'authenticated' && user?.role !== 'ADMIN') {
       router.push('/');
-      return;
     }
   }, [status, session, router]);
 
@@ -64,15 +63,20 @@ export default function NuevaZonaEnvioPage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value, type } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]:
-        type === 'checkbox'
-          ? (e.target as HTMLInputElement).checked
-          : type === 'number'
-            ? Number(value)
-            : value,
-    }));
+    setFormData((prev) => {
+      let newValue: string | number | boolean;
+      if (type === 'checkbox') {
+        newValue = (e.target as HTMLInputElement).checked;
+      } else if (type === 'number') {
+        newValue = Number(value);
+      } else {
+        newValue = value;
+      }
+      return {
+        ...prev,
+        [name]: newValue,
+      };
+    });
   };
 
   const addRegion = () => {
@@ -340,9 +344,12 @@ export default function NuevaZonaEnvioPage() {
                     type="text"
                     value={regionInput}
                     onChange={(e) => setRegionInput(e.target.value)}
-                    onKeyPress={(e) =>
-                      e.key === 'Enter' && (e.preventDefault(), addRegion())
-                    }
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addRegion();
+                      }
+                    }}
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     placeholder="Ej: Madrid"
                   />
@@ -360,7 +367,7 @@ export default function NuevaZonaEnvioPage() {
                   <div className="flex flex-wrap gap-2">
                     {formData.regions.map((region, index) => (
                       <span
-                        key={index}
+                        key={`region-${region}`}
                         className="inline-flex items-center gap-1 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-sm"
                       >
                         {region}
@@ -391,9 +398,12 @@ export default function NuevaZonaEnvioPage() {
                     type="text"
                     value={postalCodeInput}
                     onChange={(e) => setPostalCodeInput(e.target.value)}
-                    onKeyPress={(e) =>
-                      e.key === 'Enter' && (e.preventDefault(), addPostalCode())
-                    }
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addPostalCode();
+                      }
+                    }}
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     placeholder="Ej: 28"
                   />
@@ -417,7 +427,7 @@ export default function NuevaZonaEnvioPage() {
                   <div className="flex flex-wrap gap-2">
                     {formData.postalCodePrefixes.map((prefix, index) => (
                       <span
-                        key={index}
+                        key={`prefix-${prefix}`}
                         className="inline-flex items-center gap-1 px-3 py-1 bg-green-50 text-green-700 rounded-full text-sm font-mono"
                       >
                         {prefix}

@@ -69,7 +69,6 @@ export default function NuevoCuponPage() {
     const user = session?.user as { role?: string } | undefined;
     if (status === 'authenticated' && user?.role !== 'ADMIN') {
       router.push('/');
-      return;
     }
   }, [status, session, router]);
 
@@ -294,9 +293,9 @@ export default function NuevoCuponPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <span className="block text-sm font-medium text-gray-700 mb-2">
                     Tipo de Descuento *
-                  </label>
+                  </span>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     {COUPON_TYPES.map((type) => {
                       const Icon = type.icon;
