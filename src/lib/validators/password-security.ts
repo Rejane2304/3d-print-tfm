@@ -234,7 +234,7 @@ export async function checkPwnedPassword(
       if (hashSuffix === suffix) {
         return {
           isBreached: true,
-          breachCount: parseInt(count, 10) || 0,
+          breachCount: Number.parseInt(count, 10) || 0,
         };
       }
     }

@@ -43,9 +43,7 @@ export async function emitEvent(
 ): Promise<void> {
   try {
     // Store event in database - serialize payload properly
-    const serializedPayload = JSON.parse(
-      JSON.stringify(payload),
-    ) as Prisma.InputJsonValue;
+    const serializedPayload = structuredClone(payload) as Prisma.InputJsonValue;
     await prisma.eventStore.create({
       data: {
         id: crypto.randomUUID(),
@@ -60,8 +58,8 @@ export async function emitEvent(
 
     // Also emit to any connected WebSocket clients (if server-side)
     // This will be handled by the socket.io server
-    if (typeof global !== 'undefined' && global.io) {
-      const io = global.io;
+    if (typeof globalThis !== 'undefined' && (globalThis as unknown as { io?: unknown }).io) {
+      const io = (globalThis as unknown as { io: { to: (room: string) => { emit: (type: string, payload: EventPayload) => void } } }).io;
       io.to(room).emit(type, payload);
     }
   } catch (error) {
