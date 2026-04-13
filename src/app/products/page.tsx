@@ -248,7 +248,6 @@ export default async function ProductsPage({
                     <Pagination
                       currentPage={page}
                       totalPages={totalPages}
-                      searchParams={searchParams}
                     />
                   </div>
                 )}

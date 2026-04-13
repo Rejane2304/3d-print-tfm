@@ -207,3 +207,4 @@ const CartSummary: React.FC<Readonly<CartSummaryProps>> = ({
     </div>
   );
 };
+export default CartSummary;

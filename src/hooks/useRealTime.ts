@@ -272,15 +272,38 @@ export function useNotificationToast() {
   const showNotification = useCallback((event: RealTimeEvent) => {
     const id = `${event.type}-${Date.now()}`;
 
-    const titles: Record<EventType, string> = {
+    const titles: Record<string, string> = {
       "order:new": "Nuevo Pedido",
       "order:status:updated": "Estado de Pedido Actualizado",
+      "order:deleted": "Pedido Eliminado",
       "payment:confirmed": "Pago Confirmado",
       "stock:low": "Stock Bajo",
       "stock:updated": "Stock Actualizado",
       "alert:new": "Nueva Alerta",
+      "alert:deleted": "Alerta Eliminada",
       "review:new": "Nueva Reseña",
+      "review:deleted": "Reseña Eliminada",
       "metrics:update": "Métricas Actualizadas",
+      "product:created": "Producto Creado",
+      "product:updated": "Producto Actualizado",
+      "product:deleted": "Producto Eliminado",
+      "client:created": "Cliente Creado",
+      "client:updated": "Cliente Actualizado",
+      "client:deleted": "Cliente Eliminado",
+      "invoice:created": "Factura Creada",
+      "invoice:deleted": "Factura Eliminada",
+      "category:created": "Categoría Creada",
+      "category:updated": "Categoría Actualizada",
+      "category:deleted": "Categoría Eliminada",
+      "coupon:created": "Cupón Creado",
+      "coupon:updated": "Cupón Actualizado",
+      "coupon:deleted": "Cupón Eliminado",
+      "faq:created": "FAQ Creada",
+      "faq:updated": "FAQ Actualizada",
+      "faq:deleted": "FAQ Eliminada",
+      "shipping:created": "Zona de Envío Creada",
+      "shipping:updated": "Zona de Envío Actualizada",
+      "shipping:deleted": "Zona de Envío Eliminada",
     };
 
     const notification = {
