@@ -4,10 +4,10 @@
  * @see https://playwright.dev/docs/test-global-setup-teardown
  */
 import { test as setup } from '@playwright/test';
-import { PrismaClient, Role } from '@prisma/client';
+import { Material, PrismaClient, Role } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import * as dotenv from 'dotenv';
-import * as path from 'path';
+import * as path from 'node:path';
 
 // Load test environment variables explicitly
 // This ensures we use the test database, not production
@@ -28,22 +28,23 @@ const prisma = new PrismaClient();
 
 // Test user credentials - must match what E2E tests expect
 // These should match the credentials shown in the auth page UI
+// NOSONAR: These are test credentials for E2E tests only
 const TEST_USERS = [
   {
     email: 'juan@example.com',
-    password: 'JuanTFM2024!',
+    password: 'JuanTFM2024!', // NOSONAR - Test credential
     name: 'Juan Pérez',
     role: Role.CUSTOMER,
   },
   {
     email: 'admin@3dprint.com',
-    password: 'AdminTFM2024!',
+    password: 'AdminTFM2024!', // NOSONAR - Test credential
     name: 'Admin Usuario',
     role: Role.ADMIN,
   },
   {
     email: 'cliente@test.com',
-    password: 'ClienteTFM2024!',
+    password: 'ClienteTFM2024!', // NOSONAR - Test credential
     name: 'Cliente Test',
     role: Role.CUSTOMER,
   },
@@ -120,7 +121,9 @@ async function ensureTestUsers(): Promise<void> {
         where: { userId: createdUser.id }
       });
       
-      if (!existingAddress) {
+      if (existingAddress) {
+        console.log(`  ✓ ${user.email} (${user.role}) - Address exists`);
+      } else {
         await prisma.address.create({
           data: {
             userId: createdUser.id,
@@ -136,8 +139,6 @@ async function ensureTestUsers(): Promise<void> {
           },
         });
         console.log(`  ✓ ${user.email} (${user.role}) - Address created`);
-      } else {
-        console.log(`  ✓ ${user.email} (${user.role}) - Address exists`);
       }
     } else {
       console.log(`  ✓ ${user.email} (${user.role})`);
@@ -165,7 +166,7 @@ async function createShippingConfig(): Promise<void> {
       name: 'Envío Estándar',
       description: 'Entrega en 3-5 días hábiles',
       price: 5.99,
-      freeShippingFrom: 50.00,
+      freeShippingFrom: 50,
       minDays: 3,
       maxDays: 5,
       isActive: true,
@@ -199,7 +200,7 @@ async function createSiteConfig(): Promise<void> {
       companyPostalCode: '28001',
       companyPhone: '+34 91 123 4567',
       companyEmail: 'test@3dprint.com',
-      defaultVatRate: 21.00,
+      defaultVatRate: 21,
       lowStockThreshold: 5,
     },
   });
@@ -238,7 +239,7 @@ async function createSampleProducts(): Promise<void> {
       description: 'Un elegante jarrón decorativo impreso en 3D',
       price: 24.99,
       stock: 10,
-      material: 'PLA',
+      material: Material.PLA,
       isActive: true,
       isFeatured: true,
     },
@@ -248,7 +249,7 @@ async function createSampleProducts(): Promise<void> {
       description: 'Soporte moderno para plantas pequeñas',
       price: 18.50,
       stock: 15,
-      material: 'PLA',
+      material: Material.PLA,
       isActive: true,
       isFeatured: false,
     },
@@ -326,7 +327,7 @@ async function createSampleOrders(): Promise<void> {
           quantity: 1,
           subtotal: 24.99,
           category: 'Decoración',
-          material: 'PLA',
+          material: Material.PLA,
         },
       },
     },
@@ -358,7 +359,7 @@ async function createSampleOrders(): Promise<void> {
           quantity: 1,
           subtotal: 18.50,
           category: 'Decoración',
-          material: 'PLA',
+          material: Material.PLA,
         },
       },
     },

@@ -2,85 +2,85 @@
  * E2E Tests - Admin Dashboard
  * Critical business path: Admin product and order management
  */
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
+
+// Helper function to login as admin - moved to outer scope per SonarQube S7721
+async function loginAsAdmin(page: Page) {
+  // Navigate to auth with callback to admin dashboard
+  await page.goto('/auth?callbackUrl=/admin/dashboard');
+
+  // Wait for page to fully load
+  await page.waitForLoadState('networkidle');
+  await page.waitForTimeout(1000);
+
+  // Wait for form to be ready
+  const emailField = page.locator('[data-testid="login-email"]');
+  await emailField.waitFor({ state: 'visible', timeout: 10000 });
+
+  // Fill in credentials - clear first then type
+  await emailField.click();
+  await emailField.fill('admin@3dprint.com');
+
+  const passwordField = page.locator('[data-testid="login-password"]');
+  await passwordField.click();
+  await passwordField.fill('AdminTFM2024!');
+
+  // Submit login - wait for button to be enabled
+  const submitButton = page.locator('[data-testid="login-submit"]');
+  await submitButton.waitFor({ state: 'visible', timeout: 10000 });
+  await submitButton.click();
+
+  // Wait for navigation - poll the URL
+  for (let i = 0; i < 20; i++) {
+    await page.waitForTimeout(500);
+    const currentUrl = page.url();
+    if (!currentUrl.includes('/auth')) {
+      break;
+    }
+  }
+
+  // Additional wait for session to be established
+  await page.waitForTimeout(2000);
+}
+
+// Helper function to login as customer - moved to outer scope per SonarQube S7721
+async function loginAsCustomer(page: Page) {
+  await page.goto('/auth');
+
+  // Wait for page to fully load
+  await page.waitForLoadState('networkidle');
+  await page.waitForTimeout(1000);
+
+  // Wait for form to be ready
+  const emailField = page.locator('[data-testid="login-email"]');
+  await emailField.waitFor({ state: 'visible', timeout: 10000 });
+
+  // Fill in credentials
+  await emailField.click();
+  await emailField.fill('juan@example.com');
+
+  const passwordField = page.locator('[data-testid="login-password"]');
+  await passwordField.click();
+  await passwordField.fill('JuanTFM2024!');
+
+  // Submit login
+  const submitButton = page.locator('[data-testid="login-submit"]');
+  await submitButton.waitFor({ state: 'visible', timeout: 10000 });
+  await submitButton.click();
+
+  // Wait for navigation
+  for (let i = 0; i < 20; i++) {
+    await page.waitForTimeout(500);
+    const currentUrl = page.url();
+    if (!currentUrl.includes('/auth')) {
+      break;
+    }
+  }
+
+  await page.waitForTimeout(2000);
+}
 
 test.describe('Admin Dashboard', () => {
-  // Helper function to login as admin
-  async function loginAsAdmin(page: any) {
-    // Navigate to auth with callback to admin dashboard
-    await page.goto('/auth?callbackUrl=/admin/dashboard');
-
-    // Wait for page to fully load
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
-
-    // Wait for form to be ready
-    const emailField = page.locator('[data-testid="login-email"]');
-    await emailField.waitFor({ state: 'visible', timeout: 10000 });
-
-    // Fill in credentials - clear first then type
-    await emailField.click();
-    await emailField.fill('admin@3dprint.com');
-
-    const passwordField = page.locator('[data-testid="login-password"]');
-    await passwordField.click();
-    await passwordField.fill('AdminTFM2024!');
-
-    // Submit login - wait for button to be enabled
-    const submitButton = page.locator('[data-testid="login-submit"]');
-    await submitButton.waitFor({ state: 'visible', timeout: 10000 });
-    await submitButton.click();
-
-    // Wait for navigation - poll the URL
-    for (let i = 0; i < 20; i++) {
-      await page.waitForTimeout(500);
-      const currentUrl = page.url();
-      if (!currentUrl.includes('/auth')) {
-        break;
-      }
-    }
-
-    // Additional wait for session to be established
-    await page.waitForTimeout(2000);
-  }
-
-  // Helper function to login as customer
-  async function loginAsCustomer(page: any) {
-    await page.goto('/auth');
-
-    // Wait for page to fully load
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
-
-    // Wait for form to be ready
-    const emailField = page.locator('[data-testid="login-email"]');
-    await emailField.waitFor({ state: 'visible', timeout: 10000 });
-
-    // Fill in credentials
-    await emailField.click();
-    await emailField.fill('juan@example.com');
-
-    const passwordField = page.locator('[data-testid="login-password"]');
-    await passwordField.click();
-    await passwordField.fill('JuanTFM2024!');
-
-    // Submit login
-    const submitButton = page.locator('[data-testid="login-submit"]');
-    await submitButton.waitFor({ state: 'visible', timeout: 10000 });
-    await submitButton.click();
-
-    // Wait for navigation
-    for (let i = 0; i < 20; i++) {
-      await page.waitForTimeout(500);
-      const currentUrl = page.url();
-      if (!currentUrl.includes('/auth')) {
-        break;
-      }
-    }
-
-    await page.waitForTimeout(2000);
-  }
-
   test('should access admin dashboard', async ({ page }) => {
     await loginAsAdmin(page);
 
