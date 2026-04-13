@@ -513,13 +513,13 @@ export function translateProductName(slug: string): string {
   // Try with normalized characters (remove accents for fallback)
   const normalizedSlug = cleanSlug
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
+    .replaceAll(/[\u0300-\u036f]/g, '');
   if (productTranslations[normalizedSlug]) {
     return productTranslations[normalizedSlug].name;
   }
 
   // If no translation found, format the slug nicely
-  return cleanSlug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  return cleanSlug.replaceAll('-', ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 export function translateProductDescription(slug: string): string {

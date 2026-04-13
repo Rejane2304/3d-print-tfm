@@ -4,7 +4,7 @@
  */
 import { PrismaClient } from '@prisma/client';
 
-const globalForPrisma = global as unknown as {
+const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 

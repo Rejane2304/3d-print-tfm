@@ -60,7 +60,7 @@ export const authOptions: AuthOptions = {
             where: { email: credentials.email.toLowerCase() },
           });
 
-          if (!user || !user.isActive) {
+          if (!user?.isActive) {
             return null;
           }
 
