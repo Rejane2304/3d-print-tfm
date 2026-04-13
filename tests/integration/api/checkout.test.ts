@@ -206,9 +206,23 @@ describe('Checkout API', () => {
     });
 
     it('should require shipping address', async () => {
-      // FIXME: Test temporalmente deshabilitado - problemas con mock auth
-      // El mock de getServerSession no está interceptando correctamente
-      expect(true).toBe(true);
+      // Mock session
+      vi.mocked(getServerSession).mockResolvedValue({
+        user: { email: customerUser.email, name: customerUser.name },
+      });
+
+      const req = new NextRequest('http://localhost:3000/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}), // Sin shippingAddressId
+      });
+
+      const res = await createCheckout(req);
+      const body = await res.json();
+
+      expect(res.status).toBe(400);
+      // El mensaje de error puede ser 'Datos de solicitud inválidos' o similar
+      expect(body.error).toBeDefined();
     });
 
     it('should reject checkout with empty cart', async () => {
