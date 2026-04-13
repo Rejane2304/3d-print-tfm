@@ -14,29 +14,145 @@ import {
   translatePaymentStatus,
   translateProductName,
 } from '@/lib/i18n';
+import { Order, OrderItem, Invoice, Payment, OrderMessage } from '@prisma/client';
+
+interface OrderWithRelations extends Order {
+  items: (OrderItem & {
+    product: {
+      name: string;
+      slug: string;
+      images: { url: string }[];
+    } | null;
+  })[];
+  invoice: Invoice | null;
+  payment: Payment | null;
+  messages: OrderMessage[];
+}
+
+interface CouponInfo {
+  code: string;
+  type: string;
+}
+
+async function authenticateUser() {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user?.email) {
+    return { error: 'No autenticado', status: 401 };
+  }
+
+  const usuario = await prisma.user.findUnique({
+    where: { email: session.user.email },
+    select: { id: true },
+  });
+
+  if (!usuario) {
+    return { error: 'Usuario not found', status: 404 };
+  }
+
+  return { usuario };
+}
+
+async function getCouponInfo(couponId: string | null | undefined): Promise<CouponInfo | null> {
+  if (!couponId) return null;
+
+  const coupon = await prisma.coupon.findUnique({
+    where: { id: couponId },
+    select: { code: true, type: true },
+  });
+
+  if (!coupon) return null;
+
+  let couponType = '';
+  if (coupon.type === 'PERCENTAGE') {
+    couponType = 'Porcentaje';
+  } else if (coupon.type === 'FIXED') {
+    couponType = 'Monto Fijo';
+  } else {
+    couponType = 'Envío Gratis';
+  }
+
+  return {
+    code: coupon.code,
+    type: couponType,
+  };
+}
+
+function transformOrder(pedido: OrderWithRelations, couponInfo: CouponInfo | null) {
+  return {
+    id: pedido.id,
+    numeroPedido: pedido.orderNumber,
+    estado: translateOrderStatus(pedido.status),
+    subtotal: Number(pedido.subtotal),
+    envio: Number(pedido.shipping),
+    descuento: pedido.discount ? Number(pedido.discount) : null,
+    cupon: couponInfo,
+    total: Number(pedido.total),
+    createdAt: pedido.createdAt,
+    updatedAt: pedido.updatedAt,
+    nombreEnvio: pedido.shippingName,
+    telefonoEnvio: pedido.shippingPhone,
+    direccionEnvio: pedido.shippingAddress,
+    complementoEnvio: pedido.shippingComplement,
+    postalCodeEnvio: pedido.shippingPostalCode,
+    ciudadEnvio: pedido.shippingCity,
+    provinciaEnvio: pedido.shippingProvince,
+    paisEnvio: pedido.shippingCountry,
+    metodoPago: pedido.paymentMethod
+      ? translatePaymentMethod(pedido.paymentMethod)
+      : null,
+    numeroSeguimiento: pedido.trackingNumber,
+    transportista: pedido.carrier,
+    notasCliente: pedido.customerNotes,
+    items: pedido.items.map((item) => ({
+      id: item.id,
+      quantity: item.quantity,
+      unitPrice: Number(item.price),
+      subtotal: Number(item.subtotal),
+      producto: {
+        nombre: item.product?.slug
+          ? translateProductName(item.product.slug)
+          : '',
+        slug: item.product?.slug || '',
+        images: item.product?.images || [],
+      },
+    })),
+    factura: pedido.invoice
+      ? {
+          id: pedido.invoice.id,
+          numeroFactura: pedido.invoice.invoiceNumber,
+          anulada: pedido.invoice.isCancelled,
+          emitidaEn: pedido.invoice.issuedAt,
+        }
+      : undefined,
+    pago: pedido.payment
+      ? {
+          estado: translatePaymentStatus(pedido.payment.status),
+          metodo: translatePaymentMethod(pedido.payment.method),
+          createdAt: pedido.payment.createdAt,
+        }
+      : undefined,
+    messages: pedido.messages.map((msg) => ({
+      id: msg.id,
+      mensaje: msg.message,
+      tipoRemitente: msg.isFromCustomer ? 'CLIENTE' : 'ADMIN',
+      createdAt: msg.createdAt,
+    })),
+  };
+}
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } },
 ) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    const auth = await authenticateUser();
+    if ('error' in auth) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status });
     }
 
-    // Obtener usuario
-    const usuario = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      select: { id: true },
-    });
+    const { usuario } = auth;
 
-    if (!usuario) {
-      return NextResponse.json({ error: 'Usuario not found' }, { status: 404 });
-    }
-
-    // Obtener pedido específico del usuario
     const pedido = await prisma.order.findFirst({
       where: {
         id: params.id,
@@ -82,7 +198,6 @@ export async function GET(
             createdAt: true,
           },
         },
-
       },
     });
 
@@ -93,93 +208,8 @@ export async function GET(
       );
     }
 
-    // Transform to Spanish response format matching frontend expectations
-    // Translate enums from English (DB) to Spanish (UI)
-    // Get coupon info if discount exists
-    let couponInfo = null;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const orderWithCoupon = pedido as any;
-    if (orderWithCoupon.couponId) {
-      const coupon = await prisma.coupon.findUnique({
-        where: { id: orderWithCoupon.couponId },
-        select: { code: true, type: true },
-      });
-      if (coupon) {
-        let couponType = '';
-        if (coupon.type === 'PERCENTAGE') {
-          couponType = 'Porcentaje';
-        } else if (coupon.type === 'FIXED') {
-          couponType = 'Monto Fijo';
-        } else {
-          couponType = 'Envío Gratis';
-        }
-        couponInfo = {
-          code: coupon.code,
-          type: couponType,
-        };
-      }
-    }
-
-    const pedidoTransformado = {
-      id: pedido.id,
-      numeroPedido: pedido.orderNumber,
-      estado: translateOrderStatus(pedido.status),
-      subtotal: Number(pedido.subtotal),
-      envio: Number(pedido.shipping),
-      descuento: pedido.discount ? Number(pedido.discount) : null,
-      cupon: couponInfo,
-      total: Number(pedido.total),
-      createdAt: pedido.createdAt,
-      updatedAt: pedido.updatedAt,
-      nombreEnvio: pedido.shippingName,
-      telefonoEnvio: pedido.shippingPhone,
-      direccionEnvio: pedido.shippingAddress,
-      complementoEnvio: pedido.shippingComplement,
-      postalCodeEnvio: pedido.shippingPostalCode,
-      ciudadEnvio: pedido.shippingCity,
-      provinciaEnvio: pedido.shippingProvince,
-      paisEnvio: pedido.shippingCountry,
-      metodoPago: pedido.paymentMethod
-        ? translatePaymentMethod(pedido.paymentMethod)
-        : null,
-      numeroSeguimiento: pedido.trackingNumber,
-      transportista: pedido.carrier,
-      notasCliente: pedido.customerNotes,
-      items: pedido.items.map((item) => ({
-        id: item.id,
-        quantity: item.quantity,
-        unitPrice: Number(item.price),
-        subtotal: Number(item.subtotal),
-        producto: {
-          nombre: item.product?.slug
-            ? translateProductName(item.product.slug)
-            : '',
-          slug: item.product?.slug || '',
-          images: item.product?.images || [],
-        },
-      })),
-      factura: pedido.invoice
-        ? {
-          id: pedido.invoice.id,
-          numeroFactura: pedido.invoice.invoiceNumber,
-          anulada: pedido.invoice.isCancelled,
-          emitidaEn: pedido.invoice.issuedAt,
-        }
-        : undefined,
-      pago: pedido.payment
-        ? {
-          estado: translatePaymentStatus(pedido.payment.status),
-          metodo: translatePaymentMethod(pedido.payment.method),
-          createdAt: pedido.payment.createdAt,
-        }
-        : undefined,
-      messages: pedido.messages.map((msg) => ({
-        id: msg.id,
-        mensaje: msg.message,
-        tipoRemitente: msg.isFromCustomer ? 'CLIENTE' : 'ADMIN',
-        createdAt: msg.createdAt,
-      })),
-    };
+    const couponInfo = await getCouponInfo(pedido.couponId);
+    const pedidoTransformado = transformOrder(pedido as OrderWithRelations, couponInfo);
 
     return NextResponse.json({ pedido: pedidoTransformado });
   } catch (error) {

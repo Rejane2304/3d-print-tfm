@@ -9,6 +9,7 @@ import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
+import { ShippingZone } from '@prisma/client';
 
 // Schema de validación
 const shippingZoneUpdateSchema = z.object({
@@ -53,6 +54,61 @@ const shippingZoneUpdateSchema = z.object({
   displayOrder: z.number().int().min(0).optional(),
 });
 
+/**
+ * Verifica autenticación de administrador
+ * Retorna null si OK, o NextResponse con error si falla
+ */
+async function verifyAdminAuth(): Promise<null | NextResponse> {
+  let session;
+  try {
+    session = await getServerSession(authOptions);
+  } catch {
+    session = null;
+  }
+  if (!session?.user?.email) {
+    return NextResponse.json(
+      { success: false, error: 'No autenticado' },
+      { status: 401 },
+    );
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+  });
+
+  if (user?.role !== 'ADMIN') {
+    return NextResponse.json(
+      { success: false, error: 'No autorizado' },
+      { status: 401 },
+    );
+  }
+
+  return null;
+}
+
+/**
+ * Formatea la zona de envío para el panel admin (español)
+ */
+function formatShippingZone(zone: ShippingZone) {
+  return {
+    id: zone.id,
+    nombre: zone.name,
+    pais: zone.country,
+    regiones: zone.regions,
+    prefijosCP: zone.postalCodePrefixes,
+    costoBase: Number(zone.baseCost),
+    envioGratisDesde: zone.freeShippingThreshold
+      ? Number(zone.freeShippingThreshold)
+      : null,
+    diasEstimadosMin: zone.estimatedDaysMin,
+    diasEstimadosMax: zone.estimatedDaysMax,
+    activo: zone.isActive,
+    orden: zone.displayOrder,
+    creadoEn: zone.createdAt,
+    actualizadoEn: zone.updatedAt,
+  };
+}
+
 // GET - Obtener Zona de Envío
 export async function GET(
   request: NextRequest,
@@ -61,29 +117,8 @@ export async function GET(
   try {
     const { id } = await params;
 
-    let session;
-    try {
-      session = await getServerSession(authOptions);
-    } catch {
-      session = null;
-    }
-    if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
-
-    if (user?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 401 },
-      );
-    }
+    const authError = await verifyAdminAuth();
+    if (authError) return authError;
 
     const zone = await prisma.shippingZone.findUnique({
       where: { id },
@@ -96,26 +131,10 @@ export async function GET(
       );
     }
 
-    // Formatear para el panel admin (español)
-    const zoneFormateada = {
-      id: zone.id,
-      nombre: zone.name,
-      pais: zone.country,
-      regiones: zone.regions,
-      prefijosCP: zone.postalCodePrefixes,
-      costoBase: Number(zone.baseCost),
-      envioGratisDesde: zone.freeShippingThreshold
-        ? Number(zone.freeShippingThreshold)
-        : null,
-      diasEstimadosMin: zone.estimatedDaysMin,
-      diasEstimadosMax: zone.estimatedDaysMax,
-      activo: zone.isActive,
-      orden: zone.displayOrder,
-      creadoEn: zone.createdAt,
-      actualizadoEn: zone.updatedAt,
-    };
-
-    return NextResponse.json({ success: true, zone: zoneFormateada });
+    return NextResponse.json({
+      success: true,
+      zone: formatShippingZone(zone),
+    });
   } catch (error) {
     console.error('Error obteniendo zona de envío:', error);
     return NextResponse.json(
@@ -133,31 +152,9 @@ export async function PATCH(
   try {
     const { id } = await params;
 
-    let session;
-    try {
-      session = await getServerSession(authOptions);
-    } catch {
-      session = null;
-    }
-    if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
-    }
+    const authError = await verifyAdminAuth();
+    if (authError) return authError;
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
-
-    if (user?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 401 },
-      );
-    }
-
-    // Verificar que la zona existe
     const existing = await prisma.shippingZone.findUnique({
       where: { id },
     });
@@ -172,7 +169,6 @@ export async function PATCH(
     const body = await request.json();
     const data = shippingZoneUpdateSchema.parse(body);
 
-    // Validar días estimados
     const minDays = data.estimatedDaysMin ?? existing.estimatedDaysMin;
     const maxDays = data.estimatedDaysMax ?? existing.estimatedDaysMax;
 
@@ -187,7 +183,6 @@ export async function PATCH(
       );
     }
 
-    // Actualizar zona de envío
     const zone = await prisma.shippingZone.update({
       where: { id },
       data: {
@@ -238,31 +233,9 @@ export async function DELETE(
   try {
     const { id } = await params;
 
-    let session;
-    try {
-      session = await getServerSession(authOptions);
-    } catch {
-      session = null;
-    }
-    if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'No autenticado' },
-        { status: 401 },
-      );
-    }
+    const authError = await verifyAdminAuth();
+    if (authError) return authError;
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
-
-    if (user?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'No autorizado' },
-        { status: 401 },
-      );
-    }
-
-    // Verificar que la zona existe
     const existing = await prisma.shippingZone.findUnique({
       where: { id },
     });
@@ -274,7 +247,6 @@ export async function DELETE(
       );
     }
 
-    // Eliminar zona de envío
     await prisma.shippingZone.delete({
       where: { id },
     });
