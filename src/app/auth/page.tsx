@@ -2,7 +2,6 @@
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, User, LogIn, UserPlus } from 'lucide-react';
 
@@ -14,12 +13,12 @@ import { useCartMigration } from './hooks/useCartMigration';
 export const dynamic = 'force-dynamic';
 
 interface TestCredentialsProps {
-  title: string;
-  email: string;
-  password: string;
+  readonly title: string;
+  readonly email: string;
+  readonly password: string;
 }
 
-function TestCredential({ title, email, password }: TestCredentialsProps) {
+function TestCredential({ title, email, password }: Readonly<TestCredentialsProps>) {
   return (
     <div className="flex items-center justify-between bg-white p-2 rounded-lg border border-gray-100">
       <span>
@@ -33,8 +32,7 @@ function TestCredential({ title, email, password }: TestCredentialsProps) {
 function AuthContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { data: session } = useSession();
-  const { status } = useAuthRedirect();
+  useAuthRedirect();
   const { setMigrationFlag, clearMigrationFlag, migrateCart } = useCartMigration();
 
   const callbackUrl = searchParams.get('callbackUrl') || '/';
@@ -128,7 +126,7 @@ function AuthContent() {
               onClick={() => handleTabSwitch('register')}
               data-testid="register-tab"
               className={`flex-1 flex items-center justify-center gap-2 py-4 text-sm font-medium transition-all duration-300 ${
-                !isLoginTab
+                activeTab === 'register'
                   ? 'text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50/50'
                   : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
               }`}

@@ -200,6 +200,51 @@ export async function GET(
   }
 }
 
+// Helper para verificar si el código ya existe
+async function checkDuplicateCode(
+  code: string,
+  existingCode: string,
+): Promise<string | null> {
+  if (code === existingCode) {
+    return null;
+  }
+
+  const codeExists = await prisma.coupon.findUnique({
+    where: { code: code.toUpperCase() },
+  });
+
+  if (codeExists) {
+    return 'Ya existe un cupón con ese código';
+  }
+
+  return null;
+}
+
+// Helper para validar fechas
+function validateDates(
+  newValidFrom: string | undefined,
+  newValidUntil: string | undefined,
+  existingValidFrom: Date,
+  existingValidUntil: Date,
+): { error: string | null; validFrom: Date; validUntil: Date } {
+  const validFrom = newValidFrom
+    ? new Date(newValidFrom)
+    : existingValidFrom;
+  const validUntil = newValidUntil
+    ? new Date(newValidUntil)
+    : existingValidUntil;
+
+  if (validUntil <= validFrom) {
+    return {
+      error: 'La fecha de fin debe ser posterior a la fecha de inicio',
+      validFrom,
+      validUntil,
+    };
+  }
+
+  return { error: null, validFrom, validUntil };
+}
+
 // PATCH - Actualizar Cupón
 export async function PATCH(
   request: NextRequest,
@@ -227,26 +272,29 @@ export async function PATCH(
     const body = await request.json();
     const data = couponUpdateSchema.parse(body);
 
-    if (data.code && data.code !== existing.code) {
-      const codeExists = await prisma.coupon.findUnique({
-        where: { code: data.code.toUpperCase() },
-      });
-
-      if (codeExists) {
+    // Verificar código duplicado
+    if (data.code) {
+      const duplicateError = await checkDuplicateCode(data.code, existing.code);
+      if (duplicateError) {
         return NextResponse.json(
-          { success: false, error: 'Ya existe un cupón con ese código' },
+          { success: false, error: duplicateError },
           { status: 400 },
         );
       }
     }
 
+    // Validar fechas
     if (data.validFrom || data.validUntil) {
-      const validFrom = data.validFrom ? new Date(data.validFrom) : existing.validFrom;
-      const validUntil = data.validUntil ? new Date(data.validUntil) : existing.validUntil;
+      const { error: dateError } = validateDates(
+        data.validFrom,
+        data.validUntil,
+        existing.validFrom,
+        existing.validUntil,
+      );
 
-      if (validUntil <= validFrom) {
+      if (dateError) {
         return NextResponse.json(
-          { success: false, error: 'La fecha de fin debe ser posterior a la fecha de inicio' },
+          { success: false, error: dateError },
           { status: 400 },
         );
       }
