@@ -44,6 +44,23 @@ interface InvoiceData {
   orderNumber?: string;
 }
 
+// Helper function to generate client contact HTML
+function getClientContactHTML(data: { clientEmail?: string; clientPhone?: string }): string {
+  if (!data.clientEmail && !data.clientPhone) {
+    return '';
+  }
+
+  const emailPart = data.clientEmail ? `✉ ${data.clientEmail}` : '';
+  const separator = data.clientEmail && data.clientPhone ? ' · ' : '';
+  const phonePart = data.clientPhone ? `📞 ${data.clientPhone}` : '';
+
+  return `
+              <div class="client-contact">
+                ${emailPart}${separator}${phonePart}
+              </div>
+              `;
+}
+
 export function generateInvoiceHTML(data: InvoiceData): string {
   const fechaEmision = new Date(data.issuedAt).toLocaleDateString('es-ES', {
     day: '2-digit',
@@ -593,17 +610,7 @@ export function generateInvoiceHTML(data: InvoiceData): string {
                 ${data.clientPostalCode} ${data.clientCity}, ${data.clientProvince}<br>
                 ${data.clientCountry || 'España'}
               </div>
-              ${
-  data.clientEmail || data.clientPhone
-    ? `
-              <div class="client-contact">
-                ${data.clientEmail ? `✉ ${data.clientEmail}` : ''}
-                ${data.clientEmail && data.clientPhone ? ' · ' : ''}
-                ${data.clientPhone ? `📞 ${data.clientPhone}` : ''}
-              </div>
-              `
-    : ''
-}
+              ${getClientContactHTML(data)}
             </div>
 
             <div class="client-card">
@@ -620,7 +627,7 @@ export function generateInvoiceHTML(data: InvoiceData): string {
           <div class="items-section">
             <div class="section-header">
               <h3 class="section-title">Conceptos</h3>
-              <span class="items-count">${data.items.length} producto${data.items.length !== 1 ? 's' : ''}</span>
+              <span class="items-count">${data.items.length} producto${data.items.length === 1 ? '' : 's'}</span>
             </div>
             <table class="items-table">
               <thead>

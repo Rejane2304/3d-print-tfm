@@ -7,12 +7,32 @@ import { Decimal } from '@prisma/client/runtime/library';
 
 const DEFAULT_VAT_RATE = 0.21; // 21% IVA en España
 
+// Type alias for price parameter
+type PriceValue = number | string | Decimal | undefined;
+
+// Helper function to convert price to number
+function convertPriceToNumber(price: PriceValue): number | null {
+  if (price === undefined || price === null) {
+    return null;
+  }
+
+  if (price instanceof Decimal) {
+    return price.toNumber();
+  }
+
+  if (typeof price === 'string') {
+    return Number.parseFloat(price);
+  }
+
+  return price;
+}
+
 /**
  * Format price WITHOUT VAT for display in product cards
  * Shows the base price as stored in database
  */
 export function formatPrice(
-  price: number | string | Decimal | undefined,
+  price: PriceValue,
   options: { showSymbol?: boolean; decimals?: number } = {},
 ): string {
   const { showSymbol = true, decimals = 2 } = options;
@@ -20,14 +40,9 @@ export function formatPrice(
     return showSymbol ? '0 €' : '0';
   }
 
-  const numPrice =
-    price instanceof Decimal
-      ? price.toNumber()
-      : typeof price === 'string'
-        ? parseFloat(price)
-        : price;
+  const numPrice = convertPriceToNumber(price);
 
-  if (isNaN(numPrice)) {
+  if (numPrice === null || Number.isNaN(numPrice)) {
     return showSymbol ? '0 €' : '0';
   }
 
@@ -41,19 +56,12 @@ export function formatPrice(
  * When displaying to customers, prices include VAT
  */
 export function addVat(
-  price: number | string | Decimal | undefined,
+  price: PriceValue,
   vatRate: number = DEFAULT_VAT_RATE,
 ): number {
-  if (price === undefined || price === null) {
-    return 0;
-  }
-  const numPrice =
-    price instanceof Decimal
-      ? price.toNumber()
-      : typeof price === 'string'
-        ? parseFloat(price)
-        : price;
-  if (isNaN(numPrice)) {
+  const numPrice = convertPriceToNumber(price);
+
+  if (numPrice === null || Number.isNaN(numPrice)) {
     return 0;
   }
   return numPrice * (1 + vatRate);
@@ -66,11 +74,9 @@ export function removeVat(
   price: number | string | undefined,
   vatRate: number = DEFAULT_VAT_RATE,
 ): number {
-  if (price === undefined || price === null) {
-    return 0;
-  }
-  const numPrice = typeof price === 'string' ? parseFloat(price) : price;
-  if (isNaN(numPrice)) {
+  const numPrice = convertPriceToNumber(price);
+
+  if (numPrice === null || Number.isNaN(numPrice)) {
     return 0;
   }
   return numPrice / (1 + vatRate);
@@ -81,7 +87,7 @@ export function removeVat(
  * Returns formatted string with 2 decimals and € symbol option
  */
 export function formatPriceWithVat(
-  price: number | string | Decimal | undefined,
+  price: PriceValue,
   options: { showSymbol?: boolean; decimals?: number } = {},
 ): string {
   const { showSymbol = true, decimals = 2 } = options;
@@ -97,11 +103,9 @@ export function calculateVatAmount(
   price: number | string | undefined,
   vatRate: number = DEFAULT_VAT_RATE,
 ): number {
-  if (price === undefined || price === null) {
-    return 0;
-  }
-  const numPrice = typeof price === 'string' ? parseFloat(price) : price;
-  if (isNaN(numPrice)) {
+  const numPrice = convertPriceToNumber(price);
+
+  if (numPrice === null || Number.isNaN(numPrice)) {
     return 0;
   }
   return numPrice * vatRate;
