@@ -327,8 +327,9 @@ export function useNotificationToast() {
     setNotifications((prev) => [...prev, notification]);
 
     // Auto-remove after 5 seconds
+    const filterOutNotification = (n: typeof notification) => n.id !== id;
     const removeNotificationById = () => {
-      setNotifications((prev) => prev.filter((n) => n.id !== id));
+      setNotifications((prev) => prev.filter(filterOutNotification));
     };
     setTimeout(removeNotificationById, 5000);
   }, []);
