@@ -12,6 +12,26 @@ import { z } from 'zod';
 import { CouponType } from '@prisma/client';
 import { translateCouponCode } from '@/lib/i18n';
 
+// Helper functions for coupon formatting
+function getCouponTypeText(type: string): string {
+  const typeMap: Record<string, string> = {
+    PERCENTAGE: 'Porcentaje',
+    FIXED: 'Fijo',
+    FREE_SHIPPING: 'Envío Gratis',
+  };
+  return typeMap[type] ?? 'Otro';
+}
+
+function getCouponValueText(type: string, value: number): string {
+  if (type === 'PERCENTAGE') {
+    return `${value}%`;
+  }
+  if (type === 'FIXED') {
+    return `${value}€`;
+  }
+  return 'Gratis';
+}
+
 // Schema de validación
 const couponSchema = z.object({
   code: z
@@ -88,19 +108,9 @@ export async function GET() {
         estado = 'Agotado';
       }
 
-      const tipoTexto =
-        coupon.type === 'PERCENTAGE'
-          ? 'Porcentaje'
-          : coupon.type === 'FIXED'
-            ? 'Fijo'
-            : 'Envío Gratis';
+      const tipoTexto = getCouponTypeText(coupon.type);
 
-      const valorTexto =
-        coupon.type === 'PERCENTAGE'
-          ? `${coupon.value}%`
-          : coupon.type === 'FIXED'
-            ? `${coupon.value}€`
-            : 'Gratis';
+      const valorTexto = getCouponValueText(coupon.type, Number(coupon.value));
 
       return {
         id: coupon.id,
@@ -157,7 +167,7 @@ export async function POST(req: NextRequest) {
       where: { email: session.user.email },
     });
 
-    if (!user || user.role !== 'ADMIN') {
+    if (user?.role !== 'ADMIN') {
       return NextResponse.json(
         { success: false, error: 'No autorizado' },
         { status: 401 },
