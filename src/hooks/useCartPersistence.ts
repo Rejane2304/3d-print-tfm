@@ -20,7 +20,7 @@ export function useCartPersistence() {
   const clearGuestCart = useCallback(() => {
     if (!isAuthenticated) {
       localStorage.removeItem(CART_STORAGE_KEY);
-      window.dispatchEvent(new Event('cartUpdated'));
+      globalThis.dispatchEvent(new Event('cartUpdated'));
     }
   }, [isAuthenticated]);
 
@@ -68,16 +68,16 @@ export function useCartPersistence() {
         }, 1000);
       };
 
-      window.addEventListener('beforeunload', handleBeforeUnload);
-      window.addEventListener('load', handleLoad);
+      globalThis.addEventListener('beforeunload', handleBeforeUnload);
+      globalThis.addEventListener('load', handleLoad);
 
       return () => {
         clearTimeout(inactivityTimer);
         activityEvents.forEach((event) => {
           document.removeEventListener(event, resetInactivityTimer);
         });
-        window.removeEventListener('beforeunload', handleBeforeUnload);
-        window.removeEventListener('load', handleLoad);
+        globalThis.removeEventListener('beforeunload', handleBeforeUnload);
+        globalThis.removeEventListener('load', handleLoad);
       };
     }
   }, [isAuthenticated, isLoading, clearGuestCart]);

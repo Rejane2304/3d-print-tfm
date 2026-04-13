@@ -24,6 +24,23 @@ export async function getAlertConfig(): Promise<AlertConfig> {
   };
 }
 
+// Determine severity and type based on stock level
+function determineStockAlertSeverity(
+  currentStock: number,
+  minStock: number,
+): { severity: AlertSeverity; type: AlertType } | null {
+  if (currentStock === 0) {
+    return { severity: 'CRITICAL', type: 'OUT_OF_STOCK' };
+  }
+  if (currentStock <= 2) {
+    return { severity: 'HIGH', type: 'LOW_STOCK' };
+  }
+  if (currentStock <= minStock) {
+    return { severity: 'MEDIUM', type: 'LOW_STOCK' };
+  }
+  return null;
+}
+
 /**
  * Create a low stock alert for a product
  */
@@ -38,22 +55,11 @@ export async function createStockAlert(productId: string, currentStock: number, 
   }
 
   // Determine severity and type
-  let severity: AlertSeverity;
-  let type: AlertType;
-
-  if (currentStock === 0) {
-    severity = 'CRITICAL';
-    type = 'OUT_OF_STOCK';
-  } else if (currentStock <= 2) {
-    severity = 'HIGH';
-    type = 'LOW_STOCK';
-  } else if (currentStock <= minStock) {
-    severity = 'MEDIUM';
-    type = 'LOW_STOCK';
-  } else {
-    // Stock normal, no crear alerta
+  const alertConfig = determineStockAlertSeverity(currentStock, minStock);
+  if (!alertConfig) {
     return null;
   }
+  const { severity, type } = alertConfig;
 
   // Check if there's already a pending alert for this product
   const existingAlert = await prisma.alert.findFirst({
@@ -353,7 +359,7 @@ export async function createCouponExpiringAlert(couponId: string, daysThreshold:
     },
   });
 
-  if (!coupon || !coupon.validUntil) {
+  if (coupon?.validUntil === undefined) {
     return null;
   }
 
