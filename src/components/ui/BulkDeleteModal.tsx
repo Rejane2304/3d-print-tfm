@@ -33,18 +33,7 @@ interface BulkDeleteModalProps {
   isLoading?: boolean;
 }
 
-  isOpen,
-  onClose,
-  onConfirm,
-  selectedCount,
-  itemType = "items",
-  itemName = "elemento",
-  itemNamePlural = "elementos",
-  hasAssociatedItems = false,
-  associatedItemCount = 0,
-  associatedItemType = "elementos",
-  isLoading = false,
-}: Readonly<BulkDeleteModalProps>) {
+//
 export function BulkDeleteModal(props: Readonly<BulkDeleteModalProps>) {
   const {
     isOpen,
