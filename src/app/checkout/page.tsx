@@ -188,9 +188,18 @@ export default function CheckoutPage() {
   const taxAmount = (discountedSubtotal + shippingCost) * 0.21;
   const total = discountedSubtotal + shippingCost + taxAmount;
 
-  const selectedPaymentMethod = ['Tarjeta de crédito/débito', 'PayPal', 'Bizum', 'Transferencia bancaria'][
-    ['CARD', 'PAYPAL', 'BIZUM', 'TRANSFER'].indexOf(paymentMethod)
-  ];
+  // Helper function to get payment method name
+  const getPaymentMethodName = (method: string): string => {
+    const methodNames: Record<string, string> = {
+      'CARD': 'Tarjeta de crédito/débito',
+      'PAYPAL': 'PayPal',
+      'BIZUM': 'Bizum',
+      'TRANSFER': 'Transferencia bancaria',
+    };
+    return methodNames[method] ?? 'Otro método';
+  };
+
+  const selectedPaymentMethod = getPaymentMethodName(paymentMethod);
 
   const handleConfirmOrder = () => {
     setShowConfirmation(true);

@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
       include: { user: true },
     });
 
-    if (!order || order.userId !== user.id) {
+    if (order?.userId !== user.id) {
       return NextResponse.json(
         { error: 'Pedido no encontrado' },
         { status: 404 },

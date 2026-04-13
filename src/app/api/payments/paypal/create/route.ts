@@ -8,6 +8,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
 import { createPaymentFailedAlert } from '@/lib/alerts/alert-service';
+import { Decimal } from '@prisma/client/runtime/library';
 
 // PayPal API base URLs
 const PAYPAL_API =
@@ -28,11 +29,12 @@ async function getPayPalAccessToken(): Promise<string> {
 
   // Configuración de depuración disponible en logs del servidor si es necesario
 
+  const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
   const response = await fetch(`${PAYPAL_API}/v1/oauth2/token`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
-      Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`,
+      Authorization: `Basic ${credentials}`,
     },
     body: 'grant_type=client_credentials',
   });
@@ -52,6 +54,56 @@ async function getPayPalAccessToken(): Promise<string> {
 /**
  * Create PayPal order via API
  */
+// Build PayPal items from order items
+function buildPayPalItems(
+  items: Array<{ name: string; quantity: number; unitPrice: number }>,
+  vatAmountStr: string,
+) {
+  const productItems = items.map((item, index) => ({
+    name: item.name.substring(0, 127),
+    quantity: item.quantity.toString(),
+    unit_amount: {
+      currency_code: 'EUR' as const,
+      value: item.unitPrice.toFixed(2),
+    },
+    sku: `ITEM-${index + 1}`,
+    category: 'PHYSICAL_GOODS' as const,
+  }));
+
+  const vatItem = {
+    name: 'IVA (21%)',
+    quantity: '1',
+    unit_amount: {
+      currency_code: 'EUR' as const,
+      value: vatAmountStr,
+    },
+    sku: 'TAX-IVA-21',
+    category: 'PHYSICAL_GOODS' as const,
+  };
+
+  return [...productItems, vatItem];
+}
+
+// Translate PayPal error response
+function translatePayPalError(errorData: { details?: Array<{ issue: string; field?: string; description?: string }>; message?: string }): string {
+  if (!errorData.details || errorData.details.length === 0) {
+    return errorData.message ?? 'Error al crear el pedido de PayPal';
+  }
+
+  const detail = errorData.details[0];
+  const errorMap: Record<string, string> = {
+    ITEM_TOTAL_MISMATCH: 'El total de los items no coincide con el importe del pedido',
+    AMOUNT_MISMATCH: 'El importe total no es correcto',
+    INVALID_CURRENCY_CODE: 'Moneda no válida',
+  };
+
+  if (detail.issue === 'MISSING_REQUIRED_PARAMETER') {
+    return `Falta el parámetro requerido: ${detail.field}`;
+  }
+
+  return errorMap[detail.issue] ?? detail.description ?? errorData.message ?? 'Error en la validación del pedido';
+}
+
 async function createPayPalOrder(
   accessToken: string,
   orderData: {
@@ -96,30 +148,7 @@ async function createPayPalOrder(
   const totalStr = calculatedTotal.toFixed(2);
 
   // Preparar items para PayPal (productos + IVA como item separado)
-  const paypalItems = [
-    // Productos
-    ...orderData.items.map((item, index) => ({
-      name: item.name.substring(0, 127),
-      quantity: item.quantity.toString(),
-      unit_amount: {
-        currency_code: 'EUR',
-        value: item.unitPrice.toFixed(2),
-      },
-      sku: `ITEM-${index + 1}`,
-      category: 'PHYSICAL_GOODS' as const,
-    })),
-    // IVA como item separado (transparencia)
-    {
-      name: 'IVA (21%)',
-      quantity: '1',
-      unit_amount: {
-        currency_code: 'EUR',
-        value: vatAmountStr,
-      },
-      sku: 'TAX-IVA-21',
-      category: 'PHYSICAL_GOODS' as const,
-    },
-  ];
+  const paypalItems = buildPayPalItems(orderData.items, vatAmountStr);
 
   const requestBody = {
     intent: 'CAPTURE',
@@ -151,8 +180,7 @@ async function createPayPalOrder(
             address_line_1: orderData.shippingAddress.address.substring(0, 100),
             admin_area_2: orderData.shippingAddress.city,
             postal_code: orderData.shippingAddress.postalCode,
-            country_code:
-              orderData.shippingAddress.country === 'Spain' ? 'ES' : 'ES',
+            country_code: 'ES',
           },
         },
       },
@@ -187,35 +215,87 @@ async function createPayPalOrder(
     }
 
     console.error('PayPal error response:', JSON.stringify(errorData, null, 2));
-
-    // Traducir errores comunes de PayPal
-    let errorMessage = 'Error al crear el pedido de PayPal';
-
-    if (errorData.details && errorData.details.length > 0) {
-      const detail = errorData.details[0];
-      if (detail.issue === 'ITEM_TOTAL_MISMATCH') {
-        errorMessage =
-          'El total de los items no coincide con el importe del pedido';
-      } else if (detail.issue === 'AMOUNT_MISMATCH') {
-        errorMessage = 'El importe total no es correcto';
-      } else if (detail.issue === 'INVALID_CURRENCY_CODE') {
-        errorMessage = 'Moneda no válida';
-      } else if (detail.issue === 'MISSING_REQUIRED_PARAMETER') {
-        errorMessage = `Falta el parámetro requerido: ${detail.field}`;
-      } else {
-        errorMessage =
-          detail.description ||
-          errorData.message ||
-          'Error en la validación del pedido';
-      }
-    } else if (errorData.message) {
-      errorMessage = errorData.message;
-    }
-
-    throw new Error(errorMessage);
+    throw new Error(translatePayPalError(errorData));
   }
 
   return response.json();
+}
+
+// Get order with verification
+interface OrderResult {
+  success: boolean;
+  order?: { id: string; orderNumber: string; total: Decimal; shipping: Decimal; discount: Decimal | null; items: Array<{ name: string; quantity: number; price: Decimal }>; shippingName: string | null; shippingAddress: string; shippingCity: string; shippingPostalCode: string; shippingCountry: string; user: { name: string | null } };
+  error?: string;
+  status?: number;
+}
+
+async function getOrderForPayPal(orderId: string, userEmail: string): Promise<OrderResult> {
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: {
+      user: {
+        select: { id: true, email: true, name: true },
+      },
+      items: {
+        select: {
+          name: true,
+          quantity: true,
+          price: true,
+        },
+      },
+      payment: true,
+      shippingAddressData: true,
+    },
+  });
+
+  if (!order) {
+    return { success: false, error: 'Pedido no encontrado', status: 404 };
+  }
+
+  if (order.user.email !== userEmail) {
+    return { success: false, error: 'No autorizado', status: 403 };
+  }
+
+  if (!order.items || order.items.length === 0) {
+    return { success: false, error: 'El pedido no tiene items', status: 400 };
+  }
+
+  return { success: true, order };
+}
+
+// Update payment and order with PayPal order ID
+async function updatePaymentWithPayPalOrder(
+  paymentId: string,
+  orderId: string,
+  paypalOrderId: string,
+) {
+  await prisma.payment.update({
+    where: { id: paymentId },
+    data: {
+      paypalOrderId,
+      status: 'PROCESSING',
+    },
+  });
+
+  await prisma.order.update({
+    where: { id: orderId },
+    data: { paypalOrderId },
+  });
+}
+
+// Create alert for failed payment
+async function createFailedPaymentAlert(orderId: string, errorMessage: string) {
+  try {
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      select: { orderNumber: true },
+    });
+    if (order) {
+      await createPaymentFailedAlert(orderId, order.orderNumber, errorMessage);
+    }
+  } catch (alertError) {
+    console.error('Error creating payment failed alert:', alertError);
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -239,43 +319,14 @@ export async function POST(req: NextRequest) {
     }
 
     // 3. Get order data with verification
-    const order = await prisma.order.findUnique({
-      where: { id: orderId },
-      include: {
-        user: {
-          select: { id: true, email: true, name: true },
-        },
-        items: {
-          select: {
-            name: true,
-            quantity: true,
-            price: true,
-          },
-        },
-        payment: true,
-        shippingAddressData: true,
-      },
-    });
-
-    if (!order) {
+    const orderResult = await getOrderForPayPal(orderId, session.user.email);
+    if (!orderResult.success || !orderResult.order) {
       return NextResponse.json(
-        { error: 'Pedido no encontrado' },
-        { status: 404 },
+        { error: orderResult.error },
+        { status: orderResult.status },
       );
     }
-
-    // Verify order belongs to authenticated user
-    if (order.user.email !== session.user.email) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
-    }
-
-    // Verificar que hay items
-    if (!order.items || order.items.length === 0) {
-      return NextResponse.json(
-        { error: 'El pedido no tiene items' },
-        { status: 400 },
-      );
-    }
+    const order = orderResult.order;
 
     // 4. Get PayPal access token (OAuth)
     const accessToken = await getPayPalAccessToken();
@@ -302,21 +353,7 @@ export async function POST(req: NextRequest) {
     });
 
     // 6. Update payment with paypalOrderId
-    await prisma.payment.update({
-      where: { id: paymentId },
-      data: {
-        paypalOrderId: paypalOrder.id,
-        status: 'PROCESSING',
-      },
-    });
-
-    // Also update order with paypalOrderId for reference
-    await prisma.order.update({
-      where: { id: orderId },
-      data: {
-        paypalOrderId: paypalOrder.id,
-      },
-    });
+    await updatePaymentWithPayPalOrder(paymentId, orderId, paypalOrder.id);
 
     // 7. Get approval URL from PayPal response
     const approvalLink = paypalOrder.links.find(
@@ -340,24 +377,11 @@ export async function POST(req: NextRequest) {
     console.error('Error creating PayPal payment:', error);
 
     // Create alert for failed payment
-    try {
-      const body = await req.json().catch(() => ({}));
-      const { orderId } = body;
-      if (orderId) {
-        const order = await prisma.order.findUnique({
-          where: { id: orderId },
-          select: { orderNumber: true },
-        });
-        if (order) {
-          await createPaymentFailedAlert(
-            orderId,
-            order.orderNumber,
-            error instanceof Error ? error.message : 'Error desconocido',
-          );
-        }
-      }
-    } catch (alertError) {
-      console.error('Error creating payment failed alert:', alertError);
+    const body = await req.json().catch(() => ({}));
+    const { orderId } = body;
+    if (orderId) {
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      await createFailedPaymentAlert(orderId, errorMessage);
     }
 
     const errorMessage =

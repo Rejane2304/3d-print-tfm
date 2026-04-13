@@ -15,8 +15,8 @@ export async function GET(
 
     // Get query params for pagination and sorting
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
+    const page = Number.parseInt(searchParams.get('page') || '1');
+    const limit = Number.parseInt(searchParams.get('limit') || '10');
     const sortBy = searchParams.get('sortBy') || 'newest'; // newest, oldest, highest, lowest
 
     // Verificar que el producto existe

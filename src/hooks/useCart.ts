@@ -31,6 +31,142 @@ export interface CartData {
 
 const CART_STORAGE_KEY = 'cart';
 
+// Helper functions for cart operations - moved to outer scope per SonarQube S7721
+async function loadCartFromApi(): Promise<CartData> {
+  const response = await fetch('/api/cart');
+  if (!response.ok) {
+    throw new Error('Error al cargar carrito');
+  }
+  const data = await response.json();
+  if (!data.success) {
+    throw new Error('Error al cargar carrito');
+  }
+  return data.cart;
+}
+
+function loadCartFromLocalStorage(): CartData {
+  const cartData = localStorage.getItem(CART_STORAGE_KEY);
+  if (cartData) {
+    const items: CartItem[] = JSON.parse(cartData);
+    const totalItems = items.reduce(
+      (sum, item) => sum + item.quantity,
+      0,
+    );
+    const subtotal = items.reduce(
+      (sum, item) => sum + item.unitPrice * item.quantity,
+      0,
+    );
+    return {
+      id: null,
+      items,
+      subtotal,
+      totalItems,
+    };
+  }
+  return {
+    id: null,
+    items: [],
+    subtotal: 0,
+    totalItems: 0,
+  };
+}
+
+async function addItemToApi(productId: string, quantity: number): Promise<void> {
+  const response = await fetch('/api/cart', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ productId, quantity }),
+  });
+
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.error || 'Error adding to cart');
+  }
+}
+
+function getLocalCartItems(): CartItem[] {
+  const cartData = localStorage.getItem(CART_STORAGE_KEY);
+  return cartData ? JSON.parse(cartData) : [];
+}
+
+function saveLocalCartItems(items: CartItem[]): void {
+  localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+}
+
+function createCartItem(productId: string, quantity: number, productInfo: {
+  price?: number;
+  name?: string;
+  slug?: string;
+  stock?: number;
+  image?: string | null;
+}): CartItem {
+  return {
+    id: `local-${Date.now()}`,
+    productId,
+    quantity,
+    unitPrice: productInfo.price ?? 0,
+    product: {
+      id: productId,
+      name: productInfo.name ?? 'Unknown',
+      slug: productInfo.slug ?? '',
+      price: productInfo.price ?? 0,
+      stock: productInfo.stock ?? 0,
+      image: productInfo.image || null,
+    },
+  };
+}
+
+async function updateItemInApi(itemId: string, quantity: number): Promise<void> {
+  const response = await fetch(`/api/cart/${itemId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ quantity }),
+  });
+
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.error || 'Error updating');
+  }
+}
+
+function updateItemInLocalStorage(itemId: string, quantity: number): void {
+  const cartData = localStorage.getItem(CART_STORAGE_KEY);
+  if (!cartData) return;
+
+  let items: CartItem[] = JSON.parse(cartData);
+
+  if (quantity <= 0) {
+    items = items.filter((item) => item.id !== itemId);
+  } else {
+    const item = items.find((i) => i.id === itemId);
+    if (item) {
+      item.quantity = quantity;
+    }
+  }
+
+  localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+}
+
+async function removeItemFromApi(itemId: string): Promise<void> {
+  const response = await fetch(`/api/cart/${itemId}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.error || 'Error removing item');
+  }
+}
+
+function removeItemFromLocalStorage(itemId: string): void {
+  const cartData = localStorage.getItem(CART_STORAGE_KEY);
+  if (!cartData) return;
+
+  const items: CartItem[] = JSON.parse(cartData);
+  const filteredItems = items.filter((item) => item.id !== itemId);
+  localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(filteredItems));
+}
+
 export function useCart() {
   const { status } = useSession();
   const [cart, setCart] = useState<CartData | null>(null);
@@ -58,43 +194,11 @@ export function useCart() {
 
       try {
         if (isAuthenticated) {
-          // Load from API
-          const response = await fetch('/api/cart');
-          if (response.ok) {
-            const data = await response.json();
-            if (data.success) {
-              setCart(data.cart);
-            }
-          } else {
-            throw new Error('Error al cargar carrito');
-          }
+          const cartData = await loadCartFromApi();
+          setCart(cartData);
         } else {
-          // Load from localStorage
-          const cartData = localStorage.getItem(CART_STORAGE_KEY);
-          if (cartData) {
-            const items: CartItem[] = JSON.parse(cartData);
-            const totalItems = items.reduce(
-              (sum, item) => sum + item.quantity,
-              0,
-            );
-            const subtotal = items.reduce(
-              (sum, item) => sum + item.unitPrice * item.quantity,
-              0,
-            );
-            setCart({
-              id: null,
-              items,
-              subtotal,
-              totalItems,
-            });
-          } else {
-            setCart({
-              id: null,
-              items: [],
-              subtotal: 0,
-              totalItems: 0,
-            });
-          }
+          const cartData = loadCartFromLocalStorage();
+          setCart(cartData);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error desconocido');
@@ -120,61 +224,24 @@ export function useCart() {
     ) => {
       try {
         if (isAuthenticated) {
-          // Use API
-          const response = await fetch('/api/cart', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ productId, quantity }),
-          });
-
-          if (!response.ok) {
-            const data = await response.json();
-            throw new Error(data.error || 'Error adding to cart');
-          }
-
-          // Reload cart and dispatch event for cross-component updates
-          await loadCart();
-          window.dispatchEvent(new Event('cartUpdated'));
-          return { success: true };
+          await addItemToApi(productId, quantity);
         } else {
-          // Use localStorage
-          const cartData = localStorage.getItem(CART_STORAGE_KEY);
-          const items: CartItem[] = cartData ? JSON.parse(cartData) : [];
-
+          const items = getLocalCartItems();
           const existingItem = items.find(
             (item) => item.productId === productId,
           );
 
           if (existingItem) {
-            // Update quantity
             existingItem.quantity += quantity;
           } else {
-            // Add new item
-            items.push({
-              id: `local-${Date.now()}`,
-              productId,
-              quantity,
-              unitPrice: productInfo.price ?? 0,
-              product: {
-                id: productId,
-                name: productInfo.name ?? 'Unknown',
-                slug: productInfo.slug ?? '',
-                price: productInfo.price ?? 0,
-                stock: productInfo.stock ?? 0,
-                image: productInfo.image || null,
-              },
-            });
+            items.push(createCartItem(productId, quantity, productInfo));
           }
-
-          localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
-
-          // Dispatch event to update counter
-          window.dispatchEvent(new Event('cartUpdated'));
-
-          // Reload cart
-          await loadCart();
-          return { success: true };
+          saveLocalCartItems(items);
         }
+
+        await loadCart();
+        globalThis.dispatchEvent(new Event('cartUpdated'));
+        return { success: true };
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error desconocido');
         return {
@@ -191,42 +258,13 @@ export function useCart() {
     async(itemId: string, quantity: number) => {
       try {
         if (isAuthenticated) {
-          // Use API
-          const response = await fetch(`/api/cart/${itemId}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ quantity }),
-          });
-
-          if (!response.ok) {
-            const data = await response.json();
-            throw new Error(data.error || 'Error updating');
-          }
-
-          await loadCart();
-          window.dispatchEvent(new Event('cartUpdated'));
+          await updateItemInApi(itemId, quantity);
         } else {
-          // Use localStorage
-          const cartData = localStorage.getItem(CART_STORAGE_KEY);
-          if (cartData) {
-            let items: CartItem[] = JSON.parse(cartData);
-
-            if (quantity <= 0) {
-              items = items.filter((item) => item.id !== itemId);
-            } else {
-              const item = items.find((i) => i.id === itemId);
-              if (item) {
-                item.quantity = quantity;
-              }
-            }
-
-            localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
-            window.dispatchEvent(new Event('cartUpdated'));
-          }
-
-          await loadCart();
+          updateItemInLocalStorage(itemId, quantity);
         }
 
+        await loadCart();
+        globalThis.dispatchEvent(new Event('cartUpdated'));
         return { success: true };
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error desconocido');
@@ -244,31 +282,13 @@ export function useCart() {
     async(itemId: string) => {
       try {
         if (isAuthenticated) {
-          // Use API
-          const response = await fetch(`/api/cart/${itemId}`, {
-            method: 'DELETE',
-          });
-
-          if (!response.ok) {
-            const data = await response.json();
-            throw new Error(data.error || 'Error removing item');
-          }
-
-          await loadCart();
-          window.dispatchEvent(new Event('cartUpdated'));
+          await removeItemFromApi(itemId);
         } else {
-          // Use localStorage
-          const cartData = localStorage.getItem(CART_STORAGE_KEY);
-          if (cartData) {
-            let items: CartItem[] = JSON.parse(cartData);
-            items = items.filter((item) => item.id !== itemId);
-            localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
-            window.dispatchEvent(new Event('cartUpdated'));
-          }
-
-          await loadCart();
+          removeItemFromLocalStorage(itemId);
         }
 
+        await loadCart();
+        globalThis.dispatchEvent(new Event('cartUpdated'));
         return { success: true };
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error desconocido');
@@ -286,7 +306,7 @@ export function useCart() {
     try {
       if (!isAuthenticated) {
         localStorage.removeItem(CART_STORAGE_KEY);
-        window.dispatchEvent(new Event('cartUpdated'));
+        globalThis.dispatchEvent(new Event('cartUpdated'));
       }
       // For authenticated users, cart is cleared on the server during checkout
       await loadCart();
@@ -359,8 +379,8 @@ export function useCart() {
       loadCart();
     };
 
-    window.addEventListener('cartUpdated', handleCartUpdate);
-    return () => window.removeEventListener('cartUpdated', handleCartUpdate);
+    globalThis.addEventListener('cartUpdated', handleCartUpdate);
+    return () => globalThis.removeEventListener('cartUpdated', handleCartUpdate);
   }, [loadCart]);
 
   // Listen for auth changes to reload cart

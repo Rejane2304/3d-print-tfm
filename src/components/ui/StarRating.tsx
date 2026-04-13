@@ -29,7 +29,7 @@ export function StarRating({
   onRatingChange,
   showValue = false,
   className = '',
-}: StarRatingProps) {
+}: Readonly<StarRatingProps>) {
   const [hoverRating, setHoverRating] = useState(0);
 
   const sizeClasses = {
@@ -59,15 +59,14 @@ export function StarRating({
   return (
     <div className={`flex items-center gap-1 ${className}`}>
       <div className="flex items-center">
-        {[...Array(maxRating)].map((_, index) => {
-          const starIndex = index + 1;
+        {Array.from({ length: maxRating }, (_, i) => i + 1).map((starIndex) => {
           const displayRating =
             mode === 'interactive' && hoverRating > 0 ? hoverRating : rating;
           const isFilled = starIndex <= displayRating;
 
           return (
             <button
-              key={index}
+              key={`star-${starIndex}`}
               type="button"
               disabled={mode === 'display'}
               onClick={() => handleClick(starIndex)}

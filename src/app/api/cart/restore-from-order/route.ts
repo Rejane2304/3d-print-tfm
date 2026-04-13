@@ -55,16 +55,14 @@ export async function POST(req: NextRequest) {
       include: { items: true },
     });
 
-    if (!cart) {
-      cart = await prisma.cart.create({
-        data: {
-          id: crypto.randomUUID(),
-          user: { connect: { id: order.userId } },
-          updatedAt: new Date(),
-        },
-        include: { items: true },
-      });
-    }
+    cart ??= await prisma.cart.create({
+      data: {
+        id: crypto.randomUUID(),
+        user: { connect: { id: order.userId } },
+        updatedAt: new Date(),
+      },
+      include: { items: true },
+    });
 
     // Restaurar items del pedido al carrito
     for (const orderItem of order.items) {

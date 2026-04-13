@@ -47,7 +47,7 @@ export default function RegisterForm({
   onEmailChange,
   onRegisterSuccess,
   onRegisterError,
-}: RegisterFormProps) {
+}: Readonly<RegisterFormProps>) {
   const [formData, setFormData] = useState<RegisterData>({
     nombre: '',
     email: initialEmail,

@@ -20,6 +20,34 @@ import {
   Search,
 } from 'lucide-react';
 
+// SortIcon component extracted outside DataTable to avoid nested function definition
+interface SortIconProps {
+  sortDirection: SortDirection;
+}
+
+function SortIcon({ sortDirection }: Readonly<SortIconProps>) {
+  if (sortDirection === 'asc') {
+    return <ChevronUp className="h-4 w-4" />;
+  }
+  if (sortDirection === 'desc') {
+    return <ChevronDown className="h-4 w-4" />;
+  }
+  return null;
+}
+
+// BulkActionIcon component extracted to avoid nested function
+interface BulkActionIconProps {
+  isLoading: boolean;
+  icon?: React.ReactNode;
+}
+
+function BulkActionIcon({ isLoading, icon }: Readonly<BulkActionIconProps>) {
+  if (isLoading) {
+    return <Loader2 className="h-4 w-4 animate-spin" />;
+  }
+  return icon;
+}
+
 // Types
 export type SortDirection = 'asc' | 'desc' | null;
 
@@ -327,13 +355,7 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
                     disabled={bulkActionLoading === action.key}
                     className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium ${variantClass} disabled:opacity-50`}
                   >
-                    {(() => {
-                      const isLoading = bulkActionLoading === action.key;
-                      if (isLoading) {
-                        return <Loader2 className="h-4 w-4 animate-spin" />;
-                      }
-                      return action.icon;
-                    })()}
+                    <BulkActionIcon isLoading={bulkActionLoading === action.key} icon={action.icon} />
                     {action.label}
                   </button>
                 );
@@ -355,9 +377,10 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
             );
           }
           if (paginatedData.length === 0) {
+            const emptyText = searchQuery ? noResultsMessage : emptyMessage;
             return (
               <div className="p-12 text-center text-gray-500">
-                {searchQuery ? noResultsMessage : emptyMessage}
+                {emptyText}
               </div>
             );
           }
@@ -396,13 +419,7 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
                           if (!isSorted) {
                             return null;
                           }
-                          if (sortDirection === 'asc') {
-                            return <ChevronUp className="h-4 w-4" />;
-                          }
-                          if (sortDirection === 'desc') {
-                            return <ChevronDown className="h-4 w-4" />;
-                          }
-                          return null;
+                          return <SortIcon sortDirection={sortDirection} />;
                         })()}
                       </div>
                     </th>

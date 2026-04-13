@@ -28,7 +28,7 @@ export default function LoginForm({
   onLoginStart,
   onLoginError,
   onLoginSuccess,
-}: LoginFormProps) {
+}: Readonly<LoginFormProps>) {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);

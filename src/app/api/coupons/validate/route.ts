@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { z } from 'zod';
 import { couponTranslations } from '@/lib/i18n';
+import { Decimal } from '@prisma/client/runtime/library';
 
 const validateSchema = z.object({
   code: z.string().min(1, 'El código es obligatorio'),
@@ -18,6 +19,106 @@ const validateSchema = z.object({
     .default(0),
 });
 
+// Build reverse translation map for Spanish to English coupon codes
+function buildReverseTranslations(): Record<string, string> {
+  const reverseTranslations: Record<string, string> = {};
+  for (const [eng, esp] of Object.entries(couponTranslations)) {
+    reverseTranslations[esp.toUpperCase()] = eng.toUpperCase();
+  }
+  return reverseTranslations;
+}
+
+// Find coupon by code or its translation
+async function findCouponByCode(searchCode: string) {
+  const directCoupon = await prisma.coupon.findUnique({
+    where: { code: searchCode },
+  });
+
+  if (directCoupon) {
+    return directCoupon;
+  }
+
+  const reverseTranslations = buildReverseTranslations();
+  const originalCode = reverseTranslations[searchCode];
+
+  if (originalCode) {
+    return prisma.coupon.findUnique({
+      where: { code: originalCode },
+    });
+  }
+
+  return null;
+}
+
+// Validate coupon status and constraints
+interface CouponValidationInput {
+  isActive: boolean;
+  validFrom: Date;
+  validUntil: Date;
+  maxUses: number | null;
+  usedCount: number;
+  minOrderAmount: number | Decimal | null;
+}
+
+function validateCouponConstraints(
+  coupon: CouponValidationInput,
+  orderAmount: number,
+): { valid: false; error: string; status: number } | { valid: true } {
+  const now = new Date();
+
+  if (!coupon.isActive) {
+    return { valid: false, error: 'Este cupón está inactivo', status: 400 };
+  }
+
+  if (coupon.validFrom > now) {
+    return { valid: false, error: 'Este cupón aún no está disponible', status: 400 };
+  }
+
+  if (coupon.validUntil < now) {
+    return { valid: false, error: 'Este cupón ha expirado', status: 400 };
+  }
+
+  if (coupon.maxUses !== null && coupon.usedCount >= coupon.maxUses) {
+    return { valid: false, error: 'Este cupón ha alcanzado el límite de usos', status: 400 };
+  }
+
+  const minAmount = coupon.minOrderAmount !== null ? Number(coupon.minOrderAmount) : null;
+  if (minAmount !== null && orderAmount < minAmount) {
+    return {
+      valid: false,
+      error: `El monto mínimo del pedido debe ser de ${minAmount.toFixed(2)}€`,
+      status: 400,
+    };
+  }
+
+  return { valid: true };
+}
+
+// Calculate discount based on coupon type
+function calculateDiscount(
+  couponType: string,
+  couponValue: number,
+  orderAmount: number,
+): number {
+  if (couponType === 'PERCENTAGE') {
+    return orderAmount * (couponValue / 100);
+  }
+  if (couponType === 'FIXED') {
+    return Math.min(couponValue, orderAmount);
+  }
+  return 0;
+}
+
+// Get display text for coupon type
+function getCouponTypeText(couponType: string): string {
+  const typeMap: Record<string, string> = {
+    PERCENTAGE: 'Porcentaje',
+    FIXED: 'Fijo',
+    FREE_SHIPPING: 'Envío Gratis',
+  };
+  return typeMap[couponType] ?? 'Otro';
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -25,26 +126,7 @@ export async function POST(req: NextRequest) {
 
     const searchCode = data.code.toUpperCase();
 
-    // Primero buscar por código directo
-    let coupon = await prisma.coupon.findUnique({
-      where: { code: searchCode },
-    });
-
-    // Si no se encuentra, buscar en traducciones inversas
-    if (!coupon) {
-      // Buscar si el código proporcionado es una traducción española
-      const reverseTranslations: Record<string, string> = {};
-      for (const [eng, esp] of Object.entries(couponTranslations)) {
-        reverseTranslations[esp.toUpperCase()] = eng.toUpperCase();
-      }
-
-      const originalCode = reverseTranslations[searchCode];
-      if (originalCode) {
-        coupon = await prisma.coupon.findUnique({
-          where: { code: originalCode },
-        });
-      }
-    }
+    const coupon = await findCouponByCode(searchCode);
 
     if (!coupon) {
       return NextResponse.json(
@@ -53,68 +135,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Validaciones
-    const now = new Date();
-
-    if (!coupon.isActive) {
+    const validation = validateCouponConstraints(coupon, data.orderAmount);
+    if (!validation.valid) {
       return NextResponse.json(
-        { success: false, error: 'Este cupón está inactivo' },
-        { status: 400 },
+        { success: false, error: validation.error },
+        { status: validation.status },
       );
     }
 
-    if (coupon.validFrom > now) {
-      return NextResponse.json(
-        { success: false, error: 'Este cupón aún no está disponible' },
-        { status: 400 },
-      );
-    }
-
-    if (coupon.validUntil < now) {
-      return NextResponse.json(
-        { success: false, error: 'Este cupón ha expirado' },
-        { status: 400 },
-      );
-    }
-
-    if (coupon.maxUses !== null && coupon.usedCount >= coupon.maxUses) {
-      return NextResponse.json(
-        { success: false, error: 'Este cupón ha alcanzado el límite de usos' },
-        { status: 400 },
-      );
-    }
-
-    if (
-      coupon.minOrderAmount !== null &&
-      data.orderAmount < Number(coupon.minOrderAmount)
-    ) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: `El monto mínimo del pedido debe ser de ${Number(coupon.minOrderAmount).toFixed(2)}€`,
-        },
-        { status: 400 },
-      );
-    }
-
-    // Calcular descuento
-    let discount = 0;
-    if (coupon.type === 'PERCENTAGE') {
-      discount = data.orderAmount * (Number(coupon.value) / 100);
-    } else if (coupon.type === 'FIXED') {
-      discount = Math.min(Number(coupon.value), data.orderAmount);
-    } else if (coupon.type === 'FREE_SHIPPING') {
-      // El descuento de envío gratis se maneja separadamente
-      discount = 0;
-    }
-
-    // Formatear respuesta
-    const tipoTexto =
-      coupon.type === 'PERCENTAGE'
-        ? 'Porcentaje'
-        : coupon.type === 'FIXED'
-          ? 'Fijo'
-          : 'Envío Gratis';
+    const discount = calculateDiscount(coupon.type, Number(coupon.value), data.orderAmount);
+    const tipoTexto = getCouponTypeText(coupon.type);
 
     return NextResponse.json({
       success: true,

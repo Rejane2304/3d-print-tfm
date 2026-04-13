@@ -22,7 +22,7 @@ export default function PhoneInput({
   required = false,
   disabled = false,
   className = '',
-}: PhoneInputProps) {
+}: Readonly<PhoneInputProps>) {
   // Function to format the phone number
   const formatPhoneNumber = (input: string): string => {
     // Remove everything except digits
