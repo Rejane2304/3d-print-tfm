@@ -340,9 +340,9 @@ async function createSampleOrders(): Promise<void> {
       userId: customer.id,
       orderNumber: 'ORD-2024-002',
       status: 'CONFIRMED',
-      subtotal: 18.50,
+      subtotal: 18.5,
       shipping: 5.99,
-      total: 28.38, // 18.50 * 1.21 + 5.99
+      total: 28.38, // 18.5 * 1.21 + 5.99
       shippingName: customer.name,
       shippingPhone: '+34 600 123 456',
       shippingAddress: 'Calle Mayor 123',
@@ -357,7 +357,7 @@ async function createSampleOrders(): Promise<void> {
           name: product.name,
           price: 18.5,
           quantity: 1,
-          subtotal: 18.50,
+          subtotal: 18.5,
           category: 'Decoración',
           material: Material.PLA,
         },

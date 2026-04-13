@@ -126,7 +126,7 @@ export async function createTestUser(options: {
  */
 export async function createTestCategory(name?: string): Promise<{ id: string; name: string; slug: string }> {
   const categoryName = name || `Test Category ${Date.now()}`;
-  const slug = categoryName.toLowerCase().replaceAll(' ', '-').replace(/[^a-z0-9-]/g, '');
+  const slug = categoryName.toLowerCase().replaceAll(' ', '-').replaceAll(/[^a-z0-9-]/g, '');
 
   const category = await prisma.category.create({
     data: {
@@ -414,41 +414,45 @@ export function createAuthHeaders(userId?: string): Record<string, string> {
   return headers;
 }
 
+// Entity deletion configuration with proper typing
+type PrismaDeleteFunction = (args: { where: { id: string } }) => Promise<unknown>;
+
+interface EntityConfig {
+  name: keyof typeof testData;
+  deleteFn: PrismaDeleteFunction;
+}
+
+const entityConfigs: EntityConfig[] = [
+  { name: 'invoices', deleteFn: prisma.invoice.delete.bind(prisma.invoice) },
+  { name: 'orders', deleteFn: prisma.order.delete.bind(prisma.order) },
+  { name: 'cartItems', deleteFn: prisma.cartItem.delete.bind(prisma.cartItem) },
+  { name: 'carts', deleteFn: prisma.cart.delete.bind(prisma.cart) },
+  { name: 'addresses', deleteFn: prisma.address.delete.bind(prisma.address) },
+  { name: 'products', deleteFn: prisma.product.delete.bind(prisma.product) },
+  { name: 'categories', deleteFn: prisma.category.delete.bind(prisma.category) },
+  { name: 'users', deleteFn: prisma.user.delete.bind(prisma.user) },
+];
+
+/**
+ * Delete entities of a specific type
+ */
+async function deleteEntities(ids: string[], deleteFn: PrismaDeleteFunction): Promise<void> {
+  for (const id of ids) {
+    try {
+      await deleteFn({ where: { id } });
+    } catch {
+      // Entity may not exist, ignore error
+    }
+  }
+}
+
 /**
  * Clean up all test data
  */
 export async function cleanupTestData(): Promise<void> {
   // Delete in reverse order of dependencies
-  for (const id of testData.invoices) {
-    try { await prisma.invoice.delete({ where: { id } }); } catch {}
-  }
-  
-  for (const id of testData.orders) {
-    try { await prisma.order.delete({ where: { id } }); } catch {}
-  }
-  
-  for (const id of testData.cartItems) {
-    try { await prisma.cartItem.delete({ where: { id } }); } catch {}
-  }
-  
-  for (const id of testData.carts) {
-    try { await prisma.cart.delete({ where: { id } }); } catch {}
-  }
-  
-  for (const id of testData.addresses) {
-    try { await prisma.address.delete({ where: { id } }); } catch {}
-  }
-  
-  for (const id of testData.products) {
-    try { await prisma.product.delete({ where: { id } }); } catch {}
-  }
-  
-  for (const id of testData.categories) {
-    try { await prisma.category.delete({ where: { id } }); } catch {}
-  }
-  
-  for (const id of testData.users) {
-    try { await prisma.user.delete({ where: { id } }); } catch {}
+  for (const config of entityConfigs) {
+    await deleteEntities(testData[config.name], config.deleteFn);
   }
 
   // Clear arrays
