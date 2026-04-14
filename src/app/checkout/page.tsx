@@ -164,7 +164,8 @@ export default function CheckoutPage() {
   const shippingCost = getShippingCost();
 
   const discountedSubtotal = Math.max(0, subtotal - couponDiscount);
-  const taxAmount = (discountedSubtotal + shippingCost) * 0.21;
+  // IVA solo sobre productos (no sobre envío) - Fórmula correcta fiscalmente
+  const taxAmount = discountedSubtotal * 0.21;
   const total = discountedSubtotal + shippingCost + taxAmount;
 
   // Helper function to get payment method name

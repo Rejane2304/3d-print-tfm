@@ -83,7 +83,8 @@ export function OrderTotals({ subtotal, coupon }: Readonly<OrderTotalsProps>) {
   const couponDiscount = calculateDiscount(subtotal, coupon);
   const finalShippingCost = calculateShipping(subtotal, coupon);
   const discountedSubtotal = Math.max(0, subtotal - couponDiscount);
-  const taxAmount = (discountedSubtotal + finalShippingCost) * TAX_RATE;
+  // IVA solo sobre productos (no sobre envío) - Fórmula correcta fiscalmente
+  const taxAmount = discountedSubtotal * TAX_RATE;
   const total = discountedSubtotal + finalShippingCost + taxAmount;
 
   return (

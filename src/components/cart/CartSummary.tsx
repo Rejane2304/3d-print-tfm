@@ -53,8 +53,9 @@ const CartSummary: React.FC<Readonly<CartSummaryProps>> = ({
   const shipping = isFreeShipping ? 0 : shippingCost;
   const couponDiscount = appliedCoupon?.discount || 0;
   const discountedSubtotal = Math.max(0, subtotal - couponDiscount);
+  // IVA solo sobre productos (no sobre envío) - Fórmula correcta fiscalmente
   const taxMultiplier = taxRate / 100;
-  const taxAmount = (discountedSubtotal + shipping) * taxMultiplier;
+  const taxAmount = discountedSubtotal * taxMultiplier;
   const total = discountedSubtotal + shipping + taxAmount;
   const hasItems = items.length > 0;
 
