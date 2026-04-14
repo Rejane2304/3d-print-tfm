@@ -184,11 +184,12 @@ export default function EditarProductoPage() {
       const uploadedUrls: { id: string; url: string }[] = [];
 
       for (const img of imagesToUpload) {
-        if (img.file) {
+        const file = img.file;
+        if (file) {
           const reader = new FileReader();
           const base64Promise = new Promise<string>(resolve => {
             reader.onloadend = () => resolve(reader.result as string);
-            reader.readAsDataURL(img.file);
+            reader.readAsDataURL(file);
           });
           const base64 = await base64Promise;
 
@@ -197,14 +198,14 @@ export default function EditarProductoPage() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               image: base64,
-              filename: img.file.name,
+              filename: file.name,
               slug: formData.slug,
             }),
           });
 
           if (!uploadResponse.ok) {
             const uploadData = await uploadResponse.json();
-            throw new Error(uploadData.error || `Error al subir imagen: ${img.file.name}`);
+            throw new Error(uploadData.error || `Error al subir imagen: ${file.name}`);
           }
 
           const uploadData = await uploadResponse.json();
