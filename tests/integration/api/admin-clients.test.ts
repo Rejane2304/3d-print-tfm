@@ -20,7 +20,6 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { Mock } from 'vitest';
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { randomUUID } from 'node:crypto';
@@ -84,7 +83,6 @@ describe('Admin Clients API', () => {
       // No establecer sesión = no autenticado
       const req = new NextRequest('http://localhost:3000/api/admin/clients');
       const res = await getClients(req);
-      const data = await res.json();
 
       // Si el mock no funciona, el test puede fallar con 500
       // Lo importante es que NO devuelva 200 con datos

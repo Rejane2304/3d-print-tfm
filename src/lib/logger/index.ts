@@ -30,7 +30,8 @@ const getLogLevel = (): LogLevel => {
       return 'error'; // Solo errores críticos en tests
     case 'development':
     default:
-      return 'debug'; // Todo en desarrollo
+      // En desarrollo, mostrar todos los niveles de log
+      return 'debug'; // Mostrar todo en desarrollo
   }
 };
 
@@ -43,7 +44,7 @@ const LOG_LEVELS: Record<LogLevel, number> = {
 };
 
 class Logger {
-  private config: LoggerConfig;
+  private readonly config: LoggerConfig;
 
   constructor() {
     this.config = {
@@ -96,25 +97,15 @@ class Logger {
     }
   }
 
-  error(message: string, error?: Error | unknown, meta?: LogMeta): void {
+  error(message: string, error?: unknown, meta?: LogMeta): void {
     if (!this.shouldLog('error')) {
       return;
     }
 
-    const errorMeta: LogMeta = { ...meta };
+    const errorMeta = this.buildErrorMeta(error, meta);
 
-    if (error instanceof Error) {
-      errorMeta.errorName = error.name;
-      errorMeta.errorMessage = error.message;
-      errorMeta.stack = error.stack;
-    } else if (error !== undefined) {
-      errorMeta.error = error;
-    }
-
-    // En producción, aquí enviaríamos a Sentry/DataDog
     if (this.config.environment === 'production') {
-      // TODO: Integrar con servicio de monitoreo
-      // sendToErrorTracking({ message, error: errorMeta });
+      this.sendToMonitoringService(message, error, errorMeta);
     }
 
     if (this.config.environment !== 'test') {
@@ -122,8 +113,35 @@ class Logger {
     }
   }
 
+  private buildErrorMeta(error: unknown, meta?: LogMeta): LogMeta {
+    const errorMeta: LogMeta = { ...meta };
+    if (error instanceof Error) {
+      errorMeta.errorName = error.name;
+      errorMeta.errorMessage = error.message;
+      errorMeta.stack = error.stack;
+    } else if (error !== undefined) {
+      errorMeta.error = error;
+    }
+    return errorMeta;
+  }
+
+  private sendToMonitoringService(message: string, error: unknown, errorMeta: LogMeta): void {
+    if (globalThis.global !== undefined && (globalThis.global as any).monitoringService) {
+      try {
+        (globalThis.global as any).monitoringService.captureException(
+          error instanceof Error ? error : new Error(message),
+          errorMeta
+        );
+      } catch (e) {
+        if (this.config.environment !== 'test') {
+          console.error(this.formatMessage('error', 'Error sending to monitoring service', { originalError: errorMeta, monitoringError: e }));
+        }
+      }
+    }
+  }
+
   // Método para errores de API con contexto estructurado
-  apiError(route: string, method: string, error: Error | unknown, requestId?: string): void {
+  apiError(route: string, method: string, error: unknown, requestId?: string): void {
     this.error(`API Error in ${method} ${route}`, error, {
       route,
       method,
@@ -163,13 +181,9 @@ export function replaceConsoleWithLogger(): void {
   if (process.env.NODE_ENV === 'production') {
     // En producción, silenciar console.log/info/debug
     // Solo permitir warn y error
-    const originalConsoleLog = console.log;
-    const originalConsoleInfo = console.info;
-    const originalConsoleDebug = console.debug;
-
     console.log = (...args: unknown[]) => {
       logger.info('console.log called', { args });
-      // No llamar a originalConsoleLog para evitar logs no estructurados
+      // No llamar a console original para evitar logs no estructurados
     };
 
     console.info = (...args: unknown[]) => {
