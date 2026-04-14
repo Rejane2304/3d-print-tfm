@@ -256,8 +256,8 @@ export default function CheckoutPage() {
               {/* Order Summary */}
               <OrderTotals subtotal={subtotal} coupon={appliedCoupon} />
 
-              {/* Test Data Display */}
-              <TestDataDisplay paymentMethod={paymentMethod} />
+              {/* Test Data Display - Solo en desarrollo */}
+              {process.env.NODE_ENV === 'development' && <TestDataDisplay paymentMethod={paymentMethod} />}
 
               {/* Confirmation Buttons */}
               {showConfirmation === false ? (

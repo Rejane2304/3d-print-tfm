@@ -78,6 +78,9 @@ function AuthContent() {
   // Handle login success - migrate cart and redirect
   const handleLoginSuccess = async () => {
     await migrateCart();
+    // Set flag to indicate cart was just migrated
+    // This helps checkout page know it should wait/reload
+    sessionStorage.setItem('cartMigrated', Date.now().toString());
     clearMigrationFlag();
     globalThis.dispatchEvent(new Event('cartUpdated'));
     router.push(callbackUrl);

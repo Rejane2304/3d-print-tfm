@@ -75,7 +75,7 @@ export function useCheckoutData(): CheckoutDataResult {
   const migrateLocalCart = useCallback(async () => {
     const localCartData = localStorage.getItem('cart');
     if (!localCartData) {
-      return;
+      return false;
     }
 
     try {
@@ -85,7 +85,7 @@ export function useCheckoutData(): CheckoutDataResult {
       }>;
 
       if (localItems.length === 0) {
-        return;
+        return false;
       }
 
       // Migrar items del localStorage
@@ -100,15 +100,12 @@ export function useCheckoutData(): CheckoutDataResult {
         });
       }
 
-      // Limpiar localStorage y recargar carrito
+      // Limpiar localStorage después de migrar
       localStorage.removeItem('cart');
-      const refreshedCart = await fetch('/api/cart');
-      if (refreshedCart.ok) {
-        const refreshedData = await refreshedCart.json();
-        setCart(refreshedData.cart);
-      }
-    } catch (migrationError) {
-      console.error('Error migrando carrito:', migrationError);
+
+      return true;
+    } catch {
+      return false;
     }
   }, []);
 
@@ -130,6 +127,17 @@ export function useCheckoutData(): CheckoutDataResult {
     try {
       setLoading(true);
       setError(null);
+
+      // Check if cart was just migrated from auth page
+      const migratedTimestamp = sessionStorage.getItem('cartMigrated');
+      const justMigrated = !!migratedTimestamp;
+
+      // PRIMERO: Intentar migrar carrito local si existe (y no vino de migración)
+      // Si vino de auth page, la migración ya se hizo ahí
+      const hasLocalCart = !!localStorage.getItem('cart');
+      if (hasLocalCart && !justMigrated) {
+        await migrateLocalCart();
+      }
 
       // Load user profile
       const resProfile = await fetch('/api/account/profile');
@@ -155,25 +163,46 @@ export function useCheckoutData(): CheckoutDataResult {
         return;
       }
 
-      // Load cart
+      // Load cart - CON RETRY si venimos de migración
+      let cartData: { cart?: Cart | null } | null = null;
       const resCart = await fetch('/api/cart');
       if (resCart.ok) {
-        const data = await resCart.json();
-        setCart(data.cart);
+        cartData = (await resCart.json()) as { cart?: Cart | null };
+      }
+
+      // Si venimos de migración y el carrito está vacío, reintentar
+      if (justMigrated && (!cartData?.cart?.items?.length || cartData?.cart?.items?.length === 0)) {
+        // Esperar un poco para que la migración complete
+        await new Promise(resolve => setTimeout(resolve, 500));
+        // Reintentar
+        const retryRes = await fetch('/api/cart');
+        if (retryRes.ok) {
+          cartData = (await retryRes.json()) as { cart?: Cart | null };
+        }
+        // Limpiar flag
+        sessionStorage.removeItem('cartMigrated');
+      } else if (justMigrated) {
+        // Carrito tiene items, solo limpiar flag
+        sessionStorage.removeItem('cartMigrated');
+      }
+
+      if (cartData) {
+        setCart(cartData.cart || null);
         loadCoupon();
 
-        // Solo redirigir si realmente no hay items
-        if (!data.cart?.items?.length && !localStorage.getItem('cart')) {
+        // Verificar si hay items después de la migración
+        const itemCount = cartData.cart?.items?.length ?? 0;
+        const hasItems = itemCount > 0;
+        const stillHasLocalCart = !!localStorage.getItem('cart');
+
+        // Solo redirigir si no hay items Y no hay carrito local pendiente
+        if (!hasItems && !stillHasLocalCart) {
           router.push('/cart');
           return;
         }
-
-        // Si hay items en localStorage, intentar migrarlos
-        await migrateLocalCart();
       }
-    } catch (err) {
+    } catch {
       setError('Error al cargar datos del checkout');
-      console.error('Error al cargar datos de checkout:', err);
     } finally {
       setLoading(false);
     }
