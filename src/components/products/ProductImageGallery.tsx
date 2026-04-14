@@ -81,7 +81,7 @@ export default function ProductImageGallery({ images, productName }: Readonly<Pr
 
   return (
     <>
-      <div className="space-y-4">
+      <div className="space-y-6">
         {/* Main Image - Clickable - Tamaño grande */}
         <button
           type="button"
@@ -106,7 +106,7 @@ export default function ProductImageGallery({ images, productName }: Readonly<Pr
 
         {/* Thumbnails - Horizontal scroll on mobile - Tamaño pequeño */}
         {images.length > 1 && (
-          <div className="overflow-x-auto pb-2 -mx-2 px-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+          <div className="overflow-x-auto pb-2 pt-2 -mx-2 px-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent mt-2">
             <div className="flex gap-3 min-w-min">
               {images.map((image, index) => (
                 <button
