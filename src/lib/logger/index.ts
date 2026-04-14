@@ -126,15 +126,20 @@ class Logger {
   }
 
   private sendToMonitoringService(message: string, error: unknown, errorMeta: LogMeta): void {
-    if (globalThis.global !== undefined && (globalThis.global as any).monitoringService) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const monitoringService = (
+      globalThis as unknown as { monitoringService?: { captureException: (err: Error, meta: LogMeta) => void } }
+    ).monitoringService;
+    if (monitoringService) {
       try {
-        (globalThis.global as any).monitoringService.captureException(
-          error instanceof Error ? error : new Error(message),
-          errorMeta
-        );
+        monitoringService.captureException(error instanceof Error ? error : new Error(message), errorMeta);
       } catch (e) {
         if (this.config.environment !== 'test') {
-          console.error(this.formatMessage('error', 'Error sending to monitoring service', { originalError: errorMeta, monitoringError: e }));
+          console.error(
+            this.formatMessage('error', 'Error sending to monitoring service', {
+              originalError: errorMeta,
+            }),
+          );
         }
       }
     }
