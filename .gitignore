@@ -36,6 +36,7 @@ next-env.d.ts
 /playwright-report/
 /playwright/.cache/
 *.lcov
+/tests/e2e/.auth/
 
 # ENVIRONMENT FILES (SENSITIVE)
 # Todas las variables de entorno

@@ -29,8 +29,29 @@ export default defineConfig({
       name: 'setup',
       testMatch: /global\.setup\.ts/,
     },
+    // Auth setup for each browser
+    {
+      name: 'auth-setup-chromium',
+      testMatch: /auth\.setup\.ts/,
+      use: { ...devices['Desktop Chrome'] },
+      dependencies: ['setup'],
+    },
+    {
+      name: 'auth-setup-firefox',
+      testMatch: /auth\.setup\.ts/,
+      use: { ...devices['Desktop Firefox'] },
+      dependencies: ['setup'],
+    },
+    {
+      name: 'auth-setup-webkit',
+      testMatch: /auth\.setup\.ts/,
+      use: { ...devices['Desktop Safari'] },
+      dependencies: ['setup'],
+    },
+    // Regular tests (no auth required)
     {
       name: 'Desktop Chrome',
+      testMatch: /(shop|auth)\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1920, height: 1080 },
@@ -39,6 +60,7 @@ export default defineConfig({
     },
     {
       name: 'Desktop Firefox',
+      testMatch: /(shop|auth)\.spec\.ts/,
       use: {
         ...devices['Desktop Firefox'],
         viewport: { width: 1920, height: 1080 },
@@ -47,6 +69,7 @@ export default defineConfig({
     },
     {
       name: 'Desktop Safari',
+      testMatch: /(shop|auth)\.spec\.ts/,
       use: {
         ...devices['Desktop Safari'],
         viewport: { width: 1920, height: 1080 },
@@ -55,6 +78,7 @@ export default defineConfig({
     },
     {
       name: 'Tablet iPad',
+      testMatch: /(shop|auth)\.spec\.ts/,
       use: {
         ...devices['iPad Pro 11'],
         viewport: { width: 834, height: 1194 },
@@ -63,15 +87,71 @@ export default defineConfig({
     },
     {
       name: 'Mobile iPhone',
+      testMatch: /(shop|auth)\.spec\.ts/,
       use: {
         ...devices['iPhone 14'],
         viewport: { width: 390, height: 844 },
       },
       dependencies: ['setup'],
     },
-    // Very large screens (4K)
     {
       name: 'Desktop 4K',
+      testMatch: /(shop|auth)\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 3840, height: 2160 },
+      },
+      dependencies: ['setup'],
+    },
+    // Admin tests (login manual, funciona en todos los navegadores)
+    {
+      name: 'Admin Desktop Chrome',
+      testMatch: /admin\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1920, height: 1080 },
+      },
+      dependencies: ['setup'],
+    },
+    {
+      name: 'Admin Desktop Firefox',
+      testMatch: /admin\.spec\.ts/,
+      use: {
+        ...devices['Desktop Firefox'],
+        viewport: { width: 1920, height: 1080 },
+      },
+      dependencies: ['setup'],
+    },
+    {
+      name: 'Admin Desktop Safari',
+      testMatch: /admin\.spec\.ts/,
+      use: {
+        ...devices['Desktop Safari'],
+        viewport: { width: 1920, height: 1080 },
+      },
+      dependencies: ['setup'],
+    },
+    {
+      name: 'Admin Tablet iPad',
+      testMatch: /admin\.spec\.ts/,
+      use: {
+        ...devices['iPad Pro 11'],
+        viewport: { width: 834, height: 1194 },
+      },
+      dependencies: ['setup'],
+    },
+    {
+      name: 'Admin Mobile iPhone',
+      testMatch: /admin\.spec\.ts/,
+      use: {
+        ...devices['iPhone 14'],
+        viewport: { width: 390, height: 844 },
+      },
+      dependencies: ['setup'],
+    },
+    {
+      name: 'Admin Desktop 4K',
+      testMatch: /admin\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 3840, height: 2160 },
