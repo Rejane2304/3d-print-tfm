@@ -133,7 +133,7 @@ class Logger {
     if (monitoringService) {
       try {
         monitoringService.captureException(error instanceof Error ? error : new Error(message), errorMeta);
-      } catch (e) {
+      } catch (_) {
         if (this.config.environment !== 'test') {
           console.error(
             this.formatMessage('error', 'Error sending to monitoring service', {
