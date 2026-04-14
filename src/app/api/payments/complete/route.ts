@@ -43,6 +43,7 @@ export async function POST(req: NextRequest) {
       data: {
         status: 'COMPLETED',
         processedAt: new Date(),
+        updatedAt: new Date(),
       },
     });
 
@@ -51,6 +52,7 @@ export async function POST(req: NextRequest) {
       where: { id: orderId },
       data: {
         status: 'CONFIRMED',
+        confirmedAt: new Date(),
       },
     });
 

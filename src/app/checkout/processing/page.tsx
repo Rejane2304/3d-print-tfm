@@ -111,10 +111,16 @@ export default function ProcessingPage() {
           body: JSON.stringify({ orderId, paymentId }),
         });
         if (response.ok) {
-          setStatus('success');
-          setTimeout(() => {
-            router.push(`/checkout/success?orderId=${orderId}&method=${method}&ref=${reference}`);
-          }, 1500);
+          const data = await response.json();
+          if (data.success) {
+            setStatus('success');
+            // Esperar a que la transacción se complete antes de redirigir
+            setTimeout(() => {
+              router.push(`/checkout/success?orderId=${orderId}&method=${method}&ref=${reference}`);
+            }, 1500);
+          } else {
+            throw new Error(data.error || 'Error al completar el pago');
+          }
         } else {
           throw new Error('Error al completar el pago');
         }

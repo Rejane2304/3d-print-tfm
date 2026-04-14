@@ -339,6 +339,11 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   // 2. Parse and validate request body
   const body = await req.json();
+
+  // Debug log
+  // eslint-disable-next-line no-console
+  console.log('[Checkout API] Request body:', JSON.stringify(body, null, 2));
+
   const validation = validateRequest(body);
   if (!validation) {
     return NextResponse.json({ success: false, error: 'Datos de solicitud inválidos' }, { status: 400 });
@@ -351,6 +356,15 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   if (!user) {
     return NextResponse.json({ success: false, error: translateErrorMessage('Usuario not found') }, { status: 404 });
   }
+
+  // Debug log
+  // eslint-disable-next-line no-console
+  console.log('[Checkout API] User cart:', {
+    hasCart: !!user.cart,
+    cartId: user.cart?.id,
+    itemCount: user.cart?.items?.length ?? 0,
+    items: user.cart?.items?.map(i => ({ id: i.id, productId: i.productId, quantity: i.quantity })),
+  });
 
   // 4. Verify cart has items
   if (!user.cart || user.cart.items.length === 0) {
