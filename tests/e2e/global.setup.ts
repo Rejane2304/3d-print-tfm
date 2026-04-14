@@ -115,6 +115,8 @@ async function ensureTestUsers(): Promise<void> {
         name: user.name,
         role: user.role,
         isActive: true,
+        failedAttempts: 0,
+        lockedUntil: null,
       },
       create: {
         email: user.email,
@@ -122,6 +124,8 @@ async function ensureTestUsers(): Promise<void> {
         name: user.name,
         role: user.role,
         isActive: true,
+        failedAttempts: 0,
+        lockedUntil: null,
       },
     });
 

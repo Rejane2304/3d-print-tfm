@@ -34,7 +34,7 @@ interface CartItemProps {
 export default function CartItem({ item, onUpdateQuantity, onRemove, isUpdating = false }: Readonly<CartItemProps>) {
   const [quantity, setQuantity] = useState(item.quantity);
   const [modalOpen, setModalOpen] = useState(false);
-  const subtotal = item.unitPrice * item.quantity * 1.21; // IVA incluido
+  const subtotal = item.unitPrice * item.quantity; // Sin IVA, el IVA se calcula en el resumen
 
   // Si el producto ya no existe (puede haber sido eliminado), mostrar mensaje
   if (!item.product) {
@@ -115,7 +115,7 @@ export default function CartItem({ item, onUpdateQuantity, onRemove, isUpdating 
           >
             {product.name}
           </Link>
-          <p className="text-sm text-gray-500 mt-1">{(item.unitPrice * 1.21).toFixed(2)} € / unidad (IVA incluido)</p>
+          <p className="text-sm text-gray-500 mt-1">{item.unitPrice.toFixed(2)} € / unidad (sin IVA)</p>
         </div>
 
         {/* Controles de cantidad */}
