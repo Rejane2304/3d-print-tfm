@@ -81,11 +81,11 @@ export default function ProductImageGallery({ images, productName }: Readonly<Pr
 
   return (
     <>
-      <div className="space-y-6">
-        {/* Main Image - Clickable */}
+      <div className="space-y-4">
+        {/* Main Image - Clickable - Tamaño grande */}
         <button
           type="button"
-          className="relative aspect-[4/3] bg-gray-100 overflow-hidden cursor-zoom-in group rounded-xl p-0 border-0"
+          className="relative aspect-[4/3] sm:aspect-[16/10] lg:aspect-[16/9] bg-gray-100 overflow-hidden cursor-zoom-in group rounded-xl p-0 border-0 w-full"
           onClick={openModal}
           aria-label="Abrir galería de imágenes"
           style={{ appearance: 'none' }}
@@ -104,15 +104,15 @@ export default function ProductImageGallery({ images, productName }: Readonly<Pr
           </div>
         </button>
 
-        {/* Thumbnails - Horizontal scroll on mobile */}
+        {/* Thumbnails - Horizontal scroll on mobile - Tamaño pequeño */}
         {images.length > 1 && (
-          <div className="overflow-x-auto pb-3 pt-2 -mx-2 px-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-            <div className="flex gap-4 sm:grid sm:grid-cols-4 sm:gap-5 min-w-min">
+          <div className="overflow-x-auto pb-2 -mx-2 px-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+            <div className="flex gap-3 min-w-min">
               {images.map((image, index) => (
                 <button
                   key={image.id}
                   onClick={() => setSelectedIndex(index)}
-                  className={`relative flex-shrink-0 w-28 h-24 sm:w-full sm:aspect-[4/3] bg-gray-100 overflow-hidden transition-all rounded-lg ${
+                  className={`relative flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 overflow-hidden transition-all rounded-lg ${
                     selectedIndex === index
                       ? 'ring-2 ring-indigo-600 ring-offset-2'
                       : 'hover:ring-2 hover:ring-indigo-400 hover:ring-offset-2'
@@ -124,7 +124,7 @@ export default function ProductImageGallery({ images, productName }: Readonly<Pr
                     src={image.url}
                     alt={image.altText || `${productName} - imagen ${index + 1}`}
                     fill
-                    sizes="(max-width: 640px) 112px, (max-width: 768px) 25vw, (max-width: 1200px) 15vw, 12vw"
+                    sizes="96px"
                     className="object-contain bg-gray-50"
                   />
                 </button>
