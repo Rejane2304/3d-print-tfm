@@ -133,14 +133,22 @@ class Logger {
     if (monitoringService) {
       try {
         monitoringService.captureException(error instanceof Error ? error : new Error(message), errorMeta);
-      } catch (_) {
+      } catch (caughtError) {
+        // Log the caught exception for debugging/monitoring
         if (this.config.environment !== 'test') {
           console.error(
             this.formatMessage('error', 'Error sending to monitoring service', {
               originalError: errorMeta,
+              caughtException: caughtError instanceof Error ? {
+                name: caughtError.name,
+                message: caughtError.message,
+                stack: caughtError.stack,
+              } : caughtError,
             }),
           );
         }
+        // Optionally, rethrow or handle as needed
+        // throw caughtError;
       }
     }
   }
