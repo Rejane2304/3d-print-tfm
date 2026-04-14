@@ -14,7 +14,7 @@
  */
 
 import { execSync } from 'node:child_process';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { glob } from 'glob';
 
 const AUTO_FIX = process.argv.includes('--fix');
