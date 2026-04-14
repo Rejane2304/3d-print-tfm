@@ -1,16 +1,16 @@
 /**
  * Edit Product Page - Admin
- * Formulario para editar producto existente
+ * Formulario para editar producto existente con CRUD completo de imágenes
  */
-
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
-import { AlertCircle, ArrowLeft, CheckCircle2, Loader2, Package, Save, Upload, X } from 'lucide-react';
+import { AlertCircle, ArrowLeft, CheckCircle2, Loader2, Package, Save } from 'lucide-react';
+import type { ProductImage } from '@/components/admin/ProductImageManager';
+import { ProductImageManager } from '@/components/admin/ProductImageManager';
 
 interface Category {
   id: string;
@@ -30,8 +30,7 @@ export default function EditarProductoPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [images, setImages] = useState<{ url: string; isMain: boolean }[]>([]);
-  const [uploadingImage, setUploadingImage] = useState(false);
+  const [images, setImages] = useState<ProductImage[]>([]);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -96,7 +95,6 @@ export default function EditarProductoPage() {
 
       if (data.success && data.producto) {
         const p = data.producto;
-        // API returns Spanish field names with actual DB data as fallback
         setFormData({
           name: p.nombre || '',
           slug: p.slug || '',
@@ -116,11 +114,17 @@ export default function EditarProductoPage() {
           isActive: p.activo !== false,
           isFeatured: p.destacado === true,
         });
-        // Load images from API
-        const formattedImages = (p.images || []).map((img: { url: string; isMain?: boolean }) => ({
-          url: img.url,
-          isMain: img.isMain ?? false,
-        }));
+
+        // Load images as ProductImage type
+        const formattedImages: ProductImage[] = (p.images || []).map(
+          (img: { id?: string; url: string; isMain?: boolean; displayOrder?: number }, idx: number) => ({
+            id: img.id || `existing-${idx}`,
+            url: img.url,
+            isMain: img.isMain ?? false,
+            status: 'existing',
+            displayOrder: img.displayOrder ?? idx,
+          }),
+        );
         setImages(formattedImages);
       }
     } catch (err) {
@@ -139,45 +143,6 @@ export default function EditarProductoPage() {
     }));
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) {
-      return;
-    }
-
-    setUploadingImage(true);
-    try {
-      const tempUrl = URL.createObjectURL(file);
-      setImages(prev => [...prev, { url: tempUrl, isMain: prev.length === 0 }]);
-    } catch (err) {
-      console.error('Error uploading image:', err);
-      alert('Error al subir imagen. Intente nuevamente.');
-    } finally {
-      setUploadingImage(false);
-    }
-  };
-
-  const handleImageUrlAdd = () => {
-    const url = prompt('Ingrese la URL de la imagen:');
-    if (url) {
-      setImages(prev => [...prev, { url, isMain: prev.length === 0 }]);
-    }
-  };
-
-  const removeImage = (index: number) => {
-    setImages(prev => {
-      const newImages = prev.filter((_, i) => i !== index);
-      if (newImages.length > 0 && !newImages.some(img => img.isMain)) {
-        newImages[0].isMain = true;
-      }
-      return newImages;
-    });
-  };
-
-  const setMainImage = (index: number) => {
-    setImages(prev => prev.map((img, i) => ({ ...img, isMain: i === index })));
-  };
-
   const validateForm = () => {
     if (!formData.name.trim()) {
       return 'El nombre es obligatorio';
@@ -194,7 +159,8 @@ export default function EditarProductoPage() {
     if (!formData.categoryId) {
       return 'Debe seleccionar una categoría';
     }
-    if (images.length === 0) {
+    const visibleImages = images.filter(i => i.status !== 'deleted');
+    if (visibleImages.length === 0) {
       return 'Debe agregar al menos una imagen';
     }
     return null;
@@ -213,6 +179,51 @@ export default function EditarProductoPage() {
     setError(null);
 
     try {
+      // 1. Subir imágenes nuevas al servidor
+      const imagesToUpload = images.filter(i => i.status === 'new');
+      const uploadedUrls: { id: string; url: string }[] = [];
+
+      for (const img of imagesToUpload) {
+        if (img.file) {
+          const reader = new FileReader();
+          const base64Promise = new Promise<string>(resolve => {
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(img.file!);
+          });
+          const base64 = await base64Promise;
+
+          const uploadResponse = await fetch('/api/admin/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              image: base64,
+              filename: img.file.name,
+              slug: formData.slug,
+            }),
+          });
+
+          if (!uploadResponse.ok) {
+            const uploadData = await uploadResponse.json();
+            throw new Error(uploadData.error || `Error al subir imagen: ${img.file.name}`);
+          }
+
+          const uploadData = await uploadResponse.json();
+          uploadedUrls.push({ id: img.id, url: uploadData.url });
+        }
+      }
+
+      // 2. Preparar array final de imágenes
+      const finalImages = images
+        .filter(i => i.status !== 'deleted')
+        .map(img => {
+          const uploaded = uploadedUrls.find(u => u.id === img.id);
+          return {
+            url: uploaded?.url || img.url,
+            isMain: img.isMain,
+          };
+        });
+
+      // 3. Enviar datos actualizados
       const response = await fetch(`/api/admin/products/${slug}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -223,7 +234,7 @@ export default function EditarProductoPage() {
           stock: Number.parseInt(formData.stock) || 0,
           minStock: Number.parseInt(formData.minStock) || 5,
           printTime: formData.printTime ? Number.parseInt(formData.printTime) : null,
-          images,
+          images: finalImages,
         }),
       });
 
@@ -314,7 +325,6 @@ export default function EditarProductoPage() {
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                      // eslint-disable-next-line max-len
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       placeholder="Ej: Jarrón Decorativo Floral"
                       required
@@ -323,19 +333,18 @@ export default function EditarProductoPage() {
 
                   <div>
                     <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-1">
-                      Slug *
+                      Slug (no editable) *
                     </label>
                     <input
                       type="text"
                       id="slug"
                       name="slug"
                       value={formData.slug}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg \
-                        focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      placeholder="jarron-decorativo-floral"
-                      required
+                      readOnly
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
+                      title="El slug no se puede cambiar"
                     />
+                    <p className="text-xs text-gray-500 mt-1">El slug identifica al producto y no puede modificarse</p>
                   </div>
 
                   <div>
@@ -347,8 +356,7 @@ export default function EditarProductoPage() {
                       name="categoryId"
                       value={formData.categoryId}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg \
-                        focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       required
                     >
                       <option value="">Seleccionar categoría</option>
@@ -370,8 +378,7 @@ export default function EditarProductoPage() {
                       name="shortDescription"
                       value={formData.shortDescription}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg \
-                        focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       placeholder="Breve descripción para listados (máx. 255 caracteres)"
                       maxLength={255}
                     />
@@ -387,8 +394,7 @@ export default function EditarProductoPage() {
                       value={formData.description}
                       onChange={handleInputChange}
                       rows={6}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg \
-                        focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       placeholder="Descripción detallada del producto..."
                       required
                     />
@@ -403,7 +409,7 @@ export default function EditarProductoPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
-                      Precio actual (€) *
+                      Precio (€) *
                     </label>
                     <input
                       type="number"
@@ -413,8 +419,7 @@ export default function EditarProductoPage() {
                       onChange={handleInputChange}
                       step="0.01"
                       min="0"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg \
-                        focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       placeholder="29.99"
                       required
                     />
@@ -422,7 +427,7 @@ export default function EditarProductoPage() {
 
                   <div>
                     <label htmlFor="previousPrice" className="block text-sm font-medium text-gray-700 mb-1">
-                      Precio anterior (€)
+                      Precio anterior
                     </label>
                     <input
                       type="number"
@@ -432,35 +437,14 @@ export default function EditarProductoPage() {
                       onChange={handleInputChange}
                       step="0.01"
                       min="0"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg \
-                        focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       placeholder="39.99"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="material" className="block text-sm font-medium text-gray-700 mb-1">
-                      Material
-                    </label>
-                    <select
-                      id="material"
-                      name="material"
-                      value={formData.material}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg \
-                        focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    >
-                      {MATERIALES.map(mat => (
-                        <option key={mat} value={mat}>
-                          {mat}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
                     <label htmlFor="stock" className="block text-sm font-medium text-gray-700 mb-1">
-                      Stock actual *
+                      Stock *
                     </label>
                     <input
                       type="number"
@@ -469,11 +453,37 @@ export default function EditarProductoPage() {
                       value={formData.stock}
                       onChange={handleInputChange}
                       min="0"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg \
-                        focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      placeholder="10"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      placeholder="100"
                       required
                     />
+                  </div>
+                </div>
+              </div>
+
+              {/* Especificaciones */}
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Especificaciones</h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="material" className="block text-sm font-medium text-gray-700 mb-1">
+                      Material *
+                    </label>
+                    <select
+                      id="material"
+                      name="material"
+                      value={formData.material}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      required
+                    >
+                      {MATERIALES.map(mat => (
+                        <option key={mat} value={mat}>
+                          {mat}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
                   <div>
@@ -487,71 +497,62 @@ export default function EditarProductoPage() {
                       value={formData.minStock}
                       onChange={handleInputChange}
                       min="0"
-                      // eslint-disable-next-line max-len
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       placeholder="5"
                     />
                   </div>
-                </div>
-              </div>
 
-              {/* Dimensiones */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Dimensiones y Especificaciones</h2>
+                  <div className="grid grid-cols-3 gap-2 md:col-span-2">
+                    <div>
+                      <label htmlFor="widthCm" className="block text-sm font-medium text-gray-700 mb-1">
+                        Ancho (cm)
+                      </label>
+                      <input
+                        type="number"
+                        id="widthCm"
+                        name="widthCm"
+                        value={formData.widthCm}
+                        onChange={handleInputChange}
+                        step="0.1"
+                        min="0"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        placeholder="10"
+                      />
+                    </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div>
-                    <label htmlFor="widthCm" className="block text-sm font-medium text-gray-700 mb-1">
-                      Ancho (cm)
-                    </label>
-                    <input
-                      type="number"
-                      id="widthCm"
-                      name="widthCm"
-                      value={formData.widthCm}
-                      onChange={handleInputChange}
-                      step="0.1"
-                      min="0"
-                      // eslint-disable-next-line max-len
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      placeholder="10"
-                    />
-                  </div>
+                    <div>
+                      <label htmlFor="heightCm" className="block text-sm font-medium text-gray-700 mb-1">
+                        Alto (cm)
+                      </label>
+                      <input
+                        type="number"
+                        id="heightCm"
+                        name="heightCm"
+                        value={formData.heightCm}
+                        onChange={handleInputChange}
+                        step="0.1"
+                        min="0"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        placeholder="15"
+                      />
+                    </div>
 
-                  <div>
-                    <label htmlFor="heightCm" className="block text-sm font-medium text-gray-700 mb-1">
-                      Alto (cm)
-                    </label>
-                    <input
-                      type="number"
-                      id="heightCm"
-                      name="heightCm"
-                      value={formData.heightCm}
-                      onChange={handleInputChange}
-                      step="0.1"
-                      min="0"
-                      // eslint-disable-next-line max-len
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      placeholder="15"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="depthCm" className="block text-sm font-medium text-gray-700 mb-1">
-                      Profundidad (cm)
-                    </label>
-                    <input
-                      type="number"
-                      id="depthCm"
-                      name="depthCm"
-                      value={formData.depthCm}
-                      onChange={handleInputChange}
-                      step="0.1"
-                      min="0"
-                      // eslint-disable-next-line max-len
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      placeholder="8"
-                    />
+                    <div>
+                      <label htmlFor="depthCm" className="block text-sm font-medium text-gray-700 mb-1">
+                        Profundidad (cm)
+                      </label>
+                      <input
+                        type="number"
+                        id="depthCm"
+                        name="depthCm"
+                        value={formData.depthCm}
+                        onChange={handleInputChange}
+                        step="0.1"
+                        min="0"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        placeholder="8"
+                      />
+                    </div>
                   </div>
 
                   <div>
@@ -566,7 +567,6 @@ export default function EditarProductoPage() {
                       onChange={handleInputChange}
                       step="0.1"
                       min="0"
-                      // eslint-disable-next-line max-len
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       placeholder="150"
                     />
@@ -584,8 +584,7 @@ export default function EditarProductoPage() {
                     value={formData.printTime}
                     onChange={handleInputChange}
                     min="0"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg \
-                      focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     placeholder="120"
                   />
                 </div>
@@ -598,97 +597,7 @@ export default function EditarProductoPage() {
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Imágenes del Producto *</h2>
 
-                <div className="space-y-4">
-                  <div className="flex gap-2">
-                    <label className="flex-1 cursor-pointer">
-                      <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-                      <div
-                        // eslint-disable-next-line max-len
-                        className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 \
-                        rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-colors"
-                      >
-                        <Upload className="h-5 w-5 text-gray-500" />
-                        <span className="text-sm text-gray-600">{uploadingImage ? 'Subiendo...' : 'Subir imagen'}</span>
-                      </div>
-                    </label>
-                    <button
-                      type="button"
-                      onClick={handleImageUrlAdd}
-                      className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
-                    >
-                      URL
-                    </button>
-                  </div>
-
-                  {/* Image Gallery */}
-                  {images.length > 0 && (
-                    <div className="space-y-2">
-                      {/* Imagen principal - tamaño grande */}
-                      {images.find(img => img.isMain) && (
-                        <div className="relative aspect-video border-2 border-indigo-500">
-                          <Image
-                            src={images.find(img => img.isMain)!.url}
-                            alt="Imagen principal"
-                            fill
-                            sizes="(max-width: 768px) 100vw, 400px"
-                            className="object-cover"
-                            priority
-                          />
-                          <span className="absolute top-2 left-2 bg-indigo-600 text-white text-sm font-medium px-3 py-1 rounded">
-                            Principal
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => removeImage(images.findIndex(img => img.isMain))}
-                            className="absolute top-2 right-2 p-2 bg-red-500 text-white hover:bg-red-600 rounded"
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
-                        </div>
-                      )}
-
-                      {/* Imágenes de galería - tamaño pequeño */}
-                      {images.filter(img => !img.isMain).length > 0 && (
-                        <div className="grid grid-cols-4 gap-2">
-                          {images
-                            .filter(img => !img.isMain)
-                            .map((img, index) => (
-                              <div key={img.url} className="relative aspect-square border-2 border-gray-200">
-                                <Image
-                                  src={img.url}
-                                  alt={`Imagen ${index + 2}`}
-                                  fill
-                                  sizes="(max-width: 768px) 25vw, 100px"
-                                  className="object-cover"
-                                />
-                                <button
-                                  type="button"
-                                  onClick={() => removeImage(images.findIndex(i => i.url === img.url))}
-                                  className="absolute top-1 right-1 p-1 bg-red-500 text-white hover:bg-red-600 rounded"
-                                >
-                                  <X className="h-3 w-3" />
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => setMainImage(images.findIndex(i => i.url === img.url))}
-                                  className="absolute bottom-1 left-1 right-1 px-1 py-1 bg-gray-800 text-white text-xs hover:bg-gray-700 rounded"
-                                >
-                                  Principal
-                                </button>
-                              </div>
-                            ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {images.length === 0 && (
-                    <div className="text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
-                      <Package className="h-12 w-12 mx-auto mb-2" />
-                      <p className="text-sm">Agregue al menos una imagen</p>
-                    </div>
-                  )}
-                </div>
+                <ProductImageManager images={images} onChange={setImages} disabled={saving} />
               </div>
 
               {/* Configuración */}
@@ -730,16 +639,14 @@ export default function EditarProductoPage() {
               <div className="flex gap-3">
                 <Link
                   href="/admin/products"
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 \
-                    hover:bg-gray-50 text-center"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-center"
                 >
                   Cancelar
                 </Link>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 \
-                    disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {saving && <Loader2 className="h-4 w-4 animate-spin" />}
                   <Save className="h-4 w-4" />
