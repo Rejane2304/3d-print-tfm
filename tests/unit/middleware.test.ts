@@ -2,6 +2,7 @@
  * Unit tests for middleware redirect logic
  */
 import { describe, test, expect, vi, beforeEach } from 'vitest';
+import type { NextRequest } from 'next/server';
 
 // Mock NextResponse
 const mockRedirect = vi.fn();
@@ -9,8 +10,10 @@ const mockNext = vi.fn();
 
 vi.mock('next/server', () => ({
   NextResponse: {
-    redirect: (...args: unknown[]) => mockRedirect(...args),
-    next: (...args: unknown[]) => mockNext(...args),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    redirect: (...args: any[]) => mockRedirect(...args),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    next: (...args: any[]) => mockNext(...args),
   },
 }));
 
@@ -34,7 +37,7 @@ describe('Middleware Redirects', () => {
         searchParams: new URLSearchParams(),
       },
       url: 'http://localhost:3000/login',
-    } as unknown as import('next/server').NextRequest;
+    } as unknown as NextRequest;
 
     await middleware(request);
 
@@ -53,7 +56,7 @@ describe('Middleware Redirects', () => {
         searchParams: new URLSearchParams(),
       },
       url: 'http://localhost:3000/register',
-    } as unknown as import('next/server').NextRequest;
+    } as unknown as NextRequest;
 
     await middleware(request);
 
@@ -72,7 +75,7 @@ describe('Middleware Redirects', () => {
         searchParams: new URLSearchParams('callbackUrl=/checkout'),
       },
       url: 'http://localhost:3000/login?callbackUrl=/checkout',
-    } as unknown as import('next/server').NextRequest;
+    } as unknown as NextRequest;
 
     await middleware(request);
 
@@ -91,7 +94,7 @@ describe('Middleware Redirects', () => {
         searchParams: new URLSearchParams('callbackUrl=/checkout'),
       },
       url: 'http://localhost:3000/register?callbackUrl=/checkout',
-    } as unknown as import('next/server').NextRequest;
+    } as unknown as NextRequest;
 
     await middleware(request);
 

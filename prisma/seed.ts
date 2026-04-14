@@ -25,14 +25,14 @@ import 'dotenv/config';
  * ============================================
  */
 import {
-  CouponType,
-  Material,
-  MovementType,
-  OrderStatus,
-  PaymentMethod,
-  PaymentStatus,
+  type CouponType,
+  type Material,
+  type MovementType,
+  type OrderStatus,
+  type PaymentMethod,
+  type PaymentStatus,
   PrismaClient,
-  Role,
+  type Role,
 } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { readFileSync } from 'node:fs';

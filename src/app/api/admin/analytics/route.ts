@@ -404,7 +404,7 @@ export async function GET(req: NextRequest) {
         },
         orderStats: {
           // Métricas de gestoría completas
-          totalHistoric: orderStats[0], // Todos los pedidos (incluye cancelados)
+          totalHistoric: orderStats[0], // Total de pedidos (incluye cancelados)
           totalActive: orderStats[1], // Pedidos no cancelados
           totalToday: orderStats[2], // Pedidos creados hoy
           totalThisWeek: orderStats[3], // Pedidos de la semana

@@ -5,6 +5,7 @@
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcrypt';
 import { prisma } from '@/lib/db/prisma';
+import { logger } from '@/lib/logger';
 
 import type { AuthOptions } from 'next-auth';
 
@@ -135,7 +136,7 @@ export const authOptions: AuthOptions = {
             image: null,
           };
         } catch (error) {
-          console.error('Error in authorize:', error);
+          logger.error('Error in authorize:', error);
           // Re-throw lockout errors to be handled by NextAuth
           if (error instanceof Error && error.message.includes('Cuenta bloqueada')) {
             throw error;

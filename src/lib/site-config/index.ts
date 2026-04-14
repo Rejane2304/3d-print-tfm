@@ -4,6 +4,7 @@
  */
 
 import { prisma } from '@/lib/db/prisma';
+import { logger } from '@/lib/logger';
 import type { Prisma } from '@prisma/client';
 
 const SITE_CONFIG_ID = 'site-config';
@@ -42,7 +43,7 @@ export async function getSiteConfig(): Promise<SiteConfig | null> {
       },
     });
   } catch (error) {
-    console.error('Error getting site config:', error);
+    logger.error('Error getting site config:', error);
     return null;
   }
 }
@@ -67,7 +68,7 @@ export async function updateSiteConfig(data: Omit<SiteConfig, 'id' | 'updatedAt'
 
     return config;
   } catch (error) {
-    console.error('Error updating site config:', error);
+    logger.error('Error updating site config:', error);
     return null;
   }
 }

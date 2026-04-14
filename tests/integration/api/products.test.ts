@@ -16,7 +16,7 @@ import { POST as createProduct } from '@/app/api/admin/products/route';
 import { prisma } from '@/lib/db/prisma';
 import bcrypt from 'bcrypt';
 import { randomUUID } from 'node:crypto';
-import { Material } from '@prisma/client';
+import type { Material } from '@prisma/client';
 
 describe('Products API', () => {
   let testCategory: { id: string; name: string; slug: string };

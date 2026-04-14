@@ -10,7 +10,7 @@ import { authOptions } from '@/lib/auth/auth-options';
 import { ChevronRight, MapPin, MessageSquare, Package, User } from 'lucide-react';
 
 interface CuentaLayoutProps {
-  children: React.ReactNode;
+  readonly children: React.ReactNode;
 }
 
 export default async function CuentaLayout({ children }: CuentaLayoutProps) {

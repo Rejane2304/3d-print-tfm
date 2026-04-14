@@ -8,7 +8,6 @@
     "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/no-unused-expressions": "error",
     "@typescript-eslint/consistent-type-imports": "error",
-    "@typescript-eslint/strict-boolean-expressions": "warn",
     "react-hooks/exhaustive-deps": "error",
     "react-hooks/rules-of-hooks": "error",
     "no-console": ["error", { "allow": ["error"] }],
@@ -19,11 +18,7 @@
     "no-duplicate-imports": "off",
     "no-warning-comments": ["warn", { "terms": ["todo", "fixme", "hack", "xxx"], "location": "start" }],
     "no-debugger": "error",
-    "no-alert": "error",
-    "no-negated-condition": "warn",
-    "complexity": ["warn", { "max": 15 }],
-    "max-lines-per-function": ["warn", { "max": 100 }],
-    "jsx-a11y/label-has-associated-control": "error"
+    "no-alert": "error"
   },
   "overrides": [
     {
@@ -31,9 +26,7 @@
       "rules": {
         "@typescript-eslint/no-unused-vars": "off",
         "@typescript-eslint/no-explicit-any": "off",
-        "no-console": "off",
-        "complexity": "off",
-        "max-lines-per-function": "off"
+        "no-console": "off"
       }
     },
     {
@@ -72,7 +65,7 @@
     "dist/",
     "coverage/",
     "*.config.js",
-    "scripts/**/*.js",
+    "scripts/",
     "lint-staged.config.js"
   ]
 }

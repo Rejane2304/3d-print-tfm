@@ -9,7 +9,7 @@
  */
 
 // Import the extended PrismaClient with all models
-import { PrismaClient } from '@prisma/client';
+import type { PrismaClient } from '@prisma/client';
 import { prisma as prismaInstance } from '../src/lib/db/prisma';
 
 // Re-export the prisma instance from the main app for tests

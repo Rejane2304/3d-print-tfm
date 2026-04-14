@@ -2,7 +2,7 @@
  * Setup for Vitest Component Tests
  * Separate config for component tests that require jsdom/React
  */
-import React from 'react';
+import type React from 'react';
 import { vi } from 'vitest';
 import '@testing-library/jest-dom';
 

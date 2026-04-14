@@ -7,6 +7,7 @@ import type { AlertSeverity, AlertType } from '@prisma/client';
 import { getLowStockThreshold } from '@/lib/site-config';
 import { emitNewAlert } from '@/lib/realtime/event-service';
 import { translateOrderStatus } from '@/lib/i18n';
+import { logger } from '@/lib/logger';
 
 interface AlertConfig {
   lowStockThreshold: number;
@@ -455,7 +456,7 @@ export async function createNewOrderAlert(orderId: string, orderNumber: string, 
 
     return alert;
   } catch (error) {
-    console.error('Error creating new order alert:', error);
+    logger.error('Error creating new order alert:', error);
     throw error;
   }
 }
@@ -495,7 +496,7 @@ export async function createOrderCancelledAlert(orderId: string, orderNumber: st
 
     return alert;
   } catch (error) {
-    console.error('Error creating order cancelled alert:', error);
+    logger.error('Error creating order cancelled alert:', error);
     throw error;
   }
 }
@@ -528,7 +529,7 @@ export async function createOrderStatusChangedAlert(
 
     return alert;
   } catch (error) {
-    console.error('Error creating order status changed alert:', error);
+    logger.error('Error creating order status changed alert:', error);
     throw error;
   }
 }
@@ -568,7 +569,7 @@ export async function createPaymentFailedAlert(orderId: string, orderNumber: str
 
     return alert;
   } catch (error) {
-    console.error('Error creating payment failed alert:', error);
+    logger.error('Error creating payment failed alert:', error);
     throw error;
   }
 }
@@ -611,7 +612,7 @@ export async function createNewReviewAlert(reviewId: string, rating: number, pro
 
     return alert;
   } catch (error) {
-    console.error('Error creating new review alert:', error);
+    logger.error('Error creating new review alert:', error);
     throw error;
   }
 }
@@ -657,7 +658,7 @@ export async function createNewMessageAlert(messageId: string, orderId: string, 
 
     return alert;
   } catch (error) {
-    console.error('Error creating new message alert:', error);
+    logger.error('Error creating new message alert:', error);
     throw error;
   }
 }

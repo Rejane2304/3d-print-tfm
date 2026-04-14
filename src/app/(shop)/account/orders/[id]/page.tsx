@@ -157,10 +157,10 @@ export default function OrderDetailPage() {
     } else {
       if (order?.estado === 'Cancelado') {
         setInvoiceModalReason('cancelled');
-      } else if (order?.estado !== 'Entregado') {
-        setInvoiceModalReason('not_completed');
-      } else {
+      } else if (order?.estado === 'Entregado') {
         setInvoiceModalReason('not_generated');
+      } else {
+        setInvoiceModalReason('not_completed');
       }
       setInvoiceModalOpen(true);
     }
@@ -181,10 +181,10 @@ export default function OrderDetailPage() {
     } else {
       if (order?.estado === 'Cancelado') {
         setInvoiceModalReason('cancelled');
-      } else if (order?.estado !== 'Entregado') {
-        setInvoiceModalReason('not_completed');
-      } else {
+      } else if (order?.estado === 'Entregado') {
         setInvoiceModalReason('not_generated');
+      } else {
+        setInvoiceModalReason('not_completed');
       }
       setInvoiceModalOpen(true);
     }
@@ -333,7 +333,7 @@ export default function OrderDetailPage() {
                     <span className="text-gray-600">Envío</span>
                     <span>{Number(order.envio).toFixed(2)} €</span>
                   </div>
-                  {order.descuento && order.descuento > 0 && (
+                  {Boolean(order.descuento && order.descuento > 0) && (
                     <div className="flex justify-between text-sm text-green-600">
                       <span className="flex items-center gap-1">
                         Descuento

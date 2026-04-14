@@ -55,7 +55,7 @@
       "prettier --check"
     ],
     "*.{js,jsx}": [
-      "eslint --max-warnings=0 --cache",
+      "eslint --max-warnings=0 --cache --no-ignore",
       "prettier --check"
     ],
     "*.{json,css,scss,md,yml,yaml}": [

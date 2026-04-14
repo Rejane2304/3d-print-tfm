@@ -4,7 +4,7 @@
  */
 'use client';
 
-import { showAlert, showConfirm } from '@/lib/dialogs';
+import { showAlert } from '@/lib/dialogs';
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';

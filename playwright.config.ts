@@ -3,6 +3,7 @@ import path from 'node:path';
 
 // Load test environment variables if not already loaded
 if (!process.env.NODE_ENV) {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   require('dotenv').config({ path: path.resolve(__dirname, '.env.test') });
 }
 

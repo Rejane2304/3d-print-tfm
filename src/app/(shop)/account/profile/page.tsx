@@ -190,8 +190,11 @@ export default function ProfilePage() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre completo</label>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                  Nombre completo
+                </label>
                 <input
+                  id="name"
                   type="text"
                   value={profile.name}
                   onChange={e => setProfile({ ...profile, name: e.target.value })}
@@ -202,8 +205,11 @@ export default function ProfilePage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </label>
                 <input
+                  id="email"
                   type="email"
                   value={profile.email}
                   disabled
@@ -213,10 +219,13 @@ export default function ProfilePage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                  Teléfono
+                </label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                   <input
+                    id="phone"
                     type="tel"
                     value={profile.phone}
                     onChange={e => setProfile({ ...profile, phone: e.target.value })}
@@ -227,10 +236,13 @@ export default function ProfilePage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">NIF / DNI</label>
+                <label htmlFor="taxId" className="block text-sm font-medium text-gray-700 mb-1">
+                  NIF / DNI
+                </label>
                 <div className="relative">
                   <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                   <input
+                    id="taxId"
                     type="text"
                     value={profile.taxId}
                     onChange={e =>
@@ -270,9 +282,12 @@ export default function ProfilePage() {
             {changePassword && (
               <div className="space-y-4 border-t border-gray-200 pt-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña actual</label>
+                  <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                    Contraseña actual
+                  </label>
                   <div className="relative">
                     <input
+                      id="currentPassword"
                       type={showCurrentPassword ? 'text' : 'password'}
                       value={currentPassword}
                       onChange={e => setCurrentPassword(e.target.value)}
@@ -294,9 +309,12 @@ export default function ProfilePage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nueva contraseña</label>
+                  <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                    Nueva contraseña
+                  </label>
                   <div className="relative">
                     <input
+                      id="newPassword"
                       type={showNewPassword ? 'text' : 'password'}
                       value={newPassword}
                       onChange={e => setNewPassword(e.target.value)}
@@ -321,9 +339,12 @@ export default function ProfilePage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar nueva contraseña</label>
+                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                    Confirmar nueva contraseña
+                  </label>
                   <div className="relative">
                     <input
+                      id="confirmPassword"
                       type={showConfirmPassword ? 'text' : 'password'}
                       value={confirmPassword}
                       onChange={e => setConfirmPassword(e.target.value)}

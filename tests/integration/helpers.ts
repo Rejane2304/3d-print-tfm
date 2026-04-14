@@ -6,7 +6,8 @@
 
 import { prisma } from '../helpers';
 import bcrypt from 'bcrypt';
-import { Material, OrderStatus } from '@/types/prisma-enums';
+import type { Material } from '@/types/prisma-enums';
+import { OrderStatus } from '@/types/prisma-enums';
 import { randomUUID } from 'node:crypto';
 import { Decimal } from '@prisma/client/runtime/library';
 

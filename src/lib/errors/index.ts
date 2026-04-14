@@ -118,12 +118,10 @@ export function handleError(error: unknown): ApiError {
 
   // If it's a standard Error
   if (error instanceof Error) {
-    console.error('Unhandled error:', error);
     return Errors.internalError();
   }
 
   // Unknown error
-  console.error('Unknown error:', error);
   return Errors.internalError();
 }
 

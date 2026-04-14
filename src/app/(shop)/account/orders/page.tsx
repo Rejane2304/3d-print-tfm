@@ -118,6 +118,7 @@ export default function MyOrdersPage() {
       const response = await fetch('/api/account/orders');
       const data = await response.json();
 
+      // eslint-disable-next-line no-negated-condition
       if (!response.ok) {
         throw new Error(data.error || 'Error al cargar pedidos');
       }
@@ -143,6 +144,7 @@ export default function MyOrdersPage() {
         body: JSON.stringify({ orderId }),
       });
 
+      // eslint-disable-next-line no-negated-condition
       if (!response.ok) {
         throw new Error('Error al restaurar carrito');
       }
@@ -168,11 +170,10 @@ export default function MyOrdersPage() {
     }
   };
 
-  // Convert hiddenOrders Set to Array for compatibility
-  const hiddenOrdersArray = Array.from(hiddenOrders);
+  // Use hiddenOrders Set directly for O(1) lookup performance
   const filteredOrders = statusFilter
-    ? orders.filter(o => o.estado === statusFilter && !hiddenOrdersArray.includes(o.id))
-    : orders.filter(o => !hiddenOrdersArray.includes(o.id));
+    ? orders.filter(o => o.estado === statusFilter && !hiddenOrders.has(o.id))
+    : orders.filter(o => !hiddenOrders.has(o.id));
 
   if (status === 'loading' || loading) {
     return (
@@ -435,10 +436,10 @@ export default function MyOrdersPage() {
                             setSelectedOrderNumber(order.numeroPedido);
                             if (order.estado === 'Cancelado') {
                               setInvoiceModalReason('cancelled');
-                            } else if (order.estado !== 'Entregado') {
-                              setInvoiceModalReason('not_completed');
-                            } else {
+                            } else if (order.estado === 'Entregado') {
                               setInvoiceModalReason('not_generated');
+                            } else {
+                              setInvoiceModalReason('not_completed');
                             }
                             setInvoiceModalOpen(true);
                           }}

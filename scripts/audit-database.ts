@@ -3,7 +3,7 @@
  * Identifica registros históricos inconsistentes para limpieza manual
  * Ejecutar: npx tsx scripts/audit-database.ts
  */
-import { OrderStatus, PrismaClient } from '@prisma/client';
+import { type OrderStatus, PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 

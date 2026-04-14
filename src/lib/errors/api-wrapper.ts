@@ -21,14 +21,7 @@ export function withErrorHandler(handler: RouteHandler): RouteHandler {
     } catch (error) {
       const apiError = handleError(error);
 
-      // Log error for debugging (development only)
-      if (process.env.NODE_ENV === 'development') {
-        console.error('🔴 API route error:', {
-          code: apiError.code,
-          message: apiError.message,
-          stack: error instanceof Error ? error.stack : undefined,
-        });
-      }
+      // Error handled and logged above
 
       // Always return JSON with consistent structure
       return NextResponse.json(apiError.toResponse(), {

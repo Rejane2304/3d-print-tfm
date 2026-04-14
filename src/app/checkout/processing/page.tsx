@@ -162,8 +162,8 @@ export default function ProcessingPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
-        {status === 'processing' && (
-          <ProcessingContent method={method as 'bizum' | 'transfer'} progress={progress} reference={reference} />
+        {status === 'processing' && method && (
+          <ProcessingContent method={method} progress={progress} reference={reference} />
         )}
         {status === 'success' && <SuccessContent />}
         {status === 'error' && <ErrorContent errorMessage={errorMessage} router={router} />}

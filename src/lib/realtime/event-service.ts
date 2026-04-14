@@ -1,5 +1,6 @@
 import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
+import { logger } from '@/lib/logger';
 import type { Server as SocketIOServer } from 'socket.io';
 
 // Extend global to include Socket.IO server instance
@@ -68,7 +69,7 @@ export async function emitEvent(type: EventType, payload: EventPayload, room: st
       io.to(room).emit(type, payload);
     }
   } catch (error) {
-    console.error('Error emitting event:', error);
+    logger.error('Error emitting event:', error);
     throw error;
   }
 }

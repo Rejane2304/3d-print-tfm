@@ -3,6 +3,8 @@
  * Blocks commonly used passwords and checks against Have I Been Pwned API
  */
 
+import { logger } from '@/lib/logger';
+
 // ============================================
 // COMMON PASSWORD LIST
 // ============================================
@@ -235,7 +237,7 @@ export async function checkPwnedPassword(
 
     return { isBreached: false, breachCount: 0 };
   } catch (error) {
-    console.error('Error checking HIBP:', error);
+    logger.error('Error checking HIBP:', error);
     return {
       isBreached: false,
       breachCount: 0,

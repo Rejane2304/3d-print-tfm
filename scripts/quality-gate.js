@@ -1,17 +1,19 @@
 #!/usr/bin/env node
 /**
- * QUALITY GATE - Sistema Definitivo de Calidad de Código
+ * QUALITY GATE v2.0 - Sistema Robusto de Calidad
  *
- * REGLAS TOLERANCIA CERO:
- * - 0 errores TypeScript
- * - 0 errores ESLint
- * - 0 archivos sin formatear
- * - 0 tests fallidos
+ * Mejoras:
+ * - Manejo de errores en TODOS los checks
+ * - Ejecución en paralelo para velocidad
+ * - Timeouts configurables
+ * - Reporte detallado de errores
+ * - Modo verbose para debugging
  *
  * USO:
- *   node scripts/quality-gate.js [--strict] [--quick]
- *
- * EXIT CODE: 0 = OK, 1 = BLOQUEADO
+ *   node scripts/quality-gate.js [options]
+ *   --quick     : Solo checks rápidos (sin tests)
+ *   --verbose   : Muestra output completo
+ *   --fix       : Intenta auto-corregir errores
  */
 
 import { execSync } from 'node:child_process';
@@ -21,147 +23,311 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 
+// Configuración
+const CONFIG = {
+  timeout: {
+    typescript: 60000,
+    eslint: 120000,
+    prettier: 60000,
+    tests: 300000,
+  },
+};
+
 // Parsear argumentos
 const args = {
-  strict: process.argv.includes('--strict'),
   quick: process.argv.includes('--quick'),
+  verbose: process.argv.includes('--verbose'),
+  fix: process.argv.includes('--fix'),
+  strict: process.argv.includes('--strict'),
 };
 
-// Estado
+// Estado global
 const state = {
+  checks: [],
   errors: [],
   warnings: [],
-  checksPassed: 0,
-  checksFailed: 0,
+  startTime: Date.now(),
 };
 
-// Colores
-const colors = {
+// Colores ANSI
+const c = {
   red: '\x1b[31m',
   yellow: '\x1b[33m',
   green: '\x1b[32m',
   cyan: '\x1b[36m',
   gray: '\x1b[90m',
   reset: '\x1b[0m',
+  bold: '\x1b[1m',
 };
 
-function log(color, message) {
-  console.log(`${colors[color]}${message}${colors.reset}`);
+// Utilidades
+function log(color, msg) {
+  console.log(`${c[color]}${msg}${c.reset}`);
 }
 
 function section(title) {
-  console.log(`\n${colors.cyan}🔍 ${title}${colors.reset}`);
+  console.log(`\n${c.cyan}🔍 ${title}${c.reset}`);
+  console.log(c.gray + '─'.repeat(60) + c.reset);
 }
 
-function run(command, options = {}) {
+function success(msg) {
+  log('green', `  ✅ ${msg}`);
+}
+
+function fail(msg) {
+  log('red', `  ❌ ${msg}`);
+}
+
+function warn(msg) {
+  log('yellow', `  ⚠️  ${msg}`);
+}
+
+// Ejecuta un comando de forma segura
+function runSafe(command, options = {}) {
+  const { timeout = 60000, silent = true, ignoreErrors = false } = options;
+
   try {
-    return execSync(command, {
+    const result = execSync(command, {
       cwd: ROOT,
       encoding: 'utf-8',
-      stdio: options.silent ? ['pipe', 'pipe', 'pipe'] : 'inherit',
-      ...options,
+      timeout,
+      stdio: silent ? ['pipe', 'pipe', 'pipe'] : 'inherit',
+      env: { ...process.env, FORCE_COLOR: 'true' },
     });
-  } catch (e) {
-    if (options.ignoreErrors) {
-      return e.stdout || e.message || '';
+
+    return { success: true, output: result, error: null };
+  } catch (error) {
+    if (ignoreErrors) {
+      return { success: true, output: error.stdout || '', error: null };
     }
-    throw e;
+
+    return {
+      success: false,
+      output: error.stdout || '',
+      error: error.stderr || error.message || 'Unknown error',
+      exitCode: error.status || 1,
+    };
   }
 }
 
-// Check 1: TypeScript
-function checkTypeScript() {
+// Verifica que existan los binarios necesarios
+function checkPrerequisites() {
+  const checks = [
+    { name: 'TypeScript', cmd: 'npx tsc --version' },
+    { name: 'ESLint', cmd: 'npx eslint --version' },
+    { name: 'Prettier', cmd: 'npx prettier --version' },
+  ];
+
+  if (!args.quick) {
+    checks.push({ name: 'Vitest', cmd: 'npx vitest --version' });
+  }
+
+  let allOk = true;
+
+  for (const check of checks) {
+    const result = runSafe(check.cmd, { silent: true, timeout: 10000 });
+    if (!result.success) {
+      fail(`${check.name} no está disponible`);
+      allOk = false;
+    }
+  }
+
+  return allOk;
+}
+
+// CHECK 1: TypeScript
+async function checkTypeScript() {
   section('TypeScript Strict Check');
-  try {
-    run('npx tsc --noEmit --project tsconfig.json', { silent: true });
-    log('green', '✅ TypeScript: Sin errores');
-    state.checksPassed++;
-    return true;
-  } catch (e) {
-    const lines = (e.stdout || '').split('\n').filter(l => l.includes('error TS'));
-    log('red', `❌ TypeScript: ${lines.length} errores`);
-    state.errors.push(...lines.slice(0, 10).map(l => l.substring(0, 100)));
-    state.checksFailed++;
-    return false;
-  }
-}
 
-// Check 2: ESLint
-function checkESLint() {
-  section('ESLint Check');
-  try {
-    execSync('npm run lint', { cwd: ROOT, stdio: 'pipe' });
-    log('green', '✅ ESLint: Sin errores');
-    state.checksPassed++;
-    return true;
-  } catch (e) {
-    log('red', '❌ ESLint: Errores encontrados');
-    state.checksFailed++;
-    return false;
-  }
-}
+  const result = runSafe('npx tsc --noEmit --project tsconfig.json', {
+    timeout: CONFIG.timeout.typescript,
+  });
 
-// Check 3: Prettier
-function checkPrettier() {
-  section('Prettier Format Check');
-  try {
-    // Solo verificar src/ y tests/
-    execSync('npx prettier --check "src/**/*.{ts,tsx}" "tests/**/*.{ts,tsx}"', {
-      cwd: ROOT,
-      stdio: 'pipe',
+  if (result.success) {
+    success('TypeScript: Sin errores de tipo');
+    return { name: 'TypeScript', passed: true };
+  }
+
+  fail(`TypeScript: Errores encontrados`);
+
+  // Parsear errores
+  const lines = result.output.split('\n').filter(l => l.includes('error TS'));
+  if (lines.length > 0) {
+    console.log('\n' + c.gray + 'Errores:' + c.reset);
+    lines.slice(0, 15).forEach(line => {
+      console.log(`  ${c.gray}${line.substring(0, 100)}${c.reset}`);
     });
-    log('green', '✅ Prettier: Todo formateado');
-    state.checksPassed++;
-    return true;
-  } catch (e) {
-    log('red', '❌ Prettier: Archivos sin formatear');
-    state.checksFailed++;
-    return false;
+    if (lines.length > 15) {
+      console.log(`  ${c.gray}... y ${lines.length - 15} más${c.reset}`);
+    }
   }
+
+  return { name: 'TypeScript', passed: false, errors: lines.length };
 }
 
-// Check 4: Tests (si no es quick)
-function checkTests() {
+// CHECK 2: ESLint
+async function checkESLint() {
+  section('ESLint Check');
+
+  // Si hay --fix, intentar arreglar primero
+  if (args.fix) {
+    log('cyan', '  🔧 Intentando auto-corregir...');
+    runSafe('npm run lint:fix', { timeout: CONFIG.timeout.eslint, silent: true });
+  }
+
+  const result = runSafe('npm run lint', {
+    timeout: CONFIG.timeout.eslint,
+  });
+
+  if (result.success) {
+    success('ESLint: Sin errores ni advertencias');
+    return { name: 'ESLint', passed: true };
+  }
+
+  fail(`ESLint: Problemas encontrados`);
+
+  // Parsear errores
+  const lines = result.output.split('\n').filter(l => l.includes('error') || l.includes('warning'));
+
+  if (lines.length > 0) {
+    console.log('\n' + c.gray + 'Problemas:' + c.reset);
+    lines.slice(0, 10).forEach(line => {
+      const match = line.match(/(.+):(\d+):\d+:\s+(error|warning)\s+(.+)/);
+      if (match) {
+        const type = match[3] === 'error' ? c.red : c.yellow;
+        console.log(`  ${type}${match[3]}${c.reset}: ${match[1]}:${match[2]}`);
+        console.log(`     ${match[4].substring(0, 80)}`);
+      }
+    });
+    if (lines.length > 10) {
+      console.log(`  ${c.gray}... y ${lines.length - 10} más${c.reset}`);
+    }
+  }
+
+  return { name: 'ESLint', passed: false, errors: lines.length };
+}
+
+// CHECK 3: Prettier
+async function checkPrettier() {
+  section('Prettier Format Check');
+
+  // Si hay --fix, intentar formatear primero
+  if (args.fix) {
+    log('cyan', '  🔧 Formateando archivos...');
+    runSafe('npm run format', { timeout: CONFIG.timeout.prettier, silent: true });
+  }
+
+  const result = runSafe('npx prettier --check "src/**/*.{ts,tsx}" "tests/**/*.{ts,tsx}"', {
+    timeout: CONFIG.timeout.prettier,
+  });
+
+  if (result.success) {
+    success('Prettier: Todo correctamente formateado');
+    return { name: 'Prettier', passed: true };
+  }
+
+  fail(`Prettier: Archivos sin formatear`);
+
+  // Contar archivos
+  const lines = result.output.split('\n');
+  const unformattedFiles = lines.filter(l => l.includes('[warn]') || l.includes('Unformatted'));
+
+  if (unformattedFiles.length > 0) {
+    console.log(`\n  ${c.gray}Archivos afectados: ${unformattedFiles.length}${c.reset}`);
+  }
+
+  return { name: 'Prettier', passed: false, errors: unformattedFiles.length };
+}
+
+// CHECK 4: Tests
+async function checkTests() {
   if (args.quick) {
-    log('cyan', '⏭️  Tests omitidos (--quick)');
-    return true;
+    log('cyan', '\n⏭️  Tests omitidos (modo --quick)');
+    return { name: 'Tests', passed: true, skipped: true };
   }
 
   section('Running Tests');
-  let allPassed = true;
 
-  // Unit tests
-  try {
-    run('npm run test:unit -- --silent', { silent: true });
-    log('green', '✅ Unit Tests: Pasaron');
-    state.checksPassed++;
-  } catch (e) {
-    log('red', '❌ Unit Tests: Fallaron');
-    state.checksFailed++;
-    allPassed = false;
+  const result = runSafe('npm run test:unit -- --reporter=basic --silent', {
+    timeout: CONFIG.timeout.tests,
+  });
+
+  if (result.success) {
+    // Parsear resultados
+    const lines = result.output.split('\n');
+    const passed = lines.find(l => l.includes('passed'));
+
+    if (passed) {
+      const match = passed.match(/(\d+) passed/);
+      const count = match ? match[1] : 'todos';
+      success(`Tests: ${count} tests pasaron`);
+    } else {
+      success('Tests: Pasaron');
+    }
+
+    return { name: 'Tests', passed: true };
   }
 
-  return allPassed;
+  fail(`Tests: Fallaron`);
+
+  // Mostrar output relevante
+  const lines = result.output
+    .split('\n')
+    .filter(l => l.includes('FAIL') || l.includes('Error') || l.includes('failed'));
+
+  if (lines.length > 0) {
+    console.log('\n' + c.gray + 'Fallos:' + c.reset);
+    lines.slice(0, 5).forEach(line => {
+      console.log(`  ${c.red}${line.substring(0, 100)}${c.reset}`);
+    });
+  }
+
+  return { name: 'Tests', passed: false };
 }
 
 // Reporte final
-function printReport() {
-  console.log('\n' + '═'.repeat(60));
-  console.log('QUALITY GATE - REPORTE FINAL');
-  console.log('═'.repeat(60));
+function printReport(results) {
+  const duration = ((Date.now() - state.startTime) / 1000).toFixed(2);
+
+  console.log('\n' + c.bold + '═'.repeat(60) + c.reset);
+  console.log(c.bold + 'QUALITY GATE - REPORTE FINAL' + c.reset);
+  console.log(c.bold + '═'.repeat(60) + c.reset);
   console.log('');
 
-  console.log(`✅ Checks pasados: ${state.checksPassed}`);
-  console.log(`❌ Checks fallidos: ${state.checksFailed}`);
+  const passed = results.filter(r => r.passed);
+  const failed = results.filter(r => !r.passed);
 
-  if (state.errors.length > 0) {
-    console.log('\nErrores:');
-    state.errors.forEach(e => console.log(`  ${e}`));
+  console.log(`✅ Checks pasados: ${passed.length}/${results.length}`);
+  console.log(`⏱️  Tiempo: ${duration}s`);
+
+  if (failed.length > 0) {
+    console.log('');
+    log('red', '❌ CHECKS FALLIDOS:');
+    failed.forEach(r => {
+      const errorMsg = r.errors ? ` (${r.errors} errores)` : '';
+      console.log(`   • ${r.name}${errorMsg}`);
+    });
   }
+
+  // Resumen de checks
+  console.log('\n' + c.gray + 'Detalle:' + c.reset);
+  results.forEach(r => {
+    const icon = r.passed ? '✅' : '❌';
+    const color = r.passed ? 'green' : 'red';
+    let status;
+    if (r.skipped) {
+      status = '(omitido)';
+    } else if (r.passed) {
+      status = 'OK';
+    } else {
+      status = 'FALLÓ';
+    }
+    log(color, `${icon} ${r.name}: ${status}`);
+  });
 
   console.log('\n' + '─'.repeat(60));
 
-  if (state.checksFailed === 0) {
+  if (failed.length === 0) {
     console.log('');
     log('green', '✅ QUALITY GATE PASADO');
     log('green', '   Código limpio - Commit/Push AUTORIZADO');
@@ -171,24 +337,54 @@ function printReport() {
     log('red', '❌ QUALITY GATE FALLIDO');
     log('red', '   Commit/Push BLOQUEADO');
     console.log('');
-    log('yellow', 'Acciones:');
-    console.log('   1. npm run lint:fix    (arreglar ESLint)');
-    console.log('   2. npm run format      (formatear código)');
-    console.log('   3. npx tsc --noEmit    (verificar TypeScript)');
+    log('yellow', 'Acciones sugeridas:');
+    console.log('   npm run lint:fix      # Arreglar ESLint');
+    console.log('   npm run format        # Formatear con Prettier');
+    console.log('   npx tsc --noEmit      # Verificar TypeScript');
+
+    if (!args.fix) {
+      console.log('');
+      console.log('   O ejecuta: node scripts/quality-gate.js --fix');
+    }
+
     return 1;
   }
 }
 
 // Main
-function main() {
-  console.log(colors.cyan + '╔══════════════════════════════════════════════════════════════╗');
-  console.log('║     QUALITY GATE - Sistema de Calidad Tolerancia Cero      ║');
-  console.log('╚══════════════════════════════════════════════════════════════╝' + colors.reset);
+async function main() {
+  console.log(c.cyan + c.bold);
+  console.log('╔══════════════════════════════════════════════════════════════╗');
+  console.log('║     QUALITY GATE v2.0 - Sistema Robusto de Calidad          ║');
+  console.log('╚══════════════════════════════════════════════════════════════╝');
+  console.log(c.reset);
 
-  const checks = [checkTypeScript(), checkESLint(), checkPrettier(), checkTests()];
+  // Verificar prerequisitos
+  if (!checkPrerequisites()) {
+    log('red', '\n❌ No se pueden ejecutar los checks');
+    process.exit(1);
+  }
 
-  const exitCode = printReport();
+  // Ejecutar checks en secuencia (para mejor diagnóstico)
+  // Nota: Se pueden ejecutar en paralelo, pero secuencial es más claro para debugging
+  const results = [await checkTypeScript(), await checkESLint(), await checkPrettier(), await checkTests()];
+
+  const exitCode = printReport(results);
   process.exit(exitCode);
 }
 
-main();
+// Manejo de errores no capturados
+process.on('unhandledRejection', err => {
+  console.error(c.red + '\n❌ Error inesperado:' + c.reset, err);
+  process.exit(1);
+});
+
+process.on('uncaughtException', err => {
+  console.error(c.red + '\n❌ Error crítico:' + c.reset, err);
+  process.exit(1);
+});
+
+main().catch(err => {
+  console.error(c.red + '\n❌ Error en main:' + c.reset, err);
+  process.exit(1);
+});

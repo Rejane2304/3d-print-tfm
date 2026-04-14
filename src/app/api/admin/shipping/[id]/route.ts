@@ -11,6 +11,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
 import type { ShippingZone } from '@prisma/client';
+import { Decimal } from '@prisma/client/runtime/library';
 
 // Schema de validación
 const shippingZoneUpdateSchema = z.object({
@@ -115,57 +116,30 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       return authError;
     }
 
-    const existing = await prisma.shippingZone.findUnique({
+    const zone = await prisma.shippingZone.findUnique({
       where: { id },
     });
 
-    if (!existing) {
+    if (!zone) {
       return NextResponse.json({ success: false, error: 'Zona de envío no encontrada' }, { status: 404 });
     }
 
     const body = await request.json();
     const data = shippingZoneUpdateSchema.parse(body);
 
-    const minDays = data.estimatedDaysMin ?? existing.estimatedDaysMin;
-    const maxDays = data.estimatedDaysMax ?? existing.estimatedDaysMax;
-
-    if (minDays > maxDays) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Los días estimados mínimos no pueden ser mayores que los máximos',
-        },
-        { status: 400 },
-      );
+    const validationError = validateShippingDays(data, zone);
+    if (validationError) {
+      return NextResponse.json({ success: false, error: validationError }, { status: 400 });
     }
 
-    const zone = await prisma.shippingZone.update({
+    const updateData = buildUpdateData(data);
+
+    const updatedZone = await prisma.shippingZone.update({
       where: { id },
-      data: {
-        ...(data.name && { name: data.name }),
-        ...(data.country && { country: data.country }),
-        ...(data.regions && { regions: data.regions }),
-        ...(data.postalCodePrefixes && {
-          postalCodePrefixes: data.postalCodePrefixes,
-        }),
-        ...(data.baseCost !== undefined && { baseCost: data.baseCost }),
-        ...(data.freeShippingThreshold !== undefined && {
-          freeShippingThreshold: data.freeShippingThreshold,
-        }),
-        ...(data.estimatedDaysMin !== undefined && {
-          estimatedDaysMin: data.estimatedDaysMin,
-        }),
-        ...(data.estimatedDaysMax !== undefined && {
-          estimatedDaysMax: data.estimatedDaysMax,
-        }),
-        ...(data.isActive !== undefined && { isActive: data.isActive }),
-        ...(data.displayOrder !== undefined && {
-          displayOrder: data.displayOrder,
-        }),
-      },
+      data: updateData,
     });
 
-    return NextResponse.json({ success: true, zone });
+    return NextResponse.json({ success: true, zone: updatedZone });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ success: false, error: error.errors[0].message }, { status: 400 });
@@ -173,6 +147,54 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     console.error('Error actualizando zona de envío:', error);
     return NextResponse.json({ success: false, error: 'Error interno' }, { status: 500 });
   }
+}
+
+/**
+ * Valida que los días estimados sean coherentes
+ */
+function validateShippingDays(
+  data: Partial<z.infer<typeof shippingZoneUpdateSchema>>,
+  existing: ShippingZone,
+): string | null {
+  const minDays = data.estimatedDaysMin ?? existing.estimatedDaysMin;
+  const maxDays = data.estimatedDaysMax ?? existing.estimatedDaysMax;
+
+  if (minDays > maxDays) {
+    return 'Los días estimados mínimos no pueden ser mayores que los máximos';
+  }
+
+  return null;
+}
+
+/**
+ * Construye el objeto de actualización
+ */
+function buildUpdateData(data: Partial<z.infer<typeof shippingZoneUpdateSchema>>): Partial<ShippingZone> {
+  const updateData: Partial<ShippingZone> = {};
+
+  if (data.name) updateData.name = data.name;
+  if (data.country) updateData.country = data.country;
+  if (data.regions) updateData.regions = data.regions;
+  if (data.postalCodePrefixes) {
+    updateData.postalCodePrefixes = data.postalCodePrefixes;
+  }
+  if (data.baseCost !== undefined) {
+    updateData.baseCost = new Decimal(data.baseCost);
+  }
+  if (data.freeShippingThreshold !== undefined) {
+    updateData.freeShippingThreshold =
+      data.freeShippingThreshold === null ? null : new Decimal(data.freeShippingThreshold);
+  }
+  if (data.estimatedDaysMin !== undefined) {
+    updateData.estimatedDaysMin = data.estimatedDaysMin;
+  }
+  if (data.estimatedDaysMax !== undefined) {
+    updateData.estimatedDaysMax = data.estimatedDaysMax;
+  }
+  if (data.isActive !== undefined) updateData.isActive = data.isActive;
+  if (data.displayOrder !== undefined) updateData.displayOrder = data.displayOrder;
+
+  return updateData;
 }
 
 // DELETE - Eliminar Zona de Envío
@@ -185,11 +207,11 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       return authError;
     }
 
-    const existing = await prisma.shippingZone.findUnique({
+    const _zone = await prisma.shippingZone.findUnique({
       where: { id },
     });
 
-    if (!existing) {
+    if (!_zone) {
       return NextResponse.json({ success: false, error: 'Zona de envío no encontrada' }, { status: 404 });
     }
 
