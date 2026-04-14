@@ -19,7 +19,7 @@ import {
   translateProductName,
   translateProductShortDescription,
 } from '@/lib/i18n';
-import { unlink } from 'node:fs/promises';
+import { unlink, rmdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 
@@ -209,7 +209,8 @@ export async function PUT(req: NextRequest, { params }: { params: { slug: string
         // Delete removed images from filesystem
         for (const img of imagesToDelete) {
           try {
-            const filePath = path.join(process.cwd(), 'public', img.url);
+            const filename = img.url.split('/').pop() || img.filename;
+            const filePath = path.join(process.cwd(), 'public', 'images', 'products', existingProduct.slug, filename);
             if (existsSync(filePath)) {
               await unlink(filePath);
             }
@@ -272,27 +273,14 @@ export async function DELETE(req: NextRequest, { params }: { params: { slug: str
       return NextResponse.json({ success: false, error: translateErrorMessage('Producto not found') }, { status: 404 });
     }
 
-    // Delete images from filesystem
-    for (const image of existingProduct.images) {
-      try {
-        const filePath = path.join(process.cwd(), 'public', image.url);
-        if (existsSync(filePath)) {
-          await unlink(filePath);
-        }
-      } catch {
-        // Error deleting image file; ignored intentionally
-      }
-    }
-
-    // Delete product directory if exists
+    // Delete product directory if exists (includes all images)
     try {
       const dirPath = path.join(process.cwd(), 'public', 'images', 'products', existingProduct.slug);
       if (existsSync(dirPath)) {
-        const { rmdir } = await import('node:fs/promises');
         await rmdir(dirPath, { recursive: true });
       }
     } catch {
-      // Error deleting product directory
+      // Directory doesn't exist or error deleting, no action needed
     }
 
     // Delete product (cascades delete images from DB)

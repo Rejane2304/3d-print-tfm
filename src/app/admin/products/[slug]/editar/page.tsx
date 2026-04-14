@@ -622,45 +622,63 @@ export default function EditarProductoPage() {
 
                   {/* Image Gallery */}
                   {images.length > 0 && (
-                    <div className="grid grid-cols-2 gap-2">
-                      {images.map((img, index) => (
-                        <div
-                          key={img.url}
-                          className={`relative aspect-square border-2 ${
-                            img.isMain ? 'border-indigo-500' : 'border-gray-200'
-                          }`}
-                        >
+                    <div className="space-y-2">
+                      {/* Imagen principal - tamaño grande */}
+                      {images.find(img => img.isMain) && (
+                        <div className="relative aspect-video border-2 border-indigo-500">
                           <Image
-                            src={img.url}
-                            alt={`Imagen ${index + 1}`}
+                            src={images.find(img => img.isMain)!.url}
+                            alt="Imagen principal"
                             fill
-                            sizes="(max-width: 768px) 50vw, 150px"
+                            sizes="(max-width: 768px) 100vw, 400px"
                             className="object-cover"
+                            priority
                           />
-                          {img.isMain && (
-                            <span className="absolute top-1 left-1 bg-indigo-600 text-white text-xs px-2 py-1">
-                              Principal
-                            </span>
-                          )}
+                          <span className="absolute top-2 left-2 bg-indigo-600 text-white text-sm font-medium px-3 py-1 rounded">
+                            Principal
+                          </span>
                           <button
                             type="button"
-                            onClick={() => removeImage(index)}
-                            className="absolute top-1 right-1 p-1 bg-red-500 text-white hover:bg-red-600"
+                            onClick={() => removeImage(images.findIndex(img => img.isMain))}
+                            className="absolute top-2 right-2 p-2 bg-red-500 text-white hover:bg-red-600 rounded"
                           >
-                            <X className="h-3 w-3" />
+                            <X className="h-4 w-4" />
                           </button>
-                          {!img.isMain && (
-                            <button
-                              type="button"
-                              onClick={() => setMainImage(index)}
-                              className="absolute bottom-1 left-1 px-2 py-1 bg-gray-800 text-white text-xs \
-                                hover:bg-gray-700"
-                            >
-                              Principal
-                            </button>
-                          )}
                         </div>
-                      ))}
+                      )}
+
+                      {/* Imágenes de galería - tamaño pequeño */}
+                      {images.filter(img => !img.isMain).length > 0 && (
+                        <div className="grid grid-cols-4 gap-2">
+                          {images
+                            .filter(img => !img.isMain)
+                            .map((img, index) => (
+                              <div key={img.url} className="relative aspect-square border-2 border-gray-200">
+                                <Image
+                                  src={img.url}
+                                  alt={`Imagen ${index + 2}`}
+                                  fill
+                                  sizes="(max-width: 768px) 25vw, 100px"
+                                  className="object-cover"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => removeImage(images.findIndex(i => i.url === img.url))}
+                                  className="absolute top-1 right-1 p-1 bg-red-500 text-white hover:bg-red-600 rounded"
+                                >
+                                  <X className="h-3 w-3" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setMainImage(images.findIndex(i => i.url === img.url))}
+                                  className="absolute bottom-1 left-1 right-1 px-1 py-1 bg-gray-800 text-white text-xs hover:bg-gray-700 rounded"
+                                >
+                                  Principal
+                                </button>
+                              </div>
+                            ))}
+                        </div>
+                      )}
                     </div>
                   )}
 

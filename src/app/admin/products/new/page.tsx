@@ -29,6 +29,7 @@ export default function NuevoProductoPage() {
   // Almacena tanto la URL de preview como el archivo para subir luego
   const [images, setImages] = useState<{ url: string; isMain: boolean; file?: File }[]>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [imageUploadProgress, setImageUploadProgress] = useState<{ current: number; total: number } | null>(null);
 
   // Form state - all fields from Product schema
   const [formData, setFormData] = useState({
@@ -178,41 +179,72 @@ export default function NuevoProductoPage() {
     setLoading(true);
     setError(null);
 
+    // Calcular total de imágenes con archivos para subir
+    const imagesWithFiles = images.filter(img => img.file);
+    const totalImagesToUpload = imagesWithFiles.length;
+    let uploadedCount = 0;
+    const failedUploads: { index: number; fileName: string; error: string }[] = [];
+
+    if (totalImagesToUpload > 0) {
+      setImageUploadProgress({ current: 0, total: totalImagesToUpload });
+    }
+
     try {
       // Primero: subir las imágenes que tienen archivo
       const uploadedImages: { url: string; isMain: boolean }[] = [];
+      let imageIndex = 0;
 
       for (const img of images) {
+        imageIndex++;
         if (img.file) {
-          // Subir archivo a la API
-          const reader = new FileReader();
-          const base64Promise = new Promise<string>(resolve => {
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.readAsDataURL(img.file!);
-          });
-          const base64 = await base64Promise;
+          // Subir archivo a la API con try-catch individual
+          try {
+            const reader = new FileReader();
+            const base64Promise = new Promise<string>(resolve => {
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.readAsDataURL(img.file!);
+            });
+            const base64 = await base64Promise;
 
-          const uploadResponse = await fetch('/api/admin/upload', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              image: base64,
-              filename: img.file.name,
-              slug: formData.slug,
-            }),
-          });
+            const uploadResponse = await fetch('/api/admin/upload', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                image: base64,
+                filename: img.file.name,
+                slug: formData.slug,
+              }),
+            });
 
-          if (!uploadResponse.ok) {
+            if (!uploadResponse.ok) {
+              const uploadData = await uploadResponse.json();
+              throw new Error(uploadData.error || 'Error al subir imagen');
+            }
+
             const uploadData = await uploadResponse.json();
-            throw new Error(uploadData.error || 'Error al subir imagen');
+            uploadedImages.push({ url: uploadData.url, isMain: img.isMain });
+            uploadedCount++;
+            setImageUploadProgress({ current: uploadedCount, total: totalImagesToUpload });
+          } catch (uploadErr) {
+            // Guardar el error específico pero continuar con las demás imágenes
+            const errorMessage = uploadErr instanceof Error ? uploadErr.message : 'Error desconocido';
+            failedUploads.push({
+              index: imageIndex,
+              fileName: img.file.name,
+              error: errorMessage,
+            });
+            console.error(`Error al subir imagen ${imageIndex} de ${totalImagesToUpload}:`, uploadErr);
           }
-
-          const uploadData = await uploadResponse.json();
-          uploadedImages.push({ url: uploadData.url, isMain: img.isMain });
         } else {
           // Ya es una URL permanente (ej: agregada manualmente)
           uploadedImages.push({ url: img.url, isMain: img.isMain });
         }
+      }
+
+      // Verificar si todas las imágenes con archivos se subieron correctamente
+      if (failedUploads.length > 0) {
+        const failedNames = failedUploads.map(f => f.fileName).join(', ');
+        throw new Error(`Error al subir ${failedUploads.length} imagen(es) de ${totalImagesToUpload}: ${failedNames}`);
       }
 
       // Preparar datos del producto
@@ -262,6 +294,7 @@ export default function NuevoProductoPage() {
       setError(err instanceof Error ? err.message : 'Error al crear producto');
     } finally {
       setLoading(false);
+      setImageUploadProgress(null);
     }
   };
 
@@ -630,44 +663,66 @@ export default function NuevoProductoPage() {
 
                   {/* Image Gallery */}
                   {images.length > 0 && (
-                    <div className="grid grid-cols-2 gap-2">
-                      {images.map((img, index) => (
-                        <div
-                          key={`${img.url}-${index}`}
-                          className={`relative aspect-square border-2 ${
-                            img.isMain ? 'border-indigo-500' : 'border-gray-200'
-                          }`}
-                        >
+                    <div className="space-y-2">
+                      {/* Imagen principal - tamaño grande */}
+                      {images.find(img => img.isMain) && (
+                        <div className="relative aspect-video border-2 border-indigo-500">
                           <Image
-                            src={img.url}
-                            alt={`Imagen ${index + 1}`}
+                            src={images.find(img => img.isMain)!.url}
+                            alt="Imagen principal"
                             fill
-                            sizes="(max-width: 768px) 50vw, 150px"
+                            sizes="(max-width: 768px) 100vw, 400px"
                             className="object-cover"
+                            priority
                           />
-                          {img.isMain && (
-                            <span className="absolute top-1 left-1 bg-indigo-600 text-white text-xs px-2 py-1">
-                              Principal
-                            </span>
-                          )}
+                          <span className="absolute top-2 left-2 bg-indigo-600 text-white text-sm font-medium px-3 py-1 rounded">
+                            Principal
+                          </span>
                           <button
                             type="button"
-                            onClick={() => removeImage(index)}
-                            className="absolute top-1 right-1 p-1 bg-red-500 text-white hover:bg-red-600"
+                            onClick={() => removeImage(images.findIndex(img => img.isMain))}
+                            className="absolute top-2 right-2 p-2 bg-red-500 text-white hover:bg-red-600 rounded"
                           >
-                            <X className="h-3 w-3" />
+                            <X className="h-4 w-4" />
                           </button>
-                          {!img.isMain && (
-                            <button
-                              type="button"
-                              onClick={() => setMainImage(index)}
-                              className="absolute bottom-1 left-1 px-2 py-1 bg-gray-800 text-white text-xs hover:bg-gray-700"
-                            >
-                              Principal
-                            </button>
-                          )}
                         </div>
-                      ))}
+                      )}
+
+                      {/* Imágenes de galería - tamaño pequeño */}
+                      {images.filter(img => !img.isMain).length > 0 && (
+                        <div className="grid grid-cols-4 gap-2">
+                          {images
+                            .filter(img => !img.isMain)
+                            .map((img, index) => (
+                              <div
+                                key={`${img.url}-${index}`}
+                                className="relative aspect-square border-2 border-gray-200"
+                              >
+                                <Image
+                                  src={img.url}
+                                  alt={`Imagen ${index + 2}`}
+                                  fill
+                                  sizes="(max-width: 768px) 25vw, 100px"
+                                  className="object-cover"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => removeImage(images.findIndex(i => i.url === img.url))}
+                                  className="absolute top-1 right-1 p-1 bg-red-500 text-white hover:bg-red-600 rounded"
+                                >
+                                  <X className="h-3 w-3" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setMainImage(images.findIndex(i => i.url === img.url))}
+                                  className="absolute bottom-1 left-1 right-1 px-1 py-1 bg-gray-800 text-white text-xs hover:bg-gray-700 rounded"
+                                >
+                                  Principal
+                                </button>
+                              </div>
+                            ))}
+                        </div>
+                      )}
                     </div>
                   )}
 
