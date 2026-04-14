@@ -29,25 +29,6 @@ export default defineConfig({
       name: 'setup',
       testMatch: /global\.setup\.ts/,
     },
-    // Auth setup for each browser
-    {
-      name: 'auth-setup-chromium',
-      testMatch: /auth\.setup\.ts/,
-      use: { ...devices['Desktop Chrome'] },
-      dependencies: ['setup'],
-    },
-    {
-      name: 'auth-setup-firefox',
-      testMatch: /auth\.setup\.ts/,
-      use: { ...devices['Desktop Firefox'] },
-      dependencies: ['setup'],
-    },
-    {
-      name: 'auth-setup-webkit',
-      testMatch: /auth\.setup\.ts/,
-      use: { ...devices['Desktop Safari'] },
-      dependencies: ['setup'],
-    },
     // Regular tests (no auth required)
     {
       name: 'Desktop Chrome',
