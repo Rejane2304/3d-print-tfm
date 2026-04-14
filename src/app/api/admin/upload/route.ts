@@ -58,10 +58,11 @@ export async function POST(req: NextRequest) {
       // Buscar archivos que sigan el patrón {slug}-{numero}.{ext}
       const slugFiles = existingFiles.filter(f => f.startsWith(`${safeSlug}-`));
       if (slugFiles.length > 0) {
-        // Extraer índices de los archivos existentes
+        // Extraer índices de los archivos existentes usando RegExp.exec()
+        const regex = new RegExp(String.raw`^${safeSlug}-(\d+)\.`);
         const indices = slugFiles.map(f => {
-          const match = f.match(new RegExp(`^${safeSlug}-(\\d+)\\.`));
-          return match ? parseInt(match[1], 10) : 0;
+          const match = regex.exec(f);
+          return match ? Number.parseInt(match[1], 10) : 0;
         });
         index = Math.max(...indices) + 1;
       }

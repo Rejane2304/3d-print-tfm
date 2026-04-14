@@ -8,36 +8,70 @@ import { test, expect } from '@playwright/test';
 
 test.describe.configure({ mode: 'serial' });
 
-// Helper para hacer login como admin con verificación
+// Helper para hacer login como admin con verificación robusta
 async function loginAsAdmin(page: any) {
-  // Ir a auth
+  // Ir a auth con timeout generoso
   await page.goto('/auth', { timeout: 60000 });
-  await page.waitForLoadState('networkidle', { timeout: 30000 });
-  await page.waitForTimeout(1000);
 
-  // Si ya estamos autenticados, salir
-  const initialUrl = page.url();
-  if (!initialUrl.includes('/auth')) {
+  // Esperar a que la página cargue completamente
+  await page.waitForLoadState('networkidle', { timeout: 30000 });
+
+  // Dar tiempo adicional para renderizado
+  await page.waitForTimeout(2000);
+
+  // Verificar si ya estamos autenticados (redirigidos fuera de /auth)
+  const url = page.url();
+  if (!url.includes('/auth')) {
+    console.log('Already authenticated, skipping login');
     return;
   }
 
-  // Llenar login
-  await page.locator('input[type="email"]').first().fill('admin@3dprint.com');
-  await page.locator('input[type="password"]').first().fill('AdminTFM2024!');
+  // Esperar a que el formulario esté disponible
+  try {
+    await page.waitForSelector('[data-testid="login-email"]', { timeout: 10000 });
+  } catch {
+    // Si no se encuentra el formulario, verificar si estamos redirigidos
+    const currentUrl = page.url();
+    if (!currentUrl.includes('/auth')) {
+      return;
+    }
+    throw new Error('Login form not found after waiting');
+  }
+
+  // Llenar login con esperas entre campos
+  await page.locator('[data-testid="login-email"]').fill('admin@3dprint.com');
+  await page.waitForTimeout(500);
+
+  await page.locator('[data-testid="login-password"]').fill('AdminTFM2024!');
+  await page.waitForTimeout(500);
+
   await page.locator('button[type="submit"]').first().click();
 
-  // Esperar redirección (timeout generoso para Safari)
-  await page.waitForTimeout(5000);
+  // Esperar redirección con timeout largo
+  await page.waitForTimeout(6000);
 
   // Verificar que el login funcionó
   const currentUrl = page.url();
+
   if (currentUrl.includes('/auth')) {
-    // Login falló, intentar una vez más
+    // Intentar login una vez más si falló
+    console.log('First login attempt failed, retrying...');
     await page.waitForTimeout(2000);
-    await page.locator('input[type="email"]').first().fill('admin@3dprint.com');
-    await page.locator('input[type="password"]').first().fill('AdminTFM2024!');
-    await page.locator('button[type="submit"]').first().click();
-    await page.waitForTimeout(5000);
+
+    // Verificar que el formulario sigue ahí
+    const hasForm = (await page.locator('[data-testid="login-email"]').count()) > 0;
+    if (hasForm) {
+      await page.locator('[data-testid="login-email"]').fill('admin@3dprint.com');
+      await page.locator('[data-testid="login-password"]').fill('AdminTFM2024!');
+      await page.locator('button[type="submit"]').first().click();
+      await page.waitForTimeout(6000);
+    }
+
+    // Si sigue en auth, algo está mal
+    const finalUrl = page.url();
+    if (finalUrl.includes('/auth')) {
+      throw new Error('Login failed after retry');
+    }
   }
 }
 

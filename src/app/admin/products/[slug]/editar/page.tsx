@@ -188,7 +188,7 @@ export default function EditarProductoPage() {
           const reader = new FileReader();
           const base64Promise = new Promise<string>(resolve => {
             reader.onloadend = () => resolve(reader.result as string);
-            reader.readAsDataURL(img.file!);
+            reader.readAsDataURL(img.file);
           });
           const base64 = await base64Promise;
 
