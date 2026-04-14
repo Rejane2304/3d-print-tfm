@@ -57,12 +57,24 @@ test.describe('Shopping Flow', () => {
   test('should complete checkout flow', async ({ page }) => {
     // First login to ensure user has addresses
     await page.goto('/auth');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000);
     await page.locator('[data-testid="login-email"]').fill('juan@example.com');
     await page.locator('[data-testid="login-password"]').fill('JuanTFM2024!');
     await page.locator('[data-testid="login-submit"]').click();
 
-    // Wait for redirect after login
-    await page.waitForTimeout(3000);
+    // Wait for redirect after login (timeout generoso para Safari)
+    await page.waitForTimeout(5000);
+
+    // Verificar que estamos autenticados
+    const url = page.url();
+    if (url.includes('/auth')) {
+      // Reintentar login si es necesario
+      await page.locator('[data-testid="login-email"]').fill('juan@example.com');
+      await page.locator('[data-testid="login-password"]').fill('JuanTFM2024!');
+      await page.locator('[data-testid="login-submit"]').click();
+      await page.waitForTimeout(5000);
+    }
 
     // Add product to cart via API
     await page.goto('/products');

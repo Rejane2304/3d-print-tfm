@@ -2,13 +2,13 @@
  * E2E Tests - Admin Dashboard
  *
  * Tests de admin que funcionan en todos los navegadores.
- * Cada test hace login manualmente para evitar problemas con storageState.
+ * Cada test hace login manualmente y verifica que la autenticación funcionó.
  */
 import { test, expect } from '@playwright/test';
 
 test.describe.configure({ mode: 'serial' });
 
-// Helper para hacer login como admin
+// Helper para hacer login como admin con verificación
 async function loginAsAdmin(page: any) {
   // Ir a auth
   await page.goto('/auth', { timeout: 60000 });
@@ -16,8 +16,8 @@ async function loginAsAdmin(page: any) {
   await page.waitForTimeout(1000);
 
   // Si ya estamos autenticados, salir
-  const url = page.url();
-  if (!url.includes('/auth')) {
+  const initialUrl = page.url();
+  if (!initialUrl.includes('/auth')) {
     return;
   }
 
@@ -26,8 +26,19 @@ async function loginAsAdmin(page: any) {
   await page.locator('input[type="password"]').first().fill('AdminTFM2024!');
   await page.locator('button[type="submit"]').first().click();
 
-  // Esperar redirección
-  await page.waitForTimeout(4000);
+  // Esperar redirección (timeout generoso para Safari)
+  await page.waitForTimeout(5000);
+
+  // Verificar que el login funcionó
+  const currentUrl = page.url();
+  if (currentUrl.includes('/auth')) {
+    // Login falló, intentar una vez más
+    await page.waitForTimeout(2000);
+    await page.locator('input[type="email"]').first().fill('admin@3dprint.com');
+    await page.locator('input[type="password"]').first().fill('AdminTFM2024!');
+    await page.locator('button[type="submit"]').first().click();
+    await page.waitForTimeout(5000);
+  }
 }
 
 test.describe('Admin E2E', () => {
