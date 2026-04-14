@@ -163,26 +163,30 @@ export function useCheckoutData(): CheckoutDataResult {
         return;
       }
 
-      // Load cart - CON RETRY si venimos de migración
+      // Load cart - CON RETRY si venimos de migración O si hay carrito local pendiente
       let cartData: { cart?: Cart | null } | null = null;
-      const resCart = await fetch('/api/cart');
-      if (resCart.ok) {
-        cartData = (await resCart.json()) as { cart?: Cart | null };
+      let retryCount = 0;
+      const maxRetries = justMigrated ? 3 : 1;
+
+      while (retryCount < maxRetries) {
+        const resCart = await fetch('/api/cart');
+        if (resCart.ok) {
+          cartData = (await resCart.json()) as { cart?: Cart | null };
+        }
+
+        // Si venimos de migración y el carrito está vacío, reintentar
+        const hasItems = cartData?.cart?.items?.length && cartData.cart.items.length > 0;
+        if (justMigrated && !hasItems && retryCount < maxRetries - 1) {
+          // Esperar un poco para que la migración complete
+          await new Promise(resolve => setTimeout(resolve, 500));
+          retryCount++;
+        } else {
+          break;
+        }
       }
 
-      // Si venimos de migración y el carrito está vacío, reintentar
-      if (justMigrated && (!cartData?.cart?.items?.length || cartData?.cart?.items?.length === 0)) {
-        // Esperar un poco para que la migración complete
-        await new Promise(resolve => setTimeout(resolve, 500));
-        // Reintentar
-        const retryRes = await fetch('/api/cart');
-        if (retryRes.ok) {
-          cartData = (await retryRes.json()) as { cart?: Cart | null };
-        }
-        // Limpiar flag
-        sessionStorage.removeItem('cartMigrated');
-      } else if (justMigrated) {
-        // Carrito tiene items, solo limpiar flag
+      // Limpiar flag de migración
+      if (justMigrated) {
         sessionStorage.removeItem('cartMigrated');
       }
 
@@ -199,6 +203,23 @@ export function useCheckoutData(): CheckoutDataResult {
         if (!hasItems && !stillHasLocalCart) {
           router.push('/cart');
           return;
+        }
+
+        // Si hay items en localStorage pero no en el servidor, intentar migrar de nuevo
+        if (!hasItems && stillHasLocalCart) {
+          await migrateLocalCart();
+          // Recargar carrito después de segunda migración
+          const retryRes = await fetch('/api/cart');
+          if (retryRes.ok) {
+            const retryData = await retryRes.json();
+            setCart(retryData.cart || null);
+
+            // Si aún no hay items, redirigir
+            if (!retryData.cart?.items?.length) {
+              router.push('/cart');
+              return;
+            }
+          }
         }
       }
     } catch {

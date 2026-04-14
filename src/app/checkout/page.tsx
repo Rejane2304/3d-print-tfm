@@ -185,9 +185,24 @@ export default function CheckoutPage() {
   };
 
   const handlePayment = async () => {
+    // Validar que haya una dirección seleccionada antes de procesar
+    if (!selectedAddressId) {
+      setError('Por favor selecciona una dirección de envío');
+      return;
+    }
+
+    // Validar que el carrito tenga items
+    if (!cart?.items?.length) {
+      setError('El carrito está vacío. Por favor añade productos antes de continuar.');
+      return;
+    }
+
     const result = await processPayment(selectedAddressId);
     if (result.success) {
       // Payment started successfully, will redirect or open external window
+    } else if (result.error) {
+      // Mostrar error específico
+      setError(result.error);
     }
   };
 
