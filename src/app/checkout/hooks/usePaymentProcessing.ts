@@ -160,13 +160,15 @@ export function usePaymentProcessing(): UsePaymentProcessingResult {
         switch (paymentMethod) {
           case 'CARD': {
             const stripeUrl = await processCardPayment(orderId, paymentId);
-            globalThis.open(stripeUrl, '_blank');
+            // Redirect to Stripe instead of opening new window
+            globalThis.location.href = stripeUrl;
             return { success: true };
           }
 
           case 'PAYPAL': {
             const paypalUrl = await processPayPalPayment(orderId, paymentId);
-            globalThis.open(paypalUrl, '_blank');
+            // Redirect to PayPal instead of opening new window
+            globalThis.location.href = paypalUrl;
             return { success: true };
           }
 
