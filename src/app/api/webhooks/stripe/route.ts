@@ -152,6 +152,20 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
     // Payment processed successfully for order
 
+    // Emitir actualización de métricas en tiempo real
+    try {
+      const { emitMetricsUpdate } = await import('@/lib/realtime/event-service');
+      await emitMetricsUpdate({
+        type: 'order:completed',
+        orderId: order.id,
+        total: Number(order.total),
+        timestamp: new Date().toISOString(),
+      });
+    } catch (metricsError) {
+      console.error('Error emitting metrics update:', metricsError);
+      // No fallar el webhook si las métricas fallan
+    }
+
     // Crear alertas automáticas para el pedido
     try {
       // Alerta de nuevo pedido
