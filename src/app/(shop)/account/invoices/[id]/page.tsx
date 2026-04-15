@@ -5,7 +5,7 @@
  */
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -63,42 +63,50 @@ export default function UserInvoiceDetailPage() {
 
   const [hasLoaded, setHasLoaded] = useState(false);
 
-  const loadInvoice = useCallback(async () => {
-    if (hasLoaded) return;
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await fetch(`/api/account/invoices/${params.id}`);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Error al cargar factura');
-      }
-
-      setInvoice(data.factura);
-      setHasLoaded(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
-    } finally {
-      setLoading(false);
-    }
-  }, [params.id, hasLoaded]);
+  // SOLUCIÓN DEFINITIVA ANTI-BUCLE
+  // Usar ref para controlar ejecución única
+  const hasFetched = useRef(false);
 
   useEffect(() => {
-    // Solo ejecutar cuando la sesión esté lista
+    // NUNCA ejecutar si ya se ejecutó
+    if (hasFetched.current) return;
+
+    // Esperar a que la sesión esté lista
     if (status === 'loading') return;
+
+    // Marcar como ejecutado INMEDIATAMENTE
+    hasFetched.current = true;
 
     if (status === 'unauthenticated') {
       router.push('/auth?callbackUrl=/account/invoices');
       return;
     }
 
-    if (status === 'authenticated' && params.id && !hasLoaded) {
-      loadInvoice();
+    // Ejecutar fetch solo una vez
+    const fetchInvoice = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`/api/account/invoices/${params.id}`);
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Error al cargar factura');
+        }
+
+        setInvoice(data.factura);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Error desconocido');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (status === 'authenticated' && params.id) {
+      fetchInvoice();
     }
-  }, [status, router, params.id, hasLoaded]);
+    // SIN DEPENDENCIAS QUE CAUSEN RE-RENDER
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, params.id]);
 
   const printInvoice = () => {
     globalThis.print();
