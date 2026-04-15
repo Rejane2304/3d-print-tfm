@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { useRealTime } from '@/hooks/useRealTime';
+import { toast } from 'sonner';
 
 interface UserProfile {
   id: string;
@@ -59,6 +61,7 @@ interface CheckoutDataResult {
   setCart: (cart: Cart | null) => void;
   appliedCoupon: AppliedCoupon | null;
   userProfile: UserProfile | null;
+  productsOutOfStock: Set<string>;
 }
 
 export function useCheckoutData(): CheckoutDataResult {
@@ -71,6 +74,60 @@ export function useCheckoutData(): CheckoutDataResult {
   const [cart, setCart] = useState<Cart | null>(null);
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [productsOutOfStock, setProductsOutOfStock] = useState<Set<string>>(new Set());
+
+  // Real-time event handler for stock updates
+  const handleRealTimeEvent = useCallback(
+    (event: { type: string; payload: Record<string, unknown> }) => {
+      switch (event.type) {
+        case 'stock:updated': {
+          const productId = event.payload.productId as string;
+          const newStock = event.payload.newStock as number;
+          const productName = event.payload.productName as string;
+
+          // If product in cart is now out of stock
+          if (newStock <= 0 && cart) {
+            const itemInCart = cart.items.find(item => item.product.id === productId);
+            if (itemInCart) {
+              setProductsOutOfStock(prev => new Set(prev).add(productId));
+              toast.error(`Producto agotado`, {
+                description: `${productName} ya no está disponible. Por favor elimínalo del carrito.`,
+                duration: 5000,
+              });
+            }
+          }
+
+          // If product is back in stock, remove from out-of-stock list
+          if (newStock > 0) {
+            setProductsOutOfStock(prev => {
+              const newSet = new Set(prev);
+              newSet.delete(productId);
+              return newSet;
+            });
+          }
+
+          // Update stock in cart items
+          setCart(prevCart => {
+            if (!prevCart) return null;
+            return {
+              ...prevCart,
+              items: prevCart.items.map(item =>
+                item.product.id === productId ? { ...item, product: { ...item.product, stock: newStock } } : item,
+              ),
+            };
+          });
+          break;
+        }
+      }
+    },
+    [cart],
+  );
+
+  // Initialize real-time connection for stock updates
+  useRealTime({
+    eventTypes: ['stock:updated'],
+    onEvent: handleRealTimeEvent,
+  });
 
   const migrateLocalCart = useCallback(async () => {
     const localCartData = localStorage.getItem('cart');
@@ -250,5 +307,6 @@ export function useCheckoutData(): CheckoutDataResult {
     setCart,
     appliedCoupon,
     userProfile,
+    productsOutOfStock,
   };
 }

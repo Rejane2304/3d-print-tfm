@@ -9,11 +9,12 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { AlertCircle, Edit, FolderTree, ImageIcon, Loader2, Plus, Trash2 } from 'lucide-react';
+import { AlertCircle, Edit, FolderTree, ImageIcon, Loader2, Plus, Trash2, Upload } from 'lucide-react';
 import type { BulkAction, Column } from '@/components/ui/DataTable';
 import { DataTable } from '@/components/ui/DataTable';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { BulkDeleteModal } from '@/components/ui/BulkDeleteModal';
+import { CSVUpload } from '@/components/ui/CSVUpload';
 
 interface Category extends Record<string, unknown> {
   id: string;
@@ -40,6 +41,7 @@ export default function AdminCategoriesPage() {
   const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
   const [selectedCount, setSelectedCount] = useState(0);
   const [selectedIdsToDelete, setSelectedIdsToDelete] = useState<string[]>([]);
+  const [importModalOpen, setImportModalOpen] = useState(false);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -283,6 +285,13 @@ export default function AdminCategoriesPage() {
               <Link href="/admin/dashboard" className="text-indigo-600 hover:text-indigo-800 font-medium">
                 ← Volver al Panel
               </Link>
+              <button
+                onClick={() => setImportModalOpen(true)}
+                className="inline-flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+              >
+                <Upload className="h-5 w-5" />
+                Importar CSV
+              </button>
               <Link
                 href="/admin/categories/new"
                 className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
@@ -393,6 +402,25 @@ export default function AdminCategoriesPage() {
         hasAssociatedItems={true}
         associatedItemType="productos"
       />
+
+      {/* Import CSV Modal */}
+      {importModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <CSVUpload
+              title="Importar Categorías"
+              description="Sube un archivo CSV con las categorías a importar."
+              requiredColumns={['name', 'description', 'slug']}
+              apiEndpoint="/api/admin/categories/import"
+              onSuccess={() => {
+                setImportModalOpen(false);
+                loadCategories();
+              }}
+              onCancel={() => setImportModalOpen(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

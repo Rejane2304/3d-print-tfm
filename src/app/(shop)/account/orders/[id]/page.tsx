@@ -21,9 +21,12 @@ import {
   Package,
   Phone,
   Printer,
+  RotateCcw,
 } from 'lucide-react';
 import OrderProgressBar from '@/components/orders/OrderProgressBar';
 import { InvoiceNotAvailableModal } from '@/components/invoices/InvoiceNotAvailableModal';
+import { useRealTime } from '@/hooks/useRealTime';
+import { toast } from 'sonner';
 
 interface OrderDetail {
   id: string;
@@ -109,9 +112,10 @@ const translateAddressName = (name: string): string => {
 };
 
 export default function OrderDetailPage() {
-  const { status } = useSession();
+  const { status, data: session } = useSession();
   const router = useRouter();
   const params = useParams();
+  const orderId = params.id as string;
   const [order, setOrder] = useState<OrderDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -125,7 +129,7 @@ export default function OrderDetailPage() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`/api/account/orders/${params.id}`);
+      const response = await fetch(`/api/account/orders/${orderId}`);
       const data = await response.json();
 
       if (!response.ok) {
@@ -138,7 +142,64 @@ export default function OrderDetailPage() {
     } finally {
       setLoading(false);
     }
-  }, [params.id]);
+  }, [orderId]);
+
+  // Real-time event handler for order updates
+  const handleRealTimeEvent = useCallback(
+    (event: { type: string; payload: Record<string, unknown> }) => {
+      // Only process events for this order
+      const eventOrderId = event.payload.orderId as string;
+      if (eventOrderId !== orderId) {
+        return;
+      }
+
+      // Filter by user ID to ensure privacy
+      const eventUserId = event.payload.userId as string;
+      if (eventUserId && eventUserId !== session?.user?.id) {
+        return;
+      }
+
+      switch (event.type) {
+        case 'order:status:updated': {
+          const newStatus = event.payload.status as string;
+          const orderNumber = event.payload.orderNumber as string;
+
+          setOrder(prevOrder => {
+            if (!prevOrder) return null;
+            return { ...prevOrder, estado: newStatus };
+          });
+
+          toast.success(`Estado actualizado`, {
+            description: `Pedido ${orderNumber} ahora está: ${newStatus}`,
+          });
+          break;
+        }
+
+        case 'payment:confirmed': {
+          toast.success(`Pago confirmado`, {
+            description: `El pago de tu pedido ha sido procesado correctamente`,
+          });
+
+          // Refresh order data to show updated payment status
+          loadOrder();
+          break;
+        }
+
+        case 'order:new': {
+          // If viewing this order and it was just created
+          loadOrder();
+          break;
+        }
+      }
+    },
+    [orderId, session?.user?.id, loadOrder],
+  );
+
+  // Initialize real-time connection
+  useRealTime({
+    eventTypes: ['order:status:updated', 'payment:confirmed', 'order:new'],
+    onEvent: handleRealTimeEvent,
+  });
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -146,10 +207,10 @@ export default function OrderDetailPage() {
       return;
     }
 
-    if (status === 'authenticated' && params.id) {
+    if (status === 'authenticated' && orderId) {
       loadOrder();
     }
-  }, [status, router, params.id, loadOrder]);
+  }, [status, router, orderId, loadOrder]);
 
   const downloadInvoice = () => {
     if (order?.factura && !order.factura.anulada) {
@@ -443,6 +504,26 @@ export default function OrderDetailPage() {
                 </div>
               </div>
             </div>
+
+            {/* Acciones - Solicitar devolución */}
+            {order.estado === 'Entregado' && (
+              <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-6">
+                <h3 className="font-semibold text-gray-900 mb-4 text-sm sm:text-base flex items-center gap-2">
+                  <RotateCcw className="h-4 w-4 sm:h-5 sm:w-5" />
+                  ¿Necesitas devolver algo?
+                </h3>
+                <p className="text-xs text-gray-600 mb-4">
+                  Tienes 30 días desde la entrega para solicitar una devolución.
+                </p>
+                <Link
+                  href={`/account/orders/${order.id}/return`}
+                  className="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white px-4 py-2.5 rounded-lg font-medium hover:bg-indigo-700 transition-colors text-sm"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                  Solicitar Devolución
+                </Link>
+              </div>
+            )}
 
             {/* Información de pago */}
             <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-6">

@@ -3,6 +3,8 @@
  * Gestiona todos los movimientos de stock con trazabilidad completa
  */
 import { prisma } from '@/lib/db/prisma';
+import { createStockAlert } from '@/lib/alerts/alert-service';
+import { emitStockLow } from '@/lib/realtime/event-service';
 
 export interface MovementData {
   productId: string;
@@ -77,7 +79,7 @@ export async function createInventoryMovement(data: MovementData) {
       },
     });
 
-    return movement;
+    return { movement, newStock };
   });
 }
 
@@ -146,6 +148,51 @@ export async function recordStockAdjustment(productId: string, newStock: number,
     reason: `Ajuste manual: ${reason}`,
     createdBy: userId,
   });
+}
+
+/**
+ * Verifica el stock después de un movimiento y crea alerta automáticamente si es necesario
+ * Se ejecuta DESPUÉS de cualquier movimiento de inventario
+ */
+export async function checkAndCreateStockAlert(productId: string, newStock: number): Promise<void> {
+  // Solo crear alerta si stock < 5
+  const LOW_STOCK_THRESHOLD = 5;
+
+  if (newStock >= LOW_STOCK_THRESHOLD) {
+    return;
+  }
+
+  // Verificar si ya existe una alerta activa (no resuelta) para este producto
+  const existingAlert = await prisma.alert.findFirst({
+    where: {
+      productId,
+      type: { in: ['LOW_STOCK', 'OUT_OF_STOCK'] },
+      status: { in: ['PENDING', 'IN_PROGRESS'] },
+    },
+  });
+
+  // Si ya existe una alerta activa, no crear duplicada
+  if (existingAlert) {
+    return;
+  }
+
+  // Obtener el producto para traducir el nombre
+  const product = await prisma.product.findUnique({
+    where: { id: productId },
+    select: { slug: true },
+  });
+
+  if (!product) {
+    return;
+  }
+
+  // Crear la alerta de stock bajo
+  const alert = await createStockAlert(productId, newStock);
+
+  if (alert) {
+    // Emitir evento para notificación en tiempo real
+    await emitStockLow(productId, newStock, alert);
+  }
 }
 
 /**
@@ -232,7 +279,13 @@ export async function reconcileInventory(): Promise<
     select: { id: true, name: true, stock: true },
   });
 
-  const discrepancies = [];
+  const discrepancies: Array<{
+    productId: string;
+    productName: string;
+    currentStock: number;
+    calculatedStock: number;
+    discrepancy: number;
+  }> = [];
 
   for (const product of products) {
     const verification = await verifyStockIntegrity(product.id);

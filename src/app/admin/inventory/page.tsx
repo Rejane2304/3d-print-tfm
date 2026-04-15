@@ -9,10 +9,13 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { AlertTriangle, CheckCircle, Eye, Loader2, Minus, Package, Plus, RotateCcw } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Eye, Loader2, Minus, Package, Plus, RotateCcw, Upload } from 'lucide-react';
 import Image from 'next/image';
 import type { BulkAction, Column } from '@/components/ui/DataTable';
 import { DataTable } from '@/components/ui/DataTable';
+import { CSVUpload } from '@/components/ui/CSVUpload';
+import { useAdminRealTime, useNotificationToast } from '@/hooks/useRealTime';
+import { Toaster } from '@/components/ui/Toaster';
 
 interface Product {
   id: string;
@@ -41,6 +44,28 @@ export default function AdminInventoryPage() {
   const [adjustmentQuantity, setAdjustmentQuantity] = useState('');
   const [adjustmentReason, setAdjustmentReason] = useState('');
   const [processing, setProcessing] = useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
+
+  // Real-time setup
+  const { pendingEvents, acknowledgeEvents, isConnected } = useAdminRealTime();
+  const { notifications, showNotification, removeNotification } = useNotificationToast();
+
+  // Listen for real-time events
+  useEffect(() => {
+    if (pendingEvents.length > 0) {
+      pendingEvents.forEach(event => {
+        // Show notification for stock updates
+        if (event.type === 'stock:updated' || event.type === 'stock:alert') {
+          showNotification(event);
+          // Refresh inventory data
+          fetchInventory();
+        }
+      });
+      // Acknowledge events
+      acknowledgeEvents(pendingEvents.map(e => e.timestamp));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingEvents]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -352,6 +377,14 @@ export default function AdminInventoryPage() {
               <option value="low">Stock Bajo</option>
               <option value="critical">Stock Crítico</option>
             </select>
+
+            <button
+              onClick={() => setImportModalOpen(true)}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-2"
+            >
+              <Upload className="h-4 w-4" />
+              Importar CSV
+            </button>
           </div>
         </div>
 
@@ -437,6 +470,38 @@ export default function AdminInventoryPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Import CSV Modal */}
+      {importModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <CSVUpload
+              title="Importar Movimientos de Inventario"
+              description="Sube un archivo CSV con los ajustes de inventario. El stock se actualizará automáticamente."
+              requiredColumns={['productSlug', 'quantity', 'type', 'reason']}
+              apiEndpoint="/api/admin/inventory/import"
+              onSuccess={() => {
+                setImportModalOpen(false);
+                fetchInventory();
+              }}
+              onCancel={() => setImportModalOpen(false)}
+            />
+          </div>
+        </div>
+      )}
+      {/* Real-time Notifications */}
+      <Toaster notifications={notifications} onDismiss={removeNotification} />
+      {isConnected && (
+        <div className="fixed bottom-4 left-4 z-50">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-green-100 text-green-800 text-xs rounded-full">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
+            Tiempo real conectado
           </div>
         </div>
       )}

@@ -25,6 +25,8 @@ import {
   XCircle,
 } from 'lucide-react';
 import OrderProgressBar from '@/components/orders/OrderProgressBar';
+import { useAdminRealTime, useNotificationToast } from '@/hooks/useRealTime';
+import { Toaster } from '@/components/ui/Toaster';
 
 interface OrderDetail {
   id: string;
@@ -128,6 +130,30 @@ export default function AdminPedidoDetallePage() {
   const [transportista, setTransportista] = useState('');
   const [showStatusForm, setShowStatusForm] = useState(false);
   const [statusSuccessMessage, setStatusSuccessMessage] = useState<string | null>(null);
+
+  // Real-time setup
+  const { pendingEvents, acknowledgeEvents, isConnected } = useAdminRealTime();
+  const { notifications, showNotification, removeNotification } = useNotificationToast();
+
+  // Listen for real-time events
+  useEffect(() => {
+    if (pendingEvents.length > 0) {
+      pendingEvents.forEach(event => {
+        // Show notification for order status updates related to this order
+        if (event.type === 'order:status:updated') {
+          const payload = event.payload as { orderId?: string };
+          if (payload.orderId === params.id) {
+            showNotification(event);
+            // Refresh order data
+            loadOrder();
+          }
+        }
+      });
+      // Acknowledge events
+      acknowledgeEvents(pendingEvents.map(e => e.timestamp));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingEvents, params.id]);
 
   const loadOrder = useCallback(async () => {
     try {
@@ -517,6 +543,19 @@ export default function AdminPedidoDetallePage() {
           </div>
         </div>
       </div>
+      {/* Real-time Notifications */}
+      <Toaster notifications={notifications} onDismiss={removeNotification} />
+      {isConnected && (
+        <div className="fixed bottom-4 left-4 z-50">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-green-100 text-green-800 text-xs rounded-full">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
+            Tiempo real conectado
+          </div>
+        </div>
+      )}
     </div>
   );
 }

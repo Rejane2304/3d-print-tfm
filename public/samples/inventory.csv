@@ -1,0 +1,11 @@
+productSlug,quantity,type,reason,reference
+"vase-decorativo-floral",5,"IN","Ajuste inicial de inventario","INV-001"
+"porta-lapices-geometrico",8,"IN","Reposición de stock","INV-002"
+"maceta-minimalista",3,"OUT","Venta a cliente","SALE-001"
+"soporte-movil-ajustable",10,"IN","Nueva entrada de almacén","INV-003"
+"llavero-personalizado",15,"IN","Stock inicial temporada","INV-004"
+"portarretratos-moderno",2,"OUT","Stock dañado en almacén","ADJ-001"
+"organizador-cables",12,"IN","Compra proveedor","INV-005"
+"estuche-auriculares",5,"ADJUSTMENT","Ajuste por inventario físico","ADJ-002"
+"abrebotellas-magnetico",8,"IN","Reposición","INV-006"
+"lampara-led-moderna",3,"OUT","Venta online","SALE-002"

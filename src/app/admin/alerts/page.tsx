@@ -23,12 +23,16 @@ import {
   Tag,
   Trash2,
   TrendingUp,
+  Upload,
   XCircle,
 } from 'lucide-react';
 import type { BulkAction, Column } from '@/components/ui/DataTable';
 import { DataTable } from '@/components/ui/DataTable';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { BulkDeleteModal } from '@/components/ui/BulkDeleteModal';
+import { useAdminRealTime, useNotificationToast } from '@/hooks/useRealTime';
+import { Toaster } from '@/components/ui/Toaster';
+import { CSVUpload } from '@/components/admin/CSVUpload';
 
 interface Alert {
   id: string;
@@ -189,6 +193,28 @@ export default function AdminAlertsPage() {
   const [alertToDelete, setAlertToDelete] = useState<string | null>(null);
   const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
   const [selectedIdsToDelete, setSelectedIdsToDelete] = useState<string[]>([]);
+  const [showImportModal, setShowImportModal] = useState(false);
+
+  // Real-time setup
+  const { pendingEvents, acknowledgeEvents, isConnected } = useAdminRealTime();
+  const { notifications, showNotification, removeNotification } = useNotificationToast();
+
+  // Listen for real-time events
+  useEffect(() => {
+    if (pendingEvents.length > 0) {
+      pendingEvents.forEach(event => {
+        // Show notification for new alerts
+        if (event.type === 'alert:new') {
+          showNotification(event);
+          // Refresh alerts data
+          loadAlerts();
+        }
+      });
+      // Acknowledge events
+      acknowledgeEvents(pendingEvents.map(e => e.timestamp));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingEvents]);
 
   const loadAlerts = useCallback(async () => {
     try {
@@ -599,6 +625,14 @@ export default function AdminAlertsPage() {
                 <RefreshCw className="h-5 w-5" />
                 <span className="hidden sm:inline">Actualizar</span>
               </button>
+              <button
+                onClick={() => setShowImportModal(true)}
+                className="flex items-center gap-2 bg-gray-600 text-white px-3 py-2 rounded-lg \
+                  hover:bg-gray-700 transition-colors"
+              >
+                <Upload className="h-5 w-5" />
+                <span className="hidden sm:inline">Importar CSV</span>
+              </button>
               <Link href="/admin/dashboard" className="text-indigo-600 hover:text-indigo-800 font-medium">
                 &larr; Volver al Panel
               </Link>
@@ -860,6 +894,54 @@ export default function AdminAlertsPage() {
         itemName="alerta"
         itemNamePlural="alertas"
       />
+
+      {/* Import Modal */}
+      {showImportModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-gray-900">Importar Alertas</h2>
+                <button onClick={() => setShowImportModal(false)} className="text-gray-400 hover:text-gray-600">
+                  <span className="sr-only">Cerrar</span>
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <CSVUpload
+                title="Alertas"
+                description="Importa alertas del sistema desde un archivo CSV. Cada fila representa una alerta."
+                requiredColumns={['type', 'severity', 'title', 'message']}
+                optionalColumns={['productId', 'orderId', 'userId', 'couponId', 'status']}
+                apiEndpoint="/api/admin/alerts/import"
+                sampleCSV={`type,severity,title,message,productId,orderId,status
+"LOW_STOCK","HIGH","Stock bajo","Producto con stock inferior al mínimo","prod-uuid-1","","PENDING"
+"NEW_ORDER","LOW","Nuevo pedido","Se ha recibido un nuevo pedido","","order-uuid-1","PENDING"
+"PAYMENT_FAILED","CRITICAL","Pago fallido","El pago del pedido ha sido rechazado","","order-uuid-2","PENDING"`}
+                onSuccess={() => {
+                  loadAlerts();
+                  setShowImportModal(false);
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Real-time Notifications */}
+      <Toaster notifications={notifications} onDismiss={removeNotification} />
+      {isConnected && (
+        <div className="fixed bottom-4 left-4 z-50">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-green-100 text-green-800 text-xs rounded-full">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
+            Tiempo real conectado
+          </div>
+        </div>
+      )}
     </div>
   );
 }

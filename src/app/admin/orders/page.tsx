@@ -9,10 +9,26 @@ import { ConfirmDialogProvider, showConfirmDialog } from '@/components/ui/Confir
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { AlertCircle, Box, CheckCircle2, Clock, Eye, Loader2, Package, Trash2, Truck, XCircle } from 'lucide-react';
+import {
+  AlertCircle,
+  Box,
+  CheckCircle2,
+  Clock,
+  Eye,
+  Loader2,
+  Package,
+  Trash2,
+  Truck,
+  Upload,
+  XCircle,
+} from 'lucide-react';
 // RealTimeNotifications and DashboardMetricsUpdater removed - unused
 import type { BulkAction, Column } from '@/components/ui/DataTable';
 import { DataTable } from '@/components/ui/DataTable';
+import { CSVUpload } from '@/components/admin/CSVUpload';
+import { useAdminRealTime, useNotificationToast } from '@/hooks/useRealTime';
+import { Toaster } from '@/components/ui/Toaster';
+import { useNotificationSound } from '@/hooks/useNotificationSound';
 
 interface Order {
   id: string;
@@ -60,6 +76,11 @@ const orderStatuses: Record<string, { color: string; icon: React.ElementType; la
   },
 };
 
+// Sample CSV for orders
+const ordersSampleCSV = `userEmail,items,status,shippingCost,paymentMethod
+"cliente@email.com","[{\"productId\":\"uuid-product-1\",\"quantity\":2}]","DELIVERED",5.99,"CARD"
+"cliente2@email.com","[{\"productId\":\"uuid-product-2\",\"quantity\":1}]","DELIVERED",5.99,"PAYPAL"`;
+
 export default function AdminOrdersPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -67,6 +88,31 @@ export default function AdminOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState('');
+  const [showImport, setShowImport] = useState(false);
+
+  // Real-time setup
+  const { events: _events, pendingEvents, acknowledgeEvents, isConnected: _isConnected } = useAdminRealTime();
+  const { notifications, showNotification, removeNotification } = useNotificationToast();
+  const { playEventSound } = useNotificationSound();
+
+  // Listen for real-time events
+  useEffect(() => {
+    if (pendingEvents.length > 0) {
+      pendingEvents.forEach(event => {
+        // Show notification for new orders and status updates
+        if (event.type === 'order:new' || event.type === 'order:status:updated') {
+          showNotification(event);
+          // Play sound for new orders
+          playEventSound(event.type);
+          // Refresh orders on new order or status update
+          loadOrders();
+        }
+      });
+      // Acknowledge events
+      acknowledgeEvents(pendingEvents.map(e => e.timestamp));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingEvents]);
 
   const loadOrders = useCallback(async () => {
     try {
@@ -161,6 +207,11 @@ export default function AdminOrdersPage() {
         variant: 'danger',
       });
     }
+  };
+
+  const handleImportSuccess = () => {
+    loadOrders();
+    setShowImport(false);
   };
 
   const columns: Column<Order>[] = [
@@ -319,10 +370,29 @@ export default function AdminOrdersPage() {
           </div>
         )}
 
-        {/* Filters */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex items-center gap-2">
+        {/* CSV Import Section */}
+        {showImport ? (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">Importar Pedidos desde CSV</h2>
+              <button onClick={() => setShowImport(false)} className="text-gray-500 hover:text-gray-700 text-sm">
+                Cerrar
+              </button>
+            </div>
+            <CSVUpload
+              title="Importar Pedidos"
+              description="Sube un archivo CSV con pedidos históricos. El campo items debe ser un array JSON con productId y quantity."
+              requiredColumns={['userEmail', 'items']}
+              optionalColumns={['status', 'shippingCost', 'paymentMethod', 'customerNotes']}
+              apiEndpoint="/api/admin/orders/import"
+              sampleCSV={ordersSampleCSV}
+              onSuccess={handleImportSuccess}
+              options={{ skipDuplicates: false, createMissingUsers: true }}
+            />
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
               <select
                 value={statusFilter}
                 onChange={e => setStatusFilter(e.target.value)}
@@ -336,9 +406,16 @@ export default function AdminOrdersPage() {
                 <option value="Entregado">Entregado</option>
                 <option value="Cancelado">Cancelado</option>
               </select>
+              <button
+                onClick={() => setShowImport(true)}
+                className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+              >
+                <Upload className="h-4 w-4" />
+                Importar CSV
+              </button>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Orders DataTable */}
         <DataTable<Order>
@@ -358,6 +435,19 @@ export default function AdminOrdersPage() {
         />
       </div>
       <ConfirmDialogProvider />
+      {/* Real-time Notifications */}
+      <Toaster notifications={notifications} onDismiss={removeNotification} />
+      {isConnected && (
+        <div className="fixed bottom-4 left-4 z-50">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-green-100 text-green-800 text-xs rounded-full">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
+            Tiempo real conectado
+          </div>
+        </div>
+      )}
     </div>
   );
 }

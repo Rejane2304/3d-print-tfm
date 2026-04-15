@@ -330,6 +330,7 @@ model Order {
   invoice               Invoice?
   items                 OrderItem[]
   messages              OrderMessage[]
+  returns               Return[]
   coupon                Coupon?              @relation(fields: [couponId], references: [id])
   shippingAddressData   Address?             @relation(fields: [shippingAddressId], references: [id])
   user                  User                 @relation(fields: [userId], references: [id])
@@ -433,6 +434,7 @@ model Product {
   images              ProductImage[]
   category            Category             @relation(fields: [categoryId], references: [id])
   reviews             Review[]
+  returnItems         ReturnItem[]
 
   @@index([categoryId])
   @@index([createdAt])
@@ -560,6 +562,7 @@ model User {
   orders             Order[]
   payments           Payment[]
   reviews            Review[]
+  returns            Return[]
   sessions           Session[]
 
   @@index([createdAt])
@@ -590,6 +593,42 @@ model WebsocketConnection {
   @@index([isActive])
   @@index([userId])
   @@map("websocket_connections")
+}
+
+model Return {
+  id          String       @id @default(uuid())
+  orderId     String
+  userId      String
+  reason      String
+  status      ReturnStatus @default(PENDING)
+  items       ReturnItem[]
+  totalAmount Decimal      @db.Decimal(10, 2)
+  adminNotes  String?
+  processedAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @default(now())
+  order       Order        @relation(fields: [orderId], references: [id])
+  user        User         @relation(fields: [userId], references: [id])
+
+  @@index([orderId])
+  @@index([userId])
+  @@index([status])
+  @@map("returns")
+}
+
+model ReturnItem {
+  id        String  @id @default(uuid())
+  returnId  String
+  return    Return  @relation(fields: [returnId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  unitPrice Decimal @db.Decimal(10, 2)
+  reason    String?
+
+  @@index([returnId])
+  @@index([productId])
+  @@map("return_items")
 }
 
 enum AlertSeverity {
@@ -671,4 +710,11 @@ enum PaymentStatus {
 enum Role {
   CUSTOMER
   ADMIN
+}
+
+enum ReturnStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
 }

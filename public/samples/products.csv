@@ -1,0 +1,11 @@
+name,description,shortDescription,price,stock,category,material,widthCm,heightCm,depthCm,weight,printTime,isActive,isFeatured,minStock,slug
+"Vase Decorativo Floral","Elegante jarrón decorativo con diseño floral","Jarrón decorativo",29.99,15,"decoracion","PLA",12,25,12,0.15,120,true,false,5,"vase-decorativo-floral"
+"Portalápices Geométrico","Moderno organizador de escritorio con formas geométricas","Organizador geométrico",19.99,20,"organizadores","PLA",10,12,10,0.08,90,true,true,5,"porta-lapices-geometrico"
+"Maceta Minimalista","Maceta de diseño minimalista para plantas pequeñas","Maceta minimalista",24.99,12,"jardineria","PETG",15,18,15,0.22,150,true,false,5,"maceta-minimalista"
+"Soporte Móvil Ajustable","Soporte para teléfono móvil con ángulo ajustable","Soporte móvil",14.99,25,"soportes","PLA",8,12,10,0.05,60,true,true,5,"soporte-movil-ajustable"
+"Llavero Personalizado","Llavero con nombre personalizable en 3D","Llavero personalizado",9.99,50,"accesorios","PLA",5,5,3,0.02,30,true,false,5,"llavero-personalizado"
+"Portarretratos Moderno","Marco de fotos con diseño moderno y elegante","Portarretratos moderno",34.99,8,"decoracion","PETG",20,25,5,0.35,180,true,false,5,"portarretratos-moderno"
+"Organizador de Cable","Sistema organizador de cables para escritorio","Organizador cables",12.99,30,"organizadores","PLA",15,5,5,0.06,45,true,true,5,"organizador-cables"
+"Estuche Auriculares","Estuche protector para auriculares inalámbricos","Estuche auriculares",16.99,18,"accesorios","PETG",8,8,4,0.12,75,true,false,5,"estuche-auriculares"
+"Abrebotellas Magnético","Abrebotellas con imán integrado para nevera","Abrebotellas magnético",7.99,40,"cocina","PLA",6,12,2,0.04,35,true,true,5,"abrebotellas-magnetico"
+"Lámpara LED Moderna","Pantalla de lámpara con diseño paramétrico","Lámpara LED",45.99,6,"iluminacion","PLA",25,30,25,0.28,240,true,false,5,"lampara-led-moderna"

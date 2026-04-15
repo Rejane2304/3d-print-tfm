@@ -5,7 +5,7 @@
  */
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -26,6 +26,8 @@ import {
   XCircle,
 } from 'lucide-react';
 import { InvoiceNotAvailableModal } from '@/components/invoices/InvoiceNotAvailableModal';
+import { useRealTime } from '@/hooks/useRealTime';
+import { toast } from 'sonner';
 
 interface Order {
   id: string;
@@ -88,7 +90,7 @@ const estadosConfig: Record<string, { color: string; icon: React.ElementType; la
 };
 
 export default function MyOrdersPage() {
-  const { status } = useSession();
+  const { status, data: session } = useSession();
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -102,6 +104,70 @@ export default function MyOrdersPage() {
   const [restoringOrder, setRestoringOrder] = useState<string | null>(null);
   const [restoredMessage, setRestoredMessage] = useState<string | null>(null);
   const [hiddenOrders, setHiddenOrders] = useState<Set<string>>(new Set());
+
+  // Real-time event handler for order updates
+  const handleRealTimeEvent = useCallback(
+    (event: { type: string; payload: Record<string, unknown> }) => {
+      // Only process events for this user
+      const eventUserId = event.payload.userId as string;
+      if (eventUserId && eventUserId !== session?.user?.id) {
+        return;
+      }
+
+      switch (event.type) {
+        case 'order:status:updated': {
+          const orderId = event.payload.orderId as string;
+          const newStatus = event.payload.status as string;
+          const orderNumber = event.payload.orderNumber as string;
+
+          setOrders(prevOrders =>
+            prevOrders.map(order => (order.id === orderId ? { ...order, estado: newStatus } : order)),
+          );
+
+          toast.success(`Pedido ${orderNumber} actualizado`, {
+            description: `Nuevo estado: ${newStatus}`,
+          });
+          break;
+        }
+
+        case 'order:new': {
+          // Refresh orders list when a new order is created
+          loadOrders();
+          break;
+        }
+
+        case 'payment:confirmed': {
+          const orderId = event.payload.orderId as string;
+          const orderNumber = event.payload.orderNumber as string;
+
+          toast.success(`Pago confirmado`, {
+            description: `Pedido ${orderNumber}`,
+          });
+
+          // Refresh to show updated payment status
+          setOrders(prevOrders =>
+            prevOrders.map(order => {
+              if (order.id === orderId && order.pago) {
+                return {
+                  ...order,
+                  pago: { ...order.pago, estado: 'COMPLETADO' },
+                };
+              }
+              return order;
+            }),
+          );
+          break;
+        }
+      }
+    },
+    [session?.user?.id],
+  );
+
+  // Initialize real-time connection
+  useRealTime({
+    eventTypes: ['order:status:updated', 'order:new', 'payment:confirmed'],
+    onEvent: handleRealTimeEvent,
+  });
 
   // Cargar pedidos al montar el componente
   useEffect(() => {

@@ -8,11 +8,25 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { AlertCircle, Clock, Edit, Euro, Globe, Loader2, MapPin, Package, Plus, Trash2, Truck } from 'lucide-react';
+import {
+  AlertCircle,
+  Clock,
+  Edit,
+  Euro,
+  Globe,
+  Loader2,
+  MapPin,
+  Package,
+  Plus,
+  Trash2,
+  Truck,
+  Upload,
+} from 'lucide-react';
 import type { BulkAction, Column } from '@/components/ui/DataTable';
 import { DataTable } from '@/components/ui/DataTable';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { BulkDeleteModal } from '@/components/ui/BulkDeleteModal';
+import { CSVUpload } from '@/components/admin/CSVUpload';
 
 interface ShippingZone extends Record<string, unknown> {
   id: string;
@@ -46,6 +60,7 @@ export default function AdminShippingPage() {
   const [zoneToDelete, setZoneToDelete] = useState<ShippingZone | null>(null);
   const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
   const [bulkDeleteIds, setBulkDeleteIds] = useState<string[]>([]);
+  const [showImportModal, setShowImportModal] = useState(false);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -307,6 +322,13 @@ export default function AdminShippingPage() {
               <Link href="/admin/dashboard" className="text-indigo-600 hover:text-indigo-800 font-medium">
                 ← Volver al Panel
               </Link>
+              <button
+                onClick={() => setShowImportModal(true)}
+                className="inline-flex items-center gap-2 bg-gray-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-700 transition-colors"
+              >
+                <Upload className="h-5 w-5" />
+                Importar CSV
+              </button>
               <Link
                 href="/admin/shipping/new"
                 className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
@@ -439,6 +461,51 @@ export default function AdminShippingPage() {
         selectedCount={bulkDeleteIds.length}
         hasAssociatedItems={false}
       />
+
+      {/* Import Modal */}
+      {showImportModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-gray-900">Importar Zonas de Envío</h2>
+                <button onClick={() => setShowImportModal(false)} className="text-gray-400 hover:text-gray-600">
+                  <span className="sr-only">Cerrar</span>
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <CSVUpload
+                title="Zonas de Envío"
+                description="Importa zonas de envío desde un archivo CSV. Cada fila representa una zona de envío."
+                requiredColumns={['name', 'countries', 'baseCost']}
+                optionalColumns={[
+                  'regions',
+                  'postalCodePrefixes',
+                  'freeThreshold',
+                  'estimatedDaysMin',
+                  'estimatedDaysMax',
+                  'isActive',
+                  'displayOrder',
+                ]}
+                apiEndpoint="/api/admin/shipping/import"
+                sampleCSV={`name,countries,regions,postalCodePrefixes,baseCost,freeThreshold,estimatedDaysMin,estimatedDaysMax,isActive,displayOrder
+"Península","[\"Spain\"]","[\"Madrid\",\"Barcelona\",\"Valencia\"]","[\"28\",\"08\"]",5.99,50.00,3,5,true,1
+"Islas Baleares","[\"Spain\"]","[\"Islas Baleares\"]","[\"07\"]",8.99,75.00,5,7,true,2
+"Islas Canarias","[\"Spain\"]","[\"Canarias\"]","[\"35\",\"38\"]",12.99,100.00,7,10,true,3`}
+                onSuccess={() => {
+                  loadZones();
+                  setShowImportModal(false);
+                }}
+                options={{
+                  skipDuplicates: true,
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
-import { CheckCircle2, Loader2, ShoppingCart } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { AlertCircle, CheckCircle2, Loader2, ShoppingCart } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 
 import { useCheckoutData } from './hooks/useCheckoutData';
@@ -131,10 +132,21 @@ function PaymentConfirmation({
 
 export default function CheckoutPage() {
   const { status } = useSession();
+  const router = useRouter();
   const [showConfirmation, setShowConfirmation] = useState(false);
 
-  const { loading, error, setError, addresses, selectedAddressId, setSelectedAddressId, cart, setCart, appliedCoupon } =
-    useCheckoutData();
+  const {
+    loading,
+    error,
+    setError,
+    addresses,
+    selectedAddressId,
+    setSelectedAddressId,
+    cart,
+    setCart,
+    appliedCoupon,
+    productsOutOfStock,
+  } = useCheckoutData();
 
   const { cancelledOrderId, restoreCart, dismissCancelledOrder } = useCancelledOrder(setCart);
 
@@ -241,6 +253,30 @@ export default function CheckoutPage() {
             onRestore={handleRestoreCart}
             onDismiss={dismissCancelledOrder}
           />
+        )}
+
+        {/* Stock Alert - Products out of stock */}
+        {productsOutOfStock.size > 0 && cart?.items && (
+          <div className="mb-4 sm:mb-6 p-4 sm:p-6 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+              <div className="flex-shrink-0">
+                <AlertCircle className="h-8 w-8 text-red-600" />
+              </div>
+              <div className="flex-1">
+                <p className="text-red-800 font-semibold text-base sm:text-lg">Stock insuficiente</p>
+                <p className="text-red-700 text-sm mt-1 mb-4">
+                  Algunos productos en tu carrito ya no están disponibles. Por favor actualiza tu carrito.
+                </p>
+                <button
+                  onClick={() => router.push('/cart')}
+                  className="inline-flex items-center justify-center gap-2 bg-red-600 text-white py-2.5 px-5 rounded-lg font-medium hover:bg-red-700 transition-colors"
+                >
+                  <ShoppingCart className="h-4 w-4" />
+                  Ver carrito
+                </button>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Error */}

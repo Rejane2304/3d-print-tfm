@@ -1,0 +1,11 @@
+userEmail,items,status,shippingCost,paymentMethod,customerNotes
+"juan.garcia@email.com","[{""productId"":""abc12345-1234-1234-1234-123456789abc"",""quantity"":2},{""productId"":""def67890-6789-6789-6789-123456789def"",""quantity"":1}]","DELIVERED",5.99,"CARD","Pedido histórico importado"
+"maria.lopez@email.com","[{""productId"":""abc12345-1234-1234-1234-123456789abc"",""quantity"":3}]","DELIVERED",5.99,"PAYPAL",""
+"carlos.ruiz@email.com","[{""productId"":""def67890-6789-6789-6789-123456789def"",""quantity"":1},{""productId"":""ghi11111-1111-1111-1111-123456789ghi"",""quantity"":2}]","SHIPPED",5.99,"CARD","Urgente"
+"ana.martinez@email.com","[{""productId"":""abc12345-1234-1234-1234-123456789abc"",""quantity"":1}]","DELIVERED",0,"BIZUM","Envío gratuito por pedido grande"
+"pedro.sanchez@email.com","[{""productId"":""ghi11111-1111-1111-1111-123456789ghi"",""quantity"":5}]","DELIVERED",5.99,"TRANSFER","Pago por transferencia confirmado"
+"laura.gomez@email.com","[{""productId"":""def67890-6789-6789-6789-123456789def"",""quantity"":2}]","CANCELLED",5.99,"CARD","Cancelado por cliente"
+"david.fernandez@email.com","[{""productId"":""abc12345-1234-1234-1234-123456789abc"",""quantity"":1},{""productId"":""def67890-6789-6789-6789-123456789def"",""quantity"":1},{""productId"":""ghi11111-1111-1111-1111-123456789ghi"",""quantity"":1}]","DELIVERED",5.99,"PAYPAL",""
+"sandra.torres@email.com","[{""productId"":""abc12345-1234-1234-1234-123456789abc"",""quantity"":10}]","DELIVERED",0,"CARD","Pedido mayorista"
+"miguel.rodriguez@email.com","[{""productId"":""def67890-6789-6789-6789-123456789def"",""quantity"":2}]","PENDING",5.99,"CARD",""
+"elena.diaz@email.com","[{""productId"":""ghi11111-1111-1111-1111-123456789ghi"",""quantity"":3}]","CONFIRMED",5.99,"PAYPAL","Regalo de cumpleaños"

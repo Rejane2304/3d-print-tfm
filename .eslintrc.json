@@ -2,7 +2,7 @@
   "extends": ["next/core-web-vitals", "next/typescript", "prettier", "plugin:jsx-a11y/recommended"],
   "plugins": ["jsx-a11y"],
   "rules": {
-    "@typescript-eslint/no-unused-vars": "error",
+    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
     "@typescript-eslint/no-explicit-any": "error",
     "@typescript-eslint/no-require-imports": "error",
     "@typescript-eslint/no-non-null-assertion": "off",
@@ -46,8 +46,7 @@
       "files": ["src/app/admin/**/*.tsx", "src/app/admin/**/*.ts"],
       "rules": {
         "no-alert": "off",
-        "no-restricted-globals": ["error", "event", "fdescribe", "fit"],
-        "@typescript-eslint/no-unused-vars": "off"
+        "no-restricted-globals": ["error", "event", "fdescribe", "fit"]
       }
     },
     {

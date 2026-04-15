@@ -1,0 +1,11 @@
+email,name,role,phone
+"juan.garcia@email.com","Juan García","CUSTOMER","+34 123 456 789"
+"maria.lopez@email.com","María López","CUSTOMER","+34 987 654 321"
+"carlos.ruiz@email.com","Carlos Ruiz","CUSTOMER","+34 555 666 777"
+"ana.martinez@email.com","Ana Martínez","ADMIN","+34 444 555 666"
+"pedro.sanchez@email.com","Pedro Sánchez","CUSTOMER","+34 222 333 444"
+"laura.gomez@email.com","Laura Gómez","CUSTOMER","+34 111 222 333"
+"david.fernandez@email.com","David Fernández","CUSTOMER","+34 777 888 999"
+"sandra.torres@email.com","Sandra Torres","CUSTOMER","+34 333 444 555"
+"miguel.rodriguez@email.com","Miguel Rodríguez","CUSTOMER","+34 666 777 888"
+"elena.diaz@email.com","Elena Díaz","ADMIN","+34 888 999 000"

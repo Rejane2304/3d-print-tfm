@@ -9,11 +9,14 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { AlertCircle, Edit, Loader2, Package, Plus, Trash2 } from 'lucide-react';
+import { AlertCircle, Edit, Loader2, Package, Plus, Trash2, Upload } from 'lucide-react';
 import type { BulkAction, Column } from '@/components/ui/DataTable';
 import { DataTable } from '@/components/ui/DataTable';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { BulkDeleteModal } from '@/components/ui/BulkDeleteModal';
+import { CSVUpload } from '@/components/ui/CSVUpload';
+import { useAdminRealTime, useNotificationToast } from '@/hooks/useRealTime';
+import { Toaster } from '@/components/ui/Toaster';
 
 interface Product extends Record<string, unknown> {
   id: string;
@@ -38,6 +41,28 @@ export default function AdminProductsPage() {
   const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
   const [selectedCount, setSelectedCount] = useState(0);
   const [selectedIdsToDelete, setSelectedIdsToDelete] = useState<string[]>([]);
+  const [importModalOpen, setImportModalOpen] = useState(false);
+
+  // Real-time setup
+  const { pendingEvents, acknowledgeEvents, isConnected } = useAdminRealTime();
+  const { notifications, showNotification, removeNotification } = useNotificationToast();
+
+  // Listen for real-time events
+  useEffect(() => {
+    if (pendingEvents.length > 0) {
+      pendingEvents.forEach(event => {
+        // Show notification for stock alerts
+        if (event.type === 'stock:alert' || event.type === 'stock:low') {
+          showNotification(event);
+          // Refresh products data
+          loadProducts();
+        }
+      });
+      // Acknowledge events
+      acknowledgeEvents(pendingEvents.map(e => e.timestamp));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingEvents]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -250,6 +275,13 @@ export default function AdminProductsPage() {
               <Link href="/admin/dashboard" className="text-indigo-600 hover:text-indigo-800 font-medium">
                 ← Volver al Panel
               </Link>
+              <button
+                onClick={() => setImportModalOpen(true)}
+                className="inline-flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+              >
+                <Upload className="h-5 w-5" />
+                Importar CSV
+              </button>
               <Link
                 href="/admin/products/new"
                 className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
@@ -320,6 +352,38 @@ export default function AdminProductsPage() {
         itemNamePlural="productos"
         hasAssociatedItems={false}
       />
+
+      {/* Import CSV Modal */}
+      {importModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <CSVUpload
+              title="Importar Productos"
+              description="Sube un archivo CSV con los productos a importar. La categoría debe existir previamente."
+              requiredColumns={['name', 'description', 'price', 'stock', 'category', 'material', 'slug']}
+              apiEndpoint="/api/admin/products/import"
+              onSuccess={() => {
+                setImportModalOpen(false);
+                loadProducts();
+              }}
+              onCancel={() => setImportModalOpen(false)}
+            />
+          </div>
+        </div>
+      )}
+      {/* Real-time Notifications */}
+      <Toaster notifications={notifications} onDismiss={removeNotification} />
+      {isConnected && (
+        <div className="fixed bottom-4 left-4 z-50">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-green-100 text-green-800 text-xs rounded-full">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
+            Tiempo real conectado
+          </div>
+        </div>
+      )}
     </div>
   );
 }

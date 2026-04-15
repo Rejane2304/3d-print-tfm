@@ -618,9 +618,48 @@ export async function createNewReviewAlert(reviewId: string, rating: number, pro
 }
 
 /**
+ * Create alert for new return request
+ */
+export async function createReturnAlert(returnId: string, orderNumber: string, userName: string | null) {
+  try {
+    // Check if alert already exists
+    const existing = await prisma.alert.findFirst({
+      where: {
+        type: 'NEW_RETURN',
+        orderId: returnId,
+        status: { in: ['PENDING', 'IN_PROGRESS'] },
+      },
+    });
+    if (existing) {
+      return existing;
+    }
+
+    // Create alert
+    const alert = await prisma.alert.create({
+      data: {
+        id: crypto.randomUUID(),
+        type: 'NEW_RETURN',
+        severity: 'MEDIUM',
+        title: `Nueva Devolución #${orderNumber}`,
+        message: `${userName || 'Cliente'} solicitó devolución del pedido #${orderNumber}`,
+        orderId: returnId,
+        status: 'PENDING',
+      },
+    });
+
+    // Emit event
+    await emitNewAlert(alert);
+
+    return alert;
+  } catch (error) {
+    logger.error('Error creating return alert:', error);
+    throw error;
+  }
+}
+/**
  * Create alert for new message
  */
-export async function createNewMessageAlert(messageId: string, orderId: string, userName: string) {
+export async function createNewMessageAlert(orderId: string, userName: string) {
   try {
     // Obtener el orderNumber del pedido
     const order = await prisma.order.findUnique({

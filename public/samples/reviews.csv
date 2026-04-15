@@ -1,0 +1,7 @@
+productId,userEmail,rating,title,comment,isVerified,isApproved
+"vase-decorativo-floral","cliente1@email.com",5,"Excelente calidad","El jarrón superó mis expectativas. Acabado perfecto y envío rápido.",true,true
+"porta-lapices-geometrico","usuario2@test.com",4,"Muy buen diseño","El organizador es funcional y queda muy bien en mi escritorio. Recomendado.",true,true
+"maceta-minimalista","planta@email.com",5,"Perfecta para mis plantas","La maceta tiene un diseño elegante y las medidas son exactas. Muy satisfecho.",true,true
+"soporte-movil-ajustable","movil@usuario.com",4,"Útil y práctico","Cumple su función perfectamente. El ajuste de ángulo es muy cómodo.",false,true
+"llavero-personalizado","regalo@email.com",5,"Detalle único","Pedí el llavero personalizado como regalo y fue un éxito. La calidad de impresión es excelente.",true,true
+"portarretratos-moderno","foto@test.com",4,"Bonito diseño","El marco tiene un diseño moderno y elegante. Ideal para decorar.",true,false

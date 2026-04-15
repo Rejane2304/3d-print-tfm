@@ -1,0 +1,7 @@
+type,severity,title,message,productId,orderId,status
+"LOW_STOCK","HIGH","Stock bajo - Jarrón Decorativo","El producto 'Jarrón Decorativo Floral' tiene stock inferior al mínimo (3 unidades)","prod-uuid-1","","PENDING"
+"NEW_ORDER","LOW","Nuevo pedido recibido","Se ha recibido un nuevo pedido #ORD-2024-010","","order-uuid-1","PENDING"
+"PAYMENT_FAILED","CRITICAL","Pago fallido - Pedido #ORD-2024-008","El pago del pedido ha sido rechazado por la entidad bancaria","","order-uuid-2","PENDING"
+"OUT_OF_STOCK","CRITICAL","Sin stock - Soporte Móvil","El producto 'Soporte Móvil Ajustable' está agotado","prod-uuid-2","","PENDING"
+"ORDER_DELAYED","MEDIUM","Pedido retrasado - #ORD-2024-005","El pedido lleva más de 5 días en estado 'Preparando'","","order-uuid-3","PENDING"
+"COUPON_EXPIRING","LOW","Cupón próximo a expirar","El cupón 'INVIERNO24' expira en 3 días","","","PENDING"

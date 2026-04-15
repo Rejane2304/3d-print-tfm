@@ -12,7 +12,7 @@ import { withErrorHandler } from '@/lib/errors/api-wrapper';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { Prisma } from '@prisma/client';
-import { translateErrorMessage, translatePaymentMethod } from '@/lib/i18n';
+import { translateErrorMessage, translatePaymentMethod, translateProductName } from '@/lib/i18n';
 import { emitNewOrder } from '@/lib/realtime/event-service';
 import { createNewOrderAlert } from '@/lib/alerts/alert-service';
 import { DEFAULT_VAT_RATE, roundToCents } from '@/lib/constants/tax';
@@ -48,9 +48,23 @@ interface TotalsResult {
   discountedSubtotal: number;
 }
 
+interface CartItemInput {
+  productId: string;
+  quantity: number;
+  product: {
+    id: string;
+    price: Prisma.Decimal;
+    material: string | null;
+    category: {
+      name: string;
+    } | null;
+    slug: string;
+  };
+}
+
 interface OrderTransactionParams {
   userId: string;
-  items: CartItemWithProduct[];
+  items: CartItemInput[];
   totals: TotalsResult;
   addressId: string;
   paymentMethod: string;
@@ -100,16 +114,6 @@ async function getUserWithCart(email: string) {
       },
     },
   });
-}
-
-// Validate stock availability
-function validateStock(items: CartItemWithProduct[]): string | null {
-  for (const item of items) {
-    if (item.product.stock < item.quantity) {
-      return `Stock insuficiente para ${item.product.name}`;
-    }
-  }
-  return null;
 }
 
 // Validate and calculate coupon discount
@@ -189,115 +193,168 @@ async function generateOrderNumber(): Promise<string> {
   return `P-${year}${String(count + 1).padStart(6, '0')}`;
 }
 
-// Create order transaction
+// Stock validation error
+class StockValidationError extends Error {
+  constructor(
+    public productId: string,
+    public productName: string,
+    public requested: number,
+    public available: number,
+  ) {
+    super(`Stock insuficiente para ${productName}: solicitado ${requested}, disponible ${available}`);
+    this.name = 'StockValidationError';
+  }
+}
+
+// Create order transaction with stock validation INSIDE transaction
 async function createOrderTransaction(params: OrderTransactionParams) {
-  const {
-    userId,
-    items,
-    totals,
-    addressId,
-    paymentMethod,
-    couponId,
-    orderNumber,
-    // userName and userEmail available in params but not needed here
-  } = params;
+  const { userId, items, totals, addressId, paymentMethod, couponId, orderNumber } = params;
 
   const address = await getShippingAddress(addressId);
   if (!address) {
     throw new Error('Address not found');
   }
 
-  return prisma.$transaction(async tx => {
-    // 1. Create the order
-    const order = await tx.order.create({
-      data: {
-        id: crypto.randomUUID(),
-        user: { connect: { id: userId } },
-        status: 'PENDING',
-        orderNumber,
-        subtotal: totals.subtotal,
-        shipping: totals.shippingCost,
-        discount: totals.couponDiscount > 0 ? totals.couponDiscount : undefined,
-        total: totals.total,
-        shippingAddressData: { connect: { id: addressId } },
-        shippingName: address.recipient,
-        shippingPhone: address.phone,
-        shippingAddress: address.address,
-        shippingComplement: address.complement,
-        shippingPostalCode: address.postalCode,
-        shippingCity: address.city,
-        shippingProvince: address.province,
-        shippingCountry: address.country,
-        paymentMethod: paymentMethod as 'CARD' | 'PAYPAL' | 'BIZUM' | 'TRANSFER',
-        updatedAt: new Date(),
-        items: {
-          create: items.map((item: CartItemWithProduct) => ({
-            id: crypto.randomUUID(),
-            product: { connect: { id: item.product.id } },
-            name: item.product.name,
-            quantity: item.quantity,
-            price: item.product.price,
-            subtotal: new Prisma.Decimal(item.product.price).mul(item.quantity),
-            category: item.product.category?.name || 'Uncategorized',
-            material: item.product.material,
-          })),
-        },
-      },
-      include: {
-        items: true,
-      },
-    });
+  return prisma.$transaction(
+    async tx => {
+      // 1. VALIDATE STOCK INSIDE TRANSACTION with row-level locking
+      // Use SELECT FOR UPDATE to lock product rows and prevent race conditions
+      const stockValidationResults: { productId: string; name: string; requested: number; available: number }[] = [];
 
-    // 2. Create the payment
-    const payment = await createPaymentRecord(tx, order.id, totals.total, paymentMethod);
+      for (const item of items) {
+        // Lock the product row with FOR UPDATE to prevent other transactions from modifying it
+        // This ensures that once we check the stock, no other transaction can modify it until we complete
+        const lockedProduct = await tx.$queryRaw<Array<{ id: string; stock: number; name: string }>>`
+        SELECT id, stock, name FROM "products" WHERE id = ${item.productId} FOR UPDATE
+      `;
 
-    // 3. Increment coupon usage if applicable
-    if (couponId) {
-      await tx.coupon.update({
-        where: { id: couponId },
-        data: { usedCount: { increment: 1 } },
-      });
-    }
+        if (!lockedProduct || lockedProduct.length === 0) {
+          throw new Error(`Producto no encontrado: ${item.productId}`);
+        }
 
-    // 4. Deduct stock and create inventory movements
-    for (const item of items) {
-      const product = await tx.product.update({
-        where: { id: item.productId },
-        data: {
-          stock: {
-            decrement: item.quantity,
-          },
-        },
-      });
+        const product = lockedProduct[0];
 
-      await tx.inventoryMovement.create({
+        if (product.stock < item.quantity) {
+          // Get translated name for the error message
+          const translatedName = translateProductName(item.product.slug);
+          stockValidationResults.push({
+            productId: item.productId,
+            name: translatedName,
+            requested: item.quantity,
+            available: product.stock,
+          });
+        }
+      }
+
+      // If any stock validation failed, throw error (transaction will be rolled back)
+      if (stockValidationResults.length > 0) {
+        const firstError = stockValidationResults[0];
+        throw new StockValidationError(
+          firstError.productId,
+          firstError.name,
+          firstError.requested,
+          firstError.available,
+        );
+      }
+
+      // 2. Create the order
+      const order = await tx.order.create({
         data: {
           id: crypto.randomUUID(),
-          productId: item.productId,
-          orderId: order.id,
-          createdBy: userId,
-          type: 'OUT',
-          quantity: item.quantity,
-          previousStock: product.stock + item.quantity,
-          newStock: product.stock,
-          reason: `Venta - Pedido ${order.orderNumber}`,
-          reference: order.id,
+          user: { connect: { id: userId } },
+          status: 'PENDING',
+          orderNumber,
+          subtotal: totals.subtotal,
+          shipping: totals.shippingCost,
+          discount: totals.couponDiscount > 0 ? totals.couponDiscount : undefined,
+          total: totals.total,
+          shippingAddressData: { connect: { id: addressId } },
+          shippingName: address.recipient,
+          shippingPhone: address.phone,
+          shippingAddress: address.address,
+          shippingComplement: address.complement,
+          shippingPostalCode: address.postalCode,
+          shippingCity: address.city,
+          shippingProvince: address.province,
+          shippingCountry: address.country,
+          paymentMethod: paymentMethod as 'CARD' | 'PAYPAL' | 'BIZUM' | 'TRANSFER',
+          updatedAt: new Date(),
+          items: {
+            create: items.map((item: CartItemInput) => ({
+              id: crypto.randomUUID(),
+              product: { connect: { id: item.productId } },
+              name: translateProductName(item.product.slug),
+              quantity: item.quantity,
+              price: item.product.price,
+              subtotal: new Prisma.Decimal(item.product.price).mul(item.quantity),
+              category: item.product.category?.name || 'Uncategorized',
+              material: item.product.material,
+            })),
+          },
+        },
+        include: {
+          items: true,
         },
       });
-    }
 
-    // 5. Empty the cart
-    const cart = await tx.cart.findFirst({
-      where: { userId },
-    });
-    if (cart) {
-      await tx.cartItem.deleteMany({
-        where: { cartId: cart.id },
+      // 3. Create the payment
+      const payment = await createPaymentRecord(tx, order.id, totals.total, paymentMethod);
+
+      // 4. Increment coupon usage if applicable
+      if (couponId) {
+        await tx.coupon.update({
+          where: { id: couponId },
+          data: { usedCount: { increment: 1 } },
+        });
+      }
+
+      // 5. Deduct stock and create inventory movements
+      // Stock is already validated and locked, so we can safely decrement
+      for (const item of items) {
+        const product = await tx.product.update({
+          where: { id: item.productId },
+          data: {
+            stock: {
+              decrement: item.quantity,
+            },
+          },
+        });
+
+        await tx.inventoryMovement.create({
+          data: {
+            id: crypto.randomUUID(),
+            productId: item.productId,
+            orderId: order.id,
+            createdBy: userId,
+            type: 'OUT',
+            quantity: item.quantity,
+            previousStock: product.stock + item.quantity,
+            newStock: product.stock,
+            reason: `Venta - Pedido ${order.orderNumber}`,
+            reference: order.id,
+          },
+        });
+      }
+
+      // 6. Empty the cart
+      const cart = await tx.cart.findFirst({
+        where: { userId },
       });
-    }
+      if (cart) {
+        await tx.cartItem.deleteMany({
+          where: { cartId: cart.id },
+        });
+      }
 
-    return { order, payment };
-  });
+      return { order, payment };
+    },
+    {
+      // Transaction options for better isolation
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      maxWait: 5000,
+      timeout: 10000,
+    },
+  );
 }
 
 // Create payment record
@@ -373,62 +430,82 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   const cartItems = user.cart.items as CartItemWithProduct[];
 
-  // 5. Validate stock
-  const stockError = validateStock(cartItems);
-  if (stockError) {
-    return NextResponse.json({ success: false, error: stockError }, { status: 400 });
-  }
-
-  // 6. Calculate subtotal
+  // 5. Calculate subtotal
   const subtotal = Number(user.cart.subtotal);
 
-  // 7. Validate coupon
+  // 6. Validate coupon
   const { couponId, couponDiscount, hasFreeShipping } = await validateCoupon(couponCode, subtotal);
 
-  // 8. Calculate totals
+  // 7. Calculate totals
   const totals = calculateTotals(subtotal, couponDiscount, hasFreeShipping);
 
-  // 9. Generate order number
+  // 8. Generate order number
   const orderNumber = await generateOrderNumber();
 
-  // 10. Create order transaction
-  const result = await createOrderTransaction({
-    userId: user.id,
-    items: cartItems,
-    totals,
-    addressId: shippingAddressId,
-    paymentMethod,
-    couponId,
-    orderNumber,
-    userName: user.name || '',
-    userEmail: user.email,
-  });
-
-  // 11. Emit real-time event
-  await emitNewOrder({
-    orderId: result.order.id,
-    orderNumber: result.order.orderNumber,
-    total: Number(result.order.total),
-    userName: user.name || user.email,
-    timestamp: new Date().toISOString(),
-  });
-
-  // 12. Create alert
+  // 9. Create order transaction (stock validation happens INSIDE the transaction)
   try {
-    await createNewOrderAlert(result.order.id, result.order.orderNumber, Number(result.order.total));
-  } catch (alertError) {
-    console.error('Error creating new order alert:', alertError);
-  }
+    const result = await createOrderTransaction({
+      userId: user.id,
+      items: cartItems.map(item => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        product: {
+          id: item.product.id,
+          price: item.product.price,
+          material: item.product.material,
+          category: item.product.category,
+          slug: item.product.slug,
+        },
+      })),
+      totals,
+      addressId: shippingAddressId,
+      paymentMethod,
+      couponId,
+      orderNumber,
+      userName: user.name || '',
+      userEmail: user.email,
+    });
 
-  // 13. Return response
-  return NextResponse.json({
-    success: true,
-    orderId: result.order.id,
-    paymentId: result.payment.id,
-    orderNumber: result.order.orderNumber,
-    status: 'PENDING',
-    paymentMethod: translatePaymentMethod(paymentMethod),
-    discount: totals.couponDiscount > 0 ? totals.couponDiscount : undefined,
-    message: 'Pedido creado. Proceda al pago.',
-  });
+    // 10. Emit real-time event
+    await emitNewOrder({
+      orderId: result.order.id,
+      orderNumber: result.order.orderNumber,
+      total: Number(result.order.total),
+      userName: user.name || user.email,
+      timestamp: new Date().toISOString(),
+    });
+
+    // 11. Create alert
+    try {
+      await createNewOrderAlert(result.order.id, result.order.orderNumber, Number(result.order.total));
+    } catch (alertError) {
+      console.error('Error creating new order alert:', alertError);
+    }
+
+    // 12. Return response
+    return NextResponse.json({
+      success: true,
+      orderId: result.order.id,
+      paymentId: result.payment.id,
+      orderNumber: result.order.orderNumber,
+      status: 'PENDING',
+      paymentMethod: translatePaymentMethod(paymentMethod),
+      discount: totals.couponDiscount > 0 ? totals.couponDiscount : undefined,
+      message: 'Pedido creado. Proceda al pago.',
+    });
+  } catch (error) {
+    // Handle stock validation error specifically
+    if (error instanceof StockValidationError) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Stock insuficiente para ${error.productName}: solicitado ${error.requested}, disponible ${error.available}`,
+        },
+        { status: 400 },
+      );
+    }
+
+    // Re-throw other errors to be handled by withErrorHandler
+    throw error;
+  }
 });

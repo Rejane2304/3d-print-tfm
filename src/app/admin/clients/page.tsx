@@ -9,9 +9,12 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { DollarSign, Eye, Loader2, ShoppingBag, Trash2, User } from 'lucide-react';
+import { DollarSign, Eye, Loader2, ShoppingBag, Trash2, Upload, User } from 'lucide-react';
 import type { BulkAction, Column } from '@/components/ui/DataTable';
 import { DataTable } from '@/components/ui/DataTable';
+import { CSVUpload } from '@/components/admin/CSVUpload';
+import { useAdminRealTime, useNotificationToast } from '@/hooks/useRealTime';
+import { Toaster } from '@/components/ui/Toaster';
 
 interface Client {
   id: string;
@@ -26,12 +29,40 @@ interface Client {
   fechaUltimoPedido: string | null;
 }
 
+// Sample CSV for clients
+const clientsSampleCSV = `email,name,role,phone
+"cliente1@email.com","Juan García","CUSTOMER","+34 123 456 789"
+"cliente2@email.com","María López","CUSTOMER","+34 987 654 321"
+"admin@email.com","Administrador","ADMIN","+34 111 222 333"`;
+
 export default function AdminClientsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
+  const [showImport, setShowImport] = useState(false);
+
+  // Real-time setup
+  const { pendingEvents, acknowledgeEvents, isConnected } = useAdminRealTime();
+  const { notifications, showNotification, removeNotification } = useNotificationToast();
+
+  // Listen for real-time events
+  useEffect(() => {
+    if (pendingEvents.length > 0) {
+      pendingEvents.forEach(event => {
+        // Show notification for new users/clients
+        if (event.type === 'client:created' || event.type === 'user:new') {
+          showNotification(event);
+          // Refresh clients data
+          fetchClients();
+        }
+      });
+      // Acknowledge events
+      acknowledgeEvents(pendingEvents.map(e => e.timestamp));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingEvents]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -82,6 +113,11 @@ export default function AdminClientsPage() {
     } catch (error) {
       console.error('Error al eliminar clientes:', error);
     }
+  };
+
+  const handleImportSuccess = () => {
+    fetchClients();
+    setShowImport(false);
   };
 
   const formatDate = (date: string | null) => {
@@ -200,28 +236,58 @@ export default function AdminClientsPage() {
               <h1 className="text-2xl font-bold text-gray-900">Gestión de Clientes</h1>
               <p className="text-gray-600 mt-1 text-sm">Gestionar clientes registrados de la tienda</p>
             </div>
-            <Link href="/admin/dashboard" className="text-indigo-600 hover:text-indigo-800 font-medium">
-              &larr; Volver al Panel
-            </Link>
+            <div className="flex items-center gap-4">
+              <Link href="/admin/dashboard" className="text-indigo-600 hover:text-indigo-800 font-medium">
+                &larr; Volver al Panel
+              </Link>
+            </div>
           </div>
         </div>
       </header>
 
       <div className="max-w-[1920px] 3xl:max-w-[2200px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Filters */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <select
-              value={statusFilter}
-              onChange={e => setStatusFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-            >
-              <option value="all">Todos los estados</option>
-              <option value="active">Activo</option>
-              <option value="inactive">Inactivo</option>
-            </select>
+        {/* CSV Import Section */}
+        {showImport ? (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">Importar Clientes desde CSV</h2>
+              <button onClick={() => setShowImport(false)} className="text-gray-500 hover:text-gray-700 text-sm">
+                Cerrar
+              </button>
+            </div>
+            <CSVUpload
+              title="Importar Clientes"
+              description="Sube un archivo CSV con los datos de los clientes. Se generarán contraseñas temporales automáticamente."
+              requiredColumns={['email', 'name']}
+              optionalColumns={['role', 'phone']}
+              apiEndpoint="/api/admin/clients/import"
+              sampleCSV={clientsSampleCSV}
+              onSuccess={handleImportSuccess}
+              options={{ skipDuplicates: true }}
+            />
           </div>
-        </div>
+        ) : (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+              <select
+                value={statusFilter}
+                onChange={e => setStatusFilter(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="all">Todos los estados</option>
+                <option value="active">Activo</option>
+                <option value="inactive">Inactivo</option>
+              </select>
+              <button
+                onClick={() => setShowImport(true)}
+                className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+              >
+                <Upload className="h-4 w-4" />
+                Importar CSV
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Clients DataTable */}
         <DataTable<Client>
@@ -240,6 +306,19 @@ export default function AdminClientsPage() {
           noResultsMessage="Ningún cliente coincide con tu búsqueda"
         />
       </div>
+      {/* Real-time Notifications */}
+      <Toaster notifications={notifications} onDismiss={removeNotification} />
+      {isConnected && (
+        <div className="fixed bottom-4 left-4 z-50">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-green-100 text-green-800 text-xs rounded-full">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
+            Tiempo real conectado
+          </div>
+        </div>
+      )}
     </div>
   );
 }

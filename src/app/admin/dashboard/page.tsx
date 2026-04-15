@@ -26,6 +26,8 @@ import {
   Truck,
   Users,
 } from 'lucide-react';
+import { useAdminRealTime, useNotificationToast } from '@/hooks/useRealTime';
+import { Toaster } from '@/components/ui/Toaster';
 
 interface AnalyticsData {
   salesSummary: {
@@ -109,6 +111,27 @@ export default function AdminPanelPage() {
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState<DateRange>('month');
 
+  // Real-time setup
+  const { pendingEvents, acknowledgeEvents } = useAdminRealTime();
+  const { showNotification } = useNotificationToast();
+
+  // Listen for real-time events
+  useEffect(() => {
+    if (pendingEvents.length > 0) {
+      pendingEvents.forEach(event => {
+        // Show notification for new orders and metrics updates
+        if (event.type === 'order:new' || event.type === 'metrics:update' || event.type === 'stock:updated') {
+          showNotification(event);
+        }
+      });
+      // Refresh analytics on relevant events
+      fetchAnalytics();
+      // Acknowledge events
+      acknowledgeEvents(pendingEvents.map(e => e.timestamp));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingEvents]);
+
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login?callbackUrl=/admin/dashboard');
@@ -126,6 +149,18 @@ export default function AdminPanelPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, session, router, dateRange]);
+
+  // Auto-refresh metrics every 60 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (status === 'authenticated') {
+        fetchAnalytics();
+      }
+    }, 60000);
+
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]);
 
   const fetchAnalytics = async () => {
     try {
@@ -528,6 +563,8 @@ export default function AdminPanelPage() {
           </Link>
         </div>
       </div>
+      {/* Real-time Notifications */}
+      <Toaster notifications={[]} onDismiss={() => {}} />
     </div>
   );
 }

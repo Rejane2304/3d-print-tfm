@@ -8,11 +8,12 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { AlertCircle, Edit, HelpCircle, Loader2, Plus, Trash2 } from 'lucide-react';
+import { AlertCircle, Edit, HelpCircle, Loader2, Plus, Trash2, Upload } from 'lucide-react';
 import type { BulkAction, Column } from '@/components/ui/DataTable';
 import { DataTable } from '@/components/ui/DataTable';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { BulkDeleteModal } from '@/components/ui/BulkDeleteModal';
+import { CSVUpload } from '@/components/admin/CSVUpload';
 
 interface FAQ extends Record<string, unknown> {
   id: string;
@@ -38,6 +39,7 @@ export default function AdminFAQsPage() {
   // Estados para bulk delete modal
   const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
   const [selectedIdsToDelete, setSelectedIdsToDelete] = useState<string[]>([]);
+  const [showImportModal, setShowImportModal] = useState(false);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -256,6 +258,13 @@ export default function AdminFAQsPage() {
               <Link href="/admin/dashboard" className="text-indigo-600 hover:text-indigo-800 font-medium">
                 ← Volver al Panel
               </Link>
+              <button
+                onClick={() => setShowImportModal(true)}
+                className="inline-flex items-center gap-2 bg-gray-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-700 transition-colors"
+              >
+                <Upload className="h-5 w-5" />
+                Importar CSV
+              </button>
               <Link
                 href="/admin/faqs/new"
                 className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
@@ -360,6 +369,43 @@ export default function AdminFAQsPage() {
         selectedCount={selectedIdsToDelete.length}
         hasAssociatedItems={false}
       />
+
+      {/* Import Modal */}
+      {showImportModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-gray-900">Importar FAQs</h2>
+                <button onClick={() => setShowImportModal(false)} className="text-gray-400 hover:text-gray-600">
+                  <span className="sr-only">Cerrar</span>
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <CSVUpload
+                title="FAQs"
+                description="Importa preguntas frecuentes desde un archivo CSV. Cada fila representa una FAQ."
+                requiredColumns={['question', 'answer', 'category']}
+                optionalColumns={['order', 'isActive']}
+                apiEndpoint="/api/admin/faqs/import"
+                sampleCSV={`question,answer,category,order,isActive
+"¿Envían a Canarias?","Sí, enviamos a todas las islas canarias. El tiempo de entrega es de 7-10 días laborables.","Shipping",1,true
+"¿Qué materiales usan?","Usamos PLA y PETG de alta calidad, biodegradables y duraderos.","Materials",2,true
+"¿Puedo devolver un producto?","Sí, aceptamos devoluciones dentro de los 14 días desde la recepción.","Returns",3,true`}
+                onSuccess={() => {
+                  loadFAQs();
+                  setShowImportModal(false);
+                }}
+                options={{
+                  skipDuplicates: true,
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

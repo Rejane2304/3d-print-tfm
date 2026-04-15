@@ -40,7 +40,6 @@ export function showConfirmDialog(options: ConfirmDialogOptions): Promise<boolea
 export function ConfirmDialogProvider() {
   const [, setTick] = useState(0);
   const confirmButtonRef = useRef<HTMLButtonElement>(null);
-  const dialogRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -93,12 +92,6 @@ export function ConfirmDialogProvider() {
     };
   }, [isOpen]);
 
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === dialogRef.current) {
-      handleClose(false);
-    }
-  };
-
   if (!isOpen) return null;
 
   const {
@@ -133,20 +126,26 @@ export function ConfirmDialogProvider() {
 
   const styles = variantStyles[variant];
 
-  /* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions, jsx-a11y/no-noninteractive-element-interactions */
-
   return (
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     <div
-      ref={dialogRef}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-      onClick={handleBackdropClick}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="dialog-title"
+      onClick={() => handleClose(false)}
+      role="button"
+      tabIndex={-1}
     >
+      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/no-noninteractive-element-interactions */}
       <div
         className="relative bg-white rounded-xl shadow-2xl max-w-md w-full transform transition-all animate-in fade-in zoom-in-95 duration-200"
         onClick={e => e.stopPropagation()}
+        onKeyDown={e => {
+          if (e.key === 'Escape') {
+            handleClose(false);
+          }
+        }}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="dialog-title"
       >
         {/* Close button */}
         <button

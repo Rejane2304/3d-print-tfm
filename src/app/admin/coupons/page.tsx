@@ -8,11 +8,12 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Activity, AlertCircle, Edit, Euro, Loader2, Percent, Plus, Ticket, Trash2, Truck } from 'lucide-react';
+import { Activity, AlertCircle, Edit, Euro, Loader2, Percent, Plus, Ticket, Trash2, Truck, Upload } from 'lucide-react';
 import type { BulkAction, Column } from '@/components/ui/DataTable';
 import { DataTable } from '@/components/ui/DataTable';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { BulkDeleteModal } from '@/components/ui/BulkDeleteModal';
+import { CSVUpload } from '@/components/admin/CSVUpload';
 
 interface Coupon extends Record<string, unknown> {
   id: string;
@@ -34,6 +35,12 @@ interface Coupon extends Record<string, unknown> {
   actualizadoEn: string;
 }
 
+// Sample CSV for coupons
+const couponsSampleCSV = `code,type,value,validFrom,validUntil,maxUses,minOrderAmount,isActive
+"DESCUENTO10","PERCENTAGE",10,"2024-01-01","2024-12-31",100,50,true
+"BIENVENIDO20","PERCENTAGE",20,"2024-01-01","2024-06-30",50,30,true
+"ENVIOGRATIS","FREE_SHIPPING",0,"2024-01-01","2024-12-31",200,100,true`;
+
 export default function AdminCouponsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -42,6 +49,7 @@ export default function AdminCouponsPage() {
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [couponToDelete, setCouponToDelete] = useState<Coupon | null>(null);
+  const [showImport, setShowImport] = useState(false);
 
   // Estados para bulk delete modal
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
@@ -152,6 +160,11 @@ export default function AdminCouponsPage() {
       setIsBulkDeleteModalOpen(false);
       setSelectedIdsForBulkDelete([]);
     }
+  };
+
+  const handleImportSuccess = () => {
+    loadCoupons();
+    setShowImport(false);
   };
 
   // Estadísticas
@@ -340,13 +353,15 @@ export default function AdminCouponsPage() {
               <Link href="/admin/dashboard" className="text-indigo-600 hover:text-indigo-800 font-medium">
                 ← Volver al Panel
               </Link>
-              <Link
-                href="/admin/coupons/new"
-                className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
-              >
-                <Plus className="h-5 w-5" />
-                Nuevo Cupón
-              </Link>
+              {!showImport && (
+                <Link
+                  href="/admin/coupons/new"
+                  className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+                >
+                  <Plus className="h-5 w-5" />
+                  Nuevo Cupón
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -376,53 +391,88 @@ export default function AdminCouponsPage() {
           </div>
         )}
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-indigo-100 rounded-lg">
-                <Ticket className="h-5 w-5 text-indigo-600" />
+        {/* CSV Import Section */}
+        {showImport ? (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">Importar Cupones desde CSV</h2>
+              <button onClick={() => setShowImport(false)} className="text-gray-500 hover:text-gray-700 text-sm">
+                Cerrar
+              </button>
+            </div>
+            <CSVUpload
+              title="Importar Cupones"
+              description="Sube un archivo CSV con cupones masivamente. Las fechas deben estar en formato ISO (YYYY-MM-DD)."
+              requiredColumns={['code', 'type', 'value', 'validFrom', 'validUntil']}
+              optionalColumns={['maxUses', 'minOrderAmount', 'isActive']}
+              apiEndpoint="/api/admin/coupons/import"
+              sampleCSV={couponsSampleCSV}
+              onSuccess={handleImportSuccess}
+              options={{ skipDuplicates: true }}
+            />
+          </div>
+        ) : (
+          <>
+            {/* Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-indigo-100 rounded-lg">
+                    <Ticket className="h-5 w-5 text-indigo-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Total Cupones</p>
+                    <p className="text-2xl font-bold text-gray-900">{coupons.length}</p>
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-gray-500">Total Cupones</p>
-                <p className="text-2xl font-bold text-gray-900">{coupons.length}</p>
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-green-100 rounded-lg">
+                    <Activity className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Activos</p>
+                    <p className="text-2xl font-bold text-green-600">{activeCoupons}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <Percent className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">De Porcentaje</p>
+                    <p className="text-2xl font-bold text-blue-600">{percentageCoupons}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <Activity className="h-5 w-5 text-purple-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Usos Totales</p>
+                    <p className="text-2xl font-bold text-purple-600">{totalUses}</p>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <Activity className="h-5 w-5 text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Activos</p>
-                <p className="text-2xl font-bold text-green-600">{activeCoupons}</p>
-              </div>
+
+            {/* Import Button */}
+            <div className="mb-6">
+              <button
+                onClick={() => setShowImport(true)}
+                className="inline-flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+              >
+                <Upload className="h-4 w-4" />
+                Importar Cupones desde CSV
+              </button>
             </div>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Percent className="h-5 w-5 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">De Porcentaje</p>
-                <p className="text-2xl font-bold text-blue-600">{percentageCoupons}</p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <Activity className="h-5 w-5 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Usos Totales</p>
-                <p className="text-2xl font-bold text-purple-600">{totalUses}</p>
-              </div>
-            </div>
-          </div>
-        </div>
+          </>
+        )}
 
         {/* DataTable */}
         <DataTable

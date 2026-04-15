@@ -96,6 +96,14 @@ export const enumTranslations = {
     FREE_SHIPPING: 'Envío gratis',
   } as TranslationMap,
 
+  // Return statuses
+  returnStatus: {
+    PENDING: 'Pendiente',
+    APPROVED: 'Aprobada',
+    REJECTED: 'Rechazada',
+    COMPLETED: 'Completada',
+  } as TranslationMap,
+
   // Materials
   material: {
     PLA: 'PLA',
@@ -527,6 +535,10 @@ export function translateCouponCode(code: string): string {
 
 export function translateMaterial(material: string): string {
   return enumTranslations.material[material] || material;
+}
+
+export function translateReturnStatus(status: string): string {
+  return enumTranslations.returnStatus[status] || status;
 }
 
 // ============================================================================

@@ -204,7 +204,7 @@ export async function PATCH(req: NextRequest) {
 
     // Emitir evento de cambio de estado en tiempo real
     if (pedido.user?.id) {
-      await emitOrderStatusUpdated(pedido.id, estado, pedido.user.id);
+      await emitOrderStatusUpdated(pedido.id, estado, pedido.user.id, pedido.orderNumber);
     }
 
     // Create alert for order status change

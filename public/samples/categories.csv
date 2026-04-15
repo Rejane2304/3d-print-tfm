@@ -1,0 +1,10 @@
+name,description,slug,image,displayOrder,isActive
+"Decoración","Productos decorativos para el hogar","decoracion","",1,true
+"Organizadores","Soluciones de organización para escritorio y hogar","organizadores","",2,true
+"Jardinería","Macetas, soportes y accesorios para plantas","jardineria","",3,true
+"Soportes","Soportes y bases para dispositivos electrónicos","soportes","",4,true
+"Accesorios","Accesorios personalizables y funcionales","accesorios","",5,true
+"Cocina","Utensilios y herramientas para cocina","cocina","",6,true
+"Iluminación","Pantallas y accesorios para iluminación","iluminacion","",7,true
+"Oficina","Productos para organización de oficina","oficina","",8,true
+"Regalos","Ideas de regalo originales y personalizadas","regalos","",9,true

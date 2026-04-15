@@ -133,18 +133,16 @@ function updateItemInLocalStorage(itemId: string, quantity: number): void {
     return;
   }
 
-  let items: CartItem[] = JSON.parse(cartData);
+  const items: CartItem[] = JSON.parse(cartData);
+  let updatedItems: CartItem[];
 
   if (quantity <= 0) {
-    items = items.filter(item => item.id !== itemId);
+    updatedItems = items.filter(item => item.id !== itemId);
   } else {
-    const item = items.find(i => i.id === itemId);
-    if (item) {
-      item.quantity = quantity;
-    }
+    updatedItems = items.map(item => (item.id === itemId ? { ...item, quantity } : item));
   }
 
-  localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+  localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(updatedItems));
 }
 
 async function removeItemFromApi(itemId: string): Promise<void> {
@@ -231,12 +229,16 @@ export function useCart() {
           const items = getLocalCartItems();
           const existingItem = items.find(item => item.productId === productId);
 
+          let updatedItems: CartItem[];
           if (existingItem) {
-            existingItem.quantity += quantity;
+            updatedItems = items.map(item =>
+              item.productId === productId ? { ...item, quantity: item.quantity + quantity } : item,
+            );
           } else {
-            items.push(createCartItem(productId, quantity, productInfo));
+            const newItem = createCartItem(productId, quantity, productInfo);
+            updatedItems = [...items, newItem];
           }
-          saveLocalCartItems(items);
+          saveLocalCartItems(updatedItems);
         }
 
         await loadCart();

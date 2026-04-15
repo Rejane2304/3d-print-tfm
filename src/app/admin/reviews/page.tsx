@@ -8,11 +8,14 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { AlertCircle, CheckCircle2, Filter, Loader2, MessageSquare, Star, Trash2, XCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Filter, Loader2, MessageSquare, Star, Trash2, Upload, XCircle } from 'lucide-react';
 import type { BulkAction, Column } from '@/components/ui/DataTable';
 import { DataTable } from '@/components/ui/DataTable';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { BulkDeleteModal } from '@/components/ui/BulkDeleteModal';
+import { useAdminRealTime, useNotificationToast } from '@/hooks/useRealTime';
+
+import { CSVUpload } from '@/components/admin/CSVUpload';
 
 interface Resena extends Record<string, unknown> {
   id: string;
@@ -42,11 +45,37 @@ export default function AdminReviewsPage() {
   const [resenaToDelete, setResenaToDelete] = useState<Resena | null>(null);
   const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
   const [selectedIdsToDelete, setSelectedIdsToDelete] = useState<string[]>([]);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [filters, setFilters] = useState({
     product: '',
     rating: '',
     verified: '',
   });
+
+  // Real-time setup
+  const { pendingEvents, acknowledgeEvents } = useAdminRealTime();
+  const {
+    notifications: _notifications,
+    showNotification,
+    removeNotification: _removeNotification,
+  } = useNotificationToast();
+
+  // Listen for real-time events
+  useEffect(() => {
+    if (pendingEvents.length > 0) {
+      pendingEvents.forEach(event => {
+        // Show notification for new reviews
+        if (event.type === 'review:new') {
+          showNotification(event);
+          // Refresh reviews data
+          loadResenas();
+        }
+      });
+      // Acknowledge events
+      acknowledgeEvents(pendingEvents.map(e => e.timestamp));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingEvents]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -392,9 +421,18 @@ export default function AdminReviewsPage() {
               <MessageSquare className="h-8 w-8 text-indigo-600" />
               <h1 className="text-2xl font-bold text-gray-900">Gestión de Reseñas</h1>
             </div>
-            <Link href="/admin/dashboard" className="text-indigo-600 hover:text-indigo-800 font-medium">
-              ← Volver al Panel
-            </Link>
+            <div className="flex items-center gap-4">
+              <Link href="/admin/dashboard" className="text-indigo-600 hover:text-indigo-800 font-medium">
+                ← Volver al Panel
+              </Link>
+              <button
+                onClick={() => setShowImportModal(true)}
+                className="inline-flex items-center gap-2 bg-gray-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-700 transition-colors"
+              >
+                <Upload className="h-5 w-5" />
+                Importar CSV
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -567,6 +605,44 @@ export default function AdminReviewsPage() {
         itemNamePlural="reseñas"
         hasAssociatedItems={false}
       />
+
+      {/* Import Modal */}
+      {showImportModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-gray-900">Importar Reseñas</h2>
+                <button onClick={() => setShowImportModal(false)} className="text-gray-400 hover:text-gray-600">
+                  <span className="sr-only">Cerrar</span>
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <CSVUpload
+                title="Reseñas"
+                description="Importa reseñas desde un archivo CSV. Cada fila representa una reseña de producto."
+                requiredColumns={['productId', 'userEmail', 'rating', 'title', 'comment']}
+                optionalColumns={['isVerified', 'isApproved']}
+                apiEndpoint="/api/admin/reviews/import"
+                sampleCSV={`productId,userEmail,rating,title,comment,isVerified,isApproved
+"vase-decorativo-floral","cliente@email.com",5,"Excelente producto","Muy satisfecho con la calidad",true,true
+"porta-lapices-geometrico","usuario@email.com",4,"Buen diseño","El producto cumple con lo esperado",true,false
+"maceta-minimalista","test@email.com",5,"Perfecta","Ideal para mis plantas",true,true`}
+                onSuccess={() => {
+                  loadResenas();
+                  setShowImportModal(false);
+                }}
+                options={{
+                  skipDuplicates: true,
+                  createMissingUsers: true,
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

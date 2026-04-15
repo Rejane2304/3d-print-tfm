@@ -111,7 +111,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     });
 
     // Emitir evento de stock actualizado en tiempo real
-    await emitStockUpdated(result.product.id, result.product.stock, previousStock);
+    await emitStockUpdated(result.product.id, result.product.stock, previousStock, product.name);
 
     // Si el stock está bajo, emitir alerta
     if (result.product.stock <= 5) {

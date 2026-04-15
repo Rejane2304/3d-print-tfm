@@ -9,10 +9,22 @@ import { useCallback, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { AlertTriangle, CheckCircle2, Eye, FileText, Loader2, Plus, Printer, Trash2, XCircle } from 'lucide-react';
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Eye,
+  FileText,
+  Loader2,
+  Plus,
+  Printer,
+  Trash2,
+  Upload,
+  XCircle,
+} from 'lucide-react';
 import type { BulkAction, Column } from '@/components/ui/DataTable';
 import { DataTable } from '@/components/ui/DataTable';
 import ConfirmModal from '@/components/ui/ConfirmModal';
+import { CSVUpload } from '@/components/admin/CSVUpload';
 
 interface Invoice {
   id: string;
@@ -42,6 +54,7 @@ export default function AdminInvoicesPage() {
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [invoiceToCancel, setInvoiceToCancel] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [showImportModal, setShowImportModal] = useState(false);
 
   const loadInvoices = useCallback(async () => {
     try {
@@ -315,6 +328,13 @@ export default function AdminInvoicesPage() {
                 &larr; Volver al Panel
               </Link>
               <button
+                onClick={() => setShowImportModal(true)}
+                className="inline-flex items-center gap-2 bg-gray-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-700 transition-colors"
+              >
+                <Upload className="h-5 w-5" />
+                Importar CSV
+              </button>
+              <button
                 onClick={() => setShowGenerateModal(true)}
                 className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
                 data-testid="generate-invoice-button"
@@ -434,6 +454,43 @@ export default function AdminInvoicesPage() {
         confirmText="Anular factura"
         type="warning"
       />
+
+      {/* Import Modal */}
+      {showImportModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-gray-900">Importar Facturas Históricas</h2>
+                <button onClick={() => setShowImportModal(false)} className="text-gray-400 hover:text-gray-600">
+                  <span className="sr-only">Cerrar</span>
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <CSVUpload
+                title="Facturas Históricas"
+                description="Importa facturas históricas desde un archivo CSV. Cada fila representa una factura asociada a un pedido existente."
+                requiredColumns={['orderNumber', 'series', 'number', 'total']}
+                optionalColumns={['issueDate', 'status', 'vatRate', 'vatAmount', 'shipping', 'subtotal']}
+                apiEndpoint="/api/admin/invoices/import"
+                sampleCSV={`orderNumber,series,number,issueDate,status,total,vatRate,vatAmount,shipping,subtotal
+"ORD-2024-001","F",1,"2024-01-15","ISSUED",59.99,21,12.60,5.99,42.40
+"ORD-2024-002","F",2,"2024-01-16","ISSUED",89.50,21,18.90,5.99,64.61
+"ORD-2024-003","F",3,"2024-01-20","CANCELLED",45.00,21,9.45,5.99,29.56`}
+                onSuccess={() => {
+                  loadInvoices();
+                  setShowImportModal(false);
+                }}
+                options={{
+                  skipDuplicates: true,
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

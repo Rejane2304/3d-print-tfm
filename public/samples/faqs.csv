@@ -1,0 +1,9 @@
+question,answer,category,order,isActive
+"¿Envían a Canarias?","Sí, enviamos a todas las islas canarias. El tiempo de entrega es de 7-10 días laborables.","Shipping",1,true
+"¿Qué materiales usan?","Usamos PLA y PETG de alta calidad, biodegradables y duraderos. Ambos materiales son ideales para impresión 3D y ofrecen excelente calidad de acabado.","Materials",2,true
+"¿Puedo devolver un producto?","Sí, aceptamos devoluciones dentro de los 14 días desde la recepción del pedido. El producto debe estar en perfectas condiciones y con su embalaje original.","Returns",3,true
+"¿Cuánto tarda en llegar mi pedido?","Los tiempos de entrega varían según la zona: Península 3-5 días, Islas 7-10 días, Internacional 5-10 días.","Shipping",4,true
+"¿Los productos son seguros para niños?","Sí, todos nuestros productos están fabricados con materiales no tóxicos y cumplen con las normativas europeas de seguridad.","Safety",5,true
+"¿Cómo debo limpiar los productos?","Recomendamos limpiar con un paño húmedo y agua tibia. Evita productos químicos agresivos que puedan dañar el material.","Care",6,true
+"¿Puedo personalizar un producto?","Sí, ofrecemos servicios de personalización. Contacta con nosotros para más información sobre diseños personalizados.","Orders",7,true
+"¿Qué métodos de pago aceptan?","Aceptamos tarjeta de crédito/débito, PayPal, Bizum y transferencia bancaria.","Payments",8,true
