@@ -120,13 +120,6 @@ export function usePaymentProcessing(): UsePaymentProcessingResult {
         setProcessing(true);
         setError(null);
 
-        // Log para debug
-        // eslint-disable-next-line no-console
-        console.log('Iniciando proceso de pago:', {
-          shippingAddressId: selectedAddressId,
-          paymentMethod: paymentMethod,
-        });
-
         // Step 1: Create order in PENDING status
         const checkoutResponse = await fetch('/api/checkout', {
           method: 'POST',
@@ -138,14 +131,6 @@ export function usePaymentProcessing(): UsePaymentProcessingResult {
         });
 
         const checkoutData = await checkoutResponse.json();
-
-        // Log para debug de respuesta
-        // eslint-disable-next-line no-console
-        console.log('Respuesta checkout:', {
-          status: checkoutResponse.status,
-          ok: checkoutResponse.ok,
-          data: checkoutData,
-        });
 
         if (!checkoutResponse.ok) {
           throw new Error(checkoutData.error || `Error ${checkoutResponse.status}: Error al crear el pedido`);
