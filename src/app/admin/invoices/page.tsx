@@ -88,7 +88,7 @@ export default function AdminInvoicesPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/login?callbackUrl=/admin/invoices');
+      router.push('/auth?callbackUrl=/admin/invoices');
       return;
     }
 

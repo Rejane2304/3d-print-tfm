@@ -138,7 +138,7 @@ export default function AdminOrdersPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/login?callbackUrl=/admin/orders');
+      router.push('/auth?callbackUrl=/admin/orders');
       return;
     }
 

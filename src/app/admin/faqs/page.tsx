@@ -43,7 +43,7 @@ export default function AdminFAQsPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/login?callbackUrl=/admin/faqs');
+      router.push('/auth?callbackUrl=/admin/faqs');
       return;
     }
 

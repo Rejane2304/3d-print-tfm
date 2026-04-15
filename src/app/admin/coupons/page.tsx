@@ -58,7 +58,7 @@ export default function AdminCouponsPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/login?callbackUrl=/admin/coupons');
+      router.push('/auth?callbackUrl=/admin/coupons');
       return;
     }
 

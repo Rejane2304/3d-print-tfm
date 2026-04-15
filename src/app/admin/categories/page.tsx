@@ -45,7 +45,7 @@ export default function AdminCategoriesPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/login?callbackUrl=/admin/categories');
+      router.push('/auth?callbackUrl=/admin/categories');
       return;
     }
 

@@ -55,7 +55,7 @@ export default function AdminSiteConfigPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/login?callbackUrl=/admin/site-config');
+      router.push('/auth?callbackUrl=/admin/site-config');
       return;
     }
 

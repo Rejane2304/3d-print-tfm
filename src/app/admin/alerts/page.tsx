@@ -271,7 +271,7 @@ export default function AdminAlertsPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/login?callbackUrl=/admin/alerts');
+      router.push('/auth?callbackUrl=/admin/alerts');
       return;
     }
 

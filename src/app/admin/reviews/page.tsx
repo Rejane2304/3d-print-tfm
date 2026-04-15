@@ -79,7 +79,7 @@ export default function AdminReviewsPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/login?callbackUrl=/admin/reviews');
+      router.push('/auth?callbackUrl=/admin/reviews');
       return;
     }
 

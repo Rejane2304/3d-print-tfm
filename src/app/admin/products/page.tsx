@@ -66,7 +66,7 @@ export default function AdminProductsPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/login?callbackUrl=/admin/products');
+      router.push('/auth?callbackUrl=/admin/products');
       return;
     }
 

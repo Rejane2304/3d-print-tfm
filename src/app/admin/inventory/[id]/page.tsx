@@ -94,7 +94,7 @@ export default function InventoryHistoryPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/login?callbackUrl=/admin/inventory');
+      router.push('/auth?callbackUrl=/admin/inventory');
       return;
     }
 

@@ -64,7 +64,7 @@ export default function AdminShippingPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/login?callbackUrl=/admin/shipping');
+      router.push('/auth?callbackUrl=/admin/shipping');
       return;
     }
 

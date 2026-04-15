@@ -73,7 +73,7 @@ export default function AdminClientDetailPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/login?callbackUrl=/admin/clients');
+      router.push('/auth?callbackUrl=/admin/clients');
       return;
     }
 

@@ -134,7 +134,7 @@ export default function AdminPanelPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/login?callbackUrl=/admin/dashboard');
+      router.push('/auth?callbackUrl=/admin/dashboard');
       return;
     }
 
