@@ -661,6 +661,7 @@ enum AlertType {
   NEW_REVIEW
   NEW_MESSAGE
   PREPARING_ORDER
+  NEW_RETURN
 }
 
 enum CouponType {

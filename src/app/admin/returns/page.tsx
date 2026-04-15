@@ -169,7 +169,7 @@ export default function AdminReturnsPage() {
         '¿Estás seguro de que deseas aprobar esta devolución? Se restaurará el stock y se iniciará el reembolso.',
       confirmText: 'Sí, aprobar',
       cancelText: 'Cancelar',
-      variant: 'primary',
+      variant: 'info',
     });
 
     if (confirmed) {
@@ -178,17 +178,16 @@ export default function AdminReturnsPage() {
   };
 
   const handleReject = async (returnId: string) => {
-    const reason = await showConfirmDialog({
+    const confirmed = await showConfirmDialog({
       title: 'Rechazar devolución',
-      message: '¿Estás seguro de que deseas rechazar esta devolución? Incluye el motivo:',
+      message: '¿Estás seguro de que deseas rechazar esta devolución?',
       confirmText: 'Sí, rechazar',
       cancelText: 'Cancelar',
       variant: 'danger',
-      inputPlaceholder: 'Motivo del rechazo',
     });
 
-    if (typeof reason === 'string' && reason) {
-      await updateReturnStatus(returnId, 'Rechazada', reason);
+    if (confirmed) {
+      await updateReturnStatus(returnId, 'Rechazada', 'Solicitud rechazada por el administrador');
     }
   };
 

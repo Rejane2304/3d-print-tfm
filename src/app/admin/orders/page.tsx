@@ -91,7 +91,7 @@ export default function AdminOrdersPage() {
   const [showImport, setShowImport] = useState(false);
 
   // Real-time setup
-  const { events: _events, pendingEvents, acknowledgeEvents, isConnected: _isConnected } = useAdminRealTime();
+  const { events: _events, pendingEvents, acknowledgeEvents, isConnected } = useAdminRealTime();
   const { notifications, showNotification, removeNotification } = useNotificationToast();
   const { playEventSound } = useNotificationSound();
 

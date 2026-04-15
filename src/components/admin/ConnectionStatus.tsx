@@ -2,10 +2,10 @@
 
 import { useState, useCallback } from 'react';
 import { Wifi, WifiOff, RefreshCw, AlertCircle } from 'lucide-react';
-import { ConnectionStatus } from '@/hooks/useRealTime';
+import type { ConnectionStatus as ConnectionStatusType } from '@/hooks/useRealTime';
 
 interface ConnectionStatusProps {
-  status: ConnectionStatus;
+  status: ConnectionStatusType;
   reconnectAttempt: number;
   maxReconnectAttempts?: number;
   lastHeartbeatAt?: Date | null;
@@ -202,7 +202,7 @@ export default function ConnectionStatus({
 /**
  * Versión compacta del indicador (solo el punto de color)
  */
-export function ConnectionStatusDot({ status, className = '' }: { status: ConnectionStatus; className?: string }) {
+export function ConnectionStatusDot({ status, className = '' }: { status: ConnectionStatusType; className?: string }) {
   const getColor = () => {
     switch (status) {
       case 'connected':
@@ -229,7 +229,7 @@ export function AdminConnectionStatus({
   onReconnect,
   missedEventsCount,
 }: {
-  status: ConnectionStatus;
+  status: ConnectionStatusType;
   reconnectAttempt: number;
   onReconnect?: () => void;
   missedEventsCount?: number;

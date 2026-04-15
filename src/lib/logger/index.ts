@@ -139,11 +139,14 @@ class Logger {
           console.error(
             this.formatMessage('error', 'Error sending to monitoring service', {
               originalError: errorMeta,
-              caughtException: caughtError instanceof Error ? {
-                name: caughtError.name,
-                message: caughtError.message,
-                stack: caughtError.stack,
-              } : caughtError,
+              caughtException:
+                caughtError instanceof Error
+                  ? {
+                      name: caughtError.name,
+                      message: caughtError.message,
+                      stack: caughtError.stack,
+                    }
+                  : caughtError,
             }),
           );
         }

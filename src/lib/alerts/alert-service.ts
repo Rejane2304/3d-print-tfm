@@ -625,7 +625,7 @@ export async function createReturnAlert(returnId: string, orderNumber: string, u
     // Check if alert already exists
     const existing = await prisma.alert.findFirst({
       where: {
-        type: 'NEW_RETURN',
+        type: 'NEW_ORDER' as AlertType,
         orderId: returnId,
         status: { in: ['PENDING', 'IN_PROGRESS'] },
       },
@@ -638,7 +638,7 @@ export async function createReturnAlert(returnId: string, orderNumber: string, u
     const alert = await prisma.alert.create({
       data: {
         id: crypto.randomUUID(),
-        type: 'NEW_RETURN',
+        type: 'NEW_ORDER' as AlertType,
         severity: 'MEDIUM',
         title: `Nueva Devolución #${orderNumber}`,
         message: `${userName || 'Cliente'} solicitó devolución del pedido #${orderNumber}`,

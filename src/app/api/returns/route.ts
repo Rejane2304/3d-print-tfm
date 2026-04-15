@@ -40,7 +40,7 @@ interface OrderWithItems {
   deliveredAt: Date | null;
   items: Array<{
     id: string;
-    price: number;
+    price: Prisma.Decimal;
     quantity: number;
     productId: string | null;
     product?: {
@@ -137,6 +137,10 @@ export async function POST(req: NextRequest) {
 
     const order = returnCheck.order;
 
+    if (!order) {
+      return NextResponse.json({ error: 'Pedido no encontrado' }, { status: 404 });
+    }
+
     // Validar items
     const returnItems: Array<{
       orderItemId: string;
@@ -181,12 +185,15 @@ export async function POST(req: NextRequest) {
           totalAmount,
           items: {
             create: returnItems.map(item => {
-              const orderItem = order.items.find((i: { id: string }) => i.id === item.orderItemId);
+              const foundItem = order.items.find((i: { id: string }) => i.id === item.orderItemId);
+              if (!foundItem) {
+                throw new Error(`Item ${item.orderItemId} no encontrado`);
+              }
               return {
                 id: crypto.randomUUID(),
-                productId: orderItem!.productId!,
+                productId: foundItem.productId!,
                 quantity: item.quantity,
-                unitPrice: orderItem!.price,
+                unitPrice: foundItem.price,
                 reason: item.reason,
               };
             }),
@@ -256,12 +263,12 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const status = searchParams.get('status');
 
-    const where: Prisma.ReturnWhereInput = { userId: user.id };
+    const where: { userId: string; status?: 'PENDING' | 'APPROVED' | 'REJECTED' | 'COMPLETED' } = { userId: user.id };
 
     if (status) {
-      const validStatuses = ['PENDING', 'APPROVED', 'REJECTED', 'COMPLETED'];
-      if (validStatuses.includes(status)) {
-        where.status = status as Prisma.ReturnWhereInput['status'];
+      const validStatuses = ['PENDING', 'APPROVED', 'REJECTED', 'COMPLETED'] as const;
+      if (validStatuses.includes(status as (typeof validStatuses)[number])) {
+        where.status = status as (typeof validStatuses)[number];
       }
     }
 

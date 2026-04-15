@@ -34,7 +34,7 @@ function parseCSV(buffer: Buffer): { records: Record<string, string>[]; headers:
     columns: true,
     skip_empty_lines: true,
     trim: true,
-  });
+  }) as Record<string, string>[];
 
   if (records.length === 0) {
     throw new Error('El archivo CSV está vacío');
@@ -177,7 +177,7 @@ export async function POST(req: NextRequest) {
     const existingCategories = await prisma.category.findMany({
       select: { slug: true },
     });
-    const existingSlugs = new Set(existingCategories.map(c => c.slug));
+    const existingSlugs = new Set<string>(existingCategories.map(c => c.slug));
 
     // Validar todas las filas
     const previewRows: CSVPreviewRow[] = [];

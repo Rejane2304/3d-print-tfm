@@ -39,7 +39,7 @@ function parseCSV(buffer: Buffer): { records: Record<string, string>[]; headers:
     columns: true,
     skip_empty_lines: true,
     trim: true,
-  });
+  }) as Record<string, string>[];
 
   if (records.length === 0) {
     throw new Error('El archivo CSV está vacío');
@@ -181,7 +181,9 @@ export async function POST(req: NextRequest) {
     const products = await prisma.product.findMany({
       select: { id: true, slug: true, name: true, stock: true },
     });
-    const productsMap = new Map(products.map(p => [p.slug, { id: p.id, name: p.name, currentStock: p.stock }]));
+    const productsMap = new Map<string, { id: string; name: string; currentStock: number }>(
+      products.map(p => [p.slug, { id: p.id, name: p.name, currentStock: p.stock }]),
+    );
 
     // Validar todas las filas
     const previewRows: CSVPreviewRow[] = [];

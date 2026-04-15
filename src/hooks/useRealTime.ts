@@ -33,6 +33,7 @@ export type EventType =
   | 'client:created'
   | 'client:updated'
   | 'client:deleted'
+  | 'user:new'
   // Facturas
   | 'invoice:created'
   | 'invoice:deleted'
@@ -663,7 +664,7 @@ export function useNotificationToast() {
   const [notifications, setNotifications] = useState<
     Array<{
       id: string;
-      type: EventType;
+      type: 'info' | 'success' | 'warning' | 'error';
       title: string;
       message: string;
       timestamp: Date;
@@ -693,6 +694,7 @@ export function useNotificationToast() {
       'client:created': 'Cliente Creado',
       'client:updated': 'Cliente Actualizado',
       'client:deleted': 'Cliente Eliminado',
+      'user:new': 'Nuevo Usuario',
       'invoice:created': 'Factura Creada',
       'invoice:deleted': 'Factura Eliminada',
       'category:created': 'Categoría Creada',
@@ -711,7 +713,13 @@ export function useNotificationToast() {
 
     const notification = {
       id,
-      type: event.type,
+      type: (event.type.includes('deleted') || event.type.includes('failed')
+        ? 'error'
+        : event.type.includes('updated')
+          ? 'info'
+          : event.type.includes('created') || event.type.includes('new')
+            ? 'success'
+            : 'info') as 'info' | 'success' | 'warning' | 'error',
       title: titles[event.type] || 'Notificación',
       message: getNotificationMessage(event),
       timestamp: new Date(),
