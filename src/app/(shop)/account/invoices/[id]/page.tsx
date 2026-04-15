@@ -61,7 +61,11 @@ export default function UserInvoiceDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [hasLoaded, setHasLoaded] = useState(false);
+
   const loadInvoice = useCallback(async () => {
+    if (hasLoaded) return;
+
     try {
       setLoading(true);
       setError(null);
@@ -73,25 +77,28 @@ export default function UserInvoiceDetailPage() {
         throw new Error(data.error || 'Error al cargar factura');
       }
 
-      // La API ya devuelve los datos en el formato correcto
       setInvoice(data.factura);
+      setHasLoaded(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
     }
-  }, [params.id]);
+  }, [params.id, hasLoaded]);
 
   useEffect(() => {
+    // Solo ejecutar cuando la sesión esté lista
+    if (status === 'loading') return;
+
     if (status === 'unauthenticated') {
       router.push('/auth?callbackUrl=/account/invoices');
       return;
     }
 
-    if (status === 'authenticated' && params.id) {
+    if (status === 'authenticated' && params.id && !hasLoaded) {
       loadInvoice();
     }
-  }, [status, router, params.id, loadInvoice]);
+  }, [status, router, params.id, hasLoaded]);
 
   const printInvoice = () => {
     globalThis.print();
