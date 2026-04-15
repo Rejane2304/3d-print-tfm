@@ -111,13 +111,32 @@ export default function AdminPanelPage() {
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState<DateRange>('month');
 
-  // Handler for real-time events
-  const handleRealTimeEvent = useCallback((eventType: string) => {
-    // Refresh analytics on relevant events
-    if (eventType === 'metrics:update' || eventType === 'stock:updated') {
-      fetchAnalytics();
+  const fetchAnalytics = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/admin/analytics?range=${dateRange}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setAnalytics(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching analytics:', error);
+    } finally {
+      setLoading(false);
     }
-  }, []);
+  }, [dateRange]);
+
+  // Handler for real-time events
+  const handleRealTimeEvent = useCallback(
+    (eventType: string) => {
+      // Refresh analytics on relevant events
+      if (eventType === 'metrics:update' || eventType === 'stock:updated') {
+        void fetchAnalytics();
+      }
+    },
+    [fetchAnalytics],
+  );
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -132,38 +151,20 @@ export default function AdminPanelPage() {
     }
 
     if (status === 'authenticated') {
-      fetchAnalytics();
+      void fetchAnalytics();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, session, router, dateRange]);
+  }, [status, session, router, fetchAnalytics]);
 
   // Auto-refresh metrics every 60 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       if (status === 'authenticated') {
-        fetchAnalytics();
+        void fetchAnalytics();
       }
     }, 60000);
 
     return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status]);
-
-  const fetchAnalytics = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`/api/admin/analytics?range=${dateRange}`);
-      const data = await response.json();
-
-      if (data.success) {
-        setAnalytics(data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching analytics:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [status, fetchAnalytics]);
 
   const formatCurrency = (amount: number | undefined | null) => {
     if (amount === undefined || amount === null) {

@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import AdminLayout from '@/components/layout/AdminLayout';
 
 export default function Layout({ children }: { children: ReactNode }) {

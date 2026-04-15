@@ -91,8 +91,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       companyCity: factura.companyCity || 'Barcelona',
       companyProvince: factura.companyProvince || 'Barcelona',
       companyPostalCode: factura.companyPostalCode || '08001',
-      companyEmail: factura.companyEmail || 'info@3dprint.com',
-      companyPhone: factura.companyPhone || '+34 930 000 001',
+      // Datos de la empresa (valores por defecto ya que no existen en el schema)
+      companyEmail: 'info@3dprint.com',
+      companyPhone: '+34 930 000 001',
 
       // Datos del cliente
       clientName: factura.clientName || 'Cliente',
@@ -102,8 +103,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       clientProvince: factura.clientProvince || '',
       clientPostalCode: factura.clientPostalCode || '',
       clientCountry: factura.clientCountry || 'España',
-      clientEmail: factura.clientEmail || factura.order?.user?.email || '',
-      clientPhone: factura.clientPhone || factura.order?.user?.phone || '',
+      // Contacto del cliente (desde la orden)
+      clientEmail: factura.order?.user?.email || '',
+      clientPhone: factura.order?.user?.phone || '',
 
       // Info del pedido
       orderNumber: factura.order?.orderNumber || '',

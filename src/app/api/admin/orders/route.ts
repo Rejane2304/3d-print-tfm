@@ -37,6 +37,7 @@ const estadoToEnglish: Record<string, string> = {
 };
 
 // Mapping of statuses from English to Spanish
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const englishToEstado: Record<string, string> = {
   PENDING: 'Pendiente',
   CONFIRMED: 'Confirmado',

@@ -94,7 +94,7 @@ export default function UserInvoiceDetailPage() {
         setLoading(false);
       }
     }
-  }, [status, params.id]); // Solo dependencias esenciales
+  }, [status, params.id, router]); // Solo dependencias esenciales
 
   const printInvoice = () => {
     globalThis.print();
