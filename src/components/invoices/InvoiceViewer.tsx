@@ -615,6 +615,16 @@ export function InvoiceViewer({ data }: Readonly<InvoiceViewerProps>) {
     )
     .join('');
 
+  // Debug: Verificar datos
+  console.log('InvoiceViewer - Datos recibidos:', {
+    invoiceNumber: data.invoiceNumber,
+    issuedAt: data.issuedAt,
+    companyName: data.companyName,
+    itemsCount: data.items?.length,
+    orderNumber: data.orderNumber,
+    paymentMethod: data.paymentMethod,
+  });
+
   const htmlContent = `
     <div class="invoice-wrapper">
       <div class="invoice-container">
@@ -624,19 +634,19 @@ export function InvoiceViewer({ data }: Readonly<InvoiceViewerProps>) {
             <div class="company-section">
               <div class="logo-container">
                 <div class="logo-icon">3D</div>
-                <div class="company-name">${data.companyName}</div>
+                <div class="company-name">${data.companyName || 'Sin nombre'}</div>
               </div>
               <div class="company-details">
-                <strong>NIF:</strong> ${data.companyTaxId}<br>
-                ${data.companyAddress}<br>
-                ${data.companyPostalCode} ${data.companyCity}, ${data.companyProvince}
+                <strong>NIF:</strong> ${data.companyTaxId || 'N/A'}<br>
+                ${data.companyAddress || ''}<br>
+                ${data.companyPostalCode || ''} ${data.companyCity || ''}, ${data.companyProvince || ''}
                 ${data.companyPhone ? `<br>📞 ${data.companyPhone}` : ''}
                 ${data.companyEmail ? `<br>✉ ${data.companyEmail}` : ''}
               </div>
             </div>
             <div class="invoice-meta">
               <div class="invoice-label">Factura</div>
-              <div class="invoice-number">${data.invoiceNumber}</div>
+              <div class="invoice-number">${data.invoiceNumber || 'Sin número'}</div>
               <div class="invoice-date">${fechaEmision}</div>
               ${data.isCancelled ? '<div class="cancelled-badge">Factura Anulada</div>' : ''}
             </div>
@@ -652,8 +662,8 @@ export function InvoiceViewer({ data }: Readonly<InvoiceViewerProps>) {
               <div class="client-name">${data.clientName}</div>
               <div class="client-details">
                 <strong>NIF:</strong> ${data.clientTaxId || 'No especificado'}<br>
-                ${data.clientAddress}<br>
-                ${data.clientPostalCode} ${data.clientCity}, ${data.clientProvince}<br>
+                ${data.clientAddress || ''}<br>
+                ${data.clientPostalCode || ''} ${data.clientCity || ''}, ${data.clientProvince || ''}<br>
                 ${data.clientCountry || 'España'}
               </div>
               ${(() => {
@@ -679,12 +689,12 @@ export function InvoiceViewer({ data }: Readonly<InvoiceViewerProps>) {
 }
             </div>
 
-            <div class="client-card">
+              <div class="client-card">
               <div class="section-label">Información del pedido</div>
               <div class="client-details">
-                <strong>Pedido:</strong> ${data.orderNumber || 'N/A'}<br>
+                <strong>Pedido:</strong> ${data.orderNumber && data.orderNumber.trim() !== '' ? data.orderNumber : 'N/A'}<br>
                 <strong>Método de pago:</strong> ${getPaymentMethodName(data.paymentMethod)}<br>
-                <strong>Fecha de emisión:</strong> ${fechaEmision}
+                <strong>Fecha de emisión:</strong> ${fechaEmision || 'Fecha no disponible'}
               </div>
             </div>
           </div>
