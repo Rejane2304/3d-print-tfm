@@ -1,0 +1,46 @@
+name: Check PR Recommended
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  check-push:
+    name: Check Push Method
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.event.pull_request == null
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Run quality checks
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run lint
+        run: npm run lint
+        
+      - name: Run type check
+        run: npx tsc --noEmit
+        
+      - name: Run tests
+        run: npm run test:unit
+        
+      - name: Warning for direct push
+        run: |
+          echo "⚠️  ADVERTENCIA: Push directo a ${GITHUB_REF_NAME}"
+          echo ""
+          echo "✅ Los checks han pasado, el deploy continuará."
+          echo ""
+          echo "💡 RECOMENDACIÓN: Para próximos cambios, considera usar Pull Request:"
+          echo "   1. Crea una rama: git checkout -b feature/nombre-feature"
+          echo "   2. Sube: git push origin feature/nombre-feature"
+          echo "   3. Crea PR en GitHub"
+          echo ""
