@@ -109,10 +109,12 @@ export default function ReturnDetailPage() {
     [returnId, session?.user?.id, loadReturn],
   );
 
-  // Initialize real-time connection
+  // Initialize real-time connection - desactivado para evitar bucles
   useRealTime({
     eventTypes: ['return:status:updated', 'return:new'],
     onEvent: handleRealTimeEvent,
+    autoReconnect: false,
+    enableSSE: false,
   });
 
   useEffect(() => {

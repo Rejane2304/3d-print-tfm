@@ -4,7 +4,7 @@
  */
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -26,8 +26,8 @@ import {
   Truck,
   Users,
 } from 'lucide-react';
-import { useAdminRealTime, useNotificationToast } from '@/hooks/useRealTime';
 import { Toaster } from '@/components/ui/Toaster';
+import RealTimeManager from '@/components/admin/RealTimeManager';
 
 interface AnalyticsData {
   salesSummary: {
@@ -111,26 +111,13 @@ export default function AdminPanelPage() {
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState<DateRange>('month');
 
-  // Real-time setup
-  const { pendingEvents, acknowledgeEvents } = useAdminRealTime();
-  const { showNotification } = useNotificationToast();
-
-  // Listen for real-time events
-  useEffect(() => {
-    if (pendingEvents.length > 0) {
-      pendingEvents.forEach(event => {
-        // Show notification for new orders and metrics updates
-        if (event.type === 'order:new' || event.type === 'metrics:update' || event.type === 'stock:updated') {
-          showNotification(event);
-        }
-      });
-      // Refresh analytics on relevant events
+  // Handler for real-time events
+  const handleRealTimeEvent = useCallback((eventType: string) => {
+    // Refresh analytics on relevant events
+    if (eventType === 'metrics:update' || eventType === 'stock:updated') {
       fetchAnalytics();
-      // Acknowledge events
-      acknowledgeEvents(pendingEvents.map(e => e.timestamp));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pendingEvents]);
+  }, []);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -563,7 +550,8 @@ export default function AdminPanelPage() {
           </Link>
         </div>
       </div>
-      {/* Real-time Notifications */}
+      {/* Real-time Notifications - Solo renderizar cuando está autenticado */}
+      {status === 'authenticated' && <RealTimeManager onEvent={handleRealTimeEvent} />}
       <Toaster notifications={[]} onDismiss={() => {}} />
     </div>
   );

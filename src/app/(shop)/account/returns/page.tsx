@@ -100,10 +100,12 @@ export default function AccountReturnsPage() {
     [session?.user?.id, loadReturns],
   );
 
-  // Initialize real-time connection
+  // Initialize real-time connection - desactivado para evitar bucles
   useRealTime({
     eventTypes: ['return:status:updated', 'return:new'],
     onEvent: handleRealTimeEvent,
+    autoReconnect: false,
+    enableSSE: false,
   });
 
   useEffect(() => {

@@ -163,10 +163,12 @@ export default function MyOrdersPage() {
     [session?.user?.id],
   );
 
-  // Initialize real-time connection
+  // Initialize real-time connection - desactivado para evitar bucles
   useRealTime({
     eventTypes: ['order:status:updated', 'order:new', 'payment:confirmed'],
     onEvent: handleRealTimeEvent,
+    autoReconnect: false,
+    enableSSE: false,
   });
 
   // Cargar pedidos al montar el componente

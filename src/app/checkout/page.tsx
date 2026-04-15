@@ -19,7 +19,7 @@ function LoadingState() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <div className="text-center">
         <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin text-indigo-600 mx-auto mb-4" />
-        <p className="text-gray-600 text-sm sm:text-base">Cargando checkout...</p>
+        <p className="text-gray-600 text-sm sm:text-base">Cargando proceso de compra...</p>
       </div>
     </div>
   );

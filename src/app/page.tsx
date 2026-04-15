@@ -19,8 +19,8 @@ import {
 } from '@/lib/i18n';
 
 async function getFeaturedProducts() {
-  // Solo productos marcados como destacados por el admin (exclusivamente)
-  const featuredProducts = await prisma.product.findMany({
+  // 1. Primero obtener productos marcados manualmente como destacados
+  const manualFeatured = await prisma.product.findMany({
     where: {
       isActive: true,
       isFeatured: true,
@@ -30,6 +30,11 @@ async function getFeaturedProducts() {
         where: { isMain: true },
         take: 1,
       },
+      orderItems: {
+        select: {
+          quantity: true,
+        },
+      },
     },
     orderBy: {
       updatedAt: 'desc',
@@ -37,15 +42,60 @@ async function getFeaturedProducts() {
     take: 3,
   });
 
-  // Traducir productos destacados al español
-  const translatedProducts = featuredProducts.map(product => ({
+  // Si ya tenemos 3 productos destacados manuales, los usamos
+  if (manualFeatured.length === 3) {
+    return manualFeatured.map(product => ({
+      ...product,
+      name: translateProductName(product.slug),
+      description: translateProductDescription(product.slug),
+      shortDescription: translateProductShortDescription(product.slug),
+    }));
+  }
+
+  // 2. Calcular productos más vendidos para completar
+  const topSellingProducts = await prisma.product.findMany({
+    where: {
+      isActive: true,
+      isFeatured: false, // Excluir los que ya están marcados manualmente
+      id: {
+        notIn: manualFeatured.map(p => p.id), // Excluir los ya seleccionados
+      },
+    },
+    include: {
+      images: {
+        where: { isMain: true },
+        take: 1,
+      },
+      orderItems: {
+        select: {
+          quantity: true,
+        },
+      },
+    },
+  });
+
+  // 3. Calcular ventas totales y ordenar por popularidad
+  const productsWithSales = topSellingProducts.map(product => ({
+    ...product,
+    totalSales: product.orderItems.reduce((sum, item) => sum + (item.quantity || 0), 0),
+  }));
+
+  // Ordenar por ventas (más vendidos primero)
+  productsWithSales.sort((a, b) => b.totalSales - a.totalSales);
+
+  // 4. Combinar: manuales primero, luego completar con más vendidos
+  const neededCount = 3 - manualFeatured.length;
+  const additionalProducts = productsWithSales.slice(0, neededCount);
+
+  const allFeatured = [...manualFeatured, ...additionalProducts];
+
+  // Traducir al español
+  return allFeatured.map(product => ({
     ...product,
     name: translateProductName(product.slug),
     description: translateProductDescription(product.slug),
     shortDescription: translateProductShortDescription(product.slug),
   }));
-
-  return translatedProducts;
 }
 
 async function getCategories() {

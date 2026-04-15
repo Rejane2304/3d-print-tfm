@@ -54,6 +54,104 @@ interface InvoiceViewerProps {
   data: InvoiceData;
 }
 
+// Función helper para transformar datos de la API al formato del componente
+export function useInvoiceData(apiInvoice: {
+  id: string;
+  invoiceNumber: string;
+  issuedAt: string;
+  isCancelled?: boolean;
+  cancelledAt?: string | null;
+  empresaNombre: string;
+  empresaNif: string;
+  empresaDireccion: string;
+  empresaCiudad: string;
+  empresaProvincia: string;
+  empresaCodigoPostal: string;
+  empresaTelefono?: string;
+  empresaEmail?: string;
+  clienteNombre: string;
+  clienteNif: string;
+  clienteDireccion: string;
+  clienteCiudad: string;
+  clienteProvincia: string;
+  clienteCodigoPostal: string;
+  clientePais?: string;
+  clienteEmail?: string;
+  clienteTelefono?: string;
+  items?: Array<{
+    id?: string;
+    name: string;
+    quantity: number;
+    price: number;
+    subtotal: number;
+    image?: string;
+    description?: string;
+  }>;
+  subtotal: number;
+  shipping: number;
+  tipoIva: number;
+  cuotaIva: number;
+  total: number;
+  paymentMethod?: string;
+  orderNumber?: string;
+  order?: {
+    orderNumber: string;
+    paymentMethod: string;
+    items: Array<{
+      id: string;
+      name: string;
+      quantity: number;
+      price: number;
+      subtotal: number;
+      image?: string;
+      description?: string;
+    }>;
+  };
+}): InvoiceData {
+  // Extraer items de la factura (puede estar en apiInvoice.items o apiInvoice.order.items)
+  const rawItems = apiInvoice.items || apiInvoice.order?.items || [];
+
+  return {
+    invoiceNumber: apiInvoice.invoiceNumber,
+    issuedAt: apiInvoice.issuedAt,
+    isCancelled: apiInvoice.isCancelled,
+    cancelledAt: apiInvoice.cancelledAt,
+    companyName: apiInvoice.empresaNombre,
+    companyTaxId: apiInvoice.empresaNif,
+    companyAddress: apiInvoice.empresaDireccion,
+    companyCity: apiInvoice.empresaCiudad,
+    companyProvince: apiInvoice.empresaProvincia,
+    companyPostalCode: apiInvoice.empresaCodigoPostal,
+    companyPhone: apiInvoice.empresaTelefono,
+    companyEmail: apiInvoice.empresaEmail,
+    clientName: apiInvoice.clienteNombre,
+    clientTaxId: apiInvoice.clienteNif,
+    clientAddress: apiInvoice.clienteDireccion,
+    clientCity: apiInvoice.clienteCiudad,
+    clientProvince: apiInvoice.clienteProvincia,
+    clientPostalCode: apiInvoice.clienteCodigoPostal,
+    clientCountry: apiInvoice.clientePais,
+    clientEmail: apiInvoice.clienteEmail,
+    clientPhone: apiInvoice.clienteTelefono,
+    items: rawItems.map(item => ({
+      id: item.id,
+      name: item.name,
+      quantity: item.quantity,
+      price: item.price,
+      subtotal: item.subtotal,
+      image: item.image,
+      description: item.description,
+    })),
+    subtotal: apiInvoice.subtotal,
+    shipping: apiInvoice.shipping,
+    vatRate: apiInvoice.tipoIva,
+    vatAmount: apiInvoice.cuotaIva,
+    total: apiInvoice.total,
+    paymentMethod: apiInvoice.paymentMethod || apiInvoice.order?.paymentMethod,
+    orderNumber: apiInvoice.orderNumber || apiInvoice.order?.orderNumber,
+  };
+}
+
 // CSS exacto del template PDF
 const invoiceStyles = `
   .invoice-wrapper {

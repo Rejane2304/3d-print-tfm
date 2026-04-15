@@ -9,7 +9,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
-import { translateErrorMessage } from '@/lib/i18n';
+import { translateErrorMessage, translateProductName, translateProductDescription } from '@/lib/i18n';
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -61,10 +61,10 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     // Transformar datos al formato esperado por el componente
     const facturaFormateada = {
       id: factura.id,
-      numeroFactura: factura.invoiceNumber,
-      emitidaEn: factura.issuedAt?.toISOString() || new Date().toISOString(),
-      anulada: factura.isCancelled,
-      anuladaEn: factura.cancelledAt?.toISOString() || null,
+      invoiceNumber: factura.invoiceNumber || `F-${factura.id.slice(0, 8).toUpperCase()}`,
+      issuedAt: factura.issuedAt?.toISOString() || new Date().toISOString(),
+      isCancelled: factura.isCancelled,
+      cancelledAt: factura.cancelledAt?.toISOString() || null,
       cuotaIva: Number(factura.vatAmount),
       tipoIva: Number(factura.vatRate),
       total: Number(factura.total),
@@ -89,20 +89,25 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       clientePais: factura.clientCountry || 'España',
       clienteEmail: factura.order?.user?.email || undefined,
       clienteTelefono: factura.order?.user?.phone || undefined,
-      // Items con imágenes
+      // Items con imágenes y traducciones
       order: {
-        numeroPedido: factura.order?.orderNumber || '',
-        metodoPago: factura.order?.paymentMethod || 'CARD',
+        orderNumber: factura.order?.orderNumber || `P-${factura.order?.id?.slice(0, 8).toUpperCase() || 'N/A'}`,
+        paymentMethod: factura.order?.paymentMethod || 'CARD',
         items:
-          factura.order?.items.map(item => ({
-            id: item.id,
-            name: item.name,
-            quantity: item.quantity,
-            price: Number(item.price),
-            subtotal: Number(item.subtotal),
-            image: item.product?.images?.[0]?.url || undefined,
-            description: item.product?.description || undefined,
-          })) || [],
+          factura.order?.items.map(item => {
+            const productSlug = item.product?.slug;
+            return {
+              id: item.id,
+              name: productSlug ? translateProductName(productSlug) : item.name,
+              quantity: item.quantity,
+              price: Number(item.price),
+              subtotal: Number(item.subtotal),
+              image: item.product?.images?.[0]?.url || undefined,
+              description: productSlug
+                ? translateProductDescription(productSlug)
+                : item.product?.description || undefined,
+            };
+          }) || [],
         usuario: {
           nombre: factura.order?.user?.name || '',
           email: factura.order?.user?.email || '',

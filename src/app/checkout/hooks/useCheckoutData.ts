@@ -123,10 +123,12 @@ export function useCheckoutData(): CheckoutDataResult {
     [cart],
   );
 
-  // Initialize real-time connection for stock updates
+  // Initialize real-time connection for stock updates - desactivado para evitar bucles
   useRealTime({
     eventTypes: ['stock:updated'],
     onEvent: handleRealTimeEvent,
+    autoReconnect: false,
+    enableSSE: false,
   });
 
   const migrateLocalCart = useCallback(async () => {

@@ -84,6 +84,11 @@ function handleAdminRoutes(request: NextRequest, isAuthenticated: boolean, userR
     return null;
   }
 
+  // Permitir /admin (la página se encargará de redirigir al dashboard o login)
+  if (pathname === '/admin') {
+    return NextResponse.next();
+  }
+
   if (!isAuthenticated) {
     return NextResponse.redirect(new URL('/auth', request.url));
   }

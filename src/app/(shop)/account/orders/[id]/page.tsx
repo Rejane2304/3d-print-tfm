@@ -30,7 +30,7 @@ import { toast } from 'sonner';
 
 interface OrderDetail {
   id: string;
-  orderNumber: string;
+  numeroPedido: string;
   estado: string;
   subtotal: number;
   envio: number;
@@ -195,10 +195,12 @@ export default function OrderDetailPage() {
     [orderId, session?.user?.id, loadOrder],
   );
 
-  // Initialize real-time connection
+  // Initialize real-time connection - desactivado para evitar bucles
   useRealTime({
     eventTypes: ['order:status:updated', 'payment:confirmed', 'order:new'],
     onEvent: handleRealTimeEvent,
+    autoReconnect: false,
+    enableSSE: false,
   });
 
   useEffect(() => {
@@ -287,7 +289,7 @@ export default function OrderDetailPage() {
                 <ArrowLeft className="h-5 w-5 sm:h-6 sm:w-6" />
               </Link>
               <div>
-                <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Pedido {order.orderNumber}</h1>
+                <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Pedido {order.numeroPedido}</h1>
                 <p className="text-xs sm:text-sm text-gray-500">
                   Realizado el{' '}
                   {new Date(order.createdAt).toLocaleDateString('es-ES', {
@@ -565,7 +567,7 @@ export default function OrderDetailPage() {
               <div className="space-y-2 text-xs sm:text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Número:</span>
-                  <span className="font-mono">{order.orderNumber}</span>
+                  <span className="font-mono">{order.numeroPedido}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Fecha:</span>

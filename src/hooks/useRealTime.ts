@@ -137,7 +137,20 @@ export function useRealTime(options: UseRealTimeOptions = {}) {
   const lastHeartbeatReceivedRef = useRef<number>(0);
   const userId = session?.user?.id;
 
-  const { enableSSE = true, autoReconnect = true, maxReconnectAttempts = 10, heartbeatTimeout = 5000 } = options;
+  // Extraer opciones con valores por defecto
+  const {
+    enableSSE: enableSSEOption = true,
+    autoReconnect: autoReconnectOption = true,
+    maxReconnectAttempts = 10,
+    heartbeatTimeout = 5000,
+  } = options;
+
+  // Usar refs para valores dinámicos para evitar problemas de dependencias
+  const enableSSE = enableSSEOption;
+  const autoReconnectRef = useRef(autoReconnectOption);
+  autoReconnectRef.current = autoReconnectOption;
+  const enableSSERef = useRef(enableSSEOption);
+  enableSSERef.current = enableSSEOption;
 
   // Calcular delay de reconexión con backoff exponencial (1s, 2s, 4s, 8s, max 30s)
   const getReconnectDelay = useCallback(() => {
@@ -167,7 +180,7 @@ export function useRealTime(options: UseRealTimeOptions = {}) {
         status: 'reconnecting',
       }));
 
-      if (autoReconnect && !isManualCloseRef.current) {
+      if (autoReconnectRef.current && !isManualCloseRef.current) {
         reconnectAttemptRef.current += 1;
 
         if (reconnectAttemptRef.current <= maxReconnectAttempts) {
@@ -187,7 +200,7 @@ export function useRealTime(options: UseRealTimeOptions = {}) {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoReconnect, maxReconnectAttempts, heartbeatTimeout, getReconnectDelay]);
+  }, [maxReconnectAttempts, heartbeatTimeout, getReconnectDelay]);
 
   // Polling function para fallback
   const pollEvents = useCallback(async () => {
@@ -425,7 +438,7 @@ export function useRealTime(options: UseRealTimeOptions = {}) {
         }
 
         // Intentar reconexión si está habilitada y no es cierre manual
-        if (!isManualCloseRef.current && autoReconnect) {
+        if (!isManualCloseRef.current && autoReconnectRef.current) {
           reconnectAttemptRef.current += 1;
 
           if (reconnectAttemptRef.current <= maxReconnectAttempts) {
@@ -458,7 +471,7 @@ export function useRealTime(options: UseRealTimeOptions = {}) {
       // Fallback a polling
       startPolling();
     }
-  }, [userId, autoReconnect, maxReconnectAttempts, getReconnectDelay, handleSSEMessage, startPolling, options]);
+  }, [userId, maxReconnectAttempts, getReconnectDelay, handleSSEMessage, startPolling, options]);
 
   // Desconectar SSE
   const disconnectSSE = useCallback(() => {
@@ -486,9 +499,16 @@ export function useRealTime(options: UseRealTimeOptions = {}) {
     }));
   }, []);
 
-  // Inicializar conexión
+  // Inicializar conexión - solo cuando hay userId válido y autoReconnect está habilitado
   useEffect(() => {
-    if (!userId) {
+    // No conectar si no hay userId o si autoReconnect está deshabilitado
+    if (!userId || !autoReconnectRef.current) {
+      // Limpiar cualquier conexión existente si se deshabilita autoReconnect
+      if (!autoReconnectRef.current && (eventSourceRef.current || pollingIntervalRef.current)) {
+        isManualCloseRef.current = true;
+        disconnectSSE();
+        stopPolling();
+      }
       return;
     }
 
@@ -496,7 +516,7 @@ export function useRealTime(options: UseRealTimeOptions = {}) {
     reconnectAttemptRef.current = 0;
     lastHeartbeatReceivedRef.current = 0;
 
-    if (enableSSE) {
+    if (enableSSERef.current) {
       // Intentar SSE primero
       connectSSE();
     } else {
@@ -517,7 +537,7 @@ export function useRealTime(options: UseRealTimeOptions = {}) {
         clearInterval(heartbeatTimeoutRef.current);
       }
     };
-  }, [userId, enableSSE, connectSSE, startPolling, disconnectSSE, stopPolling]);
+  }, [userId, connectSSE, startPolling, disconnectSSE, stopPolling]);
 
   // Subscribe to specific rooms
   const subscribe = useCallback(
@@ -630,8 +650,11 @@ export function useRealTime(options: UseRealTimeOptions = {}) {
 }
 
 // Hook específico para dashboard de admin
+// DESACTIVADO POR DEFECTO - requiere explícitamente autoReconnect: true para conectar
 export function useAdminRealTime(options: Omit<UseRealTimeOptions, 'rooms'> = {}) {
   const baseOptions: UseRealTimeOptions = {
+    autoReconnect: false,
+    enableSSE: false,
     ...options,
     rooms: ['admin'],
   };
@@ -640,8 +663,11 @@ export function useAdminRealTime(options: Omit<UseRealTimeOptions, 'rooms'> = {}
 }
 
 // Hook específico para cuenta de usuario
+// DESACTIVADO POR DEFECTO - requiere explícitamente autoReconnect: true para conectar
 export function useUserRealTime(userId: string, options: Omit<UseRealTimeOptions, 'rooms'> = {}) {
   const baseOptions: UseRealTimeOptions = {
+    autoReconnect: false,
+    enableSSE: false,
     ...options,
     rooms: [`user:${userId}`],
   };
@@ -650,8 +676,11 @@ export function useUserRealTime(userId: string, options: Omit<UseRealTimeOptions
 }
 
 // Hook específico para detalle de producto
+// DESACTIVADO POR DEFECTO - requiere explícitamente autoReconnect: true para conectar
 export function useProductRealTime(productId: string, options: Omit<UseRealTimeOptions, 'rooms'> = {}) {
   const baseOptions: UseRealTimeOptions = {
+    autoReconnect: false,
+    enableSSE: false,
     ...options,
     rooms: [`product:${productId}`],
   };
