@@ -8,6 +8,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
+import { translateProductName } from '@/lib/i18n';
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -71,54 +72,47 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     // Transformar datos al formato esperado por el componente InvoiceViewer
     const facturaFormateada = {
       id: factura.id,
-      numeroFactura: factura.invoiceNumber,
-      emitidaEn: factura.issuedAt,
-      anulada: factura.isCancelled,
-      anuladaEn: factura.cancelledAt,
-      cuotaIva: Number(factura.vatAmount),
-      tipoIva: Number(factura.vatRate),
+      invoiceNumber: factura.invoiceNumber,
+      issuedAt: factura.issuedAt,
+      isCancelled: factura.isCancelled,
+      cancelledAt: factura.cancelledAt,
+      vatAmount: Number(factura.vatAmount),
+      vatRate: Number(factura.vatRate),
       total: Number(factura.total),
       subtotal: Number(factura.subtotal),
       shipping: Number(factura.shipping),
       // Datos de la empresa
-      empresaNombre: factura.companyName,
-      empresaNif: factura.companyTaxId,
-      empresaDireccion: factura.companyAddress,
-      empresaCiudad: factura.companyCity,
-      empresaProvincia: factura.companyProvince,
-      empresaCodigoPostal: factura.companyPostalCode,
-      empresaEmail: 'info@3dprint.com',
-      empresaTelefono: '+34 930 000 001',
+      companyName: factura.companyName,
+      companyTaxId: factura.companyTaxId,
+      companyAddress: factura.companyAddress,
+      companyCity: factura.companyCity,
+      companyProvince: factura.companyProvince,
+      companyPostalCode: factura.companyPostalCode,
+      companyEmail: 'info@3dprint.com',
+      companyPhone: '+34 930 000 001',
       // Datos del cliente
-      clienteNombre: factura.clientName,
-      clienteNif: factura.clientTaxId,
-      clienteDireccion: factura.clientAddress,
-      clienteCiudad: factura.clientCity,
-      clienteProvincia: factura.clientProvince,
-      clienteCodigoPostal: factura.clientPostalCode,
-      clientePais: factura.clientCountry || 'España',
-      clienteEmail: factura.order?.user?.email || undefined,
-      clienteTelefono: factura.order?.user?.phone || undefined,
+      clientName: factura.clientName,
+      clientTaxId: factura.clientTaxId,
+      clientAddress: factura.clientAddress,
+      clientCity: factura.clientCity,
+      clientProvince: factura.clientProvince,
+      clientPostalCode: factura.clientPostalCode,
+      clientCountry: factura.clientCountry || 'España',
+      clientEmail: factura.order?.user?.email || undefined,
+      clientPhone: factura.order?.user?.phone || undefined,
       // Items con imágenes
-      order: {
-        numeroPedido: factura.order?.orderNumber || '',
-        metodoPago: factura.order?.paymentMethod || 'CARD',
-        items:
-          factura.order?.items.map(item => ({
-            id: item.id,
-            name: item.name,
-            quantity: item.quantity,
-            price: Number(item.price),
-            subtotal: Number(item.subtotal),
-            image: item.product?.images?.[0]?.url || undefined,
-            description: item.product?.description || undefined,
-          })) || [],
-        usuario: {
-          nombre: factura.order?.user?.name || '',
-          email: factura.order?.user?.email || '',
-          telefono: factura.order?.user?.phone || undefined,
-        },
-      },
+      orderNumber: factura.order?.orderNumber || '',
+      paymentMethod: factura.order?.paymentMethod || 'CARD',
+      items:
+        factura.order?.items.map(item => ({
+          id: item.id,
+          name: item.product?.slug ? translateProductName(item.product.slug) : item.name,
+          quantity: item.quantity,
+          price: Number(item.price),
+          subtotal: Number(item.subtotal),
+          image: item.product?.images?.[0]?.url || undefined,
+          description: item.product?.description || undefined,
+        })) || [],
     };
 
     return NextResponse.json({ factura: facturaFormateada });

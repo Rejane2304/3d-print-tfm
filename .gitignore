@@ -225,3 +225,5 @@ stripe*.log
 !src/
 !public/
 !docs/
+# Security - Credentials
+.env.protection
