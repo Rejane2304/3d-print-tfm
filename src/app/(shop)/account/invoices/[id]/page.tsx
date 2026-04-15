@@ -1,7 +1,6 @@
 /**
  * Invoice Detail Page - User Account
- * Vista de factura para usuarios autenticados
- * Usa InvoiceViewer component para visualización unificada
+ * SOLUCIÓN DEFINITIVA: Sin bucles infinitos
  */
 'use client';
 
@@ -12,7 +11,6 @@ import Link from 'next/link';
 import { AlertCircle, ArrowLeft, Download, FileText, Loader2, Printer, XCircle } from 'lucide-react';
 import { InvoiceViewer } from '@/components/invoices/InvoiceViewer';
 
-// Tipo de datos que espera InvoiceViewer
 interface InvoiceData {
   invoiceNumber: string;
   issuedAt: string;
@@ -61,20 +59,13 @@ export default function UserInvoiceDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [hasLoaded, setHasLoaded] = useState(false);
-
-  // SOLUCIÓN DEFINITIVA ANTI-BUCLE
-  // Usar ref para controlar ejecución única
+  // PREVENIR BUCLE: useRef persiste entre renders
   const hasFetched = useRef(false);
 
   useEffect(() => {
-    // NUNCA ejecutar si ya se ejecutó
     if (hasFetched.current) return;
-
-    // Esperar a que la sesión esté lista
     if (status === 'loading') return;
 
-    // Marcar como ejecutado INMEDIATAMENTE
     hasFetched.current = true;
 
     if (status === 'unauthenticated') {
@@ -82,8 +73,11 @@ export default function UserInvoiceDetailPage() {
       return;
     }
 
-    // Ejecutar fetch solo una vez
-    const fetchInvoice = async () => {
+    if (status === 'authenticated' && params.id) {
+      fetchInvoice();
+    }
+
+    async function fetchInvoice() {
       try {
         setLoading(true);
         const response = await fetch(`/api/account/invoices/${params.id}`);
@@ -99,14 +93,8 @@ export default function UserInvoiceDetailPage() {
       } finally {
         setLoading(false);
       }
-    };
-
-    if (status === 'authenticated' && params.id) {
-      fetchInvoice();
     }
-    // SIN DEPENDENCIAS QUE CAUSEN RE-RENDER
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, params.id]);
+  }, [status, params.id]); // Solo dependencias esenciales
 
   const printInvoice = () => {
     globalThis.print();
@@ -179,9 +167,7 @@ export default function UserInvoiceDetailPage() {
             <div className="flex items-center gap-2">
               <button
                 onClick={printInvoice}
-                className="inline-flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium \
-                  hover:bg-gray-200 transition-colors"
-                title="Imprimir factura"
+                className="inline-flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors"
               >
                 <Printer className="h-4 w-4" />
                 Imprimir
@@ -189,9 +175,7 @@ export default function UserInvoiceDetailPage() {
               <button
                 onClick={downloadPDF}
                 disabled={invoice.isCancelled}
-                className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium \
-                  hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                title={invoice.isCancelled ? 'Factura anulada - no disponible' : 'Descargar factura PDF'}
+                className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50"
               >
                 <Download className="h-4 w-4" />
                 Descargar PDF
@@ -226,7 +210,7 @@ export default function UserInvoiceDetailPage() {
         </div>
       )}
 
-      {/* Invoice Viewer - Datos pasados directamente */}
+      {/* Invoice Viewer */}
       <div className="py-8 px-4 print:p-0">
         <InvoiceViewer data={invoice} />
       </div>
