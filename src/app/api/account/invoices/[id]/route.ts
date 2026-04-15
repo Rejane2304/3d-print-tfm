@@ -69,51 +69,56 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: 'Factura no encontrada' }, { status: 404 });
     }
 
-    // Transformar datos al formato esperado por el componente InvoiceViewer
+    // Transformar datos al formato esperado por useInvoiceData (español)
     const facturaFormateada = {
       id: factura.id,
       invoiceNumber: factura.invoiceNumber,
       issuedAt: factura.issuedAt,
       isCancelled: factura.isCancelled,
       cancelledAt: factura.cancelledAt,
-      vatAmount: Number(factura.vatAmount),
-      vatRate: Number(factura.vatRate),
+      baseImponible: Number(factura.subtotal),
+      cuotaIva: Number(factura.vatAmount),
+      tipoIva: Number(factura.vatRate),
       total: Number(factura.total),
       subtotal: Number(factura.subtotal),
       shipping: Number(factura.shipping),
       // Datos de la empresa
-      companyName: factura.companyName,
-      companyTaxId: factura.companyTaxId,
-      companyAddress: factura.companyAddress,
-      companyCity: factura.companyCity,
-      companyProvince: factura.companyProvince,
-      companyPostalCode: factura.companyPostalCode,
-      companyEmail: 'info@3dprint.com',
-      companyPhone: '+34 930 000 001',
+      empresaNombre: factura.companyName,
+      empresaNif: factura.companyTaxId,
+      empresaDireccion: factura.companyAddress,
+      empresaCiudad: factura.companyCity,
+      empresaProvincia: factura.companyProvince,
+      empresaCodigoPostal: factura.companyPostalCode,
+      empresaEmail: 'info@3dprint.com',
+      empresaTelefono: '+34 930 000 001',
       // Datos del cliente
-      clientName: factura.clientName,
-      clientTaxId: factura.clientTaxId,
-      clientAddress: factura.clientAddress,
-      clientCity: factura.clientCity,
-      clientProvince: factura.clientProvince,
-      clientPostalCode: factura.clientPostalCode,
-      clientCountry: factura.clientCountry || 'España',
-      clientEmail: factura.order?.user?.email || undefined,
-      clientPhone: factura.order?.user?.phone || undefined,
-      // Items con imágenes
-      orderNumber: factura.order?.orderNumber || '',
-      paymentMethod: factura.order?.paymentMethod || 'CARD',
-      items:
-        factura.order?.items.map(item => ({
-          id: item.id,
-          name: item.product?.slug ? translateProductName(item.product.slug) : item.name,
-          quantity: item.quantity,
-          price: Number(item.price),
-          subtotal: Number(item.subtotal),
-          image: item.product?.images?.[0]?.url || undefined,
-          description: item.product?.description || undefined,
-        })) || [],
+      clienteNombre: factura.clientName,
+      clienteNif: factura.clientTaxId,
+      clienteDireccion: factura.clientAddress,
+      clienteCiudad: factura.clientCity,
+      clienteProvincia: factura.clientProvince,
+      clienteCodigoPostal: factura.clientPostalCode,
+      clientePais: factura.clientCountry || 'España',
+      clienteEmail: factura.order?.user?.email || undefined,
+      clienteTelefono: factura.order?.user?.phone || undefined,
+      // Order info
+      order: {
+        orderNumber: factura.order?.orderNumber || '',
+        paymentMethod: factura.order?.paymentMethod || 'CARD',
+        items:
+          factura.order?.items.map(item => ({
+            id: item.id,
+            name: item.product?.slug ? translateProductName(item.product.slug) : item.name,
+            quantity: item.quantity,
+            price: Number(item.price),
+            subtotal: Number(item.subtotal),
+            image: item.product?.images?.[0]?.url || undefined,
+            description: item.product?.description || undefined,
+          })) || [],
+      },
     };
+
+    return NextResponse.json({ factura: facturaFormateada });
 
     return NextResponse.json({ factura: facturaFormateada });
   } catch (error) {
