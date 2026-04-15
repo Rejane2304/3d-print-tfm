@@ -163,10 +163,50 @@ async function validateCoupon(couponCode: string | undefined, subtotal: number):
   return result;
 }
 
+// Calculate shipping cost based on address
+async function calculateShippingCost(addressId: string, subtotal: number): Promise<number> {
+  // Get address details
+  const address = await getShippingAddress(addressId);
+  if (!address) {
+    throw new Error('Dirección de envío no encontrada');
+  }
+
+  // Find shipping zone based on country and postal code
+  const zones = await prisma.shippingZone.findMany({
+    where: { isActive: true },
+    orderBy: { displayOrder: 'asc' },
+  });
+
+  // Find matching zone
+  const zone =
+    zones.find(z => {
+      // Check if country matches
+      if (!z.country.toLowerCase().includes(address.country?.toLowerCase() || 'spain')) {
+        return false;
+      }
+      // Check postal code prefix if available
+      if (z.postalCodePrefixes && z.postalCodePrefixes.length > 0) {
+        return z.postalCodePrefixes.some(prefix => address.postalCode?.startsWith(prefix));
+      }
+      return true;
+    }) || zones.find(z => z.country.toLowerCase().includes('spain') || z.country.toLowerCase().includes('españa')); // Default to Spain
+
+  if (!zone) {
+    return 5.99; // Fallback cost
+  }
+
+  // Check free shipping threshold
+  const freeThreshold = zone.freeShippingThreshold ? Number(zone.freeShippingThreshold) : null;
+  if (freeThreshold && subtotal >= freeThreshold) {
+    return 0;
+  }
+
+  return Number(zone.baseCost);
+}
+
 // Calculate order totals
-function calculateTotals(subtotal: number, couponDiscount: number, hasFreeShipping: boolean): TotalsResult {
+function calculateTotals(subtotal: number, couponDiscount: number, shippingCost: number): TotalsResult {
   const taxRate = DEFAULT_VAT_RATE;
-  const shippingCost = subtotal >= 50 || hasFreeShipping ? 0 : 5.99;
   const discountedSubtotal = Math.max(0, subtotal - couponDiscount);
   const total = roundToCents(discountedSubtotal * (1 + taxRate) + shippingCost);
 
@@ -436,10 +476,13 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   // 6. Validate coupon
   const { couponId, couponDiscount, hasFreeShipping } = await validateCoupon(couponCode, subtotal);
 
-  // 7. Calculate totals
-  const totals = calculateTotals(subtotal, couponDiscount, hasFreeShipping);
+  // 7. Calculate shipping cost based on address
+  const shippingCost = await calculateShippingCost(shippingAddressId, subtotal);
 
-  // 8. Generate order number
+  // 8. Calculate totals
+  const totals = calculateTotals(subtotal, couponDiscount, shippingCost);
+
+  // 9. Generate order number
   const orderNumber = await generateOrderNumber();
 
   // 9. Create order transaction (stock validation happens INSIDE the transaction)
