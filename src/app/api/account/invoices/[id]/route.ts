@@ -69,51 +69,56 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: 'Factura no encontrada' }, { status: 404 });
     }
 
-    // Transformar datos al formato esperado por useInvoiceData
+    // Transformar datos al formato esperado por el frontend ( inglés )
     const facturaFormateada = {
-      id: factura.id,
-      invoiceNumber: factura.invoiceNumber,
+      // Info básica
+      invoiceNumber: factura.invoiceNumber || `INV-${factura.id.slice(0, 8)}`,
       issuedAt: factura.issuedAt?.toISOString() || new Date().toISOString(),
-      isCancelled: factura.isCancelled,
+      isCancelled: factura.isCancelled || false,
       cancelledAt: factura.cancelledAt?.toISOString() || null,
-      baseImponible: Number(factura.subtotal),
-      cuotaIva: Number(factura.vatAmount),
-      tipoIva: Number(factura.vatRate),
-      total: Number(factura.total),
-      subtotal: Number(factura.subtotal),
-      shipping: Number(factura.shipping),
+
+      // Importes
+      subtotal: Number(factura.subtotal) || 0,
+      shipping: Number(factura.shipping) || 0,
+      vatRate: Number(factura.vatRate) || 21,
+      vatAmount: Number(factura.vatAmount) || 0,
+      total: Number(factura.total) || 0,
+
       // Datos de la empresa
-      empresaNombre: factura.companyName,
-      empresaNif: factura.companyTaxId,
-      empresaDireccion: factura.companyAddress,
-      empresaCiudad: factura.companyCity,
-      empresaProvincia: factura.companyProvince,
-      empresaCodigoPostal: factura.companyPostalCode,
-      empresaEmail: 'info@3dprint.com',
-      empresaTelefono: '+34 930 000 001',
+      companyName: factura.companyName || '3D Print S.L.',
+      companyTaxId: factura.companyTaxId || 'B-12345678',
+      companyAddress: factura.companyAddress || 'Calle Tecnología 123',
+      companyCity: factura.companyCity || 'Barcelona',
+      companyProvince: factura.companyProvince || 'Barcelona',
+      companyPostalCode: factura.companyPostalCode || '08001',
+      companyEmail: factura.companyEmail || 'info@3dprint.com',
+      companyPhone: factura.companyPhone || '+34 930 000 001',
+
       // Datos del cliente
-      clienteNombre: factura.clientName,
-      clienteNif: factura.clientTaxId,
-      clienteDireccion: factura.clientAddress,
-      clienteCiudad: factura.clientCity,
-      clienteProvincia: factura.clientProvince,
-      clienteCodigoPostal: factura.clientPostalCode,
-      clientePais: factura.clientCountry || 'España',
-      clienteEmail: factura.order?.user?.email || undefined,
-      clienteTelefono: factura.order?.user?.phone || undefined,
-      // Order info directamente (no anidado para que coincida con interfaz)
+      clientName: factura.clientName || 'Cliente',
+      clientTaxId: factura.clientTaxId || 'N/A',
+      clientAddress: factura.clientAddress || '',
+      clientCity: factura.clientCity || '',
+      clientProvince: factura.clientProvince || '',
+      clientPostalCode: factura.clientPostalCode || '',
+      clientCountry: factura.clientCountry || 'España',
+      clientEmail: factura.clientEmail || factura.order?.user?.email || '',
+      clientPhone: factura.clientPhone || factura.order?.user?.phone || '',
+
+      // Info del pedido
       orderNumber: factura.order?.orderNumber || '',
       paymentMethod: factura.order?.paymentMethod || 'CARD',
-      items:
-        factura.order?.items.map(item => ({
-          id: item.id,
-          name: item.product?.slug ? translateProductName(item.product.slug) : item.name,
-          quantity: item.quantity,
-          price: Number(item.price),
-          subtotal: Number(item.subtotal),
-          image: item.product?.images?.[0]?.url || undefined,
-          description: item.product?.description || undefined,
-        })) || [],
+
+      // Items
+      items: (factura.order?.items || []).map(item => ({
+        id: item.id || '',
+        name: item.product?.slug ? translateProductName(item.product.slug) : item.name || 'Producto',
+        quantity: item.quantity || 1,
+        price: Number(item.price) || 0,
+        subtotal: Number(item.subtotal) || 0,
+        image: item.product?.images?.[0]?.url || undefined,
+        description: item.product?.description || undefined,
+      })),
     };
 
     return NextResponse.json({ factura: facturaFormateada });

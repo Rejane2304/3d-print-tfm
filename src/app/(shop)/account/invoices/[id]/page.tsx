@@ -10,65 +10,61 @@ import { useSession } from 'next-auth/react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { AlertCircle, ArrowLeft, Download, FileText, Loader2, Printer, XCircle } from 'lucide-react';
-import { InvoiceViewer, useInvoiceData } from '@/components/invoices/InvoiceViewer';
+import { InvoiceViewer } from '@/components/invoices/InvoiceViewer';
 
-interface InvoiceDetail {
-  id: string;
+// Tipo de datos que espera InvoiceViewer
+interface InvoiceData {
   invoiceNumber: string;
   issuedAt: string;
-  baseImponible: number;
-  cuotaIva: number;
-  tipoIva: number;
-  total: number;
-  subtotal: number;
-  shipping: number;
-  isCancelled: boolean;
+  isCancelled?: boolean;
   cancelledAt?: string | null;
-  empresaNombre: string;
-  empresaNif: string;
-  empresaDireccion: string;
-  empresaCiudad: string;
-  empresaProvincia: string;
-  empresaCodigoPostal: string;
-  empresaEmail?: string;
-  empresaTelefono?: string;
-  clienteNombre: string;
-  clienteNif: string;
-  clienteDireccion: string;
-  clienteCiudad: string;
-  clienteProvincia: string;
-  clienteCodigoPostal: string;
-  clientePais: string;
-  clienteEmail?: string;
-  clienteTelefono?: string;
-  // Order data directamente (no anidado)
-  orderNumber?: string;
-  paymentMethod?: string;
+  companyName: string;
+  companyTaxId: string;
+  companyAddress: string;
+  companyCity: string;
+  companyProvince: string;
+  companyPostalCode: string;
+  companyPhone?: string;
+  companyEmail?: string;
+  clientName: string;
+  clientTaxId: string;
+  clientAddress: string;
+  clientCity: string;
+  clientProvince: string;
+  clientPostalCode: string;
+  clientCountry?: string;
+  clientEmail?: string;
+  clientPhone?: string;
   items: Array<{
     id?: string;
-    name?: string;
+    name: string;
     quantity: number;
     price: number;
     subtotal: number;
     image?: string;
     description?: string;
   }>;
+  subtotal: number;
+  shipping: number;
+  vatRate: number;
+  vatAmount: number;
+  total: number;
+  paymentMethod?: string;
+  orderNumber?: string;
 }
 
 export default function UserInvoiceDetailPage() {
   const { status } = useSession();
   const router = useRouter();
   const params = useParams();
-  const [invoice, setInvoice] = useState<InvoiceDetail | null>(null);
+  const [invoice, setInvoice] = useState<InvoiceData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [debugInfo, setDebugInfo] = useState<string>('');
 
   const loadInvoice = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      setDebugInfo('');
 
       const response = await fetch(`/api/account/invoices/${params.id}`);
       const data = await response.json();
@@ -77,10 +73,7 @@ export default function UserInvoiceDetailPage() {
         throw new Error(data.error || 'Error al cargar factura');
       }
 
-      // Debug: ver qué datos llegan
-      console.log('Datos recibidos de API:', data);
-      setDebugInfo(JSON.stringify(data.factura, null, 2).substring(0, 500));
-
+      // La API ya devuelve los datos en el formato correcto
       setInvoice(data.factura);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
@@ -115,10 +108,6 @@ export default function UserInvoiceDetailPage() {
       link.remove();
     }
   };
-
-  // Transformar datos al formato esperado por InvoiceViewer
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const invoiceData = invoice ? useInvoiceData(invoice) : null;
 
   if (status === 'loading' || loading) {
     return (
@@ -222,23 +211,9 @@ export default function UserInvoiceDetailPage() {
         </div>
       )}
 
-      {/* Debug Info - Temporal */}
-      {debugInfo && (
-        <div className="max-w-[1920px] mx-auto px-4 py-4 print:hidden">
-          <div className="bg-yellow-50 border border-yellow-200 rounded p-4">
-            <h3 className="font-bold text-yellow-800 mb-2">Debug Info (temporal):</h3>
-            <pre className="text-xs text-yellow-900 overflow-auto max-h-40">{debugInfo}</pre>
-          </div>
-        </div>
-      )}
-
-      {/* Invoice Viewer */}
+      {/* Invoice Viewer - Datos pasados directamente */}
       <div className="py-8 px-4 print:p-0">
-        {invoiceData ? (
-          <InvoiceViewer data={invoiceData} />
-        ) : (
-          <div className="text-center py-8 text-gray-500">No se pudieron cargar los datos de la factura</div>
-        )}
+        <InvoiceViewer data={invoice} />
       </div>
     </div>
   );

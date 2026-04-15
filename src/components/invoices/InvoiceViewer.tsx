@@ -20,9 +20,9 @@ interface InvoiceItem {
 
 interface InvoiceData {
   invoiceNumber: string;
-  issuedAt: Date | string;
+  issuedAt: string;
   isCancelled?: boolean;
-  cancelledAt?: Date | string | null;
+  cancelledAt?: string | null;
   companyName: string;
   companyTaxId: string;
   companyAddress: string;
@@ -50,48 +50,6 @@ interface InvoiceData {
   orderNumber?: string;
 }
 
-// Tipo para datos de la API (español)
-interface ApiInvoiceData {
-  invoiceNumber: string;
-  issuedAt: string;
-  isCancelled: boolean;
-  cancelledAt?: string | null;
-  empresaNombre: string;
-  empresaNif: string;
-  empresaDireccion: string;
-  empresaCiudad: string;
-  empresaProvincia: string;
-  empresaCodigoPostal: string;
-  empresaEmail?: string;
-  empresaTelefono?: string;
-  clienteNombre: string;
-  clienteNif: string;
-  clienteDireccion: string;
-  clienteCiudad: string;
-  clienteProvincia: string;
-  clienteCodigoPostal: string;
-  clientePais?: string;
-  clienteEmail?: string;
-  clienteTelefono?: string;
-  baseImponible: number;
-  cuotaIva: number;
-  tipoIva: number;
-  total: number;
-  subtotal?: number;
-  shipping?: number;
-  orderNumber?: string;
-  paymentMethod?: string;
-  items?: Array<{
-    id?: string;
-    name?: string;
-    quantity: number;
-    price: number;
-    subtotal: number;
-    image?: string;
-    description?: string;
-  }>;
-}
-
 interface InvoiceViewerProps {
   data: InvoiceData;
 }
@@ -103,7 +61,7 @@ const invoiceStyles = `
     color: #1a202c;
     line-height: 1.6;
   }
-  
+
   .invoice-container {
     max-width: 210mm;
     margin: 0 auto;
@@ -112,7 +70,7 @@ const invoiceStyles = `
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     overflow: hidden;
   }
-  
+
   /* Header */
   .invoice-header {
     background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
@@ -120,22 +78,22 @@ const invoiceStyles = `
     padding: 32px 40px;
     position: relative;
   }
-  
+
   .header-content {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
   }
-  
+
   .company-section { flex: 1; }
-  
+
   .logo-container {
     display: flex;
     align-items: center;
     gap: 12px;
     margin-bottom: 16px;
   }
-  
+
   .logo-icon {
     width: 48px;
     height: 48px;
@@ -148,26 +106,26 @@ const invoiceStyles = `
     font-weight: 800;
     color: #4f46e5;
   }
-  
+
   .company-name {
     font-size: 24px;
     font-weight: 700;
     letter-spacing: -0.5px;
   }
-  
+
   .company-details {
     font-size: 13px;
     opacity: 0.9;
     line-height: 1.7;
   }
-  
+
   .invoice-meta {
     text-align: right;
     background: rgba(255,255,255,0.1);
     padding: 20px 28px;
     border-radius: 12px;
   }
-  
+
   .invoice-label {
     font-size: 11px;
     font-weight: 600;
@@ -176,19 +134,19 @@ const invoiceStyles = `
     opacity: 0.8;
     margin-bottom: 4px;
   }
-  
+
   .invoice-number {
     font-size: 28px;
     font-weight: 700;
     letter-spacing: -1px;
   }
-  
+
   .invoice-date {
     font-size: 13px;
     opacity: 0.9;
     margin-top: 4px;
   }
-  
+
   .cancelled-badge {
     display: inline-block;
     background: #ef4444;
@@ -199,26 +157,26 @@ const invoiceStyles = `
     text-transform: uppercase;
     margin-top: 12px;
   }
-  
+
   /* Body */
   .invoice-body {
     padding: 32px 40px;
   }
-  
+
   .client-section {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
     margin-bottom: 28px;
   }
-  
+
   .client-card {
     background: #f8fafc;
     border-radius: 12px;
     padding: 20px;
     border: 1px solid #e2e8f0;
   }
-  
+
   .section-label {
     font-size: 10px;
     font-weight: 700;
@@ -230,7 +188,7 @@ const invoiceStyles = `
     align-items: center;
     gap: 6px;
   }
-  
+
   .section-label::before {
     content: '';
     width: 3px;
@@ -238,25 +196,25 @@ const invoiceStyles = `
     background: #4f46e5;
     border-radius: 2px;
   }
-  
+
   .client-name {
     font-size: 18px;
     font-weight: 700;
     color: #1e293b;
     margin-bottom: 8px;
   }
-  
+
   .client-details {
     font-size: 13px;
     color: #475569;
     line-height: 1.6;
   }
-  
+
   .client-details strong {
     color: #1e293b;
     font-weight: 600;
   }
-  
+
   .client-contact {
     margin-top: 12px;
     padding-top: 12px;
@@ -264,12 +222,12 @@ const invoiceStyles = `
     font-size: 12px;
     color: #64748b;
   }
-  
+
   /* Items */
   .items-section {
     margin-bottom: 24px;
   }
-  
+
   .section-header {
     display: flex;
     align-items: center;
@@ -278,23 +236,23 @@ const invoiceStyles = `
     padding-bottom: 12px;
     border-bottom: 2px solid #e2e8f0;
   }
-  
+
   .section-title {
     font-size: 14px;
     font-weight: 700;
     color: #1e293b;
   }
-  
+
   .items-count {
     font-size: 12px;
     color: #64748b;
   }
-  
+
   .items-table {
     width: 100%;
     border-collapse: collapse;
   }
-  
+
   .items-table thead th {
     background: #f1f5f9;
     padding: 12px;
@@ -306,27 +264,27 @@ const invoiceStyles = `
     color: #64748b;
     border-bottom: 2px solid #e2e8f0;
   }
-  
+
   .items-table thead th:first-child {
     border-top-left-radius: 8px;
   }
-  
+
   .items-table thead th:last-child {
     border-top-right-radius: 8px;
     text-align: right;
   }
-  
+
   .items-table tbody td {
     padding: 12px;
     border-bottom: 1px solid #e2e8f0;
   }
-  
+
   .product-cell {
     display: flex;
     align-items: center;
     gap: 12px;
   }
-  
+
   .product-image-container {
     width: 48px;
     height: 48px;
@@ -336,13 +294,13 @@ const invoiceStyles = `
     border: 1px solid #e2e8f0;
     flex-shrink: 0;
   }
-  
+
   .product-image-container img {
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
-  
+
   .product-image-placeholder {
     width: 48px;
     height: 48px;
@@ -355,24 +313,24 @@ const invoiceStyles = `
     flex-shrink: 0;
     border: 1px solid #e2e8f0;
   }
-  
+
   .product-info {
     display: flex;
     flex-direction: column;
     gap: 2px;
   }
-  
+
   .product-name {
     font-weight: 600;
     color: #1e293b;
     font-size: 13px;
   }
-  
+
   .product-description {
     font-size: 11px;
     color: #64748b;
   }
-  
+
   .quantity-badge {
     display: inline-flex;
     align-items: center;
@@ -385,27 +343,27 @@ const invoiceStyles = `
     color: #475569;
     font-size: 12px;
   }
-  
+
   .unit-price {
     color: #64748b;
     font-size: 13px;
   }
-  
+
   .subtotal {
     font-weight: 600;
     color: #1e293b;
     font-size: 13px;
   }
-  
+
   .text-center { text-align: center; }
   .text-right { text-align: right; }
-  
+
   /* Totals */
   .totals-wrapper {
     display: flex;
     justify-content: flex-end;
   }
-  
+
   .totals-section {
     background: #1e293b;
     border-radius: 12px;
@@ -413,7 +371,7 @@ const invoiceStyles = `
     color: white;
     min-width: 280px;
   }
-  
+
   .totals-row {
     display: flex;
     justify-content: space-between;
@@ -422,7 +380,7 @@ const invoiceStyles = `
     font-size: 13px;
     color: #94a3b8;
   }
-  
+
   .totals-row.total-row {
     margin-top: 12px;
     padding-top: 12px;
@@ -431,7 +389,7 @@ const invoiceStyles = `
     font-weight: 700;
     color: white;
   }
-  
+
   /* Footer */
   .invoice-footer {
     background: #f8fafc;
@@ -439,14 +397,14 @@ const invoiceStyles = `
     border-top: 1px solid #e2e8f0;
     text-align: center;
   }
-  
+
   .footer-grid {
     display: flex;
     justify-content: center;
     gap: 16px;
     margin-bottom: 16px;
   }
-  
+
   .footer-block {
     display: flex;
     align-items: center;
@@ -456,7 +414,7 @@ const invoiceStyles = `
     border-radius: 8px;
     border: 1px solid #e2e8f0;
   }
-  
+
   .footer-icon {
     width: 32px;
     height: 32px;
@@ -466,17 +424,17 @@ const invoiceStyles = `
     align-items: center;
     justify-content: center;
   }
-  
+
   .footer-icon svg {
     width: 16px;
     height: 16px;
     color: white;
   }
-  
+
   .footer-content {
     text-align: left;
   }
-  
+
   .footer-content h4 {
     font-size: 10px;
     font-weight: 600;
@@ -484,55 +442,55 @@ const invoiceStyles = `
     text-transform: uppercase;
     margin-bottom: 2px;
   }
-  
+
   .footer-content p {
     font-size: 13px;
     color: #1e293b;
     font-weight: 600;
   }
-  
+
   .footer-note {
     font-size: 12px;
     color: #94a3b8;
     line-height: 1.6;
   }
-  
+
   .footer-note strong {
     color: #64748b;
   }
-  
+
   /* Responsive */
   @media (max-width: 768px) {
     .client-section {
       grid-template-columns: 1fr;
     }
-    
+
     .header-content {
       flex-direction: column;
       gap: 24px;
     }
-    
+
     .invoice-meta {
       text-align: left;
       width: 100%;
     }
-    
+
     .footer-grid {
       flex-direction: column;
     }
-    
+
     .totals-section {
       min-width: 100%;
     }
   }
-  
+
   /* Print styles */
   @media print {
     .invoice-container {
       box-shadow: none;
       border-radius: 0;
     }
-    
+
     .invoice-wrapper {
       background: white;
     }
@@ -546,13 +504,44 @@ export function InvoiceViewer({ data }: Readonly<InvoiceViewerProps>) {
     setMounted(true);
   }, []);
 
-  const fechaEmision = data.issuedAt
-    ? new Date(data.issuedAt).toLocaleDateString('es-ES', {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric',
-      })
-    : 'Fecha no disponible';
+  // Asegurar valores por defecto para todos los campos
+  const safeData = {
+    invoiceNumber: data.invoiceNumber || 'Sin número',
+    issuedAt: data.issuedAt || new Date().toISOString(),
+    isCancelled: data.isCancelled || false,
+    cancelledAt: data.cancelledAt || null,
+    companyName: data.companyName || '3D Print S.L.',
+    companyTaxId: data.companyTaxId || 'N/A',
+    companyAddress: data.companyAddress || '',
+    companyCity: data.companyCity || '',
+    companyProvince: data.companyProvince || '',
+    companyPostalCode: data.companyPostalCode || '',
+    companyPhone: data.companyPhone || '',
+    companyEmail: data.companyEmail || '',
+    clientName: data.clientName || 'Cliente',
+    clientTaxId: data.clientTaxId || 'N/A',
+    clientAddress: data.clientAddress || '',
+    clientCity: data.clientCity || '',
+    clientProvince: data.clientProvince || '',
+    clientPostalCode: data.clientPostalCode || '',
+    clientCountry: data.clientCountry || 'España',
+    clientEmail: data.clientEmail || '',
+    clientPhone: data.clientPhone || '',
+    items: Array.isArray(data.items) ? data.items : [],
+    subtotal: typeof data.subtotal === 'number' ? data.subtotal : 0,
+    shipping: typeof data.shipping === 'number' ? data.shipping : 0,
+    vatRate: typeof data.vatRate === 'number' ? data.vatRate : 21,
+    vatAmount: typeof data.vatAmount === 'number' ? data.vatAmount : 0,
+    total: typeof data.total === 'number' ? data.total : 0,
+    paymentMethod: data.paymentMethod || 'CARD',
+    orderNumber: data.orderNumber || '',
+  };
+
+  const fechaEmision = new Date(safeData.issuedAt).toLocaleDateString('es-ES', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  });
 
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat('es-ES', {
@@ -571,8 +560,8 @@ export function InvoiceViewer({ data }: Readonly<InvoiceViewerProps>) {
     return methods[method || ''] || 'Tarjeta de crédito/débito';
   };
 
-  // Generar HTML de items
-  const itemsHTML = data.items
+  // Generar HTML de items con valores seguros
+  const itemsHTML = safeData.items
     .map(
       item => `
     <tr>
@@ -582,13 +571,12 @@ export function InvoiceViewer({ data }: Readonly<InvoiceViewerProps>) {
             item.image
               ? `
             <div class="product-image-container">
-              <img src="${item.image}" alt="${item.name}">
+              <img src="${item.image}" alt="${item.name || 'Producto'}">
             </div>
           `
               : `
             <div class="product-image-placeholder">
               <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                // eslint-disable-next-line max-len, max-len, max-len
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
@@ -600,30 +588,20 @@ export function InvoiceViewer({ data }: Readonly<InvoiceViewerProps>) {
           `
           }
           <div class="product-info">
-            <span class="product-name">${item.name}</span>
+            <span class="product-name">${item.name || 'Producto'}</span>
             ${item.description ? `<span class="product-description">${item.description}</span>` : ''}
           </div>
         </div>
       </td>
       <td class="text-center">
-        <span class="quantity-badge">${item.quantity}</span>
+        <span class="quantity-badge">${item.quantity || 1}</span>
       </td>
-      <td class="text-right unit-price">${formatCurrency(item.price)}</td>
-      <td class="text-right subtotal">${formatCurrency(item.subtotal)}</td>
+      <td class="text-right unit-price">${formatCurrency(item.price || 0)}</td>
+      <td class="text-right subtotal">${formatCurrency(item.subtotal || 0)}</td>
     </tr>
   `,
     )
     .join('');
-
-  // Debug: Verificar datos
-  console.log('InvoiceViewer - Datos recibidos:', {
-    invoiceNumber: data.invoiceNumber,
-    issuedAt: data.issuedAt,
-    companyName: data.companyName,
-    itemsCount: data.items?.length,
-    orderNumber: data.orderNumber,
-    paymentMethod: data.paymentMethod,
-  });
 
   const htmlContent = `
     <div class="invoice-wrapper">
@@ -634,21 +612,21 @@ export function InvoiceViewer({ data }: Readonly<InvoiceViewerProps>) {
             <div class="company-section">
               <div class="logo-container">
                 <div class="logo-icon">3D</div>
-                <div class="company-name">${data.companyName || 'Sin nombre'}</div>
+                <div class="company-name">${safeData.companyName}</div>
               </div>
               <div class="company-details">
-                <strong>NIF:</strong> ${data.companyTaxId || 'N/A'}<br>
-                ${data.companyAddress || ''}<br>
-                ${data.companyPostalCode || ''} ${data.companyCity || ''}, ${data.companyProvince || ''}
-                ${data.companyPhone ? `<br>📞 ${data.companyPhone}` : ''}
-                ${data.companyEmail ? `<br>✉ ${data.companyEmail}` : ''}
+                <strong>NIF:</strong> ${safeData.companyTaxId}<br>
+                ${safeData.companyAddress}<br>
+                ${safeData.companyPostalCode} ${safeData.companyCity}, ${safeData.companyProvince}
+                ${safeData.companyPhone ? `<br>📞 ${safeData.companyPhone}` : ''}
+                ${safeData.companyEmail ? `<br>✉ ${safeData.companyEmail}` : ''}
               </div>
             </div>
             <div class="invoice-meta">
               <div class="invoice-label">Factura</div>
-              <div class="invoice-number">${data.invoiceNumber || 'Sin número'}</div>
+              <div class="invoice-number">${safeData.invoiceNumber}</div>
               <div class="invoice-date">${fechaEmision}</div>
-              ${data.isCancelled ? '<div class="cancelled-badge">Factura Anulada</div>' : ''}
+              ${safeData.isCancelled ? '<div class="cancelled-badge">Factura Anulada</div>' : ''}
             </div>
           </div>
         </div>
@@ -659,26 +637,26 @@ export function InvoiceViewer({ data }: Readonly<InvoiceViewerProps>) {
           <div class="client-section">
             <div class="client-card">
               <div class="section-label">Facturar a</div>
-              <div class="client-name">${data.clientName}</div>
+              <div class="client-name">${safeData.clientName}</div>
               <div class="client-details">
-                <strong>NIF:</strong> ${data.clientTaxId || 'No especificado'}<br>
-                ${data.clientAddress || ''}<br>
-                ${data.clientPostalCode || ''} ${data.clientCity || ''}, ${data.clientProvince || ''}<br>
-                ${data.clientCountry || 'España'}
+                <strong>NIF:</strong> ${safeData.clientTaxId}<br>
+                ${safeData.clientAddress}<br>
+                ${safeData.clientPostalCode} ${safeData.clientCity}, ${safeData.clientProvince}<br>
+                ${safeData.clientCountry}
               </div>
               ${(() => {
-                if (!data.clientEmail && !data.clientPhone) {
+                if (!safeData.clientEmail && !safeData.clientPhone) {
                   return '';
                 }
                 let contact = '';
-                if (data.clientEmail) {
-                  contact += `✉ ${data.clientEmail}`;
+                if (safeData.clientEmail) {
+                  contact += `✉ ${safeData.clientEmail}`;
                 }
-                if (data.clientEmail && data.clientPhone) {
+                if (safeData.clientEmail && safeData.clientPhone) {
                   contact += ' · ';
                 }
-                if (data.clientPhone) {
-                  contact += `📞 ${data.clientPhone}`;
+                if (safeData.clientPhone) {
+                  contact += `📞 ${safeData.clientPhone}`;
                 }
                 return `
               <div class="client-contact">
@@ -686,15 +664,14 @@ export function InvoiceViewer({ data }: Readonly<InvoiceViewerProps>) {
               </div>
               `;
               })()}
-}
             </div>
 
               <div class="client-card">
               <div class="section-label">Información del pedido</div>
               <div class="client-details">
-                <strong>Pedido:</strong> ${data.orderNumber && data.orderNumber.trim() !== '' ? data.orderNumber : 'N/A'}<br>
-                <strong>Método de pago:</strong> ${getPaymentMethodName(data.paymentMethod)}<br>
-                <strong>Fecha de emisión:</strong> ${fechaEmision || 'Fecha no disponible'}
+                <strong>Pedido:</strong> ${safeData.orderNumber && safeData.orderNumber.trim() !== '' ? safeData.orderNumber : 'N/A'}<br>
+                <strong>Método de pago:</strong> ${getPaymentMethodName(safeData.paymentMethod)}<br>
+                <strong>Fecha de emisión:</strong> ${fechaEmision}
               </div>
             </div>
           </div>
@@ -703,7 +680,7 @@ export function InvoiceViewer({ data }: Readonly<InvoiceViewerProps>) {
           <div class="items-section">
             <div class="section-header">
               <h3 class="section-title">Conceptos</h3>
-              <span class='items-count'>${data.items.length} producto${data.items.length === 1 ? '' : 's'}</span>
+              <span class='items-count'>${safeData.items.length} producto${safeData.items.length === 1 ? '' : 's'}</span>
             </div>
             <table class="items-table">
               <thead>
@@ -725,19 +702,19 @@ export function InvoiceViewer({ data }: Readonly<InvoiceViewerProps>) {
             <div class="totals-section">
               <div class="totals-row">
                 <span>Subtotal productos</span>
-                <span>${formatCurrency(data.subtotal)}</span>
+                <span>${formatCurrency(safeData.subtotal)}</span>
               </div>
               <div class="totals-row">
                 <span>Envío</span>
-                <span>${formatCurrency(data.shipping)}</span>
+                <span>${formatCurrency(safeData.shipping)}</span>
               </div>
               <div class="totals-row">
-                <span>IVA (${data.vatRate}%)</span>
-                <span>${formatCurrency(data.vatAmount)}</span>
+                <span>IVA (${safeData.vatRate}%)</span>
+                <span>${formatCurrency(safeData.vatAmount)}</span>
               </div>
               <div class="totals-row total-row">
                 <span>TOTAL</span>
-                <span>${formatCurrency(data.total)}</span>
+                <span>${formatCurrency(safeData.total)}</span>
               </div>
             </div>
           </div>
@@ -759,11 +736,11 @@ export function InvoiceViewer({ data }: Readonly<InvoiceViewerProps>) {
               </div>
               <div class="footer-content">
                 <h4>Método de pago</h4>
-                <p>${getPaymentMethodName(data.paymentMethod)}</p>
+                <p>${getPaymentMethodName(safeData.paymentMethod)}</p>
               </div>
             </div>
             ${
-              data.orderNumber
+              safeData.orderNumber
                 ? `
             <div class="footer-block">
               <div class="footer-icon">
@@ -778,7 +755,7 @@ export function InvoiceViewer({ data }: Readonly<InvoiceViewerProps>) {
               </div>
               <div class="footer-content">
                 <h4>Pedido</h4>
-                <p>${data.orderNumber}</p>
+                <p>${safeData.orderNumber}</p>
               </div>
             </div>
             `
@@ -787,9 +764,9 @@ export function InvoiceViewer({ data }: Readonly<InvoiceViewerProps>) {
           </div>
 
           <div class="footer-note">
-            <strong>${data.companyName}</strong> · ${data.companyCity}, ${data.companyProvince}<br>
+            <strong>${safeData.companyName}</strong> · ${safeData.companyCity}, ${safeData.companyProvince}<br>
             Factura generada electrónicamente · Este documento es válido sin firma según la normativa vigente<br>
-            ${data.companyEmail ? `Contacto: ${data.companyEmail}` : ''}
+            ${safeData.companyEmail ? `Contacto: ${safeData.companyEmail}` : ''}
           </div>
         </div>
       </div>
@@ -806,48 +783,4 @@ export function InvoiceViewer({ data }: Readonly<InvoiceViewerProps>) {
       <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
     </>
   );
-}
-
-// Hook para transformar datos de la API al formato del componente
-export function useInvoiceData(invoiceData: ApiInvoiceData): InvoiceData {
-  return {
-    invoiceNumber: invoiceData.invoiceNumber,
-    issuedAt: invoiceData.issuedAt,
-    isCancelled: invoiceData.isCancelled,
-    cancelledAt: invoiceData.cancelledAt,
-    companyName: invoiceData.empresaNombre,
-    companyTaxId: invoiceData.empresaNif,
-    companyAddress: invoiceData.empresaDireccion,
-    companyCity: invoiceData.empresaCiudad,
-    companyProvince: invoiceData.empresaProvincia,
-    companyPostalCode: invoiceData.empresaCodigoPostal,
-    companyEmail: invoiceData.empresaEmail,
-    companyPhone: invoiceData.empresaTelefono,
-    clientName: invoiceData.clienteNombre,
-    clientTaxId: invoiceData.clienteNif,
-    clientAddress: invoiceData.clienteDireccion,
-    clientCity: invoiceData.clienteCiudad,
-    clientProvince: invoiceData.clienteProvincia,
-    clientPostalCode: invoiceData.clienteCodigoPostal,
-    clientCountry: invoiceData.clientePais,
-    clientEmail: invoiceData.clienteEmail,
-    clientPhone: invoiceData.clienteTelefono,
-    items:
-      invoiceData.items?.map(item => ({
-        id: item.id || '',
-        name: item.name || '',
-        quantity: item.quantity,
-        price: item.price,
-        subtotal: item.subtotal,
-        image: item.image,
-        description: item.description,
-      })) || [],
-    subtotal: invoiceData.subtotal || invoiceData.baseImponible || 0,
-    shipping: invoiceData.shipping || 0,
-    vatRate: invoiceData.tipoIva || 21,
-    vatAmount: invoiceData.cuotaIva || 0,
-    total: invoiceData.total || 0,
-    paymentMethod: invoiceData.paymentMethod || 'CARD',
-    orderNumber: invoiceData.orderNumber || '',
-  };
 }
