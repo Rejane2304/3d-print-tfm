@@ -41,24 +41,18 @@ interface InvoiceDetail {
   clientePais: string;
   clienteEmail?: string;
   clienteTelefono?: string;
-  order: {
-    orderNumber: string;
-    paymentMethod: string;
-    items: Array<{
-      id: string;
-      name: string;
-      quantity: number;
-      price: number;
-      subtotal: number;
-      image?: string;
-      description?: string;
-    }>;
-    usuario: {
-      nombre: string;
-      email: string;
-      telefono?: string;
-    };
-  };
+  // Order data directamente (no anidado)
+  orderNumber?: string;
+  paymentMethod?: string;
+  items: Array<{
+    id?: string;
+    name?: string;
+    quantity: number;
+    price: number;
+    subtotal: number;
+    image?: string;
+    description?: string;
+  }>;
 }
 
 export default function UserInvoiceDetailPage() {

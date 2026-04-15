@@ -50,6 +50,48 @@ interface InvoiceData {
   orderNumber?: string;
 }
 
+// Tipo para datos de la API (español)
+interface ApiInvoiceData {
+  invoiceNumber: string;
+  issuedAt: string;
+  isCancelled: boolean;
+  cancelledAt?: string | null;
+  empresaNombre: string;
+  empresaNif: string;
+  empresaDireccion: string;
+  empresaCiudad: string;
+  empresaProvincia: string;
+  empresaCodigoPostal: string;
+  empresaEmail?: string;
+  empresaTelefono?: string;
+  clienteNombre: string;
+  clienteNif: string;
+  clienteDireccion: string;
+  clienteCiudad: string;
+  clienteProvincia: string;
+  clienteCodigoPostal: string;
+  clientePais?: string;
+  clienteEmail?: string;
+  clienteTelefono?: string;
+  baseImponible: number;
+  cuotaIva: number;
+  tipoIva: number;
+  total: number;
+  subtotal?: number;
+  shipping?: number;
+  orderNumber?: string;
+  paymentMethod?: string;
+  items?: Array<{
+    id?: string;
+    name?: string;
+    quantity: number;
+    price: number;
+    subtotal: number;
+    image?: string;
+    description?: string;
+  }>;
+}
+
 interface InvoiceViewerProps {
   data: InvoiceData;
 }
@@ -757,54 +799,7 @@ export function InvoiceViewer({ data }: Readonly<InvoiceViewerProps>) {
 }
 
 // Hook para transformar datos de la API al formato del componente
-export function useInvoiceData(invoiceData: {
-  invoiceNumber: string;
-  issuedAt: string;
-  isCancelled: boolean;
-  cancelledAt?: string | null;
-  empresaNombre: string;
-  empresaNif: string;
-  empresaDireccion: string;
-  empresaCiudad: string;
-  empresaProvincia: string;
-  empresaCodigoPostal: string;
-  empresaEmail?: string;
-  empresaTelefono?: string;
-  clienteNombre: string;
-  clienteNif: string;
-  clienteDireccion: string;
-  clienteCiudad: string;
-  clienteProvincia: string;
-  clienteCodigoPostal: string;
-  clientePais: string;
-  clienteEmail?: string;
-  clienteTelefono?: string;
-  order: {
-    orderNumber: string;
-    paymentMethod: string;
-    items: Array<{
-      id?: string;
-      name?: string;
-      nombre?: string;
-      quantity: number;
-      price: number;
-      subtotal: number;
-      image?: string;
-      description?: string;
-    }>;
-    usuario?: {
-      nombre?: string;
-      email?: string;
-      telefono?: string;
-    };
-  };
-  baseImponible: number;
-  cuotaIva: number;
-  tipoIva: number;
-  total: number;
-  subtotal?: number;
-  shipping?: number;
-}): InvoiceData {
+export function useInvoiceData(invoiceData: ApiInvoiceData): InvoiceData {
   return {
     invoiceNumber: invoiceData.invoiceNumber,
     issuedAt: invoiceData.issuedAt,
@@ -828,21 +823,21 @@ export function useInvoiceData(invoiceData: {
     clientEmail: invoiceData.clienteEmail,
     clientPhone: invoiceData.clienteTelefono,
     items:
-      invoiceData.order?.items?.map(item => ({
-        id: item.id,
-        name: item.name || item.nombre || '',
+      invoiceData.items?.map(item => ({
+        id: item.id || '',
+        name: item.name || '',
         quantity: item.quantity,
         price: item.price,
         subtotal: item.subtotal,
         image: item.image,
         description: item.description,
       })) || [],
-    subtotal: invoiceData.subtotal || invoiceData.baseImponible,
+    subtotal: invoiceData.subtotal || invoiceData.baseImponible || 0,
     shipping: invoiceData.shipping || 0,
-    vatRate: invoiceData.tipoIva,
-    vatAmount: invoiceData.cuotaIva,
-    total: invoiceData.total,
-    paymentMethod: invoiceData.order?.paymentMethod,
-    orderNumber: invoiceData.order?.orderNumber,
+    vatRate: invoiceData.tipoIva || 21,
+    vatAmount: invoiceData.cuotaIva || 0,
+    total: invoiceData.total || 0,
+    paymentMethod: invoiceData.paymentMethod || 'CARD',
+    orderNumber: invoiceData.orderNumber || '',
   };
 }

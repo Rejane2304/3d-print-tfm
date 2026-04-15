@@ -69,13 +69,13 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: 'Factura no encontrada' }, { status: 404 });
     }
 
-    // Transformar datos al formato esperado por useInvoiceData (español)
+    // Transformar datos al formato esperado por useInvoiceData
     const facturaFormateada = {
       id: factura.id,
       invoiceNumber: factura.invoiceNumber,
-      issuedAt: factura.issuedAt,
+      issuedAt: factura.issuedAt?.toISOString() || new Date().toISOString(),
       isCancelled: factura.isCancelled,
-      cancelledAt: factura.cancelledAt,
+      cancelledAt: factura.cancelledAt?.toISOString() || null,
       baseImponible: Number(factura.subtotal),
       cuotaIva: Number(factura.vatAmount),
       tipoIva: Number(factura.vatRate),
@@ -101,24 +101,20 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       clientePais: factura.clientCountry || 'España',
       clienteEmail: factura.order?.user?.email || undefined,
       clienteTelefono: factura.order?.user?.phone || undefined,
-      // Order info
-      order: {
-        orderNumber: factura.order?.orderNumber || '',
-        paymentMethod: factura.order?.paymentMethod || 'CARD',
-        items:
-          factura.order?.items.map(item => ({
-            id: item.id,
-            name: item.product?.slug ? translateProductName(item.product.slug) : item.name,
-            quantity: item.quantity,
-            price: Number(item.price),
-            subtotal: Number(item.subtotal),
-            image: item.product?.images?.[0]?.url || undefined,
-            description: item.product?.description || undefined,
-          })) || [],
-      },
+      // Order info directamente (no anidado para que coincida con interfaz)
+      orderNumber: factura.order?.orderNumber || '',
+      paymentMethod: factura.order?.paymentMethod || 'CARD',
+      items:
+        factura.order?.items.map(item => ({
+          id: item.id,
+          name: item.product?.slug ? translateProductName(item.product.slug) : item.name,
+          quantity: item.quantity,
+          price: Number(item.price),
+          subtotal: Number(item.subtotal),
+          image: item.product?.images?.[0]?.url || undefined,
+          description: item.product?.description || undefined,
+        })) || [],
     };
-
-    return NextResponse.json({ factura: facturaFormateada });
 
     return NextResponse.json({ factura: facturaFormateada });
   } catch (error) {

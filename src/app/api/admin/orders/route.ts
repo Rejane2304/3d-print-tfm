@@ -36,6 +36,16 @@ const estadoToEnglish: Record<string, string> = {
   Cancelado: 'CANCELLED',
 };
 
+// Mapping of statuses from English to Spanish
+const englishToEstado: Record<string, string> = {
+  PENDING: 'Pendiente',
+  CONFIRMED: 'Confirmado',
+  PREPARING: 'En preparación',
+  SHIPPED: 'Enviado',
+  DELIVERED: 'Entregado',
+  CANCELLED: 'Cancelado',
+};
+
 // GET - List orders
 export async function GET(req: NextRequest) {
   try {
@@ -204,7 +214,7 @@ export async function PATCH(req: NextRequest) {
 
     // Emitir evento de cambio de estado en tiempo real
     if (pedido.user?.id) {
-      await emitOrderStatusUpdated(pedido.id, estado, pedido.user.id, pedido.orderNumber);
+      await emitOrderStatusUpdated(pedido.id, englishStatus, pedido.user.id, pedido.orderNumber);
     }
 
     // Create alert for order status change
