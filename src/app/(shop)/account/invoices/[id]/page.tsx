@@ -62,11 +62,13 @@ export default function UserInvoiceDetailPage() {
   const [invoice, setInvoice] = useState<InvoiceDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [debugInfo, setDebugInfo] = useState<string>('');
 
   const loadInvoice = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
+      setDebugInfo('');
 
       const response = await fetch(`/api/account/invoices/${params.id}`);
       const data = await response.json();
@@ -74,6 +76,10 @@ export default function UserInvoiceDetailPage() {
       if (!response.ok) {
         throw new Error(data.error || 'Error al cargar factura');
       }
+
+      // Debug: ver qué datos llegan
+      console.log('Datos recibidos de API:', data);
+      setDebugInfo(JSON.stringify(data.factura, null, 2).substring(0, 500));
 
       setInvoice(data.factura);
     } catch (err) {
@@ -216,8 +222,24 @@ export default function UserInvoiceDetailPage() {
         </div>
       )}
 
+      {/* Debug Info - Temporal */}
+      {debugInfo && (
+        <div className="max-w-[1920px] mx-auto px-4 py-4 print:hidden">
+          <div className="bg-yellow-50 border border-yellow-200 rounded p-4">
+            <h3 className="font-bold text-yellow-800 mb-2">Debug Info (temporal):</h3>
+            <pre className="text-xs text-yellow-900 overflow-auto max-h-40">{debugInfo}</pre>
+          </div>
+        </div>
+      )}
+
       {/* Invoice Viewer */}
-      <div className="py-8 px-4 print:p-0">{invoiceData && <InvoiceViewer data={invoiceData} />}</div>
+      <div className="py-8 px-4 print:p-0">
+        {invoiceData ? (
+          <InvoiceViewer data={invoiceData} />
+        ) : (
+          <div className="text-center py-8 text-gray-500">No se pudieron cargar los datos de la factura</div>
+        )}
+      </div>
     </div>
   );
 }
