@@ -587,7 +587,7 @@ export default function OrderDetailPage() {
       <InvoiceNotAvailableModal
         isOpen={invoiceModalOpen}
         onClose={() => setInvoiceModalOpen(false)}
-        orderNumber={order?.orderNumber}
+        orderNumber={order?.numeroPedido}
         reason={invoiceModalReason}
       />
     </div>

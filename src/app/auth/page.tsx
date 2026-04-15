@@ -202,14 +202,16 @@ function AuthContent() {
           </div>
         </div>
 
-        {/* Test Credentials */}
-        <div className="mt-6 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl p-4 shadow-sm">
-          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Usuarios de prueba</h3>
-          <div className="space-y-2 text-xs text-gray-600">
-            <TestCredential title="Admin" email="admin@3dprint.com" password="AdminTFM2024!" />
-            <TestCredential title="Cliente" email="juan@example.com" password="JuanTFM2024!" />
+        {/* Test Credentials - Solo en desarrollo */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mt-6 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl p-4 shadow-sm">
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Usuarios de prueba</h3>
+            <div className="space-y-2 text-xs text-gray-600">
+              <TestCredential title="Admin" email="admin@3dprint.com" password="AdminTFM2024!" />
+              <TestCredential title="Cliente" email="juan@example.com" password="JuanTFM2024!" />
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
