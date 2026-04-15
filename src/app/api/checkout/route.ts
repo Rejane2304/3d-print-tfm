@@ -474,6 +474,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const subtotal = Number(user.cart.subtotal);
 
   // 6. Validate coupon
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { couponId, couponDiscount, hasFreeShipping } = await validateCoupon(couponCode, subtotal);
 
   // 7. Calculate shipping cost based on address
