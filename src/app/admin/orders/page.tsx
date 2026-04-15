@@ -4,8 +4,8 @@
  */
 'use client';
 
-import { showConfirm } from '@/lib/dialogs';
 import { useCallback, useEffect, useState } from 'react';
+import { ConfirmDialogProvider, showConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -123,15 +123,43 @@ export default function AdminOrdersPage() {
   };
 
   const handleDeleteOrders = async (selectedIds: string[]) => {
-    if (!showConfirm(`¿Estás seguro de que deseas eliminar ${selectedIds.length} pedido(s)?`)) {
+    const confirmed = await showConfirmDialog({
+      title: 'Eliminar pedidos',
+      message: `¿Estás seguro de que deseas eliminar ${selectedIds.length} pedido(s)? Esta acción no se puede deshacer.`,
+      confirmText: 'Sí, eliminar',
+      cancelText: 'Cancelar',
+      variant: 'danger',
+    });
+
+    if (!confirmed) {
       return;
     }
 
     try {
-      await Promise.all(selectedIds.map(id => fetch(`/api/admin/orders/${id}`, { method: 'DELETE' })));
-      await loadOrders();
+      const response = await Promise.all(selectedIds.map(id => fetch(`/api/admin/orders/${id}`, { method: 'DELETE' })));
+
+      const allSuccess = response.every(r => r.ok);
+      if (allSuccess) {
+        await loadOrders();
+        await showConfirmDialog({
+          title: 'Pedidos eliminados',
+          message: `${selectedIds.length} pedido(s) han sido eliminados correctamente.`,
+          confirmText: 'Aceptar',
+          cancelText: '',
+          variant: 'info',
+        });
+      } else {
+        throw new Error('Error al eliminar algunos pedidos');
+      }
     } catch (error) {
       console.error('Error al eliminar pedidos:', error);
+      await showConfirmDialog({
+        title: 'Error',
+        message: 'No se pudieron eliminar los pedidos. Por favor, inténtalo de nuevo.',
+        confirmText: 'Aceptar',
+        cancelText: '',
+        variant: 'danger',
+      });
     }
   };
 
@@ -329,6 +357,7 @@ export default function AdminOrdersPage() {
           noResultsMessage="Ningún pedido coincide con tu búsqueda"
         />
       </div>
+      <ConfirmDialogProvider />
     </div>
   );
 }

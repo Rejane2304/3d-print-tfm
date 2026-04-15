@@ -1,13 +1,14 @@
 /**
  * API de Pedido Individual Admin
- * Obtener detalle de un pedido específico
+ * GET: Obtener detalle de un pedido específico
+ * DELETE: Eliminar un pedido y restaurar stock
  *
  * Requiere: Rol ADMIN
  */
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
+import { prisma } from '@/lib/db/prisma';
 import { authOptions } from '@/lib/auth/auth-options';
 import {
   translateCountry,
@@ -64,8 +65,6 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ success: false, error: translateErrorMessage('Pedido not found') }, { status: 404 });
     }
 
-    // Transform to Spanish response format matching frontend expectations
-    // Translate enums from English (DB) to Spanish (UI)
     const pedidoTransformado = {
       id: order.id,
       numeroPedido: order.orderNumber,
@@ -112,5 +111,54 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   } catch (error) {
     console.error('Error obteniendo pedido:', error);
     return NextResponse.json({ success: false, error: translateErrorMessage('Internal error') }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+    });
+
+    if (user?.role !== 'ADMIN') {
+      return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 403 });
+    }
+
+    const order = await prisma.order.findUnique({
+      where: { id: params.id },
+      include: { items: true },
+    });
+
+    if (!order) {
+      return NextResponse.json({ success: false, error: 'Pedido no encontrado' }, { status: 404 });
+    }
+
+    // Restaurar stock si está confirmado, en preparación o enviado
+    if (['CONFIRMED', 'PREPARING', 'SHIPPED'].includes(order.status)) {
+      for (const item of order.items) {
+        if (item.productId) {
+          await prisma.product.update({
+            where: { id: item.productId },
+            data: { stock: { increment: item.quantity } },
+          });
+        }
+      }
+    }
+
+    // Eliminar en orden: items, payment, invoice, order
+    await prisma.orderItem.deleteMany({ where: { orderId: params.id } });
+    await prisma.payment.deleteMany({ where: { orderId: params.id } });
+    await prisma.invoice.deleteMany({ where: { orderId: params.id } });
+    await prisma.order.delete({ where: { id: params.id } });
+
+    return NextResponse.json({ success: true, message: 'Pedido eliminado correctamente' });
+  } catch (error) {
+    console.error('Error eliminando pedido:', error);
+    return NextResponse.json({ success: false, error: 'Error al eliminar el pedido' }, { status: 500 });
   }
 }
