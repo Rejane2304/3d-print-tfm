@@ -29,7 +29,7 @@ interface AdminLayoutProps {
 }
 
 const menuItems = [
-  { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/admin/dashboard', label: 'Panel', icon: LayoutDashboard },
   { href: '/admin/clients', label: 'Clientes', icon: Users },
   { href: '/admin/orders', label: 'Pedidos', icon: ClipboardList },
   { href: '/admin/products', label: 'Productos', icon: Package },
