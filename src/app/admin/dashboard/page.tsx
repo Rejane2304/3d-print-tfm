@@ -111,6 +111,8 @@ export default function AdminPanelPage() {
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState<DateRange>('month');
 
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+
   const fetchAnalytics = useCallback(async () => {
     try {
       setLoading(true);
@@ -119,6 +121,7 @@ export default function AdminPanelPage() {
 
       if (data.success) {
         setAnalytics(data.data);
+        setLastUpdated(new Date());
       }
     } catch (error) {
       console.error('Error fetching analytics:', error);
@@ -127,16 +130,12 @@ export default function AdminPanelPage() {
     }
   }, [dateRange]);
 
-  // Handler for real-time events
-  const handleRealTimeEvent = useCallback(
-    (eventType: string) => {
-      // Refresh analytics on relevant events
-      if (eventType === 'metrics:update' || eventType === 'stock:updated') {
-        void fetchAnalytics();
-      }
-    },
-    [fetchAnalytics],
-  );
+  // Handler for real-time events - disabled to avoid loops
+  const handleRealTimeEvent = useCallback((eventType: string) => {
+    // Real-time updates disabled for academic project
+    // Using auto-refresh instead
+    void eventType;
+  }, []);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -155,13 +154,13 @@ export default function AdminPanelPage() {
     }
   }, [status, session, router, fetchAnalytics]);
 
-  // Auto-refresh metrics every 60 seconds
+  // Auto-refresh metrics every 30 seconds (academic project - simple approach)
   useEffect(() => {
     const interval = setInterval(() => {
       if (status === 'authenticated') {
         void fetchAnalytics();
       }
-    }, 60000);
+    }, 30000);
 
     return () => clearInterval(interval);
   }, [status, fetchAnalytics]);
@@ -222,10 +221,13 @@ export default function AdminPanelPage() {
     <div className="min-h-screen bg-gray-100">
       <div className="max-w-[1920px] 3xl:max-w-[2200px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-8 flex justify-between items-center">
+        <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Panel</h1>
             <p className="text-gray-600 mt-2">Resumen de la tienda y estadísticas</p>
+            {lastUpdated && (
+              <p className="text-xs text-gray-400 mt-1">Actualizado: {lastUpdated.toLocaleTimeString('es-ES')}</p>
+            )}
           </div>
           <div className="relative">
             <select
