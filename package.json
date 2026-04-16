@@ -55,6 +55,7 @@
     "db:migrate:prod": "DATABASE_URL='postgresql://postgres.ctwbppfkfsuxymfouptb:putWa3-jinpeg-vorjeh@aws-1-eu-central-1.pooler.supabase.com:5432/postgres' npx prisma migrate deploy",
     "db:seed:prod": "tsx scripts/seed-prod-with-confirmation.ts",
     "db:studio:prod:blocked": "echo '❌ ERROR: Prisma Studio en producción está BLOQUEADO por seguridad.' && echo 'Motivo: Evitar modificación/eliminación accidental de datos reales.' && exit 1",
+    "db:reset:dev": "DATABASE_URL='postgresql://postgres.hkjknnymctorucyhtypm:putWa3-jinpeg-vorjeh@aws-1-eu-west-1.pooler.supabase.com:5432/postgres' DIRECT_URL='postgresql://postgres.hkjknnymctorucyhtypm:putWa3-jinpeg-vorjeh@db.hkjknnymctorucyhtypm.supabase.co:5432/postgres' tsx scripts/reset-and-seed.ts",
     "prepare": "husky",
     "pre-commit": "lint-staged"
   },
