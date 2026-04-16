@@ -29,12 +29,22 @@ const imageUpdateSchema = z.object({
   isMain: z.boolean().default(false),
 });
 
-// Validation schema for update
+// Validation schema for update with bilingual support
 // Coerce converts strings to appropriate types
 const updateProductSchema = z.object({
-  name: z.string().min(1).optional(),
-  description: z.string().optional(),
-  shortDescription: z.string().optional(),
+  // Bilingual fields - required
+  nameEs: z.string().min(2, 'El nombre en español debe tener al menos 2 caracteres').optional(),
+  nameEn: z.string().min(2, 'El nombre en inglés debe tener al menos 2 caracteres').optional(),
+  descriptionEs: z.string().min(10, 'La descripción en español debe tener al menos 10 caracteres').optional(),
+  descriptionEn: z.string().min(10, 'La descripción en inglés debe tener al menos 10 caracteres').optional(),
+  // Bilingual fields - optional
+  shortDescEs: z.string().max(255, 'La descripción corta no puede exceder 255 caracteres').optional(),
+  shortDescEn: z.string().max(255, 'La descripción corta no puede exceder 255 caracteres').optional(),
+  metaTitleEs: z.string().max(200, 'El meta título no puede exceder 200 caracteres').optional(),
+  metaTitleEn: z.string().max(200, 'El meta título no puede exceder 200 caracteres').optional(),
+  metaDescEs: z.string().max(300, 'La meta descripción no puede exceder 300 caracteres').optional(),
+  metaDescEn: z.string().max(300, 'La meta descripción no puede exceder 300 caracteres').optional(),
+  // Other fields
   price: z.coerce.number().positive().optional(),
   previousPrice: z.coerce.number().optional().nullable(),
   stock: z.coerce.number().int().min(0).optional(),
@@ -101,14 +111,26 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
       return NextResponse.json({ success: false, error: translateErrorMessage('Producto not found') }, { status: 404 });
     }
 
-    // Return translated data for admin panel
-    // Use translation if available, otherwise use actual DB data
+    // Return product with Spanish fields for admin panel
     const transformedProduct = {
       id: product.id,
       slug: product.slug,
-      nombre: translateProductName(product.slug) || product.name,
-      descripcion: translateProductDescription(product.slug) || product.description,
-      descripcionCorta: translateProductShortDescription(product.slug) || product.shortDescription,
+      // Spanish version for UI
+      nombre: product.nameEs,
+      descripcion: product.descriptionEs,
+      descripcionCorta: product.shortDescEs,
+      // Bilingual fields
+      nameEs: product.nameEs,
+      nameEn: product.nameEn,
+      descriptionEs: product.descriptionEs,
+      descriptionEn: product.descriptionEn,
+      shortDescEs: product.shortDescEs,
+      shortDescEn: product.shortDescEn,
+      metaTitleEs: product.metaTitleEs,
+      metaTitleEn: product.metaTitleEn,
+      metaDescEs: product.metaDescEs,
+      metaDescEn: product.metaDescEn,
+      // Other fields
       precio: Number(product.price),
       precioAnterior: product.previousPrice ? Number(product.previousPrice) : null,
       stock: product.stock,
@@ -158,9 +180,9 @@ export async function PUT(req: NextRequest, { params }: { params: { slug: string
     const body = await req.json();
     const data = updateProductSchema.parse(body);
 
-    // Generate new slug if name changed
-    const newSlug = data.name
-      ? data.name
+    // Generate new slug if nameEs changed (using Spanish name as canonical)
+    const newSlug = data.nameEs
+      ? data.nameEs
           .normalize('NFD')
           .replaceAll(/[\u0300-\u036f]/g, '')
           .toLowerCase()
@@ -170,11 +192,26 @@ export async function PUT(req: NextRequest, { params }: { params: { slug: string
 
     // Update product and images in a transaction
     const updated = await prisma.$transaction(async tx => {
-      // Update product data
+      // Update product data with bilingual fields
       const productUpdateData: Record<string, unknown> = {
-        name: data.name,
-        description: data.description,
-        shortDescription: data.shortDescription,
+        // Bilingual fields
+        ...(data.nameEs !== undefined && { nameEs: data.nameEs }),
+        ...(data.nameEn !== undefined && { nameEn: data.nameEn }),
+        ...(data.descriptionEs !== undefined && { descriptionEs: data.descriptionEs }),
+        ...(data.descriptionEn !== undefined && { descriptionEn: data.descriptionEn }),
+        ...(data.shortDescEs !== undefined && { shortDescEs: data.shortDescEs }),
+        ...(data.shortDescEn !== undefined && { shortDescEn: data.shortDescEn }),
+        ...(data.metaTitleEs !== undefined && { metaTitleEs: data.metaTitleEs }),
+        ...(data.metaTitleEn !== undefined && { metaTitleEn: data.metaTitleEn }),
+        ...(data.metaDescEs !== undefined && { metaDescEs: data.metaDescEs }),
+        ...(data.metaDescEn !== undefined && { metaDescEn: data.metaDescEn }),
+        // Legacy fields (update with Spanish values)
+        ...(data.nameEs !== undefined && { name: data.nameEs }),
+        ...(data.descriptionEs !== undefined && { description: data.descriptionEs }),
+        ...(data.shortDescEs !== undefined && { shortDescription: data.shortDescEs }),
+        ...(data.metaTitleEs !== undefined && { metaTitle: data.metaTitleEs }),
+        ...(data.metaDescEs !== undefined && { metaDescription: data.metaDescEs }),
+        // Other fields
         price: data.price,
         previousPrice: data.previousPrice ?? undefined,
         stock: data.stock,
@@ -235,7 +272,7 @@ export async function PUT(req: NextRequest, { params }: { params: { slug: string
               filename: img.url.split('/').pop() || 'image.jpg',
               isMain: img.isMain ?? i === 0,
               displayOrder: i,
-              altText: data.name || existingProduct.name,
+              altText: data.nameEs || existingProduct.nameEs,
             },
           });
         }
@@ -248,7 +285,40 @@ export async function PUT(req: NextRequest, { params }: { params: { slug: string
       });
     });
 
-    return NextResponse.json({ success: true, product: updated });
+    // Return updated product with Spanish fields for UI
+    const responseProduct = updated
+      ? {
+          id: updated.id,
+          slug: updated.slug,
+          name: updated.nameEs,
+          nameEs: updated.nameEs,
+          nameEn: updated.nameEn,
+          description: updated.descriptionEs,
+          descriptionEs: updated.descriptionEs,
+          descriptionEn: updated.descriptionEn,
+          shortDesc: updated.shortDescEs,
+          shortDescEs: updated.shortDescEs,
+          shortDescEn: updated.shortDescEn,
+          metaTitleEs: updated.metaTitleEs,
+          metaTitleEn: updated.metaTitleEn,
+          metaDescEs: updated.metaDescEs,
+          metaDescEn: updated.metaDescEn,
+          price: Number(updated.price),
+          previousPrice: updated.previousPrice ? Number(updated.previousPrice) : null,
+          stock: updated.stock,
+          material: updated.material,
+          widthCm: updated.widthCm,
+          heightCm: updated.heightCm,
+          depthCm: updated.depthCm,
+          weight: updated.weight,
+          printTime: updated.printTime,
+          isActive: updated.isActive,
+          isFeatured: updated.isFeatured,
+          categoryId: updated.categoryId,
+        }
+      : null;
+
+    return NextResponse.json({ success: true, product: responseProduct });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ success: false, error: error.errors[0].message }, { status: 400 });

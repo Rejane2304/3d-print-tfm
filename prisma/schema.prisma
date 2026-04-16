@@ -407,9 +407,27 @@ model ProductImage {
 model Product {
   id                  String               @id @default(uuid())
   slug                String               @unique @db.VarChar(100)
+
+  // Bilingual fields (names, descriptions, SEO)
+  nameEs              String               @db.VarChar(200)
+  nameEn              String               @db.VarChar(200)
+  descriptionEs       String
+  descriptionEn       String
+  shortDescEs         String?              @db.VarChar(255)
+  shortDescEn         String?              @db.VarChar(255)
+  metaTitleEs         String?              @db.VarChar(200)
+  metaTitleEn         String?              @db.VarChar(200)
+  metaDescEs          String?              @db.VarChar(300)
+  metaDescEn          String?              @db.VarChar(300)
+
+  // Legacy fields (maintain temporarily for backwards compatibility)
   name                String               @db.VarChar(200)
   description         String
   shortDescription    String?              @db.VarChar(255)
+  metaTitle           String?              @db.VarChar(200)
+  metaDescription     String?              @db.VarChar(300)
+
+  // Other fields (unchanged)
   price               Decimal              @db.Decimal(10, 2)
   previousPrice       Decimal?             @db.Decimal(10, 2)
   stock               Int                  @default(0)
@@ -421,8 +439,6 @@ model Product {
   depthCm             Float?
   weight              Decimal?             @db.Decimal(8, 2)
   printTime           Int?
-  metaTitle           String?              @db.VarChar(200)
-  metaDescription     String?              @db.VarChar(300)
   isActive            Boolean              @default(true)
   isFeatured          Boolean              @default(false)
   createdAt           DateTime             @default(now())

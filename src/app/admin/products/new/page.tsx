@@ -31,12 +31,24 @@ export default function NuevoProductoPage() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [, setImageUploadProgress] = useState<{ current: number; total: number } | null>(null);
 
-  // Form state - all fields from Product schema
+  // Form state - bilingual fields included
   const [formData, setFormData] = useState({
-    name: '',
+    // Bilingual name fields
+    nameEs: '',
+    nameEn: '',
+    // Bilingual description fields
+    descriptionEs: '',
+    descriptionEn: '',
+    // Bilingual short description fields
+    shortDescEs: '',
+    shortDescEn: '',
+    // Bilingual meta fields
+    metaTitleEs: '',
+    metaTitleEn: '',
+    metaDescEs: '',
+    metaDescEn: '',
+    // Other fields
     slug: '',
-    description: '',
-    shortDescription: '',
     price: '',
     previousPrice: '',
     stock: '',
@@ -91,17 +103,19 @@ export default function NuevoProductoPage() {
 
   const generateSlug = (name: string) => {
     return name
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
       .toLowerCase()
       .replaceAll(/[^a-z0-9]+/g, '-')
       .replaceAll(/(^-|-$)/g, '');
   };
 
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const name = e.target.value;
+  const handleNameEsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const nameEs = e.target.value;
     setFormData(prev => ({
       ...prev,
-      name,
-      slug: generateSlug(name),
+      nameEs,
+      slug: generateSlug(nameEs),
     }));
   };
 
@@ -146,14 +160,20 @@ export default function NuevoProductoPage() {
   };
 
   const validateForm = () => {
-    if (!formData.name.trim()) {
-      return 'El nombre es obligatorio';
+    if (!formData.nameEs.trim()) {
+      return 'El nombre en español es obligatorio';
+    }
+    if (!formData.nameEn.trim()) {
+      return 'El nombre en inglés es obligatorio';
     }
     if (!formData.slug.trim()) {
       return 'El slug es obligatorio';
     }
-    if (!formData.description.trim()) {
-      return 'La descripción es obligatoria';
+    if (!formData.descriptionEs.trim()) {
+      return 'La descripción en español es obligatoria';
+    }
+    if (!formData.descriptionEn.trim()) {
+      return 'La descripción en inglés es obligatoria';
     }
     if (!formData.price || Number.parseFloat(formData.price) <= 0) {
       return 'El precio debe ser mayor a 0';
@@ -350,97 +370,153 @@ export default function NuevoProductoPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Columna principal - Info básica */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Información básica */}
+              {/* Información básica - Bilingual */}
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                   <Package className="h-5 w-5" />
-                  Información Básica
+                  Información Básica (Bilingüe)
                 </h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="md:col-span-2">
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                      Nombre del producto *
-                    </label>
-                    <input
-                      type="text"
-                      id="name"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleNameChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      placeholder="Ej: Jarrón Decorativo Floral"
-                      required
-                    />
+                <div className="space-y-4">
+                  {/* Nombre en dos columnas */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="nameEs" className="block text-sm font-medium text-gray-700 mb-1">
+                        Nombre (Español) *
+                      </label>
+                      <input
+                        type="text"
+                        id="nameEs"
+                        name="nameEs"
+                        value={formData.nameEs}
+                        onChange={handleNameEsChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        placeholder="Ej: Jarrón Decorativo Floral"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="nameEn" className="block text-sm font-medium text-gray-700 mb-1">
+                        Nombre (Inglés) *
+                      </label>
+                      <input
+                        type="text"
+                        id="nameEn"
+                        name="nameEn"
+                        value={formData.nameEn}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        placeholder="Ej: Decorative Floral Vase"
+                        required
+                      />
+                    </div>
                   </div>
 
-                  <div>
-                    <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-1">
-                      Slug *
-                    </label>
-                    <input
-                      type="text"
-                      id="slug"
-                      name="slug"
-                      value={formData.slug}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      placeholder="jarron-decorativo-floral"
-                      required
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-1">
+                        Slug *
+                      </label>
+                      <input
+                        type="text"
+                        id="slug"
+                        name="slug"
+                        value={formData.slug}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        placeholder="jarron-decorativo-floral"
+                        readOnly
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 mb-1">
+                        Categoría *
+                      </label>
+                      <select
+                        id="categoryId"
+                        name="categoryId"
+                        value={formData.categoryId}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        required
+                      >
+                        <option value="">Seleccionar categoría</option>
+                        {categories.map(cat => (
+                          <option key={cat.id} value={cat.id}>
+                            {cat.nombre}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
 
-                  <div>
-                    <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 mb-1">
-                      Categoría *
-                    </label>
-                    <select
-                      id="categoryId"
-                      name="categoryId"
-                      value={formData.categoryId}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      required
-                    >
-                      <option value="">Seleccionar categoría</option>
-                      {categories.map(cat => (
-                        <option key={cat.id} value={cat.id}>
-                          {cat.nombre}
-                        </option>
-                      ))}
-                    </select>
+                  {/* Descripción corta en dos columnas */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="shortDescEs" className="block text-sm font-medium text-gray-700 mb-1">
+                        Descripción corta (Español)
+                      </label>
+                      <input
+                        type="text"
+                        id="shortDescEs"
+                        name="shortDescEs"
+                        value={formData.shortDescEs}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        placeholder="Breve descripción en español"
+                        maxLength={255}
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="shortDescEn" className="block text-sm font-medium text-gray-700 mb-1">
+                        Descripción corta (Inglés)
+                      </label>
+                      <input
+                        type="text"
+                        id="shortDescEn"
+                        name="shortDescEn"
+                        value={formData.shortDescEn}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        placeholder="Brief description in English"
+                        maxLength={255}
+                      />
+                    </div>
                   </div>
 
-                  <div className="md:col-span-2">
-                    <label htmlFor="shortDescription" className="block text-sm font-medium text-gray-700 mb-1">
-                      Descripción corta
-                    </label>
-                    <input
-                      type="text"
-                      id="shortDescription"
-                      name="shortDescription"
-                      value={formData.shortDescription}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      placeholder="Breve descripción para listados (máx. 255 caracteres)"
-                      maxLength={255}
-                    />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                      Descripción completa *
-                    </label>
-                    <textarea
-                      id="description"
-                      name="description"
-                      value={formData.description}
-                      onChange={handleInputChange}
-                      rows={6}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      placeholder="Descripción detallada del producto..."
-                      required
-                    />
+                  {/* Descripción completa en dos columnas */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="descriptionEs" className="block text-sm font-medium text-gray-700 mb-1">
+                        Descripción completa (Español) *
+                      </label>
+                      <textarea
+                        id="descriptionEs"
+                        name="descriptionEs"
+                        value={formData.descriptionEs}
+                        onChange={handleInputChange}
+                        rows={6}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        placeholder="Descripción detallada en español..."
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="descriptionEn" className="block text-sm font-medium text-gray-700 mb-1">
+                        Descripción completa (Inglés) *
+                      </label>
+                      <textarea
+                        id="descriptionEn"
+                        name="descriptionEn"
+                        value={formData.descriptionEn}
+                        onChange={handleInputChange}
+                        rows={6}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        placeholder="Detailed description in English..."
+                        required
+                      />
+                    </div>
                   </div>
                 </div>
               </div>

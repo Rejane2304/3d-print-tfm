@@ -260,9 +260,18 @@ export async function POST(req: NextRequest) {
             data: {
               id: crypto.randomUUID(),
               slug: data.slug.toLowerCase().trim(),
+              // Bilingual fields - using same value for both languages in import
+              nameEs: data.name.trim(),
+              nameEn: data.name.trim(),
+              descriptionEs: data.description.trim(),
+              descriptionEn: data.description.trim(),
+              shortDescEs: data.shortDescription?.trim() || null,
+              shortDescEn: data.shortDescription?.trim() || null,
+              // Legacy fields
               name: data.name.trim(),
               description: data.description.trim(),
               shortDescription: data.shortDescription?.trim() || null,
+              // Other fields
               price: Number.parseFloat(data.price),
               stock: Number.parseInt(data.stock, 10),
               categoryId,

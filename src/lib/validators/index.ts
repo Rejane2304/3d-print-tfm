@@ -132,19 +132,42 @@ export const addressSchema = z.object({
 export const addressUpdateSchema = addressSchema.partial();
 
 // ============================================
-// PRODUCT VALIDATIONS
+// PRODUCT VALIDATIONS (BILINGUAL)
 // ============================================
 
-export const productSchema = z.object({
-  name: z
+// Base bilingual fields
+const bilingualProductFields = {
+  // Required bilingual fields
+  nameEs: z
     .string()
-    .min(1, 'El nombre del producto es obligatorio')
+    .min(2, 'El nombre en español debe tener al menos 2 caracteres')
     .max(200, 'El nombre no puede exceder 200 caracteres'),
-  description: z
+  nameEn: z
     .string()
-    .min(1, 'La descripción es obligatoria')
+    .min(2, 'El nombre en inglés debe tener al menos 2 caracteres')
+    .max(200, 'El nombre no puede exceder 200 caracteres'),
+  descriptionEs: z
+    .string()
+    .min(10, 'La descripción en español debe tener al menos 10 caracteres')
     .max(5000, 'La descripción no puede exceder 5000 caracteres'),
-  shortDescription: z.string().max(255, 'La descripción corta no puede exceder 255 caracteres').optional(),
+  descriptionEn: z
+    .string()
+    .min(10, 'La descripción en inglés debe tener al menos 10 caracteres')
+    .max(5000, 'La descripción no puede exceder 5000 caracteres'),
+  // Optional bilingual fields
+  shortDescEs: z.string().max(255, 'La descripción corta no puede exceder 255 caracteres').optional(),
+  shortDescEn: z.string().max(255, 'La descripción corta no puede exceder 255 caracteres').optional(),
+  metaTitleEs: z.string().max(200, 'El meta título no puede exceder 200 caracteres').optional(),
+  metaTitleEn: z.string().max(200, 'El meta título no puede exceder 200 caracteres').optional(),
+  metaDescEs: z.string().max(300, 'La meta descripción no puede exceder 300 caracteres').optional(),
+  metaDescEn: z.string().max(300, 'La meta descripción no puede exceder 300 caracteres').optional(),
+};
+
+// Schema for creating products (bilingual)
+export const productSchema = z.object({
+  // Bilingual fields
+  ...bilingualProductFields,
+  // Other fields
   price: z
     .number({
       required_error: 'El precio es obligatorio',
@@ -184,12 +207,11 @@ export const productSchema = z.object({
     .min(1, 'El tiempo debe ser de al menos 1 minuto')
     .optional()
     .nullable(),
-  metaTitle: z.string().max(200, 'El meta título no puede exceder 200 caracteres').optional(),
-  metaDescription: z.string().max(300, 'La meta descripción no puede exceder 300 caracteres').optional(),
   isActive: z.boolean().default(true),
   isFeatured: z.boolean().default(false),
 });
 
+// Schema for updating products (all fields optional)
 export const productUpdateSchema = productSchema.partial();
 
 // ============================================

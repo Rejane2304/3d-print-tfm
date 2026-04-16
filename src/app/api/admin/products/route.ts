@@ -41,15 +41,25 @@ const imageSchema = z.object({
   isMain: z.boolean().default(false),
 });
 
-// Schema de validación
+// Schema de validación para producto bilingüe
 const productSchema = z.object({
-  name: z.string().min(1),
-  description: z.string(),
-  shortDescription: z.string().optional(),
-  price: z.number().positive(),
+  // Bilingual fields - required
+  nameEs: z.string().min(2, 'El nombre en español debe tener al menos 2 caracteres'),
+  nameEn: z.string().min(2, 'El nombre en inglés debe tener al menos 2 caracteres'),
+  descriptionEs: z.string().min(10, 'La descripción en español debe tener al menos 10 caracteres'),
+  descriptionEn: z.string().min(10, 'La descripción en inglés debe tener al menos 10 caracteres'),
+  // Bilingual fields - optional
+  shortDescEs: z.string().max(255, 'La descripción corta no puede exceder 255 caracteres').optional(),
+  shortDescEn: z.string().max(255, 'La descripción corta no puede exceder 255 caracteres').optional(),
+  metaTitleEs: z.string().max(200, 'El meta título no puede exceder 200 caracteres').optional(),
+  metaTitleEn: z.string().max(200, 'El meta título no puede exceder 200 caracteres').optional(),
+  metaDescEs: z.string().max(300, 'La meta descripción no puede exceder 300 caracteres').optional(),
+  metaDescEn: z.string().max(300, 'La meta descripción no puede exceder 300 caracteres').optional(),
+  // Other fields
+  price: z.number().positive('El precio debe ser mayor a 0'),
   previousPrice: z.number().optional().nullable(),
-  stock: z.number().int().min(0),
-  categoryId: z.string().uuid(),
+  stock: z.number().int().min(0, 'El stock no puede ser negativo'),
+  categoryId: z.string().uuid('ID de categoría inválido'),
   material: z.nativeEnum(Material),
   widthCm: z.number().optional().nullable(),
   heightCm: z.number().optional().nullable(),
@@ -156,9 +166,9 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const data = productSchema.parse(body);
 
-    // Generar slug
+    // Generar slug basado en el nombre en español
     // Normalize accented characters first, then convert to lowercase and replace special chars
-    const slug = data.name
+    const slug = data.nameEs
       .normalize('NFD')
       .replaceAll(/[\u0300-\u036f]/g, '') // Remove diacritics
       .toLowerCase()
@@ -167,13 +177,28 @@ export async function POST(req: NextRequest) {
 
     // Crear producto e imágenes en una transacción
     const product = await prisma.$transaction(async tx => {
-      // Crear el producto - usar spread para construir el objeto dinámicamente
+      // Crear el producto con campos bilingües
       const newProduct = await tx.product.create({
         data: {
           id: crypto.randomUUID(),
-          name: data.name,
-          description: data.description,
-          shortDescription: data.shortDescription,
+          // Bilingual fields
+          nameEs: data.nameEs,
+          nameEn: data.nameEn,
+          descriptionEs: data.descriptionEs,
+          descriptionEn: data.descriptionEn,
+          shortDescEs: data.shortDescEs,
+          shortDescEn: data.shortDescEn,
+          metaTitleEs: data.metaTitleEs,
+          metaTitleEn: data.metaTitleEn,
+          metaDescEs: data.metaDescEs,
+          metaDescEn: data.metaDescEn,
+          // Legacy fields (usar español por defecto)
+          name: data.nameEs,
+          description: data.descriptionEs,
+          shortDescription: data.shortDescEs,
+          metaTitle: data.metaTitleEs,
+          metaDescription: data.metaDescEs,
+          // Other fields
           price: data.price,
           previousPrice: data.previousPrice ?? undefined,
           stock: data.stock,
@@ -202,7 +227,7 @@ export async function POST(req: NextRequest) {
             filename: img.url.split('/').pop() || 'image.jpg',
             isMain: img.isMain ?? i === 0, // Primera imagen como principal por defecto
             displayOrder: i,
-            altText: data.name,
+            altText: data.nameEs,
           },
         });
       }
@@ -214,7 +239,46 @@ export async function POST(req: NextRequest) {
       });
     });
 
-    return NextResponse.json({ success: true, product }, { status: 201 });
+    // Return product with Spanish fields for the UI
+    if (!product) {
+      return NextResponse.json(
+        { success: false, error: translateErrorMessage('Error creating product') },
+        { status: 500 },
+      );
+    }
+
+    const responseProduct = {
+      id: product.id,
+      slug: product.slug,
+      name: product.nameEs,
+      nameEs: product.nameEs,
+      nameEn: product.nameEn,
+      description: product.descriptionEs,
+      descriptionEs: product.descriptionEs,
+      descriptionEn: product.descriptionEn,
+      shortDesc: product.shortDescEs,
+      shortDescEs: product.shortDescEs,
+      shortDescEn: product.shortDescEn,
+      metaTitleEs: product.metaTitleEs,
+      metaTitleEn: product.metaTitleEn,
+      metaDescEs: product.metaDescEs,
+      metaDescEn: product.metaDescEn,
+      price: Number(product.price),
+      previousPrice: product.previousPrice ? Number(product.previousPrice) : null,
+      stock: product.stock,
+      material: product.material,
+      widthCm: product.widthCm,
+      heightCm: product.heightCm,
+      depthCm: product.depthCm,
+      weight: product.weight,
+      printTime: product.printTime,
+      isActive: product.isActive,
+      isFeatured: product.isFeatured,
+      images: product.images,
+      categoryId: product.categoryId,
+    };
+
+    return NextResponse.json({ success: true, product: responseProduct }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ success: false, error: error.errors[0].message }, { status: 400 });

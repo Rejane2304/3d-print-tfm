@@ -82,14 +82,17 @@ interface AddressCSV {
 
 interface ProductCSV {
   _ref: string;
-  name: string;
+  nameEs: string;
+  nameEn: string;
   slug: string;
   price: string;
   stock: string;
   _categoryRef: string;
   material: string;
-  description: string;
-  shortDescription: string;
+  descriptionEs: string;
+  descriptionEn: string;
+  shortDescEs: string;
+  shortDescEn: string;
   widthCm: string;
   heightCm: string;
   depthCm: string;
@@ -97,6 +100,10 @@ interface ProductCSV {
   printTime: string;
   isActive: string;
   isFeatured: string;
+  metaTitleEs: string;
+  metaTitleEn: string;
+  metaDescEs: string;
+  metaDescEn: string;
 }
 
 interface ProductImageCSV {
@@ -658,10 +665,25 @@ async function seedProducts(): Promise<number> {
     }
     const created = await prisma.product.create({
       data: {
-        name: product.name,
+        // Bilingual fields (new)
+        nameEs: product.nameEs,
+        nameEn: product.nameEn,
+        descriptionEs: product.descriptionEs,
+        descriptionEn: product.descriptionEn,
+        shortDescEs: toNullableString(product.shortDescEs),
+        shortDescEn: toNullableString(product.shortDescEn),
+        metaTitleEs: toNullableString(product.metaTitleEs),
+        metaTitleEn: toNullableString(product.metaTitleEn),
+        metaDescEs: toNullableString(product.metaDescEs),
+        metaDescEn: toNullableString(product.metaDescEn),
+        // Legacy fields (copy from English for backwards compatibility)
+        name: product.nameEn,
+        description: product.descriptionEn,
+        shortDescription: toNullableString(product.shortDescEn),
+        metaTitle: toNullableString(product.metaTitleEn),
+        metaDescription: toNullableString(product.metaDescEn),
+        // Other fields
         slug: product.slug,
-        description: product.description,
-        shortDescription: toNullableString(product.shortDescription),
         price: toDecimal(product.price),
         stock: toInt(product.stock),
         categoryId: categoryId,
