@@ -425,10 +425,10 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
                       {columns.map(column => (
                         <td
                           key={String(column.key)}
-                          className={`px-4 py-3 text-sm text-gray-900 ${
-                            column.width ? '' : 'whitespace-nowrap'
+                          className={`px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-900 ${
+                            column.width ? '' : 'whitespace-normal break-words'
                           } ${column.className || ''}`}
-                          style={{ width: column.width }}
+                          style={{ width: column.width, minWidth: column.width }}
                         >
                           {getCellValue(row, column)}
                         </td>

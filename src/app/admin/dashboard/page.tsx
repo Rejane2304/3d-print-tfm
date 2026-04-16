@@ -245,37 +245,41 @@ export default function AdminPanelPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
           {/* Revenue Card */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-600">Ingresos Netos</p>
-                <p className="text-2xl font-bold text-gray-900">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 overflow-hidden">
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">Ingresos Netos</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 break-all">
                   {formatCurrency(analytics.salesSummary.net.thisMonth)}
                 </p>
-                {/* Desglose de ingresos */}
-                <div className="mt-2 space-y-1 text-xs">
-                  <div className="flex justify-between text-gray-500">
-                    <span>Bruto:</span>
-                    <span>{formatCurrency(analytics.salesSummary.gross.thisMonth)}</span>
+                {/* Desglose de ingresos - Collapsible on mobile */}
+                <div className="mt-2 space-y-1 text-xs overflow-x-auto">
+                  <div className="flex justify-between text-gray-500 min-w-[140px]">
+                    <span className="truncate mr-2">Bruto:</span>
+                    <span className="whitespace-nowrap">{formatCurrency(analytics.salesSummary.gross.thisMonth)}</span>
                   </div>
-                  <div className="flex justify-between text-red-500">
-                    <span>Cancelaciones:</span>
-                    <span>-{formatCurrency(analytics.salesSummary.cancelled.thisMonth)}</span>
+                  <div className="flex justify-between text-red-500 min-w-[140px]">
+                    <span className="truncate mr-2">Cancelaciones:</span>
+                    <span className="whitespace-nowrap">
+                      -{formatCurrency(analytics.salesSummary.cancelled.thisMonth)}
+                    </span>
                   </div>
-                  <div className="flex justify-between text-green-600 font-medium border-t border-gray-200 pt-1">
-                    <span>Neto:</span>
-                    <span>{formatCurrency(analytics.salesSummary.net.thisMonth)}</span>
+                  <div className="flex justify-between text-green-600 font-medium border-t border-gray-200 pt-1 min-w-[140px]">
+                    <span className="truncate mr-2">Neto:</span>
+                    <span className="whitespace-nowrap">{formatCurrency(analytics.salesSummary.net.thisMonth)}</span>
                   </div>
-                  <div className="flex justify-between text-blue-600">
-                    <span>Entregado:</span>
-                    <span>{formatCurrency(analytics.salesSummary.delivered.thisMonth)}</span>
+                  <div className="flex justify-between text-blue-600 min-w-[140px]">
+                    <span className="truncate mr-2">Entregado:</span>
+                    <span className="whitespace-nowrap">
+                      {formatCurrency(analytics.salesSummary.delivered.thisMonth)}
+                    </span>
                   </div>
                 </div>
                 {dateRange === 'month' && analytics.salesSummary.net.lastMonth > 0 && (
                   <p
-                    className={`text-sm mt-2 ${
+                    className={`text-xs sm:text-sm mt-2 truncate ${
                       analytics.salesSummary.net.thisMonth >= analytics.salesSummary.net.lastMonth
                         ? 'text-green-600'
                         : 'text-red-600'
@@ -285,8 +289,8 @@ export default function AdminPanelPage() {
                   </p>
                 )}
               </div>
-              <div className="p-3 bg-green-100 rounded-lg ml-4">
-                <DollarSign className="h-6 w-6 text-green-600" />
+              <div className="p-2 sm:p-3 bg-green-100 rounded-lg flex-shrink-0">
+                <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
               </div>
             </div>
           </div>
