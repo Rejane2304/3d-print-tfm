@@ -80,8 +80,14 @@ describe('Cart API', () => {
     testProduct = (await prisma.product.create({
       data: {
         id: randomUUID(),
-        name: 'Test Product',
         slug: `cart-test-product-${Date.now()}`,
+        // Bilingual fields (required)
+        nameEs: 'Test Product ES',
+        nameEn: 'Test Product EN',
+        descriptionEs: 'Test product for cart ES',
+        descriptionEn: 'Test product for cart EN',
+        // Legacy fields
+        name: 'Test Product',
         description: 'Test product for cart',
         price: 29.99,
         stock: 10,
@@ -281,8 +287,14 @@ describe('Cart API', () => {
       const inactiveProduct = await prisma.product.create({
         data: {
           id: randomUUID(),
-          name: 'Inactive Product',
           slug: `cart-test-inactive-${Date.now()}`,
+          // Bilingual fields (required)
+          nameEs: 'Inactive Product ES',
+          nameEn: 'Inactive Product EN',
+          descriptionEs: 'Inactive product ES',
+          descriptionEn: 'Inactive product EN',
+          // Legacy fields
+          name: 'Inactive Product',
           description: 'Inactive product',
           price: 19.99,
           stock: 5,
@@ -349,8 +361,14 @@ describe('Cart API', () => {
       patchTestProduct = await prisma.product.create({
         data: {
           id: randomUUID(),
-          name: 'Patch Test Product',
           slug: `cart-test-patch-${Date.now()}`,
+          // Bilingual fields (required)
+          nameEs: 'Patch Test Product ES',
+          nameEn: 'Patch Test Product EN',
+          descriptionEs: 'Test product for cart patch ES',
+          descriptionEn: 'Test product for cart patch EN',
+          // Legacy fields
+          name: 'Patch Test Product',
           description: 'Test product for cart patch',
           price: 29.99,
           stock: 10,
@@ -472,8 +490,14 @@ describe('Cart API', () => {
       deleteTestProduct = await prisma.product.create({
         data: {
           id: randomUUID(),
-          name: 'Delete Test Product',
           slug: `cart-test-delete-${Date.now()}`,
+          // Bilingual fields (required)
+          nameEs: 'Delete Test Product ES',
+          nameEn: 'Delete Test Product EN',
+          descriptionEs: 'Test product for cart delete ES',
+          descriptionEn: 'Test product for cart delete EN',
+          // Legacy fields
+          name: 'Delete Test Product',
           description: 'Test product for cart delete',
           price: 29.99,
           stock: 10,

@@ -423,12 +423,27 @@ export const productTranslations: Record<string, { name: string; description: st
       'Caja secreta con diseño de castillo medieval. Compartimento oculto con mecanismo de puzzle. Ideal para guardar pequeños objetos de valor o como regalo.',
     shortDescription: 'Caja puzzle con compartimento oculto',
   },
+  // E2E Test Products
+  'jarron-decorativo': {
+    name: 'Jarrón Decorativo',
+    description: 'Un elegante jarrón decorativo impreso en 3D',
+    shortDescription: 'Jarrón decorativo 3D',
+  },
+  'soporte-plantas': {
+    name: 'Soporte para Plantas',
+    description: 'Soporte moderno para plantas pequeñas',
+    shortDescription: 'Soporte moderno para plantas',
+  },
 };
 
 export const categoryTranslations: Record<string, { name: string; description: string }> = {
   decoration: {
     name: 'Decoración',
     description: 'Piezas decorativas para embellecer tu hogar u oficina',
+  },
+  decoracion: {
+    name: 'Decoración',
+    description: 'Productos decorativos impresos en 3D',
   },
   accessories: {
     name: 'Accesorios',

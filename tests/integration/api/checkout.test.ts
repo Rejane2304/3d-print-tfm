@@ -121,8 +121,14 @@ describe('Checkout API', () => {
     testProduct = (await prisma.product.create({
       data: {
         id: randomUUID(),
-        name: 'Test Product',
         slug: `checkout-test-product-${Date.now()}`,
+        // Bilingual fields (required)
+        nameEs: 'Test Product ES',
+        nameEn: 'Test Product EN',
+        descriptionEs: 'Test product for checkout ES',
+        descriptionEn: 'Test product for checkout EN',
+        // Legacy fields
+        name: 'Test Product',
         description: 'Test product for checkout',
         price: 29.99,
         stock: 10,

@@ -2,25 +2,74 @@
 
 > Este archivo contiene información para agentes de IA que trabajan en este proyecto.
 
-## 🚨 REGLAS CRÍTICAS DE SEGURIDAD - LECTURA OBLIGATORIA
+## 🚨 REGLA CRÍTICA DE SEGURIDAD #1: AISLAMIENTO TOTAL DE BASES DE DATOS
 
-### ⚠️ PROHIBIDO: Usar BD de Desarrollo/Producción para Tests
+### ⚠️ PROHIBIDO ABSOLUTO: Usar BD de Desarrollo/Producción para Tests
 
-**Esta prohibición es INQUEBRANTABLE:**
+**Esta prohibición es INQUEBRANTABLE y de cumplimiento obligatorio:**
 
-- ❌ **NUNCA** usar `DATABASE_URL` de `.env` (Supabase) para tests
-- ❌ **NUNCA** permitir que tests E2E toquen datos reales de usuarios
-- ❌ **NUNCA** ejecutar `prisma migrate` o seed en BD de dev/prod
-- ✅ **SIEMPRE** usar `DATABASE_URL` de `.env.test` (localhost:5433)
-- ✅ **SIEMPRE** verificar que `DATABASE_URL` contiene "test" o "localhost" antes de ejecutar tests
+| ❌ PROHIBIDO                                                  | ✅ OBLIGATORIO                             |
+| ------------------------------------------------------------- | ------------------------------------------ |
+| NUNCA usar `DATABASE_URL` de `.env` o `.env.local` para tests | SIEMPRE usar `DATABASE_URL` de `.env.test` |
+| NUNCA tocar datos reales de usuarios/clientes                 | SIEMPRE usar `localhost:5433` (Docker)     |
+| NUNCA ejecutar `prisma migrate` en BD de dev/prod             | SIEMPRE validar BD antes de ejecutar tests |
+| NUNCA ejecutar `prisma db seed` en dev/prod                   | SIEMPRE truncar tablas antes de cada test  |
 
-### Estructura de Bases de Datos
+### ⚠️ CONSECUENCIAS DE INCUMPLIMIENTO
 
-| Entorno  | Base de Datos      | Ubicación               | Uso                    |
-| -------- | ------------------ | ----------------------- | ---------------------- |
-| **Test** | `3dprint_tfm_test` | localhost:5433 (Docker) | Tests E2E, Integración |
-| **Dev**  | Supabase           | Cloud (PostgreSQL)      | Desarrollo local       |
-| **Prod** | Supabase           | Cloud (PostgreSQL)      | Producción             |
+**Si un agente usa la BD de dev/prod para tests:**
+
+1. 🔴 **Datos reales de clientes pueden ser borrados** (TRUNCATE en tests)
+2. 🔴 **Datos de prueba aparecerán en producción** (productos fake, pedidos de test)
+3. 🔴 **Seeder puede sobrescribir datos reales**
+4. 🔴 **Tests pueden exponer información sensible**
+
+### Estructura de Bases de Datos (AISLADAS)
+
+| Entorno  | Base de Datos      | Ubicación               | URL Patrón                  | Uso Permitido       |
+| -------- | ------------------ | ----------------------- | --------------------------- | ------------------- |
+| **Test** | `3dprint_tfm_test` | localhost:5433 (Docker) | `*localhost:5433*`          | ✅ Tests únicamente |
+| **Dev**  | Supabase           | Cloud (PostgreSQL)      | `*.supabase.co*,*.pooler.*` | ❌ NUNCA para tests |
+| **Prod** | Supabase           | Cloud (PostgreSQL)      | `*.supabase.co*,*.pooler.*` | ❌ NUNCA para tests |
+
+### Verificación OBLIGATORIA en Cada Archivo de Test
+
+**Todos los archivos de test DEBEN incluir esta validación:**
+
+```typescript
+// CRITICAL: Validate we're using test database
+const databaseUrl = process.env.DATABASE_URL || '';
+if (!databaseUrl.includes('test') && !databaseUrl.includes('localhost:5433')) {
+  console.error('❌ CRITICAL ERROR: DATABASE_URL does not point to a test database!');
+  console.error('   Current:', databaseUrl.substring(0, 50) + '...');
+  console.error('   Tests MUST use localhost:5433 only.');
+  process.exit(1);
+}
+console.log('✅ Using TEST database:', databaseUrl.split('@')[1]?.split('/')[0] || 'localhost:5433');
+```
+
+### Configuración Correcta por Tipo de Test
+
+| Tipo de Test    | Base de Datos    | Archivo de Config | Comando                    |
+| --------------- | ---------------- | ----------------- | -------------------------- |
+| **Unitarios**   | Ninguna (mocks)  | N/A               | `npm run test:unit`        |
+| **Integración** | `localhost:5433` | `.env.test`       | `npm run test:integration` |
+| **E2E**         | `localhost:5433` | `.env.test`       | `npm run test:e2e`         |
+
+### Checklist Pre-Test (OBLIGATORIO)
+
+Antes de ejecutar CUALQUIER test que use base de datos:
+
+- [ ] Verificar que `.env.test` tiene `DATABASE_URL=postgresql://testuser:testpassword123@localhost:5433/3dprint_tfm_test`
+- [ ] Verificar que Docker está corriendo: `docker ps | grep 3dprint-test-db`
+- [ ] Verificar que `process.env.DATABASE_URL` incluye `localhost:5433`
+- [ ] Verificar que NO se usa `DATABASE_URL` de `.env` o `.env.local`
+
+### Historial de Incidentes
+
+**2024-XX-XX**: Tests E2E crearon productos en BD de desarrollo por configuración incorrecta de `DATABASE_URL`. Se implementaron validaciones adicionales de hard-fail.
+
+**2026-04-16**: Agentes deben verificar explícitamente la URL de BD antes de ejecutar cualquier operación de base de datos en tests.
 
 ### Verificación Automática
 
@@ -41,7 +90,168 @@ if (!databaseUrl.includes('test') && !databaseUrl.includes('localhost')) {
 
 ### Historial de Incidentes
 
-**2024-XX-XX**: Tests E2E crearon productos en BD de desarrollo por configuración incorrecta de `DATABASE_URL`. Se implementaron validaciones adicionales.
+**2024-XX-XX**: Tests E2E crearon productos en BD de desarrollo por configuración incorrecta de `DATABASE_URL`. Se implementaron validaciones adicionales de hard-fail.
+
+**2026-04-16**: Agentes deben verificar explícitamente la URL de BD antes de ejecutar cualquier operación de base de datos en tests.
+
+### Verificación Automática
+
+Los tests E2E verifican automáticamente:
+
+```typescript
+if (!databaseUrl.includes('test') && !databaseUrl.includes('localhost:5433')) {
+  console.error('❌ ERROR: DATABASE_URL does not point to a test database!');
+  process.exit(1);
+}
+```
+
+### Configuración Correcta
+
+1. Tests unitarios: Usan mocks, no necesitan BD
+2. Tests integración: Usan `localhost:5433` (Docker)
+3. Tests E2E: Usan `localhost:5433` (Docker + Next.js en test mode)
+
+### Prisma Studio - Guía de Seguridad
+
+Prisma Studio es una herramienta visual para explorar la base de datos. **DEBE usarse con precaución** para evitar tocar datos de producción.
+
+#### Comandos Seguros
+
+```bash
+# ✅ Prisma Studio con BD de test (RECOMENDADO para desarrollo)
+npm run db:studio:test
+
+# ⚠️ Prisma Studio con BD actual (verificar .env primero!)
+npm run db:studio
+```
+
+#### Verificación Antes de Abrir Prisma Studio
+
+**SIEMPRE ejecutar este comando antes:**
+
+```bash
+# Verificar qué BD se usará
+echo $DATABASE_URL | grep -E "(test|localhost:5433)" && echo "✅ BD de test detectada" || echo "❌ ATENCIÓN: No es BD de test"
+```
+
+#### Tabla de Comandos Prisma Studio
+
+| Comando                  | BD Usada            | Seguro       | Uso                        |
+| ------------------------ | ------------------- | ------------ | -------------------------- |
+| `npm run db:studio:test` | `localhost:5433`    | ✅ SÍ        | Desarrollo y pruebas       |
+| `npm run db:studio`      | La de `.env` actual | ⚠️ Verificar | Solo si .env apunta a test |
+| `npx prisma studio`      | La de `.env` actual | ❌ NO        | Peligroso - sin validación |
+
+#### Reglas para Prisma Studio
+
+1. **NUNCA** usar `npx prisma studio` directamente (usa BD de .env sin validar)
+2. **SIEMPRE** preferir `npm run db:studio:test` para desarrollo
+3. **NUNCA** abrir Prisma Studio en BD de producción
+4. **SIEMPRE** verificar la URL antes de ejecutar comandos manuales
+
+#### Verificación Visual en Prisma Studio
+
+Una vez abierto, verifica en la esquina inferior:
+
+- ✅ **Esperado:** `postgresql://testuser:***@localhost:5433/3dprint_tfm_test`
+- ❌ **Peligro:** Cualquier URL con `supabase.co` o `pooler.supabase.com`
+
+---
+
+## Gestión de Bases de Datos Multi-Entorno
+
+### Estructura de Bases de Datos
+
+| Entorno  | Base de Datos           | Ubicación               | URL Patrón                 | Script de Seed                    |
+| -------- | ----------------------- | ----------------------- | -------------------------- | --------------------------------- |
+| **Test** | `3dprint_tfm_test`      | localhost:5433 (Docker) | `*localhost:5433*`         | `npm run test:db:seed`            |
+| **Dev**  | Supabase (eu-west-1)    | Cloud (PostgreSQL)      | `*.hkjknnymctorucyhtypm.*` | `npm run db:seed:dev`             |
+| **Prod** | Supabase (eu-central-1) | Cloud (PostgreSQL)      | `*.ctwbppfkfsuxymfouptb.*` | `npm run db:seed:prod` (confirma) |
+
+### Comandos por Entorno
+
+#### Desarrollo (Supabase Dev)
+
+```bash
+# Setup completo (migrate + seed)
+npm run db:setup:dev
+
+# Solo migraciones
+npm run db:migrate:dev
+
+# Solo seed
+npm run db:seed:dev
+
+# Prisma Studio (BD de desarrollo)
+npm run db:studio:dev
+```
+
+#### Producción (Supabase Prod) - ⚠️ CON CUIDADO
+
+```bash
+# Solo migraciones (sin confirmación)
+npm run db:migrate:prod
+
+# Seed con confirmación interactiva (escribe "PRODUCCION")
+npm run db:seed:prod
+
+# ❌ Prisma Studio está BLOQUEADO en producción
+```
+
+#### Test (localhost:5433)
+
+```bash
+# Seed en BD de test
+npm run test:db:seed
+
+# Prisma Studio con BD de test
+npm run db:studio:test
+```
+
+### Configuración de Archivos .env
+
+#### `.env.local` (Desarrollo)
+
+Apunta a **Supabase DEV** para desarrollo colaborativo:
+
+```bash
+DATABASE_URL=postgresql://postgres.hkjknnymctorucyhtypm:putWa3-jinpeg-vorjeh@aws-1-eu-west-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=10
+DIRECT_URL=postgresql://postgres.hkjknnymctorucyhtypm:putWa3-jinpeg-vorjeh@db.hkjknnymctorucyhtypm.supabase.co:5432/postgres
+```
+
+#### `.env` (Producción - Solo para deployment)
+
+Apunta a **Supabase PROD** (descomentar solo para deploy):
+
+```bash
+# DATABASE_URL=postgresql://postgres.ctwbppfkfsuxymfouptb:putWa3-jinpeg-vorjeh@aws-1-eu-central-1.pooler.supabase.com:5432/postgres
+# DIRECT_URL=postgresql://postgres.ctwbppfkfsuxymfouptb:putWa3-jinpeg-vorjeh@aws-1-eu-central-1.pooler.supabase.com:5432/postgres
+```
+
+#### `.env.test` (Tests)
+
+Apunta a **localhost:5433** exclusivamente:
+
+```bash
+DATABASE_URL=postgresql://testuser:testpassword123@localhost:5433/3dprint_tfm_test
+```
+
+### ⚠️ Seguridad en Seeds
+
+| Entorno  | ¿Requiere Confirmación?      | ¿Qué hace?                                   |
+| -------- | ---------------------------- | -------------------------------------------- |
+| **Test** | ❌ No                        | TRUNCATE + Seed automático                   |
+| **Dev**  | ❌ No                        | TRUNCATE + Seed con datos de desarrollo      |
+| **Prod** | ✅ SÍ - Escribe "PRODUCCION" | TRUNCATE + Seed con confirmación interactiva |
+
+**⚠️ Advertencia:** El seed SIEMPRE hace `TRUNCATE` de todas las tablas antes de insertar datos.
+
+### Flujo de Trabajo Recomendado
+
+1. **Desarrollo Local**: Usa `npm run dev` (apunta a Supabase DEV)
+2. **Pruebas**: Usa `npm run test:e2e` (usa localhost:5433 automáticamente)
+3. **Seed en DEV**: `npm run db:setup:dev` (cuando necesites datos frescos)
+4. **Seed en PROD**: Solo durante mantenimiento, con confirmación
 
 ---
 

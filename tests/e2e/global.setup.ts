@@ -245,12 +245,17 @@ async function createSampleProducts(): Promise<void> {
     },
   });
 
-  // Create sample products
+  // Create sample products with bilingual fields
   const products = [
     {
-      name: 'Jarrón Decorativo',
       slug: 'jarron-decorativo',
+      nameEs: 'Jarrón Decorativo',
+      nameEn: 'Decorative Vase',
+      descriptionEs: 'Un elegante jarrón decorativo impreso en 3D',
+      descriptionEn: 'An elegant decorative vase 3D printed',
+      name: 'Jarrón Decorativo',
       description: 'Un elegante jarrón decorativo impreso en 3D',
+      shortDescription: 'Jarrón decorativo 3D',
       price: 24.99,
       stock: 10,
       material: Material.PLA,
@@ -258,9 +263,14 @@ async function createSampleProducts(): Promise<void> {
       isFeatured: true,
     },
     {
-      name: 'Soporte para Plantas',
       slug: 'soporte-plantas',
+      nameEs: 'Soporte para Plantas',
+      nameEn: 'Plant Holder',
+      descriptionEs: 'Soporte moderno para plantas pequeñas',
+      descriptionEn: 'Modern holder for small plants',
+      name: 'Soporte para Plantas',
       description: 'Soporte moderno para plantas pequeñas',
+      shortDescription: 'Soporte plantas',
       price: 18.5,
       stock: 15,
       material: Material.PLA,

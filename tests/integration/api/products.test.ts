@@ -60,8 +60,14 @@ describe('Products API', () => {
     const product1 = await prisma.product.create({
       data: {
         id: randomUUID(),
-        name: 'Test Product PLA',
         slug: `test-product-${timestamp}-1`,
+        // Bilingual fields (required)
+        nameEs: 'Test Product PLA ES',
+        nameEn: 'Test Product PLA EN',
+        descriptionEs: 'A test product made with PLA ES',
+        descriptionEn: 'A test product made with PLA EN',
+        // Legacy fields
+        name: 'Test Product PLA',
         description: 'A test product made with PLA',
         price: 19.99,
         stock: 10,
@@ -75,8 +81,14 @@ describe('Products API', () => {
     const product2 = await prisma.product.create({
       data: {
         id: randomUUID(),
-        name: 'Test Product PETG',
         slug: `test-product-${timestamp}-2`,
+        // Bilingual fields (required)
+        nameEs: 'Test Product PETG ES',
+        nameEn: 'Test Product PETG EN',
+        descriptionEs: 'A test product made with PETG ES',
+        descriptionEn: 'A test product made with PETG EN',
+        // Legacy fields
+        name: 'Test Product PETG',
         description: 'A test product made with PETG',
         price: 39.99,
         stock: 5,
@@ -90,8 +102,14 @@ describe('Products API', () => {
     const inactiveProduct = await prisma.product.create({
       data: {
         id: randomUUID(),
-        name: 'Inactive Test Product',
         slug: `test-product-${timestamp}-3`,
+        // Bilingual fields (required)
+        nameEs: 'Inactive Test Product ES',
+        nameEn: 'Inactive Test Product EN',
+        descriptionEs: 'An inactive test product ES',
+        descriptionEn: 'An inactive test product EN',
+        // Legacy fields
+        name: 'Inactive Test Product',
         description: 'An inactive test product',
         price: 29.99,
         stock: 0,

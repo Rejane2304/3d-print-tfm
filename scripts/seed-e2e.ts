@@ -193,8 +193,12 @@ async function createSampleProducts(): Promise<void> {
 
   const products = [
     {
-      name: 'Jarrón Decorativo',
       slug: 'jarron-decorativo',
+      nameEs: 'Jarrón Decorativo',
+      nameEn: 'Decorative Vase',
+      descriptionEs: 'Un elegante jarrón decorativo impreso en 3D',
+      descriptionEn: 'An elegant decorative vase 3D printed',
+      name: 'Jarrón Decorativo',
       description: 'Un elegante jarrón decorativo impreso en 3D',
       price: 24.99,
       stock: 10,
@@ -203,8 +207,12 @@ async function createSampleProducts(): Promise<void> {
       isFeatured: true,
     },
     {
-      name: 'Soporte para Plantas',
       slug: 'soporte-plantas',
+      nameEs: 'Soporte para Plantas',
+      nameEn: 'Plant Holder',
+      descriptionEs: 'Soporte moderno para plantas pequeñas',
+      descriptionEn: 'Modern holder for small plants',
+      name: 'Soporte para Plantas',
       description: 'Soporte moderno para plantas pequeñas',
       price: 18.5,
       stock: 15,
@@ -269,8 +277,12 @@ async function createSampleOrders(): Promise<void> {
     })) ||
     (await prisma.product.create({
       data: {
-        name: 'Producto Decorativo',
         slug: 'producto-decorativo',
+        nameEs: 'Producto Decorativo',
+        nameEn: 'Decorative Product',
+        descriptionEs: 'Un producto decorativo impreso en 3D',
+        descriptionEn: 'A decorative product 3D printed',
+        name: 'Producto Decorativo',
         description: 'Un producto decorativo impreso en 3D',
         price: 24.99,
         isActive: true,

@@ -12,13 +12,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
 import { Material } from '@prisma/client';
-import {
-  translateCategoryName,
-  translateErrorMessage,
-  translateProductDescription,
-  translateProductName,
-  translateProductShortDescription,
-} from '@/lib/i18n';
+import { translateCategoryName, translateErrorMessage } from '@/lib/i18n';
 import { unlink, rmdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';

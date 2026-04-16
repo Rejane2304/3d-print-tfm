@@ -158,8 +158,14 @@ export async function createTestProduct(categoryId: string, options?: Partial<Te
   const product = await prisma.product.create({
     data: {
       id: randomUUID(),
-      name: options?.name || `Test Product ${timestamp}`,
       slug: options?.slug || `test-product-${timestamp}`,
+      // Bilingual fields (required)
+      nameEs: options?.name || `Test Product ES ${timestamp}`,
+      nameEn: options?.name || `Test Product EN ${timestamp}`,
+      descriptionEs: options?.description || 'Test product description ES',
+      descriptionEn: options?.description || 'Test product description EN',
+      // Legacy fields (for backwards compatibility)
+      name: options?.name || `Test Product ${timestamp}`,
       description: options?.description || 'Test product description',
       price: options?.price || 29.99,
       stock: options?.stock ?? 10,
