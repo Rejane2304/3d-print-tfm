@@ -8,10 +8,28 @@ import { Material } from '@/types/prisma-enums';
 
 describe('Product Validators', () => {
   const validProduct = {
+    // Bilingual fields (required)
+    nameEs: 'Florero Decorativo Moderno',
+    nameEn: 'Modern Decorative Vase',
+    descriptionEs:
+      'Elegante florero impreso en 3D con diseño geométrico contemporáneo. Perfecto para decorar salones, oficinas y espacios modernos. Material PLA de alta calidad.',
+    descriptionEn:
+      'Elegant 3D printed vase with contemporary geometric design. Perfect for decorating living rooms, offices, and modern spaces. High quality PLA material.',
+    // Bilingual fields (optional)
+    shortDescEs: 'Florero 3D moderno',
+    shortDescEn: 'Modern 3D vase',
+    metaTitleEs: 'Florero Decorativo Moderno | Impresión 3D',
+    metaTitleEn: 'Modern Decorative Vase | 3D Printing',
+    metaDescEs: 'Florero decorativo impreso en 3D con diseño único. Envío gratis en pedidos superiores a 50€.',
+    metaDescEn: '3D printed decorative vase with unique design. Free shipping on orders over €50.',
+    // Legacy fields (maintained for backwards compatibility)
     name: 'Florero Decorativo Moderno',
     description:
       'Elegante florero impreso en 3D con diseño geométrico contemporáneo. Perfecto para decorar salones, oficinas y espacios modernos. Material PLA de alta calidad.',
     shortDescription: 'Florero 3D moderno',
+    metaTitle: 'Florero Decorativo Moderno | Impresión 3D',
+    metaDescription: 'Florero decorativo impreso en 3D con diseño único. Envío gratis en pedidos superiores a 50€.',
+    // Other fields
     price: 24.99,
     previousPrice: null as number | null,
     stock: 15,
@@ -21,8 +39,6 @@ describe('Product Validators', () => {
     dimensions: '20x15x15 cm',
     weight: 0.25,
     printTime: 180,
-    metaTitle: 'Florero Decorativo Moderno | Impresión 3D',
-    metaDescription: 'Florero decorativo impreso en 3D con diseño único. Envío gratis en pedidos superiores a 50€.',
     isActive: true,
     isFeatured: false,
   };
@@ -38,10 +54,13 @@ describe('Product Validators', () => {
         const result = productSchema.safeParse({
           ...validProduct,
           name: '',
+          nameEs: '',
+          nameEn: '',
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('El nombre del producto es obligatorio');
+          // The bilingual field validation message
+          expect(result.error.errors[0].message).toBe('El nombre en español debe tener al menos 2 caracteres');
         }
       });
 
@@ -49,6 +68,8 @@ describe('Product Validators', () => {
         const result = productSchema.safeParse({
           ...validProduct,
           name: 'A'.repeat(201),
+          nameEs: 'A'.repeat(201),
+          nameEn: 'A'.repeat(201),
         });
         expect(result.success).toBe(false);
         if (!result.success) {
@@ -57,9 +78,12 @@ describe('Product Validators', () => {
       });
 
       it('should accept name with exactly 200 characters', () => {
+        const longName = 'A'.repeat(200);
         const result = productSchema.safeParse({
           ...validProduct,
-          name: 'A'.repeat(200),
+          name: longName,
+          nameEs: longName,
+          nameEn: longName,
         });
         expect(result.success).toBe(true);
       });
@@ -68,6 +92,8 @@ describe('Product Validators', () => {
         const result = productSchema.safeParse({
           ...validProduct,
           name: 'Maceta Decorativa con Diseño Único Café',
+          nameEs: 'Maceta Decorativa con Diseño Único Café',
+          nameEn: 'Decorative Pot with Unique Coffee Design',
         });
         expect(result.success).toBe(true);
       });
@@ -78,10 +104,13 @@ describe('Product Validators', () => {
         const result = productSchema.safeParse({
           ...validProduct,
           description: '',
+          descriptionEs: '',
+          descriptionEn: '',
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.errors[0].message).toBe('La descripción es obligatoria');
+          // The bilingual field validation message
+          expect(result.error.errors[0].message).toBe('La descripción en español debe tener al menos 10 caracteres');
         }
       });
 
@@ -89,6 +118,8 @@ describe('Product Validators', () => {
         const result = productSchema.safeParse({
           ...validProduct,
           description: 'A'.repeat(5001),
+          descriptionEs: 'A'.repeat(5001),
+          descriptionEn: 'A'.repeat(5001),
         });
         expect(result.success).toBe(false);
         if (!result.success) {
@@ -97,9 +128,12 @@ describe('Product Validators', () => {
       });
 
       it('should accept description with exactly 5000 characters', () => {
+        const longDesc = 'A'.repeat(5000);
         const result = productSchema.safeParse({
           ...validProduct,
-          description: 'A'.repeat(5000),
+          description: longDesc,
+          descriptionEs: longDesc,
+          descriptionEn: longDesc,
         });
         expect(result.success).toBe(true);
       });
@@ -116,6 +150,8 @@ describe('Product Validators', () => {
         const result = productSchema.safeParse({
           ...validProduct,
           shortDescription: 'A'.repeat(256),
+          shortDescEs: 'A'.repeat(256),
+          shortDescEn: 'A'.repeat(256),
         });
         expect(result.success).toBe(false);
         if (!result.success) {
@@ -124,9 +160,12 @@ describe('Product Validators', () => {
       });
 
       it('should accept short description with exactly 255 characters', () => {
+        const shortDesc255 = 'A'.repeat(255);
         const result = productSchema.safeParse({
           ...validProduct,
-          shortDescription: 'A'.repeat(255),
+          shortDescription: shortDesc255,
+          shortDescEs: shortDesc255,
+          shortDescEn: shortDesc255,
         });
         expect(result.success).toBe(true);
       });
@@ -523,6 +562,8 @@ describe('Product Validators', () => {
         const result = productSchema.safeParse({
           ...validProduct,
           metaTitle: 'A'.repeat(201),
+          metaTitleEs: 'A'.repeat(201),
+          metaTitleEn: 'A'.repeat(201),
         });
         expect(result.success).toBe(false);
         if (!result.success) {
@@ -534,12 +575,14 @@ describe('Product Validators', () => {
         const result = productSchema.safeParse({
           ...validProduct,
           metaTitle: 'A'.repeat(200),
+          metaTitleEs: 'A'.repeat(200),
+          metaTitleEn: 'A'.repeat(200),
         });
         expect(result.success).toBe(true);
       });
 
       it('should accept product without metaTitle (optional)', () => {
-        const { metaTitle: _, ...dataWithoutMetaTitle } = validProduct;
+        const { metaTitle: _, metaTitleEs: _es, metaTitleEn: _en, ...dataWithoutMetaTitle } = validProduct;
         const result = productSchema.safeParse(dataWithoutMetaTitle);
         expect(result.success).toBe(true);
       });
@@ -550,6 +593,8 @@ describe('Product Validators', () => {
         const result = productSchema.safeParse({
           ...validProduct,
           metaDescription: 'A'.repeat(301),
+          metaDescEs: 'A'.repeat(301),
+          metaDescEn: 'A'.repeat(301),
         });
         expect(result.success).toBe(false);
         if (!result.success) {
@@ -561,12 +606,14 @@ describe('Product Validators', () => {
         const result = productSchema.safeParse({
           ...validProduct,
           metaDescription: 'A'.repeat(300),
+          metaDescEs: 'A'.repeat(300),
+          metaDescEn: 'A'.repeat(300),
         });
         expect(result.success).toBe(true);
       });
 
       it('should accept product without metaDescription (optional)', () => {
-        const { metaDescription: _, ...dataWithoutMetaDesc } = validProduct;
+        const { metaDescription: _, metaDescEs: _es, metaDescEn: _en, ...dataWithoutMetaDesc } = validProduct;
         const result = productSchema.safeParse(dataWithoutMetaDesc);
         expect(result.success).toBe(true);
       });

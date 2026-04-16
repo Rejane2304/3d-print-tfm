@@ -131,18 +131,18 @@ model Category {
 }
 
 model Coupon {
-  id             String   @id @default(uuid())
-  code           String   @unique @db.VarChar(50)
+  id             String     @id @default(uuid())
+  code           String     @unique @db.VarChar(50)
   type           CouponType
-  value          Decimal  @db.Decimal(10, 2)
-  minOrderAmount Decimal? @db.Decimal(10, 2)
+  value          Decimal    @db.Decimal(10, 2)
+  minOrderAmount Decimal?   @db.Decimal(10, 2)
   maxUses        Int?
-  usedCount      Int      @default(0)
+  usedCount      Int        @default(0)
   validFrom      DateTime
   validUntil     DateTime
-  isActive       Boolean  @default(true)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @default(now())
+  isActive       Boolean    @default(true)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @default(now())
   orders         Order[]
 
   @@index([code])
@@ -153,15 +153,15 @@ model Coupon {
 }
 
 model EventStore {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   type        String
   payload     Json
   room        String
   userId      String?
-  timestamp   DateTime @default(now())
-  delivered   Boolean  @default(false)
+  timestamp   DateTime  @default(now())
+  delivered   Boolean   @default(false)
   deliveredAt DateTime?
-  retries     Int      @default(0)
+  retries     Int       @default(0)
   expiresAt   DateTime
 
   @@index([delivered, timestamp])
@@ -211,36 +211,36 @@ model InventoryMovement {
 }
 
 model Invoice {
-  id                String   @id @default(uuid())
-  orderId           String   @unique
-  invoiceNumber     String   @unique @db.VarChar(50)
-  series            String   @default("F") @db.VarChar(10)
+  id                String    @id @default(uuid())
+  orderId           String    @unique
+  invoiceNumber     String    @unique @db.VarChar(50)
+  series            String    @default("F") @db.VarChar(10)
   number            Int
-  companyName       String   @db.VarChar(200)
-  companyTaxId      String   @db.VarChar(20)
-  companyAddress    String   @db.VarChar(255)
-  companyCity       String   @db.VarChar(100)
-  companyProvince   String   @db.VarChar(100)
-  companyPostalCode String   @db.VarChar(10)
-  clientName        String   @db.VarChar(200)
-  clientTaxId       String   @db.VarChar(20)
-  clientAddress     String   @db.VarChar(255)
-  clientCity        String   @db.VarChar(100)
-  clientProvince    String   @db.VarChar(100)
-  clientPostalCode  String   @db.VarChar(10)
-  clientCountry     String   @db.VarChar(50)
-  subtotal          Decimal  @db.Decimal(10, 2)
-  shipping          Decimal  @db.Decimal(10, 2)
-  discount          Decimal? @db.Decimal(10, 2)
-  vatRate           Decimal  @default(21) @db.Decimal(5, 2)
-  vatAmount         Decimal  @db.Decimal(10, 2)
-  total             Decimal  @db.Decimal(10, 2)
-  pdfUrl            String?  @db.VarChar(500)
-  isCancelled       Boolean  @default(false)
+  companyName       String    @db.VarChar(200)
+  companyTaxId      String    @db.VarChar(20)
+  companyAddress    String    @db.VarChar(255)
+  companyCity       String    @db.VarChar(100)
+  companyProvince   String    @db.VarChar(100)
+  companyPostalCode String    @db.VarChar(10)
+  clientName        String    @db.VarChar(200)
+  clientTaxId       String    @db.VarChar(20)
+  clientAddress     String    @db.VarChar(255)
+  clientCity        String    @db.VarChar(100)
+  clientProvince    String    @db.VarChar(100)
+  clientPostalCode  String    @db.VarChar(10)
+  clientCountry     String    @db.VarChar(50)
+  subtotal          Decimal   @db.Decimal(10, 2)
+  shipping          Decimal   @db.Decimal(10, 2)
+  discount          Decimal?  @db.Decimal(10, 2)
+  vatRate           Decimal   @default(21) @db.Decimal(5, 2)
+  vatAmount         Decimal   @db.Decimal(10, 2)
+  total             Decimal   @db.Decimal(10, 2)
+  pdfUrl            String?   @db.VarChar(500)
+  isCancelled       Boolean   @default(false)
   cancelledAt       DateTime?
   cancelReason      String?
-  issuedAt          DateTime @default(now())
-  order             Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  issuedAt          DateTime  @default(now())
+  order             Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@index([clientTaxId])
   @@index([invoiceNumber])
@@ -270,17 +270,17 @@ model OrderItem {
 }
 
 model OrderMessage {
-  id             String   @id @default(uuid())
+  id             String    @id @default(uuid())
   orderId        String
   userId         String
   message        String
-  isFromCustomer Boolean  @default(true)
+  isFromCustomer Boolean   @default(true)
   attachments    Json?
-  isRead         Boolean  @default(false)
+  isRead         Boolean   @default(false)
   readAt         DateTime?
-  createdAt      DateTime @default(now())
-  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  user           User     @relation(fields: [userId], references: [id])
+  createdAt      DateTime  @default(now())
+  order          Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user           User      @relation(fields: [userId], references: [id])
 
   @@index([createdAt])
   @@index([isFromCustomer])
@@ -289,36 +289,36 @@ model OrderMessage {
 }
 
 model Order {
-  id                    String               @id @default(uuid())
-  orderNumber           String               @unique @db.VarChar(20)
+  id                    String              @id @default(uuid())
+  orderNumber           String              @unique @db.VarChar(20)
   userId                String
-  status                OrderStatus          @default(PENDING)
-  subtotal              Decimal              @db.Decimal(10, 2)
-  shipping              Decimal              @db.Decimal(10, 2)
-  discount              Decimal?             @db.Decimal(10, 2)
-  total                 Decimal              @db.Decimal(10, 2)
+  status                OrderStatus         @default(PENDING)
+  subtotal              Decimal             @db.Decimal(10, 2)
+  shipping              Decimal             @db.Decimal(10, 2)
+  discount              Decimal?            @db.Decimal(10, 2)
+  total                 Decimal             @db.Decimal(10, 2)
   shippingAddressId     String?
-  shippingName          String               @db.VarChar(100)
-  shippingPhone         String               @db.VarChar(20)
-  shippingAddress       String               @db.VarChar(255)
-  shippingComplement    String?              @db.VarChar(100)
-  shippingPostalCode     String               @db.VarChar(10)
-  shippingCity          String               @db.VarChar(100)
-  shippingProvince      String               @db.VarChar(100)
-  shippingCountry       String               @db.VarChar(50)
-  paymentMethod         PaymentMethod        @default(CARD)
-  stripeSessionId       String?              @unique @db.VarChar(255)
-  stripePaymentIntentId String?              @db.VarChar(255)
-  paypalOrderId         String?              @unique @db.VarChar(255)
-  paypalCaptureId       String?              @db.VarChar(255)
+  shippingName          String              @db.VarChar(100)
+  shippingPhone         String              @db.VarChar(20)
+  shippingAddress       String              @db.VarChar(255)
+  shippingComplement    String?             @db.VarChar(100)
+  shippingPostalCode    String              @db.VarChar(10)
+  shippingCity          String              @db.VarChar(100)
+  shippingProvince      String              @db.VarChar(100)
+  shippingCountry       String              @db.VarChar(50)
+  paymentMethod         PaymentMethod       @default(CARD)
+  stripeSessionId       String?             @unique @db.VarChar(255)
+  stripePaymentIntentId String?             @db.VarChar(255)
+  paypalOrderId         String?             @unique @db.VarChar(255)
+  paypalCaptureId       String?             @db.VarChar(255)
   customerNotes         String?
   internalNotes         String?
   shippedAt             DateTime?
-  trackingNumber        String?              @db.VarChar(100)
-  carrier               String?              @db.VarChar(100)
+  trackingNumber        String?             @db.VarChar(100)
+  carrier               String?             @db.VarChar(100)
   deliveredAt           DateTime?
-  createdAt             DateTime             @default(now())
-  updatedAt             DateTime             @default(now())
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @default(now())
   confirmedAt           DateTime?
   preparingAt           DateTime?
   sentAt                DateTime?
@@ -331,9 +331,9 @@ model Order {
   items                 OrderItem[]
   messages              OrderMessage[]
   returns               Return[]
-  coupon                Coupon?              @relation(fields: [couponId], references: [id])
-  shippingAddressData   Address?             @relation(fields: [shippingAddressId], references: [id])
-  user                  User                 @relation(fields: [userId], references: [id])
+  coupon                Coupon?             @relation(fields: [couponId], references: [id])
+  shippingAddressData   Address?            @relation(fields: [shippingAddressId], references: [id])
+  user                  User                @relation(fields: [userId], references: [id])
   payment               Payment?
 
   @@index([createdAt])
@@ -554,21 +554,21 @@ model SiteConfig {
 }
 
 model User {
-  id                 String               @id @default(uuid())
-  email              String               @unique @db.VarChar(255)
-  password           String               @db.VarChar(255)
-  name               String               @db.VarChar(100)
-  phone              String?              @db.VarChar(20)
-  role               Role                 @default(CUSTOMER)
-  taxId              String?              @db.VarChar(20)
-  fiscalName         String?              @db.VarChar(200)
-  isActive           Boolean              @default(true)
+  id                 String              @id @default(uuid())
+  email              String              @unique @db.VarChar(255)
+  password           String              @db.VarChar(255)
+  name               String              @db.VarChar(100)
+  phone              String?             @db.VarChar(20)
+  role               Role                @default(CUSTOMER)
+  taxId              String?             @db.VarChar(20)
+  fiscalName         String?             @db.VarChar(200)
+  isActive           Boolean             @default(true)
   emailVerified      DateTime?
   lastAccess         DateTime?
-  failedAttempts     Int                  @default(0)
+  failedAttempts     Int                 @default(0)
   lockedUntil        DateTime?
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime             @default(now())
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @default(now())
   createdBy          String?
   addresses          Address[]
   alerts             Alert[]
@@ -617,12 +617,12 @@ model Return {
   userId      String
   reason      String
   status      ReturnStatus @default(PENDING)
-  items       ReturnItem[]
   totalAmount Decimal      @db.Decimal(10, 2)
   adminNotes  String?
   processedAt DateTime?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @default(now())
+  items       ReturnItem[]
   order       Order        @relation(fields: [orderId], references: [id])
   user        User         @relation(fields: [userId], references: [id])
 
@@ -635,12 +635,12 @@ model Return {
 model ReturnItem {
   id        String  @id @default(uuid())
   returnId  String
-  return    Return  @relation(fields: [returnId], references: [id])
   productId String
-  product   Product @relation(fields: [productId], references: [id])
   quantity  Int
   unitPrice Decimal @db.Decimal(10, 2)
   reason    String?
+  return    Return  @relation(fields: [returnId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
 
   @@index([returnId])
   @@index([productId])

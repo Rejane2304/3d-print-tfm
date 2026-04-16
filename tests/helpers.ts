@@ -446,6 +446,12 @@ export async function seedTestData(): Promise<void> {
       {
         id: 'test-product-1',
         slug: 'test-product-1',
+        // Bilingual fields
+        nameEs: 'Producto de Prueba 1',
+        nameEn: 'Test Product 1',
+        descriptionEs: 'Descripción del producto de prueba',
+        descriptionEn: 'Description of test product',
+        // Legacy fields (for compatibility)
         name: 'Test Product 1',
         description: 'Description of test product',
         price: 19.99,
@@ -458,6 +464,12 @@ export async function seedTestData(): Promise<void> {
       {
         id: 'test-product-2',
         slug: 'test-product-2',
+        // Bilingual fields
+        nameEs: 'Producto de Prueba 2',
+        nameEn: 'Test Product 2',
+        descriptionEs: 'Otro producto de prueba',
+        descriptionEn: 'Another test product',
+        // Legacy fields
         name: 'Test Product 2',
         description: 'Another test product',
         price: 29.99,

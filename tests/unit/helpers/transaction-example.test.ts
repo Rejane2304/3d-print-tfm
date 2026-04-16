@@ -91,6 +91,12 @@ describe('Example: Transaction Safety Demo', () => {
         data: {
           id: randomUUID(),
           slug: 'test-product-temp',
+          // Bilingual fields
+          nameEs: 'Producto de Prueba',
+          nameEn: 'Test Product',
+          descriptionEs: 'Un producto de prueba',
+          descriptionEn: 'A test product',
+          // Legacy fields
           name: 'Test Product',
           description: 'A test product',
           price: 19.99,
