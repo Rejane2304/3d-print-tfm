@@ -83,7 +83,17 @@ function AuthContent() {
     sessionStorage.setItem('cartMigrated', Date.now().toString());
     clearMigrationFlag();
     globalThis.dispatchEvent(new Event('cartUpdated'));
-    router.push(callbackUrl);
+
+    // Check if cart has items after migration
+    const cartData = localStorage.getItem('cart');
+    const cart = cartData ? JSON.parse(cartData) : null;
+    const cartHasItems = cart?.items?.length > 0;
+
+    if (cartHasItems) {
+      router.push(callbackUrl);
+    } else {
+      router.push('/products');
+    }
   };
 
   // Handle register success - switch to login tab
