@@ -8,6 +8,8 @@ on:
 
 env:
   NODE_VERSION: '22.x'
+  DATABASE_URL: 'postgresql://testuser:testpassword123@localhost:5433/3dprint_tfm_test'
+  DIRECT_URL: 'postgresql://testuser:testpassword123@localhost:5433/3dprint_tfm_test'
 
 jobs:
   # ============================================
