@@ -9,32 +9,23 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
-import { POST as createCheckout } from '@/app/api/checkout/route';
-import { POST as stripeWebhook } from '@/app/api/webhooks/stripe/route';
 import { prisma } from '@/lib/db/prisma';
 import bcrypt from 'bcrypt';
 import { randomUUID } from 'node:crypto';
 
-// Mock next-auth
-vi.mock('next-auth', () => ({
-  getServerSession: vi.fn(),
-}));
-
-import { getServerSession } from 'next-auth';
-
-// Mock Stripe
+// Mock Stripe - using proper constructor pattern
 vi.mock('stripe', () => {
   return {
-    default: vi.fn().mockImplementation(() => ({
-      checkout: {
+    default: class MockStripe {
+      checkout = {
         sessions: {
           create: vi.fn().mockResolvedValue({
             id: 'cs_test_session123',
             url: 'https://checkout.stripe.com/test',
           }),
         },
-      },
-      webhooks: {
+      };
+      webhooks = {
         constructEvent: vi.fn().mockImplementation((payload: string, signature: string) => {
           if (!signature || signature === '') {
             throw new Error('No signature provided');
@@ -53,10 +44,21 @@ vi.mock('stripe', () => {
             },
           };
         }),
-      },
-    })),
+      };
+    },
   };
 });
+
+// Mock next-auth
+vi.mock('next-auth', () => ({
+  getServerSession: vi.fn(),
+}));
+
+import { getServerSession } from 'next-auth';
+
+// Import handlers AFTER mocking Stripe
+import { POST as createCheckout } from '@/app/api/checkout/route';
+import { POST as stripeWebhook } from '@/app/api/webhooks/stripe/route';
 
 describe('Checkout API', () => {
   let customerUser: { id: string; email: string; name: string };

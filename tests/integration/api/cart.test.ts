@@ -35,9 +35,12 @@ describe('Cart API', () => {
   let testCategory: { id: string };
 
   beforeEach(async () => {
-    // Clean up test data
+    // Clean up test data - IMPORTANT: Delete cartItems FIRST before products
     await prisma.cartItem.deleteMany({
       where: { cart: { user: { email: { startsWith: 'cart-test-' } } } },
+    });
+    await prisma.cartItem.deleteMany({
+      where: { product: { slug: { startsWith: 'cart-test-' } } },
     });
     await prisma.cart.deleteMany({
       where: { user: { email: { startsWith: 'cart-test-' } } },
@@ -109,9 +112,12 @@ describe('Cart API', () => {
   });
 
   afterEach(async () => {
-    // Clean up
+    // Clean up - IMPORTANT: Delete cartItems FIRST before products
     await prisma.cartItem.deleteMany({
       where: { cart: { user: { email: { startsWith: 'cart-test-' } } } },
+    });
+    await prisma.cartItem.deleteMany({
+      where: { product: { slug: { startsWith: 'cart-test-' } } },
     });
     await prisma.cart.deleteMany({
       where: { user: { email: { startsWith: 'cart-test-' } } },
