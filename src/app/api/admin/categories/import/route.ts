@@ -28,29 +28,100 @@ interface ImportResult {
   skipped: number;
 }
 
-// Helper para validar y procesar CSV
-function parseCSV(buffer: Buffer): { records: Record<string, string>[]; headers: string[] } {
-  const records = parse(buffer, {
-    columns: true,
-    skip_empty_lines: true,
-    trim: true,
-  }) as Record<string, string>[];
-
-  if (records.length === 0) {
-    throw new Error('El archivo CSV está vacío');
+// 1. Authentication verification
+async function verifyAdminAuth(
+  req: NextRequest,
+): Promise<{ success: false; response: NextResponse } | { success: true; userId: string }> {
+  let session;
+  try {
+    session = await getServerSession(authOptions);
+  } catch {
+    session = null;
   }
 
-  const headers = Object.keys(records[0]);
-  return { records, headers };
+  if (!session?.user?.email) {
+    return {
+      success: false,
+      response: NextResponse.json({ success: false, error: translateErrorMessage('No autenticado') }, { status: 401 }),
+    };
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+  });
+
+  if (user?.role !== 'ADMIN') {
+    return {
+      success: false,
+      response: NextResponse.json({ success: false, error: translateErrorMessage('No autorizado') }, { status: 403 }),
+    };
+  }
+
+  return { success: true, userId: user.id };
 }
 
-// Validar columnas requeridas
-function validateColumns(headers: string[]): { valid: boolean; missing: string[] } {
+// 2. Parse and validate CSV file
+async function parseAndValidateCSV(
+  file: File,
+): Promise<
+  { success: false; response: NextResponse } | { success: true; records: Record<string, string>[]; headers: string[] }
+> {
+  if (!file.name.endsWith('.csv')) {
+    return {
+      success: false,
+      response: NextResponse.json({ success: false, error: 'El archivo debe ser un CSV' }, { status: 400 }),
+    };
+  }
+
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
+
+  let records: Record<string, string>[];
+  let headers: string[];
+
+  try {
+    records = parse(buffer, {
+      columns: true,
+      skip_empty_lines: true,
+      trim: true,
+    }) as Record<string, string>[];
+
+    if (records.length === 0) {
+      throw new Error('El archivo CSV está vacío');
+    }
+
+    headers = Object.keys(records[0]);
+  } catch (error) {
+    return {
+      success: false,
+      response: NextResponse.json(
+        { success: false, error: `Error al parsear CSV: ${(error as Error).message}` },
+        { status: 400 },
+      ),
+    };
+  }
+
+  // Validate required columns
   const missing = REQUIRED_COLUMNS.filter(col => !headers.includes(col));
-  return { valid: missing.length === 0, missing };
+  if (missing.length > 0) {
+    return {
+      success: false,
+      response: NextResponse.json(
+        {
+          success: false,
+          error: `Columnas faltantes: ${missing.join(', ')}`,
+          requiredColumns: REQUIRED_COLUMNS,
+          foundColumns: headers,
+        },
+        { status: 400 },
+      ),
+    };
+  }
+
+  return { success: true, records, headers };
 }
 
-// Validar una fila de categoría
+// 3. Validate a single category row
 async function validateCategoryRow(
   row: Record<string, string>,
   rowNumber: number,
@@ -105,30 +176,62 @@ async function validateCategoryRow(
   };
 }
 
-// POST - Importar categorías desde CSV
+// 4. Import categories in transaction
+async function importCategories(validRows: CSVPreviewRow[], result: ImportResult): Promise<void> {
+  await prisma.$transaction(async tx => {
+    for (const row of validRows) {
+      const data = row.data;
+
+      try {
+        // Verificar si el slug ya existe
+        const exists = await tx.category.findUnique({
+          where: { slug: data.slug.toLowerCase().trim() },
+          select: { id: true },
+        });
+
+        if (exists) {
+          result.skipped++;
+          result.errors.push({
+            row: row.row,
+            errors: [`La categoría con slug '${data.slug}' ya existe`],
+            data,
+          });
+          continue;
+        }
+
+        // Crear categoría
+        await tx.category.create({
+          data: {
+            id: crypto.randomUUID(),
+            name: data.name.trim(),
+            slug: data.slug.toLowerCase().trim(),
+            description: data.description.trim() || null,
+            image: data.image?.trim() || null,
+            displayOrder: data.displayOrder ? Number.parseInt(data.displayOrder, 10) : 0,
+            isActive: data.isActive?.toLowerCase() !== 'false',
+          },
+        });
+
+        result.imported++;
+      } catch (error) {
+        result.errors.push({
+          row: row.row,
+          errors: [`Error al crear categoría: ${(error as Error).message}`],
+          data,
+        });
+      }
+    }
+  });
+}
+
+// 5. Simplified POST handler
 export async function POST(req: NextRequest) {
   try {
-    // Verificar autenticación
-    let session;
-    try {
-      session = await getServerSession(authOptions);
-    } catch {
-      session = null;
-    }
+    // Verify admin authentication
+    const auth = await verifyAdminAuth(req);
+    if (!auth.success) return auth.response;
 
-    if (!session?.user?.email) {
-      return NextResponse.json({ success: false, error: translateErrorMessage('No autenticado') }, { status: 401 });
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
-
-    if (user?.role !== 'ADMIN') {
-      return NextResponse.json({ success: false, error: translateErrorMessage('No autorizado') }, { status: 403 });
-    }
-
-    // Leer el archivo CSV
+    // Parse form data
     const formData = await req.formData();
     const file = formData.get('file') as File | null;
     const mode = (formData.get('mode') as string) || 'preview';
@@ -137,49 +240,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'No se proporcionó ningún archivo' }, { status: 400 });
     }
 
-    if (!file.name.endsWith('.csv')) {
-      return NextResponse.json({ success: false, error: 'El archivo debe ser un CSV' }, { status: 400 });
-    }
+    // Parse and validate CSV
+    const csvValidation = await parseAndValidateCSV(file);
+    if (!csvValidation.success) return csvValidation.response;
 
-    // Leer contenido del archivo
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    const { records, headers } = csvValidation;
 
-    // Parsear CSV
-    let records: Record<string, string>[];
-    let headers: string[];
-    try {
-      const result = parseCSV(buffer);
-      records = result.records;
-      headers = result.headers;
-    } catch (error) {
-      return NextResponse.json(
-        { success: false, error: `Error al parsear CSV: ${(error as Error).message}` },
-        { status: 400 },
-      );
-    }
-
-    // Validar columnas requeridas
-    const columnValidation = validateColumns(headers);
-    if (!columnValidation.valid) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: `Columnas faltantes: ${columnValidation.missing.join(', ')}`,
-          requiredColumns: REQUIRED_COLUMNS,
-          foundColumns: headers,
-        },
-        { status: 400 },
-      );
-    }
-
-    // Obtener slugs existentes
+    // Get existing slugs
     const existingCategories = await prisma.category.findMany({
       select: { slug: true },
     });
     const existingSlugs = new Set<string>(existingCategories.map(c => c.slug));
 
-    // Validar todas las filas
+    // Validate all rows
     const previewRows: CSVPreviewRow[] = [];
     const validRows: CSVPreviewRow[] = [];
     const csvSlugs = new Set<string>();
@@ -192,7 +265,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Si es solo preview, retornar información
+    // Preview mode
     if (mode === 'preview') {
       return NextResponse.json({
         success: true,
@@ -205,7 +278,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Modo import
+    // Import mode
     if (validRows.length === 0) {
       return NextResponse.json({ success: false, error: 'No hay registros válidos para importar' }, { status: 400 });
     }
@@ -216,51 +289,7 @@ export async function POST(req: NextRequest) {
       skipped: 0,
     };
 
-    // Importar en transacción
-    await prisma.$transaction(async tx => {
-      for (const row of validRows) {
-        const data = row.data;
-
-        try {
-          // Verificar si el slug ya existe
-          const exists = await tx.category.findUnique({
-            where: { slug: data.slug.toLowerCase().trim() },
-            select: { id: true },
-          });
-
-          if (exists) {
-            result.skipped++;
-            result.errors.push({
-              row: row.row,
-              errors: [`La categoría con slug '${data.slug}' ya existe`],
-              data,
-            });
-            continue;
-          }
-
-          // Crear categoría
-          await tx.category.create({
-            data: {
-              id: crypto.randomUUID(),
-              name: data.name.trim(),
-              slug: data.slug.toLowerCase().trim(),
-              description: data.description.trim() || null,
-              image: data.image?.trim() || null,
-              displayOrder: data.displayOrder ? Number.parseInt(data.displayOrder, 10) : 0,
-              isActive: data.isActive?.toLowerCase() !== 'false',
-            },
-          });
-
-          result.imported++;
-        } catch (error) {
-          result.errors.push({
-            row: row.row,
-            errors: [`Error al crear categoría: ${(error as Error).message}`],
-            data,
-          });
-        }
-      }
-    });
+    await importCategories(validRows, result);
 
     return NextResponse.json({
       success: true,

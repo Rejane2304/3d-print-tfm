@@ -20,10 +20,10 @@ const couponImportSchema = z.object({
   value: z
     .string()
     .or(z.number())
-    .transform(val => Number(val))
+    .transform(Number)
     .refine(val => val >= 0, { message: 'Valor debe ser mayor o igual a 0' }),
-  validFrom: z.string().refine(val => !isNaN(Date.parse(val)), { message: 'Fecha de inicio inválida' }),
-  validUntil: z.string().refine(val => !isNaN(Date.parse(val)), { message: 'Fecha de fin inválida' }),
+  validFrom: z.string().refine(val => !Number.isNaN(Date.parse(val)), { message: 'Fecha de inicio inválida' }),
+  validUntil: z.string().refine(val => !Number.isNaN(Date.parse(val)), { message: 'Fecha de fin inválida' }),
   maxUses: z
     .string()
     .or(z.number())
@@ -54,43 +54,173 @@ interface ImportResult {
   warnings: Array<{ row: number; message: string }>;
 }
 
-export async function POST(req: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions);
+interface ProcessRowResult {
+  success: boolean;
+  warning?: string;
+  error?: string;
+}
 
-    if (!session?.user?.email) {
-      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
+// 1. Authentication verification
+async function verifyAdminAuth(
+  req: NextRequest,
+): Promise<{ success: false; response: NextResponse } | { success: true; userId: string }> {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user?.email) {
+    return {
+      success: false,
+      response: NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 }),
+    };
+  }
+
+  const adminUser = await prisma.user.findUnique({
+    where: { email: session.user.email },
+    select: { id: true, role: true },
+  });
+
+  if (adminUser?.role !== 'ADMIN') {
+    return {
+      success: false,
+      response: NextResponse.json({ success: false, error: 'Acceso denegado' }, { status: 403 }),
+    };
+  }
+
+  return { success: true, userId: adminUser.id };
+}
+
+// 2. Data validation
+function validateImportData(body: { data?: unknown; options?: unknown }):
+  | {
+      success: false;
+      response: NextResponse;
     }
+  | {
+      success: true;
+      data: unknown[];
+      options: { skipDuplicates?: boolean };
+    } {
+  const { data, options = {} } = body;
 
-    // Verify admin role
-    const adminUser = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      select: { id: true, role: true },
-    });
+  if (!Array.isArray(data) || data.length === 0) {
+    return {
+      success: false,
+      response: NextResponse.json(
+        { success: false, error: 'No se proporcionaron datos para importar' },
+        { status: 400 },
+      ),
+    };
+  }
 
-    if (adminUser?.role !== 'ADMIN') {
-      return NextResponse.json({ success: false, error: 'Acceso denegado' }, { status: 403 });
-    }
+  const requiredColumns = ['code', 'type', 'value', 'validFrom', 'validUntil'];
+  const firstRow = data[0] as Record<string, unknown>;
+  const missingColumns = requiredColumns.filter(col => !(col in firstRow));
 
-    const body = await req.json();
-    const { data, options = {} } = body;
-
-    if (!Array.isArray(data) || data.length === 0) {
-      return NextResponse.json({ success: false, error: 'No se proporcionaron datos para importar' }, { status: 400 });
-    }
-
-    // Validate required columns
-    const requiredColumns = ['code', 'type', 'value', 'validFrom', 'validUntil'];
-    const firstRow = data[0];
-    const missingColumns = requiredColumns.filter(col => !(col in firstRow));
-
-    if (missingColumns.length > 0) {
-      return NextResponse.json(
+  if (missingColumns.length > 0) {
+    return {
+      success: false,
+      response: NextResponse.json(
         { success: false, error: `Columnas requeridas faltantes: ${missingColumns.join(', ')}` },
         { status: 400 },
-      );
-    }
+      ),
+    };
+  }
 
+  return {
+    success: true,
+    data,
+    options: options as { skipDuplicates?: boolean },
+  };
+}
+
+// 3. Row processing
+async function processCouponRow(
+  row: Record<string, unknown>,
+  options: { skipDuplicates?: boolean },
+  existingCodes: Set<string>,
+): Promise<ProcessRowResult> {
+  const validatedData = couponImportSchema.parse({
+    code: String(row.code ?? '')
+      .trim()
+      .toUpperCase(),
+    type: String(row.type ?? '').toUpperCase() as CouponType,
+    value: row.value,
+    validFrom: String(row.validFrom ?? '').trim(),
+    validUntil: String(row.validUntil ?? '').trim(),
+    maxUses: row.maxUses,
+    minOrderAmount: row.minOrderAmount,
+    isActive: row.isActive,
+  });
+
+  // Check for duplicate code
+  if (existingCodes.has(validatedData.code)) {
+    if (options.skipDuplicates) {
+      return {
+        success: false,
+        warning: `Código ${validatedData.code} ya existe - omitido`,
+      };
+    }
+    return {
+      success: false,
+      error: `Código ${validatedData.code} ya existe`,
+    };
+  }
+
+  // Parse dates
+  const validFrom = new Date(validatedData.validFrom);
+  const validUntil = new Date(validatedData.validUntil);
+
+  // Validate date range
+  if (validUntil <= validFrom) {
+    return {
+      success: false,
+      error: 'La fecha de fin debe ser posterior a la fecha de inicio',
+    };
+  }
+
+  // Validate value based on type
+  let warning: string | undefined;
+  if (validatedData.type === 'PERCENTAGE' && validatedData.value > 100) {
+    warning = 'Valor de porcentaje mayor a 100% - se importará igual';
+  }
+
+  // Create coupon
+  await prisma.coupon.create({
+    data: {
+      id: crypto.randomUUID(),
+      code: validatedData.code,
+      type: validatedData.type as CouponType,
+      value: validatedData.value,
+      validFrom,
+      validUntil,
+      maxUses: validatedData.maxUses,
+      minOrderAmount: validatedData.minOrderAmount,
+      isActive: validatedData.isActive ?? true,
+      usedCount: 0,
+      updatedAt: new Date(),
+    },
+  });
+
+  // Add to existing codes set
+  existingCodes.add(validatedData.code);
+
+  return { success: true, warning };
+}
+
+// 4. Simplified POST handler
+export async function POST(req: NextRequest) {
+  try {
+    // Verify admin authentication
+    const auth = await verifyAdminAuth(req);
+    if (!auth.success) return auth.response;
+
+    // Parse and validate request body
+    const body = await req.json();
+    const validation = validateImportData(body);
+    if (!validation.success) return validation.response;
+
+    const { data, options } = validation;
+
+    // Initialize result
     const result: ImportResult = {
       success: true,
       imported: 0,
@@ -100,89 +230,27 @@ export async function POST(req: NextRequest) {
 
     // Get existing codes to check for duplicates
     const existingCodes = new Set(
-      (
-        await prisma.coupon.findMany({
-          select: { code: true },
-        })
-      ).map(c => c.code.toUpperCase()),
+      (await prisma.coupon.findMany({ select: { code: true } })).map(c => c.code.toUpperCase()),
     );
 
     // Process each row
     for (let i = 0; i < data.length; i++) {
-      const row = data[i];
+      const row = data[i] as Record<string, unknown>;
       const rowNumber = i + 1;
 
       try {
-        // Validate row data
-        const validatedData = couponImportSchema.parse({
-          code: row.code?.trim().toUpperCase(),
-          type: row.type?.toUpperCase() as CouponType,
-          value: row.value,
-          validFrom: row.validFrom?.trim(),
-          validUntil: row.validUntil?.trim(),
-          maxUses: row.maxUses,
-          minOrderAmount: row.minOrderAmount,
-          isActive: row.isActive,
-        });
+        const processResult = await processCouponRow(row, options, existingCodes);
 
-        // Check for duplicate code
-        if (existingCodes.has(validatedData.code)) {
-          if (options.skipDuplicates) {
-            result.warnings.push({
-              row: rowNumber,
-              message: `Código ${validatedData.code} ya existe - omitido`,
-            });
-            continue;
-          } else {
-            result.errors.push({
-              row: rowNumber,
-              message: `Código ${validatedData.code} ya existe`,
-            });
-            continue;
+        if (processResult.success) {
+          result.imported++;
+          if (processResult.warning) {
+            result.warnings.push({ row: rowNumber, message: processResult.warning });
           }
+        } else if (processResult.warning) {
+          result.warnings.push({ row: rowNumber, message: processResult.warning });
+        } else if (processResult.error) {
+          result.errors.push({ row: rowNumber, message: processResult.error });
         }
-
-        // Parse dates
-        const validFrom = new Date(validatedData.validFrom);
-        const validUntil = new Date(validatedData.validUntil);
-
-        // Validate date range
-        if (validUntil <= validFrom) {
-          result.errors.push({
-            row: rowNumber,
-            message: 'La fecha de fin debe ser posterior a la fecha de inicio',
-          });
-          continue;
-        }
-
-        // Validate value based on type
-        if (validatedData.type === 'PERCENTAGE' && validatedData.value > 100) {
-          result.warnings.push({
-            row: rowNumber,
-            message: 'Valor de porcentaje mayor a 100% - se importará igual',
-          });
-        }
-
-        // Create coupon
-        await prisma.coupon.create({
-          data: {
-            id: crypto.randomUUID(),
-            code: validatedData.code,
-            type: validatedData.type as CouponType,
-            value: validatedData.value,
-            validFrom,
-            validUntil,
-            maxUses: validatedData.maxUses,
-            minOrderAmount: validatedData.minOrderAmount,
-            isActive: validatedData.isActive ?? true,
-            usedCount: 0,
-            updatedAt: new Date(),
-          },
-        });
-
-        // Add to existing codes set
-        existingCodes.add(validatedData.code);
-        result.imported++;
       } catch (error) {
         if (error instanceof z.ZodError) {
           result.errors.push({
