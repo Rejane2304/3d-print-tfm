@@ -133,6 +133,54 @@ function runCommand(cmd, options = {}) {
   });
 }
 
+// Procesar mensajes de ESLint
+function processEslintMessage(message, filePath) {
+  if (message.severity !== 2 && !CONFIG.strict) {
+    return null;
+  }
+
+  return {
+    file: filePath,
+    line: message.line,
+    column: message.column,
+    code: message.ruleId || 'unknown',
+    message: message.message,
+    severity: message.severity === 2 ? 'error' : 'warning',
+    fix: message.fix ? 'Auto-fix disponible' : suggestEslintFix(message.ruleId),
+  };
+}
+
+// Extraer errores de salida ESLint
+function extractEslintErrors(eslintOutput) {
+  const errors = [];
+  for (const file of eslintOutput) {
+    for (const message of file.messages) {
+      const error = processEslintMessage(message, file.filePath);
+      if (error) {
+        errors.push(error);
+      }
+    }
+  }
+  return errors;
+}
+
+// Manejar error fatal de ESLint
+function handleEslintFatalError(result) {
+  if (result.stderr) {
+    return [
+      {
+        file: 'global',
+        line: 0,
+        column: 0,
+        code: 'ESLINT_FATAL',
+        message: result.stderr,
+        severity: 'error',
+      },
+    ];
+  }
+  return [];
+}
+
 // Detectores de errores específicos
 const detectors = {
   // 1. TypeScript
@@ -183,35 +231,10 @@ const detectors = {
     let errors = [];
     try {
       const eslintOutput = JSON.parse(result.stdout);
-
-      for (const file of eslintOutput) {
-        for (const message of file.messages) {
-          if (message.severity === 2 || CONFIG.strict) {
-            // Error o modo estricto
-            errors.push({
-              file: file.filePath,
-              line: message.line,
-              column: message.column,
-              code: message.ruleId || 'unknown',
-              message: message.message,
-              severity: message.severity === 2 ? 'error' : 'warning',
-              fix: message.fix ? 'Auto-fix disponible' : suggestEslintFix(message.ruleId),
-            });
-          }
-        }
-      }
+      errors = extractEslintErrors(eslintOutput);
     } catch (e) {
-      // NOSONAR - Si no es JSON válido, hubo un error grave
-      if (result.stderr) {
-        errors.push({
-          file: 'global',
-          line: 0,
-          column: 0,
-          code: 'ESLINT_FATAL',
-          message: result.stderr,
-          severity: 'error',
-        });
-      }
+      // Si no es JSON válido, hubo un error grave
+      errors = handleEslintFatalError(result);
     }
 
     return {
@@ -372,53 +395,88 @@ function suggestEslintFix(ruleId) {
   return suggestions[ruleId] || 'Ejecuta "npx eslint --fix" para auto-corregir';
 }
 
+// Agrupar errores por archivo
+function groupErrorsByFile(errors) {
+  const byFile = {};
+  for (const error of errors.slice(0, 10)) {
+    if (!byFile[error.file]) byFile[error.file] = [];
+    byFile[error.file].push(error);
+  }
+  return byFile;
+}
+
+// Imprimir un error individual
+function printErrorDetail(error) {
+  const location = error.line > 0 ? `[L${error.line}:${error.column}]` : '';
+  log(`      ${location} ${error.code}: ${error.message.substring(0, 80)}`, 'white');
+  if (error.fix) {
+    log(`      💡 ${error.fix}`, 'cyan');
+  }
+}
+
+// Imprimir errores por archivo
+function printErrorsByFile(byFile) {
+  for (const [file, errors] of Object.entries(byFile)) {
+    log(`\n   📄 ${file}`, 'yellow');
+    for (const error of errors) {
+      printErrorDetail(error);
+    }
+  }
+}
+
+// Imprimir mensaje de errores adicionales
+function printAdditionalErrorsMessage(totalErrors) {
+  if (totalErrors > 10) {
+    log(`\n   ... y ${totalErrors - 10} errores más`, 'yellow');
+  }
+}
+
+// Calcular totales
+function calculateTotals(results) {
+  let totalErrors = 0;
+  let totalWarnings = 0;
+  let totalDuration = 0;
+
+  for (const result of results) {
+    totalErrors += result.errors.filter(e => e.severity === 'error').length;
+    totalWarnings += result.errors.filter(e => e.severity === 'warning').length;
+    totalDuration += result.duration;
+  }
+
+  return { totalErrors, totalWarnings, totalDuration };
+}
+
+// Imprimir resultado de un check
+function printCheckResult(result) {
+  const icon = result.valid ? '✅' : '❌';
+  const color = result.valid ? 'green' : 'red';
+  log(`${icon} ${result.name}: ${result.summary} (${result.duration}ms)`, color);
+}
+
+// Imprimir errores de un resultado
+function printResultErrors(result) {
+  if (result.valid || result.errors.length === 0) {
+    return;
+  }
+
+  log('\n   Errores encontrados:', 'red');
+  const byFile = groupErrorsByFile(result.errors);
+  printErrorsByFile(byFile);
+  printAdditionalErrorsMessage(result.errors.length);
+}
+
 // Reporte final
 function generateReport(results) {
   log('\n' + '='.repeat(80), 'white');
   log('REPORTE FINAL DE CALIDAD', 'magenta');
   log('='.repeat(80) + '\n', 'white');
 
-  let totalErrors = 0;
-  let totalWarnings = 0;
-  let totalDuration = 0;
-
   for (const result of results) {
-    const icon = result.valid ? '✅' : '❌';
-    const color = result.valid ? 'green' : 'red';
-
-    log(`${icon} ${result.name}: ${result.summary} (${result.duration}ms)`, color);
-
-    if (!result.valid && result.errors.length > 0) {
-      log('\n   Errores encontrados:', 'red');
-
-      // Agrupar por archivo
-      const byFile = {};
-      for (const error of result.errors.slice(0, 10)) {
-        // Mostrar máximo 10
-        if (!byFile[error.file]) byFile[error.file] = [];
-        byFile[error.file].push(error);
-      }
-
-      for (const [file, errors] of Object.entries(byFile)) {
-        log(`\n   📄 ${file}`, 'yellow');
-        for (const error of errors) {
-          const location = error.line > 0 ? `[L${error.line}:${error.column}]` : '';
-          log(`      ${location} ${error.code}: ${error.message.substring(0, 80)}`, 'white');
-          if (error.fix) {
-            log(`      💡 ${error.fix}`, 'cyan');
-          }
-        }
-      }
-
-      if (result.errors.length > 10) {
-        log(`\n   ... y ${result.errors.length - 10} errores más`, 'yellow');
-      }
-    }
-
-    totalErrors += result.errors.filter(e => e.severity === 'error').length;
-    totalWarnings += result.errors.filter(e => e.severity === 'warning').length;
-    totalDuration += result.duration;
+    printCheckResult(result);
+    printResultErrors(result);
   }
+
+  const { totalErrors, totalWarnings, totalDuration } = calculateTotals(results);
 
   log('\n' + '='.repeat(80), 'white');
   log(`Resumen: ${totalErrors} errores, ${totalWarnings} advertencias`, totalErrors > 0 ? 'red' : 'green');

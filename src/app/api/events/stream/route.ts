@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { eventService } from '@/lib/realtime/event-service';
+import { checkSSERateLimit, incrementSSEConnection, decrementSSEConnection } from '@/lib/rate-limit/sse-rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -79,6 +80,22 @@ function cleanupOldEvents(userId: string) {
  * - Detección de desconexión mejorada
  */
 export async function GET(req: NextRequest) {
+  // Obtener IP del cliente (considerando proxies)
+  const forwarded = req.headers.get('x-forwarded-for');
+  const ip = forwarded ? forwarded.split(',')[0].trim() : 'unknown';
+
+  // Rate limiting: máximo 5 conexiones SSE por IP
+  const rateLimit = checkSSERateLimit(ip);
+  if (!rateLimit.allowed) {
+    return new Response(JSON.stringify({ error: rateLimit.reason }), {
+      status: 429,
+      headers: {
+        'Content-Type': 'application/json',
+        'Retry-After': String(rateLimit.retryAfter || 60),
+      },
+    });
+  }
+
   const { searchParams } = new URL(req.url);
   const userId = searchParams.get('userId');
   const token = searchParams.get('token');
@@ -95,6 +112,9 @@ export async function GET(req: NextRequest) {
       headers: { 'Content-Type': 'application/json' },
     });
   }
+
+  // Incrementar contador de conexiones
+  incrementSSEConnection(ip);
 
   // Limpiar eventos antiguos para este usuario
   cleanupOldEvents(userId);
@@ -221,6 +241,9 @@ export async function GET(req: NextRequest) {
       const cleanup = () => {
         if (!isActive) return;
         isActive = false;
+
+        // Decrementar contador de conexiones
+        decrementSSEConnection(ip);
 
         if (heartbeatInterval) {
           clearInterval(heartbeatInterval);
