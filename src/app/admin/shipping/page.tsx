@@ -491,9 +491,9 @@ export default function AdminShippingPage() {
                 ]}
                 apiEndpoint="/api/admin/shipping/import"
                 sampleCSV={`name,countries,regions,postalCodePrefixes,baseCost,freeThreshold,estimatedDaysMin,estimatedDaysMax,isActive,displayOrder
-"Península","[\"Spain\"]","[\"Madrid\",\"Barcelona\",\"Valencia\"]","[\"28\",\"08\"]",5.99,50.00,3,5,true,1
-"Islas Baleares","[\"Spain\"]","[\"Islas Baleares\"]","[\"07\"]",8.99,75.00,5,7,true,2
-"Islas Canarias","[\"Spain\"]","[\"Canarias\"]","[\"35\",\"38\"]",12.99,100.00,7,10,true,3`}
+"Península","[""Spain""]","[""Madrid"",""Barcelona"",""Valencia""]","[""28"",""08""]",5.99,50.00,3,5,true,1
+"Islas Baleares","[""Spain""]","[""Islas Baleares""]","[""07""]",8.99,75.00,5,7,true,2
+"Islas Canarias","[""Spain""]","[""Canarias""]","[""35"",""38""]",12.99,100.00,7,10,true,3`}
                 onSuccess={() => {
                   loadZones();
                   setShowImportModal(false);

@@ -78,8 +78,8 @@ const orderStatuses: Record<string, { color: string; icon: React.ElementType; la
 
 // Sample CSV for orders
 const ordersSampleCSV = `userEmail,items,status,shippingCost,paymentMethod
-"cliente@email.com","[{\"productId\":\"uuid-product-1\",\"quantity\":2}]","DELIVERED",5.99,"CARD"
-"cliente2@email.com","[{\"productId\":\"uuid-product-2\",\"quantity\":1}]","DELIVERED",5.99,"PAYPAL"`;
+"cliente@email.com","[{""productId"":""uuid-product-1"",""quantity"":2}]","DELIVERED",5.99,"CARD"
+"cliente2@email.com","[{""productId"":""uuid-product-2"",""quantity"":1}]","DELIVERED",5.99,"PAYPAL"`;
 
 export default function AdminOrdersPage() {
   const { data: session, status } = useSession();
@@ -444,7 +444,7 @@ export default function AdminOrdersPage() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
             </span>
-            Tiempo real conectado
+            {'Tiempo real conectado'}
           </div>
         </div>
       )}

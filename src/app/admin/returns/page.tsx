@@ -403,9 +403,9 @@ export default function AdminReturnsPage() {
                 optionalColumns={['status', 'adminNotes']}
                 apiEndpoint="/api/admin/returns/import"
                 sampleCSV={`orderId,userEmail,reason,items,status,adminNotes
-"ORD-2024-001","cliente@email.com","Producto defectuoso","[{\"productId\":\"prod-uuid-1\",\"quantity\":1,\"reason\":\"Defecto\"}]","PENDING",""
-"ORD-2024-002","usuario@email.com","No coincide con la descripción","[{\"productId\":\"prod-uuid-2\",\"quantity\":2}]","PENDING",""
-"ORD-2024-003","test@email.com","Cambio de opinión","[{\"productId\":\"prod-uuid-3\",\"quantity\":1}]","APPROVED","Aprobado por política de 14 días"`}
+"ORD-2024-001","cliente@email.com","Producto defectuoso","[{""productId"":""prod-uuid-1"",""quantity"":1,""reason"":""Defecto""}]","PENDING",""
+"ORD-2024-002","usuario@email.com","No coincide con la descripción","[{""productId"":""prod-uuid-2"",""quantity"":2}]","PENDING",""
+"ORD-2024-003","test@email.com","Cambio de opinión","[{""productId"":""prod-uuid-3"",""quantity"":1}]","APPROVED","Aprobado por política de 14 días"`}
                 onSuccess={() => {
                   loadReturns();
                   setShowImportModal(false);
@@ -429,7 +429,7 @@ export default function AdminReturnsPage() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
             </span>
-            Tiempo real conectado
+            {'Tiempo real conectado'}
           </div>
         </div>
       )}

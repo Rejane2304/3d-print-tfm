@@ -29,7 +29,7 @@ export default function NuevoProductoPage() {
   // Almacena tanto la URL de preview como el archivo para subir luego
   const [images, setImages] = useState<{ url: string; isMain: boolean; file?: File }[]>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
-  const [, setImageUploadProgress] = useState<{ current: number; total: number } | null>(null);
+  const [_imageUploadProgress, setImageUploadProgress] = useState<{ current: number; total: number } | null>(null);
 
   // Form state - bilingual fields included
   const [formData, setFormData] = useState({
@@ -104,7 +104,7 @@ export default function NuevoProductoPage() {
   const generateSlug = (name: string) => {
     return name
       .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+      .replaceAll(/[\u0300-\u036f]/g, '') // Remove diacritics
       .toLowerCase()
       .replaceAll(/[^a-z0-9]+/g, '-')
       .replaceAll(/(^-|-$)/g, '');
@@ -187,6 +187,65 @@ export default function NuevoProductoPage() {
     return null;
   };
 
+  // Helper function to upload images
+  const uploadImages = async (
+    imgs: { url: string; isMain: boolean; file?: File }[],
+    slug: string,
+    failedUploads: { index: number; fileName: string; error: string }[],
+    totalToUpload: number,
+    initialCount: number,
+    setProgress: (progress: { current: number; total: number } | null) => void,
+  ): Promise<{ uploadedImages: { url: string; isMain: boolean }[]; newUploadedCount: number }> => {
+    const uploadedImages: { url: string; isMain: boolean }[] = [];
+    let uploadedCount = initialCount;
+
+    for (let i = 0; i < imgs.length; i++) {
+      const img = imgs[i];
+      if (img.file) {
+        try {
+          const reader = new FileReader();
+          const base64Promise = new Promise<string>(resolve => {
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(img.file!);
+          });
+          const base64 = await base64Promise;
+
+          const uploadResponse = await fetch('/api/admin/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              image: base64,
+              filename: img.file.name,
+              slug,
+            }),
+          });
+
+          if (!uploadResponse.ok) {
+            const uploadData = await uploadResponse.json();
+            throw new Error(uploadData.error || 'Error al subir imagen');
+          }
+
+          const uploadData = await uploadResponse.json();
+          uploadedImages.push({ url: uploadData.url, isMain: img.isMain });
+          uploadedCount++;
+          setProgress({ current: uploadedCount, total: totalToUpload });
+        } catch (uploadErr) {
+          const errorMessage = uploadErr instanceof Error ? uploadErr.message : 'Error desconocido';
+          failedUploads.push({
+            index: i + 1,
+            fileName: img.file.name,
+            error: errorMessage,
+          });
+          console.error(`Error al subir imagen ${i + 1} de ${totalToUpload}:`, uploadErr);
+        }
+      } else {
+        uploadedImages.push({ url: img.url, isMain: img.isMain });
+      }
+    }
+
+    return { uploadedImages, newUploadedCount: uploadedCount };
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -210,56 +269,16 @@ export default function NuevoProductoPage() {
     }
 
     try {
-      // Primero: subir las imágenes que tienen archivo
-      const uploadedImages: { url: string; isMain: boolean }[] = [];
-      let imageIndex = 0;
-
-      for (const img of images) {
-        imageIndex++;
-        if (img.file) {
-          // Subir archivo a la API con try-catch individual
-          try {
-            const reader = new FileReader();
-            const base64Promise = new Promise<string>(resolve => {
-              reader.onloadend = () => resolve(reader.result as string);
-              reader.readAsDataURL(img.file!);
-            });
-            const base64 = await base64Promise;
-
-            const uploadResponse = await fetch('/api/admin/upload', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                image: base64,
-                filename: img.file.name,
-                slug: formData.slug,
-              }),
-            });
-
-            if (!uploadResponse.ok) {
-              const uploadData = await uploadResponse.json();
-              throw new Error(uploadData.error || 'Error al subir imagen');
-            }
-
-            const uploadData = await uploadResponse.json();
-            uploadedImages.push({ url: uploadData.url, isMain: img.isMain });
-            uploadedCount++;
-            setImageUploadProgress({ current: uploadedCount, total: totalImagesToUpload });
-          } catch (uploadErr) {
-            // Guardar el error específico pero continuar con las demás imágenes
-            const errorMessage = uploadErr instanceof Error ? uploadErr.message : 'Error desconocido';
-            failedUploads.push({
-              index: imageIndex,
-              fileName: img.file.name,
-              error: errorMessage,
-            });
-            console.error(`Error al subir imagen ${imageIndex} de ${totalImagesToUpload}:`, uploadErr);
-          }
-        } else {
-          // Ya es una URL permanente (ej: agregada manualmente)
-          uploadedImages.push({ url: img.url, isMain: img.isMain });
-        }
-      }
+      // Upload images and get their URLs
+      const { uploadedImages, newUploadedCount } = await uploadImages(
+        images,
+        formData.slug,
+        failedUploads,
+        totalImagesToUpload,
+        uploadedCount,
+        setImageUploadProgress,
+      );
+      uploadedCount = newUploadedCount;
 
       // Verificar si todas las imágenes con archivos se subieron correctamente
       if (failedUploads.length > 0) {
@@ -765,7 +784,7 @@ export default function NuevoProductoPage() {
                       )}
 
                       {/* Imágenes de galería - tamaño pequeño */}
-                      {images.filter(img => !img.isMain).length > 0 && (
+                      {images.some(img => !img.isMain) && (
                         <div className="grid grid-cols-4 gap-2">
                           {images
                             .filter(img => !img.isMain)
