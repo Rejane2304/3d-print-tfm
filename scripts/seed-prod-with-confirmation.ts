@@ -11,8 +11,13 @@
 import * as readline from 'node:readline';
 import { execSync } from 'node:child_process';
 
-const PROD_DATABASE_URL =
-  'postgresql://postgres.ctwbppfkfsuxymfouptb:putWa3-jinpeg-vorjeh@aws-1-eu-central-1.pooler.supabase.com:5432/postgres';
+const PROD_DATABASE_URL = process.env.PROD_DATABASE_URL;
+
+if (!PROD_DATABASE_URL) {
+  console.error('❌ Error: PROD_DATABASE_URL no está definida en las variables de entorno');
+  console.error('   Configure la variable PROD_DATABASE_URL antes de ejecutar este script');
+  process.exit(1);
+}
 
 const rl = readline.createInterface({
   input: process.stdin,

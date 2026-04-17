@@ -242,7 +242,7 @@ async function createSampleProducts(): Promise<void> {
 
   for (const product of products) {
     const { images, ...productData } = product;
-    const createdProduct = await prisma.product.create({
+    await prisma.product.create({
       data: {
         ...productData,
         categoryId: category.id,

@@ -5,9 +5,9 @@
  * ⚠️ Requiere confirmación manual
  */
 
-import { spawnSync } from 'child_process';
+import { spawnSync } from 'node:child_process';
 import { config } from 'dotenv';
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 import * as readline from 'node:readline';
 
 // Cargar .env.production o .env.local

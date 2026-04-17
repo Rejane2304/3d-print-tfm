@@ -12,10 +12,10 @@
  * - Incremental (solo archivos modificados)
  */
 
-const { execSync, spawn } = require('child_process');
-const fs = require('fs');
-const path = require('path');
-const crypto = require('crypto');
+const { execSync, spawn } = require('node:child_process');
+const fs = require('node:fs');
+const path = require('node:path');
+const crypto = require('node:crypto');
 
 // Configuración
 const CONFIG = {
@@ -136,6 +136,7 @@ function runCommand(cmd, options = {}) {
 // Detectores de errores específicos
 const detectors = {
   // 1. TypeScript
+  // NOSONAR - Complejidad cognitiva necesaria para parseo de errores
   async typescript(files) {
     log('\n🔍 Verificando TypeScript...', 'cyan');
 
@@ -152,8 +153,8 @@ const detectors = {
       if (match) {
         errors.push({
           file: match[1].trim(),
-          line: parseInt(match[2]),
-          column: parseInt(match[3]),
+          line: Number.parseInt(match[2]),
+          column: Number.parseInt(match[3]),
           code: match[4],
           message: match[5].trim(),
           severity: 'error',
@@ -200,7 +201,7 @@ const detectors = {
         }
       }
     } catch (e) {
-      // Si no es JSON válido, hubo un error grave
+      // NOSONAR - Si no es JSON válido, hubo un error grave
       if (result.stderr) {
         errors.push({
           file: 'global',
@@ -240,7 +241,7 @@ const detectors = {
           line: 0,
           column: 0,
           code: 'PRISMA',
-          message: line.replace(/\x1b\[\d+m/g, ''), // Remove ANSI codes
+          message: line.replaceAll(/\x1b\[\d+m/g, ''), // Remove ANSI codes
           severity: 'error',
         });
       }
@@ -438,7 +439,8 @@ async function autoFix(results) {
     try {
       await runCommand('npx eslint . --ext .ts,.tsx --fix');
       success('ESLint fixes aplicados');
-    } catch (e) {
+    } catch {
+      // NOSONAR - ESLint puede fallar si hay errores no auto-corregibles
       error('No se pudieron aplicar todos los fixes de ESLint');
     }
   }
@@ -448,7 +450,8 @@ async function autoFix(results) {
   try {
     await runCommand('npx prettier --write "**/*.{ts,tsx,json,css,scss,md}"');
     success('Prettier aplicado');
-  } catch (e) {
+  } catch {
+    // NOSONAR - Prettier puede fallar si hay archivos con errores de sintaxis
     error('Error aplicando Prettier');
   }
 }
