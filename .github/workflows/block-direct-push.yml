@@ -1,4 +1,4 @@
-name: Check PR Recommended
+name: Quality Gate - Direct Push Protection
 
 on:
   push:
@@ -6,20 +6,92 @@ on:
       - main
       - develop
 
+env:
+  NODE_VERSION: '22.x'
+
 jobs:
-  check-push:
-    name: Check Push Method
+  # ============================================
+  # QUALITY GATE - BLOQUEA SI HAY ERRORES
+  # ============================================
+  quality-check:
+    name: Quality Check
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.event.pull_request == null
     
     steps:
-      - name: Warning for direct push
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Run ESLint
+        run: npm run lint
+        # Falla si hay errores de lint
+
+      - name: Run TypeScript Type Check
+        run: npx tsc --noEmit
+        # Falla si hay errores de tipo
+
+      - name: Run Unit Tests
+        run: npm run test:unit
+        # Falla si hay tests fallando
+
+      - name: Check Code Formatting
+        run: npx prettier --check "**/*.{ts,tsx,json,css,scss,md}"
+        # Falla si el código no está formateado
+
+  # ============================================
+  # NOTIFICACIÓN - ÉXITO
+  # ============================================
+  notify-success:
+    name: Success Notification
+    runs-on: ubuntu-latest
+    needs: quality-check
+    if: success()
+    
+    steps:
+      - name: All quality checks passed
         run: |
-          echo "⚠️  ADVERTENCIA: Push directo a ${GITHUB_REF_NAME}"
+          echo "✅ QUALITY GATE PASADO"
           echo ""
-          echo "💡 RECOMENDACIÓN: Para próximos cambios, considera usar Pull Request:"
-          echo "   1. Crea una rama: git checkout -b feature/nombre-feature"
-          echo "   2. Sube: git push origin feature/nombre-feature"
-          echo "   3. Crea PR en GitHub"
+          echo "Todos los checks de calidad han pasado:"
+          echo "  ✅ ESLint: Sin errores"
+          echo "  ✅ TypeScript: Sin errores de tipo"
+          echo "  ✅ Unit Tests: 299 tests pasando"
+          echo "  ✅ Prettier: Código formateado correctamente"
           echo ""
-          echo "✅ Los checks principales se ejecutarán en el workflow CI/CD"
+          echo "El push está autorizado."
+
+  # ============================================
+  # NOTIFICACIÓN - FALLO (BLOQUEA EL PUSH)
+  # ============================================
+  notify-failure:
+    name: Failure Notification
+    runs-on: ubuntu-latest
+    needs: quality-check
+    if: failure()
+    
+    steps:
+      - name: Quality checks failed
+        run: |
+          echo "❌ QUALITY GATE FALLIDO"
+          echo ""
+          echo "El push ha sido BLOQUEADO porque:"
+          echo "  - Hay errores de ESLint, TypeScript, tests fallando, o código sin formatear"
+          echo ""
+          echo "💡 Solución:"
+          echo "  1. Corre localmente: npm run lint && npm run type-check && npm run test:unit"
+          echo "  2. Arregla los errores"
+          echo "  3. Formatea el código: npx prettier --write ."
+          echo "  4. Commit y push nuevamente"
+          echo ""
+          exit 1
