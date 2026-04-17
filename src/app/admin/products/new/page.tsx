@@ -193,11 +193,10 @@ export default function NuevoProductoPage() {
     slug: string,
     failedUploads: { index: number; fileName: string; error: string }[],
     totalToUpload: number,
-    initialCount: number,
     setProgress: (progress: { current: number; total: number } | null) => void,
-  ): Promise<{ uploadedImages: { url: string; isMain: boolean }[]; newUploadedCount: number }> => {
+  ): Promise<{ uploadedImages: { url: string; isMain: boolean }[]; uploadedCount: number }> => {
     const uploadedImages: { url: string; isMain: boolean }[] = [];
-    let uploadedCount = initialCount;
+    let uploadedCount = 0;
 
     for (let i = 0; i < imgs.length; i++) {
       const img = imgs[i];
@@ -243,7 +242,7 @@ export default function NuevoProductoPage() {
       }
     }
 
-    return { uploadedImages, newUploadedCount: uploadedCount };
+    return { uploadedImages, uploadedCount };
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -270,15 +269,13 @@ export default function NuevoProductoPage() {
 
     try {
       // Upload images and get their URLs
-      const { uploadedImages, newUploadedCount } = await uploadImages(
+      const { uploadedImages } = await uploadImages(
         images,
         formData.slug,
         failedUploads,
         totalImagesToUpload,
-        uploadedCount,
         setImageUploadProgress,
       );
-      uploadedCount = newUploadedCount;
 
       // Verificar si todas las imágenes con archivos se subieron correctamente
       if (failedUploads.length > 0) {

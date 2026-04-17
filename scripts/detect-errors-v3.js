@@ -232,7 +232,7 @@ const detectors = {
     try {
       const eslintOutput = JSON.parse(result.stdout);
       errors = extractEslintErrors(eslintOutput);
-    } catch (e) {
+    } catch {
       // Si no es JSON válido, hubo un error grave
       errors = handleEslintFatalError(result);
     }
