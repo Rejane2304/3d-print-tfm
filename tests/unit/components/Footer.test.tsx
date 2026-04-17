@@ -4,7 +4,8 @@
  */
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import { screen } from '@testing-library/dom';
 import Footer from '@/components/layout/Footer';
 import '@testing-library/jest-dom';
 
