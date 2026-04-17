@@ -32,11 +32,7 @@ const orderImportSchema = z.object({
     { message: 'Items debe ser un array JSON válido con {productId, quantity}' },
   ),
   status: z.enum(['PENDING', 'CONFIRMED', 'PREPARING', 'SHIPPED', 'DELIVERED', 'CANCELLED']).default('DELIVERED'),
-  shippingCost: z
-    .string()
-    .or(z.number())
-    .transform(val => Number(val))
-    .default(0),
+  shippingCost: z.string().or(z.number()).transform(Number).default(0),
   paymentMethod: z.enum(['CARD', 'PAYPAL', 'BIZUM', 'TRANSFER']).default('CARD'),
   customerNotes: z.string().optional(),
 });
@@ -58,6 +54,20 @@ interface OrderItemData {
   subtotal: number;
 }
 
+interface ProcessRowResult {
+  success: boolean;
+  warning?: string;
+  error?: string;
+}
+
+interface ProductCacheData {
+  id: string;
+  name: string;
+  price: number;
+  material: Material;
+  category: { name: string };
+}
+
 // Generate order number
 function generateOrderNumber(): string {
   const prefix = 'IMP';
@@ -70,6 +80,233 @@ function generateOrderNumber(): string {
 async function hashPassword(password: string): Promise<string> {
   const bcrypt = await import('bcryptjs');
   return bcrypt.hash(password, 12);
+}
+
+// Create missing user
+async function createMissingUser(email: string): Promise<{ id: string; name: string; email: string }> {
+  const tempPassword = await hashPassword(crypto.randomUUID());
+  return prisma.user.create({
+    data: {
+      id: crypto.randomUUID(),
+      email: email.toLowerCase(),
+      name: email.split('@')[0] || 'Usuario Importado',
+      password: tempPassword,
+      role: 'CUSTOMER',
+      isActive: true,
+    },
+    select: { id: true, name: true, email: true },
+  });
+}
+
+// Find or create user
+async function findOrCreateUser(
+  email: string,
+  userCache: Map<string, { id: string; name: string; email: string }>,
+  createMissingUsers: boolean | undefined,
+): Promise<{ user?: { id: string; name: string; email: string }; warning?: string; error?: string }> {
+  const normalizedEmail = email.toLowerCase();
+  let user = userCache.get(normalizedEmail);
+
+  if (user) {
+    return { user };
+  }
+
+  const dbUser = await prisma.user.findUnique({
+    where: { email: normalizedEmail },
+    select: { id: true, name: true, email: true },
+  });
+
+  if (dbUser) {
+    userCache.set(normalizedEmail, dbUser);
+    return { user: dbUser };
+  }
+
+  if (createMissingUsers) {
+    const newUser = await createMissingUser(email);
+    if (newUser) {
+      userCache.set(normalizedEmail, newUser);
+      return { user: newUser, warning: `Usuario ${email} creado automáticamente` };
+    }
+    return { error: `Usuario ${email} no pudo ser creado` };
+  }
+
+  return { error: `Usuario ${email} no existe` };
+}
+
+// Fetch product from cache or database
+async function fetchProduct(
+  productId: string,
+  productCache: Map<string, ProductCacheData>,
+): Promise<ProductCacheData | null> {
+  let product = productCache.get(productId);
+
+  if (product) {
+    return product;
+  }
+
+  const dbProduct = await prisma.product.findUnique({
+    where: { id: productId },
+    include: { category: { select: { name: true } } },
+  });
+
+  if (dbProduct) {
+    product = {
+      id: dbProduct.id,
+      name: dbProduct.name,
+      price: Number(dbProduct.price),
+      material: dbProduct.material,
+      category: { name: dbProduct.category.name },
+    };
+    productCache.set(productId, product);
+    return product;
+  }
+
+  return null;
+}
+
+// Process order items
+async function processOrderItems(
+  items: Array<{ productId: string; quantity: number }>,
+  productCache: Map<string, ProductCacheData>,
+  rowNumber: number,
+  result: { errors: Array<{ row: number; message: string }> },
+): Promise<{ items: OrderItemData[]; subtotal: number } | null> {
+  const orderItems: OrderItemData[] = [];
+  let subtotal = 0;
+
+  for (const item of items) {
+    const product = await fetchProduct(item.productId, productCache);
+
+    if (!product) {
+      result.errors.push({
+        row: rowNumber,
+        message: `Producto ${item.productId} no existe`,
+      });
+      return null;
+    }
+
+    const itemSubtotal = product.price * item.quantity;
+    subtotal += itemSubtotal;
+
+    orderItems.push({
+      productId: product.id,
+      name: product.name,
+      price: product.price,
+      quantity: item.quantity,
+      category: product.category.name,
+      material: product.material,
+      subtotal: itemSubtotal,
+    });
+  }
+
+  return { items: orderItems, subtotal };
+}
+
+// Create order with items
+async function createOrderWithItems(
+  user: { id: string; name: string },
+  orderItems: OrderItemData[],
+  validatedData: z.infer<typeof orderImportSchema>,
+  subtotal: number,
+): Promise<void> {
+  const shipping = validatedData.shippingCost;
+  const total = subtotal + shipping;
+
+  const orderItemsCreate = orderItems.map(item => ({
+    id: crypto.randomUUID(),
+    productId: item.productId,
+    name: item.name,
+    price: item.price,
+    quantity: item.quantity,
+    category: item.category,
+    material: item.material,
+    subtotal: item.subtotal,
+  }));
+
+  await prisma.order.create({
+    data: {
+      id: crypto.randomUUID(),
+      orderNumber: generateOrderNumber(),
+      userId: user.id,
+      status: validatedData.status,
+      subtotal,
+      shipping,
+      total,
+      paymentMethod: validatedData.paymentMethod,
+      shippingName: user.name,
+      shippingPhone: '',
+      shippingAddress: 'Dirección importada',
+      shippingPostalCode: '00000',
+      shippingCity: 'Ciudad',
+      shippingProvince: 'Provincia',
+      shippingCountry: 'Spain',
+      customerNotes: validatedData.customerNotes || 'Pedido importado desde CSV',
+      internalNotes: 'Importado desde CSV',
+      deliveredAt: validatedData.status === 'DELIVERED' ? new Date() : null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      items: {
+        create: orderItemsCreate,
+      },
+    },
+  });
+}
+
+// Process a single order row
+async function processOrderRow(
+  row: Record<string, unknown>,
+  rowNumber: number,
+  userCache: Map<string, { id: string; name: string; email: string }>,
+  productCache: Map<string, ProductCacheData>,
+  options: { createMissingUsers?: boolean },
+  result: ImportResult,
+): Promise<ProcessRowResult> {
+  // Validate row data
+  const validatedData = orderImportSchema.parse({
+    userEmail: String(row.userEmail ?? '').trim(),
+    items: String(row.items ?? '').trim(),
+    status: (String(row.status ?? '').toUpperCase() as OrderStatus) || 'DELIVERED',
+    shippingCost: row.shippingCost || 0,
+    paymentMethod: (String(row.paymentMethod ?? '').toUpperCase() as PaymentMethod) || 'CARD',
+    customerNotes: String(row.customerNotes ?? '').trim(),
+  });
+
+  // Find or create user
+  const userResult = await findOrCreateUser(validatedData.userEmail, userCache, options.createMissingUsers);
+
+  if (userResult.error) {
+    return { success: false, error: userResult.error };
+  }
+
+  if (userResult.warning) {
+    result.warnings.push({ row: rowNumber, message: userResult.warning });
+  }
+
+  if (!userResult.user) {
+    return { success: false, error: `Usuario ${validatedData.userEmail} no pudo ser encontrado o creado` };
+  }
+
+  // Parse items
+  const items = JSON.parse(validatedData.items) as Array<{ productId: string; quantity: number }>;
+
+  // Process order items
+  const itemsResult = await processOrderItems(items, productCache, rowNumber, result);
+  if (!itemsResult) {
+    return { success: false, error: 'Error procesando items del pedido' };
+  }
+
+  // Create order
+  await createOrderWithItems(userResult.user, itemsResult.items, validatedData, itemsResult.subtotal);
+
+  return { success: true };
+}
+
+// Handle row processing error
+function handleRowError(error: unknown): { message: string } {
+  if (error instanceof z.ZodError) {
+    return { message: error.errors[0]?.message || 'Error de validación' };
+  }
+  return { message: error instanceof Error ? error.message : 'Error desconocido' };
 }
 
 export async function POST(req: NextRequest) {
@@ -119,10 +356,7 @@ export async function POST(req: NextRequest) {
     // Cache for user lookups
     const userCache = new Map<string, { id: string; name: string; email: string }>();
     // Cache for product lookups
-    const productCache = new Map<
-      string,
-      { id: string; name: string; price: number; material: Material; category: { name: string } }
-    >();
+    const productCache = new Map<string, ProductCacheData>();
 
     // Process each row
     for (let i = 0; i < data.length; i++) {
@@ -130,177 +364,16 @@ export async function POST(req: NextRequest) {
       const rowNumber = i + 1;
 
       try {
-        // Validate row data
-        const validatedData = orderImportSchema.parse({
-          userEmail: row.userEmail?.trim(),
-          items: row.items?.trim(),
-          status: (row.status?.toUpperCase() as OrderStatus) || 'DELIVERED',
-          shippingCost: row.shippingCost || 0,
-          paymentMethod: (row.paymentMethod?.toUpperCase() as PaymentMethod) || 'CARD',
-          customerNotes: row.customerNotes?.trim(),
-        });
+        const processResult = await processOrderRow(row, rowNumber, userCache, productCache, options, result);
 
-        // Find or cache user
-        let user = userCache.get(validatedData.userEmail.toLowerCase());
-        if (!user) {
-          const dbUser = await prisma.user.findUnique({
-            where: { email: validatedData.userEmail.toLowerCase() },
-            select: { id: true, name: true, email: true },
-          });
-
-          if (!dbUser) {
-            if (options.createMissingUsers) {
-              // Create user with temporary data
-              const tempPassword = await hashPassword(crypto.randomUUID());
-              const newUser = await prisma.user.create({
-                data: {
-                  id: crypto.randomUUID(),
-                  email: validatedData.userEmail.toLowerCase(),
-                  name: validatedData.userEmail.split('@')[0] || 'Usuario Importado',
-                  password: tempPassword,
-                  role: 'CUSTOMER',
-                  isActive: true,
-                },
-                select: { id: true, name: true, email: true },
-              });
-              user = newUser;
-              if (user) {
-                userCache.set(validatedData.userEmail.toLowerCase(), user);
-              }
-              result.warnings.push({
-                row: rowNumber,
-                message: `Usuario ${validatedData.userEmail} creado automáticamente`,
-              });
-            } else {
-              result.errors.push({
-                row: rowNumber,
-                message: `Usuario ${validatedData.userEmail} no existe`,
-              });
-              continue;
-            }
-          } else {
-            user = dbUser;
-            userCache.set(validatedData.userEmail.toLowerCase(), user);
-          }
+        if (processResult.success) {
+          result.imported++;
+        } else if (processResult.error) {
+          result.errors.push({ row: rowNumber, message: processResult.error });
         }
-
-        // Check user exists
-        if (!user) {
-          result.errors.push({
-            row: rowNumber,
-            message: `Usuario ${validatedData.userEmail} no pudo ser encontrado o creado`,
-          });
-          continue;
-        }
-
-        // Parse items
-        const items = JSON.parse(validatedData.items) as Array<{ productId: string; quantity: number }>;
-
-        // Validate and fetch products
-        const orderItems: OrderItemData[] = [];
-        let subtotal = 0;
-
-        for (const item of items) {
-          let product = productCache.get(item.productId);
-
-          if (!product) {
-            const dbProduct = await prisma.product.findUnique({
-              where: { id: item.productId },
-              include: { category: { select: { name: true } } },
-            });
-
-            if (!dbProduct) {
-              result.errors.push({
-                row: rowNumber,
-                message: `Producto ${item.productId} no existe`,
-              });
-              throw new Error('Producto no existe');
-            }
-
-            product = {
-              id: dbProduct.id,
-              name: dbProduct.name,
-              price: Number(dbProduct.price),
-              material: dbProduct.material,
-              category: { name: dbProduct.category.name },
-            };
-            productCache.set(item.productId, product);
-          }
-
-          const itemSubtotal = product.price * item.quantity;
-          subtotal += itemSubtotal;
-
-          orderItems.push({
-            productId: product.id,
-            name: product.name,
-            price: product.price,
-            quantity: item.quantity,
-            category: product.category.name,
-            material: product.material,
-            subtotal: itemSubtotal,
-          });
-        }
-
-        // Calculate totals
-        const shipping = validatedData.shippingCost;
-        const total = subtotal + shipping;
-
-        // Create order items data for Prisma
-        const orderItemsCreate = orderItems.map(item => ({
-          id: crypto.randomUUID(),
-          productId: item.productId,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-          category: item.category,
-          material: item.material,
-          subtotal: item.subtotal,
-        }));
-
-        // Create order with order items
-        await prisma.order.create({
-          data: {
-            id: crypto.randomUUID(),
-            orderNumber: generateOrderNumber(),
-            userId: user.id,
-            status: validatedData.status,
-            subtotal,
-            shipping,
-            total,
-            paymentMethod: validatedData.paymentMethod,
-            shippingName: user.name,
-            shippingPhone: '',
-            shippingAddress: 'Dirección importada',
-            shippingPostalCode: '00000',
-            shippingCity: 'Ciudad',
-            shippingProvince: 'Provincia',
-            shippingCountry: 'Spain',
-            customerNotes: validatedData.customerNotes || 'Pedido importado desde CSV',
-            internalNotes: 'Importado desde CSV',
-            deliveredAt: validatedData.status === 'DELIVERED' ? new Date() : null,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            items: {
-              create: orderItemsCreate,
-            },
-          },
-        });
-
-        result.imported++;
       } catch (error) {
-        if (error instanceof z.ZodError) {
-          result.errors.push({
-            row: rowNumber,
-            message: error.errors[0]?.message || 'Error de validación',
-          });
-        } else if (error instanceof Error && error.message === 'Producto no existe') {
-          // Already handled above
-        } else {
-          result.errors.push({
-            row: rowNumber,
-            message: error instanceof Error ? error.message : 'Error desconocido',
-          });
-        }
+        const { message } = handleRowError(error);
+        result.errors.push({ row: rowNumber, message });
       }
     }
 

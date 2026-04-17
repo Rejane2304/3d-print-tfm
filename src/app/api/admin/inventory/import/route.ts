@@ -33,6 +33,10 @@ interface ImportResult {
   skipped: number;
 }
 
+interface ValidationContext {
+  productsMap: Map<string, { id: string; name: string; currentStock: number }>;
+}
+
 // Helper para validar y procesar CSV
 function parseCSV(buffer: Buffer): { records: Record<string, string>[]; headers: string[] } {
   const records = parse(buffer, {
@@ -55,48 +59,102 @@ function validateColumns(headers: string[]): { valid: boolean; missing: string[]
   return { valid: missing.length === 0, missing };
 }
 
+// Validar campos requeridos
+function validateRequiredFields(data: Record<string, string>): string[] {
+  const errors: string[] = [];
+  if (!data.productSlug?.trim()) errors.push('El slug del producto es obligatorio');
+  if (!data.quantity?.trim()) errors.push('La cantidad es obligatoria');
+  if (!data.type?.trim()) errors.push('El tipo de movimiento es obligatorio');
+  if (!data.reason?.trim()) errors.push('El motivo es obligatorio');
+  return errors;
+}
+
+// Validar cantidad
+function validateQuantity(quantityStr: string): { valid: boolean; error?: string; quantity?: number } {
+  const quantity = Number.parseInt(quantityStr, 10);
+  if (Number.isNaN(quantity) || quantity <= 0) {
+    return { valid: false, error: 'La cantidad debe ser un número entero positivo' };
+  }
+  return { valid: true, quantity };
+}
+
+// Validar tipo de movimiento
+function validateMovementType(type: string): { valid: boolean; error?: string; normalizedType?: string } {
+  const normalizedType = type.toUpperCase().trim();
+  if (!VALID_MOVEMENT_TYPES.includes(normalizedType)) {
+    return {
+      valid: false,
+      error: `Tipo de movimiento inválido. Valores permitidos: ${VALID_MOVEMENT_TYPES.join(', ')}`,
+    };
+  }
+  return { valid: true, normalizedType };
+}
+
+// Validar stock para movimiento OUT
+function validateStockForOut(
+  type: string,
+  quantity: number,
+  productInfo: { currentStock: number } | undefined,
+): string | null {
+  if (type === 'OUT' && productInfo && quantity > productInfo.currentStock) {
+    return `Stock insuficiente para reducir. Stock actual: ${productInfo.currentStock}, Cantidad a reducir: ${quantity}`;
+  }
+  return null;
+}
+
+// Buscar producto en el mapa
+function findProduct(
+  productSlug: string,
+  productsMap: Map<string, { id: string; name: string; currentStock: number }>,
+): { id: string; name: string; currentStock: number } | undefined {
+  const normalizedSlug = productSlug.toLowerCase().trim();
+  return productsMap.get(normalizedSlug);
+}
+
 // Validar una fila de inventario
 async function validateInventoryRow(
   row: Record<string, string>,
   rowNumber: number,
-  productsMap: Map<string, { id: string; name: string; currentStock: number }>,
+  context: ValidationContext,
 ): Promise<CSVPreviewRow> {
   const errors: string[] = [];
   const data = { ...row };
 
   // Validar campos requeridos
-  if (!data.productSlug?.trim()) errors.push('El slug del producto es obligatorio');
-  if (!data.quantity?.trim()) errors.push('La cantidad es obligatoria');
-  if (!data.type?.trim()) errors.push('El tipo de movimiento es obligatorio');
-  if (!data.reason?.trim()) errors.push('El motivo es obligatorio');
+  errors.push(...validateRequiredFields(data));
 
   // Validar cantidad
-  const quantity = Number.parseInt(data.quantity, 10);
-  if (Number.isNaN(quantity) || quantity <= 0) {
-    errors.push('La cantidad debe ser un número entero positivo');
+  let quantity: number | undefined;
+  if (data.quantity) {
+    const quantityValidation = validateQuantity(data.quantity);
+    if (!quantityValidation.valid) {
+      errors.push(quantityValidation.error!);
+    } else {
+      quantity = quantityValidation.quantity;
+    }
   }
 
   // Validar tipo de movimiento
-  const type = data.type?.toUpperCase().trim();
-  if (type && !VALID_MOVEMENT_TYPES.includes(type)) {
-    errors.push(`Tipo de movimiento inválido. Valores permitidos: ${VALID_MOVEMENT_TYPES.join(', ')}`);
+  let type: string | undefined;
+  if (data.type) {
+    const typeValidation = validateMovementType(data.type);
+    if (!typeValidation.valid) {
+      errors.push(typeValidation.error!);
+    } else {
+      type = typeValidation.normalizedType;
+    }
   }
 
   // Validar que el producto existe
   let productInfo: { id: string; name: string; currentStock: number } | undefined;
-  const productSlug = data.productSlug?.toLowerCase().trim();
-
-  if (productSlug) {
-    productInfo = productsMap.get(productSlug);
+  if (data.productSlug) {
+    productInfo = findProduct(data.productSlug, context.productsMap);
     if (!productInfo) {
       errors.push(`No existe un producto con el slug '${data.productSlug}'`);
-    } else {
+    } else if (quantity && type) {
       // Validar stock suficiente para OUT
-      if (type === 'OUT' && quantity > productInfo.currentStock) {
-        errors.push(
-          `Stock insuficiente para reducir. Stock actual: ${productInfo.currentStock}, Cantidad a reducir: ${quantity}`,
-        );
-      }
+      const stockError = validateStockForOut(type, quantity, productInfo);
+      if (stockError) errors.push(stockError);
     }
   }
 
@@ -107,6 +165,129 @@ async function validateInventoryRow(
     valid: errors.length === 0,
     productInfo,
   };
+}
+
+// Calcular nuevo stock basado en el tipo de movimiento
+function calculateNewStock(type: MovementType, currentStock: number, quantity: number): number {
+  switch (type) {
+    case 'IN':
+      return currentStock + quantity;
+    case 'OUT':
+      return currentStock - quantity;
+    case 'ADJUSTMENT':
+      return quantity; // En ajuste, quantity es el stock final
+    default:
+      return currentStock;
+  }
+}
+
+// Calcular cantidad absoluta del movimiento
+function calculateMovementQuantity(type: MovementType, newStock: number, previousStock: number): number {
+  if (type === 'ADJUSTMENT') {
+    return Math.abs(newStock - previousStock);
+  }
+  return Math.abs(newStock - previousStock);
+}
+
+// Crear datos del movimiento de inventario
+function buildInventoryMovementData(
+  productId: string,
+  type: MovementType,
+  quantity: number,
+  previousStock: number,
+  newStock: number,
+  reason: string,
+  reference: string | undefined,
+  rowNumber: number,
+  userId: string,
+) {
+  return {
+    id: crypto.randomUUID(),
+    productId,
+    type,
+    quantity: calculateMovementQuantity(type, newStock, previousStock),
+    previousStock,
+    newStock,
+    reason: reason.trim(),
+    reference: reference?.trim() || `CSV_IMPORT_${rowNumber}`,
+    createdBy: userId,
+  };
+}
+
+// Procesar una fila de inventario
+async function processInventoryRow(
+  tx: {
+    product: { update: typeof prisma.product.update };
+    inventoryMovement: { create: typeof prisma.inventoryMovement.create };
+  },
+  row: CSVPreviewRow,
+  userId: string,
+  result: ImportResult,
+): Promise<void> {
+  const data = row.data;
+  const productInfo = row.productInfo;
+
+  if (!productInfo) {
+    result.skipped++;
+    return;
+  }
+
+  try {
+    const quantity = Number.parseInt(data.quantity, 10);
+    const type = data.type.toUpperCase().trim() as MovementType;
+
+    // Calcular nuevo stock
+    const newStock = Math.max(0, calculateNewStock(type, productInfo.currentStock, quantity));
+
+    // Actualizar stock del producto
+    await tx.product.update({
+      where: { id: productInfo.id },
+      data: { stock: newStock },
+    });
+
+    // Crear movimiento de inventario
+    await tx.inventoryMovement.create({
+      data: buildInventoryMovementData(
+        productInfo.id,
+        type,
+        quantity,
+        productInfo.currentStock,
+        newStock,
+        data.reason,
+        data.reference,
+        row.row,
+        userId,
+      ),
+    });
+
+    // Actualizar el stock en el mapa para siguientes operaciones
+    productInfo.currentStock = newStock;
+
+    result.imported++;
+  } catch (error) {
+    result.errors.push({
+      row: row.row,
+      errors: [`Error al procesar movimiento: ${(error as Error).message}`],
+      data,
+    });
+  }
+}
+
+// Importar movimientos en transacción
+async function importInventoryMovements(validRows: CSVPreviewRow[], userId: string): Promise<ImportResult> {
+  const result: ImportResult = {
+    imported: 0,
+    errors: [],
+    skipped: 0,
+  };
+
+  await prisma.$transaction(async tx => {
+    for (const row of validRows) {
+      await processInventoryRow(tx, row, userId, result);
+    }
+  });
+
+  return result;
 }
 
 // POST - Importar movimientos de inventario desde CSV
@@ -188,9 +369,10 @@ export async function POST(req: NextRequest) {
     // Validar todas las filas
     const previewRows: CSVPreviewRow[] = [];
     const validRows: CSVPreviewRow[] = [];
+    const context: ValidationContext = { productsMap };
 
     for (let i = 0; i < records.length; i++) {
-      const validated = await validateInventoryRow(records[i], i + 2, productsMap);
+      const validated = await validateInventoryRow(records[i], i + 2, context);
       previewRows.push(validated);
       if (validated.valid) {
         validRows.push(validated);
@@ -223,76 +405,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'No hay registros válidos para importar' }, { status: 400 });
     }
 
-    const result: ImportResult = {
-      imported: 0,
-      errors: [],
-      skipped: 0,
-    };
-
-    // Importar en transacción
-    await prisma.$transaction(async tx => {
-      for (const row of validRows) {
-        const data = row.data;
-        const productInfo = row.productInfo;
-
-        if (!productInfo) {
-          result.skipped++;
-          continue;
-        }
-
-        try {
-          const quantity = Number.parseInt(data.quantity, 10);
-          const type = data.type.toUpperCase().trim() as MovementType;
-
-          // Calcular nuevo stock
-          let newStock = productInfo.currentStock;
-          if (type === 'IN') {
-            newStock = productInfo.currentStock + quantity;
-          } else if (type === 'OUT') {
-            newStock = productInfo.currentStock - quantity;
-          } else if (type === 'ADJUSTMENT') {
-            newStock = quantity; // En ajuste, quantity es el stock final
-          }
-
-          // Asegurar que el stock no sea negativo
-          if (newStock < 0) {
-            newStock = 0;
-          }
-
-          // Actualizar stock del producto
-          await tx.product.update({
-            where: { id: productInfo.id },
-            data: { stock: newStock },
-          });
-
-          // Crear movimiento de inventario
-          await tx.inventoryMovement.create({
-            data: {
-              id: crypto.randomUUID(),
-              productId: productInfo.id,
-              type,
-              quantity: type === 'ADJUSTMENT' ? Math.abs(newStock - productInfo.currentStock) : quantity,
-              previousStock: productInfo.currentStock,
-              newStock,
-              reason: data.reason.trim(),
-              reference: data.reference?.trim() || `CSV_IMPORT_${row.row}`,
-              createdBy: user.id,
-            },
-          });
-
-          // Actualizar el stock en el mapa para siguientes operaciones
-          productInfo.currentStock = newStock;
-
-          result.imported++;
-        } catch (error) {
-          result.errors.push({
-            row: row.row,
-            errors: [`Error al procesar movimiento: ${(error as Error).message}`],
-            data,
-          });
-        }
-      }
-    });
+    const result = await importInventoryMovements(validRows, user.id);
 
     return NextResponse.json({
       success: true,

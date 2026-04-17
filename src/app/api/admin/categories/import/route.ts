@@ -28,6 +28,11 @@ interface ImportResult {
   skipped: number;
 }
 
+interface ValidationContext {
+  existingSlugs: Set<string>;
+  csvSlugs: Set<string>;
+}
+
 // 1. Authentication verification
 async function verifyAdminAuth(
   req: NextRequest,
@@ -121,52 +126,87 @@ async function parseAndValidateCSV(
   return { success: true, records, headers };
 }
 
-// 3. Validate a single category row
-async function validateCategoryRow(
-  row: Record<string, string>,
-  rowNumber: number,
-  existingSlugs: Set<string>,
-  csvSlugs: Set<string>,
-): Promise<CSVPreviewRow> {
+// 3. Field validators
+function validateRequiredFields(data: Record<string, string>): string[] {
   const errors: string[] = [];
-  const data = { ...row };
-
-  // Validar campos requeridos
   if (!data.name?.trim()) errors.push('El nombre es obligatorio');
   if (!data.description?.trim()) errors.push('La descripción es obligatoria');
   if (!data.slug?.trim()) errors.push('El slug es obligatorio');
+  return errors;
+}
 
-  // Validar longitudes
+function validateFieldLengths(data: Record<string, string>): string[] {
+  const errors: string[] = [];
   if (data.name && data.name.length > 100) errors.push('El nombre debe tener máximo 100 caracteres');
   if (data.description && data.description.length > 500) {
     errors.push('La descripción debe tener máximo 500 caracteres');
   }
   if (data.slug && data.slug.length > 100) errors.push('El slug debe tener máximo 100 caracteres');
+  return errors;
+}
+
+function validateSlugFormat(slug: string): string | null {
+  const normalizedSlug = slug.toLowerCase().trim();
+  if (!/^[a-z0-9-]+$/.test(normalizedSlug)) {
+    return 'El slug solo puede contener letras minúsculas, números y guiones';
+  }
+  return null;
+}
+
+function validateSlugUniqueness(slug: string, context: ValidationContext): string | null {
+  const normalizedSlug = slug.toLowerCase().trim();
+  if (context.existingSlugs.has(normalizedSlug)) {
+    return `El slug '${slug}' ya existe en la base de datos`;
+  }
+  if (context.csvSlugs.has(normalizedSlug)) {
+    return `El slug '${slug}' está duplicado en el CSV`;
+  }
+  return null;
+}
+
+function validateDisplayOrder(data: Record<string, string>): string | null {
+  if (data.displayOrder) {
+    const order = Number.parseInt(data.displayOrder, 10);
+    if (Number.isNaN(order) || order < 0) {
+      return 'El orden de visualización debe ser un número entero no negativo';
+    }
+  }
+  return null;
+}
+
+// 4. Validate a single category row
+async function validateCategoryRow(
+  row: Record<string, string>,
+  rowNumber: number,
+  context: ValidationContext,
+): Promise<CSVPreviewRow> {
+  const errors: string[] = [];
+  const data = { ...row };
+
+  // Validar campos requeridos
+  errors.push(...validateRequiredFields(data));
+
+  // Validar longitudes
+  errors.push(...validateFieldLengths(data));
 
   // Validar slug (solo letras, números, guiones)
   const slug = data.slug?.toLowerCase().trim();
-  if (slug && !/^[a-z0-9-]+$/.test(slug)) {
-    errors.push('El slug solo puede contener letras minúsculas, números y guiones');
-  }
-
-  // Validar slug único
   if (slug) {
-    if (existingSlugs.has(slug)) {
-      errors.push(`El slug '${slug}' ya existe en la base de datos`);
-    } else if (csvSlugs.has(slug)) {
-      errors.push(`El slug '${slug}' está duplicado en el CSV`);
+    const formatError = validateSlugFormat(data.slug);
+    if (formatError) errors.push(formatError);
+
+    // Validar slug único
+    const uniquenessError = validateSlugUniqueness(data.slug, context);
+    if (uniquenessError) {
+      errors.push(uniquenessError);
     } else {
-      csvSlugs.add(slug);
+      context.csvSlugs.add(slug);
     }
   }
 
   // Validar displayOrder si existe
-  if (data.displayOrder) {
-    const order = Number.parseInt(data.displayOrder, 10);
-    if (Number.isNaN(order) || order < 0) {
-      errors.push('El orden de visualización debe ser un número entero no negativo');
-    }
-  }
+  const displayOrderError = validateDisplayOrder(data);
+  if (displayOrderError) errors.push(displayOrderError);
 
   return {
     row: rowNumber,
@@ -176,55 +216,84 @@ async function validateCategoryRow(
   };
 }
 
-// 4. Import categories in transaction
+// 5. Create category data helper
+function buildCategoryCreateData(data: Record<string, string>): {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  image: string | null;
+  displayOrder: number;
+  isActive: boolean;
+} {
+  return {
+    id: crypto.randomUUID(),
+    name: data.name.trim(),
+    slug: data.slug.toLowerCase().trim(),
+    description: data.description.trim() || null,
+    image: data.image?.trim() || null,
+    displayOrder: data.displayOrder ? Number.parseInt(data.displayOrder, 10) : 0,
+    isActive: data.isActive?.toLowerCase() !== 'false',
+  };
+}
+
+// 6. Check if category exists
+async function checkCategoryExists(
+  tx: { category: { findUnique: typeof prisma.category.findUnique } },
+  slug: string,
+): Promise<boolean> {
+  const exists = await tx.category.findUnique({
+    where: { slug: slug.toLowerCase().trim() },
+    select: { id: true },
+  });
+  return !!exists;
+}
+
+// 7. Import a single category
+async function importSingleCategory(
+  tx: { category: { findUnique: typeof prisma.category.findUnique; create: typeof prisma.category.create } },
+  row: CSVPreviewRow,
+  result: ImportResult,
+): Promise<void> {
+  const data = row.data;
+
+  try {
+    const exists = await checkCategoryExists(tx, data.slug);
+
+    if (exists) {
+      result.skipped++;
+      result.errors.push({
+        row: row.row,
+        errors: [`La categoría con slug '${data.slug}' ya existe`],
+        data,
+      });
+      return;
+    }
+
+    await tx.category.create({
+      data: buildCategoryCreateData(data),
+    });
+
+    result.imported++;
+  } catch (error) {
+    result.errors.push({
+      row: row.row,
+      errors: [`Error al crear categoría: ${(error as Error).message}`],
+      data,
+    });
+  }
+}
+
+// 8. Import categories in transaction
 async function importCategories(validRows: CSVPreviewRow[], result: ImportResult): Promise<void> {
   await prisma.$transaction(async tx => {
     for (const row of validRows) {
-      const data = row.data;
-
-      try {
-        // Verificar si el slug ya existe
-        const exists = await tx.category.findUnique({
-          where: { slug: data.slug.toLowerCase().trim() },
-          select: { id: true },
-        });
-
-        if (exists) {
-          result.skipped++;
-          result.errors.push({
-            row: row.row,
-            errors: [`La categoría con slug '${data.slug}' ya existe`],
-            data,
-          });
-          continue;
-        }
-
-        // Crear categoría
-        await tx.category.create({
-          data: {
-            id: crypto.randomUUID(),
-            name: data.name.trim(),
-            slug: data.slug.toLowerCase().trim(),
-            description: data.description.trim() || null,
-            image: data.image?.trim() || null,
-            displayOrder: data.displayOrder ? Number.parseInt(data.displayOrder, 10) : 0,
-            isActive: data.isActive?.toLowerCase() !== 'false',
-          },
-        });
-
-        result.imported++;
-      } catch (error) {
-        result.errors.push({
-          row: row.row,
-          errors: [`Error al crear categoría: ${(error as Error).message}`],
-          data,
-        });
-      }
+      await importSingleCategory(tx, row, result);
     }
   });
 }
 
-// 5. Simplified POST handler
+// 9. Simplified POST handler
 export async function POST(req: NextRequest) {
   try {
     // Verify admin authentication
@@ -256,9 +325,10 @@ export async function POST(req: NextRequest) {
     const previewRows: CSVPreviewRow[] = [];
     const validRows: CSVPreviewRow[] = [];
     const csvSlugs = new Set<string>();
+    const context: ValidationContext = { existingSlugs, csvSlugs };
 
     for (let i = 0; i < records.length; i++) {
-      const validated = await validateCategoryRow(records[i], i + 2, existingSlugs, csvSlugs);
+      const validated = await validateCategoryRow(records[i], i + 2, context);
       previewRows.push(validated);
       if (validated.valid) {
         validRows.push(validated);

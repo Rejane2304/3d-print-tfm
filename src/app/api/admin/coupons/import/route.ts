@@ -34,17 +34,7 @@ const couponImportSchema = z.object({
     .or(z.number())
     .optional()
     .transform(val => (val ? Number(val) : null)),
-  isActive: z
-    .string()
-    .or(z.boolean())
-    .optional()
-    .transform(val => {
-      if (typeof val === 'boolean') return val;
-      if (typeof val === 'string') {
-        return val.toLowerCase() === 'true' || val === '1' || val.toLowerCase() === 'yes' || val.toLowerCase() === 'si';
-      }
-      return true;
-    }),
+  isActive: z.string().or(z.boolean()).optional().transform(parseIsActive),
 });
 
 interface ImportResult {
@@ -58,6 +48,33 @@ interface ProcessRowResult {
   success: boolean;
   warning?: string;
   error?: string;
+}
+
+// Parse isActive field
+function parseIsActive(val: unknown): boolean {
+  if (typeof val === 'boolean') return val;
+  if (typeof val === 'string') {
+    const normalized = val.toLowerCase().trim();
+    const truthyValues = ['true', '1', 'yes', 'si', 'sí'];
+    return truthyValues.includes(normalized);
+  }
+  return true;
+}
+
+// Validate date range
+function validateDateRange(validFrom: Date, validUntil: Date): string | null {
+  if (validUntil <= validFrom) {
+    return 'La fecha de fin debe ser posterior a la fecha de inicio';
+  }
+  return null;
+}
+
+// Validate coupon value based on type
+function validateCouponValue(type: CouponType, value: number): string | undefined {
+  if (type === 'PERCENTAGE' && value > 100) {
+    return 'Valor de porcentaje mayor a 100% - se importará igual';
+  }
+  return undefined;
 }
 
 // 1. Authentication verification
@@ -132,13 +149,9 @@ function validateImportData(body: { data?: unknown; options?: unknown }):
   };
 }
 
-// 3. Row processing
-async function processCouponRow(
-  row: Record<string, unknown>,
-  options: { skipDuplicates?: boolean },
-  existingCodes: Set<string>,
-): Promise<ProcessRowResult> {
-  const validatedData = couponImportSchema.parse({
+// 3. Validate and parse row data
+function parseCouponRowData(row: Record<string, unknown>): z.infer<typeof couponImportSchema> {
+  return couponImportSchema.parse({
     code: String(row.code ?? '')
       .trim()
       .toUpperCase(),
@@ -150,54 +163,74 @@ async function processCouponRow(
     minOrderAmount: row.minOrderAmount,
     isActive: row.isActive,
   });
+}
 
-  // Check for duplicate code
-  if (existingCodes.has(validatedData.code)) {
-    if (options.skipDuplicates) {
+// 4. Check for duplicate code
+function checkDuplicateCode(
+  code: string,
+  existingCodes: Set<string>,
+  skipDuplicates: boolean | undefined,
+): ProcessRowResult | null {
+  if (existingCodes.has(code)) {
+    if (skipDuplicates) {
       return {
         success: false,
-        warning: `Código ${validatedData.code} ya existe - omitido`,
+        warning: `Código ${code} ya existe - omitido`,
       };
     }
     return {
       success: false,
-      error: `Código ${validatedData.code} ya existe`,
+      error: `Código ${code} ya existe`,
     };
   }
+  return null;
+}
+
+// 5. Build coupon create data
+function buildCouponCreateData(validatedData: z.infer<typeof couponImportSchema>, validFrom: Date, validUntil: Date) {
+  return {
+    id: crypto.randomUUID(),
+    code: validatedData.code,
+    type: validatedData.type as CouponType,
+    value: validatedData.value,
+    validFrom,
+    validUntil,
+    maxUses: validatedData.maxUses,
+    minOrderAmount: validatedData.minOrderAmount,
+    isActive: validatedData.isActive ?? true,
+    usedCount: 0,
+    updatedAt: new Date(),
+  };
+}
+
+// 6. Row processing
+async function processCouponRow(
+  row: Record<string, unknown>,
+  options: { skipDuplicates?: boolean },
+  existingCodes: Set<string>,
+): Promise<ProcessRowResult> {
+  const validatedData = parseCouponRowData(row);
+
+  // Check for duplicate code
+  const duplicateCheck = checkDuplicateCode(validatedData.code, existingCodes, options.skipDuplicates);
+  if (duplicateCheck) return duplicateCheck;
 
   // Parse dates
   const validFrom = new Date(validatedData.validFrom);
   const validUntil = new Date(validatedData.validUntil);
 
   // Validate date range
-  if (validUntil <= validFrom) {
-    return {
-      success: false,
-      error: 'La fecha de fin debe ser posterior a la fecha de inicio',
-    };
+  const dateError = validateDateRange(validFrom, validUntil);
+  if (dateError) {
+    return { success: false, error: dateError };
   }
 
   // Validate value based on type
-  let warning: string | undefined;
-  if (validatedData.type === 'PERCENTAGE' && validatedData.value > 100) {
-    warning = 'Valor de porcentaje mayor a 100% - se importará igual';
-  }
+  const warning = validateCouponValue(validatedData.type, validatedData.value);
 
   // Create coupon
   await prisma.coupon.create({
-    data: {
-      id: crypto.randomUUID(),
-      code: validatedData.code,
-      type: validatedData.type as CouponType,
-      value: validatedData.value,
-      validFrom,
-      validUntil,
-      maxUses: validatedData.maxUses,
-      minOrderAmount: validatedData.minOrderAmount,
-      isActive: validatedData.isActive ?? true,
-      usedCount: 0,
-      updatedAt: new Date(),
-    },
+    data: buildCouponCreateData(validatedData, validFrom, validUntil),
   });
 
   // Add to existing codes set
@@ -206,7 +239,15 @@ async function processCouponRow(
   return { success: true, warning };
 }
 
-// 4. Simplified POST handler
+// 7. Handle row processing error
+function handleRowError(error: unknown): { message: string } {
+  if (error instanceof z.ZodError) {
+    return { message: error.errors[0]?.message || 'Error de validación' };
+  }
+  return { message: error instanceof Error ? error.message : 'Error desconocido' };
+}
+
+// 8. Simplified POST handler
 export async function POST(req: NextRequest) {
   try {
     // Verify admin authentication
@@ -252,17 +293,8 @@ export async function POST(req: NextRequest) {
           result.errors.push({ row: rowNumber, message: processResult.error });
         }
       } catch (error) {
-        if (error instanceof z.ZodError) {
-          result.errors.push({
-            row: rowNumber,
-            message: error.errors[0]?.message || 'Error de validación',
-          });
-        } else {
-          result.errors.push({
-            row: rowNumber,
-            message: error instanceof Error ? error.message : 'Error desconocido',
-          });
-        }
+        const { message } = handleRowError(error);
+        result.errors.push({ row: rowNumber, message });
       }
     }
 

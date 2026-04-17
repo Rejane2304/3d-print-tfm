@@ -119,32 +119,64 @@ function validateImportData(body: { data?: unknown; options?: unknown }):
   };
 }
 
-// 3. Row processing
-async function processClientRow(
-  row: Record<string, unknown>,
-  options: { skipDuplicates?: boolean },
-  existingEmails: Set<string>,
-): Promise<ProcessRowResult> {
-  const validatedData = clientImportSchema.parse({
+// 3. Validate row data with schema
+function validateRowData(row: Record<string, unknown>): z.infer<typeof clientImportSchema> {
+  return clientImportSchema.parse({
     email: String(row.email ?? '').trim(),
     name: String(row.name ?? '').trim(),
     role: (String(row.role ?? '').toUpperCase() as 'CUSTOMER' | 'ADMIN') || 'CUSTOMER',
     phone: String(row.phone ?? '').trim() || undefined,
   });
+}
 
-  // Check for duplicate email
-  if (existingEmails.has(validatedData.email.toLowerCase())) {
-    if (options.skipDuplicates) {
+// 4. Check for duplicate email
+function checkDuplicateEmail(
+  email: string,
+  existingEmails: Set<string>,
+  skipDuplicates: boolean | undefined,
+): ProcessRowResult | null {
+  const normalizedEmail = email.toLowerCase();
+  if (existingEmails.has(normalizedEmail)) {
+    if (skipDuplicates) {
       return {
         success: false,
-        warning: `Email ${validatedData.email} ya existe - omitido`,
+        warning: `Email ${email} ya existe - omitido`,
       };
     }
     return {
       success: false,
-      error: `Email ${validatedData.email} ya existe`,
+      error: `Email ${email} ya existe`,
     };
   }
+  return null;
+}
+
+// 5. Create user data
+function buildUserCreateData(validatedData: z.infer<typeof clientImportSchema>, hashedPassword: string) {
+  return {
+    id: crypto.randomUUID(),
+    email: validatedData.email.toLowerCase(),
+    name: validatedData.name,
+    password: hashedPassword,
+    role: validatedData.role,
+    phone: validatedData.phone || null,
+    isActive: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+}
+
+// 6. Row processing
+async function processClientRow(
+  row: Record<string, unknown>,
+  options: { skipDuplicates?: boolean },
+  existingEmails: Set<string>,
+): Promise<ProcessRowResult> {
+  const validatedData = validateRowData(row);
+
+  // Check for duplicate email
+  const duplicateCheck = checkDuplicateEmail(validatedData.email, existingEmails, options.skipDuplicates);
+  if (duplicateCheck) return duplicateCheck;
 
   // Generate temporary password
   const tempPassword = generateTempPassword();
@@ -152,17 +184,7 @@ async function processClientRow(
 
   // Create user
   await prisma.user.create({
-    data: {
-      id: crypto.randomUUID(),
-      email: validatedData.email.toLowerCase(),
-      name: validatedData.name,
-      password: hashedPassword,
-      role: validatedData.role,
-      phone: validatedData.phone || null,
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
+    data: buildUserCreateData(validatedData, hashedPassword),
   });
 
   // Add to existing emails set
@@ -171,7 +193,15 @@ async function processClientRow(
   return { success: true };
 }
 
-// 4. Simplified POST handler
+// 7. Handle row processing error
+function handleRowError(error: unknown): { message: string } {
+  if (error instanceof z.ZodError) {
+    return { message: error.errors[0]?.message || 'Error de validación' };
+  }
+  return { message: error instanceof Error ? error.message : 'Error desconocido' };
+}
+
+// 8. Simplified POST handler
 export async function POST(req: NextRequest) {
   try {
     // Verify admin authentication
@@ -214,17 +244,8 @@ export async function POST(req: NextRequest) {
           result.errors.push({ row: rowNumber, message: processResult.error });
         }
       } catch (error) {
-        if (error instanceof z.ZodError) {
-          result.errors.push({
-            row: rowNumber,
-            message: error.errors[0]?.message || 'Error de validación',
-          });
-        } else {
-          result.errors.push({
-            row: rowNumber,
-            message: error instanceof Error ? error.message : 'Error desconocido',
-          });
-        }
+        const { message } = handleRowError(error);
+        result.errors.push({ row: rowNumber, message });
       }
     }
 
