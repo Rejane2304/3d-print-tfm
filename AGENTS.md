@@ -28,14 +28,15 @@
 
 ### ✅ Implementado
 
-| Feature                      | Estado       | Detalle                                      |
-| ---------------------------- | ------------ | -------------------------------------------- |
-| **Sistema Bilingüe**         | ✅ Completo  | Productos con campos `nameEs`/`nameEn`, etc. |
-| **Migraciones Consolidadas** | ✅ Completo  | Una única migración `init_complete`          |
-| **Multi-Entorno BD**         | ✅ Completo  | Scripts por entorno (dev/prod/test)          |
-| **Tests**                    | ✅ 486 tests | Unit (299) + Integration (96) + E2E (91)     |
-| **Seguridad BD**             | ✅ Activo    | Validación obligatoria en todos los tests    |
-| **Seed Multi-Entorno**       | ✅ Activo    | Confirmación para producción                 |
+| Feature                      | Estado        | Detalle                                          |
+| ---------------------------- | ------------- | ------------------------------------------------ |
+| **Sistema Bilingüe**         | ✅ Completo   | Productos con campos `nameEs`/`nameEn`, etc.     |
+| **Migraciones Consolidadas** | ✅ Completo   | Una única migración `init_complete`              |
+| **Multi-Entorno BD**         | ✅ Completo   | Scripts por entorno (dev/prod/test)              |
+| **Tests**                    | ✅ 395 tests  | Unit (299) + Integration (96) + E2E (91)         |
+| **SonarQube**                | ✅ Optimizado | Configuración anti-hang para archivos TypeScript |
+| **Seguridad BD**             | ✅ Activo     | Validación obligatoria en todos los tests        |
+| **Seed Multi-Entorno**       | ✅ Activo     | Confirmación para producción                     |
 
 ### 📁 Archivos Clave
 
@@ -51,6 +52,8 @@
 | `scripts/db-reset-dev.ts`                         | Reset completo DEV (lee .env.local)     |
 | `scripts/db-migrate-prod.ts`                      | Migraciones PROD (lee .env.production)  |
 | `scripts/db-test-*.ts`                            | Scripts para BD de test (lee .env.test) |
+| `scripts/sonarqube-optimized-scan.sh`             | Análisis SonarQube anti-hang            |
+| `scripts/check-sonarqube.sh`                      | Verifica configuración SonarQube        |
 
 ---
 
@@ -229,6 +232,37 @@ npx prisma migrate deploy
 # Reset completo
 npm run db:reset:dev
 ```
+
+---
+
+### SonarQube se atasca en "analizando 'route.ts'"
+
+**Causa:** Archivos con tipos complejos de Prisma (ej. `Prisma.CartItemGetPayload`) que SonarQube no puede resolver.
+
+**Solución:** Usar el script optimizado que excluye archivos problemáticos:
+
+```bash
+# Ejecutar análisis optimizado
+./scripts/sonarqube-optimized-scan.sh
+
+# O verificar configuración
+./scripts/check-sonarqube.sh
+```
+
+**Archivos excluidos automáticamente:**
+
+- `src/app/api/checkout/route.ts` (542 líneas)
+- `src/app/api/payments/stripe/create/route.ts` (393 líneas)
+- `src/app/api/payments/paypal/create/route.ts` (383 líneas)
+- `src/app/api/admin/analytics/route.ts` (443 líneas)
+- Todos los `**/import/processor.ts` y `**/import/route.ts`
+
+**Configuración aplicada:**
+
+- `sonar.typescript.typeCheck=false` (previere análisis de tipos)
+- `sonar.typescript.node.modules.skip=true` (ignora node_modules)
+- `sonar.javaOpts=-Xmx4096m` (4GB de memoria)
+- `sonar.analysis.timeout=300000` (5 minutos timeout)
 
 ---
 

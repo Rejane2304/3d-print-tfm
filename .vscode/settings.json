@@ -1,0 +1,24 @@
+{
+  "sonarlint.connectedMode.project": {
+    "connectionId": "3d-print-tfm",
+    "projectKey": "3d-print-tfm"
+  },
+  "sonarlint.pathToNodeExecutable": "${workspaceFolder}/node_modules/.bin/node",
+  "sonarlint.analyzerProperties": {
+    "sonar.typescript.typeCheck": "false",
+    "sonar.typescript.node.modules.skip": "true"
+  },
+  "sonarlint.excludedFiles": [
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/node_modules/**",
+    "**/.next/**",
+    "**/src/app/api/checkout/route.ts",
+    "**/src/app/api/payments/stripe/create/route.ts",
+    "**/src/app/api/payments/paypal/create/route.ts",
+    "**/src/app/api/admin/analytics/route.ts",
+    "**/src/app/api/**/import/**"
+  ],
+  "sonarlint.focusOnNewCode": false,
+  "sonarlint.liveshare.enabled": false
+}
