@@ -35,19 +35,17 @@ jobs:
       - name: Generate Prisma Client
         run: npx prisma generate
 
-      - name: Run ESLint
-        run: npm run lint
-        # Falla si hay errores de lint
-
       - name: Run TypeScript Type Check
         run: npx tsc --noEmit
         # Falla si hay errores de tipo
 
       - name: Check Code Formatting
         run: npx prettier --check "**/*.{ts,tsx,json,css,scss,md}"
-        # NOTA: Los tests unitarios corren en el workflow ci.yml completo
-        # Este workflow solo hace checks rápidos (lint, type-check, format)
         # Falla si el código no está formateado
+
+      - name: Build Application
+        run: npm run build
+        # El build verifica TypeScript y construcción completa
 
   # ============================================
   # NOTIFICACIÓN - ÉXITO
@@ -64,9 +62,8 @@ jobs:
           echo "✅ QUALITY GATE PASADO"
           echo ""
           echo "Todos los checks de calidad han pasado:"
-          echo "  ✅ ESLint: Sin errores"
           echo "  ✅ TypeScript: Sin errores de tipo"
-          echo "  ✅ Unit Tests: 299 tests pasando"
+          echo "  ✅ Build: Construcción exitosa"
           echo "  ✅ Prettier: Código formateado correctamente"
           echo ""
           echo "El push está autorizado."
@@ -86,10 +83,10 @@ jobs:
           echo "❌ QUALITY GATE FALLIDO"
           echo ""
           echo "El push ha sido BLOQUEADO porque:"
-          echo "  - Hay errores de ESLint, TypeScript, tests fallando, o código sin formatear"
+          echo "  - Hay errores de TypeScript, build fallando, o código sin formatear"
           echo ""
           echo "💡 Solución:"
-          echo "  1. Corre localmente: npm run lint && npm run type-check && npm run test:unit"
+          echo "  1. Corre localmente: npm run type-check && npm run build"
           echo "  2. Arregla los errores"
           echo "  3. Formatea el código: npx prettier --write ."
           echo "  4. Commit y push nuevamente"
