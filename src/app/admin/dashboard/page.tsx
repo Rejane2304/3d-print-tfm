@@ -123,18 +123,19 @@ export default function AdminPanelPage() {
         setAnalytics(data.data);
         setLastUpdated(new Date());
       }
-    } catch (error) {
-      console.error('Error fetching analytics:', error);
+    } catch {
+      // Error silently handled - analytics not critical
     } finally {
       setLoading(false);
     }
   }, [dateRange]);
 
   // Handler for real-time events - disabled to avoid loops
-  const handleRealTimeEvent = useCallback((eventType: string) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleRealTimeEvent = useCallback((_eventType: string) => {
     // Real-time updates disabled for academic project
     // Using auto-refresh instead
-    void eventType;
+    // Intentionally empty - real-time disabled
   }, []);
 
   useEffect(() => {
@@ -150,7 +151,9 @@ export default function AdminPanelPage() {
     }
 
     if (status === 'authenticated') {
-      void fetchAnalytics();
+      fetchAnalytics().catch(() => {
+        // Error handled in fetchAnalytics
+      });
     }
   }, [status, session, router, fetchAnalytics]);
 
@@ -158,7 +161,9 @@ export default function AdminPanelPage() {
   useEffect(() => {
     const interval = setInterval(() => {
       if (status === 'authenticated') {
-        void fetchAnalytics();
+        fetchAnalytics().catch(() => {
+          // Error handled in fetchAnalytics
+        });
       }
     }, 30000);
 

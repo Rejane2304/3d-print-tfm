@@ -13,8 +13,10 @@ import { translateErrorMessage, translateMovementType } from '@/lib/i18n';
 import { emitStockLow, emitStockUpdated } from '@/lib/realtime/event-service';
 import { createStockAlert } from '@/lib/alerts/alert-service';
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
+
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
@@ -30,8 +32,6 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     if (adminUser?.role !== 'ADMIN') {
       return NextResponse.json({ success: false, error: 'Acceso denegado' }, { status: 403 });
     }
-
-    const { id } = params;
     const body = await req.json();
     const { type, quantity, reason } = body;
 

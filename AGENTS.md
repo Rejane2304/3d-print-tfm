@@ -39,12 +39,18 @@
 
 ### 📁 Archivos Clave
 
-| Archivo                                           | Propósito                   |
-| ------------------------------------------------- | --------------------------- |
-| `prisma/migrations/20260416100000_init_complete/` | Única migración consolidada |
-| `prisma/seed.ts`                                  | Seed con datos bilingües    |
-| `scripts/reset-and-seed.ts`                       | Reset completo + seed       |
-| `scripts/seed-prod-with-confirmation.ts`          | Seed con confirmación PROD  |
+| Archivo                                           | Propósito                               |
+| ------------------------------------------------- | --------------------------------------- |
+| `prisma/migrations/20260416100000_init_complete/` | Única migración consolidada             |
+| `prisma/seed.ts`                                  | Seed con datos bilingües                |
+| `scripts/reset-and-seed.ts`                       | Reset completo + seed                   |
+| `scripts/seed-prod-with-confirmation.ts`          | Seed con confirmación PROD              |
+| `scripts/db-migrate-dev.ts`                       | Migraciones DEV (lee .env.local)        |
+| `scripts/db-seed-dev.ts`                          | Seed DEV (lee .env.local)               |
+| `scripts/db-studio-dev.ts`                        | Prisma Studio DEV (lee .env.local)      |
+| `scripts/db-reset-dev.ts`                         | Reset completo DEV (lee .env.local)     |
+| `scripts/db-migrate-prod.ts`                      | Migraciones PROD (lee .env.production)  |
+| `scripts/db-test-*.ts`                            | Scripts para BD de test (lee .env.test) |
 
 ---
 

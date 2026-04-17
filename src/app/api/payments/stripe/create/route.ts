@@ -142,8 +142,8 @@ async function createFailedPaymentAlert(orderId: string, errorMessage: string) {
     if (order) {
       await createPaymentFailedAlert(orderId, order.orderNumber, errorMessage);
     }
-  } catch (alertError) {
-    console.error('Error creating payment failed alert:', alertError);
+  } catch {
+    // Alert creation failed - silently continue
   }
 }
 
@@ -151,7 +151,7 @@ async function createFailedPaymentAlert(orderId: string, errorMessage: string) {
 type AuthResult = { success: true; email: string } | { success: false; response: NextResponse };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function verifyAuthSession(req: NextRequest): Promise<AuthResult> {
+async function verifyAuthSession(_req: NextRequest): Promise<AuthResult> {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.email) {
@@ -325,7 +325,6 @@ export async function POST(req: NextRequest) {
     // VALIDACIÓN CRÍTICA: Verify calculated total matches order.total
     const orderTotal = Number(order.total);
     if (Math.abs(totals.calculatedTotal - orderTotal) > 0.01) {
-      console.error(`Total mismatch: calculated ${totals.calculatedTotal}, order ${orderTotal}`);
       throw new Error('El total calculado no coincide con el pedido');
     }
 
@@ -364,8 +363,6 @@ export async function POST(req: NextRequest) {
       sessionId: stripeSession.id,
     });
   } catch (error) {
-    console.error('Error creating Stripe checkout session:', error);
-
     // Create alert for failed payment
     const body = await req.json().catch(() => ({}));
     const { orderId } = body;

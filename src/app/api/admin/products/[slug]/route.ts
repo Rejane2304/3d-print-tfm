@@ -91,14 +91,14 @@ async function findProduct(identifier: string) {
 }
 
 // GET - Get product by ID or slug
-export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   try {
     const auth = await verifyAdminAuth();
     if ('error' in auth) {
       return NextResponse.json({ success: false, error: auth.error }, { status: auth.status });
     }
 
-    const { slug: identifier } = params;
+    const { slug: identifier } = await params;
     const product = await findProduct(identifier);
 
     if (!product) {
@@ -157,14 +157,14 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
 }
 
 // PUT - Update product
-export async function PUT(req: NextRequest, { params }: { params: { slug: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   try {
     const auth = await verifyAdminAuth();
     if ('error' in auth) {
       return NextResponse.json({ success: false, error: auth.error }, { status: auth.status });
     }
 
-    const { slug: identifier } = params;
+    const { slug: identifier } = await params;
     const existingProduct = await findProduct(identifier);
 
     if (!existingProduct) {
@@ -323,14 +323,14 @@ export async function PUT(req: NextRequest, { params }: { params: { slug: string
 }
 
 // DELETE - Delete product
-export async function DELETE(req: NextRequest, { params }: { params: { slug: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   try {
     const auth = await verifyAdminAuth();
     if ('error' in auth) {
       return NextResponse.json({ success: false, error: auth.error }, { status: auth.status });
     }
 
-    const { slug: identifier } = params;
+    const { slug: identifier } = await params;
     const existingProduct = await findProduct(identifier);
 
     if (!existingProduct) {

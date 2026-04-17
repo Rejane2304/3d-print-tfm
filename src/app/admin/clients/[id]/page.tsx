@@ -100,8 +100,8 @@ export default function AdminClientDetailPage() {
       } else {
         router.push('/admin/clients');
       }
-    } catch (error) {
-      console.error('Error fetching client:', error);
+    } catch {
+      // Error silently handled
     } finally {
       setLoading(false);
     }

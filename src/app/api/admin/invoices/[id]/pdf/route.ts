@@ -71,8 +71,10 @@ async function getImageAsBase64(imageUrl: string): Promise<string | undefined> {
   }
 }
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
+
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
@@ -87,7 +89,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     }
 
     const factura = await prisma.invoice.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         order: {
           include: {

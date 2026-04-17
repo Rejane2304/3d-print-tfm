@@ -10,8 +10,10 @@ import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
+
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
@@ -27,7 +29,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
     // Check that the alert exists
     const alerta = await prisma.alert.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!alerta) {
@@ -36,7 +38,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
     // Delete the alert
     await prisma.alert.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ success: true });

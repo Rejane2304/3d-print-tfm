@@ -10,7 +10,7 @@
     "@typescript-eslint/consistent-type-imports": "error",
     "react-hooks/exhaustive-deps": "error",
     "react-hooks/rules-of-hooks": "error",
-    "no-console": ["error", { "allow": ["error"] }],
+    "no-console": "off",
     "no-unused-vars": "off",
     "prefer-const": "error",
     "no-var": "error",

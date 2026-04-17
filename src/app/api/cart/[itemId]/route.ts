@@ -15,8 +15,8 @@ import { authOptions } from '@/lib/auth/auth-options';
 import { translateErrorMessage } from '@/lib/i18n';
 
 // PATCH /api/cart/[itemId] - Update quantity
-export const PATCH = withErrorHandler(async (req: NextRequest, { params }: { params: { itemId: string } }) => {
-  const { itemId } = params;
+export const PATCH = withErrorHandler(async (req: NextRequest, { params }: { params: Promise<{ itemId: string }> }) => {
+  const { itemId } = await params;
 
   // Verify authentication
   const session = await getServerSession(authOptions);
@@ -115,58 +115,60 @@ export const PATCH = withErrorHandler(async (req: NextRequest, { params }: { par
 });
 
 // DELETE /api/cart/[itemId] - Remove item
-export const DELETE = withErrorHandler(async (req: NextRequest, { params }: { params: { itemId: string } }) => {
-  const { itemId } = params;
+export const DELETE = withErrorHandler(
+  async (req: NextRequest, { params }: { params: Promise<{ itemId: string }> }) => {
+    const { itemId } = await params;
 
-  // Verify authentication
-  const session = await getServerSession(authOptions);
+    // Verify authentication
+    const session = await getServerSession(authOptions);
 
-  if (!session?.user?.email) {
-    return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
-  }
+    if (!session?.user?.email) {
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
+    }
 
-  // Buscar item y verificar que pertenece al usuario
-  const item = await prisma.cartItem.findFirst({
-    where: {
-      id: itemId,
-      cart: {
-        user: {
-          email: session.user.email,
+    // Buscar item y verificar que pertenece al usuario
+    const item = await prisma.cartItem.findFirst({
+      where: {
+        id: itemId,
+        cart: {
+          user: {
+            email: session.user.email,
+          },
         },
       },
-    },
-    include: {
-      cart: true,
-    },
-  });
+      include: {
+        cart: true,
+      },
+    });
 
-  if (!item) {
-    return NextResponse.json({ success: false, error: translateErrorMessage('Item not found') }, { status: 404 });
-  }
+    if (!item) {
+      return NextResponse.json({ success: false, error: translateErrorMessage('Item not found') }, { status: 404 });
+    }
 
-  // Eliminar item
-  await prisma.cartItem.delete({
-    where: { id: itemId },
-  });
+    // Eliminar item
+    await prisma.cartItem.delete({
+      where: { id: itemId },
+    });
 
-  // Recalcular subtotal
-  const remainingItems = await prisma.cartItem.findMany({
-    where: { cartId: item.cartId },
-  });
+    // Recalcular subtotal
+    const remainingItems = await prisma.cartItem.findMany({
+      where: { cartId: item.cartId },
+    });
 
-  const newSubtotal = remainingItems.reduce(
-    (sum: number, i: { unitPrice: { toString: () => string }; quantity: number }) =>
-      sum + Number(i.unitPrice) * i.quantity,
-    0,
-  );
+    const newSubtotal = remainingItems.reduce(
+      (sum: number, i: { unitPrice: { toString: () => string }; quantity: number }) =>
+        sum + Number(i.unitPrice) * i.quantity,
+      0,
+    );
 
-  await prisma.cart.update({
-    where: { id: item.cartId },
-    data: { subtotal: newSubtotal },
-  });
+    await prisma.cart.update({
+      where: { id: item.cartId },
+      data: { subtotal: newSubtotal },
+    });
 
-  return NextResponse.json({
-    success: true,
-    message: 'Artículo eliminado del carrito',
-  });
-});
+    return NextResponse.json({
+      success: true,
+      message: 'Artículo eliminado del carrito',
+    });
+  },
+);

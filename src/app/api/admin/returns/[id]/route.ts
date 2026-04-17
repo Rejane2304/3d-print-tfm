@@ -40,8 +40,10 @@ async function authenticateAdmin() {
 }
 
 // PATCH - Update return status
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
+
     const auth = await authenticateAdmin();
     if ('error' in auth) {
       return NextResponse.json({ success: false, error: auth.error }, { status: auth.status });
@@ -62,7 +64,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
 
     // Get return with items
     const returnRecord = await prisma.return.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         items: {
           include: {
@@ -110,7 +112,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     const result = await prisma.$transaction(async tx => {
       // Actualizar devolución
       const updatedReturn = await tx.return.update({
-        where: { id: params.id },
+        where: { id },
         data: {
           status: englishStatus as 'PENDING' | 'APPROVED' | 'REJECTED' | 'COMPLETED',
           adminNotes: notasAdmin || returnRecord.adminNotes,

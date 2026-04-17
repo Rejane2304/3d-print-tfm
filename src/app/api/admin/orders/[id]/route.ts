@@ -19,8 +19,10 @@ import {
   translateProductName,
 } from '@/lib/i18n';
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
+
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
@@ -35,7 +37,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     }
 
     const order = await prisma.order.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         user: {
           select: {
@@ -114,8 +116,10 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
+
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
@@ -130,7 +134,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     }
 
     const order = await prisma.order.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: { items: true },
     });
 
@@ -151,10 +155,10 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     }
 
     // Eliminar en orden: items, payment, invoice, order
-    await prisma.orderItem.deleteMany({ where: { orderId: params.id } });
-    await prisma.payment.deleteMany({ where: { orderId: params.id } });
-    await prisma.invoice.deleteMany({ where: { orderId: params.id } });
-    await prisma.order.delete({ where: { id: params.id } });
+    await prisma.orderItem.deleteMany({ where: { orderId: id } });
+    await prisma.payment.deleteMany({ where: { orderId: id } });
+    await prisma.invoice.deleteMany({ where: { orderId: id } });
+    await prisma.order.delete({ where: { id } });
 
     return NextResponse.json({ success: true, message: 'Pedido eliminado correctamente' });
   } catch (error) {

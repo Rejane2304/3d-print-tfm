@@ -210,7 +210,6 @@ async function createPayPalOrder(
       errorData = { message: await response.text() };
     }
 
-    console.error('PayPal error response:', JSON.stringify(errorData, null, 2));
     throw new Error(translatePayPalError(errorData));
   }
 
@@ -298,8 +297,8 @@ async function createFailedPaymentAlert(orderId: string, errorMessage: string) {
     if (order) {
       await createPaymentFailedAlert(orderId, order.orderNumber, errorMessage);
     }
-  } catch (alertError) {
-    console.error('Error creating payment failed alert:', alertError);
+  } catch {
+    // Alert creation failed - silently continue
   }
 }
 
@@ -369,8 +368,6 @@ export async function POST(req: NextRequest) {
       paypalOrderId: paypalOrder.id,
     });
   } catch (error) {
-    console.error('Error creating PayPal payment:', error);
-
     // Create alert for failed payment
     const body = await req.json().catch(() => ({}));
     const { orderId } = body;

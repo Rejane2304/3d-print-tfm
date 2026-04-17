@@ -72,12 +72,18 @@ export function CouponSection({ appliedCoupon, onApplyCoupon, onRemoveCoupon }: 
           className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
           onKeyDown={e => {
             if (e.key === 'Enter') {
-              void handleApply();
+              handleApply().catch(() => {
+                // Error handled in handleApply
+              });
             }
           }}
         />
         <button
-          onClick={() => void handleApply()}
+          onClick={() => {
+            handleApply().catch(() => {
+              // Error handled in handleApply
+            });
+          }}
           disabled={applying || !couponCode.trim()}
           className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >

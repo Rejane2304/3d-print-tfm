@@ -439,7 +439,7 @@ describe('Invoices API', () => {
       });
 
       const req = new NextRequest(`http://localhost:3000/api/admin/invoices/${invoiceId}/pdf`);
-      const res = await generateInvoicePDF(req, { params: { id: invoiceId } });
+      const res = await generateInvoicePDF(req, { params: Promise.resolve({ id: invoiceId }) });
 
       expect(res.status).toBe(200);
       expect(res.headers.get('Content-Type')).toContain('application/pdf');
@@ -450,7 +450,7 @@ describe('Invoices API', () => {
       vi.mocked(getServerSession).mockResolvedValue(null);
 
       const req = new NextRequest(`http://localhost:3000/api/admin/invoices/${invoiceId}/pdf`);
-      const res = await generateInvoicePDF(req, { params: { id: invoiceId } });
+      const res = await generateInvoicePDF(req, { params: Promise.resolve({ id: invoiceId }) });
       expect(res.status).toBe(401);
     });
 
@@ -461,7 +461,7 @@ describe('Invoices API', () => {
 
       const req = new NextRequest('http://localhost:3000/api/admin/invoices/non-existent-id/pdf');
       const res = await generateInvoicePDF(req, {
-        params: { id: 'non-existent-id' },
+        params: Promise.resolve({ id: 'non-existent-id' }),
       });
       expect(res.status).toBe(404);
     });

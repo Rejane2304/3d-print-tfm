@@ -11,8 +11,10 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { translateErrorMessage, translateProductName, translateProductDescription } from '@/lib/i18n';
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
+
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ success: false, error: translateErrorMessage('No autenticado') }, { status: 401 });
@@ -27,7 +29,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     }
 
     const factura = await prisma.invoice.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         order: {
           include: {
@@ -123,8 +125,10 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
+
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ success: false, error: translateErrorMessage('No autenticado') }, { status: 401 });
@@ -140,7 +144,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
     // Anular la factura (no eliminar)
     const factura = await prisma.invoice.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         isCancelled: true,
         cancelledAt: new Date(),

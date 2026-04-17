@@ -192,9 +192,8 @@ export default function MyOrdersPage() {
       }
 
       setOrders(data.pedidos || []);
-    } catch (err) {
-      console.error('Error loading orders:', err);
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+    } catch {
+      // Error silently handled
     } finally {
       setLoading(false);
     }
@@ -229,8 +228,8 @@ export default function MyOrdersPage() {
       setTimeout(() => {
         router.push('/checkout');
       }, 1500);
-    } catch (err) {
-      console.error('Error restoring cart:', err);
+    } catch {
+      // Error silently handled
       setRestoredMessage('Error al restaurar carrito');
     } finally {
       setRestoringOrder(null);

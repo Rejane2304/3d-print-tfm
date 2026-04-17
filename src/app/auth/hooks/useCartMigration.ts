@@ -59,14 +59,12 @@ export function useCartMigration() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error('Failed to migrate item:', item.productId, errorData);
         return { success: false, productId: item.productId, error: errorData };
       }
 
       return { success: true, productId: item.productId };
-    } catch (error) {
-      console.error('Error migrating item:', item.productId, error);
-      return { success: false, productId: item.productId, error };
+    } catch {
+      return { success: false, productId: item.productId, error: new Error('Migration failed') };
     }
   };
 
@@ -82,8 +80,8 @@ export function useCartMigration() {
 
       // Limpiar localStorage después de la migración
       localStorage.removeItem(cartStorageKey);
-    } catch (err) {
-      console.error('Error migrating cart:', err);
+    } catch {
+      // Error silently handled - migration continues with other items
     }
   };
 

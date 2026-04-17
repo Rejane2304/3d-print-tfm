@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env tsx
 /**
  * Seed script for E2E test database
  * Populates the test database with required data
@@ -205,6 +205,15 @@ async function createSampleProducts(): Promise<void> {
       material: Material.PLA,
       isActive: true,
       isFeatured: true,
+      images: [
+        {
+          url: 'https://images.unsplash.com/photo-1578500494198-246f612d3b3d?w=800&q=80',
+          filename: 'jarron-decorativo.jpg',
+          isMain: true,
+          displayOrder: 0,
+          altText: 'Jarrón Decorativo',
+        },
+      ],
     },
     {
       slug: 'soporte-plantas',
@@ -219,14 +228,27 @@ async function createSampleProducts(): Promise<void> {
       material: Material.PLA,
       isActive: true,
       isFeatured: false,
+      images: [
+        {
+          url: 'https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=800&q=80',
+          filename: 'soporte-plantas.jpg',
+          isMain: true,
+          displayOrder: 0,
+          altText: 'Soporte para Plantas',
+        },
+      ],
     },
   ];
 
   for (const product of products) {
-    await prisma.product.create({
+    const { images, ...productData } = product;
+    const createdProduct = await prisma.product.create({
       data: {
-        ...product,
+        ...productData,
         categoryId: category.id,
+        images: {
+          create: images,
+        },
       },
     });
     console.log(`  ✓ ${product.name}`);
@@ -239,6 +261,11 @@ async function createSampleOrders(): Promise<void> {
   console.log('📦 Creating sample orders...');
 
   // Obtener o crear un usuario de ejemplo para la orden
+  const seedPassword = process.env.SEED_USER_PASSWORD;
+  if (!seedPassword) {
+    throw new Error('SEED_USER_PASSWORD environment variable must be set for seeding.');
+  }
+
   const customer =
     (await prisma.user.findFirst({
       where: { email: 'customer@example.com' },
@@ -247,12 +274,7 @@ async function createSampleOrders(): Promise<void> {
       data: {
         name: 'Cliente Ejemplo',
         email: 'customer@example.com',
-        password: (() => {
-          if (!process.env.SEED_USER_PASSWORD) {
-            throw new Error('SEED_USER_PASSWORD environment variable must be set for seeding.');
-          }
-          return process.env.SEED_USER_PASSWORD;
-        })(),
+        password: seedPassword,
         role: 'CUSTOMER',
         isActive: true,
       },

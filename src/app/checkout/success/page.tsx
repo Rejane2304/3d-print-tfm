@@ -33,9 +33,9 @@ function CheckoutSuccessContent() {
         return data.order || data.pedido;
       }
       throw new Error('Error verificando pago de Stripe');
-    } catch (err) {
-      console.error('Error verificando pago Stripe:', err);
-      throw err;
+    } catch {
+      // Error silently handled
+      throw new Error('Error verificando pago de Stripe');
     }
   }, []);
 
@@ -47,9 +47,9 @@ function CheckoutSuccessContent() {
         return data.pedido;
       }
       throw new Error('Error verificando pedido');
-    } catch (err) {
-      console.error('Error verificando pedido por ID:', err);
-      throw err;
+    } catch {
+      // Error silently handled
+      throw new Error('Error verificando pedido');
     }
   }, []);
 
@@ -63,9 +63,9 @@ function CheckoutSuccessContent() {
       }
       const errorData = await response.json();
       throw new Error(errorData.error || 'Error verificando pago de PayPal');
-    } catch (err) {
-      console.error('Error verificando pago PayPal:', err);
-      throw err;
+    } catch {
+      // Error silently handled
+      throw new Error('Error verificando pago de PayPal');
     }
   }, []);
 
@@ -105,8 +105,8 @@ function CheckoutSuccessContent() {
           setPedido(orderData);
           clearCart();
         }
-      } catch (err: unknown) {
-        console.error('Error en verificación de pago:', err);
+      } catch {
+        // Error handled by UI - order may still be valid
         setError('Tu pedido ha sido registrado. Verifica el estado en "Mis Pedidos".');
       } finally {
         setLoading(false);

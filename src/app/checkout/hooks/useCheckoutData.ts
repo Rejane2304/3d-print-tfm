@@ -288,13 +288,15 @@ export function useCheckoutData(): CheckoutDataResult {
     }
   }, [router, loadCoupon, migrateLocalCart]);
 
+  // Load initial cart
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/auth?callbackUrl=/checkout');
       return;
     }
     if (status === 'authenticated') {
-      void loadData();
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      loadData();
     }
   }, [status, router, loadData]);
 

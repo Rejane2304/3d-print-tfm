@@ -98,8 +98,8 @@ export default function AdminInventoryPage() {
       if (data.success) {
         setProducts(data.products);
       }
-    } catch (error) {
-      console.error('Error fetching inventory:', error);
+    } catch {
+      // Error silently handled
     } finally {
       setLoading(false);
     }
@@ -154,8 +154,8 @@ export default function AdminInventoryPage() {
       } else {
         showAlert(data.error || 'Error adjusting stock');
       }
-    } catch (error) {
-      console.error('Error adjusting stock:', error);
+    } catch {
+      // Error silently handled
     } finally {
       setProcessing(false);
     }

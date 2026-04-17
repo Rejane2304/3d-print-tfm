@@ -10,8 +10,10 @@ import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
 import { translateProductName } from '@/lib/i18n';
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
+
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
@@ -31,7 +33,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     // Obtener factura específica del usuario
     const factura = await prisma.invoice.findFirst({
       where: {
-        id: params.id,
+        id,
         order: {
           userId: usuario.id,
         },

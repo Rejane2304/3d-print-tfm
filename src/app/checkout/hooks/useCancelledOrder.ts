@@ -60,8 +60,8 @@ export function useCancelledOrder(setCart: (cart: Cart | null) => void): UseCanc
         }
         setCancelledOrderId(null);
       }
-    } catch (err) {
-      console.error('Error restaurando carrito:', err);
+    } catch {
+      // Error silently handled
     }
   };
 

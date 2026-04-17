@@ -95,8 +95,8 @@ export default function AdminClientsPage() {
       if (data.success) {
         setClients(data.clients);
       }
-    } catch (error) {
-      console.error('Error fetching clients:', error);
+    } catch {
+      // Error silently handled
     } finally {
       setLoading(false);
     }
@@ -110,8 +110,8 @@ export default function AdminClientsPage() {
     try {
       await Promise.all(selectedIds.map(id => fetch(`/api/admin/clients/${id}`, { method: 'DELETE' })));
       await fetchClients();
-    } catch (error) {
-      console.error('Error al eliminar clientes:', error);
+    } catch {
+      // Error silently handled
     }
   };
 

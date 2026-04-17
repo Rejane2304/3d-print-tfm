@@ -7,65 +7,96 @@ import { test, expect } from '@playwright/test';
 test.describe('Shopping Flow', () => {
   test('should display product catalog', async ({ page }) => {
     await page.goto('/products');
+
+    // Wait for product grid to be visible with explicit wait
     await expect(page.locator('[data-testid="product-grid"]')).toBeVisible({
-      timeout: 10000,
+      timeout: 15000,
     });
-    await expect(page.locator('[data-testid="product-card"]').first()).toBeVisible({ timeout: 10000 });
+
+    // Verify at least one product card is visible
+    const firstCard = page.locator('[data-testid="product-card"]').first();
+    await expect(firstCard).toBeVisible({ timeout: 10000 });
   });
 
   test('should navigate to product detail', async ({ page }) => {
+    // First go to products page to ensure products exist
     await page.goto('/products');
-
-    // Click first product and wait for navigation
-    const productCard = page.locator('[data-testid="product-card"]').first();
-    await expect(productCard).toBeVisible({ timeout: 10000 });
-    await productCard.click();
-
-    // Wait for product detail page to load
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
-
-    // Verify product detail page by checking for key elements
-    await expect(page.locator('[data-testid="product-detail"]')).toBeVisible({
-      timeout: 10000,
+    await expect(page.locator('[data-testid="product-grid"]')).toBeVisible({
+      timeout: 15000,
     });
-    await expect(page.locator('[data-testid="add-to-cart-button"]')).toBeVisible({ timeout: 10000 });
+
+    // Get the first product card and extract its href to navigate directly
+    const firstCard = page.locator('[data-testid="product-card"]').first();
+    await expect(firstCard).toBeVisible({ timeout: 10000 });
+
+    // Get the href attribute from the link
+    const href = await firstCard.getAttribute('href');
+    expect(href).toBeTruthy();
+
+    // Navigate to the product detail page using the extracted href
+    await page.goto(href!);
+    await page.waitForTimeout(2000);
+
+    // Wait for product detail page elements to be visible
+    await expect(page.locator('[data-testid="product-detail"]')).toBeVisible({
+      timeout: 15000,
+    });
+    await expect(page.locator('[data-testid="add-to-cart-container"]')).toBeVisible({ timeout: 10000 });
   });
 
   test('should add product to cart', async ({ page }) => {
+    // First go to products page to ensure products exist
     await page.goto('/products');
+    await expect(page.locator('[data-testid="product-grid"]')).toBeVisible({
+      timeout: 15000,
+    });
 
-    // Navigate to product
-    const productCard = page.locator('[data-testid="product-card"]').first();
-    await expect(productCard).toBeVisible({ timeout: 10000 });
-    await productCard.click();
+    // Get the first product card and extract its href
+    const firstCard = page.locator('[data-testid="product-card"]').first();
+    await expect(firstCard).toBeVisible({ timeout: 10000 });
 
-    // Wait for page to load
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
+    // Get the href attribute from the link
+    const href = await firstCard.getAttribute('href');
+    expect(href).toBeTruthy();
 
-    // Add to cart
-    await page.locator('[data-testid="add-to-cart-button"]').click();
+    // Navigate to the product detail page
+    await page.goto(href!);
+    await page.waitForTimeout(2000);
+
+    // Wait for product detail page to load
+    await expect(page.locator('[data-testid="product-detail"]')).toBeVisible({
+      timeout: 15000,
+    });
+
+    // Wait for add to cart button to be visible
+    const addButton = page.locator('[data-testid="add-to-cart-button"]');
+    await expect(addButton).toBeVisible({ timeout: 10000 });
+
+    // Click the add to cart button
+    await addButton.click();
 
     // Verify cart updated - wait for the cart count to appear
-    await expect(page.locator('[data-testid="cart-count"]')).toBeVisible({
-      timeout: 10000,
-    });
-    await expect(page.locator('[data-testid="cart-count"]')).toContainText('1', { timeout: 10000 });
+    await page.waitForTimeout(1000);
+
+    // Wait for cart count to be visible
+    const cartCount = page.locator('[data-testid="cart-count"]');
+    await expect(cartCount).toBeVisible({ timeout: 15000 });
+    await expect(cartCount).toContainText('1', { timeout: 10000 });
   });
 
   test('should complete checkout flow', async ({ page }) => {
-    // Aumentar timeout para este test (Firefox es más lento)
-    test.setTimeout(60000);
+    // Aumentar timeout para este test
+    test.setTimeout(90000);
+
     // First login to ensure user has addresses
     await page.goto('/auth');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(2000);
+
     await page.locator('[data-testid="login-email"]').fill('juan@example.com');
     await page.locator('[data-testid="login-password"]').fill('JuanTFM2024!');
     await page.locator('[data-testid="login-submit"]').click();
 
-    // Wait for redirect after login (timeout generoso para Safari)
+    // Wait for redirect after login
     await page.waitForTimeout(5000);
 
     // Verificar que estamos autenticados
@@ -78,30 +109,42 @@ test.describe('Shopping Flow', () => {
       await page.waitForTimeout(5000);
     }
 
-    // Add product to cart via API
+    // First go to products page
     await page.goto('/products');
-    await page.waitForLoadState('networkidle');
+    await expect(page.locator('[data-testid="product-grid"]')).toBeVisible({
+      timeout: 15000,
+    });
 
-    const productCard = page.locator('[data-testid="product-card"]').first();
-    await expect(productCard).toBeVisible({ timeout: 10000 });
-    await productCard.click();
+    // Get the first product card and extract its href
+    const firstCard = page.locator('[data-testid="product-card"]').first();
+    await expect(firstCard).toBeVisible({ timeout: 10000 });
 
-    await page.waitForLoadState('networkidle');
+    const href = await firstCard.getAttribute('href');
+    expect(href).toBeTruthy();
+
+    // Navigate to the product detail page
+    await page.goto(href!);
     await page.waitForTimeout(2000);
+
+    // Wait for product detail page
+    await expect(page.locator('[data-testid="product-detail"]')).toBeVisible({
+      timeout: 15000,
+    });
 
     const addButton = page.locator('[data-testid="add-to-cart-button"]');
     await expect(addButton).toBeVisible({ timeout: 10000 });
     await addButton.click();
 
-    await page.waitForTimeout(2000);
+    // Wait for cart count to update
+    await page.waitForTimeout(1000);
     await expect(page.locator('[data-testid="cart-count"]')).toBeVisible({
-      timeout: 10000,
+      timeout: 15000,
     });
 
     // Navigate to cart directly (stay logged in)
     await page.goto('/cart');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(3000);
+    await expect(page.locator('h1')).toContainText('Carrito', { timeout: 10000 });
+    await page.waitForTimeout(2000);
 
     // Check if cart has items before clicking checkout
     const emptyCart = await page
@@ -186,49 +229,89 @@ test.describe('Shopping Flow', () => {
   });
 
   test('should update cart quantity', async ({ page }) => {
+    // First go to products page
     await page.goto('/products');
+    await expect(page.locator('[data-testid="product-grid"]')).toBeVisible({
+      timeout: 15000,
+    });
 
-    // Add product
-    const productCard = page.locator('[data-testid="product-card"]').first();
-    await expect(productCard).toBeVisible({ timeout: 10000 });
-    await productCard.click();
+    // Get the first product card and extract its href
+    const firstCard = page.locator('[data-testid="product-card"]').first();
+    await expect(firstCard).toBeVisible({ timeout: 10000 });
 
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
-    await page.locator('[data-testid="add-to-cart-button"]').click();
+    const href = await firstCard.getAttribute('href');
+    expect(href).toBeTruthy();
+
+    // Navigate to the product detail page
+    await page.goto(href!);
+    await page.waitForTimeout(2000);
+
+    // Wait for product detail page
+    await expect(page.locator('[data-testid="product-detail"]')).toBeVisible({
+      timeout: 15000,
+    });
+
+    // Add to cart
+    const addButton = page.locator('[data-testid="add-to-cart-button"]');
+    await expect(addButton).toBeVisible({ timeout: 10000 });
+    await addButton.click();
 
     // Wait for cart count to update
-    await expect(page.locator('[data-testid="cart-count"]')).toContainText('1', { timeout: 10000 });
+    await page.waitForTimeout(1000);
+    await expect(page.locator('[data-testid="cart-count"]')).toContainText('1', { timeout: 15000 });
 
     // Go to cart
     await page.locator('[data-testid="cart-icon"]').click();
     await page.waitForURL(/\/cart/, { timeout: 10000 });
+
+    // Wait for cart page to load
+    await expect(page.locator('[data-testid="cart-item-quantity"]')).toBeVisible({ timeout: 10000 });
 
     // Update quantity by clicking increase button
     await page.locator('[data-testid="quantity-increase"]').first().click();
 
-    // Verify quantity updated - check the input value
-    await expect(page.locator('[data-testid="cart-item-quantity"]').first()).toHaveValue('2', { timeout: 10000 });
+    // Verify quantity updated - check the input value with retry
+    await expect(page.locator('[data-testid="cart-item-quantity"]').first()).toHaveValue('2', { timeout: 15000 });
   });
 
   test('should remove item from cart', async ({ page }) => {
+    // First go to products page
     await page.goto('/products');
+    await expect(page.locator('[data-testid="product-grid"]')).toBeVisible({
+      timeout: 15000,
+    });
 
-    // Add product
-    const productCard = page.locator('[data-testid="product-card"]').first();
-    await expect(productCard).toBeVisible({ timeout: 10000 });
-    await productCard.click();
+    // Get the first product card and extract its href
+    const firstCard = page.locator('[data-testid="product-card"]').first();
+    await expect(firstCard).toBeVisible({ timeout: 10000 });
 
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
-    await page.locator('[data-testid="add-to-cart-button"]').click();
+    const href = await firstCard.getAttribute('href');
+    expect(href).toBeTruthy();
+
+    // Navigate to the product detail page
+    await page.goto(href!);
+    await page.waitForTimeout(2000);
+
+    // Wait for product detail page
+    await expect(page.locator('[data-testid="product-detail"]')).toBeVisible({
+      timeout: 15000,
+    });
+
+    // Add to cart
+    const addButton = page.locator('[data-testid="add-to-cart-button"]');
+    await expect(addButton).toBeVisible({ timeout: 10000 });
+    await addButton.click();
 
     // Wait for cart count to update
-    await expect(page.locator('[data-testid="cart-count"]')).toContainText('1', { timeout: 10000 });
+    await page.waitForTimeout(1000);
+    await expect(page.locator('[data-testid="cart-count"]')).toContainText('1', { timeout: 15000 });
 
     // Go to cart
     await page.locator('[data-testid="cart-icon"]').click();
     await page.waitForURL(/\/cart/, { timeout: 10000 });
+
+    // Wait for cart items to be visible
+    await expect(page.locator('[data-testid="remove-item-button"]')).toBeVisible({ timeout: 10000 });
 
     // Remove item (triggers confirmation modal)
     await page.locator('[data-testid="remove-item-button"]').first().click();

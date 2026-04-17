@@ -15,8 +15,8 @@ import {
   translateProductShortDescription,
 } from '@/lib/i18n';
 
-export const GET = withErrorHandler(async (req: NextRequest, { params }: { params: { slug: string } }) => {
-  const { slug } = params;
+export const GET = withErrorHandler(async (req: NextRequest, { params }: { params: Promise<{ slug: string }> }) => {
+  const { slug } = await params;
 
   if (!slug) {
     throw new ApiError(ErrorCode.VALIDATION_INVALID_INPUT, 'El identificador del producto es requerido', 400);

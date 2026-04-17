@@ -16,9 +16,9 @@ import { authOptions } from '@/lib/auth/auth-options';
 import { translateCategoryName, translateProductDescription, translateProductName } from '@/lib/i18n';
 
 interface ProductDetailPageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 // Extended product type with optional dimension fields
@@ -180,7 +180,10 @@ export default async function ProductDetailPage({ params }: Readonly<ProductDeta
   const isAdmin = session?.user?.role === 'ADMIN';
   const isLoggedIn = Boolean(session?.user);
 
-  const data = await getProduct(params.slug);
+  // Await params as per Next.js 15+ requirements
+  const { slug } = await params;
+
+  const data = await getProduct(slug);
 
   if (!data) {
     notFound();

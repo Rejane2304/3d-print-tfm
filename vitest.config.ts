@@ -29,11 +29,6 @@ export default defineConfig({
     setupFiles: ['./tests/setup.ts'],
     include: ['tests/**/*.{test,spec}.{js,jsx,ts,tsx}'],
     pool: 'forks',
-    poolOptions: {
-      forks: {
-        singleFork: true,
-      },
-    },
     exclude: [
       '**/node_modules/**',
       '**/dist/**',

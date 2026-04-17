@@ -10,8 +10,10 @@ import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
 import { translateErrorMessage, translateMovementType, translateProductName } from '@/lib/i18n';
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id: productId } = await params;
+
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
@@ -27,8 +29,6 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     if (adminUser?.role !== 'ADMIN') {
       return NextResponse.json({ success: false, error: 'Acceso denegado' }, { status: 403 });
     }
-
-    const productId = params.id;
 
     // Get query parameters for pagination
     const { searchParams } = new URL(req.url);

@@ -142,8 +142,10 @@ function transformOrder(pedido: OrderWithRelations, couponInfo: CouponInfo | nul
   };
 }
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
+
     const auth = await authenticateUser();
     if ('error' in auth) {
       return NextResponse.json({ error: auth.error }, { status: auth.status });
@@ -153,7 +155,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
     const pedido = await prisma.order.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: usuario.id,
       },
       include: {

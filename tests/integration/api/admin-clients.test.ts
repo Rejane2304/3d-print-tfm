@@ -239,7 +239,7 @@ describe('Admin Clients API', () => {
       setMockSession('ADMIN', adminEmail);
 
       const req = new NextRequest(`http://localhost:3000/api/admin/clients/${customerId}`);
-      const res = await getClientDetail(req, { params: { id: customerId } });
+      const res = await getClientDetail(req, { params: Promise.resolve({ id: customerId }) });
 
       if (res.status === 200) {
         const data = await res.json();
@@ -268,7 +268,7 @@ describe('Admin Clients API', () => {
 
       const req = new NextRequest('http://localhost:3000/api/admin/clients/non-existent-id');
       const res = await getClientDetail(req, {
-        params: { id: 'non-existent-id' },
+        params: Promise.resolve({ id: 'non-existent-id' }),
       });
 
       // Si autenticado como admin: 404
