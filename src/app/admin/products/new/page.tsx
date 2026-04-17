@@ -29,7 +29,6 @@ export default function NuevoProductoPage() {
   // Almacena tanto la URL de preview como el archivo para subir luego
   const [images, setImages] = useState<{ url: string; isMain: boolean; file?: File }[]>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [uploadProgress, setImageUploadProgress] = useState<{ current: number; total: number } | null>(null);
 
   // Form state - bilingual fields included
@@ -742,8 +741,20 @@ export default function NuevoProductoPage() {
                       />
                       <div className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-colors">
                         <Upload className="h-5 w-5 text-gray-500" />
-                        <span className="text-sm text-gray-600">{uploadingImage ? 'Subiendo...' : 'Subir imagen'}</span>
+                        <span className="text-sm text-gray-600">
+                          {uploadingImage && uploadProgress
+                            ? `Subiendo ${uploadProgress.current}/${uploadProgress.total}...`
+                            : 'Subir imagen'}
+                        </span>
                       </div>
+                      {uploadingImage && uploadProgress && (
+                        <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                          <div
+                            className="bg-indigo-600 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${(uploadProgress.current / uploadProgress.total) * 100}%` }}
+                          />
+                        </div>
+                      )}
                     </label>
                     <button
                       type="button"
