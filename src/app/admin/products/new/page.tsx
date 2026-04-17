@@ -29,7 +29,7 @@ export default function NuevoProductoPage() {
   // Almacena tanto la URL de preview como el archivo para subir luego
   const [images, setImages] = useState<{ url: string; isMain: boolean; file?: File }[]>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
-  const [_imageUploadProgress, setImageUploadProgress] = useState<{ current: number; total: number } | null>(null);
+  const [imageUploadProgress, setImageUploadProgress] = useState<{ current: number; total: number } | null>(null);
 
   // Form state - bilingual fields included
   const [formData, setFormData] = useState({
