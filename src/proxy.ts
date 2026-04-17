@@ -144,7 +144,7 @@ function handleAuthRoutes(request: NextRequest, isAuthenticated: boolean, userRo
   return NextResponse.redirect(new URL('/', request.url));
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // Check rate limiting
   const rateLimitResponse = checkRateLimitIfNeeded(request);
   if (rateLimitResponse) {

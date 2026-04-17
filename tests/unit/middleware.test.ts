@@ -28,7 +28,7 @@ describe('Middleware Redirects', () => {
   });
 
   test('should redirect /login to /auth', async () => {
-    const { middleware } = await import('@/middleware');
+    const { proxy } = await import('@/proxy');
 
     const request = {
       nextUrl: {
@@ -39,7 +39,7 @@ describe('Middleware Redirects', () => {
       url: 'http://localhost:3000/login',
     } as unknown as NextRequest;
 
-    await middleware(request);
+    await proxy(request);
 
     expect(mockRedirect).toHaveBeenCalled();
     const callArg = mockRedirect.mock.calls[0][0];
@@ -47,7 +47,7 @@ describe('Middleware Redirects', () => {
   });
 
   test('should redirect /register to /auth?tab=register', async () => {
-    const { middleware } = await import('@/middleware');
+    const { proxy } = await import('@/proxy');
 
     const request = {
       nextUrl: {
@@ -58,7 +58,7 @@ describe('Middleware Redirects', () => {
       url: 'http://localhost:3000/register',
     } as unknown as NextRequest;
 
-    await middleware(request);
+    await proxy(request);
 
     expect(mockRedirect).toHaveBeenCalled();
     const callArg = mockRedirect.mock.calls[0][0];
@@ -66,7 +66,7 @@ describe('Middleware Redirects', () => {
   });
 
   test('should preserve query params when redirecting /login', async () => {
-    const { middleware } = await import('@/middleware');
+    const { proxy } = await import('@/proxy');
 
     const request = {
       nextUrl: {
@@ -77,7 +77,7 @@ describe('Middleware Redirects', () => {
       url: 'http://localhost:3000/login?callbackUrl=/checkout',
     } as unknown as NextRequest;
 
-    await middleware(request);
+    await proxy(request);
 
     expect(mockRedirect).toHaveBeenCalled();
     const callArg = mockRedirect.mock.calls[0][0];
@@ -85,7 +85,7 @@ describe('Middleware Redirects', () => {
   });
 
   test('should preserve query params when redirecting /register', async () => {
-    const { middleware } = await import('@/middleware');
+    const { proxy } = await import('@/proxy');
 
     const request = {
       nextUrl: {
@@ -96,7 +96,7 @@ describe('Middleware Redirects', () => {
       url: 'http://localhost:3000/register?callbackUrl=/checkout',
     } as unknown as NextRequest;
 
-    await middleware(request);
+    await proxy(request);
 
     expect(mockRedirect).toHaveBeenCalled();
     const callArg = mockRedirect.mock.calls[0][0];
