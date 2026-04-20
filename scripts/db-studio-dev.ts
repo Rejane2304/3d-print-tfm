@@ -12,10 +12,11 @@ import { resolve } from 'node:path';
 const envPath = resolve(process.cwd(), '.env.local');
 config({ path: envPath });
 
-const databaseUrl = process.env.DATABASE_URL;
+// Usar DIRECT_URL para Prisma Studio (requiere conexión directa, no pgbouncer)
+const databaseUrl = process.env.DIRECT_URL || process.env.DATABASE_URL;
 
 if (!databaseUrl) {
-  console.error('❌ Error: DATABASE_URL no está definida en .env.local');
+  console.error('❌ Error: DIRECT_URL o DATABASE_URL no están definidos en .env.local');
   process.exit(1);
 }
 
@@ -32,11 +33,17 @@ if (!databaseUrl.includes('localhost') && !databaseUrl.includes('hkjknnymctorucy
 }
 
 console.log('🎨 Abriendo Prisma Studio en BD de desarrollo...');
+console.log('   Usando DIRECT_URL para conexión directa (sin pgbouncer)');
 
 const result = spawnSync('npx', ['prisma', 'studio'], {
   stdio: 'inherit',
   shell: true,
-  env: { ...process.env, DATABASE_URL: databaseUrl },
+  env: {
+    ...process.env,
+    DATABASE_URL: databaseUrl,
+    // Deshabilitar SSL estricto para desarrollo local
+    PRISMA_CLIENT_ENGINE_TYPE: 'library',
+  },
 });
 
 process.exit(result.status ?? 0);
