@@ -1,9 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // ESLint config moved to .eslintrc.json
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  // Next.js 16+ uses ESLint 9 flat config - no eslint key here
   typescript: {
     ignoreBuildErrors: true,
   },
