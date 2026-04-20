@@ -233,6 +233,22 @@ npx prisma migrate deploy
 npm run db:reset:dev
 ```
 
+### "Can't reach database server at db.\*.supabase.co:5432" en Prisma Studio
+
+**Causa:** Supabase ya no expone `db.{project}.supabase.co:5432` públicamente. Este host ya no resuelve DNS.
+
+**Solución:** Usar el pooler de Supabase en puerto 5432 (sin pgbouncer):
+
+```env
+# ANTES (ya no funciona):
+DIRECT_URL=postgresql://...db.hkjknnymctorucyhtypm.supabase.co:5432/postgres
+
+# AHORA (funciona):
+DIRECT_URL=postgresql://...aws-1-eu-west-1.pooler.supabase.com:5432/postgres
+```
+
+El script `db-studio-dev.ts` ahora agrega automáticamente `sslmode=require` si es necesario.
+
 ---
 
 ### SonarQube se atasca en "analizando 'route.ts'"

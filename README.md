@@ -41,7 +41,7 @@
 ### Filosofía del Proyecto
 
 - **🎯 Tolerancia Cero:** Cero errores en ESLint, TypeScript y tests
-- **🧪 Test-Driven Development:** 378+ tests (unitarios, integración, E2E)
+- **🧪 Test-Driven Development:** 395+ tests (unitarios, integración, E2E)
 - **🌍 Backend Translation:** Sistema 100% español con traducción en backend
 - **🔒 Security First:** Enterprise-grade security con rate limiting, account lockout, validación de contraseñas
 - **📱 Responsive Design:** Optimizado desde mobile (320px) hasta 4K (3840px)
@@ -50,11 +50,11 @@
 
 | Métrica              | Valor                |
 | -------------------- | -------------------- |
-| **Líneas de Código** | 59,000+              |
-| **Archivos Fuente**  | 243+ (TS/TSX)        |
-| **Endpoints API**    | 62+ RESTful          |
-| **Tests**            | 378+ (80%+ coverage) |
-| **Componentes UI**   | 85+                  |
+| **Líneas de Código** | 75,000+              |
+| **Archivos Fuente**  | 250+ (TS/TSX)        |
+| **Endpoints API**    | 91+ RESTful          |
+| **Tests**            | 395+ (80%+ coverage) |
+| **Componentes UI**   | 90+                  |
 | **Modelos BD**       | 24+ entidades        |
 | **Módulos Admin**    | 15+ CRUD completos   |
 
@@ -311,10 +311,11 @@ npm run check-code        # Ejecutar lint + type-check
 
 ```bash
 npm run db:generate       # Generar cliente Prisma
-npm run db:migrate        # Crear nueva migración
-npm run db:seed           # Poblar con datos iniciales
-npm run db:reset          # Reset + seed (cuidado: borra datos)
-npm run db:studio         # Abrir Prisma Studio (GUI)
+npm run db:migrate          # Crear nueva migración
+npm run db:setup:dev        # Setup completo en DEV (migraciones + seed)
+npm run db:seed             # Poblar con datos iniciales
+npm run db:reset            # Reset + seed (cuidado: borra datos)
+npm run db:studio           # Abrir Prisma Studio (GUI)
 ```
 
 ### Testing
@@ -351,10 +352,10 @@ npm run test:docker:setup
 
 | Tipo            | Framework           | Tests    | Cobertura            |
 | --------------- | ------------------- | -------- | -------------------- |
-| **Unitarios**   | Vitest              | 69+      | Validadores, helpers |
-| **Integración** | Vitest + PostgreSQL | 290+     | APIs, base de datos  |
-| **E2E**         | Playwright          | 19       | Flujos completos     |
-| **Total**       | -                   | **378+** | **80%+**             |
+| **Unitarios**   | Vitest              | 299+     | Validadores, helpers |
+| **Integración** | Vitest + PostgreSQL | 96+      | APIs, base de datos  |
+| **E2E**         | Playwright          | 91+      | Flujos completos     |
+| **Total**       | -                   | **395+** | **80%+**             |
 
 ### Calidad de Código
 
