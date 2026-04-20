@@ -392,10 +392,11 @@ export function useCart() {
     if (status === 'authenticated') {
       // Small delay to allow any migration to complete
       const timeout = setTimeout(() => {
-        loadCart(true);
+        void loadCart(true);
       }, 100);
       return () => clearTimeout(timeout);
     }
+    return undefined;
   }, [status, loadCart]);
 
   return {

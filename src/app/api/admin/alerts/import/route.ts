@@ -9,13 +9,14 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
+import type { AlertType, AlertSeverity, AlertStatus } from '@prisma/client';
 import { translateErrorMessage } from '@/lib/i18n';
 
 // Columnas requeridas
 const REQUIRED_COLUMNS = ['type', 'severity', 'title', 'message'];
 
-// Tipos válidos de alerta
-const VALID_ALERT_TYPES = [
+// Type assertions for Prisma enums
+const VALID_ALERT_TYPES: AlertType[] = [
   'LOW_STOCK',
   'OUT_OF_STOCK',
   'ORDER_DELAYED',
@@ -33,11 +34,9 @@ const VALID_ALERT_TYPES = [
   'PREPARING_ORDER',
 ];
 
-// Severidades válidas
-const VALID_SEVERITIES = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
+const VALID_SEVERITIES: AlertSeverity[] = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
 
-// Estados válidos
-const VALID_STATUSES = ['PENDING', 'IN_PROGRESS', 'RESOLVED', 'IGNORED'];
+const VALID_STATUSES: AlertStatus[] = ['PENDING', 'IN_PROGRESS', 'RESOLVED', 'IGNORED'];
 
 interface ImportRow {
   type: string;
@@ -59,11 +58,18 @@ interface ImportResult {
   message?: string;
 }
 
+interface ValidationResult {
+  valid: boolean;
+  errors: string[];
+  warnings: string[];
+  data?: ImportRow;
+}
+
 // Validar fila de datos
 function validateRow(
-  row: Record<string, string | number | boolean>,
+  row: Record<string, string | number | boolean | undefined | null>,
   _rowIndex: number,
-): { valid: boolean; errors: string[]; warnings: string[]; data?: ImportRow } {
+): ValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
 
@@ -96,7 +102,9 @@ function validateRow(
       type = typeMap[type];
     }
 
-    if (!VALID_ALERT_TYPES.includes(type)) {
+    // Validación usando string array en lugar de AlertType[] para evitar conflicto de tipos
+    const validTypesArray: readonly string[] = VALID_ALERT_TYPES;
+    if (!validTypesArray.includes(type)) {
       warnings.push(`Tipo de alerta '${type}' no estándar, se usará como está`);
     }
   }
@@ -118,7 +126,9 @@ function validateRow(
     if (severityMap[severity]) {
       severity = severityMap[severity];
     }
-    if (!VALID_SEVERITIES.includes(severity)) {
+    // Validación usando string array en lugar de AlertSeverity[]
+    const validSeveritiesArray: readonly string[] = VALID_SEVERITIES;
+    if (!validSeveritiesArray.includes(severity)) {
       warnings.push(`Severidad '${severity}' no reconocida, se usará 'MEDIUM'`);
       severity = 'MEDIUM';
     }
@@ -151,7 +161,9 @@ function validateRow(
   if (statusMap[status]) {
     status = statusMap[status];
   }
-  if (!VALID_STATUSES.includes(status)) {
+  // Validación usando string array en lugar de AlertStatus[]
+  const validStatusesArray: readonly string[] = VALID_STATUSES;
+  if (!validStatusesArray.includes(status)) {
     warnings.push(`Estado '${status}' no reconocido, se usará 'PENDING'`);
     status = 'PENDING';
   }
@@ -202,7 +214,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Obtener datos del body
-    const body = await req.json();
+    const body = (await req.json()) as { data: Array<Record<string, string | number | boolean | undefined | null>> };
     const { data: rows } = body;
 
     if (!Array.isArray(rows) || rows.length === 0) {
@@ -243,7 +255,7 @@ export async function POST(req: NextRequest) {
     const validRows: { data: ImportRow; rowIndex: number }[] = [];
     for (let i = 0; i < rows.length; i++) {
       const validation = validateRow(rows[i], i + 2);
-      if (validation.warnings) {
+      if (validation.warnings.length > 0) {
         result.warnings.push(...validation.warnings.map(w => ({ row: i + 2, message: w })));
       }
       if (!validation.valid || !validation.data) {
@@ -289,38 +301,24 @@ export async function POST(req: NextRequest) {
           await tx.alert.create({
             data: {
               id: crypto.randomUUID(),
-              type: data.type as
-                | 'LOW_STOCK'
-                | 'OUT_OF_STOCK'
-                | 'ORDER_DELAYED'
-                | 'PAYMENT_FAILED'
-                | 'SYSTEM_ERROR'
-                | 'NEW_ORDER'
-                | 'NEGATIVE_REVIEW'
-                | 'HIGH_VALUE_ORDER'
-                | 'NEW_USER'
-                | 'COUPON_EXPIRING'
-                | 'ORDER_CANCELLED'
-                | 'ORDER_STATUS_CHANGED'
-                | 'NEW_REVIEW'
-                | 'NEW_MESSAGE'
-                | 'PREPARING_ORDER',
-              severity: data.severity as 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL',
+              type: data.type as AlertType,
+              severity: data.severity as AlertSeverity,
               title: data.title,
               message: data.message,
               productId: data.productId,
               orderId: data.orderId,
               userId: data.userId,
               couponId: data.couponId,
-              status: data.status as 'PENDING' | 'IN_PROGRESS' | 'RESOLVED' | 'IGNORED',
+              status: data.status as AlertStatus,
             },
           });
 
           result.imported++;
-        } catch (error) {
+        } catch (error: unknown) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
           result.errors.push({
             row: rowIndex,
-            message: `Error al crear alerta: ${(error as Error).message}`,
+            message: `Error al crear alerta: ${errorMessage}`,
           });
         }
       }

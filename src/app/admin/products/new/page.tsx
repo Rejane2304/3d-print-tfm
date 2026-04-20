@@ -260,7 +260,7 @@ export default function NuevoProductoPage() {
     // Calcular total de imágenes con archivos para subir
     const imagesWithFiles = images.filter(img => img.file);
     const totalImagesToUpload = imagesWithFiles.length;
-    let uploadedCount = 0;
+    const _unusedUploadedCount = 0;
     const failedUploads: { index: number; fileName: string; error: string }[] = [];
 
     if (totalImagesToUpload > 0) {

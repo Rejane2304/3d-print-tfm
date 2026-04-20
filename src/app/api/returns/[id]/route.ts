@@ -29,7 +29,7 @@ async function authenticateUser() {
 }
 
 // GET - Obtener detalle de devolución
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 

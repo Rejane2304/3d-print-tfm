@@ -15,7 +15,7 @@ import {
   translateProductShortDescription,
 } from '@/lib/i18n';
 
-export const GET = withErrorHandler(async (req: NextRequest, { params }: { params: Promise<{ slug: string }> }) => {
+export const GET = withErrorHandler(async (_req: NextRequest, { params }: { params: Promise<{ slug: string }> }) => {
   const { slug } = await params;
 
   if (!slug) {

@@ -15,19 +15,74 @@ import {
   translatePaymentStatus,
   translateProductName,
 } from '@/lib/i18n';
-import type { Invoice, Order, OrderItem, OrderMessage, Payment } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 
-interface OrderWithRelations extends Order {
-  items: (OrderItem & {
-    product: {
-      name: string;
-      slug: string;
-      images: { url: string }[];
-    } | null;
-  })[];
-  invoice: Invoice | null;
-  payment: Payment | null;
-  messages: OrderMessage[];
+// Producto incluido en item
+type ProductWithImages = {
+  name: string;
+  slug: string | null;
+  images: { url: string }[];
+};
+
+// Item con producto
+type OrderItemWithProduct = {
+  id: string;
+  quantity: number;
+  price: Prisma.Decimal | number;
+  subtotal: Prisma.Decimal | number;
+  product: ProductWithImages | null;
+};
+
+// Factura simplificada
+type OrderInvoice = {
+  id: string;
+  invoiceNumber: string;
+  isCancelled: boolean;
+  issuedAt: Date;
+};
+
+// Pago simplificado
+type OrderPayment = {
+  status: string;
+  method: string;
+  createdAt: Date;
+};
+
+// Mensaje simplificado
+type OrderMessageData = {
+  id: string;
+  message: string;
+  isFromCustomer: boolean;
+  createdAt: Date;
+};
+
+// Pedido con relaciones completas
+interface OrderWithRelations {
+  id: string;
+  orderNumber: string;
+  status: string;
+  subtotal: Prisma.Decimal | number;
+  shipping: Prisma.Decimal | number;
+  discount: Prisma.Decimal | number | null;
+  total: Prisma.Decimal | number;
+  createdAt: Date;
+  updatedAt: Date;
+  shippingName: string | null;
+  shippingPhone: string | null;
+  shippingAddress: string | null;
+  shippingComplement: string | null;
+  shippingPostalCode: string | null;
+  shippingCity: string | null;
+  shippingProvince: string | null;
+  shippingCountry: string | null;
+  paymentMethod: string | null;
+  trackingNumber: string | null;
+  carrier: string | null;
+  customerNotes: string | null;
+  items: OrderItemWithProduct[];
+  invoice: OrderInvoice | null;
+  payment: OrderPayment | null;
+  messages: OrderMessageData[];
 }
 
 interface CouponInfo {
@@ -107,7 +162,7 @@ function transformOrder(pedido: OrderWithRelations, couponInfo: CouponInfo | nul
     numeroSeguimiento: pedido.trackingNumber,
     transportista: pedido.carrier,
     notasCliente: pedido.customerNotes,
-    items: pedido.items.map(item => ({
+    items: pedido.items.map((item: OrderItemWithProduct) => ({
       id: item.id,
       quantity: item.quantity,
       unitPrice: Number(item.price),
@@ -142,7 +197,7 @@ function transformOrder(pedido: OrderWithRelations, couponInfo: CouponInfo | nul
   };
 }
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 
@@ -206,7 +261,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     const couponInfo = await getCouponInfo(pedido.couponId);
-    const pedidoTransformado = transformOrder(pedido as OrderWithRelations, couponInfo);
+
+    const typedPedido = pedido as unknown as OrderWithRelations;
+    const pedidoTransformado = transformOrder(typedPedido, couponInfo);
 
     return NextResponse.json({ pedido: pedidoTransformado });
   } catch (error) {

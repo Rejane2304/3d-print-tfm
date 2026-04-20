@@ -116,7 +116,7 @@ export const PATCH = withErrorHandler(async (req: NextRequest, { params }: { par
 
 // DELETE /api/cart/[itemId] - Remove item
 export const DELETE = withErrorHandler(
-  async (req: NextRequest, { params }: { params: Promise<{ itemId: string }> }) => {
+  async (_req: NextRequest, { params }: { params: Promise<{ itemId: string }> }) => {
     const { itemId } = await params;
 
     // Verify authentication

@@ -9,7 +9,38 @@ import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
 import { translateOrderStatus, translatePaymentMethod, translatePaymentStatus } from '@/lib/i18n';
 
-export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+// Type definitions for client data
+interface OrderItem {
+  id: string;
+  name: string;
+  quantity: number;
+  price: number;
+  subtotal: number;
+}
+
+interface ClientOrderFull {
+  id: string;
+  orderNumber: string;
+  status: string;
+  total: number;
+  createdAt: Date;
+  items: OrderItem[];
+  payment: { status: string; method: string } | null;
+}
+
+interface ClientAddress {
+  id: string;
+  name: string;
+  recipient: string;
+  phone: string | null;
+  address: string;
+  postalCode: string;
+  city: string;
+  province: string;
+  isDefault: boolean;
+}
+
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 
@@ -65,12 +96,17 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     }
 
     // Calculate statistics
-    const totalOrders = client.orders.length;
-    const totalSpent = client.orders.filter(o => o.status !== 'CANCELLED').reduce((sum, o) => sum + Number(o.total), 0);
+    const orders = client.orders as unknown as ClientOrderFull[];
+    const totalOrders = orders.length;
+    const totalSpent = orders
+      .filter(o => o.status !== 'CANCELLED')
+      .reduce((sum: number, o) => sum + Number(o.total), 0);
 
-    const completedOrders = client.orders.filter(o => o.status === 'DELIVERED').length;
+    const completedOrders = orders.filter(o => o.status === 'DELIVERED').length;
 
-    const pendingOrders = client.orders.filter(o => ['PENDING', 'CONFIRMED', 'PREPARING'].includes(o.status)).length;
+    const pendingOrders = orders.filter(o => ['PENDING', 'CONFIRMED', 'PREPARING'].includes(o.status)).length;
+
+    const addresses = client.addresses as unknown as ClientAddress[];
 
     return NextResponse.json({
       success: true,
@@ -82,7 +118,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         activo: client.isActive,
         creadoEn: client.createdAt,
         ultimoAcceso: client.lastAccess,
-        addresses: client.addresses.map(addr => ({
+        addresses: addresses.map((addr: ClientAddress) => ({
           id: addr.id,
           name: addr.name,
           recipient: addr.recipient,
@@ -93,11 +129,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
           province: addr.province,
           isDefault: addr.isDefault,
         })),
-        orders: client.orders.map(order => ({
+        orders: orders.map((order: ClientOrderFull) => ({
           id: order.id,
           numeroPedido: order.orderNumber,
           estado: translateOrderStatus(order.status),
-          total: order.total,
+          total: Number(order.total),
           createdAt: order.createdAt,
           itemCount: order.items.length,
           pagoEstado: translatePaymentStatus(order.payment?.status || 'PENDING'),

@@ -33,7 +33,7 @@ const faqUpdateSchema = z.object({
 });
 
 // GET - Obtener FAQ
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 
@@ -148,7 +148,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 }
 
 // DELETE - Eliminar FAQ
-export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 

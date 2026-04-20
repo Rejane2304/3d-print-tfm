@@ -4,8 +4,6 @@
  */
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { z } from 'zod';
-import { Material } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { translateCategoryName, translateErrorMessage } from '@/lib/i18n';
 import { rmdir } from 'node:fs/promises';
@@ -18,6 +16,7 @@ import {
   updateProductTransaction,
   transformProductForPutResponse,
   type UpdateProductData,
+  type MaterialType,
 } from './processor';
 
 // Transform product for GET response
@@ -40,7 +39,7 @@ function transformProductForResponse(product: {
   minStock: number;
   categoryId: string | null;
   category: { slug: string } | null;
-  material: Material;
+  material: MaterialType;
   widthCm: unknown;
   heightCm: unknown;
   depthCm: unknown;
@@ -106,7 +105,7 @@ async function deleteProductDirectory(productSlug: string): Promise<void> {
 }
 
 // GET handler
-export async function GET(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   try {
     const auth = await verifyAdminAuth();
     if (auth.error) {
@@ -150,7 +149,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ slug
 }
 
 // DELETE handler
-export async function DELETE(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   try {
     const auth = await verifyAdminAuth();
     if (auth.error) {

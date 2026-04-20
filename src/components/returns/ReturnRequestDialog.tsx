@@ -5,7 +5,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { X, Package, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 interface OrderItem {

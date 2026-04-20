@@ -8,7 +8,11 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
 import { z } from 'zod';
-import type { OrderStatus, PaymentMethod, Material } from '@prisma/client';
+
+// Type definitions for enums (local types)
+type OrderStatus = 'PENDING' | 'CONFIRMED' | 'PREPARING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
+type PaymentMethod = 'CARD' | 'PAYPAL' | 'BIZUM' | 'TRANSFER';
+type Material = 'PLA' | 'PETG';
 
 const orderItemSchema = z.object({
   productId: z.string().uuid('ID de producto inválido'),
@@ -82,7 +86,7 @@ export async function processOrdersImport(req: NextRequest): Promise<Response> {
 }
 
 // Authentication
-async function verifyAdminAuth(req: NextRequest): Promise<NextResponse | null> {
+async function verifyAdminAuth(_req: NextRequest): Promise<NextResponse | null> {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
     return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });

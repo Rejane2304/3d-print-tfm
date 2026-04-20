@@ -4,7 +4,7 @@
  */
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { StarRating } from '@/components/ui/StarRating';
 import { CheckCircle2, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 

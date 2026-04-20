@@ -8,7 +8,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
 import { z } from 'zod';
-import type { CouponType } from '@prisma/client';
+
+// Type definition for CouponType (local type)
+type CouponType = 'PERCENTAGE' | 'FIXED' | 'FREE_SHIPPING';
 
 const couponImportSchema = z.object({
   code: z.string().min(3, 'Código debe tener al menos 3 caracteres').max(50, 'Máximo 50 caracteres'),
@@ -69,7 +71,7 @@ export async function processCouponsImport(req: NextRequest): Promise<Response> 
 }
 
 // Authentication
-async function verifyAdminAuth(req: NextRequest): Promise<NextResponse | null> {
+async function verifyAdminAuth(_req: NextRequest): Promise<NextResponse | null> {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
     return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
@@ -199,9 +201,12 @@ function handleRowError(error: unknown): string {
   return error instanceof Error ? error.message : 'Error desconocido';
 }
 
+// Coupon data type
+type CouponData = { code: string };
+
 // Get existing codes
 async function getExistingCodes(): Promise<Set<string>> {
-  const coupons = await prisma.coupon.findMany({ select: { code: true } });
+  const coupons: CouponData[] = await prisma.coupon.findMany({ select: { code: true } });
   return new Set(coupons.map(c => c.code.toUpperCase()));
 }
 

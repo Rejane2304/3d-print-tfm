@@ -85,7 +85,7 @@ export function CouponSelector({
     }
   };
 
-  const handleSelectCoupon = async (couponCode: string, couponCodeRaw: string) => {
+  const handleSelectCoupon = async (_couponCode: string, couponCodeRaw: string) => {
     setLoading(true);
     setError(null);
     try {

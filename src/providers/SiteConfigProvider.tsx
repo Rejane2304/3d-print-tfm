@@ -6,7 +6,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 interface SiteConfig {
   _ref: string;

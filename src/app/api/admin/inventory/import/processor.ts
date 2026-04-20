@@ -8,8 +8,10 @@ import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { parse } from 'csv-parse/sync';
-import type { MovementType } from '@prisma/client';
 import { translateErrorMessage } from '@/lib/i18n';
+
+// Type definition for MovementType (local type)
+type MovementType = 'IN' | 'OUT' | 'ADJUSTMENT' | 'CANCELLATION' | 'RETURN';
 
 const REQUIRED_COLUMNS = ['productSlug', 'quantity', 'type', 'reason'];
 const VALID_MOVEMENT_TYPES = ['IN', 'OUT', 'ADJUSTMENT'];
@@ -78,7 +80,7 @@ export async function processInventoryImport(req: NextRequest): Promise<Response
 }
 
 // Authentication
-async function verifyAdminAuth(req: NextRequest): Promise<{ userId: string } | NextResponse> {
+async function verifyAdminAuth(_req: NextRequest): Promise<{ userId: string } | NextResponse> {
   const session = await getServerSession(authOptions).catch(() => null);
 
   if (!session?.user?.email) {
@@ -219,7 +221,7 @@ async function validateInventoryRow(
     }
   }
 
-  let productInfo = findProduct(data.productSlug, ctx.productsMap);
+  const productInfo = findProduct(data.productSlug, ctx.productsMap);
   if (!productInfo) {
     errors.push(`No existe un producto con el slug '${data.productSlug}'`);
   } else if (quantity && type) {
@@ -230,9 +232,14 @@ async function validateInventoryRow(
   return { row: rowNum, data, errors, valid: errors.length === 0, productInfo };
 }
 
+// Product data type
+type ProductData = { id: string; slug: string; name: string; stock: number };
+
 // Get products map
 async function getProductsMap(): Promise<Map<string, { id: string; name: string; currentStock: number }>> {
-  const products = await prisma.product.findMany({ select: { id: true, slug: true, name: true, stock: true } });
+  const products: ProductData[] = await prisma.product.findMany({
+    select: { id: true, slug: true, name: true, stock: true },
+  });
   return new Map(products.map(p => [p.slug, { id: p.id, name: p.name, currentStock: p.stock }]));
 }
 
@@ -299,10 +306,7 @@ function buildMovementData(
 
 // Process single row
 async function processInventoryRow(
-  tx: {
-    product: { update: typeof prisma.product.update };
-    inventoryMovement: { create: typeof prisma.inventoryMovement.create };
-  },
+  tx: TransactionClient,
   row: CSVPreviewRow,
   userId: string,
   result: ImportResult,
@@ -346,11 +350,14 @@ async function processInventoryRow(
   }
 }
 
+// Transaction client type
+type TransactionClient = Parameters<Parameters<typeof prisma.$transaction>[0]>[0];
+
 // Import movements
 async function importMovements(validRows: CSVPreviewRow[], userId: string): Promise<ImportResult> {
   const result: ImportResult = { imported: 0, errors: [], skipped: 0 };
 
-  await prisma.$transaction(async tx => {
+  await prisma.$transaction(async (tx: TransactionClient) => {
     for (const row of validRows) {
       await processInventoryRow(tx, row, userId, result);
     }

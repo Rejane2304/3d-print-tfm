@@ -84,7 +84,7 @@ export async function processCategoriesImport(req: NextRequest): Promise<Respons
 }
 
 // Auth check
-async function checkAuth(req: NextRequest): Promise<NextResponse | null> {
+async function checkAuth(_req: NextRequest): Promise<NextResponse | null> {
   const session = await getServerSession(authOptions).catch(() => null);
 
   if (!session?.user?.email) {
@@ -126,7 +126,7 @@ async function parseCSVFile(
 
 // Get existing slugs
 async function getExistingSlugs(): Promise<Set<string>> {
-  const categories = await prisma.category.findMany({ select: { slug: true } });
+  const categories: Array<{ slug: string }> = await prisma.category.findMany({ select: { slug: true } });
   return new Set(categories.map(c => c.slug));
 }
 

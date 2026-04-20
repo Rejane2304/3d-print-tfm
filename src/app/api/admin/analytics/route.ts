@@ -354,7 +354,8 @@ export async function GET(req: NextRequest) {
     });
 
     const statusCounts: Record<string, number> = {};
-    orderStats[8].forEach((s: { status: string; _count: { status: number } }) => {
+    const statusData = orderStats[8] as Array<{ status: string; _count: { status: number } }>;
+    statusData.forEach(s => {
       const translatedStatus = translateOrderStatus(s.status);
       statusCounts[translatedStatus] = s._count.status;
     });

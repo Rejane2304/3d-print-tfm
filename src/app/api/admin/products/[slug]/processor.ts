@@ -6,11 +6,13 @@ import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
-import { Material } from '@prisma/client';
-import { translateErrorMessage } from '@/lib/i18n';
 import { unlink } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
+
+// Material type definition
+type Material = 'PLA' | 'PETG';
+export type MaterialType = Material;
 
 interface ImageUpdate {
   url: string;
@@ -37,7 +39,7 @@ const updateProductSchema = z.object({
   previousPrice: z.coerce.number().optional().nullable(),
   stock: z.coerce.number().int().min(0).optional(),
   categoryId: z.string().uuid().optional(),
-  material: z.nativeEnum(Material).optional(),
+  material: z.enum(['PLA', 'PETG']).optional(),
   widthCm: z.coerce.number().optional().nullable(),
   heightCm: z.coerce.number().optional().nullable(),
   depthCm: z.coerce.number().optional().nullable(),
@@ -139,8 +141,8 @@ async function findImagesToDelete(
   newImages: Array<{ url: string }>,
 ): Promise<Array<{ url: string; filename: string; id: string }>> {
   const currentImages = await tx.productImage.findMany({ where: { productId } });
-  const newImageUrls = new Set(newImages.map(img => img.url));
-  return currentImages.filter(img => !newImageUrls.has(img.url));
+  const newImageUrls = new Set(newImages.map((img: { url: string }) => img.url));
+  return currentImages.filter((img: { url: string }) => !newImageUrls.has(img.url));
 }
 
 // Delete image files
@@ -218,7 +220,7 @@ export function transformProductForPutResponse(product: {
   previousPrice: unknown;
   stock: number;
   categoryId: string | null;
-  material: Material;
+  material: MaterialType;
   widthCm: unknown;
   heightCm: unknown;
   depthCm: unknown;
@@ -258,12 +260,15 @@ export function transformProductForPutResponse(product: {
   };
 }
 
+// Transaction type definition (use Prisma.TransactionClient)
+type TransactionClient = Parameters<Parameters<typeof prisma.$transaction>[0]>[0];
+
 // Update product in transaction
 export async function updateProductTransaction(
   existingProduct: { id: string; slug: string; nameEs: string },
   data: UpdateProductData,
 ): Promise<unknown> {
-  return prisma.$transaction(async tx => {
+  return prisma.$transaction(async (tx: TransactionClient) => {
     const updateData = buildProductUpdateData(data, existingProduct.slug);
 
     const updated = await tx.product.update({
@@ -274,8 +279,8 @@ export async function updateProductTransaction(
     if (data.images) {
       const productName = data.nameEs || existingProduct.nameEs;
       const imagesWithUrl = data.images
-        .filter(img => img.url !== undefined && img.url !== '')
-        .map(img => ({ url: img.url, isMain: img.isMain ?? false }));
+        .filter((img: { url: string }) => img.url !== undefined && img.url !== '')
+        .map((img: { url: string; isMain?: boolean }) => ({ url: img.url, isMain: img.isMain ?? false }));
       await handleImagesUpdate(tx, existingProduct.id, existingProduct.slug, imagesWithUrl, productName);
     }
 

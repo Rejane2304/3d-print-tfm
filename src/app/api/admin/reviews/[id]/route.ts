@@ -103,7 +103,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 }
 
 // DELETE - Eliminar reseña
-export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 

@@ -67,36 +67,45 @@ export async function GET() {
 
     // Transformar a formato español esperado por el frontend
     // Traducir enums de inglés (BD) a español (UI)
-    const pedidos = pedidosRaw.map(pedido => ({
-      id: pedido.id,
-      numeroPedido: pedido.orderNumber,
-      estado: translateOrderStatus(pedido.status),
-      total: pedido.total,
-      createdAt: pedido.createdAt,
-      items: pedido.items.map(item => ({
-        id: item.id,
-        quantity: item.quantity,
-        unitPrice: item.price,
-        producto: {
-          nombre: item.product?.slug ? translateProductName(item.product.slug) : 'Producto',
-          slug: item.product?.slug || '',
-          images: item.product?.images || [],
-        },
-      })),
-      factura: pedido.invoice
-        ? {
-            id: pedido.invoice.id,
-            numeroFactura: pedido.invoice.invoiceNumber,
-            anulada: pedido.invoice.isCancelled,
-          }
-        : undefined,
-      pago: pedido.payment
-        ? {
-            estado: translatePaymentStatus(pedido.payment.status),
-            metodo: translatePaymentMethod(pedido.payment.method),
-          }
-        : undefined,
-    }));
+    const pedidos = pedidosRaw.map(pedido => {
+      const typedItems = pedido.items as Array<{
+        id: string;
+        quantity: number;
+        price: number | { toNumber: () => number };
+        product?: { slug: string | null; images?: { url: string }[] } | null;
+      }>;
+
+      return {
+        id: pedido.id,
+        numeroPedido: pedido.orderNumber,
+        estado: translateOrderStatus(pedido.status),
+        total: typeof pedido.total === 'object' ? pedido.total.toNumber() : pedido.total,
+        createdAt: pedido.createdAt,
+        items: typedItems.map(item => ({
+          id: item.id,
+          quantity: item.quantity,
+          unitPrice: typeof item.price === 'object' ? item.price.toNumber() : item.price,
+          producto: {
+            nombre: item.product?.slug ? translateProductName(item.product.slug) : 'Producto',
+            slug: item.product?.slug || '',
+            images: item.product?.images || [],
+          },
+        })),
+        factura: pedido.invoice
+          ? {
+              id: pedido.invoice.id,
+              numeroFactura: pedido.invoice.invoiceNumber,
+              anulada: pedido.invoice.isCancelled,
+            }
+          : undefined,
+        pago: pedido.payment
+          ? {
+              estado: translatePaymentStatus(pedido.payment.status),
+              metodo: translatePaymentMethod(pedido.payment.method),
+            }
+          : undefined,
+      };
+    });
 
     return NextResponse.json({ pedidos });
   } catch (error) {

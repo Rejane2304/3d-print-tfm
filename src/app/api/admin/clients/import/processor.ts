@@ -45,7 +45,7 @@ export async function processClientsImport(req: NextRequest): Promise<Response> 
 }
 
 // Authentication
-async function verifyAdminAuth(req: NextRequest): Promise<NextResponse | null> {
+async function verifyAdminAuth(_req: NextRequest): Promise<NextResponse | null> {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
     return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
@@ -169,7 +169,7 @@ function handleRowError(error: unknown): string {
 
 // Get existing emails
 async function getExistingEmails(): Promise<Set<string>> {
-  const users = await prisma.user.findMany({ select: { email: true } });
+  const users: { email: string }[] = await prisma.user.findMany({ select: { email: true } });
   return new Set(users.map(u => u.email.toLowerCase()));
 }
 

@@ -12,7 +12,7 @@ import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
 import { withErrorHandler } from '@/lib/errors/api-wrapper';
 
-export const POST = withErrorHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+export const POST = withErrorHandler(async (_req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   const { id } = await params;
 
   const session = await getServerSession(authOptions);

@@ -9,27 +9,21 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
-import type { Prisma } from '@prisma/client';
 import { COMPANY_CONFIG, generatePDF } from '@/lib/invoices/pdf-generator';
 import { generateInvoiceHTML } from '@/lib/invoices/invoice-template';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-// Type for invoice with order
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-type InvoiceWithOrder = Prisma.InvoiceGetPayload<{
-  include: {
-    order: {
-      include: {
-        items: {
-          include: {
-            product: true;
-          };
-        };
-      };
-    };
-  };
-}>;
+// Type for invoice item
+interface InvoiceItem {
+  name: string;
+  quantity: number;
+  price: number;
+  subtotal: number;
+  product: {
+    images: { url: string }[];
+  } | null;
+}
 
 /**
  * Convierte una imagen a base64
@@ -69,7 +63,7 @@ async function getImageAsBase64(imageUrl: string): Promise<string | undefined> {
   }
 }
 
-export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 
@@ -116,7 +110,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
     // Procesar items y convertir imágenes a base64
     const itemsWithBase64Images = await Promise.all(
-      factura.order?.items.map(async item => {
+      ((factura.order?.items as unknown as InvoiceItem[]) || []).map(async (item: InvoiceItem) => {
         const imageUrl = item.product?.images?.[0]?.url;
         const base64Image = imageUrl ? await getImageAsBase64(imageUrl) : undefined;
 

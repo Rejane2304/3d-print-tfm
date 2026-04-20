@@ -10,7 +10,7 @@ import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { z } from 'zod';
-import type { AlertSeverity, AlertStatus, AlertType, Prisma } from '@prisma/client';
+import type { Prisma, AlertType, AlertSeverity, AlertStatus } from '@prisma/client';
 import {
   translateAlertSeverity,
   translateAlertStatus,
@@ -122,15 +122,17 @@ export async function GET(req: NextRequest) {
     // Translate only for UI, keep original values
     const translatedAlertas = alertas.map(alerta => {
       // Traducir nombre del producto si existe
-      const productNameTranslated = alerta.product ? translateProductName(alerta.product.slug) : null;
+      const productNameTranslated = alerta.product?.slug ? translateProductName(alerta.product.slug) : null;
 
       // Reconstruir título y mensaje con nombre traducido
-      const titleTranslated = productNameTranslated
-        ? alerta.title.replace(alerta.product!.name, productNameTranslated)
-        : alerta.title;
-      const messageTranslated = productNameTranslated
-        ? alerta.message.replace(alerta.product!.name, productNameTranslated)
-        : alerta.message;
+      const titleTranslated =
+        productNameTranslated && alerta.product
+          ? alerta.title.replace(alerta.product.name, productNameTranslated)
+          : alerta.title;
+      const messageTranslated =
+        productNameTranslated && alerta.product
+          ? alerta.message.replace(alerta.product.name, productNameTranslated)
+          : alerta.message;
 
       return {
         id: alerta.id,

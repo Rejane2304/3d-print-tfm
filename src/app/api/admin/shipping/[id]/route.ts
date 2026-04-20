@@ -79,7 +79,7 @@ function formatShippingZone(zone: ShippingZone) {
 }
 
 // GET - Obtener Zona de Envío
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 
@@ -198,7 +198,7 @@ function buildUpdateData(data: Partial<z.infer<typeof shippingZoneUpdateSchema>>
 }
 
 // DELETE - Eliminar Zona de Envío
-export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 

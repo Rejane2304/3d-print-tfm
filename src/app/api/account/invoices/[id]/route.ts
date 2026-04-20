@@ -10,7 +10,7 @@ import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
 import { translateProductName } from '@/lib/i18n';
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 
@@ -114,15 +114,24 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       paymentMethod: factura.order?.paymentMethod || 'CARD',
 
       // Items
-      items: (factura.order?.items || []).map(item => ({
-        id: item.id || '',
-        name: item.product?.slug ? translateProductName(item.product.slug) : item.name || 'Producto',
-        quantity: item.quantity || 1,
-        price: Number(item.price) || 0,
-        subtotal: Number(item.subtotal) || 0,
-        image: item.product?.images?.[0]?.url || undefined,
-        description: item.product?.description || undefined,
-      })),
+      items: (factura.order?.items || []).map(
+        (item: {
+          id: string;
+          product?: { slug: string | null; description?: string | null; images?: { url: string }[] } | null;
+          name: string;
+          quantity: number;
+          price: unknown;
+          subtotal: unknown;
+        }) => ({
+          id: item.id || '',
+          name: item.product?.slug ? translateProductName(item.product.slug) : item.name || 'Producto',
+          quantity: item.quantity || 1,
+          price: Number(item.price) || 0,
+          subtotal: Number(item.subtotal) || 0,
+          image: item.product?.images?.[0]?.url || undefined,
+          description: item.product?.description || undefined,
+        }),
+      ),
     };
 
     return NextResponse.json({ factura: facturaFormateada });

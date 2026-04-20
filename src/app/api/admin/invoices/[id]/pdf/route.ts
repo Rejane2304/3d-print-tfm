@@ -15,9 +15,9 @@ import { COMPANY_CONFIG, generatePDF } from '@/lib/invoices/pdf-generator';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-// Type for invoice with order
+// Type for invoice with order - kept for future use
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-type InvoiceWithOrder = Prisma.InvoiceGetPayload<{
+export type _InvoiceWithOrder = Prisma.InvoiceGetPayload<{
   include: {
     order: {
       include: {
@@ -71,7 +71,7 @@ async function getImageAsBase64(imageUrl: string): Promise<string | undefined> {
   }
 }
 
-export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 

@@ -3,7 +3,7 @@
  * POST /api/admin/categories/import
  */
 import type { NextRequest } from 'next/server';
-import { NextResponse } from 'next/server';
+
 import { processCategoriesImport } from './processor';
 
 export async function POST(req: NextRequest): Promise<Response> {

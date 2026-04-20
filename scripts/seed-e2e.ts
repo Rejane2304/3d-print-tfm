@@ -4,7 +4,8 @@
  * Populates the test database with required data
  */
 
-import { Material, PrismaClient, Role } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
+import { Material, Role } from '../src/types/prisma-enums';
 
 import * as bcrypt from 'bcrypt';
 

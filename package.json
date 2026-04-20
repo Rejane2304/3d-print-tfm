@@ -57,6 +57,7 @@
     "db:seed:prod": "tsx scripts/seed-prod-with-confirmation.ts",
     "db:studio:prod:blocked": "echo '❌ ERROR: Prisma Studio en producción está BLOQUEADO por seguridad.' && echo 'Motivo: Evitar modificación/eliminación accidental de datos reales.' && exit 1",
     "db:reset:dev": "tsx scripts/db-reset-dev.ts",
+    "quality:check": "./scripts/quality-gate-zero.sh",
     "prepare": "husky",
     "pre-commit": "lint-staged"
   },

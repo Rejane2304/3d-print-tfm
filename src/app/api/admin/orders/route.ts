@@ -16,9 +16,8 @@ import { createOrderStatusChangedAlert } from '@/lib/alerts/alert-service';
 import { emitOrderStatusUpdated } from '@/lib/realtime/event-service';
 import { prepareStatusUpdate, validateStatusTransition } from '@/lib/orders/status-machine';
 
-// Validation schema for update
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const actualizarPedidoSchema = z.object({
+// Validation schema for update - kept for future reference
+const _actualizarPedidoSchema = z.object({
   status: z.enum(['PENDING', 'CONFIRMED', 'PREPARING', 'SHIPPED', 'DELIVERED', 'CANCELLED']),
   internalNotes: z.string().optional(),
   shippedAt: z.string().datetime().optional(),
@@ -37,8 +36,7 @@ const estadoToEnglish: Record<string, string> = {
 };
 
 // Mapping of statuses from English to Spanish
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const englishToEstado: Record<string, string> = {
+const _englishToEstado: Record<string, string> = {
   PENDING: 'Pendiente',
   CONFIRMED: 'Confirmado',
   PREPARING: 'En preparación',

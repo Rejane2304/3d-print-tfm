@@ -5,8 +5,6 @@
 
 'use client';
 
-import React from 'react';
-
 interface ReturnStatusBadgeProps {
   status: string;
   className?: string;

@@ -26,7 +26,7 @@ export function useCartPersistence() {
 
   useEffect(() => {
     if (isLoading) {
-      return;
+      return undefined;
     }
 
     // For NON-authenticated users
