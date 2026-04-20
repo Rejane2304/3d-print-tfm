@@ -13,7 +13,7 @@ const envPath = resolve(process.cwd(), '.env.local');
 config({ path: envPath });
 
 // Usar DIRECT_URL para Prisma Studio (requiere conexión directa, no pgbouncer)
-const databaseUrl = process.env.DIRECT_URL || process.env.DATABASE_URL;
+let databaseUrl = process.env.DIRECT_URL || process.env.DATABASE_URL;
 
 if (!databaseUrl) {
   console.error('❌ Error: DIRECT_URL o DATABASE_URL no están definidos en .env.local');
@@ -32,8 +32,14 @@ if (!databaseUrl.includes('localhost') && !databaseUrl.includes('hkjknnymctorucy
   process.exit(1);
 }
 
+// Para Supabase, asegurar que la URL tenga sslmode=require
+if (databaseUrl.includes('supabase.co') && !databaseUrl.includes('sslmode=')) {
+  const separator = databaseUrl.includes('?') ? '&' : '?';
+  databaseUrl = `${databaseUrl}${separator}sslmode=require`;
+}
+
 console.log('🎨 Abriendo Prisma Studio en BD de desarrollo...');
-console.log('   Usando DIRECT_URL para conexión directa (sin pgbouncer)');
+console.log('   Usando DIRECT_URL con SSL requerido');
 
 const result = spawnSync('npx', ['prisma', 'studio'], {
   stdio: 'inherit',
@@ -41,8 +47,6 @@ const result = spawnSync('npx', ['prisma', 'studio'], {
   env: {
     ...process.env,
     DATABASE_URL: databaseUrl,
-    // Deshabilitar SSL estricto para desarrollo local
-    PRISMA_CLIENT_ENGINE_TYPE: 'library',
   },
 });
 
