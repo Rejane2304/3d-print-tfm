@@ -50,6 +50,19 @@ jobs:
       - name: Generate Prisma Client
         run: npx prisma generate
 
+      - name: Wait for PostgreSQL
+        run: |
+          for i in {1..30}; do
+            if pg_isready -h localhost -p 5433; then
+              echo "PostgreSQL is ready"
+              exit 0
+            fi
+            echo "Waiting for PostgreSQL... attempt $i/30"
+            sleep 1
+          done
+          echo "PostgreSQL failed to start"
+          exit 1
+
       - name: Run database migrations
         run: npx prisma migrate deploy
         env:
