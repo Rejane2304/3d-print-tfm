@@ -52,18 +52,12 @@ SCHEMA_RESULT=$(cat /tmp/schema_check.txt)
 
 if echo "$SCHEMA_RESULT" | grep -q "SCHEMA_MISMATCH"; then
   echo "⚠️  Schema desincronizado detectado"
-  echo "🔧 Intentando sincronizar con db push..."
+  echo "🔧 Ejecutando migración de columnas bilingües..."
   
-  set +e
-  npx prisma db push --accept-data-loss --skip-generate 2>&1
-  DB_PUSH_EXIT=$?
-  set -e
+  # Ejecutar script de migración que maneja datos existentes
+  node scripts/migrate-bilingual-columns.js
   
-  if [ $DB_PUSH_EXIT -eq 0 ]; then
-    echo "✅ Schema sincronizado con db push"
-  else
-    echo "⚠️  db push falló, continuando con migrate deploy..."
-  fi
+  echo "✅ Columnas bilingües migradas exitosamente"
 else
   echo "✅ Schema verificado correctamente"
 fi
