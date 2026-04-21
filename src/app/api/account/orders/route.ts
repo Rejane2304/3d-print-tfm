@@ -75,11 +75,32 @@ export async function GET() {
         product?: { slug: string | null; images?: { url: string }[] } | null;
       }>;
 
+      // Calcular valores para mostrar el desglose
+      const subtotal = typedItems.reduce((sum, item) => {
+        const price = typeof item.price === 'object' ? item.price.toNumber() : item.price;
+        return sum + price * item.quantity;
+      }, 0);
+
+      const discount = pedido.discount
+        ? typeof pedido.discount === 'object'
+          ? pedido.discount.toNumber()
+          : pedido.discount
+        : 0;
+      const shipping = pedido.shipping
+        ? typeof pedido.shipping === 'object'
+          ? pedido.shipping.toNumber()
+          : pedido.shipping
+        : 0;
+      const total = typeof pedido.total === 'object' ? pedido.total.toNumber() : pedido.total;
+
       return {
         id: pedido.id,
         numeroPedido: pedido.orderNumber,
         estado: translateOrderStatus(pedido.status),
-        total: typeof pedido.total === 'object' ? pedido.total.toNumber() : pedido.total,
+        subtotal,
+        discount,
+        shipping,
+        total,
         createdAt: pedido.createdAt,
         items: typedItems.map(item => ({
           id: item.id,

@@ -33,6 +33,9 @@ interface Order {
   id: string;
   numeroPedido: string;
   estado: string;
+  subtotal: number;
+  discount: number;
+  shipping: number;
   total: number;
   createdAt: string;
   items: Array<{
@@ -444,9 +447,20 @@ export default function MyOrdersPage() {
 
                       {/* Total y acciones */}
                       <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2">
-                        <span className="text-xl sm:text-2xl font-bold text-gray-900">
-                          {Number(order.total).toFixed(2)} €
-                        </span>
+                        <div className="text-right">
+                          {/* Mostrar desglose si hay descuento */}
+                          {order.discount > 0 && (
+                            <div className="text-xs text-gray-500 mb-1">
+                              <span className="line-through">
+                                {Number(order.subtotal + order.shipping).toFixed(2)} €
+                              </span>
+                              <span className="ml-1 text-green-600 font-medium">-{order.discount.toFixed(2)} €</span>
+                            </div>
+                          )}
+                          <span className="text-xl sm:text-2xl font-bold text-gray-900">
+                            {Number(order.total).toFixed(2)} €
+                          </span>
+                        </div>
                         <Link
                           href={`/account/orders/${order.id}`}
                           className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-800 font-medium text-xs sm:text-sm"
