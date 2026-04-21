@@ -77,15 +77,30 @@ function AuthContent() {
 
   // Handle login success - migrate cart and redirect
   const handleLoginSuccess = async () => {
-    await migrateCart();
-    // Set flag to indicate cart was just migrated
-    sessionStorage.setItem('cartMigrated', Date.now().toString());
-    clearMigrationFlag();
-    globalThis.dispatchEvent(new Event('cartUpdated'));
+    try {
+      // Esperar a que la migración se complete
+      const result = await migrateCart();
 
-    // Always redirect to callbackUrl after login
-    // This ensures checkout flow continues properly
-    router.push(callbackUrl);
+      if (result.migratedCount > 0) {
+        console.log(`[Auth] Migrated ${result.migratedCount} cart items`);
+        // Esperar sincronización con BD
+        await new Promise(resolve => setTimeout(resolve, 800));
+      }
+
+      // Set flag to indicate cart was just migrated
+      sessionStorage.setItem('cartMigrated', Date.now().toString());
+      clearMigrationFlag();
+
+      // Trigger cart update event
+      globalThis.dispatchEvent(new Event('cartUpdated'));
+
+      // Always redirect to callbackUrl after login
+      router.push(callbackUrl);
+    } catch (error) {
+      console.error('[Auth] Migration failed:', error);
+      // Aún así redirigir al callbackUrl
+      router.push(callbackUrl);
+    }
   };
 
   // Handle register success - switch to login tab

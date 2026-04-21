@@ -1,5 +1,6 @@
 /**
  * Hook para manejar la migración del carrito desde localStorage
+ * Optimizado para producción con manejo de errores
  */
 import { useCallback } from 'react';
 
@@ -43,6 +44,7 @@ export function useCartMigration() {
 
   const clearMigrationFlag = useCallback(() => {
     sessionStorage.removeItem('migratingCart');
+    sessionStorage.removeItem('cartMigrated');
   }, []);
 
   const migrateItem = async (item: CartItem): Promise<MigrationResult> => {
@@ -68,20 +70,32 @@ export function useCartMigration() {
     }
   };
 
-  const migrateCart = async (): Promise<void> => {
+  const migrateCart = async (): Promise<{ success: boolean; migratedCount: number }> => {
     const items = getLocalCart();
     if (!items) {
-      return;
+      return { success: true, migratedCount: 0 };
     }
 
     try {
-      // Migrar cada item
-      await Promise.allSettled(items.map(migrateItem));
+      // Migrar cada item secuencialmente para evitar sobrecarga
+      let migratedCount = 0;
+      for (const item of items) {
+        const result = await migrateItem(item);
+        if (result.success) {
+          migratedCount++;
+        }
+      }
 
-      // Limpiar localStorage después de la migración
+      // Limpiar localStorage después de la migración exitosa
       localStorage.removeItem(cartStorageKey);
-    } catch {
-      // Error silently handled - migration continues with other items
+
+      // Esperar un momento para que la BD se sincronice
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      return { success: true, migratedCount };
+    } catch (error) {
+      console.error('Cart migration error:', error);
+      return { success: false, migratedCount: 0 };
     }
   };
 
