@@ -19,6 +19,21 @@ jobs:
     name: Quality Check
     runs-on: ubuntu-latest
     
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpassword123
+          POSTGRES_DB: 3dprint_tfm_test
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -35,6 +50,12 @@ jobs:
       - name: Generate Prisma Client
         run: npx prisma generate
 
+      - name: Run database migrations
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          DIRECT_URL: ${{ env.DIRECT_URL }}
+
       - name: Run TypeScript Type Check
         run: npx tsc --noEmit
         # Falla si hay errores de tipo
@@ -45,6 +66,9 @@ jobs:
 
       - name: Build Application
         run: npm run build
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          DIRECT_URL: ${{ env.DIRECT_URL }}
         # El build verifica TypeScript y construcción completa
 
   # ============================================
