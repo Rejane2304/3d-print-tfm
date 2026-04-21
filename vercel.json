@@ -1,5 +1,5 @@
 {
-  "buildCommand": "prisma generate && next build",
+  "buildCommand": "export DIRECT_URL=$\u0026DATABASE_URL npx tsx scripts/vercel-build-with-baseline.sh",
   "crons": [
     {
       "path": "/api/cron/expired-orders",
