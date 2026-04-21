@@ -59,7 +59,8 @@
     "db:reset:dev": "tsx scripts/db-reset-dev.ts",
     "quality:check": "./scripts/quality-gate-zero.sh",
     "prepare": "husky",
-    "pre-commit": "lint-staged"
+    "pre-commit": "lint-staged",
+    "db:baseline:prod": "NODE_ENV=production tsx scripts/db-baseline-prod.ts"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
