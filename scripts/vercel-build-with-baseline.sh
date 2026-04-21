@@ -62,34 +62,74 @@ else
   echo "✅ Schema verificado correctamente"
 fi
 
-# Paso 3: Intentar migraciones (con manejo de baseline automático)
+# Paso 3: Intentar migraciones (con manejo de baseline automático y reintentos)
 echo ""
 echo "🗄️  Paso 3: Aplicando migraciones..."
 
-# Capturar output y código de salida del migrate deploy
-set +e
-OUTPUT=$(npx prisma migrate deploy 2>&1)
-EXIT_CODE=$?
-set -e
-
-if [ $EXIT_CODE -ne 0 ]; then
-  # Verificar si es error P3005
-  if echo "$OUTPUT" | grep -q "P3005"; then
-    echo "⚠️  Detectada BD existente sin migraciones (P3005)"
-    echo "🔄 Ejecutando baseline automático..."
-    echo ""
+# Función para ejecutar migrate deploy con reintentos
+run_migrate_with_retry() {
+  local max_attempts=5
+  local attempt=1
+  local delay=5
+  
+  while [ $attempt -le $max_attempts ]; do
+    echo "🔄 Intento $attempt de $max_attempts..."
     
-    # Hacer baseline de la migración
-    npx prisma migrate resolve --applied 20260416100000_init_complete
-    echo "✅ Baseline completado"
-  else
-    # Si es otro error, mostrarlo y salir
+    set +e
+    OUTPUT=$(npx prisma migrate deploy 2>&1)
+    EXIT_CODE=$?
+    set -e
+    
+    if [ $EXIT_CODE -eq 0 ]; then
+      echo "✅ Migraciones aplicadas correctamente"
+      return 0
+    fi
+    
+    # Verificar si es error P3005 (baseline needed)
+    if echo "$OUTPUT" | grep -q "P3005"; then
+      echo "⚠️  Detectada BD existente sin migraciones (P3005)"
+      echo "🔄 Ejecutando baseline automático..."
+      
+      set +e
+      npx prisma migrate resolve --applied 20260416100000_init_complete
+      RESOLVE_EXIT=$?
+      set -e
+      
+      if [ $RESOLVE_EXIT -eq 0 ]; then
+        echo "✅ Baseline completado"
+        return 0
+      fi
+    fi
+    
+    # Verificar si es error de conexión (MaxClientsInSessionMode)
+    if echo "$OUTPUT" | grep -q "MaxClientsInSessionMode"; then
+      echo "⚠️  Pool de conexiones lleno, esperando ${delay}s..."
+      sleep $delay
+      # Aumentar delay para siguiente intento
+      delay=$((delay + 5))
+      attempt=$((attempt + 1))
+      continue
+    fi
+    
+    # Otro error, mostrar y continuar
     echo "❌ Error en migrate deploy:"
     echo "$OUTPUT"
-    exit 1
-  fi
-else
-  echo "✅ Migraciones aplicadas correctamente"
+    
+    # Si no es error de conexión, no reintentar
+    if ! echo "$OUTPUT" | grep -q "Connection\|pool\|timeout\|ECONNREFUSED"; then
+      return 1
+    fi
+    
+    sleep $delay
+    attempt=$((attempt + 1))
+  done
+  
+  echo "❌ Se agotaron los intentos de migración"
+  return 1
+}
+
+if ! run_migrate_with_retry; then
+  exit 1
 fi
 
 # Paso 4: Build de Next.js
