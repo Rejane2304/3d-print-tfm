@@ -353,15 +353,10 @@ async function createOrderTransaction(params: OrderTransactionParams) {
       // This prevents blocking inventory for abandoned payments
       // See: /api/webhooks/stripe/route.ts and /api/paypal/verify/route.ts
 
-      // 5. Empty the cart
-      const cart = await tx.cart.findFirst({
-        where: { userId },
-      });
-      if (cart) {
-        await tx.cartItem.deleteMany({
-          where: { cartId: cart.id },
-        });
-      }
+      // NOTE: Cart is NOT emptied here anymore
+      // Cart is emptied AFTER successful payment
+      // This allows users to retry payment if it fails
+      // See: /api/webhooks/stripe/route.ts, /api/paypal/verify/route.ts, etc.
 
       return { order, payment };
     },
