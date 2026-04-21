@@ -3,6 +3,8 @@
  * Muestra información completa de un producto traducida al español
  * Responsive: mobile → 4K
  */
+export const dynamic = 'force-dynamic';
+
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/db/prisma';
 import Link from 'next/link';
