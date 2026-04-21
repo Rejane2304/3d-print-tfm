@@ -5,13 +5,16 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import type { ReactNode } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import type { ReactPayPalScriptOptions } from '@paypal/react-paypal-js';
 
 // Dynamically import PayPal components to avoid SSR issues
 const DynamicPayPalScriptProvider = dynamic(
   () => import('@paypal/react-paypal-js').then(mod => mod.PayPalScriptProvider),
-  { ssr: false },
+  {
+    ssr: false,
+    loading: () => null,
+  },
 );
 
 interface PayPalProviderProps {
@@ -19,21 +22,39 @@ interface PayPalProviderProps {
 }
 
 export default function PayPalProvider({ children }: Readonly<PayPalProviderProps>) {
+  const [isClient, setIsClient] = useState(false);
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
 
-  if (!clientId) {
-    console.warn('PayPal: NEXT_PUBLIC_PAYPAL_CLIENT_ID no está configurado');
+  // Si no hay clientId o hay error, renderizar children sin PayPal
+  if (!clientId || hasError) {
+    if (!clientId && typeof window !== 'undefined') {
+      console.warn('[PayPal] NEXT_PUBLIC_PAYPAL_CLIENT_ID no está configurado');
+    }
+    if (hasError) {
+      console.warn('[PayPal] Deshabilitado debido a error previo');
+    }
     return <>{children}</>;
   }
 
-  // Determinar si es sandbox
-  // Sandbox IDs típicamente contienen "sb" en el string
+  // Validar formato del clientId (debe tener cierta longitud mínima)
+  if (clientId.length < 20) {
+    console.error('[PayPal] Client ID parece inválido (muy corto)');
+    return <>{children}</>;
+  }
+
+  // Determinar si es sandbox - solo IDs que contienen "sb-" o "sb_"
   const isSandbox = clientId.toLowerCase().includes('sb');
 
-  // Log para debugging
-  if (typeof window !== 'undefined') {
-    console.log('PayPal Mode:', isSandbox ? 'Sandbox' : 'Production');
-    console.log('PayPal Client ID (first 10 chars):', clientId.substring(0, 10) + '...');
+  // Log para debugging (solo en cliente)
+  if (isClient && typeof window !== 'undefined') {
+    console.log('[PayPal] Modo:', isSandbox ? 'Sandbox' : 'Production');
+    console.log('[PayPal] Client ID preview:', clientId.substring(0, 8) + '...');
   }
 
   // Opciones base para PayPal
@@ -46,9 +67,13 @@ export default function PayPalProvider({ children }: Readonly<PayPalProviderProp
   };
 
   // Solo añadir buyer-country en sandbox
-  // En producción, esta opción causa error 400
   if (isSandbox) {
     paypalOptions['buyer-country'] = 'ES';
+  }
+
+  // Si estamos en SSR, no renderizar el provider todavía
+  if (!isClient) {
+    return <>{children}</>;
   }
 
   return <DynamicPayPalScriptProvider options={paypalOptions}>{children}</DynamicPayPalScriptProvider>;
