@@ -47,10 +47,22 @@ export async function getFeaturedProducts(
         take: count,
       });
 
+      // Debug: Log para verificar qué campos se están usando
+      if (process.env.NODE_ENV === 'production') {
+        console.log(
+          '[products-cache] Raw products:',
+          products.map(p => ({
+            slug: p.slug,
+            nameEs: p.nameEs,
+            nameEn: p.nameEn,
+          })),
+        );
+      }
+
       return products.map(product => ({
         ...product,
-        name: product.nameEs, // Use bilingual field
-        description: product.descriptionEs,
+        name: product.nameEs || product.name, // Fallback a name si nameEs es null
+        description: product.descriptionEs || product.description,
       }));
     },
     CACHE_TTL.PRODUCTS,
