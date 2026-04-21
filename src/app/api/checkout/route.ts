@@ -348,35 +348,12 @@ async function createOrderTransaction(params: OrderTransactionParams) {
         });
       }
 
-      // 5. Deduct stock and create inventory movements
-      // Stock is already validated and locked, so we can safely decrement
-      for (const item of items) {
-        const product = await tx.product.update({
-          where: { id: item.productId },
-          data: {
-            stock: {
-              decrement: item.quantity,
-            },
-          },
-        });
+      // NOTE: Stock is NOT decremented here anymore
+      // Stock decrement now happens AFTER payment is confirmed
+      // This prevents blocking inventory for abandoned payments
+      // See: /api/webhooks/stripe/route.ts and /api/paypal/verify/route.ts
 
-        await tx.inventoryMovement.create({
-          data: {
-            id: crypto.randomUUID(),
-            productId: item.productId,
-            orderId: order.id,
-            createdBy: userId,
-            type: 'OUT',
-            quantity: item.quantity,
-            previousStock: product.stock + item.quantity,
-            newStock: product.stock,
-            reason: `Venta - Pedido ${order.orderNumber}`,
-            reference: order.id,
-          },
-        });
-      }
-
-      // 6. Empty the cart
+      // 5. Empty the cart
       const cart = await tx.cart.findFirst({
         where: { userId },
       });

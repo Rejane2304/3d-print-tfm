@@ -47,6 +47,57 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Get order with items for stock decrement
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: { items: true },
+    });
+
+    if (!order) {
+      return NextResponse.json({ success: false, error: 'Pedido no encontrado' }, { status: 404 });
+    }
+
+    // Decrement stock AFTER payment is confirmed
+    // This prevents blocking inventory for abandoned payments
+    for (const item of order.items) {
+      if (item.productId) {
+        // Get current stock before update
+        const product = await prisma.product.findUnique({
+          where: { id: item.productId },
+          select: { stock: true },
+        });
+
+        if (product) {
+          const previousStock = product.stock;
+          const newStock = previousStock - item.quantity;
+
+          await prisma.product.update({
+            where: { id: item.productId },
+            data: {
+              stock: {
+                decrement: item.quantity,
+              },
+            },
+          });
+
+          await prisma.inventoryMovement.create({
+            data: {
+              id: crypto.randomUUID(),
+              productId: item.productId,
+              orderId: order.id,
+              type: 'OUT',
+              quantity: item.quantity,
+              previousStock,
+              newStock,
+              reason: `Venta - Pedido ${order.orderNumber}`,
+              reference: order.id,
+              createdBy: user.id,
+            },
+          });
+        }
+      }
+    }
+
     // Update order to CONFIRMED
     await prisma.order.update({
       where: { id: orderId },

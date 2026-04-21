@@ -136,6 +136,47 @@ export async function GET(req: NextRequest) {
         },
       });
 
+      // Decrement stock AFTER payment is confirmed
+      // This prevents blocking inventory for abandoned payments
+      for (const item of order.items) {
+        if (item.productId) {
+          // Get current stock before update
+          const product = await prisma.product.findUnique({
+            where: { id: item.productId },
+            select: { stock: true },
+          });
+
+          if (product) {
+            const previousStock = product.stock;
+            const newStock = previousStock - item.quantity;
+
+            await prisma.product.update({
+              where: { id: item.productId },
+              data: {
+                stock: {
+                  decrement: item.quantity,
+                },
+              },
+            });
+
+            await prisma.inventoryMovement.create({
+              data: {
+                id: crypto.randomUUID(),
+                productId: item.productId,
+                orderId: order.id,
+                type: 'OUT',
+                quantity: item.quantity,
+                previousStock,
+                newStock,
+                reason: `Venta PayPal - Pedido ${order.orderNumber}`,
+                reference: order.id,
+                createdBy: order.userId,
+              },
+            });
+          }
+        }
+      }
+
       // Crear registro de pago (solo si no existe)
       const existingPayment = await prisma.payment.findUnique({
         where: { orderId: order.id },

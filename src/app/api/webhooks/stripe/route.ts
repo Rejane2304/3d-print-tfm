@@ -135,9 +135,46 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       },
     });
 
-    // NOTE: Stock was already decremented when order was created in checkout
-    // DO NOT decrement stock again here - this was causing double decrement
-    // Stock decrement happens in /api/checkout/route.ts when order is created
+    // Decrement stock AFTER payment is confirmed
+    // This prevents blocking inventory for abandoned payments
+    for (const item of order.items) {
+      if (item.productId) {
+        // Get current stock before update
+        const product = await prisma.product.findUnique({
+          where: { id: item.productId },
+          select: { stock: true },
+        });
+
+        if (product) {
+          const previousStock = product.stock;
+          const newStock = previousStock - item.quantity;
+
+          await prisma.product.update({
+            where: { id: item.productId },
+            data: {
+              stock: {
+                decrement: item.quantity,
+              },
+            },
+          });
+
+          await prisma.inventoryMovement.create({
+            data: {
+              id: crypto.randomUUID(),
+              productId: item.productId,
+              orderId: order.id,
+              type: 'OUT',
+              quantity: item.quantity,
+              previousStock,
+              newStock,
+              reason: `Venta - Pedido ${order.orderNumber}`,
+              reference: order.id,
+              createdBy: userId,
+            },
+          });
+        }
+      }
+    }
 
     // Clear cart if it exists
     if (cartId) {
