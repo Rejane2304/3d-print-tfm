@@ -12,8 +12,11 @@ import { createPaymentFailedAlert } from '@/lib/alerts/alert-service';
 import type { Decimal } from '@prisma/client/runtime/library';
 
 // PayPal API base URLs
+// Use sandbox if PAYPAL_SANDBOX_MODE is set or not in production
 const PAYPAL_API =
-  process.env.NODE_ENV === 'production' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com';
+  process.env.NODE_ENV === 'production' && !process.env.PAYPAL_SANDBOX_MODE
+    ? 'https://api-m.paypal.com'
+    : 'https://api-m.sandbox.paypal.com';
 
 /**
  * Get PayPal OAuth access token

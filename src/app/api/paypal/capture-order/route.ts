@@ -10,8 +10,11 @@ import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
 import { translateErrorMessage } from '@/lib/i18n';
 
+// PayPal API base URLs
 const PAYPAL_API =
-  process.env.NODE_ENV === 'production' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com';
+  process.env.NODE_ENV === 'production' && !process.env.PAYPAL_SANDBOX_MODE
+    ? 'https://api-m.paypal.com'
+    : 'https://api-m.sandbox.paypal.com';
 
 async function getPayPalAccessToken(): Promise<string> {
   const clientId = process.env.PAYPAL_CLIENT_ID;
