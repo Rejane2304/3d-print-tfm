@@ -1,55 +1,64 @@
 /**
- * Site Config Module
+ * Site Config Module with Caching
  * Server-side functions for managing site configuration
+ * Optimized for Session Mode with memory caching
  */
 
 import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
+import { memoryCache, CACHE_TTL } from '@/lib/cache/memory-cache';
 import type { Prisma } from '@prisma/client';
 
 const SITE_CONFIG_ID = 'site-config';
+const CACHE_KEY = 'site:config';
 
 // Type from Prisma
 export type SiteConfig = Prisma.SiteConfigGetPayload<Record<string, never>>;
 
 /**
- * Get or create the site configuration (singleton)
+ * Get or create the site configuration (singleton) - Cached
  */
 export async function getSiteConfig(): Promise<SiteConfig | null> {
-  try {
-    const config = await prisma.siteConfig.findUnique({
-      where: { id: SITE_CONFIG_ID },
-    });
+  return memoryCache.getOrSet(
+    CACHE_KEY,
+    async () => {
+      try {
+        const config = await prisma.siteConfig.findUnique({
+          where: { id: SITE_CONFIG_ID },
+        });
 
-    if (config) {
-      return config;
-    }
+        if (config) {
+          return config;
+        }
 
-    // Create default config if not exists
-    return await prisma.siteConfig.create({
-      data: {
-        id: SITE_CONFIG_ID,
-        companyName: '3D Print',
-        companyTaxId: 'B12345678',
-        companyAddress: 'Calle Admin 123',
-        companyCity: 'Barcelona',
-        companyProvince: 'Barcelona',
-        companyPostalCode: '08001',
-        companyPhone: '+34930000001',
-        companyEmail: 'info@3dprint.com',
-        defaultVatRate: 21,
-        lowStockThreshold: 5,
-        updatedAt: new Date(),
-      },
-    });
-  } catch (error) {
-    logger.error('Error getting site config:', error);
-    return null;
-  }
+        // Create default config if not exists
+        return await prisma.siteConfig.create({
+          data: {
+            id: SITE_CONFIG_ID,
+            companyName: '3D Print',
+            companyTaxId: 'B12345678',
+            companyAddress: 'Calle Admin 123',
+            companyCity: 'Barcelona',
+            companyProvince: 'Barcelona',
+            companyPostalCode: '08001',
+            companyPhone: '+34930000001',
+            companyEmail: 'info@3dprint.com',
+            defaultVatRate: 21,
+            lowStockThreshold: 5,
+            updatedAt: new Date(),
+          },
+        });
+      } catch (error) {
+        logger.error('Error getting site config:', error);
+        return null;
+      }
+    },
+    CACHE_TTL.SITE_CONFIG,
+  );
 }
 
 /**
- * Update site configuration
+ * Update site configuration - Clears cache
  */
 export async function updateSiteConfig(data: Omit<SiteConfig, 'id' | 'updatedAt'>): Promise<SiteConfig | null> {
   try {
@@ -65,6 +74,9 @@ export async function updateSiteConfig(data: Omit<SiteConfig, 'id' | 'updatedAt'
         updatedAt: new Date(),
       },
     });
+
+    // Clear cache after update
+    memoryCache.clear(CACHE_KEY);
 
     return config;
   } catch (error) {
