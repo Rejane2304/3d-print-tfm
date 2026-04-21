@@ -79,21 +79,13 @@ function AuthContent() {
   const handleLoginSuccess = async () => {
     await migrateCart();
     // Set flag to indicate cart was just migrated
-    // This helps checkout page know it should wait/reload
     sessionStorage.setItem('cartMigrated', Date.now().toString());
     clearMigrationFlag();
     globalThis.dispatchEvent(new Event('cartUpdated'));
 
-    // Check if cart has items after migration
-    const cartData = localStorage.getItem('cart');
-    const cart = cartData ? JSON.parse(cartData) : null;
-    const cartHasItems = cart?.items?.length > 0;
-
-    if (cartHasItems) {
-      router.push(callbackUrl);
-    } else {
-      router.push('/products');
-    }
+    // Always redirect to callbackUrl after login
+    // This ensures checkout flow continues properly
+    router.push(callbackUrl);
   };
 
   // Handle register success - switch to login tab
