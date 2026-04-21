@@ -52,13 +52,15 @@ jobs:
 
       - name: Wait for PostgreSQL
         run: |
+          echo "Waiting for PostgreSQL to be ready..."
+          sleep 10
           for i in {1..30}; do
-            if pg_isready -h localhost -p 5433; then
+            if nc -z localhost 5433; then
               echo "PostgreSQL is ready"
               exit 0
             fi
             echo "Waiting for PostgreSQL... attempt $i/30"
-            sleep 1
+            sleep 2
           done
           echo "PostgreSQL failed to start"
           exit 1
