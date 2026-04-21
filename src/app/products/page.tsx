@@ -6,10 +6,12 @@
 import { prisma } from '@/lib/db/prisma';
 import { translateProductDescription, translateProductName } from '@/lib/i18n';
 import ProductCard from '@/components/products/ProductCard';
-import FilterSidebar from '@/components/products/FilterSidebar';
-import Pagination from '@/components/products/Pagination';
-import SearchBar from '@/components/products/SearchBar';
-import SortSelector from '@/components/products/SortSelector';
+import {
+  FilterSidebarWrapper,
+  PaginationWrapper,
+  SearchBarWrapper,
+  SortSelectorWrapper,
+} from '@/components/products/ClientComponentsWithSuspense';
 import type { Prisma } from '@prisma/client';
 import { Package, Shield, Sparkles, Truck } from 'lucide-react';
 
@@ -184,7 +186,7 @@ export default async function ProductsPage({ searchParams }: Readonly<ProductsPa
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* Search Bar Prominente */}
         <div className="max-w-3xl mx-auto mb-8 sm:mb-12">
-          <SearchBar />
+          <SearchBarWrapper />
         </div>
 
         {/* Main Content */}
@@ -192,7 +194,7 @@ export default async function ProductsPage({ searchParams }: Readonly<ProductsPa
           {/* Sidebar Filters - Estilo Moderno */}
           <aside className="w-full lg:w-72 flex-shrink-0">
             <div className="lg:sticky lg:top-24">
-              <FilterSidebar searchParams={searchParams} />
+              <FilterSidebarWrapper searchParams={searchParams} />
             </div>
           </aside>
 
@@ -210,7 +212,7 @@ export default async function ProductsPage({ searchParams }: Readonly<ProductsPa
                   {products.length} <span className="text-gray-400 font-normal">de</span> {total} productos
                 </p>
               </div>
-              <SortSelector />
+              <SortSelectorWrapper />
             </div>
 
             {products.length > 0 ? (
@@ -227,7 +229,7 @@ export default async function ProductsPage({ searchParams }: Readonly<ProductsPa
                 {/* Pagination Moderno */}
                 {totalPages > 1 && (
                   <div className="mt-12 sm:mt-16 pt-8 border-t border-gray-200">
-                    <Pagination currentPage={page} totalPages={totalPages} />
+                    <PaginationWrapper currentPage={page} totalPages={totalPages} />
                   </div>
                 )}
               </>
