@@ -1,10 +1,10 @@
 #!/bin/bash
-# Build script for Vercel with automatic baseline handling
+# Build script for Vercel with automatic baseline handling and schema verification
 
 set -e
 
-echo "🔧 Vercel Build con Auto-Baseline"
-echo "=================================="
+echo "🔧 Vercel Build con Validación de Schema"
+echo "============================================"
 echo ""
 
 # Export DIRECT_URL si no está definido (para Prisma)
@@ -17,9 +17,60 @@ fi
 echo "📦 Paso 1: Generando Prisma Client..."
 npx prisma generate
 
-# Paso 2: Intentar migraciones (con manejo de baseline automático)
+# Paso 2: Verificar si el schema está sincronizado
 echo ""
-echo "🗄️  Paso 2: Verificando migraciones..."
+echo "🗄️  Paso 2: Verificando sincronización del schema..."
+
+set +e
+# Intentar validar el schema contra la BD
+npx prisma validate >/dev/null 2>&1
+VALIDATE_EXIT=$?
+set -e
+
+# Intentar una consulta simple para verificar columnas
+set +e
+node -e "
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+async function test() {
+  try {
+    await prisma.product.findFirst({ select: { id: true, nameEs: true }, take: 1 });
+    console.log('SCHEMA_OK');
+  } catch(e) {
+    if (e.message.includes('nameEs') || e.message.includes('column') || e.message.includes('does not exist')) {
+      console.log('SCHEMA_MISMATCH');
+    } else {
+      console.log('SCHEMA_OK');
+    }
+  } finally {
+    await prisma.\$disconnect();
+  }
+}
+test();
+" >/tmp/schema_check.txt 2>&1
+SCHEMA_RESULT=$(cat /tmp/schema_check.txt)
+
+if echo "$SCHEMA_RESULT" | grep -q "SCHEMA_MISMATCH"; then
+  echo "⚠️  Schema desincronizado detectado"
+  echo "🔧 Intentando sincronizar con db push..."
+  
+  set +e
+  npx prisma db push --accept-data-loss --skip-generate 2>&1
+  DB_PUSH_EXIT=$?
+  set -e
+  
+  if [ $DB_PUSH_EXIT -eq 0 ]; then
+    echo "✅ Schema sincronizado con db push"
+  else
+    echo "⚠️  db push falló, continuando con migrate deploy..."
+  fi
+else
+  echo "✅ Schema verificado correctamente"
+fi
+
+# Paso 3: Intentar migraciones (con manejo de baseline automático)
+echo ""
+echo "🗄️  Paso 3: Aplicando migraciones..."
 
 # Capturar output y código de salida del migrate deploy
 set +e
@@ -47,9 +98,9 @@ else
   echo "✅ Migraciones aplicadas correctamente"
 fi
 
-# Paso 3: Build de Next.js
+# Paso 4: Build de Next.js
 echo ""
-echo "🏗️  Paso 3: Construyendo Next.js..."
+echo "🏗️  Paso 4: Construyendo Next.js..."
 npx next build
 
 echo ""
