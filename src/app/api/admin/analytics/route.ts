@@ -439,6 +439,18 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching analytics:', error);
-    return NextResponse.json({ success: false, error: 'Error al obtener analytics' }, { status: 500 });
+    // Log detailed error for debugging
+    if (error instanceof Error) {
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+    }
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Error al obtener analytics',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 },
+    );
   }
 }
