@@ -1,5 +1,5 @@
 {
-  "buildCommand": "export DIRECT_URL=$\u0026DATABASE_URL npx tsx scripts/vercel-build-with-baseline.sh",
+  "buildCommand": "chmod +x scripts/vercel-build-with-baseline.sh \u0026\u0026 bash scripts/vercel-build-with-baseline.sh",
   "crons": [
     {
       "path": "/api/cron/expired-orders",
