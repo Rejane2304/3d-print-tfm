@@ -3,6 +3,8 @@
  * Muestra lista de productos traducidos con filtros y paginación
  * Responsive: mobile → 4K
  */
+export const dynamic = 'force-dynamic';
+
 import { prisma } from '@/lib/db/prisma';
 import { translateProductDescription, translateProductName } from '@/lib/i18n';
 import ProductCard from '@/components/products/ProductCard';
