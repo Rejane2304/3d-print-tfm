@@ -1,7 +1,7 @@
 // Lint y style fixes por un senior:
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AlertCircle, ArrowRightLeft, CheckCircle2, Smartphone } from 'lucide-react';
 
@@ -83,7 +83,7 @@ function ErrorContent({
   );
 }
 
-export default function ProcessingPage() {
+function ProcessingPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -175,5 +175,13 @@ export default function ProcessingPage() {
         {status === 'error' && <ErrorContent errorMessage={errorMessage} router={router} />}
       </div>
     </div>
+  );
+}
+
+export default function ProcessingPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Cargando...</div>}>
+      <ProcessingPageContent />
+    </Suspense>
   );
 }
