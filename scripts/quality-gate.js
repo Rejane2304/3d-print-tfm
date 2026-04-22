@@ -175,7 +175,7 @@ async function checkESLint() {
     runSafe('npm run lint:fix', { timeout: CONFIG.timeout.eslint, silent: true });
   }
 
-  const result = runSafe('npm run lint', {
+  const result = runSafe('npx eslint . --ext .ts,.tsx --max-warnings=0', {
     timeout: CONFIG.timeout.eslint,
   });
 
