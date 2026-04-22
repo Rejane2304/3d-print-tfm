@@ -31,23 +31,10 @@ export async function getSiteConfig(): Promise<SiteConfig | null> {
           return config;
         }
 
-        // Create default config if not exists
-        return await prisma.siteConfig.create({
-          data: {
-            id: SITE_CONFIG_ID,
-            companyName: '3D Print',
-            companyTaxId: 'B12345678',
-            companyAddress: 'Calle Admin 123',
-            companyCity: 'Barcelona',
-            companyProvince: 'Barcelona',
-            companyPostalCode: '08001',
-            companyPhone: '+34930000001',
-            companyEmail: 'info@3dprint.com',
-            defaultVatRate: 21,
-            lowStockThreshold: 5,
-            updatedAt: new Date(),
-          },
-        });
+        // Si no existe, solo retornamos null (no creamos automáticamente)
+        // La creación debe hacerse vía admin panel
+        logger.warn('SiteConfig not found in database');
+        return null;
       } catch (error) {
         logger.error('Error getting site config:', error);
         return null;
