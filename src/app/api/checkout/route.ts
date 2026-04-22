@@ -226,11 +226,15 @@ async function getShippingAddress(addressId: string) {
   });
 }
 
-// Generate order number
+// Generate unique order number using timestamp + random
+// This prevents duplicates from concurrent requests
 async function generateOrderNumber(): Promise<string> {
   const year = new Date().getFullYear();
-  const count = await prisma.order.count();
-  return `P-${year}${String(count + 1).padStart(6, '0')}`;
+  const timestamp = Date.now().toString(36).toUpperCase(); // Base36 for shorter string
+  const random = Math.floor(Math.random() * 1000)
+    .toString()
+    .padStart(3, '0');
+  return `P-${year}${timestamp}${random}`;
 }
 
 // Stock validation error
