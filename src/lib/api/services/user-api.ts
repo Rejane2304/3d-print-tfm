@@ -270,7 +270,7 @@ export async function getDefaultAddress(): Promise<AddressResponse | null> {
   try {
     const addresses = await getAddresses();
     return addresses.find(a => a.isDefault) ?? addresses[0] ?? null;
-  } catch (error) {
+  } catch {
     return null;
   }
 }

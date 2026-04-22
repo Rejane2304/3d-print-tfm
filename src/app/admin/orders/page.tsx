@@ -27,7 +27,7 @@ import { CSVUpload } from '@/components/admin/CSVUpload';
 import { useAdminRealTime, useNotificationToast } from '@/hooks/useRealTime';
 import { Toaster } from '@/components/ui/Toaster';
 import { useNotificationSound } from '@/hooks/useNotificationSound';
-import { useAdminOrders, useUpdateOrderStatusMutation, useDeleteOrderMutation, AdminOrder } from '@/hooks/queries';
+import { useAdminOrders, useUpdateOrderStatusMutation, useDeleteOrderMutation, type AdminOrder } from '@/hooks/queries';
 import { useState, useEffect, useCallback } from 'react';
 
 const orderStatuses: Record<string, { color: string; icon: React.ElementType; label: string }> = {
@@ -77,7 +77,7 @@ export default function AdminOrdersPage() {
   // React Query hooks
   const { data: orders = [], isLoading, error: queryError } = useAdminOrders(statusFilter || undefined);
   const { mutate: updateStatus, isPending: isUpdatingStatus } = useUpdateOrderStatusMutation();
-  const { mutate: deleteOrder, isPending: isDeleting } = useDeleteOrderMutation();
+  const { mutate: deleteOrder, isPending: _isDeleting } = useDeleteOrderMutation();
 
   // Real-time setup
   const { events: _events, pendingEvents, acknowledgeEvents, isConnected } = useAdminRealTime();

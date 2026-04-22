@@ -30,13 +30,10 @@ export function useNetworkStatus(): NetworkStatus {
 
   // Actualizar información de conexión
   const updateConnectionInfo = useCallback(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    /* eslint-disable @typescript-eslint/no-explicit-any */
     const connection =
-      (navigator as any).connection ||
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (navigator as any).mozConnection ||
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (navigator as any).webkitConnection;
+      (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+    /* eslint-enable @typescript-eslint/no-explicit-any */
 
     if (connection) {
       setConnectionType(connection.effectiveType || connection.type || 'unknown');
@@ -72,13 +69,10 @@ export function useNetworkStatus(): NetworkStatus {
     window.addEventListener('offline', handleOffline);
 
     // Escuchar cambios en la conexión (tipo, velocidad)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    /* eslint-disable @typescript-eslint/no-explicit-any */
     const connection =
-      (navigator as any).connection ||
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (navigator as any).mozConnection ||
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (navigator as any).webkitConnection;
+      (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+    /* eslint-enable @typescript-eslint/no-explicit-any */
 
     if (connection) {
       connection.addEventListener('change', updateConnectionInfo);

@@ -4,7 +4,7 @@
  * @module lib/api/client
  */
 
-import { ApiErrorCode, ApiErrorResponse, type ApiRequestOptions } from '@/types/api';
+import { ApiErrorCode, type ApiErrorResponse, type ApiRequestOptions } from '@/types/api';
 
 /**
  * Error de API con información detallada del error HTTP
@@ -85,11 +85,11 @@ function getCsrfToken(): string | null {
  * Refresca el token de sesión si es necesario
  * Nota: Next-auth maneja el refresh automáticamente
  */
-async function refreshTokenIfNeeded(): Promise<boolean> {
-  // Next-auth maneja el token automáticamente
-  // Esta función está disponible para implementación futura
-  return true;
-}
+// async function refreshTokenIfNeeded(): Promise<boolean> {
+//   // Next-auth maneja el token automáticamente
+//   // Esta función está disponible para implementación futura
+//   return true;
+// }
 
 // ============================================================================
 // Request Helpers

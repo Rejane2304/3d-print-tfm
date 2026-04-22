@@ -213,7 +213,7 @@ export function useApiProducts(params: ProductSearchParams = {}): UseApiReturn<P
         error: error instanceof Error ? error : new Error(String(error)),
       });
     }
-  }, [JSON.stringify(params)]); // Dependencia serializada
+  }, [params]); // Dependencia correcta
 
   const clearError = useCallback(() => {
     setState(prev => ({ ...prev, error: null }));
@@ -449,7 +449,7 @@ export function useApiCheckout(): UseCheckoutReturn {
 // Export all hooks
 // ============================================================================
 
-export default {
+const apiHooks = {
   useApiCart,
   useApiProducts,
   useApiProduct,
@@ -457,3 +457,5 @@ export default {
   useApiOrder,
   useApiCheckout,
 };
+
+export default apiHooks;

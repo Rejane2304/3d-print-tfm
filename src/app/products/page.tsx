@@ -17,7 +17,7 @@ import {
 } from '@/components/products/ClientComponentsWithSuspense';
 import type { Prisma } from '@prisma/client';
 import { Package, Shield, Sparkles, Truck } from 'lucide-react';
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 
 // Next.js 15: searchParams es ahora un Promise
 interface ProductsPageProps {

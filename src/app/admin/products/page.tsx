@@ -16,7 +16,7 @@ import { BulkDeleteModal } from '@/components/ui/BulkDeleteModal';
 import { CSVUpload } from '@/components/ui/CSVUpload';
 import { useAdminRealTime, useNotificationToast } from '@/hooks/useRealTime';
 import { Toaster } from '@/components/ui/Toaster';
-import { useAdminProducts, useDeleteProductMutation, AdminProduct } from '@/hooks/queries';
+import { useAdminProducts, useDeleteProductMutation, type AdminProduct } from '@/hooks/queries';
 import { useState, useEffect, useCallback } from 'react';
 
 export default function AdminProductsPage() {

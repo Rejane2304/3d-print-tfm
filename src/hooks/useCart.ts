@@ -10,7 +10,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import * as cartApi from '@/lib/api/services/cart-api';
-import type { CartError } from '@/lib/api/services/cart-api';
+// import type { CartError } from '@/lib/api/services/cart-api';
 import { useToast } from '@/hooks/useToast';
 
 export interface CartItem {

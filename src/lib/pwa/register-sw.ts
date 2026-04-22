@@ -76,6 +76,7 @@ function showUpdateNotification(worker: ServiceWorker): void {
   window.dispatchEvent(updateEvent);
 
   // También mostrar confirmación nativa
+  // eslint-disable-next-line no-alert
   if (confirm('Nueva versión disponible. ¿Actualizar ahora?')) {
     updateServiceWorker(worker);
   }
@@ -98,7 +99,7 @@ export function updateServiceWorker(worker: ServiceWorker): void {
 /**
  * Maneja mensajes del Service Worker
  */
-function handleServiceWorkerMessages(registration: ServiceWorkerRegistration): void {
+function handleServiceWorkerMessages(_registration: ServiceWorkerRegistration): void {
   navigator.serviceWorker.addEventListener('message', event => {
     console.log('[PWA] Message from SW:', event.data);
 
@@ -214,7 +215,7 @@ export async function requestCartSync(): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (swRegistration as any).sync.register('sync-cart');
     console.log('[PWA] Cart sync registered');
-  } catch (error) {
+  } catch {
     console.log('[PWA] Background sync failed, syncing manually');
     // Fallback: disparar evento para sincronización manual
     window.dispatchEvent(new CustomEvent('cart-sync-required'));

@@ -6,7 +6,7 @@
  * - Mantiene el contenido accesible para screen readers
  */
 
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 interface VisuallyHiddenProps {
   /** Contenido a ocultar visualmente pero mantener accesible */

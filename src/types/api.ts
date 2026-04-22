@@ -5,25 +5,25 @@
  */
 
 import type {
-  Address,
-  Alert,
+  // Address,
+  // Alert,
   AlertSeverity,
   AlertStatus,
   AlertType,
-  Cart,
-  Category,
-  Coupon,
+  // Cart,
+  // Category,
+  // Coupon,
   CouponType,
   Material,
-  Order,
+  // Order,
   OrderStatus,
   PaymentMethod,
   PaymentStatus,
-  Product,
-  ProductImage,
-  Review,
+  // Product,
+  // ProductImage,
+  // Review,
   Role,
-  User,
+  // User,
 } from '@prisma/client';
 
 // ============================================================================
@@ -414,6 +414,7 @@ export interface CreateAddressRequest {
 /**
  * Request para actualizar dirección
  */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface UpdateAddressRequest extends Partial<CreateAddressRequest> {}
 
 /**

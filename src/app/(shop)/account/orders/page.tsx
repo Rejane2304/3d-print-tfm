@@ -28,7 +28,7 @@ import {
 } from 'lucide-react';
 import { InvoiceNotAvailableModal } from '@/components/invoices/InvoiceNotAvailableModal';
 import { useRealTime } from '@/hooks/useRealTime';
-import { useOrders, useCancelOrderMutation, Order } from '@/hooks/queries';
+import { useOrders, useCancelOrderMutation, type Order } from '@/hooks/queries';
 import { toast } from 'sonner';
 
 const estadosConfig: Record<string, { color: string; icon: React.ElementType; label: string }> = {
@@ -79,7 +79,7 @@ export default function MyOrdersPage() {
 
   // React Query hooks
   const { data: orders = [], isLoading, error: queryError, refetch } = useOrders(statusFilter || undefined);
-  const { mutate: cancelOrder, isPending: isCancelling } = useCancelOrderMutation();
+  const { mutate: _cancelOrder, isPending: _isCancelling } = useCancelOrderMutation();
 
   // Real-time event handler for order updates
   const handleRealTimeEvent = useCallback(

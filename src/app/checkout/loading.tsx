@@ -2,7 +2,7 @@
  * Checkout Loading State
  * Loading state para el proceso de checkout
  */
-import { SkeletonCard, SkeletonText } from '@/components/ui/SkeletonCard';
+import { SkeletonText } from '@/components/ui/SkeletonCard';
 
 export default function CheckoutLoading() {
   return (

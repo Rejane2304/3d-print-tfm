@@ -2,7 +2,7 @@
  * Admin Products Loading State
  * Loading state para la lista de productos del admin
  */
-import { SkeletonCards, SkeletonTable } from '@/components/ui/SkeletonCard';
+import { SkeletonTable } from '@/components/ui/SkeletonCard';
 
 export default function AdminProductsLoading() {
   return (

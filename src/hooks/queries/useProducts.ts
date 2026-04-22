@@ -3,8 +3,7 @@
  * Hook para obtener productos con React Query
  */
 
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { useQuery, type useQueryClient } from '@tanstack/react-query';
 
 // Types
 export interface ProductFilters {

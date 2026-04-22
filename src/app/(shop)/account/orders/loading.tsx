@@ -2,7 +2,6 @@
  * Account Orders Loading State
  * Loading state para la lista de pedidos del cliente
  */
-import { SkeletonTable } from '@/components/ui/SkeletonCard';
 
 export default function AccountOrdersLoading() {
   return (

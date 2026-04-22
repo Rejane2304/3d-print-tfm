@@ -2,7 +2,7 @@
  * Admin Dashboard Loading State
  * Loading state para el panel de administración
  */
-import { SkeletonCard, SkeletonTable } from '@/components/ui/SkeletonCard';
+import { SkeletonTable } from '@/components/ui/SkeletonCard';
 
 export default function AdminLoading() {
   return (
