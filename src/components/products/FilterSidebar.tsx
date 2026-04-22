@@ -25,7 +25,11 @@ const MATERIALES = [
   { value: 'PETG', label: 'PETG' },
 ];
 
-interface FilterSidebarProps {
+interface FilterContentProps {
+  hasActiveFilters: boolean;
+  clearFilters: () => void;
+  expandedSections: Record<string, boolean>;
+  toggleSection: (section: 'category' | 'material' | 'price' | 'stock') => void;
   searchParams: {
     category?: string;
     material?: string;
@@ -33,14 +37,6 @@ interface FilterSidebarProps {
     maxPrice?: string;
     inStock?: string;
   };
-}
-
-interface FilterContentProps {
-  hasActiveFilters: boolean;
-  clearFilters: () => void;
-  expandedSections: Record<string, boolean>;
-  toggleSection: (section: 'category' | 'material' | 'price' | 'stock') => void;
-  searchParams: FilterSidebarProps['searchParams'];
   updateFilter: (key: string, value: string) => void;
   setIsOpen: (open: boolean) => void;
   activeFiltersCount: number;
@@ -203,9 +199,18 @@ function FilterContent({
   );
 }
 
-export default function FilterSidebar({ searchParams }: Readonly<FilterSidebarProps>) {
+export default function FilterSidebar() {
   const router = useRouter();
   const currentSearchParams = useSearchParams();
+
+  // Parse search params from URL
+  const searchParams = {
+    category: currentSearchParams.get('category') || undefined,
+    material: currentSearchParams.get('material') || undefined,
+    minPrice: currentSearchParams.get('minPrice') || undefined,
+    maxPrice: currentSearchParams.get('maxPrice') || undefined,
+    inStock: currentSearchParams.get('inStock') || undefined,
+  };
   const [isOpen, setIsOpen] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
     category: true,

@@ -5,6 +5,143 @@ Todos los cambios notables de este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [1.1.0] - 2026-04-22
+
+### 🚀 Mejoras Arquitectónicas - Data Fetching Moderno
+
+Esta versión introduce una arquitectura moderna de data fetching con React Query y un API Client centralizado.
+
+### ✨ Nuevas Características
+
+#### 🌐 API Client Centralizado
+
+- **Cliente HTTP fetch** centralizado en `/src/lib/api/client.ts` (471 líneas)
+- **Manejo de errores** con clases `ApiError`, `ApiTimeoutError`, `ApiNetworkError`
+- **Retries automáticos** con backoff exponencial (hasta 3 intentos)
+- **CSRF protection** mediante tokens en headers
+- **Timeouts configurables** (default: 30 segundos)
+- **Mensajes de error amigables** para usuarios
+
+```typescript
+// Ejemplo de uso
+import { apiClient, isApiError } from '@/lib/api/client';
+
+const products = await apiClient.get('/api/products');
+const newOrder = await apiClient.post('/api/orders', orderData);
+```
+
+#### ⚛️ React Query (TanStack Query)
+
+- **Integración completa** con `@tanstack/react-query` v5
+- **Caché inteligente** con staleTime: 5 minutos, gcTime: 10 minutos
+- **Refetching automático** al reconectar a red
+- **Optimistic Updates** para UX fluida en carrito
+- **Invalidación automática** de queries tras mutations
+
+```typescript
+// En componentes
+const { data: products, isLoading, error } = useProducts();
+const { mutate: addToCart, isPending } = useAddToCart();
+```
+
+#### 🔔 Sistema de Notificaciones (Sonner)
+
+- **Toast notifications** globales con `sonner`
+- **Promises con loading state** integrado
+- **Tipos**: success, error, warning, info
+- **Posición**: bottom-right por defecto
+
+```typescript
+toast.success('Producto añadido al carrito');
+toast.promise(saveData(), {
+  loading: 'Guardando...',
+  success: 'Guardado exitoso',
+  error: 'Error al guardar',
+});
+```
+
+#### 💀 Loading States (Skeletons)
+
+- **Componentes Skeleton** reutilizables para todas las páginas
+- **Consistencia visual** durante carga de datos
+- **Ubicación**: `/src/components/ui/skeletons/`
+- **Cobertura**: Productos, carrito, checkout, órdenes, admin
+
+#### 🛡️ Error Boundaries
+
+- **Manejo de errores por área** con fallback UI
+- **Captura de errores** en componentes React
+- **UI de recuperación** con opción de retry
+- **Logging de errores** para debugging
+
+#### 📱 Service Worker (PWA)
+
+- **Soporte offline básico** con Service Worker
+- **Precache** de assets estáticos
+- **Notificaciones push** preparadas
+- **Instalación como app** en móviles/escritorio
+
+#### ♿ Accesibilidad (A11y)
+
+- **Skip links** para navegación rápida
+- **Focus traps** en modales y drawers
+- **ARIA labels** en todos los componentes interactivos
+- **Contraste validado** WCAG 2.1 AA compliant
+- **Keyboard navigation** completa sin mouse
+
+### 🗂️ Nueva Estructura de Archivos
+
+```
+src/
+├── lib/
+│   ├── api/
+│   │   ├── client.ts          # API Client (471 líneas)
+│   │   ├── services/          # Servicios API
+│   │   └── hooks.ts           # Hooks legacy
+│   └── query-client.ts        # React Query config
+├── hooks/
+│   └── queries/               # React Query hooks
+│       ├── useProducts.ts
+│       ├── useCart.ts
+│       ├── useOrders.ts
+│       ├── useUser.ts
+│       └── useCheckout.ts
+├── components/
+│   ├── providers/
+│   │   ├── QueryProvider.tsx  # React Query provider
+│   │   └── ToastProvider.tsx  # Sonner provider
+│   └── ui/skeletons/          # Loading states
+└── types/
+    └── api.ts                 # Tipos API (751 líneas)
+```
+
+### 🔧 Hooks de React Query
+
+| Hook               | Descripción                                |
+| ------------------ | ------------------------------------------ |
+| `useProducts`      | Fetch y gestión de productos con filtros   |
+| `useCart`          | Gestión del carrito con optimistic updates |
+| `useOrders`        | Historial de pedidos del usuario           |
+| `useUser`          | Datos del usuario y perfil                 |
+| `useCheckout`      | Proceso de checkout con validaciones       |
+| `useAdminOrders`   | Gestión de pedidos en admin                |
+| `useAdminProducts` | Gestión de productos en admin              |
+
+### 📦 Tipos API Compartidos
+
+- **751 líneas** de tipos TypeScript estandarizados
+- **Responses/Requests** para todos los endpoints
+- **Enums** para códigos de error y estados
+- **Reutilización** entre frontend y backend
+
+### 🧪 Tests Actualizados
+
+- Tests unitarios para API Client
+- Tests de integración para React Query hooks
+- Tests E2E actualizados para nuevos flujos
+
+---
+
 ## [1.0.0] - 2026-04-22
 
 ### 🎉 Versión Final - TFM Completado

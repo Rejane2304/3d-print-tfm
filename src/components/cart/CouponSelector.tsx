@@ -1,12 +1,17 @@
 /**
- * CouponSelector Component - Mejorado
+ * CouponSelector Component - Actualizado
  * Muestra cupones disponibles de forma clara y permite aplicarlos fácilmente
+ *
+ * UPDATED: Ahora usa el apiClient centralizado en lugar de fetch directo
  */
 
 'use client';
 
 import { useEffect, useState } from 'react';
 import { CheckCircle2, Loader2, Tag, Ticket, X, XCircle, Copy, Info, Sparkles } from 'lucide-react';
+import { apiClient } from '@/lib/api/client';
+import { useToast } from '@/hooks/useToast';
+import type { ApiResponse, CouponResponse } from '@/types/api';
 
 interface AvailableCoupon {
   id: string;
@@ -30,6 +35,38 @@ interface CouponSelectorProps {
   disabled?: boolean;
 }
 
+/**
+ * Transforma un cupón de la API al formato interno del componente
+ */
+function transformCoupon(coupon: CouponResponse): AvailableCoupon {
+  const codeFormatted = coupon.code.toUpperCase();
+  let description = '';
+
+  switch (coupon.type) {
+    case 'PERCENTAGE':
+      description = `${coupon.value}% de descuento`;
+      break;
+    case 'FIXED':
+      description = `${coupon.value.toFixed(2)}€ de descuento`;
+      break;
+    case 'FREE_SHIPPING':
+      description = 'Envío gratis';
+      break;
+    default:
+      description = 'Cupón de descuento';
+  }
+
+  return {
+    id: coupon.id,
+    code: codeFormatted,
+    codeRaw: coupon.code,
+    description,
+    type: coupon.type,
+    value: Number(coupon.value),
+    minOrderAmount: coupon.minOrderAmount ? Number(coupon.minOrderAmount) : null,
+  };
+}
+
 export function CouponSelector({
   onApply,
   onRemove,
@@ -43,6 +80,7 @@ export function CouponSelector({
   const [availableCoupons, setAvailableCoupons] = useState<AvailableCoupon[]>([]);
   const [loadingCoupons, setLoadingCoupons] = useState(true);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const { success: showSuccess } = useToast();
 
   // Cargar cupones disponibles al montar el componente
   useEffect(() => {
@@ -52,13 +90,16 @@ export function CouponSelector({
   const loadAvailableCoupons = async () => {
     try {
       setLoadingCoupons(true);
-      const response = await fetch('/api/coupons');
-      const data = await response.json();
-      if (data.success) {
-        setAvailableCoupons(data.coupons || []);
+      // Usar apiClient centralizado en lugar de fetch directo
+      const response = await apiClient.get<ApiResponse<{ coupons: CouponResponse[] }>>('/api/coupons');
+
+      if (response.success) {
+        const transformedCoupons = response.data.coupons.map(transformCoupon);
+        setAvailableCoupons(transformedCoupons);
       }
     } catch (err) {
       console.error('Error loading coupons:', err);
+      // No mostrar error al usuario, solo loggear
     } finally {
       setLoadingCoupons(false);
     }
@@ -100,6 +141,7 @@ export function CouponSelector({
   const handleCopyCode = (codeToCopy: string) => {
     navigator.clipboard.writeText(codeToCopy);
     setCopiedCode(codeToCopy);
+    showSuccess(`Código ${codeToCopy} copiado al portapapeles`);
     setTimeout(() => setCopiedCode(null), 2000);
   };
 

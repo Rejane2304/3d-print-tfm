@@ -2,11 +2,19 @@
  * Componente Modal de Confirmación Moderno
  * Para acciones destructivas (eliminar, anular, etc.)
  * Diseño consistente con Tailwind CSS y animaciones suaves
+ *
+ * Accessibility improvements:
+ * - role="dialog" and aria-modal="true"
+ * - aria-labelledby para título
+ * - Focus trap con focus inicial en el botón de acción
+ * - Escape key para cerrar
+ * - Focus restoration al cerrar
  */
 'use client';
 
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { AlertCircle, AlertTriangle, Trash2, X } from 'lucide-react';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -34,27 +42,56 @@ export function ConfirmModal(props: Readonly<ConfirmModalProps>) {
     isLoading = false,
     confirmDisabled = false,
   } = props;
-  // Cerrar con ESC
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
-    },
-    [onClose],
-  );
 
+  const modalRef = useRef<HTMLDivElement>(null);
+  const confirmButtonRef = useRef<HTMLButtonElement>(null);
+  const previouslyFocusedRef = useRef<Element | null>(null);
+
+  // Guardar el elemento con foco antes de abrir
   useEffect(() => {
     if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'hidden';
+      previouslyFocusedRef.current = document.activeElement;
     }
+  }, [isOpen]);
 
+  // Focus trap
+  useFocusTrap(modalRef, {
+    isActive: isOpen,
+    onEscape: onClose,
+    restoreFocusOnClose: false, // Lo manejamos manualmente
+  });
+
+  // Focus inicial y restauración
+  useEffect(() => {
+    if (isOpen) {
+      // Focus en el botón de confirmar después de un pequeño delay
+      const timer = setTimeout(() => {
+        confirmButtonRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timer);
+    } else {
+      // Restaurar focus al cerrar
+      if (previouslyFocusedRef.current instanceof HTMLElement) {
+        previouslyFocusedRef.current.focus();
+      }
+    }
+  }, [isOpen]);
+
+  // Prevenir scroll del body
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = '';
     };
-  }, [isOpen, handleKeyDown]);
+  }, [isOpen]);
+
+  const handleConfirm = useCallback(() => {
+    onConfirm();
+  }, [onConfirm]);
 
   if (!isOpen) {
     return null;
@@ -88,21 +125,18 @@ export function ConfirmModal(props: Readonly<ConfirmModalProps>) {
   const Icon = config.icon;
 
   return (
-    <dialog
-      open={isOpen}
+    <div
+      ref={modalRef}
+      role="dialog"
+      aria-modal="true"
       aria-labelledby="modal-title"
-      className="fixed inset-0 z-50 overflow-y-auto bg-transparent flex items-center justify-center"
-      style={{ padding: 0, border: 'none', background: 'none' }}
-      onClose={onClose}
+      className="fixed inset-0 z-50 overflow-y-auto"
     >
       {/* Backdrop */}
-      <button
-        type="button"
-        className="fixed inset-0 bg-gray-500/75 backdrop-blur-sm transition-opacity cursor-pointer"
-        aria-label="Cerrar modal"
-        disabled={isLoading}
-        onClick={onClose}
-        style={{ outline: 'none', border: 'none', padding: 0, margin: 0 }}
+      <div
+        className="fixed inset-0 bg-gray-500/75 backdrop-blur-sm transition-opacity"
+        aria-hidden="true"
+        onClick={isLoading ? undefined : onClose}
       />
 
       {/* Modal Container */}
@@ -111,10 +145,11 @@ export function ConfirmModal(props: Readonly<ConfirmModalProps>) {
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="absolute right-3 top-3 sm:right-4 sm:top-4 text-gray-400 hover:text-gray-600 transition-colors p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full hover:bg-gray-100"
+            disabled={isLoading}
+            className="absolute right-3 top-3 sm:right-4 sm:top-4 text-gray-400 hover:text-gray-600 transition-colors p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500"
             aria-label="Cerrar modal"
           >
-            <X className="h-5 w-5" />
+            <X className="h-5 w-5" aria-hidden="true" />
           </button>
 
           {/* Content */}
@@ -123,8 +158,9 @@ export function ConfirmModal(props: Readonly<ConfirmModalProps>) {
               {/* Icon */}
               <div
                 className={`mx-auto sm:mx-0 flex-shrink-0 h-12 w-12 sm:h-14 sm:w-14 flex items-center justify-center rounded-full ${config.iconBg}`}
+                aria-hidden="true"
               >
-                <Icon className={`h-6 w-6 sm:h-7 sm:w-7 ${config.iconColor}`} aria-hidden="true" />
+                <Icon className={`h-6 w-6 sm:h-7 sm:w-7 ${config.iconColor}`} />
               </div>
 
               {/* Text */}
@@ -141,8 +177,9 @@ export function ConfirmModal(props: Readonly<ConfirmModalProps>) {
             {/* Actions */}
             <div className="mt-6 sm:mt-8 flex flex-col-reverse sm:flex-row-reverse sm:gap-3 gap-2">
               <button
+                ref={confirmButtonRef}
                 type="button"
-                onClick={onConfirm}
+                onClick={handleConfirm}
                 disabled={isLoading || confirmDisabled}
                 className={`w-full sm:w-auto inline-flex justify-center items-center rounded-xl px-4 sm:px-5 py-3 text-sm font-semibold text-white shadow-sm ${config.buttonBg} ${config.buttonFocus} focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 min-h-[48px] sm:min-w-[120px]`}
               >
@@ -153,6 +190,7 @@ export function ConfirmModal(props: Readonly<ConfirmModalProps>) {
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
+                      aria-hidden="true"
                     >
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path
@@ -179,7 +217,7 @@ export function ConfirmModal(props: Readonly<ConfirmModalProps>) {
           </div>
         </div>
       </div>
-    </dialog>
+    </div>
   );
 }
 

@@ -4,7 +4,7 @@
 
 # 🖨️ E-commerce de Impresión 3D
 
-[![Version](https://img.shields.io/badge/version-1.0.1-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](CHANGELOG.md)
 [![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)](docs/TESTING.md)
 [![Coverage](https://img.shields.io/badge/coverage-80%25-green.svg)](docs/TESTING.md)
 [![License](https://img.shields.io/badge/license-Academic-orange.svg)](LICENSE)
@@ -20,15 +20,14 @@
 ## 📋 Tabla de Contenidos
 
 - [Descripción General](#descripción-general)
-- [Arquitectura del Sistema](#arquitectura-del-sistema)
-- [Stack Tecnológico](#stack-tecnológico)
 - [Características Principales](#características-principales)
+- [Stack Tecnológico](#stack-tecnológico)
+- [Arquitectura del Sistema](#arquitectura-del-sistema)
 - [Instalación y Configuración](#instalación-y-configuración)
 - [Uso y Comandos](#uso-y-comandos)
 - [Testing y Calidad](#testing-y-calidad)
 - [Estructura del Proyecto](#estructura-del-proyecto)
 - [Documentación Técnica](#documentación-técnica)
-- [Seguridad](#seguridad)
 - [Roadmap y Mejoras](#roadmap-y-mejoras)
 - [Soporte y Contacto](#soporte-y-contacto)
 
@@ -42,118 +41,21 @@
 
 - **🎯 Tolerancia Cero:** Cero errores en ESLint, TypeScript y tests
 - **🧪 Test-Driven Development:** 395+ tests (unitarios, integración, E2E)
-- **🌍 Backend Translation:** Sistema 100% español con traducción en backend
+- **🌍 Backend Translation:** Sistema bilingüe (ES/EN) con traducción en backend
 - **🔒 Security First:** Enterprise-grade security con rate limiting, account lockout, validación de contraseñas
 - **📱 Responsive Design:** Optimizado desde mobile (320px) hasta 4K (3840px)
 
 ### Estadísticas del Proyecto
 
-| Métrica              | Valor                   |
-| -------------------- | ----------------------- |
-| **Líneas de Código** | **60,764**              |
-| **Archivos Fuente**  | **254+** (TS/TSX)       |
-| **Endpoints API**    | **91** RESTful          |
-| **Tests**            | **395** (80%+ coverage) |
-| **Componentes UI**   | **50+**                 |
-| **Modelos BD**       | **28** entidades        |
-| **Módulos Admin**    | **16** CRUD completos   |
-
----
-
-## Arquitectura del Sistema
-
-### Arquitectura de Alto Nivel
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    CLIENTE (Navegador)                       │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
-│  │   Next.js   │  │  React 18   │  │   Tailwind CSS      │  │
-│  │  (App Router)│  │  (UI)       │  │   (Estilos)         │  │
-│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    SERVIDOR (Next.js)                        │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
-│  │  API Routes │  │   Server    │  │     Middleware      │  │
-│  │  (62+ endpoints)│  │   Actions   │  │   (Auth/Security)   │  │
-│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    DATOS Y SERVICIOS                         │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
-│  │  PostgreSQL │  │  Prisma ORM │  │  Stripe/PayPal     │  │
-│  │  (Supabase) │  │  (24 models)│  │  (Pagos)            │  │
-│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
-│  │ Socket.io   │  │  EventStore │  │  PDF Generation    │  │
-│  │ (Real-time) │  │  (PostgreSQL)│  │  (html2canvas)      │  │
-│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### Flujo de Datos
-
-1. **Frontend (Next.js App Router):** Server Components para SEO + Client Components para interactividad
-2. **Backend (Next.js API Routes):** RESTful APIs con validación Zod
-3. **Base de Datos:** PostgreSQL con Prisma ORM y transacciones ACID
-4. **Real-time:** Socket.io + PostgreSQL EventStore para notificaciones instantáneas
-5. **Traducción:** Backend 100% - Frontend recibe español directamente
-
----
-
-## Stack Tecnológico
-
-### Core
-
-| Tecnología       | Versión | Uso                                 |
-| ---------------- | ------- | ----------------------------------- |
-| **Next.js**      | 16.2.4  | Framework full-stack con App Router |
-| **React**        | ^18.3.0 | Biblioteca UI                       |
-| **TypeScript**   | ^5.x    | Tipado estático                     |
-| **Tailwind CSS** | ^3.4.19 | Estilos utility-first               |
-| **Node.js**      | 18+     | Runtime                             |
-
-### Backend y Datos
-
-| Tecnología      | Versión  | Uso                             |
-| --------------- | -------- | ------------------------------- |
-| **PostgreSQL**  | 15+      | Base de datos principal         |
-| **Prisma**      | ^5.22.0  | ORM y migraciones               |
-| **NextAuth.js** | ^4.24.13 | Autenticación JWT               |
-| **bcrypt**      | ^5.x     | Hash de contraseñas (12 rounds) |
-| **Socket.io**   | ^4.x     | Comunicación tiempo real        |
-
-### Pagos
-
-| Servicio          | Tipo     | Descripción                     |
-| ----------------- | -------- | ------------------------------- |
-| **Stripe**        | Real     | Checkout con tarjetas de prueba |
-| **PayPal**        | Real     | Smart Buttons integrados        |
-| **Bizum**         | Simulado | Para mercado español            |
-| **Transferencia** | Manual   | Con referencia única            |
-
-### Testing
-
-| Framework           | Tipo               | Cobertura           |
-| ------------------- | ------------------ | ------------------- |
-| **Vitest**          | Unit + Integration | 80%+                |
-| **Playwright**      | E2E                | 19 tests, 6 devices |
-| **Testing Library** | React Testing      | Unitarios           |
-
-### Seguridad y Calidad
-
-| Herramienta   | Propósito                |
-| ------------- | ------------------------ |
-| **Zod**       | Validación de inputs     |
-| **ESLint**    | Linting (max-warnings=0) |
-| **Prettier**  | Formateo de código       |
-| **Husky**     | Git hooks                |
-| **SonarQube** | Análisis estático        |
+| Métrica              | Valor                    |
+| -------------------- | ------------------------ |
+| **Líneas de Código** | **60,000+**              |
+| **Archivos Fuente**  | **254+** (TS/TSX)        |
+| **Endpoints API**    | **91+** RESTful          |
+| **Tests**            | **395+** (80%+ coverage) |
+| **Componentes UI**   | **50+**                  |
+| **Modelos BD**       | **28** entidades         |
+| **Módulos Admin**    | **16** CRUD completos    |
 
 ---
 
@@ -166,7 +68,7 @@
 - **Checkout:** Multi-paso, 4 métodos de pago, validación de direcciones, cupones de descuento
 - **Pedidos:** Flujo completo (Pendiente → Confirmado → En preparación → Enviado → Entregado)
 
-### 👨‍💼 Panel de Administración (15+ Módulos)
+### 👨‍💼 Panel de Administración (16 Módulos)
 
 | Módulo            | Funcionalidad                                                    |
 | ----------------- | ---------------------------------------------------------------- |
@@ -182,6 +84,7 @@
 | **Envíos**        | Zonas de envío configurables, costos por región                  |
 | **Categorías**    | CRUD jerárquico de categorías                                    |
 | **Reseñas**       | Moderación de reviews de productos                               |
+| **Devoluciones**  | Gestión de devoluciones y reembolsos                             |
 | **Configuración** | Datos de la empresa, términos legales, cookies                   |
 
 ### 💳 Sistema de Pagos
@@ -208,6 +111,125 @@
 - **Anulación:** Soporte para facturas anuladas
 - **Datos Fiscales:** Completos (empresa y cliente)
 
+### 🆕 Nuevas Características (v1.1.0)
+
+| Feature              | Descripción                                               |
+| -------------------- | --------------------------------------------------------- |
+| **API Client**       | Cliente HTTP centralizado con manejo de errores y retries |
+| **React Query**      | Data fetching con caché automática y optimistic updates   |
+| **Sonner Toast**     | Notificaciones globales con promesas                      |
+| **Skeletons**        | Loading states consistentes en toda la app                |
+| **Error Boundaries** | Manejo de errores por área con UI de fallback             |
+| **Service Worker**   | Soporte offline básico (PWA)                              |
+| **A11y Mejorada**    | Accesibilidad WCAG 2.1 AA compliant                       |
+
+---
+
+## Stack Tecnológico
+
+### Core
+
+| Tecnología       | Versión | Uso                                 |
+| ---------------- | ------- | ----------------------------------- |
+| **Next.js**      | 16.2.4  | Framework full-stack con App Router |
+| **React**        | ^18.3.0 | Biblioteca UI                       |
+| **TypeScript**   | ^5.x    | Tipado estático                     |
+| **Tailwind CSS** | ^3.4.19 | Estilos utility-first               |
+| **Node.js**      | 18+     | Runtime                             |
+
+### Backend y Datos
+
+| Tecnología         | Versión  | Uso                             |
+| ------------------ | -------- | ------------------------------- |
+| **PostgreSQL**     | 15+      | Base de datos principal         |
+| **Prisma**         | ^5.22.0  | ORM y migraciones               |
+| **NextAuth.js**    | ^4.24.13 | Autenticación JWT               |
+| **bcrypt**         | ^5.x     | Hash de contraseñas (12 rounds) |
+| **Socket.io**      | ^4.x     | Comunicación tiempo real        |
+| **TanStack Query** | ^5.x     | Data fetching y caché           |
+
+### Pagos
+
+| Servicio          | Tipo     | Descripción                     |
+| ----------------- | -------- | ------------------------------- |
+| **Stripe**        | Real     | Checkout con tarjetas de prueba |
+| **PayPal**        | Real     | Smart Buttons integrados        |
+| **Bizum**         | Simulado | Para mercado español            |
+| **Transferencia** | Manual   | Con referencia única            |
+
+### Testing
+
+| Framework           | Tipo               | Cobertura            |
+| ------------------- | ------------------ | -------------------- |
+| **Vitest**          | Unit + Integration | 80%+                 |
+| **Playwright**      | E2E                | 91+ tests, 6 devices |
+| **Testing Library** | React Testing      | Unitarios            |
+
+### Seguridad y Calidad
+
+| Herramienta   | Propósito                |
+| ------------- | ------------------------ |
+| **Zod**       | Validación de inputs     |
+| **ESLint**    | Linting (max-warnings=0) |
+| **Prettier**  | Formateo de código       |
+| **Husky**     | Git hooks                |
+| **SonarQube** | Análisis estático        |
+
+---
+
+## Arquitectura del Sistema
+
+### Arquitectura de Data Fetching
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    FRONTEND (Next.js)                        │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
+│  │ React Query │  │  API Client │  │   Components        │  │
+│  │  (Cache)    │  │  (HTTP)     │  │   (UI)              │  │
+│  │  - staleTime│  │  - Timeouts │  │  - Skeletons        │  │
+│  │  - gcTime   │  │  - Retries  │  │  - Error Boundaries │  │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    BACKEND (Next.js API)                     │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
+│  │  API Routes │  │   Prisma    │  │   Validation        │  │
+│  │  (91+)      │  │   ORM       │  │   (Zod)             │  │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    DATABASE (PostgreSQL)                     │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
+│  │  Products   │  │   Orders    │  │   Users             │  │
+│  │  Cart       │  │   Invoices  │  │   Reviews           │  │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Características del Data Fetching
+
+| Característica         | Implementación                              | Beneficio                     |
+| ---------------------- | ------------------------------------------- | ----------------------------- |
+| **Caché**              | React Query con staleTime: 5min             | Reduce peticiones al servidor |
+| **Retries**            | 3 reintentos con backoff exponencial        | Resiliencia ante fallos       |
+| **Optimistic Updates** | UI actualiza antes de confirmación          | UX fluida                     |
+| **Invalidación**       | Mutations invalidan queries automáticamente | Consistencia de datos         |
+| **Error Handling**     | Error boundaries por área                   | UX robusta                    |
+
+### Flujo de Datos
+
+1. **Frontend (Next.js App Router):** Server Components para SEO + Client Components para interactividad
+2. **Data Fetching:** React Query con API Client centralizado
+3. **Backend (Next.js API Routes):** RESTful APIs con validación Zod
+4. **Base de Datos:** PostgreSQL con Prisma ORM y transacciones ACID
+5. **Real-time:** Socket.io + PostgreSQL EventStore para notificaciones instantáneas
+6. **Traducción:** Backend 100% - Frontend recibe español directamente
+
 ---
 
 ## Instalación y Configuración
@@ -223,7 +245,7 @@
 
 ```bash
 # Clonar repositorio
-git clone https://github.com/tu-usuario/3d-print-tfm.git
+git clone https://github.com/Rejane2304/3d-print-tfm.git
 cd 3d-print-tfm
 
 # Instalar dependencias
@@ -244,6 +266,7 @@ cp .env.example .env.local
 ```env
 # Base de datos
 DATABASE_URL="postgresql://user:password@localhost:5432/3dprint_tfm"
+DIRECT_URL="postgresql://user:password@localhost:5432/3dprint_tfm"
 
 # NextAuth
 NEXTAUTH_SECRET="tu-secreto-jwt-generado-con-openssl"
@@ -266,11 +289,8 @@ NEXT_PUBLIC_PAYPAL_CLIENT_ID="..."
 # Generar cliente Prisma
 npx prisma generate
 
-# Ejecutar migraciones
-npx prisma migrate dev --name init
-
-# Poblar datos iniciales (50+ productos, 8 usuarios)
-npm run db:seed
+# Setup completo (migraciones + seed)
+npm run db:setup:dev
 ```
 
 ### Paso 4: Iniciar Servidor
@@ -294,6 +314,7 @@ La aplicación estará disponible en: **http://localhost:3000**
 ```bash
 npm run dev              # Iniciar servidor de desarrollo
 npm run build            # Construir para producción
+npm run type-check       # Verificar tipos TypeScript
 npm start                # Iniciar servidor de producción
 ```
 
@@ -311,11 +332,11 @@ npm run check-code        # Ejecutar lint + type-check
 
 ```bash
 npm run db:generate       # Generar cliente Prisma
-npm run db:migrate          # Crear nueva migración
-npm run db:setup:dev        # Setup completo en DEV (migraciones + seed)
-npm run db:seed             # Poblar con datos iniciales
-npm run db:reset            # Reset + seed (cuidado: borra datos)
-npm run db:studio           # Abrir Prisma Studio (GUI)
+npm run db:migrate:dev    # Crear nueva migración en DEV
+npm run db:setup:dev      # Setup completo en DEV (migraciones + seed)
+npm run db:seed:dev       # Poblar con datos iniciales en DEV
+npm run db:reset:dev      # Reset + seed (cuidado: borra datos)
+npm run db:studio:dev     # Abrir Prisma Studio (GUI)
 ```
 
 ### Testing
@@ -388,7 +409,7 @@ npm run test:docker:setup
 ├── 📁 .husky/                 # Git hooks
 │   └── pre-commit
 │
-├── 📁 docs/                   # Documentación técnica (14+ archivos)
+├── 📁 docs/                   # Documentación técnica
 │   ├── TESTING.md
 │   ├── ROADMAP.md
 │   ├── ESTRUCTURA_CARPETAS.md
@@ -396,103 +417,56 @@ npm run test:docker:setup
 │   └── ...
 │
 ├── 📁 prisma/                 # Base de datos
-│   ├── schema.prisma          # 24+ modelos
+│   ├── schema.prisma          # 28+ modelos
 │   ├── migrations/
 │   └── seed.ts
 │
 ├── 📁 scripts/                # Scripts utilitarios
-│   ├── code-auditor.js
-│   └── wait-for-postgres.mjs
+│   ├── db-*.ts                # Scripts de BD por entorno
+│   └── sonarqube-optimized-scan.sh
 │
 ├── 📁 src/
 │   ├── 📁 app/
 │   │   ├── 📁 (shop)/         # Tienda pública
-│   │   │   ├── account/       # Perfil, pedidos, facturas, direcciones
-│   │   │   ├── cart/          # Carrito de compras
-│   │   │   ├── checkout/      # Checkout multi-paso
-│   │   │   ├── products/      # Catálogo con filtros
-│   │   │   └── ...
-│   │   │
-│   │   ├── 📁 admin/          # Panel de administración (15+ módulos)
-│   │   │   ├── alerts/
-│   │   │   ├── categories/
-│   │   │   ├── clients/
-│   │   │   ├── coupons/
-│   │   │   ├── dashboard/
-│   │   │   ├── faqs/
-│   │   │   ├── inventory/
-│   │   │   ├── invoices/
-│   │   │   ├── orders/
-│   │   │   ├── products/
-│   │   │   ├── returns/
-│   │   │   ├── reviews/
-│   │   │   ├── shipping/
-│   │   │   └── site-config/
-│   │   │
-│   │   ├── 📁 api/            # APIs RESTful (62+ endpoints)
-│   │   │   ├── account/
-│   │   │   ├── admin/
-│   │   │   ├── auth/
-│   │   │   ├── cart/
-│   │   │   ├── checkout/
-│   │   │   ├── payments/
-│   │   │   └── webhooks/
-│   │   │
-│   │   ├── 📁 auth/           # Autenticación
-│   │   ├── 📁 checkout/
-│   │   ├── 📁 products/
-│   │   ├── layout.tsx
-│   │   └── page.tsx
+│   │   ├── 📁 admin/          # Panel de administración
+│   │   ├── 📁 api/            # APIs RESTful (91+ endpoints)
+│   │   └── 📁 auth/           # Autenticación
 │   │
 │   ├── 📁 components/
 │   │   ├── admin/             # Componentes admin
-│   │   ├── auth/              # Login, registro
-│   │   ├── cart/              # Carrito, items
-│   │   ├── checkout/          # Formularios checkout
-│   │   ├── layout/            # Header, footer
-│   │   ├── payment/           # PayPal, métodos de pago
-│   │   ├── products/          # Cards, filtros, galería
-│   │   └── ui/                # Componentes UI reutilizables
+│   │   ├── cart/              # Carrito
+│   │   ├── checkout/          # Checkout
+│   │   ├── providers/         # QueryProvider, etc.
+│   │   ├── ui/skeletons/      # Loading states
+│   │   └── ...
 │   │
-│   ├── 📁 hooks/              # Custom React hooks
-│   │   ├── useAdminAuth.ts
-│   │   ├── useCart.ts
+│   ├── 📁 hooks/
+│   │   ├── queries/           # React Query hooks
+│   │   │   ├── useProducts.ts
+│   │   │   ├── useCart.ts
+│   │   │   └── useOrders.ts
 │   │   └── useRealTime.ts
 │   │
 │   ├── 📁 lib/
-│   │   ├── alerts/            # Servicio de alertas
-│   │   ├── auth/              # Configuración NextAuth
-│   │   ├── db/                # Cliente Prisma
-│   │   ├── errors/            # Manejo de errores
-│   │   ├── i18n/              # Traducciones (backend)
-│   │   ├── invoices/          # Servicio de facturas
-│   │   ├── logger/            # Logger estructurado
-│   │   ├── realtime/          # Socket.io + EventStore
-│   │   └── validators/        # Zod schemas
+│   │   ├── api/               # API Client y servicios
+│   │   │   ├── client.ts      # Cliente HTTP centralizado
+│   │   │   └── services/      # Servicios API
+│   │   ├── query-client.ts    # React Query config
+│   │   ├── i18n/              # Traducciones
+│   │   └── ...
 │   │
-│   ├── 📁 providers/          # Context providers
-│   ├── 📁 styles/             # Estilos globales
-│   └── 📁 types/              # Tipos TypeScript globales
+│   └── 📁 types/              # Tipos TypeScript
+│       └── api.ts             # Tipos API compartidos
 │
 ├── 📁 tests/
-│   ├── 📁 unit/               # Tests unitarios (Vitest)
-│   ├── 📁 integration/         # Tests integración (Vitest + DB)
-│   └── 📁 e2e/                # Tests E2E (Playwright)
+│   ├── 📁 unit/               # Tests unitarios
+│   ├── 📁 integration/        # Tests integración
+│   └── 📁 e2e/                # Tests E2E
 │
-├── 📄 .env.example            # Variables de entorno de ejemplo
-├── 📄 .eslintrc.json          # Configuración ESLint
-├── 📄 .prettierrc             # Configuración Prettier
 ├── 📄 AGENTS.md               # Guía para agentes AI
 ├── 📄 CHANGELOG.md            # Historial de cambios
-├── 📄 DATABASE-SAFETY.md      # Seguridad de BD
-├── 📄 LICENSE                 # Licencia académica
-├── 📄 next.config.ts          # Configuración Next.js
-├── 📄 package.json            # Dependencias y scripts
-├── 📄 postcss.config.js       # Configuración PostCSS
 ├── 📄 README.md               # Este archivo
-├── 📄 tailwind.config.ts      # Configuración Tailwind
-├── 📄 tsconfig.json           # Configuración TypeScript
-└── 📄 vitest.config.ts        # Configuración Vitest
+└── 📄 package.json            # Dependencias y scripts
 ```
 
 ---
@@ -503,53 +477,21 @@ npm run test:docker:setup
 
 | Documento                                                 | Descripción               | Ubicación |
 | --------------------------------------------------------- | ------------------------- | --------- |
+| **[AGENTS.md](AGENTS.md)**                                | Guía para agentes AI      | `/`       |
 | **[TESTING.md](docs/TESTING.md)**                         | Guía completa de testing  | `/docs/`  |
 | **[ROADMAP.md](docs/ROADMAP.md)**                         | Plan de mejoras y roadmap | `/docs/`  |
 | **[ESTRUCTURA_CARPETAS.md](docs/ESTRUCTURA_CARPETAS.md)** | Estructura detallada      | `/docs/`  |
 | **[PROJECT-SUMMARY.md](docs/PROJECT-SUMMARY.md)**         | Documentación académica   | `/docs/`  |
 | **[TOLERANCIA-CERO.md](docs/TOLERANCIA-CERO.md)**         | Política de calidad       | `/docs/`  |
-| **[AGENTS.md](AGENTS.md)**                                | Guía para agentes AI      | `/`       |
 
-### Seguridad y Operaciones
+### Nuevos Documentos (v1.1.0)
 
-| Documento                | Descripción                     |
-| ------------------------ | ------------------------------- |
-| **DATABASE-SAFETY.md**   | Protocolos de seguridad de BD   |
-| **DATABASE-CONFIG.md**   | Configuración de bases de datos |
-| **DATABASE-STATUS.md**   | Estado de migraciones           |
-| **DEPLOYMENT-STATUS.md** | Estado de despliegue            |
-
-### Fiscal y Legal
-
-| Documento                                 | Descripción          |
-| ----------------------------------------- | -------------------- |
-| **AUDITORIA-FISCAL-COMPLETA.md**          | Documentación fiscal |
-| **VERIFICACION-FISCAL-FINAL-APROBADO.md** | Verificación fiscal  |
-
----
-
-## Seguridad
-
-### Medidas Implementadas
-
-| Capa              | Implementación                                            |
-| ----------------- | --------------------------------------------------------- |
-| **Autenticación** | JWT con NextAuth.js, sesiones httpOnly/secure/sameSite    |
-| **Autorización**  | RBAC (USER/ADMIN) con middleware de protección de rutas   |
-| **Contraseñas**   | bcrypt (12 rounds), validación de complejidad             |
-| **Rate Limiting** | 5 intentos/15min login, bloqueo tras 5 fallos             |
-| **SQL Injection** | Prisma ORM (consultas parametrizadas)                     |
-| **XSS**           | Escapado automático de React, sanitización de inputs      |
-| **CSRF**          | Tokens en formularios, validación de origen               |
-| **Validación**    | Zod para todos los inputs de APIs                         |
-| **Errores**       | Manejo centralizado, sin filtrado de información sensible |
-
-### Validación de Contraseñas
-
-- **Longitud mínima:** 8 caracteres
-- **Complejidad:** Mayúsculas, minúsculas, números, símbolos
-- **Lista negra:** 100+ contraseñas comunes bloqueadas
-- **Pwned Check:** Integración opcional con Have I Been Pwned
+| Documento           | Descripción                       |
+| ------------------- | --------------------------------- |
+| **API.md**          | Documentación de la API REST      |
+| **ARCHITECTURE.md** | Arquitectura técnica detallada    |
+| **DEVELOPMENT.md**  | Guía de desarrollo y convenciones |
+| **DEPLOYMENT.md**   | Guía de despliegue                |
 
 ---
 
@@ -561,11 +503,18 @@ npm run test:docker:setup
 - [x] Catálogo de productos con filtros
 - [x] Carrito persistente
 - [x] Checkout con 4 métodos de pago
-- [x] Panel admin con 15+ módulos
+- [x] Panel admin con 16+ módulos
 - [x] Sistema de facturación automática
 - [x] Notificaciones en tiempo real
-- **Tests:** 395+ con 80%+ coverage
+- [x] Tests: 395+ con 80%+ coverage
 - [x] Tolerancia cero en ESLint/TypeScript
+- [x] **API Client centralizado**
+- [x] **React Query para data fetching**
+- [x] **Toast system con Sonner**
+- [x] **Loading skeletons**
+- [x] **Error boundaries**
+- [x] **Service Worker para offline**
+- [x] **Mejoras de accesibilidad**
 
 ### En Progreso 🚧
 
@@ -589,8 +538,8 @@ Ver [ROADMAP.md](docs/ROADMAP.md) para detalles completos.
 ### Recursos
 
 - 📚 **Documentación:** Ver carpeta `/docs/`
-- 🐛 **Issues:** [GitHub Issues](https://github.com/tu-usuario/3d-print-tfm/issues)
-- 💬 **Discusiones:** [GitHub Discussions](https://github.com/tu-usuario/3d-print-tfm/discussions)
+- 🤖 **Guía Agentes:** Ver [AGENTS.md](AGENTS.md)
+- 🐛 **Issues:** [GitHub Issues](https://github.com/Rejane2304/3d-print-tfm/issues)
 
 ### Desarrollador
 
@@ -598,8 +547,8 @@ Ver [ROADMAP.md](docs/ROADMAP.md) para detalles completos.
 
 - 🎓 Máster en Desarrollo de Aplicaciones con IA
 - 📧 Email: [tu-email@example.com](mailto:tu-email@example.com)
-- 💼 LinkedIn: [linkedin.com/in/tu-perfil](https://linkedin.com/in/tu-perfil)
-- 🐙 GitHub: [github.com/tu-usuario](https://github.com/tu-usuario)
+- 💼 LinkedIn: [linkedin.com/in/rejane-rodrigues](https://linkedin.com/in/rejane-rodrigues)
+- 🐙 GitHub: [github.com/Rejane2304](https://github.com/Rejane2304)
 
 ---
 
@@ -607,7 +556,7 @@ Ver [ROADMAP.md](docs/ROADMAP.md) para detalles completos.
 
 Este proyecto es desarrollado para fines académicos como **Trabajo de Fin de Máster**.
 
-Copyright © 2025 Rejane Rodrigues. Todos los derechos reservados.
+Copyright © 2026 Rejane Rodrigues. Todos los derechos reservados.
 
 ---
 
@@ -615,6 +564,6 @@ Copyright © 2025 Rejane Rodrigues. Todos los derechos reservados.
 
 **Desarrollado con ❤️ y muchas ☕ por Rejane Rodrigues**
 
-**Última actualización:** Abril 2025 | **Versión:** 1.0.1
+**Última actualización:** Abril 2026 | **Versión:** 1.1.0
 
 </div>

@@ -2,10 +2,16 @@
  * useCart Hook
  * Manages shopping cart for both authenticated users (API)
  * and unauthenticated users (localStorage)
+ *
+ * UPDATED: Ahora utiliza los servicios API centralizados para usuarios autenticados
+ * mientras mantiene compatibilidad con localStorage para invitados
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import * as cartApi from '@/lib/api/services/cart-api';
+import type { CartError } from '@/lib/api/services/cart-api';
+import { useToast } from '@/hooks/useToast';
 
 export interface CartItem {
   id: string;
@@ -31,18 +37,9 @@ export interface CartData {
 
 const CART_STORAGE_KEY = 'cart';
 
-// Helper functions for cart operations - moved to outer scope per SonarQube S7721
-async function loadCartFromApi(): Promise<CartData> {
-  const response = await fetch('/api/cart');
-  if (!response.ok) {
-    throw new Error('Error al cargar carrito');
-  }
-  const data = await response.json();
-  if (!data.success) {
-    throw new Error('Error al cargar carrito');
-  }
-  return data.cart;
-}
+// ============================================================================
+// LocalStorage Helpers (for unauthenticated users)
+// ============================================================================
 
 function loadCartFromLocalStorage(): CartData {
   const cartData = localStorage.getItem(CART_STORAGE_KEY);
@@ -63,19 +60,6 @@ function loadCartFromLocalStorage(): CartData {
     subtotal: 0,
     totalItems: 0,
   };
-}
-
-async function addItemToApi(productId: string, quantity: number): Promise<void> {
-  const response = await fetch('/api/cart', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ productId, quantity }),
-  });
-
-  if (!response.ok) {
-    const data = await response.json();
-    throw new Error(data.error || 'Error adding to cart');
-  }
 }
 
 function getLocalCartItems(): CartItem[] {
@@ -114,19 +98,6 @@ function createCartItem(
   };
 }
 
-async function updateItemInApi(itemId: string, quantity: number): Promise<void> {
-  const response = await fetch(`/api/cart/${itemId}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ quantity }),
-  });
-
-  if (!response.ok) {
-    const data = await response.json();
-    throw new Error(data.error || 'Error updating');
-  }
-}
-
 function updateItemInLocalStorage(itemId: string, quantity: number): void {
   const cartData = localStorage.getItem(CART_STORAGE_KEY);
   if (!cartData) {
@@ -145,17 +116,6 @@ function updateItemInLocalStorage(itemId: string, quantity: number): void {
   localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(updatedItems));
 }
 
-async function removeItemFromApi(itemId: string): Promise<void> {
-  const response = await fetch(`/api/cart/${itemId}`, {
-    method: 'DELETE',
-  });
-
-  if (!response.ok) {
-    const data = await response.json();
-    throw new Error(data.error || 'Error removing item');
-  }
-}
-
 function removeItemFromLocalStorage(itemId: string): void {
   const cartData = localStorage.getItem(CART_STORAGE_KEY);
   if (!cartData) {
@@ -167,17 +127,54 @@ function removeItemFromLocalStorage(itemId: string): void {
   localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(filteredItems));
 }
 
+// ============================================================================
+// API Loaders (using centralized API client)
+// ============================================================================
+
+async function loadCartFromApi(): Promise<CartData> {
+  return cartApi.getCart();
+}
+
+async function addItemToApi(productId: string, quantity: number): Promise<void> {
+  const result = await cartApi.addToCart(productId, quantity);
+  if (!result.success) {
+    throw new Error(result.message);
+  }
+}
+
+async function updateItemInApi(itemId: string, quantity: number): Promise<void> {
+  const result = await cartApi.updateCartItem(itemId, quantity);
+  if (!result.success) {
+    throw new Error(result.message);
+  }
+}
+
+async function removeItemFromApi(itemId: string): Promise<void> {
+  const result = await cartApi.removeFromCart(itemId);
+  if (!result.success) {
+    throw new Error(result.message);
+  }
+}
+
+// ============================================================================
+// Hook
+// ============================================================================
+
 export function useCart() {
   const { status } = useSession();
   const [cart, setCart] = useState<CartData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const skipAutoLoadRef = useRef(false);
+  const { success: showSuccess, error: showError } = useToast();
 
   const isAuthenticated = status === 'authenticated';
   const isLoadingSession = status === 'loading';
 
-  // Load cart
+  /**
+   * Load cart data
+   * Uses API for authenticated users, localStorage for guests
+   */
   const loadCart = useCallback(
     async (force = false) => {
       if (isLoadingSession) {
@@ -209,7 +206,10 @@ export function useCart() {
     [isAuthenticated, isLoadingSession],
   );
 
-  // Add item to cart
+  /**
+   * Add item to cart
+   * Uses API for authenticated users, localStorage for guests
+   */
   const addItem = useCallback(
     async (
       productId: string,
@@ -243,19 +243,30 @@ export function useCart() {
 
         await loadCart();
         globalThis.dispatchEvent(new Event('cartUpdated'));
+        showSuccess('Producto añadido al carrito');
         return { success: true };
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error desconocido');
+        // Handle CartError specifically
+        const errorMessage = cartApi.isCartError(err)
+          ? cartApi.getCartErrorMessage(err)
+          : err instanceof Error
+            ? err.message
+            : 'Error desconocido';
+        setError(errorMessage);
+        showError(errorMessage);
         return {
           success: false,
-          error: err instanceof Error ? err.message : 'Error desconocido',
+          error: errorMessage,
         };
       }
     },
-    [isAuthenticated, loadCart],
+    [isAuthenticated, loadCart, showSuccess, showError],
   );
 
-  // Update item quantity
+  /**
+   * Update item quantity
+   * Uses API for authenticated users, localStorage for guests
+   */
   const updateQuantity = useCallback(
     async (itemId: string, quantity: number) => {
       try {
@@ -267,19 +278,29 @@ export function useCart() {
 
         await loadCart();
         globalThis.dispatchEvent(new Event('cartUpdated'));
+        showSuccess('Cantidad actualizada');
         return { success: true };
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error desconocido');
+        const errorMessage = cartApi.isCartError(err)
+          ? cartApi.getCartErrorMessage(err)
+          : err instanceof Error
+            ? err.message
+            : 'Error desconocido';
+        setError(errorMessage);
+        showError(errorMessage);
         return {
           success: false,
-          error: err instanceof Error ? err.message : 'Error desconocido',
+          error: errorMessage,
         };
       }
     },
-    [isAuthenticated, loadCart],
+    [isAuthenticated, loadCart, showSuccess, showError],
   );
 
-  // Remove item from cart
+  /**
+   * Remove item from cart
+   * Uses API for authenticated users, localStorage for guests
+   */
   const removeItem = useCallback(
     async (itemId: string) => {
       try {
@@ -291,38 +312,60 @@ export function useCart() {
 
         await loadCart();
         globalThis.dispatchEvent(new Event('cartUpdated'));
+        showSuccess('Producto eliminado del carrito');
         return { success: true };
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error desconocido');
+        const errorMessage = cartApi.isCartError(err)
+          ? cartApi.getCartErrorMessage(err)
+          : err instanceof Error
+            ? err.message
+            : 'Error desconocido';
+        setError(errorMessage);
+        showError(errorMessage);
         return {
           success: false,
-          error: err instanceof Error ? err.message : 'Error desconocido',
+          error: errorMessage,
         };
       }
     },
-    [isAuthenticated, loadCart],
+    [isAuthenticated, loadCart, showSuccess, showError],
   );
 
-  // Clear cart (useful for checkout)
+  /**
+   * Clear cart
+   * Clears localStorage for guests, API handles clearing for authenticated users
+   */
   const clearCart = useCallback(async () => {
     try {
       if (!isAuthenticated) {
         localStorage.removeItem(CART_STORAGE_KEY);
         globalThis.dispatchEvent(new Event('cartUpdated'));
+      } else {
+        // For authenticated users, cart is cleared on the server during checkout
+        await cartApi.clearCart();
       }
-      // For authenticated users, cart is cleared on the server during checkout
       await loadCart();
+      showSuccess('Carrito vaciado');
       return { success: true };
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      const errorMessage = cartApi.isCartError(err)
+        ? cartApi.getCartErrorMessage(err)
+        : err instanceof Error
+          ? err.message
+          : 'Error desconocido';
+      setError(errorMessage);
+      showError(errorMessage);
       return {
         success: false,
-        error: err instanceof Error ? err.message : 'Error desconocido',
+        error: errorMessage,
       };
     }
-  }, [isAuthenticated, loadCart]);
+  }, [isAuthenticated, loadCart, showSuccess, showError]);
 
-  // Migrate cart from localStorage to API (useful when logging in)
+  /**
+   * Migrate cart from localStorage to API (when logging in)
+   * Uses the centralized API client for better error handling
+   */
   const migrateCart = useCallback(async () => {
     if (!isAuthenticated) {
       return { success: false, error: 'Not authenticated' };
@@ -335,25 +378,20 @@ export function useCart() {
       const cartData = localStorage.getItem(CART_STORAGE_KEY);
       if (cartData) {
         const items: CartItem[] = JSON.parse(cartData);
+        const itemsToMigrate = items.map(item => ({
+          productId: item.productId,
+          quantity: item.quantity,
+        }));
 
-        // Add each item to API
-        for (const item of items) {
-          try {
-            await fetch('/api/cart', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                productId: item.productId,
-                quantity: item.quantity,
-              }),
-            });
-          } catch (err) {
-            console.error('Error migrating item:', err);
-          }
+        // Use centralized API client for migration
+        const result = await cartApi.migrateLocalCart(itemsToMigrate);
+
+        if (result.success) {
+          // Clear localStorage AFTER successful migration
+          localStorage.removeItem(CART_STORAGE_KEY);
+        } else {
+          console.warn('Some items failed to migrate:', result.errors);
         }
-
-        // Clear localStorage AFTER successful migration
-        localStorage.removeItem(CART_STORAGE_KEY);
       }
 
       // Reload cart from API with force=true

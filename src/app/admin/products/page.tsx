@@ -1,10 +1,9 @@
 /**
  * Admin Products Page
- * Product management with DataTable
+ * Product management with DataTable using React Query
  */
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -17,25 +16,18 @@ import { BulkDeleteModal } from '@/components/ui/BulkDeleteModal';
 import { CSVUpload } from '@/components/ui/CSVUpload';
 import { useAdminRealTime, useNotificationToast } from '@/hooks/useRealTime';
 import { Toaster } from '@/components/ui/Toaster';
-
-interface Product extends Record<string, unknown> {
-  id: string;
-  slug: string;
-  nombre: string;
-  precio: number;
-  stock: number;
-  categoria: string;
-  material: string;
-  activo: boolean;
-  imagenes: Array<{ url: string }>;
-}
+import { useAdminProducts, useDeleteProductMutation, AdminProduct } from '@/hooks/queries';
+import { useState, useEffect, useCallback } from 'react';
 
 export default function AdminProductsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+
+  // React Query hooks
+  const { data: products = [], isLoading, error: queryError, refetch } = useAdminProducts();
+  const { mutate: deleteProduct, isPending: isDeleting } = useDeleteProductMutation();
+
+  // Local state
   const [modalOpen, setModalOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
   const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
@@ -55,7 +47,7 @@ export default function AdminProductsPage() {
         if (event.type === 'stock:alert' || event.type === 'stock:low') {
           showNotification(event);
           // Refresh products data
-          loadProducts();
+          refetch();
         }
       });
       // Acknowledge events
@@ -76,76 +68,44 @@ export default function AdminProductsPage() {
         router.push('/');
         return;
       }
-      loadProducts();
     }
   }, [status, session, router]);
 
-  const loadProducts = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await fetch('/api/admin/products');
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Error al cargar productos');
-      }
-
-      setProducts(data.productos || []);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDelete = (id: string) => {
+  const handleDelete = useCallback((id: string) => {
     setProductToDelete(id);
     setModalOpen(true);
-  };
+  }, []);
 
-  const confirmDelete = async () => {
+  const confirmDelete = useCallback(async () => {
     if (!productToDelete) {
       return;
     }
 
-    try {
-      const response = await fetch(`/api/admin/products/${productToDelete}`, {
-        method: 'DELETE',
-      });
+    deleteProduct(productToDelete, {
+      onSuccess: () => {
+        setModalOpen(false);
+        setProductToDelete(null);
+      },
+    });
+  }, [productToDelete, deleteProduct]);
 
-      if (response.ok) {
-        setProducts(products.filter(p => p.id !== productToDelete));
-      }
-    } catch {
-      setError('Error al eliminar producto');
-    } finally {
-      setModalOpen(false);
-      setProductToDelete(null);
-    }
-  };
-
-  const handleBulkDelete = (selectedIds: string[]) => {
+  const handleBulkDelete = useCallback((selectedIds: string[]) => {
     setSelectedIdsToDelete(selectedIds);
     setSelectedCount(selectedIds.length);
     setBulkDeleteModalOpen(true);
-  };
+  }, []);
 
-  const confirmBulkDelete = async () => {
-    try {
-      await Promise.all(selectedIdsToDelete.map(id => fetch(`/api/admin/products/${id}`, { method: 'DELETE' })));
-      setProducts(products.filter(p => !selectedIdsToDelete.includes(p.id)));
-    } catch {
-      setError('Error al eliminar productos');
-    } finally {
-      setBulkDeleteModalOpen(false);
-      setSelectedIdsToDelete([]);
-      setSelectedCount(0);
+  const confirmBulkDelete = useCallback(async () => {
+    // Delete each product sequentially
+    for (const id of selectedIdsToDelete) {
+      await deleteProduct(id);
     }
-  };
+    setBulkDeleteModalOpen(false);
+    setSelectedIdsToDelete([]);
+    setSelectedCount(0);
+  }, [selectedIdsToDelete, deleteProduct]);
 
-  const columns: Column<Product>[] = [
+  const columns: Column<AdminProduct>[] = [
     {
       key: 'nombre',
       header: 'Producto',
@@ -230,7 +190,8 @@ export default function AdminProductsPage() {
               e.stopPropagation();
               handleDelete(product.id);
             }}
-            className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors"
+            disabled={isDeleting}
+            className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors disabled:opacity-50"
             title="Eliminar"
           >
             <Trash2 className="h-4 w-4" />
@@ -250,7 +211,9 @@ export default function AdminProductsPage() {
     },
   ];
 
-  if (status === 'loading' || loading) {
+  const error = queryError ? (queryError as Error).message : null;
+
+  if (status === 'loading' || isLoading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -318,7 +281,7 @@ export default function AdminProductsPage() {
           bulkActions={bulkActions}
           exportable={true}
           exportFilename="products.csv"
-          loading={loading}
+          loading={isLoading}
           emptyMessage="No se encontraron productos"
           noResultsMessage="Ningún producto coincide con tu búsqueda"
           onRowClick={product => router.push(`/admin/products/${product.slug}/editar`)}
@@ -364,7 +327,7 @@ export default function AdminProductsPage() {
               apiEndpoint="/api/admin/products/import"
               onSuccess={() => {
                 setImportModalOpen(false);
-                loadProducts();
+                refetch();
               }}
               onCancel={() => setImportModalOpen(false)}
             />

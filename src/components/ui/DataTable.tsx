@@ -6,11 +6,18 @@
  * - Pagination with size selector
  * - Multi-selection with bulk actions
  * - CSV export
+ *
+ * Accessibility improvements:
+ * - Proper table structure with scope attributes
+ * - ARIA labels for interactive elements
+ * - Keyboard navigation support
+ * - Loading states announced to screen readers
  */
 'use client';
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Download, Loader2, Search } from 'lucide-react';
+import { useAnnouncer } from '@/hooks/useAnnouncer';
 
 // SortIcon component extracted outside DataTable to avoid nested function definition
 interface SortIconProps {
@@ -19,10 +26,10 @@ interface SortIconProps {
 
 function SortIcon({ sortDirection }: Readonly<SortIconProps>) {
   if (sortDirection === 'asc') {
-    return <ChevronUp className="h-4 w-4" />;
+    return <ChevronUp className="h-4 w-4" aria-hidden="true" />;
   }
   if (sortDirection === 'desc') {
-    return <ChevronDown className="h-4 w-4" />;
+    return <ChevronDown className="h-4 w-4" aria-hidden="true" />;
   }
   return null;
 }
@@ -35,7 +42,7 @@ interface BulkActionIconProps {
 
 function BulkActionIcon({ isLoading, icon }: Readonly<BulkActionIconProps>) {
   if (isLoading) {
-    return <Loader2 className="h-4 w-4 animate-spin" />;
+    return <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />;
   }
   return icon;
 }
@@ -81,6 +88,8 @@ export interface DataTableProps<T> {
   className?: string;
   onRowClick?: (row: T) => void;
   selectedRowClassName?: string;
+  /** Accessible label for the table */
+  tableLabel?: string;
 }
 
 export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) {
@@ -90,7 +99,7 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
     rowKey,
     searchable = false,
     searchKeys,
-    searchPlaceholder = 'Search...',
+    searchPlaceholder = 'Buscar...',
     pagination = true,
     pageSizeOptions = [10, 25, 50, 100],
     defaultPageSize = 25,
@@ -100,12 +109,16 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
     exportable = false,
     exportFilename = 'export.csv',
     loading = false,
-    emptyMessage = 'No data available',
-    noResultsMessage = 'No results found',
+    emptyMessage = 'No hay datos disponibles',
+    noResultsMessage = 'No se encontraron resultados',
     className = '',
     onRowClick,
     selectedRowClassName = 'bg-indigo-50',
+    tableLabel = 'Tabla de datos',
   } = props;
+
+  const { announce } = useAnnouncer();
+  const tableRef = useRef<HTMLTableElement>(null);
 
   // States
   const [searchQuery, setSearchQuery] = useState('');
@@ -179,49 +192,66 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
 
   // Handlers
   const handleSort = useCallback(
-    (columnKey: keyof T | string) => {
+    (columnKey: keyof T | string, columnHeader: string) => {
+      let newDirection: SortDirection = 'asc';
+
       if (sortColumn === columnKey) {
-        setSortDirection(prev => {
-          if (prev === 'asc') {
-            return 'desc';
-          }
-          if (prev === 'desc') {
-            return null;
-          }
-          return 'asc';
-        });
-        if (sortDirection === 'desc') {
+        if (sortDirection === 'asc') {
+          newDirection = 'desc';
+        } else if (sortDirection === 'desc') {
+          newDirection = null;
+        } else {
+          newDirection = 'asc';
+        }
+
+        if (sortDirection === 'desc' && newDirection === null) {
           setSortColumn(null);
+          announce(`Ordenación eliminada para ${columnHeader}`, 'polite');
+        } else {
+          setSortDirection(newDirection);
+          announce(
+            `Ordenado por ${columnHeader} en orden ${newDirection === 'asc' ? 'ascendente' : 'descendente'}`,
+            'polite',
+          );
         }
       } else {
         setSortColumn(columnKey);
         setSortDirection('asc');
+        announce(`Ordenado por ${columnHeader} en orden ascendente`, 'polite');
       }
     },
-    [sortColumn, sortDirection],
+    [sortColumn, sortDirection, announce],
   );
 
-  const toggleRowSelection = useCallback((rowId: string) => {
-    setSelectedRows(prev => {
-      const newSet = new Set(prev);
-      const isSelected = newSet.has(rowId);
-      if (isSelected) {
-        newSet.delete(rowId);
-      } else {
-        newSet.add(rowId);
-      }
-      return newSet;
-    });
-  }, []);
+  const toggleRowSelection = useCallback(
+    (rowId: string, rowName?: string) => {
+      setSelectedRows(prev => {
+        const newSet = new Set(prev);
+        const isSelected = newSet.has(rowId);
+        if (isSelected) {
+          newSet.delete(rowId);
+          announce(`${rowName || 'Elemento'} deseleccionado`, 'polite');
+        } else {
+          newSet.add(rowId);
+          announce(`${rowName || 'Elemento'} seleccionado`, 'polite');
+        }
+        return newSet;
+      });
+    },
+    [announce],
+  );
 
   const toggleAllSelection = useCallback(() => {
     setSelectedRows(prev => {
       if (prev.size === paginatedData.length) {
+        announce('Todos los elementos deseleccionados', 'polite');
         return new Set();
       }
-      return new Set(paginatedData.map(row => String(row[rowKey])));
+      const allIds = paginatedData.map(row => String(row[rowKey]));
+      announce(`${allIds.length} elementos seleccionados`, 'polite');
+      return new Set(allIds);
     });
-  }, [paginatedData, rowKey]);
+  }, [paginatedData, rowKey, announce]);
 
   const getCellValue = useCallback((row: T, column: Column<T>): React.ReactNode => {
     const value = row[column.key as keyof T];
@@ -233,6 +263,8 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
 
   const exportToCSV = useCallback(async () => {
     setIsExporting(true);
+    announce('Exportando datos a CSV...', 'polite');
+
     try {
       const headers = columns.map(col => col.header).join(',');
       const rows = filteredData.map(row =>
@@ -259,14 +291,17 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
       link.download = exportFilename;
       link.click();
       URL.revokeObjectURL(url);
+      announce('Exportación completada', 'polite');
     } finally {
       setIsExporting(false);
     }
-  }, [columns, filteredData, exportFilename]);
+  }, [columns, filteredData, exportFilename, announce]);
 
   const handleBulkAction = useCallback(
     async (action: BulkAction) => {
       setBulkActionLoading(action.key);
+      announce(`Ejecutando acción: ${action.label}...`, 'polite');
+
       try {
         const selectedIds = Array.from(selectedRows);
         if (onBulkAction) {
@@ -275,12 +310,27 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
           await action.onClick(selectedIds);
         }
         setSelectedRows(new Set());
+        announce(`Acción ${action.label} completada`, 'polite');
       } finally {
         setBulkActionLoading(null);
       }
     },
-    [selectedRows, onBulkAction],
+    [selectedRows, onBulkAction, announce],
   );
+
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setSearchQuery(value);
+      if (value) {
+        announce(`Buscando: ${value}`, 'polite');
+      }
+    },
+    [announce],
+  );
+
+  // Calculate selection state for "select all" checkbox
+  const allSelected = paginatedData.length > 0 && paginatedData.every(row => selectedRows.has(String(row[rowKey])));
+  const someSelected = selectedRows.size > 0 && !allSelected;
 
   return (
     <div className={`bg-white rounded-xl shadow-sm border border-gray-200 ${className}`}>
@@ -290,13 +340,14 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
           {/* Search */}
           {searchable && (
             <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" aria-hidden="true" />
               <input
                 type="text"
                 placeholder={searchPlaceholder}
                 value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
+                onChange={e => handleSearchChange(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                aria-label={searchPlaceholder}
               />
             </div>
           )}
@@ -308,9 +359,14 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
                 onClick={exportToCSV}
                 disabled={isExporting || filteredData.length === 0}
                 className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label="Exportar a CSV"
               >
-                {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-                Export CSV
+                {isExporting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                ) : (
+                  <Download className="h-4 w-4" aria-hidden="true" />
+                )}
+                Exportar CSV
               </button>
             )}
           </div>
@@ -318,8 +374,10 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
 
         {/* Bulk Actions */}
         {selectable && selectedRows.size > 0 && (
-          <div className="mt-4 flex items-center gap-3 p-3 bg-indigo-50 rounded-lg">
-            <span className="text-sm font-medium text-indigo-900">{selectedRows.size} selected</span>
+          <div className="mt-4 flex items-center gap-3 p-3 bg-indigo-50 rounded-lg" role="status" aria-live="polite">
+            <span className="text-sm font-medium text-indigo-900">
+              {selectedRows.size} {selectedRows.size === 1 ? 'seleccionado' : 'seleccionados'}
+            </span>
             <div className="flex gap-2">
               {bulkActions.map(action => {
                 let variantClass = 'bg-gray-100 text-gray-700 hover:bg-gray-200';
@@ -334,6 +392,7 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
                     onClick={() => handleBulkAction(action)}
                     disabled={bulkActionLoading === action.key}
                     className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium ${variantClass} disabled:opacity-50`}
+                    aria-label={action.label}
                   >
                     <BulkActionIcon isLoading={bulkActionLoading === action.key} icon={action.icon} />
                     {action.label}
@@ -350,50 +409,62 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
         {(() => {
           if (loading) {
             return (
-              <div className="p-12 text-center">
-                <Loader2 className="h-8 w-8 animate-spin text-indigo-600 mx-auto mb-4" />
-                <p className="text-gray-500">Loading...</p>
+              <div className="p-12 text-center" role="status" aria-live="polite">
+                <Loader2 className="h-8 w-8 animate-spin text-indigo-600 mx-auto mb-4" aria-hidden="true" />
+                <p className="text-gray-500">Cargando datos...</p>
               </div>
             );
           }
           if (paginatedData.length === 0) {
             const emptyText = searchQuery ? noResultsMessage : emptyMessage;
-            return <div className="p-12 text-center text-gray-500">{emptyText}</div>;
+            return (
+              <div className="p-12 text-center text-gray-500" role="status">
+                {emptyText}
+              </div>
+            );
           }
           return (
-            <table className="min-w-full divide-y divide-gray-200">
+            <table ref={tableRef} className="min-w-full divide-y divide-gray-200" aria-label={tableLabel}>
               <thead className="bg-gray-50">
                 <tr>
                   {selectable && (
-                    <th className="px-4 py-3 w-10">
+                    <th scope="col" className="px-4 py-3 w-10">
                       <input
                         type="checkbox"
-                        checked={
-                          paginatedData.length > 0 && paginatedData.every(row => selectedRows.has(String(row[rowKey])))
-                        }
+                        checked={allSelected}
+                        ref={input => {
+                          if (input) {
+                            input.indeterminate = someSelected;
+                          }
+                        }}
                         onChange={toggleAllSelection}
                         className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                        aria-label={allSelected ? 'Deseleccionar todos' : 'Seleccionar todos'}
                       />
                     </th>
                   )}
                   {columns.map(column => (
                     <th
                       key={String(column.key)}
+                      scope="col"
                       className={`px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
                         column.sortable ? 'cursor-pointer hover:bg-gray-100' : ''
                       } ${column.className || ''}`}
                       style={{ width: column.width }}
-                      onClick={() => column.sortable && handleSort(column.key)}
+                      onClick={() => column.sortable && handleSort(column.key, column.header)}
+                      aria-sort={
+                        sortColumn === column.key
+                          ? sortDirection === 'asc'
+                            ? 'ascending'
+                            : sortDirection === 'desc'
+                              ? 'descending'
+                              : 'none'
+                          : undefined
+                      }
                     >
                       <div className="flex items-center gap-1">
                         {column.header}
-                        {(() => {
-                          const isSorted = column.sortable && sortColumn === column.key;
-                          if (!isSorted) {
-                            return null;
-                          }
-                          return <SortIcon sortDirection={sortDirection} />;
-                        })()}
+                        {column.sortable && sortColumn === column.key && <SortIcon sortDirection={sortDirection} />}
                       </div>
                     </th>
                   ))}
@@ -403,6 +474,14 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
                 {paginatedData.map(row => {
                   const rowId = String(row[rowKey]);
                   const isSelected = selectedRows.has(rowId);
+                  const rowName =
+                    'name' in row
+                      ? String(row.name)
+                      : 'nombre' in row
+                        ? String(row.nombre)
+                        : 'title' in row
+                          ? String(row.title)
+                          : 'Elemento';
 
                   return (
                     <tr
@@ -411,14 +490,16 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
                         isSelected ? selectedRowClassName : ''
                       } ${onRowClick ? 'cursor-pointer' : ''}`}
                       onClick={() => onRowClick?.(row)}
+                      aria-selected={selectable ? isSelected : undefined}
                     >
                       {selectable && (
                         <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
                           <input
                             type="checkbox"
                             checked={isSelected}
-                            onChange={() => toggleRowSelection(rowId)}
+                            onChange={() => toggleRowSelection(rowId, rowName)}
                             className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                            aria-label={`Seleccionar ${rowName}`}
                           />
                         </td>
                       )}
@@ -451,11 +532,16 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
                 Mostrando {(currentPage - 1) * pageSize + 1} a {Math.min(currentPage * pageSize, sortedData.length)} de{' '}
                 {sortedData.length} resultados
               </span>
+              <label className="sr-only" htmlFor="page-size-select">
+                Resultados por página
+              </label>
               <select
+                id="page-size-select"
                 value={pageSize}
                 onChange={e => {
                   setPageSize(Number(e.target.value));
                   setCurrentPage(1);
+                  announce(`${e.target.value} resultados por página`, 'polite');
                 }}
                 className="border border-gray-300 rounded-lg px-2 py-1 text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               >
@@ -467,27 +553,33 @@ export function DataTable<T extends object>(props: Readonly<DataTableProps<T>>) 
               </select>
             </div>
 
-            <div className="flex items-center gap-1 sm:gap-2">
+            <nav aria-label="Paginación" className="flex items-center gap-1 sm:gap-2">
               <button
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                onClick={() => {
+                  setCurrentPage(p => Math.max(1, p - 1));
+                  announce('Página anterior', 'polite');
+                }}
                 disabled={currentPage === 1}
                 className="p-1.5 sm:p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="Página anterior"
               >
-                <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+                <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
               </button>
               <span className="text-xs sm:text-sm text-gray-700 px-1 sm:px-2 whitespace-nowrap">
                 Pág. {currentPage} de {totalPages}
               </span>
               <button
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                onClick={() => {
+                  setCurrentPage(p => Math.min(totalPages, p + 1));
+                  announce('Página siguiente', 'polite');
+                }}
                 disabled={currentPage === totalPages}
                 className="p-1.5 sm:p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="Página siguiente"
               >
-                <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
+                <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
               </button>
-            </div>
+            </nav>
           </div>
         </div>
       )}

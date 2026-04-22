@@ -9,6 +9,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { signOut, useSession } from 'next-auth/react';
 import { useEffect, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import {
   Bell,
   ChevronDown,
@@ -37,6 +38,7 @@ import CartIcon from '@/components/cart/CartIcon';
 
 export default function Header() {
   const { data: session, status } = useSession();
+  const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [adminMenuOpen, setAdminMenuOpen] = useState(false); // Submenu for admin on mobile
@@ -48,6 +50,14 @@ export default function Header() {
   // Get first letter of user's name
   const userName = session?.user?.name || '';
   const firstLetter = userName.charAt(0).toUpperCase();
+
+  // Helper to determine if a link is active
+  const isActivePath = (path: string) => {
+    if (path === '/') {
+      return pathname === path;
+    }
+    return pathname?.startsWith(path);
+  };
 
   const handleLogout = async () => {
     try {
@@ -119,22 +129,32 @@ export default function Header() {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-1">
+          <nav className="hidden md:flex items-center space-x-1" aria-label="Navegación principal">
             {/* Home */}
             <Link
               href="/"
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 ${
+                isActivePath('/')
+                  ? 'text-indigo-600 bg-indigo-50 font-medium'
+                  : 'text-gray-600 hover:text-indigo-600 hover:bg-indigo-50'
+              }`}
+              aria-current={isActivePath('/') ? 'page' : undefined}
             >
-              <Home className="h-5 w-5" />
+              <Home className="h-5 w-5" aria-hidden="true" />
               <span className="text-sm font-medium">Inicio</span>
             </Link>
 
             {/* Products */}
             <Link
               href="/products"
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 ${
+                isActivePath('/products')
+                  ? 'text-indigo-600 bg-indigo-50 font-medium'
+                  : 'text-gray-600 hover:text-indigo-600 hover:bg-indigo-50'
+              }`}
+              aria-current={isActivePath('/products') ? 'page' : undefined}
             >
-              <Package className="h-5 w-5" />
+              <Package className="h-5 w-5" aria-hidden="true" />
               <span className="text-sm font-medium">Catálogo</span>
             </Link>
           </nav>

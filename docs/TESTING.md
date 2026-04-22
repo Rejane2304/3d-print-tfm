@@ -1,6 +1,6 @@
 # Guía de Testing - 3D Print TFM
 
-Guía completa para ejecutar y mantener tests del proyecto.
+Guía completa para ejecutar y mantener tests del proyecto, incluyendo el nuevo sistema de data fetching con React Query y API Client.
 
 ---
 
@@ -12,10 +12,10 @@ Guía completa para ejecutar y mantener tests del proyecto.
 # Todos los tests
 npm test
 
-# Tests unitarios (validadores, utilidades)
+# Tests unitarios (validadores, utilidades, API Client)
 npm run test:unit
 
-# Tests de integración (APIs, BD) - Requiere PostgreSQL/Docker
+# Tests de integración (APIs, BD, React Query hooks) - Requiere PostgreSQL/Docker
 npm run test:integration
 
 # Tests E2E (flujos completos) - Requiere servidor corriendo
@@ -23,6 +23,9 @@ npm run test:e2e
 
 # Con reporte de cobertura
 npm run test:coverage
+
+# Tests específicos de API Client
+npm run test:unit -- tests/unit/lib/api/client.test.ts
 ```
 
 ---
@@ -53,6 +56,11 @@ tests/
 ├── unit/                       # Tests unitarios
 │   ├── validators/             # Validaciones Zod
 │   ├── security/               # Seguridad de contraseñas
+│   ├── lib/                    # 🆕 Tests de librerías
+│   │   └── api/                # Tests de API Client
+│   │       └── client.test.ts
+│   ├── hooks/                  # 🆕 Tests de hooks
+│   │   └── queries/            # Tests de React Query hooks
 │   └── helpers/                # Utilidades
 ├── integration/                # Tests de integración
 │   └── api/
@@ -109,13 +117,25 @@ Flujos completos de usuario.
 
 ## 📊 Métricas Actuales
 
-| Tipo        | Tests | Cobertura      |
-| ----------- | ----- | -------------- |
-| Unitarios   | 25+   | 80%+           |
-| Integración | 290+  | 80%+           |
-| E2E         | 19    | 6 dispositivos |
+| Tipo        | Tests    | Cobertura      |
+| ----------- | -------- | -------------- |
+| Unitarios   | 299+     | 80%+           |
+| Integración | 96+      | 80%+           |
+| E2E         | 91+      | 6 dispositivos |
+| **Total**   | **395+** | **80%+**       |
 
 **Meta de cobertura:** 80%+
+
+### Tests por Categoría
+
+| Categoría   | Tests | Descripción                                 |
+| ----------- | ----- | ------------------------------------------- |
+| Validators  | 45+   | Validaciones Zod (auth, productos, órdenes) |
+| API Client  | 20+   | Tests del API Client centralizado           |
+| React Query | 30+   | Tests de hooks de data fetching             |
+| Componentes | 50+   | Tests de componentes UI                     |
+| Integración | 96+   | Tests de APIs con BD real                   |
+| E2E         | 91+   | Flujos completos de usuario                 |
 
 ---
 
@@ -196,4 +216,4 @@ npm run test:unit -- tests/unit/validators/my-feature.test.ts
 
 ---
 
-**Última actualización:** Abril 2025
+**Última actualización:** Abril 2026

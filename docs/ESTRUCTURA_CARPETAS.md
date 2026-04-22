@@ -223,7 +223,9 @@
 │   │   ├── providers/            # Providers de contexto
 │   │   │   ├── CartPersistenceProvider.tsx
 │   │   │   ├── PayPalProvider.tsx
-│   │   │   └── SessionProvider.tsx
+│   │   │   ├── QueryProvider.tsx       # 🆕 React Query provider
+│   │   │   ├── SessionProvider.tsx
+│   │   │   └── ToastProvider.tsx       # 🆕 Sonner toast provider
 │   │   ├── reviews/              # ReviewsList, ReviewForm
 │   │   │   ├── ReviewsList.tsx
 │   │   │   ├── ReviewForm.tsx
@@ -231,23 +233,52 @@
 │   │   ├── invoices/             # InvoiceViewer
 │   │   │   ├── InvoiceViewer.tsx
 │   │   │   └── InvoiceNotAvailableModal.tsx
-│   │   └── ui/                   # Componentes UI reutilizables
-│   │       ├── Button.tsx
-│   │       ├── DataTable.tsx
-│   │       ├── ConfirmModal.tsx
-│   │       ├── Input.tsx
-│   │       ├── StarRating.tsx
-│   │       └── PhoneInput.tsx
+│   │   ├── ui/                   # Componentes UI reutilizables
+│   │   │   ├── Button.tsx
+│   │   │   ├── DataTable.tsx
+│   │   │   ├── ConfirmModal.tsx
+│   │   │   ├── Input.tsx
+│   │   │   ├── StarRating.tsx
+│   │   │   ├── PhoneInput.tsx
+│   │   │   └── skeletons/        # 🆕 Loading skeletons
+│   │   │       ├── ProductCardSkeleton.tsx
+│   │   │       ├── ProductDetailSkeleton.tsx
+│   │   │       ├── CartSkeleton.tsx
+│   │   │       ├── CheckoutSkeleton.tsx
+│   │   │       └── AdminTableSkeleton.tsx
+│   │   └── error-boundaries/     # 🆕 Error boundaries
+│   │       ├── ErrorBoundary.tsx
+│   │       └── QueryErrorBoundary.tsx
 │   │
 │   ├── 📁 hooks/                 # 🎣 Custom React Hooks
-│   │   ├── useCart.ts
+│   │   ├── queries/               # 🆕 React Query hooks
+│   │   │   ├── index.ts           # Exportaciones
+│   │   │   ├── useAdminOrders.ts
+│   │   │   ├── useAdminProducts.ts
+│   │   │   ├── useCart.ts         # React Query + optimistic updates
+│   │   │   ├── useCheckout.ts
+│   │   │   ├── useOrders.ts
+│   │   │   ├── useProducts.ts
+│   │   │   └── useUser.ts
+│   │   ├── useCart.ts             # Hook legacy (en migración)
 │   │   ├── useCoupon.ts
 │   │   ├── useRealTime.ts
+│   │   ├── useNotificationSound.ts
 │   │   └── useCartPersistence.ts
 │   │
 │   ├── 📁 lib/                   # 📚 Librerías y utilidades
 │   │   ├── alerts/
 │   │   │   └── alert-service.ts   # Servicio de alertas
+│   │   ├── api/                   # 🆕 API Client y servicios
+│   │   │   ├── client.ts          # Cliente HTTP centralizado (471 líneas)
+│   │   │   ├── hooks.ts           # Hooks legacy de API
+│   │   │   ├── index.ts           # Exportaciones
+│   │   │   └── services/          # Servicios API
+│   │   │       ├── cart-api.ts
+│   │   │       ├── checkout-api.ts
+│   │   │       ├── orders-api.ts
+│   │   │       ├── products-api.ts
+│   │   │       └── user-api.ts
 │   │   ├── auth/
 │   │   │   └── auth-options.ts
 │   │   ├── db/
@@ -258,6 +289,9 @@
 │   │   │   └── index.ts          # Sistema de traducción backend
 │   │   ├── invoices/
 │   │   │   └── invoice-service.ts
+│   │   ├── pwa/                   # 🆕 Service Worker y PWA
+│   │   │   └── register-sw.ts
+│   │   ├── query-client.ts        # 🆕 React Query configuration
 │   │   ├── realtime/
 │   │   │   ├── event-service.ts
 │   │   │   └── event-store.ts
@@ -271,8 +305,13 @@
 │   │   └── ToastProvider.tsx
 │   │
 │   ├── 📁 types/                 # 📋 TypeScript Types
+│   │   ├── api.ts                # 🆕 Tipos API compartidos (751 líneas)
+│   │   ├── auth.ts
+│   │   ├── global.d.ts
+│   │   ├── invoice.ts
 │   │   ├── next-auth.d.ts
-│   │   └── invoice.ts
+│   │   ├── prisma-enums.ts
+│   │   └── toast.ts
 │   │
 │   └── middleware.ts             # 🛡️ Next.js Middleware
 │       # (protección de rutas, rate limiting)

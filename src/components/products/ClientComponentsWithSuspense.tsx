@@ -20,20 +20,10 @@ export function SearchBarWrapper() {
 }
 
 // Wrapper for FilterSidebar
-interface FilterSidebarWrapperProps {
-  searchParams: {
-    category?: string;
-    material?: string;
-    minPrice?: string;
-    maxPrice?: string;
-    inStock?: string;
-  };
-}
-
-export function FilterSidebarWrapper({ searchParams }: FilterSidebarWrapperProps) {
+export function FilterSidebarWrapper() {
   return (
     <Suspense fallback={<div className="w-full h-96 bg-gray-200 rounded-lg animate-pulse" />}>
-      <FilterSidebar searchParams={searchParams} />
+      <FilterSidebar />
     </Suspense>
   );
 }

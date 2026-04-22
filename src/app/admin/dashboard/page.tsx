@@ -4,10 +4,11 @@
  */
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import {
   Bell,
   Calendar,
@@ -27,7 +28,9 @@ import {
   Users,
 } from 'lucide-react';
 import { Toaster } from '@/components/ui/Toaster';
-import RealTimeManager from '@/components/admin/RealTimeManager';
+
+// Lazy load de componentes pesados de admin
+const RealTimeManager = dynamic(() => import('@/components/admin/RealTimeManager'), { ssr: false });
 
 interface AnalyticsData {
   salesSummary: {
@@ -563,7 +566,7 @@ export default function AdminPanelPage() {
         </div>
       </div>
       {/* Real-time Notifications - Solo renderizar cuando está autenticado */}
-      {status === 'authenticated' && <RealTimeManager onEvent={handleRealTimeEvent} />}
+      {status === 'authenticated' && <RealTimeManager />}
       <Toaster notifications={[]} onDismiss={() => {}} />
     </div>
   );

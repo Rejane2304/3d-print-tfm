@@ -2,14 +2,21 @@
  * CartItem Component
  * Item individual del carrito de compras
  * Responsive: mobile → desktop
+ *
+ * Accessibility improvements:
+ * - Labels asociados a inputs
+ * - Aria-live para anuncios de cantidad
+ * - Descriptive aria-labels for buttons
+ * - Error announcements via screen reader
  */
 'use client';
 
-import { useState } from 'react';
+import { useState, useId } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Loader2, Minus, Plus, Trash2 } from 'lucide-react';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { useAnnouncer } from '@/hooks/useAnnouncer';
 
 interface CartItemProps {
   item: {
@@ -34,7 +41,12 @@ interface CartItemProps {
 export default function CartItem({ item, onUpdateQuantity, onRemove, isUpdating = false }: Readonly<CartItemProps>) {
   const [quantity, setQuantity] = useState(item.quantity);
   const [modalOpen, setModalOpen] = useState(false);
-  const subtotal = item.unitPrice * item.quantity; // Sin IVA, el IVA se calcula en el resumen
+  const { announce } = useAnnouncer();
+
+  // Unique IDs for accessibility
+  const quantityId = useId();
+
+  const subtotal = item.unitPrice * item.quantity;
 
   // Si el producto ya no existe (puede haber sido eliminado), mostrar mensaje
   if (!item.product) {
@@ -49,9 +61,9 @@ export default function CartItem({ item, onUpdateQuantity, onRemove, isUpdating 
             type="button"
             onClick={() => onRemove(item.id)}
             className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
-            aria-label="Eliminar del carrito"
+            aria-label="Eliminar producto no disponible del carrito"
           >
-            <Trash2 className="h-5 w-5" />
+            <Trash2 className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
       </div>
@@ -68,6 +80,7 @@ export default function CartItem({ item, onUpdateQuantity, onRemove, isUpdating 
   const handleConfirmRemove = () => {
     setModalOpen(false);
     onRemove(item.id);
+    announce(`${product.name} eliminado del carrito`, 'polite');
   };
 
   const handleQuantityChange = (newQuantity: number) => {
@@ -76,6 +89,7 @@ export default function CartItem({ item, onUpdateQuantity, onRemove, isUpdating 
     }
     setQuantity(newQuantity);
     onUpdateQuantity(item.id, newQuantity);
+    announce(`Cantidad de ${product.name} actualizada a ${newQuantity}`, 'polite');
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -91,17 +105,22 @@ export default function CartItem({ item, onUpdateQuantity, onRemove, isUpdating 
 
   const handleInputBlur = () => {
     onUpdateQuantity(item.id, quantity);
+    announce(`Cantidad de ${product.name} actualizada a ${quantity}`, 'polite');
   };
 
   return (
     <div className="flex flex-col sm:flex-row gap-4 p-4 bg-white rounded-lg shadow-sm border border-gray-200">
       {/* Imagen del producto */}
-      <Link href={`/products/${product.slug}`} className="relative w-full sm:w-32 h-32 flex-shrink-0">
+      <Link
+        href={`/products/${product.slug}`}
+        className="relative w-full sm:w-32 h-32 flex-shrink-0 block"
+        aria-label={`Ver detalles de ${product.name}`}
+      >
         <Image
           src={product.image || '/images/placeholder.jpg'}
-          alt={product.name}
+          alt={`Imagen de ${product.name}`}
           fill
-          className="object-cover"
+          className="object-cover rounded-md"
           sizes="(max-width: 640px) 100vw, 128px"
         />
       </Link>
@@ -121,20 +140,24 @@ export default function CartItem({ item, onUpdateQuantity, onRemove, isUpdating 
         {/* Controles de cantidad */}
         <div className="flex items-center justify-between mt-4 sm:mt-0">
           <div className="flex items-center gap-2">
+            <label htmlFor={quantityId} className="sr-only">
+              Cantidad de {product.name}
+            </label>
+
             {/* Botón decrementar */}
             <button
               type="button"
               onClick={() => handleQuantityChange(quantity - 1)}
               disabled={quantity <= 1 || isUpdating}
-              aria-label="Decrementar cantidad"
-              className="p-2 rounded-md border border-gray-300 hover:bg-gray-100 disabled:opacity-50 \
-              disabled:cursor-not-allowed transition-colors"
+              aria-label={`Disminuir cantidad de ${product.name}`}
+              className="p-2 rounded-md border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
-              <Minus className="h-4 w-4" />
+              <Minus className="h-4 w-4" aria-hidden="true" />
             </button>
 
             {/* Input de cantidad */}
             <input
+              id={quantityId}
               type="number"
               value={quantity}
               onChange={handleInputChange}
@@ -143,8 +166,9 @@ export default function CartItem({ item, onUpdateQuantity, onRemove, isUpdating 
               max={product.stock}
               disabled={isUpdating}
               data-testid="cart-item-quantity"
-              className="w-16 text-center border border-gray-300 rounded-md py-2 focus:ring-2 \
-              focus:ring-indigo-500 focus:border-indigo-500"
+              aria-label={`Cantidad actual: ${quantity}`}
+              aria-describedby={`${quantityId}-stock-info`}
+              className="w-16 text-center border border-gray-300 rounded-md py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:opacity-50"
             />
 
             {/* Botón incrementar */}
@@ -152,16 +176,22 @@ export default function CartItem({ item, onUpdateQuantity, onRemove, isUpdating 
               type="button"
               onClick={() => handleQuantityChange(quantity + 1)}
               disabled={quantity >= product.stock || isUpdating}
-              aria-label="Incrementar cantidad"
+              aria-label={`Aumentar cantidad de ${product.name}`}
               data-testid="quantity-increase"
-              className="p-2 rounded-md border border-gray-300 hover:bg-gray-100 disabled:opacity-50 \
-              disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-md border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-4 w-4" aria-hidden="true" />
             </button>
 
             {/* Indicador de stock */}
-            {quantity >= product.stock && <span className="text-xs text-orange-600 ml-2">Stock máximo</span>}
+            <span
+              id={`${quantityId}-stock-info`}
+              className={`text-xs ml-2 ${quantity >= product.stock ? 'text-orange-600 font-medium' : 'text-gray-500'}`}
+              role="status"
+              aria-live="polite"
+            >
+              {quantity >= product.stock ? 'Stock máximo alcanzado' : `Máx: ${product.stock}`}
+            </span>
           </div>
 
           {/* Subtotal y botón eliminar */}
@@ -178,11 +208,15 @@ export default function CartItem({ item, onUpdateQuantity, onRemove, isUpdating 
               type="button"
               onClick={handleRemoveClick}
               disabled={isUpdating}
-              aria-label="Eliminar del carrito"
+              aria-label={`Eliminar ${product.name} del carrito`}
               data-testid="remove-item-button"
-              className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors disabled:opacity-50"
+              className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-red-500"
             >
-              {isUpdating ? <Loader2 className="h-5 w-5 animate-spin" /> : <Trash2 className="h-5 w-5" />}
+              {isUpdating ? (
+                <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+              ) : (
+                <Trash2 className="h-5 w-5" aria-hidden="true" />
+              )}
             </button>
           </div>
         </div>

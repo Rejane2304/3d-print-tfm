@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="64" fill="#000000"/>
+  <path d="M256 85.33 L415.33 165 L415.33 346.67 L256 426.67 L96.67 346.67 L96.67 165 Z" fill="none" stroke="#ffffff" stroke-width="20"/>
+  <path d="M256 85.33 L256 256 L415.33 346.67" fill="none" stroke="#ffffff" stroke-width="10"/>
+  <path d="M256 256 L96.67 346.67" fill="none" stroke="#ffffff" stroke-width="10"/>
+  <circle cx="256" cy="256" r="20" fill="#ffffff"/>
+  <text x="256" y="480" text-anchor="middle" fill="#ffffff" font-size="42" font-family="Arial, sans-serif" font-weight="bold">3D Print TFM</text>
+</svg>

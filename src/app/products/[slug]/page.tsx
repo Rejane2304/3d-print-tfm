@@ -10,12 +10,12 @@ import { prisma } from '@/lib/db/prisma';
 import Link from 'next/link';
 import AddToCartButton from '@/components/products/AddToCartButton';
 import ProductImageGallery from '@/components/products/ProductImageGallery';
-import { ReviewsList } from '@/components/reviews/ReviewsList';
 import { StarRating } from '@/components/ui/StarRating';
 import { ReviewFormClient } from '@/components/reviews/ReviewFormClient';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { translateCategoryName, translateProductDescription, translateProductName } from '@/lib/i18n';
+import { LazyReviewsList } from '@/components/reviews/LazyReviewsList';
 
 interface ProductDetailPageProps {
   params: Promise<{
@@ -339,9 +339,9 @@ export default async function ProductDetailPage({ params }: Readonly<ProductDeta
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">Reseñas de Clientes</h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-            {/* Reviews List */}
+            {/* Reviews List con Lazy Loading */}
             <div className="lg:col-span-2">
-              <ReviewsList
+              <LazyReviewsList
                 reviews={reviews as []}
                 estadisticas={
                   reviewStats as {

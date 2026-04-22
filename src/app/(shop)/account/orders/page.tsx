@@ -1,11 +1,12 @@
 /**
  * Página de Mis Pedidos - Usuario
  * Historial completo de pedidos del usuario autenticado
+ * Usa React Query para data fetching
  * Responsive: mobile → 4K
  */
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -27,37 +28,8 @@ import {
 } from 'lucide-react';
 import { InvoiceNotAvailableModal } from '@/components/invoices/InvoiceNotAvailableModal';
 import { useRealTime } from '@/hooks/useRealTime';
+import { useOrders, useCancelOrderMutation, Order } from '@/hooks/queries';
 import { toast } from 'sonner';
-
-interface Order {
-  id: string;
-  numeroPedido: string;
-  estado: string;
-  subtotal: number;
-  discount: number;
-  shipping: number;
-  total: number;
-  createdAt: string;
-  items: Array<{
-    id: string;
-    quantity: number;
-    unitPrice: number;
-    producto: {
-      nombre: string;
-      slug: string;
-      images: Array<{ url: string }>;
-    };
-  }>;
-  factura?: {
-    id: string;
-    numeroFactura: string;
-    anulada: boolean;
-  };
-  pago?: {
-    estado: string;
-    metodo: string;
-  };
-}
 
 const estadosConfig: Record<string, { color: string; icon: React.ElementType; label: string }> = {
   Pendiente: {
@@ -95,9 +67,6 @@ const estadosConfig: Record<string, { color: string; icon: React.ElementType; la
 export default function MyOrdersPage() {
   const { status, data: session } = useSession();
   const router = useRouter();
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState('');
   const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
   const [invoiceModalReason, setInvoiceModalReason] = useState<
@@ -107,6 +76,10 @@ export default function MyOrdersPage() {
   const [restoringOrder, setRestoringOrder] = useState<string | null>(null);
   const [restoredMessage, setRestoredMessage] = useState<string | null>(null);
   const [hiddenOrders, setHiddenOrders] = useState<Set<string>>(new Set());
+
+  // React Query hooks
+  const { data: orders = [], isLoading, error: queryError, refetch } = useOrders(statusFilter || undefined);
+  const { mutate: cancelOrder, isPending: isCancelling } = useCancelOrderMutation();
 
   // Real-time event handler for order updates
   const handleRealTimeEvent = useCallback(
@@ -119,28 +92,24 @@ export default function MyOrdersPage() {
 
       switch (event.type) {
         case 'order:status:updated': {
-          const orderId = event.payload.orderId as string;
-          const newStatus = event.payload.status as string;
           const orderNumber = event.payload.orderNumber as string;
-
-          setOrders(prevOrders =>
-            prevOrders.map(order => (order.id === orderId ? { ...order, estado: newStatus } : order)),
-          );
+          const newStatus = event.payload.status as string;
 
           toast.success(`Pedido ${orderNumber} actualizado`, {
             description: `Nuevo estado: ${newStatus}`,
           });
+          // Refetch orders to update UI
+          refetch();
           break;
         }
 
         case 'order:new': {
           // Refresh orders list when a new order is created
-          loadOrders();
+          refetch();
           break;
         }
 
         case 'payment:confirmed': {
-          const orderId = event.payload.orderId as string;
           const orderNumber = event.payload.orderNumber as string;
 
           toast.success(`Pago confirmado`, {
@@ -148,22 +117,12 @@ export default function MyOrdersPage() {
           });
 
           // Refresh to show updated payment status
-          setOrders(prevOrders =>
-            prevOrders.map(order => {
-              if (order.id === orderId && order.pago) {
-                return {
-                  ...order,
-                  pago: { ...order.pago, estado: 'COMPLETADO' },
-                };
-              }
-              return order;
-            }),
-          );
+          refetch();
           break;
         }
       }
     },
-    [session?.user?.id],
+    [session?.user?.id, refetch],
   );
 
   // Initialize real-time connection - desactivado para evitar bucles
@@ -174,37 +133,6 @@ export default function MyOrdersPage() {
     enableSSE: false,
   });
 
-  // Cargar pedidos al montar el componente
-  useEffect(() => {
-    if (status === 'authenticated') {
-      loadOrders();
-    }
-  }, [status]);
-
-  const loadOrders = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await fetch('/api/account/orders');
-      const data = await response.json();
-
-      // eslint-disable-next-line no-negated-condition
-      if (!response.ok) {
-        throw new Error(data.error || 'Error al cargar pedidos');
-      }
-
-      setOrders(data.pedidos || []);
-    } catch {
-      // Error silently handled
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Recalcular pedidos cancelados
-  const cancelledOrders = orders.filter(o => o.estado === 'Cancelado');
-
   const handleRestoreCart = async (orderId: string) => {
     try {
       setRestoringOrder(orderId);
@@ -214,7 +142,6 @@ export default function MyOrdersPage() {
         body: JSON.stringify({ orderId }),
       });
 
-      // eslint-disable-next-line no-negated-condition
       if (!response.ok) {
         throw new Error('Error al restaurar carrito');
       }
@@ -232,7 +159,6 @@ export default function MyOrdersPage() {
         router.push('/checkout');
       }, 1500);
     } catch {
-      // Error silently handled
       setRestoredMessage('Error al restaurar carrito');
     } finally {
       setRestoringOrder(null);
@@ -240,12 +166,18 @@ export default function MyOrdersPage() {
     }
   };
 
-  // Use hiddenOrders Set directly for O(1) lookup performance
+  // Filter orders by status and hidden
   const filteredOrders = statusFilter
-    ? orders.filter(o => o.estado === statusFilter && !hiddenOrders.has(o.id))
-    : orders.filter(o => !hiddenOrders.has(o.id));
+    ? orders.filter((o: Order) => o.estado === statusFilter && !hiddenOrders.has(o.id))
+    : orders.filter((o: Order) => !hiddenOrders.has(o.id));
 
-  if (status === 'loading' || loading) {
+  // Recalcular pedidos cancelados
+  const cancelledOrders = orders.filter((o: Order) => o.estado === 'Cancelado');
+
+  // Query error display
+  const error = queryError ? (queryError as Error).message : null;
+
+  if (status === 'loading' || isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="text-center">
@@ -298,7 +230,7 @@ export default function MyOrdersPage() {
             </button>
             {Object.entries(estadosConfig).map(([estado, config]) => {
               const Icon = config.icon;
-              const count = orders.filter(o => o.estado === estado).length;
+              const count = orders.filter((o: Order) => o.estado === estado).length;
               return (
                 <button
                   key={estado}
@@ -388,8 +320,8 @@ export default function MyOrdersPage() {
           </div>
         ) : (
           <div className="space-y-3 sm:space-y-4">
-            {filteredOrders.map(order => {
-              const statusConfig = estadosConfig[order.estado] || estadosConfig.PENDING;
+            {filteredOrders.map((order: Order) => {
+              const statusConfig = estadosConfig[order.estado] || estadosConfig.Pendiente;
               const StatusIcon = statusConfig.icon;
               const firstItem = order.items?.[0];
               const firstImage = firstItem?.producto?.images?.[0]?.url;
@@ -531,11 +463,11 @@ export default function MyOrdersPage() {
                         </button>
                       )}
 
-                      {order.estado === 'SHIPPED' && (
+                      {order.estado === 'Enviado' && (
                         <span className="text-xs sm:text-sm text-purple-600">Pedido en camino</span>
                       )}
 
-                      {order.estado === 'DELIVERED' && (
+                      {order.estado === 'Entregado' && (
                         <span className="text-xs sm:text-sm text-green-600 flex items-center gap-1">
                           <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />
                           Entregado

@@ -44,6 +44,16 @@ Plan de desarrollo y mejoras del proyecto.
 - ✅ Corrección de errores críticos de pagos
 - ✅ Documentación actualizada
 
+### 🆕 Nueva Arquitectura de Data Fetching (v1.1.0)
+
+- ✅ API Client centralizado con manejo de errores
+- ✅ React Query (TanStack Query) integrado
+- ✅ Sistema de notificaciones con Sonner Toast
+- ✅ Loading states con Skeletons
+- ✅ Error boundaries por área
+- ✅ Service Worker para PWA
+- ✅ Mejoras de accesibilidad (A11y)
+
 ---
 
 ## 📋 Próximos Pasos

@@ -1,6 +1,7 @@
 /**
  * Página de Catálogo de Productos - Diseño Moderno
  * Muestra lista de productos traducidos con filtros y paginación
+ * Usa React Query para data fetching
  * Responsive: mobile → 4K
  */
 export const dynamic = 'force-dynamic';
@@ -16,9 +17,11 @@ import {
 } from '@/components/products/ClientComponentsWithSuspense';
 import type { Prisma } from '@prisma/client';
 import { Package, Shield, Sparkles, Truck } from 'lucide-react';
+import { Metadata } from 'next';
 
+// Next.js 15: searchParams es ahora un Promise
 interface ProductsPageProps {
-  searchParams: {
+  searchParams: Promise<{
     page?: string;
     category?: string;
     material?: string;
@@ -28,54 +31,84 @@ interface ProductsPageProps {
     sortBy?: string;
     sortOrder?: string;
     search?: string;
+  }>;
+}
+
+export async function generateMetadata({ searchParams }: Readonly<ProductsPageProps>): Promise<Metadata> {
+  // Unwrap searchParams Promise
+  const params = await searchParams;
+  const search = params.search;
+  const category = params.category;
+
+  if (search) {
+    return {
+      title: `Buscar "${search}" - 3D Print`,
+      description: `Resultados de búsqueda para "${search}" en nuestro catálogo de productos impresos en 3D.`,
+    };
+  }
+
+  if (category) {
+    return {
+      title: `${category} - 3D Print`,
+      description: `Explora nuestra categoría ${category} con productos impresos en 3D de alta calidad.`,
+    };
+  }
+
+  return {
+    title: 'Catálogo de Productos - 3D Print',
+    description:
+      'Descubre nuestra colección única de productos impresos en 3D. Diseños exclusivos fabricados con los mejores materiales.',
   };
 }
 
 async function getProducts(searchParams: ProductsPageProps['searchParams']) {
-  const page = Number.parseInt(searchParams.page || '1', 10);
+  // Unwrap the Promise
+  const params = await searchParams;
+
+  const page = Number.parseInt(params.page || '1', 10);
   const pageSize = 12;
   const skip = (page - 1) * pageSize;
 
   const where: Prisma.ProductWhereInput = { isActive: true };
 
-  if (searchParams.category) {
+  if (params.category) {
     const category = await prisma.category.findUnique({
-      where: { slug: searchParams.category },
+      where: { slug: params.category },
     });
     if (category) {
       where.categoryId = category.id;
     }
   }
 
-  if (searchParams.material) {
-    where.material = searchParams.material as Prisma.EnumMaterialFilter;
+  if (params.material) {
+    where.material = params.material as Prisma.EnumMaterialFilter;
   }
 
-  if (searchParams.minPrice || searchParams.maxPrice) {
+  if (params.minPrice || params.maxPrice) {
     where.price = {};
-    if (searchParams.minPrice) {
-      where.price.gte = Number.parseFloat(searchParams.minPrice);
+    if (params.minPrice) {
+      where.price.gte = Number.parseFloat(params.minPrice);
     }
-    if (searchParams.maxPrice) {
-      where.price.lte = Number.parseFloat(searchParams.maxPrice);
+    if (params.maxPrice) {
+      where.price.lte = Number.parseFloat(params.maxPrice);
     }
   }
 
-  if (searchParams.inStock === 'true') {
+  if (params.inStock === 'true') {
     where.stock = { gt: 0 };
   }
 
-  if (searchParams.search) {
+  if (params.search) {
     where.OR = [
       {
         name: {
-          contains: searchParams.search,
+          contains: params.search,
           mode: 'insensitive' as Prisma.QueryMode,
         },
       },
       {
         description: {
-          contains: searchParams.search,
+          contains: params.search,
           mode: 'insensitive' as Prisma.QueryMode,
         },
       },
@@ -83,10 +116,10 @@ async function getProducts(searchParams: ProductsPageProps['searchParams']) {
   }
 
   const orderBy: Prisma.ProductOrderByWithRelationInput = {};
-  if (searchParams.sortBy === 'price') {
-    orderBy.price = (searchParams.sortOrder as Prisma.SortOrder) || 'asc';
-  } else if (searchParams.sortBy === 'stock') {
-    orderBy.stock = (searchParams.sortOrder as Prisma.SortOrder) || 'desc';
+  if (params.sortBy === 'price') {
+    orderBy.price = (params.sortOrder as Prisma.SortOrder) || 'asc';
+  } else if (params.sortBy === 'stock') {
+    orderBy.stock = (params.sortOrder as Prisma.SortOrder) || 'desc';
   }
 
   const [products, total] = await Promise.all([
@@ -110,14 +143,15 @@ async function getProducts(searchParams: ProductsPageProps['searchParams']) {
     description: translateProductDescription(product.slug),
   }));
 
+  // Client-side sorting for translated products
   const sortedProducts = [...translatedProducts].sort((a, b) => {
     let comparison = 0;
 
-    if (searchParams.sortBy === 'price') {
+    if (params.sortBy === 'price') {
       const priceA = Number(a.price);
       const priceB = Number(b.price);
       comparison = priceA - priceB;
-    } else if (searchParams.sortBy === 'stock') {
+    } else if (params.sortBy === 'stock') {
       comparison = a.stock - b.stock;
     } else {
       comparison = (a.name || '').localeCompare(b.name || '', 'es', {
@@ -125,7 +159,7 @@ async function getProducts(searchParams: ProductsPageProps['searchParams']) {
       });
     }
 
-    return searchParams.sortOrder === 'desc' ? -comparison : comparison;
+    return params.sortOrder === 'desc' ? -comparison : comparison;
   });
 
   return {
@@ -196,7 +230,7 @@ export default async function ProductsPage({ searchParams }: Readonly<ProductsPa
           {/* Sidebar Filters - Estilo Moderno */}
           <aside className="w-full lg:w-72 flex-shrink-0">
             <div className="lg:sticky lg:top-24">
-              <FilterSidebarWrapper searchParams={searchParams} />
+              <FilterSidebarWrapper />
             </div>
           </aside>
 

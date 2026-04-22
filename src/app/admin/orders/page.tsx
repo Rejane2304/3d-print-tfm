@@ -1,10 +1,9 @@
 /**
  * Admin Orders Page
- * Order listing and management with DataTable component
+ * Order listing and management with DataTable component using React Query
  */
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
 import { ConfirmDialogProvider, showConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -22,26 +21,14 @@ import {
   Upload,
   XCircle,
 } from 'lucide-react';
-// RealTimeNotifications and DashboardMetricsUpdater removed - unused
 import type { BulkAction, Column } from '@/components/ui/DataTable';
 import { DataTable } from '@/components/ui/DataTable';
 import { CSVUpload } from '@/components/admin/CSVUpload';
 import { useAdminRealTime, useNotificationToast } from '@/hooks/useRealTime';
 import { Toaster } from '@/components/ui/Toaster';
 import { useNotificationSound } from '@/hooks/useNotificationSound';
-
-interface Order {
-  id: string;
-  numeroPedido: string;
-  estado: string;
-  total: number;
-  createdAt: string;
-  usuario: {
-    nombre: string;
-    email: string;
-  };
-  items: Array<{ id: string }>;
-}
+import { useAdminOrders, useUpdateOrderStatusMutation, useDeleteOrderMutation, AdminOrder } from '@/hooks/queries';
+import { useState, useEffect, useCallback } from 'react';
 
 const orderStatuses: Record<string, { color: string; icon: React.ElementType; label: string }> = {
   Pendiente: {
@@ -84,11 +71,13 @@ const ordersSampleCSV = `userEmail,items,status,shippingCost,paymentMethod
 export default function AdminOrdersPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState('');
   const [showImport, setShowImport] = useState(false);
+
+  // React Query hooks
+  const { data: orders = [], isLoading, error: queryError } = useAdminOrders(statusFilter || undefined);
+  const { mutate: updateStatus, isPending: isUpdatingStatus } = useUpdateOrderStatusMutation();
+  const { mutate: deleteOrder, isPending: isDeleting } = useDeleteOrderMutation();
 
   // Real-time setup
   const { events: _events, pendingEvents, acknowledgeEvents, isConnected } = useAdminRealTime();
@@ -104,8 +93,6 @@ export default function AdminOrdersPage() {
           showNotification(event);
           // Play sound for new orders
           playEventSound(event.type);
-          // Refresh orders on new order or status update
-          loadOrders();
         }
       });
       // Acknowledge events
@@ -113,28 +100,6 @@ export default function AdminOrdersPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pendingEvents]);
-
-  const loadOrders = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const queryParams = statusFilter ? `?estado=${statusFilter}` : '';
-      const url = `/api/admin/orders${queryParams}`;
-      const response = await fetch(url);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Error al cargar pedidos');
-      }
-
-      setOrders(data.pedidos || []);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
-    } finally {
-      setLoading(false);
-    }
-  }, [statusFilter]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -148,73 +113,43 @@ export default function AdminOrdersPage() {
         router.push('/');
         return;
       }
-      loadOrders();
     }
-  }, [status, session, router, loadOrders]);
+  }, [status, session, router]);
 
-  const updateStatus = async (id: string, nuevoEstado: string) => {
-    try {
-      const response = await fetch('/api/admin/orders', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, estado: nuevoEstado }),
-      });
+  const handleUpdateStatus = useCallback(
+    (id: string, nuevoEstado: string) => {
+      updateStatus({ id, estado: nuevoEstado });
+    },
+    [updateStatus],
+  );
 
-      if (response.ok) {
-        await loadOrders();
-      }
-    } catch {
-      setError('Error al actualizar estado');
-    }
-  };
-
-  const handleDeleteOrders = async (selectedIds: string[]) => {
-    const confirmed = await showConfirmDialog({
-      title: 'Eliminar pedidos',
-      message: `¿Estás seguro de que deseas eliminar ${selectedIds.length} pedido(s)? Esta acción no se puede deshacer.`,
-      confirmText: 'Sí, eliminar',
-      cancelText: 'Cancelar',
-      variant: 'danger',
-    });
-
-    if (!confirmed) {
-      return;
-    }
-
-    try {
-      const response = await Promise.all(selectedIds.map(id => fetch(`/api/admin/orders/${id}`, { method: 'DELETE' })));
-
-      const allSuccess = response.every(r => r.ok);
-      if (allSuccess) {
-        await loadOrders();
-        await showConfirmDialog({
-          title: 'Pedidos eliminados',
-          message: `${selectedIds.length} pedido(s) han sido eliminados correctamente.`,
-          confirmText: 'Aceptar',
-          cancelText: '',
-          variant: 'info',
-        });
-      } else {
-        throw new Error('Error al eliminar algunos pedidos');
-      }
-    } catch (error) {
-      console.error('Error al eliminar pedidos:', error);
-      await showConfirmDialog({
-        title: 'Error',
-        message: 'No se pudieron eliminar los pedidos. Por favor, inténtalo de nuevo.',
-        confirmText: 'Aceptar',
-        cancelText: '',
+  const handleDeleteOrders = useCallback(
+    async (selectedIds: string[]) => {
+      const confirmed = await showConfirmDialog({
+        title: 'Eliminar pedidos',
+        message: `¿Estás seguro de que deseas eliminar ${selectedIds.length} pedido(s)? Esta acción no se puede deshacer.`,
+        confirmText: 'Sí, eliminar',
+        cancelText: 'Cancelar',
         variant: 'danger',
       });
-    }
-  };
 
-  const handleImportSuccess = () => {
-    loadOrders();
+      if (!confirmed) {
+        return;
+      }
+
+      // Delete each order
+      for (const id of selectedIds) {
+        await deleteOrder(id);
+      }
+    },
+    [deleteOrder],
+  );
+
+  const handleImportSuccess = useCallback(() => {
     setShowImport(false);
-  };
+  }, []);
 
-  const columns: Column<Order>[] = [
+  const columns: Column<AdminOrder>[] = [
     {
       key: 'numeroPedido',
       header: 'Nº Pedido',
@@ -298,9 +233,10 @@ export default function AdminOrdersPage() {
             <button
               onClick={e => {
                 e.stopPropagation();
-                updateStatus(row.id, 'En preparación');
+                handleUpdateStatus(row.id, 'En preparación');
               }}
-              className="text-blue-600 hover:text-blue-900 p-1.5 rounded hover:bg-blue-50"
+              disabled={isUpdatingStatus}
+              className="text-blue-600 hover:text-blue-900 p-1.5 rounded hover:bg-blue-50 disabled:opacity-50"
               title="Marcar como En preparación"
             >
               <Box className="h-4 w-4" />
@@ -310,9 +246,10 @@ export default function AdminOrdersPage() {
             <button
               onClick={e => {
                 e.stopPropagation();
-                updateStatus(row.id, 'Enviado');
+                handleUpdateStatus(row.id, 'Enviado');
               }}
-              className="text-purple-600 hover:text-purple-900 p-1.5 rounded hover:bg-purple-50"
+              disabled={isUpdatingStatus}
+              className="text-purple-600 hover:text-purple-900 p-1.5 rounded hover:bg-purple-50 disabled:opacity-50"
               title="Marcar como Enviado"
             >
               <Truck className="h-4 w-4" />
@@ -333,7 +270,9 @@ export default function AdminOrdersPage() {
     },
   ];
 
-  if (status === 'loading' || loading) {
+  const error = queryError ? (queryError as Error).message : null;
+
+  if (status === 'loading' || isLoading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -418,7 +357,7 @@ export default function AdminOrdersPage() {
         )}
 
         {/* Orders DataTable */}
-        <DataTable<Order>
+        <DataTable<AdminOrder>
           data={orders}
           columns={columns}
           rowKey="id"
