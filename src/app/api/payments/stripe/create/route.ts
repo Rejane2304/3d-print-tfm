@@ -278,6 +278,8 @@ async function updateOrderAndPayment(orderId: string, paymentId: string | undefi
 }
 
 export async function POST(req: NextRequest) {
+  let requestBody: { orderId?: string; paymentId?: string } = {};
+
   try {
     // 1. Verify authentication
     const authResult = await verifyAuthSession(req);
@@ -285,9 +287,9 @@ export async function POST(req: NextRequest) {
       return authResult.response;
     }
 
-    // 2. Get request body
-    const body = await req.json();
-    const { orderId, paymentId } = body;
+    // 2. Get request body (solo se lee UNA VEZ)
+    requestBody = await req.json();
+    const { orderId, paymentId } = requestBody;
 
     if (!orderId || typeof orderId !== 'string') {
       return NextResponse.json({ success: false, error: 'El ID de pedido es requerido' }, { status: 400 });
@@ -363,9 +365,8 @@ export async function POST(req: NextRequest) {
       sessionId: stripeSession.id,
     });
   } catch (error) {
-    // Create alert for failed payment
-    const body = await req.json().catch(() => ({}));
-    const { orderId } = body;
+    // Create alert for failed payment (usar requestBody guardado, NO volver a leer req.json())
+    const { orderId } = requestBody;
     if (orderId) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
       await createFailedPaymentAlert(orderId, errorMessage);
