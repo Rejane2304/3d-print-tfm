@@ -147,6 +147,21 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  // Ignorar peticiones de autenticación (no cacheables)
+  if (
+    url.pathname.startsWith('/api/auth/') ||
+    url.pathname === '/auth' ||
+    url.pathname === '/login' ||
+    url.pathname === '/register'
+  ) {
+    return;
+  }
+
+  // Ignorar peticiones de autenticación (no cacheables)
+  if (url.pathname.startsWith('/api/auth/') || url.pathname === '/auth') {
+    return;
+  }
+
   // Estrategia: Cache First para imágenes
   if (request.destination === 'image' || isProductImage(url)) {
     event.respondWith(
