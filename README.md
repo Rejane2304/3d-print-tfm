@@ -48,15 +48,15 @@
 
 ### Estadísticas del Proyecto
 
-| Métrica              | Valor                |
-| -------------------- | -------------------- |
-| **Líneas de Código** | 75,000+              |
-| **Archivos Fuente**  | 250+ (TS/TSX)        |
-| **Endpoints API**    | 91+ RESTful          |
-| **Tests**            | 395+ (80%+ coverage) |
-| **Componentes UI**   | 90+                  |
-| **Modelos BD**       | 24+ entidades        |
-| **Módulos Admin**    | 15+ CRUD completos   |
+| Métrica              | Valor                   |
+| -------------------- | ----------------------- |
+| **Líneas de Código** | **60,764**              |
+| **Archivos Fuente**  | **254+** (TS/TSX)       |
+| **Endpoints API**    | **91** RESTful          |
+| **Tests**            | **395** (80%+ coverage) |
+| **Componentes UI**   | **50+**                 |
+| **Modelos BD**       | **28** entidades        |
+| **Módulos Admin**    | **16** CRUD completos   |
 
 ---
 

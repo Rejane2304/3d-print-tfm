@@ -328,15 +328,15 @@ npm start
 ## 📈 Estadísticas de Desarrollo
 
 - **Tiempo total**: ~8 semanas
-- **Líneas de código**: ~20,000+
+- **Líneas de código**: **60,764**
 - **Commits**: 50+
 - **Archivos**: 315+ (git)
-- **Archivos fuente**: 166 (TypeScript/TSX)
-- **Tests**: 150+
+- **Archivos fuente**: **254** (TypeScript/TSX)
+- **Tests**: **395 exactos** (299 unit + 96 integration + 91 E2E)
 - **Cobertura**: 80%+ configurado
-- **Modelos BD**: 24+
-- **Rutas API**: 62+
-- **Endpoints Admin**: 15+ páginas
+- **Modelos BD**: **28**
+- **Rutas API**: **91**
+- **Endpoints Admin**: **16 páginas**
 
 ---
 

@@ -137,7 +137,7 @@ function generateOrderNumber(): string {
 
 // Hash password
 async function hashPassword(password: string): Promise<string> {
-  const bcrypt = await import('bcryptjs');
+  const bcrypt = await import('bcrypt');
   return bcrypt.hash(password, 12);
 }
 
