@@ -306,6 +306,8 @@ async function createFailedPaymentAlert(orderId: string, errorMessage: string) {
 }
 
 export async function POST(req: NextRequest) {
+  let requestBody: { orderId?: string; paymentId?: string } = {};
+
   try {
     // 1. Auth check
     const session = await getServerSession(authOptions);
@@ -314,9 +316,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    // 2. Get request body
-    const body = await req.json();
-    const { orderId, paymentId } = body;
+    // 2. Get request body (solo se lee UNA VEZ)
+    requestBody = await req.json();
+    const { orderId, paymentId } = requestBody;
 
     if (!orderId || !paymentId) {
       return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
@@ -371,9 +373,8 @@ export async function POST(req: NextRequest) {
       paypalOrderId: paypalOrder.id,
     });
   } catch (error) {
-    // Create alert for failed payment
-    const body = await req.json().catch(() => ({}));
-    const { orderId } = body;
+    // Create alert for failed payment (usar requestBody guardado, NO volver a leer req.json())
+    const { orderId } = requestBody;
     if (orderId) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
       await createFailedPaymentAlert(orderId, errorMessage);
