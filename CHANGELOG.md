@@ -5,7 +5,7 @@ Todos los cambios notables de este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
-## [1.0.0] - 2026-04-07
+## [1.0.0] - 2026-04-22
 
 ### 🎉 Versión Final - TFM Completado
 
@@ -67,10 +67,10 @@ Esta versión representa la entrega final del Trabajo de Fin de Máster - E-comm
 ### 🧪 Testing
 
 ```
-Total: 378 tests (100% passing)
-├── Unit Tests: 37
-├── Integration Tests: 227
-└── E2E Tests: 114 (multi-device)
+Total: 395 tests (100% passing)
+├── Unit Tests: 299
+├── Integration Tests: 96
+└── E2E Tests: 91 (multi-device)
 
 Cobertura: 80%+ objetivo alcanzado
 ```

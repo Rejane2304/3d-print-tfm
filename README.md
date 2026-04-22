@@ -112,10 +112,10 @@
 
 | Tecnología       | Versión | Uso                                 |
 | ---------------- | ------- | ----------------------------------- |
-| **Next.js**      | 14.2.35 | Framework full-stack con App Router |
+| **Next.js**      | 16.2.4  | Framework full-stack con App Router |
 | **React**        | ^18.3.0 | Biblioteca UI                       |
 | **TypeScript**   | ^5.x    | Tipado estático                     |
-| **Tailwind CSS** | ^3.4.1  | Estilos utility-first               |
+| **Tailwind CSS** | ^3.4.19 | Estilos utility-first               |
 | **Node.js**      | 18+     | Runtime                             |
 
 ### Backend y Datos
@@ -564,7 +564,7 @@ npm run test:docker:setup
 - [x] Panel admin con 15+ módulos
 - [x] Sistema de facturación automática
 - [x] Notificaciones en tiempo real
-- [x] Tests: 378+ con 80%+ coverage
+- **Tests:** 395+ con 80%+ coverage
 - [x] Tolerancia cero en ESLint/TypeScript
 
 ### En Progreso 🚧

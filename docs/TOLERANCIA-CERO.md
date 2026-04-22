@@ -103,4 +103,5 @@ scripts/
 ---
 
 _Documento creado: Abril 2025_
+_Última actualización: Abril 2026_
 _Tolerancia: CERO_

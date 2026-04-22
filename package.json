@@ -1,8 +1,14 @@
 {
   "name": "3d-print-tfm",
-  "description": "Ecommerce de impresion 3d",
-  "version": "0.1.0",
+  "description": "E-commerce de Impresión 3D - Trabajo Final de Máster",
+  "version": "1.0.0",
   "private": true,
+  "author": "Rejane Rodrigues",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Rejane2304/3d-print-tfm.git"
+  },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
   },
