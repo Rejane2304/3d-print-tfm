@@ -142,14 +142,43 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ success: false, error: 'Pedido no encontrado' }, { status: 404 });
     }
 
-    // Restaurar stock si está confirmado, en preparación o enviado
-    if (['CONFIRMED', 'PREPARING', 'SHIPPED'].includes(order.status)) {
+    // Restaurar stock para pedidos que tienen stock reservado/comprometido
+    // PENDING: stock validado pero no decrementado (pero podría haberse decrementado en versiones anteriores)
+    // CONFIRMED, PREPARING, SHIPPED: stock ya decrementado, debe restaurarse
+    if (['PENDING', 'CONFIRMED', 'PREPARING', 'SHIPPED'].includes(order.status)) {
       for (const item of order.items) {
         if (item.productId) {
-          await prisma.product.update({
+          // Obtener stock actual antes de actualizar
+          const currentProduct = await prisma.product.findUnique({
             where: { id: item.productId },
-            data: { stock: { increment: item.quantity } },
+            select: { stock: true },
           });
+
+          if (currentProduct) {
+            const previousStock = currentProduct.stock;
+            const newStock = previousStock + item.quantity;
+
+            await prisma.product.update({
+              where: { id: item.productId },
+              data: { stock: { increment: item.quantity } },
+            });
+
+            // Registrar movimiento de inventario IN (devolución por eliminación)
+            await prisma.inventoryMovement.create({
+              data: {
+                id: crypto.randomUUID(),
+                productId: item.productId,
+                orderId: order.id,
+                createdBy: user.id,
+                type: 'IN',
+                quantity: item.quantity,
+                previousStock,
+                newStock,
+                reason: `Eliminación de pedido ${order.orderNumber} - Restauración de stock`,
+                reference: order.id,
+              },
+            });
+          }
         }
       }
     }
