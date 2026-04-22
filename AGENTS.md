@@ -1,7 +1,7 @@
 # AGENTS.md - 3D Print TFM
 
 > Este archivo contiene información para agentes de IA que trabajan en este proyecto.
-> **Última actualización:** Abril 2026
+> **Última actualización:** Abril 2026 (Día de Entrega)
 
 ## 🚨 REGLA CRÍTICA DE SEGURIDAD: AISLAMIENTO TOTAL DE BASES DE DATOS
 
@@ -279,6 +279,42 @@ El script `db-studio-dev.ts` ahora agrega automáticamente `sslmode=require` si 
 - `sonar.typescript.node.modules.skip=true` (ignora node_modules)
 - `sonar.javaOpts=-Xmx4096m` (4GB de memoria)
 - `sonar.analysis.timeout=300000` (5 minutos timeout)
+
+---
+
+### Error 500 en endpoints de pagos (PayPal/Stripe)
+
+**Causa:** Intentar leer `req.json()` dos veces (en el try y en el catch)
+
+**Solución:** Almacenar el body en una variable fuera del try-catch:
+
+```typescript
+// ❌ INCORRECTO - Esto causa error 500
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json(); // Primera lectura
+    // ... código ...
+  } catch (error) {
+    const body = await req.json().catch(() => ({})); // ¡ERROR! Segunda lectura
+  }
+}
+
+// ✅ CORRECTO - Body guardado antes del try
+export async function POST(req: NextRequest) {
+  let requestBody = {};
+  try {
+    requestBody = await req.json(); // Leer una sola vez
+    // ... código ...
+  } catch (error) {
+    const { orderId } = requestBody; // Reusar la variable
+  }
+}
+```
+
+**Archivos corregidos (Abril 2026):**
+
+- `/src/app/api/payments/paypal/create/route.ts`
+- `/src/app/api/payments/stripe/create/route.ts`
 
 ---
 

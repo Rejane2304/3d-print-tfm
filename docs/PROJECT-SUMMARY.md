@@ -9,7 +9,8 @@
 - **Idioma**: UI 100% en español con traducción backend
 - **Responsive**: Móvil → 4K
 - **Seguridad**: Nivel empresarial
-- **Estado**: ✅ Completado
+- **Estado**: ✅ Completado y en Producción
+- **Deployment**: https://3d-print-tfm.vercel.app
 
 ---
 
@@ -77,10 +78,10 @@
 ### Tests
 
 ```
-Total: ~150+ tests
-├── Unitarios: Tests de validación, utilidades y componentes
-├── Integración: Tests de APIs con base de datos real
-└── E2E: Tests de flujos completos (Playwright)
+Total: 395 tests
+├── Unitarios: 299 tests de validación, utilidades y componentes
+├── Integración: 96 tests de APIs con base de datos real
+└── E2E: 91 tests de flujos completos (Playwright)
 
 Cobertura de dispositivos E2E:
 ├── Desktop Chrome
