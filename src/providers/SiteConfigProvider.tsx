@@ -73,7 +73,13 @@ export function SiteConfigProvider({ children }: Readonly<{ children: ReactNode 
 export function useSiteConfig() {
   const context = useContext(SiteConfigContext);
   if (context === undefined) {
-    throw new Error('useSiteConfig must be used within a SiteConfigProvider');
+    // Return default context instead of throwing
+    return {
+      config: null,
+      loading: false,
+      error: null,
+      refetch: async () => {},
+    };
   }
   return context;
 }
