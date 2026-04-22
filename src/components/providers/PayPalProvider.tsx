@@ -23,7 +23,7 @@ interface PayPalProviderProps {
 
 export default function PayPalProvider({ children }: Readonly<PayPalProviderProps>) {
   const [isClient, setIsClient] = useState(false);
-  const [hasError, setHasError] = useState(false);
+  const [hasError] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
