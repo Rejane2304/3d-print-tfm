@@ -48,13 +48,15 @@ export default function PayPalProvider({ children }: Readonly<PayPalProviderProp
     return <>{children}</>;
   }
 
-  // Determinar si es sandbox - solo IDs que contienen "sb-" o "sb_"
-  const isSandbox = clientId.toLowerCase().includes('sb');
+  // Determinar si es sandbox usando la variable de entorno
+  // NEXT_PUBLIC_PAYPAL_SANDBOX_MODE indica explícitamente el modo
+  const isSandbox = process.env.NEXT_PUBLIC_PAYPAL_SANDBOX_MODE === 'true' || clientId.toLowerCase().includes('sb');
 
   // Log para debugging (solo en cliente)
   if (isClient && typeof window !== 'undefined') {
     console.log('[PayPal] Modo:', isSandbox ? 'Sandbox' : 'Production');
     console.log('[PayPal] Client ID preview:', clientId.substring(0, 8) + '...');
+    console.log('[PayPal] Sandbox Mode env:', process.env.NEXT_PUBLIC_PAYPAL_SANDBOX_MODE);
   }
 
   // Opciones base para PayPal
