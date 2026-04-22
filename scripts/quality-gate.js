@@ -248,7 +248,7 @@ async function checkTests() {
 
   section('Running Tests');
 
-  const result = runSafe('npm run test:unit -- --reporter=basic --silent', {
+  const result = runSafe('npm run test:unit -- --reporter=dot --silent', {
     timeout: CONFIG.timeout.tests,
   });
 
