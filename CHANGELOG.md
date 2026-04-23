@@ -142,6 +142,53 @@ src/
 
 ---
 
+## [1.2.0] - 2026-04-23
+
+### 💰 Precios con IVA Incluido y Flujo de Checkout Mejorado
+
+Esta versión corrige la visualización de precios para mostrar siempre IVA incluido y mejora la estabilidad del flujo de checkout.
+
+### ✨ Mejoras
+
+#### 💵 Precios con IVA Incluido
+
+- **Todos los precios mostrados al cliente incluyen IVA (21%)**
+- **API del carrito** devuelve precios con IVA
+- **ProductCard** muestra precios con IVA incluido
+- **Página de detalle de producto** con precios con IVA
+- **Carrito y Checkout** sincronizados con IVA
+- **Función `calculatePriceWithVAT()`** en `lib/constants/tax.ts` para cálculo preciso
+
+#### 🛒 Checkout Mejorado
+
+- **Resumen del pedido simplificado** sin duplicación de IVA
+- **Títulos diferenciados**: "Artículos en tu pedido" y "Resumen del pedido"
+- **Cálculo de envío** basado en subtotal con IVA
+- **PayPal y Stripe** estandarizados para usar precios con IVA
+- **Redirección corregida** al carrito cuando no hay items
+
+#### 🧪 Tests Actualizados
+
+- **Tests de integración** actualizados para reflejar precios con IVA
+- **96 tests de integración** pasando
+- **Cálculo de subtotal** ajustado en tests del carrito
+
+### 📋 Cambios Técnicos
+
+| Archivo                                        | Cambio                             |
+| ---------------------------------------------- | ---------------------------------- |
+| `src/app/api/cart/route.ts`                    | Devuelve precios con IVA           |
+| `src/components/cart/CartItem.tsx`             | Muestra precios con IVA            |
+| `src/components/cart/CartSummary.tsx`          | Resumen simplificado               |
+| `src/app/checkout/components/OrderSummary.tsx` | Títulos diferenciados              |
+| `src/app/products/[slug]/page.tsx`             | Precios con IVA en detalle         |
+| `src/components/products/ProductCard.tsx`      | Precios con IVA en tarjetas        |
+| `src/lib/constants/tax.ts`                     | `calculatePriceWithVAT()` mejorado |
+| `src/app/api/payments/paypal/create/route.ts`  | Estandarizado con IVA              |
+| `src/app/api/payments/stripe/create/route.ts`  | Estandarizado con IVA              |
+
+---
+
 ## [1.0.0] - 2026-04-22
 
 ### 🎉 Versión Final - TFM Completado

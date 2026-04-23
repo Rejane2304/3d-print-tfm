@@ -28,28 +28,32 @@
 
 ### ✅ Implementado
 
-| Feature                      | Estado        | Detalle                                                      |
-| ---------------------------- | ------------- | ------------------------------------------------------------ |
-| **Sistema Bilingüe**         | ✅ Completo   | Productos con campos `nameEs`/`nameEn`, etc.                 |
-| **Migraciones Consolidadas** | ✅ Completo   | Una única migración `init_complete`                          |
-| **Multi-Entorno BD**         | ✅ Completo   | Scripts por entorno (dev/prod/test)                          |
-| **Tests**                    | ✅ 395+ tests | Unit (299) + Integration (96) + E2E (91+)                    |
-| **SonarQube**                | ✅ Optimizado | Configuración anti-hang para archivos TypeScript             |
-| **Seguridad BD**             | ✅ Activo     | Validación obligatoria en todos los tests                    |
-| **Seed Multi-Entorno**       | ✅ Activo     | Confirmación para producción                                 |
-| **API Client Centralizado**  | ✅ Completo   | Cliente HTTP con manejo de errores, retries, CSRF protection |
-| **React Query**              | ✅ Completo   | TanStack Query v5 con caché de 5 minutos                     |
-| **Tipos API Compartidos**    | ✅ Completo   | 751 líneas de tipos estandarizados en `/src/types/api.ts`    |
-| **Toast System**             | ✅ Completo   | Notificaciones globales con sonner + ToastProvider           |
-| **Loading States**           | ✅ Completo   | 14 archivos loading.tsx + SkeletonCard + LoadingSpinner      |
-| **Error Boundaries**         | ✅ Completo   | 8 archivos error.tsx + ErrorMessage global                   |
-| **Service Worker**           | ✅ Completo   | PWA con sw.js, manifest.json, registro automático            |
-| **Lazy Loading**             | ✅ Completo   | Componentes pesados con dynamic imports                      |
-| **Real-time**                | ✅ Activo     | SSE + Socket.io para notificaciones en tiempo real           |
-| **Accesibilidad**            | ✅ Completo   | A11y audit + Skip Links + Focus Traps + Announcer            |
-| **Documentación**            | ✅ Completo   | 13 archivos en /docs con guías y reportes                    |
-| **Network Status**           | ✅ Completo   | Hook useNetworkStatus para detectar conexión                 |
-| **ClientOnly**               | ✅ Completo   | Wrapper para componentes solo cliente                        |
+| Feature                      | Estado          | Detalle                                                      |
+| ---------------------------- | --------------- | ------------------------------------------------------------ |
+| **Sistema Bilingüe**         | ✅ Completo     | Productos con campos `nameEs`/`nameEn`, etc.                 |
+| **Migraciones Consolidadas** | ✅ Completo     | Una única migración `init_complete`                          |
+| **Multi-Entorno BD**         | ✅ Completo     | Scripts por entorno (dev/prod/test)                          |
+| **Tests**                    | ✅ 395+ tests   | Unit (299) + Integration (96) + E2E (91+)                    |
+| **SonarQube**                | ✅ Optimizado   | Configuración anti-hang para archivos TypeScript             |
+| **Seguridad BD**             | ✅ Activo       | Validación obligatoria en todos los tests                    |
+| **Seed Multi-Entorno**       | ✅ Activo       | Confirmación para producción                                 |
+| **API Client Centralizado**  | ✅ Completo     | Cliente HTTP con manejo de errores, retries, CSRF protection |
+| **React Query**              | ✅ Completo     | TanStack Query v5 con caché de 5 minutos                     |
+| **Tipos API Compartidos**    | ✅ Completo     | 751 líneas de tipos estandarizados en `/src/types/api.ts`    |
+| **Toast System**             | ✅ Completo     | Notificaciones globales con sonner + ToastProvider           |
+| **Loading States**           | ✅ Completo     | 14 archivos loading.tsx + SkeletonCard + LoadingSpinner      |
+| **Error Boundaries**         | ✅ Completo     | 8 archivos error.tsx + ErrorMessage global                   |
+| **Service Worker**           | ✅ Completo     | PWA con sw.js, manifest.json, registro automático            |
+| **Lazy Loading**             | ✅ Completo     | Componentes pesados con dynamic imports                      |
+| **Real-time**                | ✅ Activo       | SSE + Socket.io para notificaciones en tiempo real           |
+| **Accesibilidad**            | ✅ Completo     | A11y audit + Skip Links + Focus Traps + Announcer            |
+| **Documentación**            | ✅ Completo     | 13 archivos en /docs con guías y reportes                    |
+| **Network Status**           | ✅ Completo     | Hook useNetworkStatus para detectar conexión                 |
+| **ClientOnly**               | ✅ Completo     | Wrapper para componentes solo cliente                        |
+| **Precios con IVA**          | ✅ Completo     | Todos los precios mostrados incluyen IVA (21%)               |
+| **Checkout Flow**            | ✅ Completo     | Flujo de pago con múltiples métodos (Stripe, PayPal, etc.)   |
+| **Cupones de Descuento**     | ✅ Completo     | Sistema de cupones con restricciones de monto mínimo         |
+| **Pasarela de Pagos**        | ✅ Estabilizado | PayPal y Stripe con cálculo de totales corregido             |
 
 ### 📁 Archivos Clave
 
