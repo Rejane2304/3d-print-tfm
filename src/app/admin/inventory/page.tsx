@@ -207,7 +207,13 @@ export default function AdminInventoryPage() {
         <div className="flex items-center">
           {row.imagenes?.[0] ? (
             <div className="flex-shrink-0 h-10 w-10 bg-gray-100 flex items-center justify-center overflow-hidden">
-              <Image src={row.imagenes[0].url} alt={row.nombre} width={40} height={40} className="object-cover" />
+              <Image
+                src={row.imagenes[0].url}
+                alt={row.nombre || 'Producto'}
+                width={40}
+                height={40}
+                className="object-cover"
+              />
             </div>
           ) : (
             <div className="flex-shrink-0 h-10 w-10 bg-gray-100 flex items-center justify-center">
