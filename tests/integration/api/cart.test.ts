@@ -154,9 +154,9 @@ describe('Cart API', () => {
 
       expect(res.status).toBe(200);
       expect(body.success).toBe(true);
-      expect(body.cart.items).toEqual([]);
-      expect(body.cart.totalItems).toBe(0);
-      expect(body.cart.subtotal).toBe(0);
+      expect(body.data.items).toEqual([]);
+      expect(body.data.totalItems).toBe(0);
+      expect(body.data.subtotal).toBe(0);
     });
 
     it('should return cart with items', async () => {
@@ -191,9 +191,9 @@ describe('Cart API', () => {
 
       expect(res.status).toBe(200);
       expect(body.success).toBe(true);
-      expect(body.cart.items.length).toBe(1);
-      expect(body.cart.totalItems).toBe(2);
-      expect(body.cart.subtotal).toBeCloseTo(59.98, 2);
+      expect(body.data.items.length).toBe(1);
+      expect(body.data.totalItems).toBe(2);
+      expect(body.data.subtotal).toBeCloseTo(59.98, 2);
     });
   });
 

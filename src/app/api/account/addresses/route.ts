@@ -37,7 +37,9 @@ export async function GET() {
     });
 
     if (!usuario) {
-      return NextResponse.json({ error: 'Usuario not found' }, { status: 404 });
+      // Temporal: retornar array vacío en lugar de error 404
+      console.warn('[Addresses] User not found for email:', session.user.email);
+      return NextResponse.json({ addresses: [] });
     }
 
     const addresses = await prisma.address.findMany({
@@ -47,8 +49,9 @@ export async function GET() {
 
     return NextResponse.json({ addresses });
   } catch (error) {
-    console.error('Error al obtener direcciones:', error);
-    return NextResponse.json({ error: 'Error al obtener direcciones' }, { status: 500 });
+    console.error('[Addresses] Error:', error);
+    // Temporal: no romper el frontend
+    return NextResponse.json({ addresses: [] });
   }
 }
 
