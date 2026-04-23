@@ -223,18 +223,18 @@ export function useCheckoutData(): CheckoutDataResult {
       }
 
       // Load cart - CON RETRY si venimos de migración O si hay carrito local pendiente
-      let cartData: { cart?: Cart | null } | null = null;
+      let cartData: { data?: { items: CartItem[]; subtotal: number } | null } | null = null;
       let retryCount = 0;
       const maxRetries = justMigrated ? 3 : 1;
 
       while (retryCount < maxRetries) {
         const resCart = await fetch('/api/cart');
         if (resCart.ok) {
-          cartData = (await resCart.json()) as { cart?: Cart | null };
+          cartData = (await resCart.json()) as { data?: { items: CartItem[]; subtotal: number } | null };
         }
 
         // Si venimos de migración y el carrito está vacío, reintentar
-        const hasItems = cartData?.cart?.items?.length && cartData.cart.items.length > 0;
+        const hasItems = cartData?.data?.items?.length && cartData.data.items.length > 0;
         if (justMigrated && !hasItems && retryCount < maxRetries - 1) {
           // Esperar un poco para que la migración complete
           await new Promise(resolve => setTimeout(resolve, 500));
@@ -250,11 +250,11 @@ export function useCheckoutData(): CheckoutDataResult {
       }
 
       if (cartData) {
-        setCart(cartData.cart || null);
+        setCart(cartData.data || null);
         loadCoupon();
 
         // Verificar si hay items después de la migración
-        const itemCount = cartData.cart?.items?.length ?? 0;
+        const itemCount = cartData.data?.items?.length ?? 0;
         const hasItems = itemCount > 0;
         const stillHasLocalCart = !!localStorage.getItem('cart');
 
@@ -271,10 +271,10 @@ export function useCheckoutData(): CheckoutDataResult {
           const retryRes = await fetch('/api/cart');
           if (retryRes.ok) {
             const retryData = await retryRes.json();
-            setCart(retryData.cart || null);
+            setCart(retryData.data || null);
 
             // Si aún no hay items, redirigir
-            if (!retryData.cart?.items?.length) {
+            if (!retryData.data?.items?.length) {
               router.push('/cart');
               return;
             }

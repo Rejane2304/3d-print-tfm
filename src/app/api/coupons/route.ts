@@ -51,7 +51,7 @@ export async function GET(_req: NextRequest) {
       };
     });
 
-    return NextResponse.json({ success: true, coupons: formattedCoupons });
+    return NextResponse.json({ success: true, data: { coupons: formattedCoupons } });
   } catch (error) {
     console.error('Error fetching coupons:', error);
     return NextResponse.json({ success: false, error: 'Error interno' }, { status: 500 });
