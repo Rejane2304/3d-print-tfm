@@ -193,7 +193,8 @@ describe('Cart API', () => {
       expect(body.success).toBe(true);
       expect(body.data.items.length).toBe(1);
       expect(body.data.totalItems).toBe(2);
-      expect(body.data.subtotal).toBeCloseTo(59.98, 2);
+      // Ahora el subtotal incluye IVA (29.99 * 1.21 * 2 = 72.58)
+      expect(body.data.subtotal).toBeCloseTo(72.58, 2);
     });
   });
 
