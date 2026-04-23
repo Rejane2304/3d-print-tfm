@@ -49,14 +49,12 @@ const CartSummary: React.FC<Readonly<CartSummaryProps>> = ({
 }) => {
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const hasFreeShippingCoupon = appliedCoupon?.freeShipping === true;
+  // El subtotal ya viene con IVA incluido desde la API
   const isFreeShipping = subtotal >= freeShippingFrom || hasFreeShippingCoupon;
   const shipping = isFreeShipping ? 0 : shippingCost;
   const couponDiscount = appliedCoupon?.discount || 0;
   const discountedSubtotal = Math.max(0, subtotal - couponDiscount);
-  // IVA solo sobre productos (no sobre envío) - Fórmula correcta fiscalmente
-  const taxMultiplier = taxRate / 100;
-  const taxAmount = discountedSubtotal * taxMultiplier;
-  const total = discountedSubtotal + shipping + taxAmount;
+  const total = discountedSubtotal + shipping;
   const hasItems = items.length > 0;
 
   return (
@@ -92,11 +90,14 @@ const CartSummary: React.FC<Readonly<CartSummaryProps>> = ({
 
           {/* Desglose completo con IVA separado (Transparente) */}
 
-          {/* Subtotal (sin IVA) */}
+          {/* Subtotal */}
           <div className="flex justify-between py-2 border-b border-gray-100 text-sm sm:text-base">
-            <span className="text-gray-600">Subtotal (sin IVA)</span>
+            <span className="text-gray-600">Subtotal</span>
             <span className="font-medium">{subtotal.toFixed(2)} €</span>
           </div>
+
+          {/* Info de IVA incluido */}
+          <div className="text-xs text-gray-500 py-1">IVA incluido en el precio</div>
 
           {/* Descuento por cupón */}
           {couponDiscount > 0 && (
@@ -120,12 +121,6 @@ const CartSummary: React.FC<Readonly<CartSummaryProps>> = ({
               Te falta {(freeShippingFrom - subtotal).toFixed(2)} € para envío gratis
             </div>
           )}
-
-          {/* IVA (separado y transparente) */}
-          <div className="flex justify-between py-2 border-b border-gray-100 text-sm sm:text-base">
-            <span className="text-gray-600">IVA ({taxRate}%)</span>
-            <span className="font-medium">{taxAmount.toFixed(2)} €</span>
-          </div>
 
           {/* Total Final */}
           <div className="flex justify-between py-3 sm:py-4 mt-3 sm:mt-4 border-t-2 border-gray-200">

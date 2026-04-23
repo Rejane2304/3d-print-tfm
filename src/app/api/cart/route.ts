@@ -13,6 +13,7 @@ import { withErrorHandler } from '@/lib/errors/api-wrapper';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { translateErrorMessage, translateProductName } from '@/lib/i18n';
+import { calculatePriceWithVAT } from '@/lib/constants/tax';
 
 // GET /api/cart - Get user's cart
 export const GET = withErrorHandler(async () => {
@@ -67,7 +68,10 @@ export const GET = withErrorHandler(async () => {
     // Calculate totals
     const cart = user.cart;
     const totalItems = cart.items.reduce((sum, item) => sum + item.quantity, 0);
-    const subtotal = cart.items.reduce((sum, item) => sum + Number(item.unitPrice) * item.quantity, 0);
+    const subtotal = cart.items.reduce(
+      (sum, item) => sum + calculatePriceWithVAT(Number(item.unitPrice)) * item.quantity,
+      0,
+    );
 
     return NextResponse.json({
       success: true,
@@ -77,12 +81,12 @@ export const GET = withErrorHandler(async () => {
           id: item.id,
           productId: item.productId,
           quantity: item.quantity,
-          unitPrice: Number(item.unitPrice),
+          unitPrice: calculatePriceWithVAT(Number(item.unitPrice)),
           product: {
             id: item.product.id,
             name: translateProductName(item.product.slug),
             slug: item.product.slug,
-            price: Number(item.product.price),
+            price: calculatePriceWithVAT(Number(item.product.price)),
             stock: item.product.stock,
             image: item.product.images[0]?.url || null,
           },
