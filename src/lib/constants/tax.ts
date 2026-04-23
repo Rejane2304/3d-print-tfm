@@ -3,6 +3,9 @@
  *
  * NOTA: Estos valores son CONSTANTES y no deben cambiarse sin autorización
  * ya que afectan cálculos contables críticos.
+ *
+ * IMPORTANTE: Los precios en la BD se almacenan SIN IVA.
+ * Los precios mostrados al cliente deben incluir IVA.
  */
 
 /** Tasa de IVA por defecto (21% en España) */
@@ -12,7 +15,16 @@ export const DEFAULT_VAT_RATE = 0.21; // 21%
 export const DEFAULT_VAT_RATE_PERCENT = 21;
 
 /**
- * Calcula el IVA dado un importe
+ * Calcula el precio con IVA incluido
+ * @param basePrice - Precio base sin IVA
+ * @returns Precio con IVA incluido
+ */
+export function calculatePriceWithVAT(basePrice: number): number {
+  return roundToCents(basePrice * (1 + DEFAULT_VAT_RATE));
+}
+
+/**
+ * Calcula el IVA dado un importe base
  * @param amount - Importe base
  * @returns IVA calculado
  */
@@ -41,7 +53,7 @@ export function amountsMatch(amount1: number, amount2: number): boolean {
 
 /**
  * Calcula los totales de un pedido
- * @param subtotal - Subtotal de items
+ * @param subtotal - Subtotal de items (SIN IVA)
  * @param discount - Descuento aplicado
  * @param shipping - Costo de envío
  * @returns Objeto con totales calculados
@@ -69,7 +81,7 @@ export function calculateOrderTotals(
 }
 
 /**
- * FÓRMULA CORRECTA (según requerimiento fiscal):
+ * FÓRMULA CORRECTA (según requerimiento fiscal español):
  *
  * IVA = (Subtotal - Descuento) × 0.21
  * Total = (Subtotal - Descuento) × 1.21 + Envío
@@ -77,9 +89,13 @@ export function calculateOrderTotals(
  * El IVA solo se aplica sobre los productos, NO sobre el envío.
  * El envío se suma al final sin IVA.
  *
+ * NOTA IMPORTANTE PARA UI:
+ * Los precios mostrados al cliente deben INCLUIR IVA.
+ * Usar calculatePriceWithVAT() para mostrar precios.
+ *
  * Ejemplo:
- *   Productos: 100€
- *   IVA 21%: 21€ (solo sobre productos)
+ *   Precio en BD: 100€ (sin IVA)
+ *   Precio mostrado: 121€ (con IVA incluido)
  *   Envío: 5€
  *   Total: 126€
  */

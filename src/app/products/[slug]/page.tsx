@@ -16,6 +16,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { translateCategoryName, translateProductDescription, translateProductName } from '@/lib/i18n';
 import { LazyReviewsList } from '@/components/reviews/LazyReviewsList';
+import { calculatePriceWithVAT } from '@/lib/constants/tax';
 
 interface ProductDetailPageProps {
   params: Promise<{
@@ -226,15 +227,15 @@ export default async function ProductDetailPage({ params }: Readonly<ProductDeta
               </div>
             </div>
 
-            {/* Precio base sin IVA */}
+            {/* Precio con IVA incluido */}
             <div className="flex items-baseline gap-2 flex-wrap">
               <span className="text-3xl sm:text-4xl font-bold text-indigo-600">
-                {Number(product.price).toFixed(2)} €
+                {calculatePriceWithVAT(Number(product.price)).toFixed(2)} €
               </span>
-              <span className="text-sm text-gray-500">sin IVA</span>
+              <span className="text-sm text-gray-500">IVA incluido</span>
               {product.previousPrice && (
                 <span className="text-lg sm:text-xl text-gray-500 line-through">
-                  {Number(product.previousPrice).toFixed(2)} €
+                  {calculatePriceWithVAT(Number(product.previousPrice)).toFixed(2)} €
                 </span>
               )}
             </div>

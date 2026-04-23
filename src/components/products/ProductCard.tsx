@@ -14,7 +14,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import type { Decimal } from '@prisma/client/runtime/library';
 import { StarRating } from '@/components/ui/StarRating';
-import { formatPrice } from '@/lib/pricing';
+import { formatPriceWithVat } from '@/lib/pricing';
 
 interface Product {
   id: string;
@@ -49,7 +49,7 @@ export default function ProductCard({ product }: Readonly<ProductCardProps>) {
   // Generate aria-label for the card link
   const cardAriaLabel = [
     product.name,
-    formatPrice(product.price),
+    formatPriceWithVat(product.price),
     product.stock > 0 ? `${product.stock} unidades disponibles` : 'Agotado',
     hasRating ? `Calificación: ${product._avgRating?.toFixed(1)} de 5 estrellas` : null,
   ]
@@ -99,86 +99,59 @@ export default function ProductCard({ product }: Readonly<ProductCardProps>) {
             aria-hidden="true"
           />
 
-          {/* Badges */}
-          <div className="absolute top-3 left-3 flex flex-col gap-2">
-            {product.stock > 0 && product.stock < 5 && (
-              <span
-                className="bg-red-500 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-md"
-                role="status"
-              >
-                ¡Últimas unidades!
-              </span>
-            )}
-            {product.stock === 0 && (
-              <span
-                className="bg-gray-800 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-md"
-                role="status"
-              >
-                Agotado
-              </span>
-            )}
+          {/* Stock Badge */}
+          <div
+            className={`absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-semibold backdrop-blur-sm ${
+              stockStatus.urgent ? 'bg-white/90' : 'bg-white/70'
+            } ${stockStatus.className}`}
+            aria-label={stockStatus.text}
+          >
+            {stockStatus.text}
           </div>
 
-          {/* Rating Badge */}
-          {hasRating && (
-            <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full shadow-md flex items-center gap-1">
-              <span className="text-yellow-500" aria-hidden="true">
-                ★
-              </span>
-              <span className="text-sm font-semibold text-gray-700">{product._avgRating?.toFixed(1)}</span>
-              <span className="sr-only">{`Calificación: ${product._avgRating?.toFixed(1)} de 5 estrellas`}</span>
+          {/* Featured Badge - if applicable */}
+          {product.stock === 0 && (
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-[2px]">
+              <span className="bg-gray-900/80 text-white px-4 py-2 rounded-full text-sm font-medium">Agotado</span>
             </div>
           )}
         </div>
 
         {/* Content */}
-        <div className="p-5 flex flex-col flex-1">
-          {/* Product Name */}
-          <h3
-            className="font-bold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors line-clamp-2 text-base leading-tight"
-            data-testid="product-name"
-            title={product.name}
-          >
+        <div className="flex flex-col flex-1 p-5">
+          {/* Title */}
+          <h3 className="font-bold text-lg text-gray-900 mb-2 line-clamp-2 group-hover:text-indigo-600 transition-colors duration-300 leading-tight">
             {product.name}
           </h3>
 
-          {/* Divider */}
-          <div
-            className="w-12 h-0.5 bg-gray-200 mb-4 group-hover:bg-indigo-500 transition-colors group-hover:w-20"
-            aria-hidden="true"
-          />
+          {/* Description */}
+          <p className="text-gray-500 text-sm line-clamp-2 mb-4 flex-1 leading-relaxed">
+            {product.shortDescription || product.description || 'Sin descripción'}
+          </p>
+
+          {/* Material Tag */}
+          {product.material && (
+            <div className="mb-3">
+              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
+                {product.material}
+              </span>
+            </div>
+          )}
 
           {/* Rating */}
           {hasRating && (
             <div className="flex items-center gap-2 mb-3">
-              <StarRating rating={product._avgRating || 0} size="sm" ariaLabel={`Calificación de ${product.name}`} />
-              <span className="text-xs text-gray-400">({product._reviewCount})</span>
+              <StarRating rating={product._avgRating || 0} size="sm" />
+              <span className="text-sm text-gray-600">({product._reviewCount})</span>
             </div>
           )}
 
-          {/* Spacer */}
-          <div className="flex-1" aria-hidden="true" />
-
-          {/* Price Section - Fixed at bottom */}
-          <div className="pt-4 border-t border-gray-100 mt-auto">
-            <div className="flex items-center justify-between">
+          {/* Price Section */}
+          <div className="mt-auto pt-4 border-t border-gray-100">
+            <div className="flex items-baseline justify-between">
               <div>
-                <span className="text-xs text-gray-400 block mb-0.5">Precio</span>
-                <span className="text-2xl font-bold text-gray-900" data-testid="product-price">
-                  {formatPrice(product.price)}
-                </span>
-              </div>
-
-              <div className="text-right">
-                <span className="text-xs text-gray-400 block mb-0.5">Disponibilidad</span>
-                <span
-                  className={`text-sm font-medium ${stockStatus.className}`}
-                  data-testid="product-stock"
-                  role="status"
-                  aria-live={stockStatus.urgent ? 'polite' : undefined}
-                >
-                  {stockStatus.text}
-                </span>
+                <span className="text-2xl font-bold text-indigo-600">{formatPriceWithVat(product.price)}</span>
+                <span className="block text-xs text-gray-500 mt-1">IVA incluido</span>
               </div>
             </div>
           </div>

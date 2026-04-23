@@ -17,6 +17,7 @@ import Link from 'next/link';
 import { Loader2, Minus, Plus, Trash2 } from 'lucide-react';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { useAnnouncer } from '@/hooks/useAnnouncer';
+import { calculatePriceWithVAT } from '@/lib/constants/tax';
 
 interface CartItemProps {
   item: {
@@ -46,7 +47,7 @@ export default function CartItem({ item, onUpdateQuantity, onRemove, isUpdating 
   // Unique IDs for accessibility
   const quantityId = useId();
 
-  const subtotal = item.unitPrice * item.quantity;
+  const subtotal = calculatePriceWithVAT(item.unitPrice) * item.quantity;
 
   // Si el producto ya no existe (puede haber sido eliminado), mostrar mensaje
   if (!item.product) {
@@ -134,7 +135,9 @@ export default function CartItem({ item, onUpdateQuantity, onRemove, isUpdating 
           >
             {product.name}
           </Link>
-          <p className="text-sm text-gray-500 mt-1">{item.unitPrice.toFixed(2)} € / unidad (sin IVA)</p>
+          <p className="text-sm text-gray-500 mt-1">
+            {calculatePriceWithVAT(item.unitPrice).toFixed(2)} € / unidad (IVA incluido)
+          </p>
         </div>
 
         {/* Controles de cantidad */}
