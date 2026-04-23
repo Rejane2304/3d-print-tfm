@@ -17,10 +17,12 @@ export const DEFAULT_VAT_RATE_PERCENT = 21;
 /**
  * Calcula el precio con IVA incluido
  * @param basePrice - Precio base sin IVA
- * @returns Precio con IVA incluido
+ * @returns Precio con IVA incluido (sin redondear para evitar errores de 0.01€)
  */
 export function calculatePriceWithVAT(basePrice: number): number {
-  return roundToCents(basePrice * (1 + DEFAULT_VAT_RATE));
+  const exactPrice = basePrice * (1 + DEFAULT_VAT_RATE);
+  // Usar toFixed(2) para redondeo estándar bancario
+  return Number.parseFloat(exactPrice.toFixed(2));
 }
 
 /**
