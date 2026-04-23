@@ -21,8 +21,8 @@ if (!databaseUrl) {
   process.exit(1);
 }
 
-// Validar que sea la BD de producción
-if (!databaseUrl.includes('ctwbppfkfsuxymfouptb')) {
+// Validar que sea la BD de producción (identificador del proyecto o pooler eu-west-1/eu-central-1)
+if (!databaseUrl.includes('nuhevspwirnesfkkujlo') && !databaseUrl.includes('pooler.supabase.com')) {
   console.error('❌ Error: DATABASE_URL no apunta a producción. Usa db:migrate:dev para desarrollo.');
   process.exit(1);
 }
