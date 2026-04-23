@@ -56,8 +56,9 @@ async function getPayPalAccessToken(): Promise<string> {
 /**
  * Create PayPal order via API
  */
-// Build PayPal items from order items
-function buildPayPalItems(items: Array<{ name: string; quantity: number; unitPrice: number }>, vatAmountStr: string) {
+// Build PayPal items from order items (deprecated - VAT now included in prices)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function _buildPayPalItems(items: Array<{ name: string; quantity: number; unitPrice: number }>, vatAmountStr: string) {
   const productItems = items.map((item, index) => ({
     name: item.name.substring(0, 127),
     quantity: item.quantity.toString(),
@@ -128,26 +129,31 @@ async function createPayPalOrder(
     };
   },
 ): Promise<{ id: string; links: Array<{ rel: string; href: string }> }> {
-  // Calcular totales con IVA separado (transparente) - BASE IMPONIBLE INCLUYE ENVÍO
+  // Calcular totales exactos para PayPal (sin IVA separado para evitar errores de redondeo)
   const itemsTotal = orderData.items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
+  const discount = orderData.discount || 0;
+  const shipping = orderData.shipping;
 
-  // Aplicar descuento antes de calcular IVA
-  const discountedItems = Math.max(0, itemsTotal - (orderData.discount || 0));
+  // El total debe coincidir exactamente: items - discount + shipping
+  const calculatedTotal = itemsTotal - discount + shipping;
 
-  // Calcular IVA (21% solo sobre items con descuento, envío sin IVA)
-  const vatRate = 0.21;
-  const vatAmount = discountedItems * vatRate;
-
-  // El total debe ser: (items con descuento × 1.21) + envío
-  const calculatedTotal = discountedItems * (1 + vatRate) + orderData.shipping;
-
-  // Asegurar que tenemos al menos 2 decimales
-  const vatAmountStr = vatAmount.toFixed(2);
-  const shippingStr = orderData.shipping.toFixed(2);
+  // Asegurar 2 decimales
+  const itemsTotalStr = itemsTotal.toFixed(2);
+  const shippingStr = shipping.toFixed(2);
   const totalStr = calculatedTotal.toFixed(2);
+  const discountStr = discount.toFixed(2);
 
-  // Preparar items para PayPal (productos + IVA como item separado)
-  const paypalItems = buildPayPalItems(orderData.items, vatAmountStr);
+  // Items para PayPal (precios sin IVA, el total ya incluye todo)
+  const paypalItems = orderData.items.map((item, index) => ({
+    name: item.name.substring(0, 127),
+    quantity: item.quantity.toString(),
+    unit_amount: {
+      currency_code: 'EUR' as const,
+      value: item.unitPrice.toFixed(2),
+    },
+    sku: `ITEM-${index + 1}`,
+    category: 'PHYSICAL_GOODS' as const,
+  }));
 
   const requestBody = {
     intent: 'CAPTURE',
@@ -161,12 +167,15 @@ async function createPayPalOrder(
           breakdown: {
             item_total: {
               currency_code: 'EUR',
-              // Incluir items + IVA en el total de items (transparencia)
-              value: (itemsTotal + vatAmount).toFixed(2),
+              value: itemsTotalStr,
             },
             shipping: {
               currency_code: 'EUR',
               value: shippingStr,
+            },
+            discount: {
+              currency_code: 'EUR',
+              value: discountStr,
             },
           },
         },

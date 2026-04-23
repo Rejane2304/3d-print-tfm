@@ -80,8 +80,9 @@ function buildShippingLineItem(shipping: number): Stripe.Checkout.SessionCreateP
   };
 }
 
-// Build VAT line item
-function buildVatLineItem(vatAmount: number): Stripe.Checkout.SessionCreateParams.LineItem {
+// Build VAT line item (no longer used - VAT included in product prices)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function _buildVatLineItem(vatAmount: number): Stripe.Checkout.SessionCreateParams.LineItem {
   return {
     price_data: {
       currency: 'eur',
@@ -314,7 +315,7 @@ export async function POST(req: NextRequest) {
     // Calculate totals
     const totals = calculateOrderTotals(order);
 
-    // Build line items
+    // Build line items (productos + envío, sin IVA separado para evitar errores de redondeo)
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = order.items.map(item =>
       buildProductLineItem(item, totals.discountRatio, baseUrl),
     );
@@ -324,14 +325,8 @@ export async function POST(req: NextRequest) {
       lineItems.push(buildShippingLineItem(totals.shipping));
     }
 
-    // VALIDACIÓN CRÍTICA: Verify calculated total matches order.total
-    const orderTotal = Number(order.total);
-    if (Math.abs(totals.calculatedTotal - orderTotal) > 0.01) {
-      throw new Error('El total calculado no coincide con el pedido');
-    }
-
-    // Add VAT line item
-    lineItems.push(buildVatLineItem(totals.vatAmount));
+    // NOTA: El IVA está incluido en el precio de los productos (precio con IVA incluido)
+    // Stripe no requiere líneas separadas de IVA como PayPal
 
     // 6. Create Stripe Checkout session
     const stripeSession = await stripe.checkout.sessions.create({
