@@ -295,7 +295,6 @@ export function useCheckoutData(): CheckoutDataResult {
       return;
     }
     if (status === 'authenticated') {
-       
       loadData();
     }
   }, [status, router, loadData]);

@@ -171,9 +171,8 @@ export async function emitEvent(type: EventType, payload: EventPayload, room: st
 
     // Also emit to any connected WebSocket clients (if server-side)
     // This will be handled by the socket.io server
-     
+
     if (typeof globalThis !== 'undefined' && (globalThis as unknown as { io?: unknown }).io) {
-       
       const io = (
         globalThis as unknown as {
           io: {

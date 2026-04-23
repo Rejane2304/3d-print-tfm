@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-     
+
     const { image, filename: _unusedFilename, slug } = body;
 
     if (!image) {

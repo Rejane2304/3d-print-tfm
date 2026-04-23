@@ -2,7 +2,7 @@
  * Header Component with Avatar Menu
  * Shows avatar with first letter for authenticated users
  */
- 
+
 'use client';
 
 import Link from 'next/link';

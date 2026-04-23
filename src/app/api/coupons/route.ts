@@ -9,7 +9,6 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { translateCouponCode } from '@/lib/i18n';
 
- 
 export async function GET(_req: NextRequest) {
   try {
     const now = new Date();

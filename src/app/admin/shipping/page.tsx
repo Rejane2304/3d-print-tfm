@@ -76,7 +76,6 @@ export default function AdminShippingPage() {
       }
       loadZones();
     }
-     
   }, [status, session, router]);
 
   const loadZones = async () => {

@@ -72,7 +72,6 @@ export default function AdminCouponsPage() {
     }
   }, [status, session, router]);
 
-   
   const loadCoupons = async () => {
     try {
       setLoading(true);

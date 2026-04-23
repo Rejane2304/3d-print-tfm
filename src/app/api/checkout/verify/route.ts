@@ -16,7 +16,7 @@ import { translateOrderStatus, translatePaymentStatus } from '@/lib/i18n';
 import type { Order, OrderItem, Prisma } from '@prisma/client';
 
 // Tipo para el pedido incluyendo items y producto
- 
+
 type OrderWithItems = Order & {
   items: (OrderItem & {
     product: {

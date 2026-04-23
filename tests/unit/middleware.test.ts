@@ -10,9 +10,8 @@ const mockNext = vi.fn();
 
 vi.mock('next/server', () => ({
   NextResponse: {
-     
     redirect: (...args: any[]) => mockRedirect(...args),
-     
+
     next: (...args: any[]) => mockNext(...args),
   },
 }));

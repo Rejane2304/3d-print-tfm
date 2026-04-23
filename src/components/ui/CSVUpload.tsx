@@ -138,7 +138,7 @@ export function CSVUpload({
         processFile(e.dataTransfer.files[0]);
       }
     },
-     
+
     [processFile],
   );
 
