@@ -3,7 +3,6 @@
 import { Package } from 'lucide-react';
 import Image from 'next/image';
 import type { AppliedCoupon, CartItem } from '../hooks/useCheckoutData';
-import { calculatePriceWithVAT } from '@/lib/constants/tax';
 
 interface OrderSummaryProps {
   items: CartItem[];
@@ -11,18 +10,11 @@ interface OrderSummaryProps {
   appliedCoupon: AppliedCoupon | null;
 }
 
-interface OrderTotalsProps {
-  subtotal: number;
-  coupon: AppliedCoupon | null;
-}
-
-const TAX_RATE = 0.21;
 const FREE_SHIPPING_THRESHOLD = 50;
 const DEFAULT_SHIPPING_COST = 5.99;
+const VAT_RATE = 0.21;
 
-function calculateShipping(subtotal: number, coupon: AppliedCoupon | null): number {
-  // Calcular envío basado en subtotal con IVA incluido
-  const subtotalWithVAT = calculatePriceWithVAT(subtotal);
+function calculateShipping(subtotalWithVAT: number, coupon: AppliedCoupon | null): number {
   if (subtotalWithVAT >= FREE_SHIPPING_THRESHOLD) {
     return 0;
   }
@@ -32,12 +24,12 @@ function calculateShipping(subtotal: number, coupon: AppliedCoupon | null): numb
   return DEFAULT_SHIPPING_COST;
 }
 
-function calculateDiscount(subtotal: number, coupon: AppliedCoupon | null): number {
+function calculateDiscount(subtotalWithVAT: number, coupon: AppliedCoupon | null): number {
   if (!coupon) {
     return 0;
   }
   if (coupon.type === 'PERCENTAGE') {
-    return subtotal * (coupon.discount / 100);
+    return subtotalWithVAT * (coupon.discount / 100);
   }
   return coupon.discount;
 }
@@ -49,7 +41,7 @@ function formatCurrency(value: number): string {
 export function OrderItems({ items }: Readonly<{ items: CartItem[] }>) {
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-      <h2 className="text-lg sm:text-xl font-semibold mb-4">Resumen del pedido</h2>
+      <h2 className="text-lg sm:text-xl font-semibold mb-4">Artículos en tu pedido</h2>
 
       {items.map(item => (
         <div key={item.id} className="flex items-center gap-3 sm:gap-4 py-3 border-b border-gray-100 last:border-0">
@@ -70,11 +62,11 @@ export function OrderItems({ items }: Readonly<{ items: CartItem[] }>) {
           <div className="flex-1 min-w-0">
             <p className="font-medium text-sm sm:text-base truncate">{item.product.name}</p>
             <p className="text-sm text-gray-600">
-              {item.quantity} x {calculatePriceWithVAT(item.unitPrice || 0).toFixed(2)} €
+              {item.quantity} x {(item.unitPrice || 0).toFixed(2)} €
             </p>
           </div>
           <p className="font-semibold text-sm sm:text-base whitespace-nowrap">
-            {((item.quantity || 1) * calculatePriceWithVAT(item.unitPrice || 0)).toFixed(2)} €
+            {((item.quantity || 1) * (item.unitPrice || 0)).toFixed(2)} €
           </p>
         </div>
       ))}
@@ -82,49 +74,59 @@ export function OrderItems({ items }: Readonly<{ items: CartItem[] }>) {
   );
 }
 
-export function OrderTotals({ subtotal, coupon }: Readonly<OrderTotalsProps>) {
+export function OrderTotals({ subtotal, coupon }: Readonly<{ subtotal: number; coupon: AppliedCoupon | null }>) {
+  // El subtotal viene con IVA incluido desde el carrito
   const couponDiscount = calculateDiscount(subtotal, coupon);
   const finalShippingCost = calculateShipping(subtotal, coupon);
-  const discountedSubtotal = Math.max(0, subtotal - couponDiscount);
-  // IVA solo sobre productos (no sobre envío) - Fórmula correcta fiscalmente
-  const taxAmount = discountedSubtotal * TAX_RATE;
-  const total = discountedSubtotal + finalShippingCost + taxAmount;
+  const subtotalAfterDiscount = Math.max(0, subtotal - couponDiscount);
+
+  // Calcular IVA incluido en el subtotal (para mostrarlo por transparencia)
+  // IVA = precio_con_iva - precio_sin_iva
+  const vatAmountIncluded = subtotalAfterDiscount - subtotalAfterDiscount / (1 + VAT_RATE);
+
+  // Total final: subtotal (con IVA) - descuento + envío (sin IVA)
+  const total = subtotalAfterDiscount + finalShippingCost;
 
   return (
-    <div className="border-t pt-4 sm:pt-6 mb-4 sm:mb-6">
-      <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Resumen del pedido</h3>
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+      <h3 className="text-lg sm:text-xl font-semibold mb-4">Resumen del pedido</h3>
 
-      <div className="space-y-2 sm:space-y-3">
+      <div className="space-y-3">
         {/* Subtotal */}
-        <div className="flex justify-between text-gray-600 text-sm sm:text-base">
-          <span>Subtotal (IVA incluido)</span>
-          <span>{formatCurrency(calculatePriceWithVAT(subtotal))} €</span>
+        <div className="flex justify-between text-gray-600">
+          <span>Subtotal</span>
+          <span>{formatCurrency(subtotal)} €</span>
         </div>
+
+        {/* Info de IVA incluido */}
+        <div className="text-xs text-gray-500 -mt-2 mb-2">IVA incluido</div>
 
         {/* Descuento por cupón */}
         {couponDiscount > 0 && (
-          <div className="flex justify-between text-green-600 text-sm sm:text-base">
-            <span>Descuento ({coupon?.code})</span>
-            <span>-{formatCurrency(calculatePriceWithVAT(couponDiscount))} €</span>
+          <div className="flex justify-between text-green-600">
+            <span>Descuento {coupon?.code && `(${coupon.code})`}</span>
+            <span>-{formatCurrency(couponDiscount)} €</span>
           </div>
         )}
 
         {/* Envío */}
-        <div className="flex justify-between text-gray-600 text-sm sm:text-base">
+        <div className="flex justify-between text-gray-600">
           <span>Envío</span>
           <span className={finalShippingCost === 0 ? 'text-green-600 font-medium' : ''}>
             {finalShippingCost === 0 ? 'Gratis' : `${formatCurrency(finalShippingCost)} €`}
           </span>
         </div>
 
-        {/* IVA */}
-        <div className="flex justify-between text-gray-600 text-sm sm:text-base">
-          <span>IVA (21%)</span>
-          <span>{formatCurrency(calculatePriceWithVAT(taxAmount))} €</span>
+        {/* Desglose del IVA (transparencia fiscal) */}
+        <div className="border-t border-gray-100 pt-2 mt-2">
+          <div className="flex justify-between text-gray-500 text-sm">
+            <span>Incluye IVA (21%)</span>
+            <span>{formatCurrency(vatAmountIncluded)} €</span>
+          </div>
         </div>
 
         {/* Total Final */}
-        <div className="flex justify-between text-lg sm:text-xl font-bold border-t-2 border-gray-200 pt-3 mt-2">
+        <div className="flex justify-between text-xl font-bold border-t-2 border-gray-200 pt-4 mt-4">
           <span>Total a pagar</span>
           <span className="text-indigo-600">{formatCurrency(total)} €</span>
         </div>
@@ -135,9 +137,9 @@ export function OrderTotals({ subtotal, coupon }: Readonly<OrderTotalsProps>) {
 
 export function OrderSummary({ items, subtotal, appliedCoupon }: Readonly<OrderSummaryProps>) {
   return (
-    <>
+    <div className="space-y-4">
       <OrderItems items={items} />
       <OrderTotals subtotal={subtotal} coupon={appliedCoupon} />
-    </>
+    </div>
   );
 }
