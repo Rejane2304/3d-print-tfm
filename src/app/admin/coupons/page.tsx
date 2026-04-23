@@ -72,7 +72,7 @@ export default function AdminCouponsPage() {
     }
   }, [status, session, router]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   const loadCoupons = async () => {
     try {
       setLoading(true);

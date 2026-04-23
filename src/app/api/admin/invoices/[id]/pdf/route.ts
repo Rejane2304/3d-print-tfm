@@ -16,7 +16,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 // Type for invoice with order - kept for future use
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 export type _InvoiceWithOrder = Prisma.InvoiceGetPayload<{
   include: {
     order: {

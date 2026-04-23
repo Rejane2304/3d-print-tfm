@@ -326,7 +326,7 @@ async function seedUsers(): Promise<number> {
     });
     idMaps.users.set(user._ref, created.id);
   }
-  // eslint-disable-next-line no-console
+   
   // console.log(`✅ ${usersCSV.length} users created\n`);
   return usersCSV.length;
 }
@@ -628,7 +628,7 @@ async function seedAddresses(): Promise<number> {
   for (const addr of addressesCSV) {
     const userId = idMaps.users.get(addr._userRef);
     if (!userId) {
-      // eslint-disable-next-line no-console
+       
       process.stderr.write(`⚠️ User ${addr._userRef} not found for address ${addr._ref}\n`);
       continue;
     }
@@ -819,7 +819,7 @@ async function seedOrderItems(): Promise<number> {
     const orderId = idMaps.orders.get(item._orderRef);
     const productId = item._productRef ? idMaps.products.get(item._productRef) : null;
     if (!orderId) {
-      // eslint-disable-next-line no-console
+       
       process.stderr.write(`⚠️ Order ${item._orderRef} not found for item ${item._ref}\n`);
       continue;
     }
@@ -930,7 +930,7 @@ async function seedInvoices(): Promise<number> {
   for (const inv of invoicesCSV) {
     const orderId = idMaps.orders.get(inv._orderRef);
     if (!orderId) {
-      // eslint-disable-next-line no-console
+       
       process.stderr.write(`⚠️ Order ${inv._orderRef} not found for invoice ${inv._ref}\n`);
       continue;
     }
@@ -985,7 +985,7 @@ async function cleanDatabase(): Promise<void> {
 // ============================================
 
 async function main(): Promise<void> {
-  // eslint-disable-next-line no-console
+   
   console.info('🌱 Starting database seed...\n');
 
   await cleanDatabase();
@@ -1009,12 +1009,12 @@ async function main(): Promise<void> {
   await seedInvoices();
 
   // Summary
-  // eslint-disable-next-line no-console
+   
   console.info('✅ Seed completed successfully!');
-  // eslint-disable-next-line no-console
+   
   console.log(`   - Product Images: ${productImages}`);
 
-  // eslint-disable-next-line no-console
+   
   console.log(`   - Order Items: ${orderItems}`);
 }
 

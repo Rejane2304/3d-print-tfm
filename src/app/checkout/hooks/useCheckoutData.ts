@@ -295,7 +295,7 @@ export function useCheckoutData(): CheckoutDataResult {
       return;
     }
     if (status === 'authenticated') {
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+       
       loadData();
     }
   }, [status, router, loadData]);

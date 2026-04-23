@@ -9,7 +9,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { translateCouponCode } from '@/lib/i18n';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 export async function GET(_req: NextRequest) {
   try {
     const now = new Date();

@@ -57,7 +57,7 @@ async function getPayPalAccessToken(): Promise<string> {
  * Create PayPal order via API
  */
 // Build PayPal items from order items (deprecated - VAT now included in prices)
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 function _buildPayPalItems(items: Array<{ name: string; quantity: number; unitPrice: number }>, vatAmountStr: string) {
   const productItems = items.map((item, index) => ({
     name: item.name.substring(0, 127),

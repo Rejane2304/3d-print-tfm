@@ -39,7 +39,6 @@ const CartSummary: React.FC<Readonly<CartSummaryProps>> = ({
   subtotal,
   shippingCost = 5.99,
   freeShippingFrom = 50,
-  taxRate = 21,
   isProcessing = false,
   onCheckout,
   onContinueShopping,

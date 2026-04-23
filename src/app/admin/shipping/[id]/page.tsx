@@ -295,7 +295,7 @@ export default function EditarZonaEnvioPage() {
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    // eslint-disable-next-line max-len
+                     
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg \
                       focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     placeholder="Ej: Península - Zona Centro"
@@ -313,7 +313,7 @@ export default function EditarZonaEnvioPage() {
                     name="country"
                     value={formData.country}
                     onChange={handleInputChange}
-                    // eslint-disable-next-line max-len
+                     
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg \
                       focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     placeholder="Ej: España"
@@ -342,7 +342,7 @@ export default function EditarZonaEnvioPage() {
                         addRegion();
                       }
                     }}
-                    // eslint-disable-next-line max-len
+                     
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     placeholder="Ej: Madrid"
                   />

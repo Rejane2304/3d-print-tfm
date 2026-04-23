@@ -76,7 +76,7 @@ export default function AdminShippingPage() {
       }
       loadZones();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [status, session, router]);
 
   const loadZones = async () => {

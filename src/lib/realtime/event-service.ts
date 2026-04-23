@@ -171,9 +171,9 @@ export async function emitEvent(type: EventType, payload: EventPayload, room: st
 
     // Also emit to any connected WebSocket clients (if server-side)
     // This will be handled by the socket.io server
-    // eslint-disable-next-line max-len
+     
     if (typeof globalThis !== 'undefined' && (globalThis as unknown as { io?: unknown }).io) {
-      // eslint-disable-next-line max-len
+       
       const io = (
         globalThis as unknown as {
           io: {

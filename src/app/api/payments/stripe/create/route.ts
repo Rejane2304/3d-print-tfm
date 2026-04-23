@@ -81,7 +81,7 @@ function buildShippingLineItem(shipping: number): Stripe.Checkout.SessionCreateP
 }
 
 // Build VAT line item (no longer used - VAT included in product prices)
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 function _buildVatLineItem(vatAmount: number): Stripe.Checkout.SessionCreateParams.LineItem {
   return {
     price_data: {
@@ -151,7 +151,7 @@ async function createFailedPaymentAlert(orderId: string, errorMessage: string) {
 // Verify authentication and get session
 type AuthResult = { success: true; email: string } | { success: false; response: NextResponse };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 async function verifyAuthSession(_req: NextRequest): Promise<AuthResult> {
   const session = await getServerSession(authOptions);
 

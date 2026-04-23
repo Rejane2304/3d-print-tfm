@@ -138,7 +138,7 @@ export function CSVUpload({
         processFile(e.dataTransfer.files[0]);
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
     [processFile],
   );
 

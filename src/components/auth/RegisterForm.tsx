@@ -3,7 +3,7 @@
  * Formulario de registro con datos personales y dirección
  * Mejoras de accesibilidad: labels asociados, aria-invalid, aria-describedby
  */
-/* eslint-disable max-len */
+ 
 'use client';
 
 import { useState, useId } from 'react';

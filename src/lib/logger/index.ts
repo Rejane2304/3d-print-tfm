@@ -126,7 +126,7 @@ class Logger {
   }
 
   private sendToMonitoringService(message: string, error: unknown, errorMeta: LogMeta): void {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const monitoringService = (
       globalThis as unknown as { monitoringService?: { captureException: (err: Error, meta: LogMeta) => void } }
     ).monitoringService;

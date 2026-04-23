@@ -2,7 +2,7 @@
  * Header Component with Avatar Menu
  * Shows avatar with first letter for authenticated users
  */
-/* eslint-disable max-len */
+ 
 'use client';
 
 import Link from 'next/link';
