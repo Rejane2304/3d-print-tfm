@@ -55,7 +55,7 @@ export const GET = withErrorHandler(async () => {
     if (!user.cart) {
       return NextResponse.json({
         success: true,
-        cart: {
+        data: {
           id: null,
           items: [],
           subtotal: 0,
@@ -71,7 +71,7 @@ export const GET = withErrorHandler(async () => {
 
     return NextResponse.json({
       success: true,
-      cart: {
+      data: {
         id: cart.id,
         items: cart.items.map(item => ({
           id: item.id,
