@@ -16,26 +16,28 @@ import { translateErrorMessage, translateProductName } from '@/lib/i18n';
 
 // GET /api/cart - Get user's cart
 export const GET = withErrorHandler(async () => {
-  // Verify authentication
-  const session = await getServerSession(authOptions);
+  try {
+    // Verify authentication
+    const session = await getServerSession(authOptions);
 
-  if (!session?.user?.email) {
-    return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
-  }
+    if (!session?.user?.email) {
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
+    }
 
-  // Find user and their cart
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
-    include: {
-      cart: {
-        include: {
-          items: {
-            include: {
-              product: {
-                include: {
-                  images: {
-                    where: { isMain: true },
-                    take: 1,
+    // Find user and their cart
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      include: {
+        cart: {
+          include: {
+            items: {
+              include: {
+                product: {
+                  include: {
+                    images: {
+                      where: { isMain: true },
+                      take: 1,
+                    },
                   },
                 },
               },
@@ -43,53 +45,64 @@ export const GET = withErrorHandler(async () => {
           },
         },
       },
-    },
-  });
+    });
 
-  if (!user) {
-    return NextResponse.json({ success: false, error: 'Usuario no encontrado' }, { status: 404 });
-  }
+    if (!user) {
+      return NextResponse.json({ success: false, error: 'Usuario no encontrado' }, { status: 404 });
+    }
 
-  // If no cart, return empty structure
-  if (!user.cart) {
+    // If no cart, return empty structure
+    if (!user.cart) {
+      return NextResponse.json({
+        success: true,
+        cart: {
+          id: null,
+          items: [],
+          subtotal: 0,
+          totalItems: 0,
+        },
+      });
+    }
+
+    // Calculate totals
+    const cart = user.cart;
+    const totalItems = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+    const subtotal = cart.items.reduce((sum, item) => sum + Number(item.unitPrice) * item.quantity, 0);
+
     return NextResponse.json({
       success: true,
       cart: {
-        id: null,
-        items: [],
-        subtotal: 0,
-        totalItems: 0,
+        id: cart.id,
+        items: cart.items.map(item => ({
+          id: item.id,
+          productId: item.productId,
+          quantity: item.quantity,
+          unitPrice: Number(item.unitPrice),
+          product: {
+            id: item.product.id,
+            name: translateProductName(item.product.slug),
+            slug: item.product.slug,
+            price: Number(item.product.price),
+            stock: item.product.stock,
+            image: item.product.images[0]?.url || null,
+          },
+        })),
+        subtotal,
+        totalItems,
       },
     });
+  } catch (error) {
+    console.error('[Cart GET] Database error:', error);
+    // Professional error handling: fail fast with clear message
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Error al cargar el carrito. Por favor, intenta de nuevo.',
+        code: 'CART_LOAD_ERROR',
+      },
+      { status: 503 },
+    );
   }
-
-  // Calculate totals
-  const cart = user.cart;
-  const totalItems = cart.items.reduce((sum, item) => sum + item.quantity, 0);
-  const subtotal = cart.items.reduce((sum, item) => sum + Number(item.unitPrice) * item.quantity, 0);
-
-  return NextResponse.json({
-    success: true,
-    cart: {
-      id: cart.id,
-      items: cart.items.map(item => ({
-        id: item.id,
-        productId: item.productId,
-        quantity: item.quantity,
-        unitPrice: Number(item.unitPrice),
-        product: {
-          id: item.product.id,
-          name: translateProductName(item.product.slug),
-          slug: item.product.slug,
-          price: Number(item.product.price),
-          stock: item.product.stock,
-          image: item.product.images[0]?.url || null,
-        },
-      })),
-      subtotal,
-      totalItems,
-    },
-  });
 });
 
 // POST /api/cart - Add product to cart
