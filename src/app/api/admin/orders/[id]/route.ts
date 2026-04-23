@@ -18,6 +18,7 @@ import {
   translatePaymentStatus,
   translateProductName,
 } from '@/lib/i18n';
+import { calculatePriceWithVAT } from '@/lib/constants/tax';
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -71,8 +72,8 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       id: order.id,
       numeroPedido: order.orderNumber,
       estado: translateOrderStatus(order.status),
-      total: order.total,
-      subtotal: Number(order.subtotal),
+      total: calculatePriceWithVAT(Number(order.subtotal)) + Number(order.shipping),
+      subtotal: calculatePriceWithVAT(Number(order.subtotal)),
       envio: Number(order.shipping),
       createdAt: order.createdAt,
       updatedAt: order.updatedAt,
@@ -84,8 +85,8 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
         id: item.id,
         nombre: item.product?.slug ? translateProductName(item.product.slug) : item.product?.name || 'Producto',
         quantity: item.quantity,
-        price: Number(item.price),
-        subtotal: Number(item.subtotal),
+        price: calculatePriceWithVAT(Number(item.price)),
+        subtotal: calculatePriceWithVAT(Number(item.subtotal)),
         imagenUrl: item.product?.images?.[0]?.url || null,
       })),
       nombreEnvio: order.shippingName,
