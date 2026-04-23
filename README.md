@@ -9,7 +9,7 @@
 [![Coverage](https://img.shields.io/badge/coverage-80%25-green.svg)](docs/TESTING.md)
 [![License](https://img.shields.io/badge/license-Academic-orange.svg)](LICENSE)
 
-**Trabajo de Fin de Máster - Máster en Desarrollo de Aplicaciones con Inteligencia Artificial**
+**Trabajo de Fin de Máster - Máster de Desarrollo con IA**
 
 🚀 **Demo en Vivo:** [https://3d-print-tfm.vercel.app](https://3d-print-tfm.vercel.app)
 

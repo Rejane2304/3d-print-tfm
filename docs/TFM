@@ -1,0 +1,67 @@
+# MÓDULO 12: PROYECTO FINAL
+## DOCUMENTACIÓN COMPLEMENTARIA TFM
+### MÁSTER DE DESARROLLO CON IA
+
+---
+
+### Objetivo
+
+El objetivo principal del trabajo de fin de máster es elaborar una aplicación real adaptada a tu nivel de conocimientos y experiencia.
+
+Un proyecto original que ante todo demuestre tus conocimientos adquiridos a lo largo del máster, sea diferenciador y te aporte valor personal. Algo que disfrutes construyendo y te sirva para ponerte a prueba y enfrentarte a ti mismo.
+
+Sobre el tipo de software, eres libre si lo que quieres desarrollar es una web, app, utilidad, herramienta, juego o lo que se te ocurra. Todo está permitido. Simplemente piensa también en tus intereses profesionales.
+
+No existe una idea mejor que otra ya que, desde el principio, este máster ha sido agnóstico en cuanto a tecnología y tipo de software a desarrollar.
+
+---
+
+### Requisitos
+
+Deberás entregar los siguientes recursos relacionados con el proyecto a desarrollar para que el TFM sea revisado y calificado.
+
+#### 1. Documentación completa y detallada (README.md)
+* **a.** Descripción general del proyecto.
+* **b.** Stack tecnológico utilizado.
+* **c.** Información sobre su instalación y ejecución.
+* **d.** Estructura del proyecto.
+* **e.** Funcionalidades principales.
+
+#### 2. Código mediante diferentes medios
+* **a. [Opción mejor valorada]** Repositorio público en GitHub (u otra plataforma de control de versiones).
+* **b.** Repositorio privado en GitHub (deberás conceder permisos al email `mouredev@gmail.com`).
+* **c.** URL pública Google Drive (u otra plataforma de almacenamiento en la nube).
+
+*Nota: Ten en cuenta que no trabajar con un control de versiones juega en tu contra.*
+
+#### 3. Despliegue o publicación del proyecto
+* En funcionamiento para su utilización (recomendado siempre que sea posible).
+* **a.** URL o acceso al proyecto real (añádela también en la documentación).
+
+#### 4. Slides con una presentación del proyecto
+* Realizada con Google Slides, PowerPoint, Canva, o lo que tú consideres.
+* **a.** URL de acceso a la presentación o documento adjunto junto al código.
+
+**En el directorio del código también debe encontrarse:**
+* La documentación.
+* La información del despliegue (puede ser dentro de la documentación).
+* Las slides (puede ser como un enlace a la documentación o subir directamente el documento con dicha presentación).
+
+---
+
+### Entrega
+
+Para enviar el TFM, y todo el material descrito en la sección de requisitos, debes utilizar el formulario de entrega que se encuentra en la descripción de la lección correspondiente al Proyecto Final.
+
+En el formulario deberás cumplimentar:
+* Nombre completo del alumno.
+* Email utilizado en la inscripción del máster.
+* URL al código.
+* URL despliegue o publicación (si existe).
+* URL a las slides (si no existe debes subir el documento en el directorio del código).
+
+#### Plazos y corrección
+La fecha de entrega será la reflejada en el temario del máster (**23/02**), pero podrás enviar el proyecto en cualquier momento. Fuera del plazo propio de la edición, los tiempos de corrección pueden variar. Aun así, el TFM siempre será revisado y calificado.
+
+---
+**BIG school**

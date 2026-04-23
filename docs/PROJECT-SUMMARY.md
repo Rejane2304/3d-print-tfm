@@ -2,7 +2,9 @@
 
 ## 📖 Visión General
 
-**E-commerce de Impresión 3D** desarrollado como Trabajo Final de Máster (TFM) con enfoque TDD (Desarrollo Guiado por Tests).
+**E-commerce de Impresión 3D** desarrollado como Trabajo Final de Máster (TFM) del **Máster de Desarrollo con IA**.
+
+- **Enfoque**: TDD (Desarrollo Guiado por Tests)
 
 - **Stack**: Next.js 14 + Prisma + PostgreSQL
 - **Enfoque**: TDD con tests unitarios, integración y E2E
@@ -387,7 +389,7 @@ Proyecto académico - Uso educativo únicamente.
 
 **Próximos pasos**:
 
-1. [ ] Desplegar en Vercel (despliegue en producción)
+1. [x] Desplegar en Vercel (despliegue en producción) - ✅ https://3d-print-tfm.vercel.app
 2. [ ] Crear presentación del TFM
-3. [ ] Demo en vivo
+3. [x] Demo en vivo - ✅ Disponible en https://3d-print-tfm.vercel.app
 4. [ ] Entrega de documentación impresa
