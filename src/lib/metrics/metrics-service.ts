@@ -1,11 +1,12 @@
 /**
- * Servicio Centralizado de Métricas del Dashboard
+ * Servicio Centralizado de Métricas del Dashboard - Versión Robusta
  *
  * Este servicio unifica el cálculo de todas las métricas del dashboard administrativo
  * para garantizar consistencia entre diferentes endpoints y componentes.
  *
  * Características:
  * - Cálculos consistentes y documentados
+ * - Manejo de errores individual para cada métrica
  * - Cache en memoria con TTL de 60 segundos
  * - Invalidación manual mediante invalidateCache()
  * - Tipado estricto TypeScript
@@ -109,180 +110,187 @@ function setCachedMetrics(metrics: DashboardMetrics): void {
 
 /**
  * ============================================================================
- * FUNCIONES DE CÁLCULO (PRIVADAS)
+ * FUNCIONES DE CÁLCULO CON MANEJO DE ERRORES (PRIVADAS)
  * ============================================================================
  */
 
 /**
- * Calcula los ingresos brutos
- *
- * Definición: Suma de `totalAmount` de pedidos con pago COMPLETED o PAYMENT_PENDING
- * Incluye envío y descuentos aplicados
- *
- * @returns Ingresos brutos totales
+ * Calcula los ingresos brutos con manejo de errores
  */
 async function calculateGrossRevenue(): Promise<number> {
-  const result = await prisma.order.aggregate({
-    where: {
-      status: { not: OrderStatus.CANCELLED },
-      payment: {
-        status: {
-          in: [PaymentStatus.COMPLETED, PaymentStatus.PENDING],
+  try {
+    const result = await prisma.order.aggregate({
+      where: {
+        status: { not: OrderStatus.CANCELLED },
+        payment: {
+          status: {
+            in: [PaymentStatus.COMPLETED, PaymentStatus.PENDING],
+          },
         },
       },
-    },
-    _sum: { total: true },
-  });
-
-  return Number(result._sum.total || 0);
+      _sum: { total: true },
+    });
+    return Number(result._sum.total || 0);
+  } catch (error) {
+    console.error('[Metrics] Error calculating gross revenue:', error);
+    return 0;
+  }
 }
 
 /**
- * Calcula los ingresos del mes actual
- *
- * Definición: Suma de `totalAmount` de pedidos no cancelados del mes actual
- *
- * @returns Ingresos del mes actual
+ * Calcula los ingresos del mes actual con manejo de errores
  */
 async function calculateRevenueThisMonth(): Promise<number> {
-  const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  try {
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-  const result = await prisma.order.aggregate({
-    where: {
-      status: { not: OrderStatus.CANCELLED },
-      createdAt: { gte: monthStart },
-    },
-    _sum: { total: true },
-  });
+    const result = await prisma.order.aggregate({
+      where: {
+        status: { not: OrderStatus.CANCELLED },
+        createdAt: { gte: monthStart },
+      },
+      _sum: { total: true },
+    });
 
-  return Number(result._sum.total || 0);
+    return Number(result._sum.total || 0);
+  } catch (error) {
+    console.error('[Metrics] Error calculating revenue this month:', error);
+    return 0;
+  }
 }
 
 /**
- * Calcula las devoluciones aprobadas
- *
- * Definición: Suma de `totalAmount` de devoluciones con estado APPROVED o COMPLETED
- *
- * @returns Total de devoluciones aprobadas
+ * Calcula las devoluciones aprobadas con manejo de errores
  */
 async function calculateApprovedReturns(): Promise<number> {
-  const result = await prisma.return.aggregate({
-    where: {
-      status: { in: ['APPROVED', 'COMPLETED'] },
-    },
-    _sum: { totalAmount: true },
-  });
+  try {
+    const result = await prisma.return.aggregate({
+      where: {
+        status: { in: ['APPROVED', 'COMPLETED'] },
+      },
+      _sum: { totalAmount: true },
+    });
 
-  return Number(result._sum.totalAmount || 0);
+    return Number(result._sum.totalAmount || 0);
+  } catch (error) {
+    console.error('[Metrics] Error calculating approved returns:', error);
+    return 0;
+  }
 }
 
 /**
- * Calcula el total de pedidos
- *
- * Definición: Conteo de pedidos con estado diferente a CANCELLED
- *
- * @returns Total de pedidos
+ * Calcula el total de pedidos con manejo de errores
  */
 async function calculateTotalOrders(): Promise<number> {
-  return prisma.order.count({
-    where: { status: { not: OrderStatus.CANCELLED } },
-  });
+  try {
+    return prisma.order.count({
+      where: { status: { not: OrderStatus.CANCELLED } },
+    });
+  } catch (error) {
+    console.error('[Metrics] Error calculating total orders:', error);
+    return 0;
+  }
 }
 
 /**
- * Calcula los pedidos del mes actual
- *
- * Definición: Conteo de pedidos no cancelados creados este mes
- *
- * @returns Pedidos del mes actual
+ * Calcula los pedidos del mes actual con manejo de errores
  */
 async function calculateOrdersThisMonth(): Promise<number> {
-  const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  try {
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-  return prisma.order.count({
-    where: {
-      status: { not: OrderStatus.CANCELLED },
-      createdAt: { gte: monthStart },
-    },
-  });
+    return prisma.order.count({
+      where: {
+        status: { not: OrderStatus.CANCELLED },
+        createdAt: { gte: monthStart },
+      },
+    });
+  } catch (error) {
+    console.error('[Metrics] Error calculating orders this month:', error);
+    return 0;
+  }
 }
 
 /**
- * Calcula los pedidos pendientes
- *
- * Definición: Conteo de pedidos con estado PENDING
- * NOTA: No incluye PROCESSING
- *
- * @returns Pedidos pendientes
+ * Calcula los pedidos pendientes con manejo de errores
  */
 async function calculatePendingOrders(): Promise<number> {
-  return prisma.order.count({
-    where: { status: OrderStatus.PENDING },
-  });
+  try {
+    return prisma.order.count({
+      where: { status: OrderStatus.PENDING },
+    });
+  } catch (error) {
+    console.error('[Metrics] Error calculating pending orders:', error);
+    return 0;
+  }
 }
 
 /**
- * Calcula los pedidos entregados
- *
- * Definición: Conteo de pedidos con estado DELIVERED y pago COMPLETED
- *
- * @returns Pedidos entregados y pagados
+ * Calcula los pedidos entregados con manejo de errores
  */
 async function calculateDeliveredOrders(): Promise<number> {
-  return prisma.order.count({
-    where: {
-      status: OrderStatus.DELIVERED,
-      payment: {
-        status: PaymentStatus.COMPLETED,
+  try {
+    return prisma.order.count({
+      where: {
+        status: OrderStatus.DELIVERED,
+        payment: {
+          status: PaymentStatus.COMPLETED,
+        },
       },
-    },
-  });
+    });
+  } catch (error) {
+    console.error('[Metrics] Error calculating delivered orders:', error);
+    return 0;
+  }
 }
 
 /**
- * Calcula los productos con stock bajo
- *
- * Definición: Conteo de productos con stock < 5 unidades
- *
- * @returns Productos con stock bajo
+ * Calcula los productos con stock bajo con manejo de errores
  */
 async function calculateLowStockProducts(): Promise<number> {
-  return prisma.product.count({
-    where: {
-      stock: { lt: LOW_STOCK_THRESHOLD },
-      isActive: true,
-    },
-  });
+  try {
+    return prisma.product.count({
+      where: {
+        stock: { lt: LOW_STOCK_THRESHOLD },
+        isActive: true,
+      },
+    });
+  } catch (error) {
+    console.error('[Metrics] Error calculating low stock products:', error);
+    return 0;
+  }
 }
 
 /**
- * Calcula las alertas activas
- *
- * Definición: Conteo de alertas con estado PENDING o IN_PROGRESS
- *
- * @returns Alertas activas
+ * Calcula las alertas activas con manejo de errores
  */
 async function calculateActiveAlerts(): Promise<number> {
-  return prisma.alert.count({
-    where: {
-      status: { in: ['PENDING', 'IN_PROGRESS'] },
-    },
-  });
+  try {
+    return prisma.alert.count({
+      where: {
+        status: { in: ['PENDING', 'IN_PROGRESS'] },
+      },
+    });
+  } catch (error) {
+    console.error('[Metrics] Error calculating active alerts:', error);
+    return 0;
+  }
 }
 
 /**
- * Calcula el total de clientes
- *
- * Definición: Conteo de usuarios con rol CUSTOMER
- *
- * @returns Total de clientes
+ * Calcula el total de clientes con manejo de errores
  */
 async function calculateTotalCustomers(): Promise<number> {
-  return prisma.user.count({
-    where: { role: 'CUSTOMER' },
-  });
+  try {
+    return prisma.user.count({
+      where: { role: 'CUSTOMER' },
+    });
+  } catch (error) {
+    console.error('[Metrics] Error calculating total customers:', error);
+    return 0;
+  }
 }
 
 /**
@@ -292,34 +300,14 @@ async function calculateTotalCustomers(): Promise<number> {
  */
 
 /**
- * Obtiene todas las métricas del dashboard
+ * Obtiene todas las métricas del dashboard con manejo de errores robusto
  *
  * Esta función calcula todas las métricas necesarias para el dashboard
  * administrativo de forma consistente. Utiliza caché para mejorar el rendimiento.
- *
- * Métricas calculadas:
- * - grossRevenue: Ingresos brutos (pedidos pagados, incluye envío)
- * - netRevenue: Ingresos netos (grossRevenue - devoluciones)
- * - totalOrders: Total de pedidos (excluye cancelados)
- * - pendingOrders: Pedidos en estado PENDING
- * - deliveredOrders: Pedidos DELIVERED con pago COMPLETED
- * - lowStockProducts: Productos con stock < 5
- * - activeAlerts: Alertas no resueltas
- * - totalCustomers: Total de clientes
- * - ordersThisMonth: Pedidos del mes actual
- * - revenueThisMonth: Ingresos del mes actual
+ * Si alguna métrica falla, las demás continúan y se retornan valores por defecto.
  *
  * @param skipCache Si es true, ignora el caché y recalcula todas las métricas
- * @returns Objeto con todas las métricas del dashboard
- *
- * @example
- * ```typescript
- * // Obtener métricas (con caché)
- * const metrics = await getDashboardMetrics();
- *
- * // Forzar recálculo (sin caché)
- * const freshMetrics = await getDashboardMetrics(true);
- * ```
+ * @returns Objeto con todas las métricas del dashboard (con valores por defecto si fallan)
  */
 export async function getDashboardMetrics(skipCache = false): Promise<DashboardMetrics> {
   // Verificar caché primero
@@ -330,30 +318,17 @@ export async function getDashboardMetrics(skipCache = false): Promise<DashboardM
     }
   }
 
-  // Calcular todas las métricas en paralelo para mejor rendimiento
-  const [
-    grossRevenue,
-    approvedReturns,
-    totalOrders,
-    pendingOrders,
-    deliveredOrders,
-    lowStockProducts,
-    activeAlerts,
-    totalCustomers,
-    ordersThisMonth,
-    revenueThisMonth,
-  ] = await Promise.all([
-    calculateGrossRevenue(),
-    calculateApprovedReturns(),
-    calculateTotalOrders(),
-    calculatePendingOrders(),
-    calculateDeliveredOrders(),
-    calculateLowStockProducts(),
-    calculateActiveAlerts(),
-    calculateTotalCustomers(),
-    calculateOrdersThisMonth(),
-    calculateRevenueThisMonth(),
-  ]);
+  // Calcular todas las métricas individualmente con manejo de errores
+  const grossRevenue = await calculateGrossRevenue();
+  const approvedReturns = await calculateApprovedReturns();
+  const totalOrders = await calculateTotalOrders();
+  const pendingOrders = await calculatePendingOrders();
+  const deliveredOrders = await calculateDeliveredOrders();
+  const lowStockProducts = await calculateLowStockProducts();
+  const activeAlerts = await calculateActiveAlerts();
+  const totalCustomers = await calculateTotalCustomers();
+  const ordersThisMonth = await calculateOrdersThisMonth();
+  const revenueThisMonth = await calculateRevenueThisMonth();
 
   // Calcular ingresos netos
   const netRevenue = Math.max(0, grossRevenue - approvedReturns);
@@ -385,17 +360,6 @@ export async function getDashboardMetrics(skipCache = false): Promise<DashboardM
 
 /**
  * Invalida el caché de métricas
- *
- * Esta función debe llamarse cuando los datos cambian (pedidos nuevos,
- * actualizaciones de estado, devoluciones, etc.) para forzar el recálculo
- * en la próxima solicitud.
- *
- * @example
- * ```typescript
- * // Después de crear un pedido
- * await invalidateMetricsCache();
- * await emitMetricsUpdate(await getDashboardMetrics());
- * ```
  */
 export function invalidateMetricsCache(): void {
   metricsCache = null;
@@ -403,10 +367,6 @@ export function invalidateMetricsCache(): void {
 
 /**
  * Obtiene el estado actual del caché
- *
- * �til para debugging y monitoreo
- *
- * @returns Información del estado del caché
  */
 export function getCacheStatus(): {
   isCached: boolean;
@@ -426,25 +386,7 @@ export function getCacheStatus(): {
 }
 
 /**
- * ============================================================================
- * FUNCIÓN DE EMISIÓN DE EVENTOS (INTEGRACIÓN)
- * ============================================================================
- */
-
-/**
  * Obtiene métricas actualizadas e invalida el caché
- *
- * Combina la invalidación del caché con el recálculo de métricas
- * para usar cuando se emiten eventos de actualización.
- *
- * @returns Métricas recién calculadas
- *
- * @example
- * ```typescript
- * // En un webhook de Stripe después de confirmar pago
- * const metrics = await refreshAndGetMetrics();
- * await emitMetricsUpdate(metrics);
- * ```
  */
 export async function refreshAndGetMetrics(): Promise<DashboardMetrics> {
   invalidateMetricsCache();
