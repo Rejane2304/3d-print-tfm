@@ -10,6 +10,7 @@ import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { COMPANY_CONFIG, generatePDF, generatePrintableHTML } from '@/lib/invoices/pdf-generator';
+import { generatePDFServerless } from '@/lib/invoices/pdf-generator-serverless';
 
 // Type for invoice item
 interface InvoiceItem {
@@ -141,17 +142,29 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       orderNumber: factura.order?.orderNumber || undefined,
     };
 
-    // En producción, usar HTML con descarga (PDF no funciona en Vercel)
+    // En producción, generar PDF real con pdf-lib (funciona en serverless)
     if (process.env.NODE_ENV === 'production') {
-      console.log('[Invoice PDF] Generando HTML descargable en producción');
-      const htmlContent = generatePrintableHTML(invoiceData, shouldAutoPrint);
+      console.log('[Invoice PDF] Generando PDF real en producción con pdf-lib');
+      try {
+        const pdfBuffer = await generatePDFServerless(invoiceData);
 
-      return new NextResponse(htmlContent, {
-        headers: {
-          'Content-Type': 'text/html; charset=utf-8',
-          'Content-Disposition': `attachment; filename="factura-${factura.invoiceNumber}.html"`,
-        },
-      });
+        return new NextResponse(new Uint8Array(pdfBuffer), {
+          headers: {
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': `attachment; filename="factura-${factura.invoiceNumber}.pdf"`,
+          },
+        });
+      } catch (pdfError) {
+        console.error('[Invoice PDF] Error generating PDF with pdf-lib:', pdfError);
+        // Fallback to HTML if PDF generation fails
+        const htmlContent = generatePrintableHTML(invoiceData, shouldAutoPrint);
+        return new NextResponse(htmlContent, {
+          headers: {
+            'Content-Type': 'text/html; charset=utf-8',
+            'Content-Disposition': `attachment; filename="factura-${factura.invoiceNumber}.html"`,
+          },
+        });
+      }
     }
 
     // En desarrollo, intentar generar PDF
