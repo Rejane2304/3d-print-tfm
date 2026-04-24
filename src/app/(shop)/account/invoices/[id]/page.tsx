@@ -98,16 +98,9 @@ export default function UserInvoiceDetailPage() {
 
   const printInvoice = () => {
     if (invoice && params.id) {
-      // Abrir el HTML de la factura en una ventana nueva
-      const printWindow = window.open(`/api/account/invoices/${params.id}/pdf`, '_blank');
-      // Esperar a que cargue y luego imprimir
-      if (printWindow) {
-        printWindow.addEventListener('load', () => {
-          setTimeout(() => {
-            printWindow.print();
-          }, 500); // Dar tiempo a que cargue el CSS
-        });
-      }
+      // Simplemente abrir el HTML limpio de la factura en nueva pestaña
+      // El HTML ya tiene botón de imprimir y estilos @media print
+      window.open(`/api/account/invoices/${params.id}/pdf`, '_blank');
     }
   };
 

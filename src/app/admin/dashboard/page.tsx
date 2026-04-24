@@ -33,8 +33,17 @@ import { Toaster } from '@/components/ui/Toaster';
 const RealTimeManager = dynamic(() => import('@/components/admin/RealTimeManager'), { ssr: false });
 
 interface AnalyticsData {
-  salesSummary: {
-    // Nuevas métricas de gestoría
+  // Nueva estructura de la API /api/admin/analytics
+  summary?: {
+    totalOrders: number;
+    totalRevenue: number;
+    activeOrders: number;
+    pendingOrders: number;
+    averageOrderValue: number;
+    totalCustomers?: number;
+  };
+  // Estructura legacy (para compatibilidad)
+  salesSummary?: {
     gross: {
       today: number;
       thisWeek: number;
@@ -63,46 +72,58 @@ interface AnalyticsData {
       lastMonth: number;
       total: number;
     };
-    // Legacy
     today: number;
     thisWeek: number;
     thisMonth: number;
     lastMonth: number;
     total: number;
   };
-  orderStats: {
+  orderStats?: {
     total: number;
     today: number;
     thisWeek: number;
     thisMonth: number;
     byStatus: Record<string, number>;
   };
-  customerStats: {
+  customerStats?: {
     total: number;
     newThisMonth: number;
     active: number;
   };
-  topProducts: Array<{
-    id: string;
-    nombre: string;
-    vendido: number;
-    ingresos: number;
-    stock: number;
+  statusCounts?: Record<string, number>;
+  topProducts?: Array<{
+    id?: string;
+    nombre?: string;
+    name?: string;
+    vendido?: number;
+    quantity?: number;
+    ingresos?: number;
+    revenue?: number;
+    stock?: number;
   }>;
-  topCustomers: Array<{
+  topCustomers?: Array<{
     id: string;
     nombre: string;
     pedidos: number;
     gastado: number;
   }>;
-  recentOrders: Array<{
+  recentOrders?: Array<{
     id: string;
-    numeroPedido: string;
-    clienteNombre: string;
+    numeroPedido?: string;
+    orderNumber?: string;
+    estado?: string;
+    status?: string;
     total: number;
-    estado: string;
-    creadoEn: string;
+    fecha?: string;
+    createdAt?: string | Date;
+    cliente?: string;
+    user?: {
+      name: string | null;
+      email: string;
+    };
   }>;
+  period?: string;
+  generatedAt?: string;
 }
 
 type DateRange = 'today' | 'week' | 'month' | 'lastMonth' | 'year';
@@ -180,7 +201,10 @@ export default function AdminPanelPage() {
     return `${Number(amount).toFixed(2)} €`;
   };
 
-  const formatDate = (date: string) => {
+  const formatDate = (date: string | Date) => {
+    if (date instanceof Date) {
+      return date.toLocaleDateString('es-ES');
+    }
     return new Date(date).toLocaleDateString('es-ES');
   };
 
@@ -260,44 +284,13 @@ export default function AdminPanelPage() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 overflow-hidden">
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
-                <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">Ingresos Netos</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">Ingresos</p>
                 <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 break-all">
-                  {formatCurrency(analytics.salesSummary.net.thisMonth)}
+                  {formatCurrency(analytics.summary?.totalRevenue || analytics.salesSummary?.net?.thisMonth || 0)}
                 </p>
-                {/* Desglose de ingresos - Collapsible on mobile */}
-                <div className="mt-2 space-y-1 text-xs overflow-x-auto">
-                  <div className="flex justify-between text-gray-500 min-w-[140px]">
-                    <span className="truncate mr-2">Bruto:</span>
-                    <span className="whitespace-nowrap">{formatCurrency(analytics.salesSummary.gross.thisMonth)}</span>
-                  </div>
-                  <div className="flex justify-between text-red-500 min-w-[140px]">
-                    <span className="truncate mr-2">Cancelaciones:</span>
-                    <span className="whitespace-nowrap">
-                      -{formatCurrency(analytics.salesSummary.cancelled.thisMonth)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-green-600 font-medium border-t border-gray-200 pt-1 min-w-[140px]">
-                    <span className="truncate mr-2">Neto:</span>
-                    <span className="whitespace-nowrap">{formatCurrency(analytics.salesSummary.net.thisMonth)}</span>
-                  </div>
-                  <div className="flex justify-between text-blue-600 min-w-[140px]">
-                    <span className="truncate mr-2">Entregado:</span>
-                    <span className="whitespace-nowrap">
-                      {formatCurrency(analytics.salesSummary.delivered.thisMonth)}
-                    </span>
-                  </div>
-                </div>
-                {dateRange === 'month' && analytics.salesSummary.net.lastMonth > 0 && (
-                  <p
-                    className={`text-xs sm:text-sm mt-2 truncate ${
-                      analytics.salesSummary.net.thisMonth >= analytics.salesSummary.net.lastMonth
-                        ? 'text-green-600'
-                        : 'text-red-600'
-                    }`}
-                  >
-                    vs {formatCurrency(analytics.salesSummary.net.lastMonth)} mes ant.
-                  </p>
-                )}
+                <p className="text-xs text-gray-500 mt-1">
+                  {analytics.summary?.totalOrders || analytics.orderStats?.thisMonth || 0} pedidos
+                </p>
               </div>
               <div className="p-2 sm:p-3 bg-green-100 rounded-lg flex-shrink-0">
                 <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
@@ -310,8 +303,10 @@ export default function AdminPanelPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Pedidos</p>
-                <p className="text-2xl font-bold text-gray-900">{analytics.orderStats.thisMonth}</p>
-                <p className="text-sm text-gray-500 mt-1">{analytics.orderStats.today} hoy</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {analytics.summary?.totalOrders || analytics.orderStats?.thisMonth || 0}
+                </p>
+                <p className="text-sm text-gray-500 mt-1">{analytics.summary?.pendingOrders || 0} pendientes</p>
               </div>
               <div className="p-3 bg-blue-100 rounded-lg">
                 <ShoppingBag className="h-6 w-6 text-blue-600" />
@@ -324,8 +319,10 @@ export default function AdminPanelPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Clientes</p>
-                <p className="text-2xl font-bold text-gray-900">{analytics.customerStats.total}</p>
-                <p className="text-sm text-green-600 mt-1">+{analytics.customerStats.newThisMonth} nuevos</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {analytics.customerStats?.total || analytics.summary?.totalCustomers || 0}
+                </p>
+                <p className="text-sm text-green-600 mt-1">Activos</p>
               </div>
               <div className="p-3 bg-purple-100 rounded-lg">
                 <Users className="h-6 w-6 text-purple-600" />
@@ -333,30 +330,15 @@ export default function AdminPanelPage() {
             </div>
           </div>
 
-          {/* Average Order Card - Basado en ingresos netos */}
+          {/* Average Order Card */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Ticket Medio Neto</p>
+                <p className="text-sm font-medium text-gray-600">Ticket Medio</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {formatCurrency(
-                    analytics.orderStats.thisMonth > 0
-                      ? analytics.salesSummary.net.thisMonth / analytics.orderStats.thisMonth
-                      : 0,
-                  )}
+                  {formatCurrency(analytics.summary?.averageOrderValue || 0)}
                 </p>
-                <div className="mt-2 space-y-1 text-xs text-gray-500">
-                  <div className="flex justify-between">
-                    <span>Ticket Bruto:</span>
-                    <span>
-                      {formatCurrency(
-                        analytics.orderStats.thisMonth > 0
-                          ? analytics.salesSummary.gross.thisMonth / analytics.orderStats.thisMonth
-                          : 0,
-                      )}
-                    </span>
-                  </div>
-                </div>
+                <p className="text-xs text-gray-500 mt-1">Por pedido</p>
               </div>
               <div className="p-3 bg-yellow-100 rounded-lg">
                 <TrendingUp className="h-6 w-6 text-yellow-600" />
@@ -376,23 +358,22 @@ export default function AdminPanelPage() {
               </h3>
             </div>
             <div className="p-6">
-              {analytics.topProducts.length === 0 ? (
+              {(analytics.topProducts?.length || 0) === 0 ? (
                 <p className="text-gray-500 text-center py-4">No hay datos de ventas</p>
               ) : (
                 <div className="space-y-4">
-                  {analytics.topProducts.map((product, index) => (
-                    <div key={product.id} className="flex items-center">
-                      <div
-                        className="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-100 flex items-center \
-                        justify-center text-sm font-bold text-indigo-600"
-                      >
+                  {analytics.topProducts?.map((product, index) => (
+                    <div key={product.id || index} className="flex items-center">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-sm font-bold text-indigo-600">
                         {index + 1}
                       </div>
                       <div className="ml-4 flex-1">
-                        <p className="text-sm font-medium text-gray-900">{product.nombre}</p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {product.nombre || product.name || 'Producto'}
+                        </p>
                         <div className="flex items-center text-xs text-gray-500 mt-1">
-                          <span className="mr-3">{product.vendido} vendidos</span>
-                          <span>{formatCurrency(product.ingresos)}</span>
+                          <span className="mr-3">{product.vendido || product.quantity || 0} vendidos</span>
+                          <span>{formatCurrency(product.ingresos || product.revenue || 0)}</span>
                         </div>
                       </div>
                       <div className="text-right">
@@ -404,17 +385,18 @@ export default function AdminPanelPage() {
                             'text-xs',
                             'rounded-full',
                             (() => {
-                              if (product.stock > 5) {
+                              const stock = product.stock ?? 0;
+                              if (stock > 5) {
                                 return 'bg-green-100 text-green-800';
                               }
-                              if (product.stock > 0) {
+                              if (stock > 0) {
                                 return 'bg-yellow-100 text-yellow-800';
                               }
                               return 'bg-red-100 text-red-800';
                             })(),
                           ].join(' ')}
                         >
-                          {product.stock} en stock
+                          {product.stock ?? 0} en stock
                         </span>
                       </div>
                     </div>
@@ -433,26 +415,30 @@ export default function AdminPanelPage() {
               </h3>
             </div>
             <div className="divide-y divide-gray-200">
-              {analytics.recentOrders.length === 0 ? (
+              {(analytics.recentOrders?.length || 0) === 0 ? (
                 <p className="text-gray-500 text-center py-8">No hay pedidos recientes</p>
               ) : (
-                analytics.recentOrders.map(order => (
+                analytics.recentOrders?.map(order => (
                   <div key={order.id} className="px-6 py-4 hover:bg-gray-50">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-900">#{order.numeroPedido}</p>
-                        <p className="text-xs text-gray-500">{order.clienteNombre}</p>
+                        <p className="text-sm font-medium text-gray-900">
+                          #{order.orderNumber || order.numeroPedido || order.id}
+                        </p>
+                        <p className="text-xs text-gray-500">{order.user?.name || order.cliente || 'Cliente'}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-medium text-gray-900">{formatCurrency(order.total)}</p>
+                        <p className="text-sm font-medium text-gray-900">{formatCurrency(order.total || 0)}</p>
                         <span
-                          className={`inline-flex px-2 py-0.5 text-xs rounded-full ${getStatusBadge(order.estado)}`}
+                          className={`inline-flex px-2 py-0.5 text-xs rounded-full ${getStatusBadge(order.status || order.estado || 'PENDING')}`}
                         >
-                          {order.estado}
+                          {order.status || order.estado || 'PENDING'}
                         </span>
                       </div>
                     </div>
-                    <p className="text-xs text-gray-400 mt-1">{formatDate(order.creadoEn)}</p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      {formatDate(order.createdAt || order.fecha || new Date().toISOString())}
+                    </p>
                   </div>
                 ))
               )}
