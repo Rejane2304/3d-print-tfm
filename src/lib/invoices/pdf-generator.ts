@@ -135,20 +135,11 @@ export function generatePrintableHTML(
     .join('');
 
   // Construir contacto del cliente
-  let clientContact = '';
-  if (invoiceData.clientEmail || invoiceData.clientPhone) {
-    if (invoiceData.clientEmail) clientContact += `✉ ${invoiceData.clientEmail}`;
-    if (invoiceData.clientEmail && invoiceData.clientPhone) clientContact += ' · ';
-    if (invoiceData.clientPhone) clientContact += `📞 ${invoiceData.clientPhone}`;
-    clientContact = `
-      <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b;">
-        ${clientContact}
-      </div>
-    `;
-  }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _clientContact = '';
 
   const cancelledBadge = invoiceData.isCancelled
-    ? '<div style="display: inline-block; background: #ef4444; color: white; padding: 6px 12px; border-radius: 20px; font-size: 10px; font-weight: 600; text-transform: uppercase; margin-top: 12px;">Factura Anulada</div>'
+    ? '<div style="display: inline-block; background: #ef4444; color: white; padding: 8px 16px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-top: 12px; border: 2px solid #ef4444;">FACTURA ANULADA</div>'
     : '';
 
   return `
@@ -161,264 +152,169 @@ export function generatePrintableHTML(
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { 
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      color: #1a202c;
-      line-height: 1.6;
+      font-family: Helvetica, Arial, sans-serif;
+      color: #1e293b;
+      line-height: 1.5;
       background: #f8fafc;
-      padding: 40px 20px;
+      padding: 40px;
     }
     .invoice-container {
       max-width: 210mm;
       margin: 0 auto;
       background: white;
-      border-radius: 16px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
+      border: 1px solid #e2e8f0;
     }
     .invoice-header {
-      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      background: #4f46e5;
       color: white;
-      padding: 32px 40px;
-      position: relative;
-    }
-    .header-content {
+      padding: 30px 40px;
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
     }
     .company-section { flex: 1; }
-    .logo-container {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-    .logo-icon {
-      width: 48px;
-      height: 48px;
-      background: white;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      font-weight: 800;
-      color: #4f46e5;
-    }
     .company-name {
-      font-size: 24px;
+      font-size: 26px;
       font-weight: 700;
-      letter-spacing: -0.5px;
+      margin-bottom: 8px;
     }
     .company-details {
-      font-size: 13px;
+      font-size: 10px;
       opacity: 0.9;
-      line-height: 1.7;
+      line-height: 1.6;
     }
     .invoice-meta {
       text-align: right;
       background: rgba(255,255,255,0.1);
-      padding: 20px 28px;
-      border-radius: 12px;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.2);
     }
     .invoice-label {
-      font-size: 11px;
-      font-weight: 600;
+      font-size: 10px;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 2px;
+      letter-spacing: 1px;
       opacity: 0.8;
       margin-bottom: 4px;
     }
     .invoice-number {
-      font-size: 28px;
+      font-size: 22px;
       font-weight: 700;
-      letter-spacing: -1px;
+      letter-spacing: -0.5px;
     }
     .invoice-date {
-      font-size: 13px;
+      font-size: 11px;
       opacity: 0.9;
       margin-top: 4px;
     }
     .invoice-body {
-      padding: 32px 40px;
+      padding: 30px 40px;
     }
     .client-section {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      margin-bottom: 28px;
-    }
-    .client-card {
-      background: #f8fafc;
-      border-radius: 12px;
-      padding: 20px;
-      border: 1px solid #e2e8f0;
+      margin-bottom: 30px;
     }
     .section-label {
       font-size: 10px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 1px;
-      color: #64748b;
-      margin-bottom: 8px;
+      color: #4f46e5;
+      margin-bottom: 12px;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
     }
     .section-label::before {
       content: '';
-      width: 3px;
-      height: 12px;
+      width: 4px;
+      height: 16px;
       background: #4f46e5;
       border-radius: 2px;
     }
     .client-name {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 700;
       color: #1e293b;
       margin-bottom: 8px;
     }
     .client-details {
-      font-size: 13px;
-      color: #475569;
+      font-size: 11px;
+      color: #64748b;
       line-height: 1.6;
     }
-    .client-details strong {
-      color: #1e293b;
-      font-weight: 600;
-    }
     .items-section {
-      margin-bottom: 24px;
-    }
-    .section-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 12px;
-      padding-bottom: 12px;
-      border-bottom: 2px solid #e2e8f0;
+      margin-bottom: 30px;
     }
     .section-title {
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 700;
       color: #1e293b;
-    }
-    .items-count {
-      font-size: 12px;
-      color: #64748b;
+      margin-bottom: 12px;
+      text-transform: uppercase;
     }
     .items-table {
       width: 100%;
       border-collapse: collapse;
     }
     .items-table thead th {
-      background: #f1f5f9;
+      background: #4f46e5;
       padding: 12px;
       text-align: left;
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: #64748b;
-      border-bottom: 2px solid #e2e8f0;
-    }
-    .items-table thead th:first-child {
-      border-top-left-radius: 8px;
+      color: white;
+      border: none;
     }
     .items-table thead th:last-child {
-      border-top-right-radius: 8px;
       text-align: right;
     }
-    .totals-wrapper {
-      display: flex;
-      justify-content: flex-end;
+    .items-table tbody td {
+      padding: 12px;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 11px;
+    }
+    .items-table tbody tr:nth-child(even) {
+      background: #f8fafc;
     }
     .totals-section {
-      background: #1e293b;
-      border-radius: 12px;
-      padding: 24px;
-      color: white;
-      min-width: 280px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 20px;
+      width: 50%;
+      margin-left: auto;
     }
     .totals-row {
       display: flex;
       justify-content: space-between;
-      align-items: center;
       margin-bottom: 8px;
-      font-size: 13px;
-      color: #94a3b8;
+      font-size: 11px;
+      color: #64748b;
     }
     .totals-row.total-row {
       margin-top: 12px;
       padding-top: 12px;
-      border-top: 2px solid rgba(255,255,255,0.1);
-      font-size: 20px;
+      border-top: 2px solid #4f46e5;
+      font-size: 16px;
       font-weight: 700;
-      color: white;
+      color: #1e293b;
     }
     .invoice-footer {
       background: #f8fafc;
-      padding: 24px 40px;
+      padding: 20px 40px;
       border-top: 1px solid #e2e8f0;
       text-align: center;
     }
-    .footer-grid {
-      display: flex;
-      justify-content: center;
-      gap: 16px;
-      margin-bottom: 16px;
-    }
-    .footer-block {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 16px;
-      background: white;
-      border-radius: 8px;
-      border: 1px solid #e2e8f0;
-    }
-    .footer-icon {
-      width: 32px;
-      height: 32px;
-      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .footer-content {
-      text-align: left;
-    }
-    .footer-content h4 {
-      font-size: 10px;
-      font-weight: 600;
-      color: #64748b;
-      text-transform: uppercase;
-      margin-bottom: 2px;
-    }
-    .footer-content p {
-      font-size: 13px;
-      color: #1e293b;
-      font-weight: 600;
-    }
     .footer-note {
-      font-size: 12px;
+      font-size: 10px;
       color: #94a3b8;
       line-height: 1.6;
     }
-    .footer-note strong {
-      color: #64748b;
-    }
-    @media (max-width: 768px) {
-      .client-section { grid-template-columns: 1fr; }
-      .header-content { flex-direction: column; gap: 24px; }
-      .invoice-meta { text-align: left; width: 100%; }
-      .footer-grid { flex-direction: column; }
-      .totals-section { min-width: 100%; }
-    }
     @media print {
       body { background: white; padding: 0; }
-      .invoice-container { box-shadow: none; border-radius: 0; }
+      .invoice-container { box-shadow: none; border: none; }
       .no-print { display: none; }
     }
   </style>
@@ -427,26 +323,19 @@ export function generatePrintableHTML(
   <div class="invoice-container">
     <!-- Header -->
     <div class="invoice-header">
-      <div class="header-content">
-        <div class="company-section">
-          <div class="logo-container">
-            <div class="logo-icon">3D</div>
-            <div class="company-name">${invoiceData.companyName}</div>
-          </div>
-          <div class="company-details">
-            <strong>NIF:</strong> ${invoiceData.companyTaxId}<br>
-            ${invoiceData.companyAddress}<br>
-            ${invoiceData.companyPostalCode} ${invoiceData.companyCity}, ${invoiceData.companyProvince}
-            ${invoiceData.companyPhone ? `<br>📞 ${invoiceData.companyPhone}` : ''}
-            ${invoiceData.companyEmail ? `<br>✉ ${invoiceData.companyEmail}` : ''}
-          </div>
+      <div class="company-section">
+        <div class="company-name">${invoiceData.companyName}</div>
+        <div class="company-details">
+          NIF: ${invoiceData.companyTaxId}<br>
+          ${invoiceData.companyAddress}<br>
+          ${invoiceData.companyPostalCode} ${invoiceData.companyCity}, ${invoiceData.companyProvince}
         </div>
-        <div class="invoice-meta">
-          <div class="invoice-label">Factura</div>
-          <div class="invoice-number">${invoiceData.invoiceNumber}</div>
-          <div class="invoice-date">${formatDate(invoiceData.issuedAt)}</div>
-          ${cancelledBadge}
-        </div>
+      </div>
+      <div class="invoice-meta">
+        <div class="invoice-label">Factura</div>
+        <div class="invoice-number">${invoiceData.invoiceNumber}</div>
+        <div class="invoice-date">${formatDate(invoiceData.issuedAt)}</div>
+        ${cancelledBadge}
       </div>
     </div>
 
@@ -454,41 +343,28 @@ export function generatePrintableHTML(
     <div class="invoice-body">
       <!-- Client Info -->
       <div class="client-section">
-        <div class="client-card">
-          <div class="section-label">Facturar a</div>
-          <div class="client-name">${invoiceData.clientName}</div>
-          <div class="client-details">
-            <strong>NIF:</strong> ${invoiceData.clientTaxId || 'N/A'}<br>
-            ${invoiceData.clientAddress || ''}<br>
-            ${invoiceData.clientPostalCode || ''} ${invoiceData.clientCity || ''}, ${invoiceData.clientProvince || ''}<br>
-            ${invoiceData.clientCountry || 'España'}
-          </div>
-          ${clientContact}
-        </div>
-
-        <div class="client-card">
-          <div class="section-label">Información del pedido</div>
-          <div class="client-details">
-            <strong>Pedido:</strong> ${invoiceData.orderNumber && invoiceData.orderNumber.trim() !== '' ? invoiceData.orderNumber : 'N/A'}<br>
-            <strong>Método de pago:</strong> ${getPaymentMethodName(invoiceData.paymentMethod)}<br>
-            <strong>Fecha de emisión:</strong> ${formatDate(invoiceData.issuedAt)}
-          </div>
+        <div class="section-label">Datos del Cliente</div>
+        <div class="client-name">${invoiceData.clientName}</div>
+        <div class="client-details">
+          ${invoiceData.clientTaxId ? `NIF: ${invoiceData.clientTaxId}<br>` : ''}
+          ${invoiceData.clientAddress ? `${invoiceData.clientAddress}<br>` : ''}
+          ${invoiceData.clientPostalCode || ''} ${invoiceData.clientCity || ''}, ${invoiceData.clientProvince || ''}
+          ${invoiceData.clientCountry ? `<br>${invoiceData.clientCountry}` : ''}
+          ${invoiceData.clientEmail ? `<br>${invoiceData.clientEmail}` : ''}
+          ${invoiceData.clientPhone ? `<br>${invoiceData.clientPhone}` : ''}
         </div>
       </div>
 
       <!-- Items -->
       <div class="items-section">
-        <div class="section-header">
-          <h3 class="section-title">Conceptos</h3>
-          <span class="items-count">${invoiceData.items.length} producto${invoiceData.items.length === 1 ? '' : 's'}</span>
-        </div>
+        <div class="section-title">Conceptos</div>
         <table class="items-table">
           <thead>
             <tr>
-              <th style="width: 50%">Producto</th>
-              <th style="width: 15%; text-align: center;">Cant.</th>
-              <th style="width: 20%; text-align: right;">Precio</th>
-              <th style="width: 15%; text-align: right;">Importe</th>
+              <th>Producto</th>
+              <th style="text-align: center;">Cant.</th>
+              <th style="text-align: right;">Precio</th>
+              <th style="text-align: right;">Total</th>
             </tr>
           </thead>
           <tbody>
@@ -498,94 +374,59 @@ export function generatePrintableHTML(
       </div>
 
       <!-- Totals -->
-      <div class="totals-wrapper">
-        <div class="totals-section">
-          <div class="totals-row">
-            <span>Subtotal productos</span>
-            <span>${formatCurrency(invoiceData.subtotal)}</span>
-          </div>
-          <div class="totals-row">
-            <span>Envío</span>
-            <span>${formatCurrency(invoiceData.shipping)}</span>
-          </div>
-          <div class="totals-row">
-            <span>IVA (${invoiceData.vatRate}%)</span>
-            <span>${formatCurrency(invoiceData.vatAmount)}</span>
-          </div>
-          <div class="totals-row total-row">
-            <span>TOTAL</span>
-            <span>${formatCurrency(invoiceData.total)}</span>
-          </div>
+      <div class="totals-section">
+        <div class="totals-row">
+          <span>Subtotal</span>
+          <span>${formatCurrency(invoiceData.subtotal)}</span>
+        </div>
+        <div class="totals-row">
+          <span>Envío</span>
+          <span>${formatCurrency(invoiceData.shipping)}</span>
+        </div>
+        <div class="totals-row">
+          <span>IVA (${invoiceData.vatRate}%)</span>
+          <span>${formatCurrency(invoiceData.vatAmount)}</span>
+        </div>
+        <div class="totals-row total-row">
+          <span>TOTAL</span>
+          <span>${formatCurrency(invoiceData.total)}</span>
         </div>
       </div>
-    </div>
 
-    <!-- Footer -->
-    <div class="invoice-footer">
-      <div class="footer-grid">
-        <div class="footer-block">
-          <div class="footer-icon">
-            <svg width="16" height="16" fill="none" stroke="white" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
-            </svg>
-          </div>
-          <div class="footer-content">
-            <h4>Método de pago</h4>
-            <p>${getPaymentMethodName(invoiceData.paymentMethod)}</p>
-          </div>
-        </div>
+      <!-- Payment Info -->
+      <div style="margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 4px;">
+        <div style="font-size: 9px; color: #64748b; font-weight: 700; text-transform: uppercase; margin-bottom: 5px;">Método de Pago</div>
+        <div style="font-size: 11px; color: #1e293b; font-weight: 600;">${getPaymentMethodName(invoiceData.paymentMethod)}</div>
         ${
           invoiceData.orderNumber
             ? `
-        <div class="footer-block">
-          <div class="footer-icon">
-            <svg width="16" height="16" fill="none" stroke="white" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-            </svg>
-          </div>
-          <div class="footer-content">
-            <h4>Pedido</h4>
-            <p>${invoiceData.orderNumber}</p>
-          </div>
+        <div style="margin-top: 10px;">
+          <div style="font-size: 9px; color: #64748b; font-weight: 700; text-transform: uppercase; margin-bottom: 5px;">Pedido</div>
+          <div style="font-size: 11px; color: #1e293b; font-weight: 600;">${invoiceData.orderNumber}</div>
         </div>
         `
             : ''
         }
       </div>
+    </div>
 
+    <!-- Footer -->
+    <div class="invoice-footer">
       <div class="footer-note">
         <strong>${invoiceData.companyName}</strong> · ${invoiceData.companyCity}, ${invoiceData.companyProvince}<br>
-        Factura generada electrónicamente · Este documento es válido sin firma según la normativa vigente<br>
-        ${invoiceData.companyEmail ? `Contacto: ${invoiceData.companyEmail}` : ''}
+        Factura generada electrónicamente · Este documento es válido sin firma según la normativa vigente
       </div>
     </div>
   </div>
 
-  <button class="no-print" id="printBtn" onclick="window.print(); this.disabled=true; this.style.opacity='0.5'; this.textContent='🖨️ Imprimiendo...';" style="position: fixed; bottom: 20px; right: 20px; padding: 12px 24px; background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-    🖨️ Imprimir Factura
+  <button class="no-print" onclick="window.print()" style="position: fixed; bottom: 20px; right: 20px; padding: 12px 24px; background: #4f46e5; color: white; border: none; border-radius: 4px; font-size: 14px; cursor: pointer;">
+    🖨️ Imprimir
   </button>
   ${
     shouldAutoPrint
       ? `
   <script>
-    // Auto-print when page loads - SOLO UNA VEZ
-    (function() {
-      let printed = false;
-      window.addEventListener('load', function() {
-        if (printed) return;
-        printed = true;
-        setTimeout(function() {
-          window.print();
-          // Deshabilitar botón después de auto-print
-          var btn = document.getElementById('printBtn');
-          if (btn) {
-            btn.disabled = true;
-            btn.style.opacity = '0.5';
-            btn.textContent = '🖨️ Imprimiendo...';
-          }
-        }, 800);
-      });
-    })();
+    window.onload = function() { setTimeout(function() { window.print(); }, 500); };
   </script>
   `
       : ''

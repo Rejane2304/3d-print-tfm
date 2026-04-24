@@ -1,6 +1,7 @@
 /**
  * Serverless PDF Generator using pdf-lib
  * Works in production (Vercel) without Puppeteer
+ * Enhanced design to match development HTML layout
  */
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 
@@ -43,6 +44,21 @@ interface InvoiceData {
   orderNumber?: string;
 }
 
+// Color palette matching the HTML design
+const colors = {
+  primary: { r: 0.31, g: 0.27, b: 0.9 }, // #4f46e5
+  primaryDark: { r: 0.49, g: 0.23, b: 0.93 }, // #7c3aed
+  secondary: { r: 0.12, g: 0.16, b: 0.22 }, // #1e293b
+  text: { r: 0.13, g: 0.16, b: 0.22 }, // #1e293b
+  textLight: { r: 0.37, g: 0.41, b: 0.51 }, // #64748b
+  textMuted: { r: 0.42, g: 0.45, b: 0.51 }, // #64748b
+  border: { r: 0.89, g: 0.91, b: 0.94 }, // #e2e8f0
+  background: { r: 0.97, g: 0.98, b: 0.99 }, // #f8fafc
+  white: { r: 1, g: 1, b: 1 },
+  danger: { r: 0.93, g: 0.26, b: 0.27 }, // #ef4444
+  dangerBg: { r: 0.99, g: 0.89, b: 0.89 }, // #fee2e2
+};
+
 export async function generatePDFServerless(data: InvoiceData): Promise<Buffer> {
   const pdfDoc = await PDFDocument.create();
   const page = pdfDoc.addPage([595.276, 841.89]); // A4 size
@@ -76,153 +92,176 @@ export async function generatePDFServerless(data: InvoiceData): Promise<Buffer> 
     return methods[method || ''] || method || 'No especificado';
   };
 
-  let y = height - 50;
   const margin = 50;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _lineHeight = 14;
+  let y = height - 60;
 
-  // Header - Company Info
+  // ========== HEADER WITH GRADIENT BACKGROUND ==========
+  // Draw gradient header background (simulated with rectangles)
+  const headerHeight = 140;
+
+  // Main header background
+  page.drawRectangle({
+    x: 0,
+    y: height - headerHeight,
+    width: width,
+    height: headerHeight,
+    color: rgb(colors.primary.r, colors.primary.g, colors.primary.b),
+  });
+
+  // Secondary accent (top-right corner effect)
+  page.drawRectangle({
+    x: width * 0.6,
+    y: height - headerHeight,
+    width: width * 0.4,
+    height: headerHeight,
+    color: rgb(colors.primaryDark.r, colors.primaryDark.g, colors.primaryDark.b),
+    opacity: 0.3,
+  });
+
+  // Decorative circle in header
+  page.drawCircle({
+    x: width - 80,
+    y: height - 50,
+    size: 40,
+    color: rgb(1, 1, 1),
+    opacity: 0.1,
+  });
+
+  // Company name in header (white text on colored background)
   page.drawText(data.companyName, {
     x: margin,
-    y,
-    size: 20,
+    y: height - 55,
+    size: 26,
     font: helveticaBold,
-    color: rgb(0.31, 0.27, 0.9),
+    color: rgb(1, 1, 1),
   });
-  y -= 25;
 
-  page.drawText(`NIF: ${data.companyTaxId}`, {
+  // Company info in header (lighter text)
+  y = height - 85;
+  page.drawText(`${data.companyAddress}, ${data.companyPostalCode} ${data.companyCity}`, {
     x: margin,
     y,
     size: 9,
     font: helvetica,
-    color: rgb(0.4, 0.4, 0.4),
+    color: rgb(0.9, 0.9, 1),
   });
-  y -= 12;
-
-  page.drawText(data.companyAddress, {
+  y -= 14;
+  page.drawText(`NIF: ${data.companyTaxId} | ${data.companyEmail} | ${data.companyPhone}`, {
     x: margin,
     y,
-    size: 9,
+    size: 8,
     font: helvetica,
-    color: rgb(0.4, 0.4, 0.4),
-  });
-  y -= 12;
-
-  page.drawText(`${data.companyPostalCode} ${data.companyCity}, ${data.companyProvince}`, {
-    x: margin,
-    y,
-    size: 9,
-    font: helvetica,
-    color: rgb(0.4, 0.4, 0.4),
-  });
-  y -= 12;
-
-  page.drawText(data.companyEmail, {
-    x: margin,
-    y,
-    size: 9,
-    font: helvetica,
-    color: rgb(0.4, 0.4, 0.4),
-  });
-  y -= 12;
-
-  page.drawText(data.companyPhone, {
-    x: margin,
-    y,
-    size: 9,
-    font: helvetica,
-    color: rgb(0.4, 0.4, 0.4),
+    color: rgb(0.8, 0.8, 1),
   });
 
-  // Invoice Title (Right side)
-  y = height - 50;
-  const titleX = width - margin - 150;
+  // Invoice info box (white card on right side)
+  const infoBoxX = width - margin - 180;
+  const infoBoxY = height - 120;
+  page.drawRectangle({
+    x: infoBoxX,
+    y: infoBoxY,
+    width: 180,
+    height: 100,
+    color: rgb(1, 1, 1),
+    borderColor: rgb(colors.border.r, colors.border.g, colors.border.b),
+    borderWidth: 1,
+  });
 
+  // Invoice title and number in box
   page.drawText('FACTURA', {
-    x: titleX,
-    y,
-    size: 18,
-    font: helveticaBold,
-    color: rgb(0.12, 0.16, 0.22),
-  });
-  y -= 22;
-
-  page.drawText(data.invoiceNumber, {
-    x: titleX,
-    y,
-    size: 12,
-    font: helveticaBold,
-    color: rgb(0.31, 0.27, 0.9),
-  });
-  y -= 18;
-
-  page.drawText(`Fecha: ${formatDate(data.issuedAt)}`, {
-    x: titleX,
-    y,
-    size: 10,
-    font: helvetica,
-    color: rgb(0.4, 0.4, 0.4),
-  });
-
-  // Separator line
-  y = height - 160;
-  page.drawLine({
-    start: { x: margin, y },
-    end: { x: width - margin, y },
-    thickness: 2,
-    color: rgb(0.31, 0.27, 0.9),
-  });
-
-  // Client Info
-  y -= 25;
-  page.drawText('DATOS DEL CLIENTE', {
-    x: margin,
-    y,
+    x: infoBoxX + 10,
+    y: infoBoxY + 75,
     size: 11,
     font: helveticaBold,
-    color: rgb(0.31, 0.27, 0.9),
+    color: rgb(colors.textLight.r, colors.textLight.g, colors.textLight.b),
   });
-  y -= 20;
 
+  page.drawText(data.invoiceNumber, {
+    x: infoBoxX + 10,
+    y: infoBoxY + 55,
+    size: 16,
+    font: helveticaBold,
+    color: rgb(colors.primary.r, colors.primary.g, colors.primary.b),
+  });
+
+  page.drawText(`Fecha de emisión:`, {
+    x: infoBoxX + 10,
+    y: infoBoxY + 35,
+    size: 8,
+    font: helvetica,
+    color: rgb(colors.textMuted.r, colors.textMuted.g, colors.textMuted.b),
+  });
+
+  page.drawText(formatDate(data.issuedAt), {
+    x: infoBoxX + 10,
+    y: infoBoxY + 20,
+    size: 10,
+    font: helveticaBold,
+    color: rgb(colors.secondary.r, colors.secondary.g, colors.secondary.b),
+  });
+
+  // ========== CLIENT SECTION ==========
+  y = height - headerHeight - 30;
+
+  // Section title with accent line
+  page.drawRectangle({
+    x: margin,
+    y: y,
+    width: 4,
+    height: 20,
+    color: rgb(colors.primary.r, colors.primary.g, colors.primary.b),
+  });
+
+  page.drawText('DATOS DEL CLIENTE', {
+    x: margin + 12,
+    y: y + 3,
+    size: 10,
+    font: helveticaBold,
+    color: rgb(colors.primary.r, colors.primary.g, colors.primary.b),
+  });
+
+  y -= 30;
+
+  // Client name (large)
   page.drawText(data.clientName, {
     x: margin,
     y,
-    size: 12,
+    size: 14,
     font: helveticaBold,
-    color: rgb(0.12, 0.16, 0.22),
+    color: rgb(colors.secondary.r, colors.secondary.g, colors.secondary.b),
   });
-  y -= 16;
+  y -= 22;
 
+  // Client details
   if (data.clientTaxId) {
     page.drawText(`NIF/CIF: ${data.clientTaxId}`, {
       x: margin,
       y,
       size: 10,
       font: helvetica,
-      color: rgb(0.37, 0.41, 0.51),
+      color: rgb(colors.textLight.r, colors.textLight.g, colors.textLight.b),
     });
-    y -= 14;
+    y -= 16;
   }
 
   if (data.clientAddress) {
-    page.drawText(data.clientAddress, {
+    page.drawText(`${data.clientAddress}`, {
       x: margin,
       y,
       size: 10,
       font: helvetica,
-      color: rgb(0.37, 0.41, 0.51),
+      color: rgb(colors.textLight.r, colors.textLight.g, colors.textLight.b),
     });
-    y -= 14;
+    y -= 16;
 
     page.drawText(`${data.clientPostalCode} ${data.clientCity}, ${data.clientProvince}`, {
       x: margin,
       y,
       size: 10,
       font: helvetica,
-      color: rgb(0.37, 0.41, 0.51),
+      color: rgb(colors.textLight.r, colors.textLight.g, colors.textLight.b),
     });
-    y -= 14;
+    y -= 16;
 
     if (data.clientCountry) {
       page.drawText(data.clientCountry, {
@@ -230,299 +269,339 @@ export async function generatePDFServerless(data: InvoiceData): Promise<Buffer> 
         y,
         size: 10,
         font: helvetica,
-        color: rgb(0.37, 0.41, 0.51),
+        color: rgb(colors.textLight.r, colors.textLight.g, colors.textLight.b),
       });
-      y -= 14;
+      y -= 16;
     }
   }
 
-  if (data.clientEmail) {
-    page.drawText(data.clientEmail, {
+  // Contact info
+  const contactInfo = [];
+  if (data.clientEmail) contactInfo.push(data.clientEmail);
+  if (data.clientPhone) contactInfo.push(data.clientPhone);
+
+  if (contactInfo.length > 0) {
+    y -= 5;
+    page.drawText(contactInfo.join(' · '), {
       x: margin,
       y,
-      size: 10,
+      size: 9,
       font: helvetica,
-      color: rgb(0.37, 0.41, 0.51),
+      color: rgb(colors.primary.r, colors.primary.g, colors.primary.b),
     });
-    y -= 14;
   }
 
-  if (data.clientPhone) {
-    page.drawText(data.clientPhone, {
-      x: margin,
-      y,
-      size: 10,
-      font: helvetica,
-      color: rgb(0.37, 0.41, 0.51),
-    });
-    y -= 14;
-  }
+  // ========== ITEMS TABLE ==========
+  y -= 35;
 
-  // Items Table Header
-  y -= 30;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _tableY = y;
-
-  // Table background
+  // Table header with gradient background
+  const tableHeaderY = y + 10;
   page.drawRectangle({
     x: margin,
-    y: y + 15,
+    y: tableHeaderY - 5,
     width: width - margin * 2,
-    height: 25,
-    color: rgb(0.31, 0.27, 0.9),
+    height: 35,
+    color: rgb(colors.primary.r, colors.primary.g, colors.primary.b),
   });
 
+  // Table headers
   page.drawText('PRODUCTO', {
-    x: margin + 5,
-    y: y + 5,
+    x: margin + 12,
+    y: tableHeaderY,
     size: 9,
     font: helveticaBold,
     color: rgb(1, 1, 1),
   });
 
   page.drawText('CANT.', {
-    x: margin + 250,
-    y: y + 5,
+    x: margin + 240,
+    y: tableHeaderY,
     size: 9,
     font: helveticaBold,
     color: rgb(1, 1, 1),
   });
 
   page.drawText('PRECIO', {
-    x: margin + 330,
-    y: y + 5,
+    x: margin + 310,
+    y: tableHeaderY,
     size: 9,
     font: helveticaBold,
     color: rgb(1, 1, 1),
   });
 
   page.drawText('TOTAL', {
-    x: width - margin - 60,
-    y: y + 5,
+    x: width - margin - 70,
+    y: tableHeaderY,
     size: 9,
     font: helveticaBold,
     color: rgb(1, 1, 1),
   });
 
-  // Items
-  y -= 25;
+  // Table rows
+  y -= 35;
   data.items.forEach((item, index) => {
-    // Alternate row background
-    if (index % 2 === 1) {
+    const rowY = y - index * 28;
+    const isEven = index % 2 === 1;
+
+    // Alternating row background
+    if (isEven) {
       page.drawRectangle({
         x: margin,
-        y: y - 5,
+        y: rowY - 8,
         width: width - margin * 2,
-        height: 20,
-        color: rgb(0.96, 0.96, 0.96),
+        height: 28,
+        color: rgb(colors.background.r, colors.background.g, colors.background.b),
       });
     }
 
-    page.drawText(item.name.length > 35 ? item.name.substring(0, 35) + '...' : item.name, {
-      x: margin + 5,
-      y,
+    // Item name (truncated if too long)
+    const displayName = item.name.length > 40 ? item.name.substring(0, 37) + '...' : item.name;
+    page.drawText(displayName, {
+      x: margin + 12,
+      y: rowY,
       size: 9,
       font: helveticaBold,
-      color: rgb(0.22, 0.24, 0.29),
+      color: rgb(colors.secondary.r, colors.secondary.g, colors.secondary.b),
     });
 
-    page.drawText(item.quantity.toString(), {
-      x: margin + 258,
-      y,
+    // Quantity with badge-like styling
+    const qtyStr = item.quantity.toString();
+    page.drawText(qtyStr, {
+      x: margin + 248,
+      y: rowY,
       size: 9,
-      font: helvetica,
-      color: rgb(0.37, 0.41, 0.51),
+      font: helveticaBold,
+      color: rgb(colors.textLight.r, colors.textLight.g, colors.textLight.b),
     });
 
+    // Price
     const priceText = formatCurrency(item.price);
     const priceWidth = helvetica.widthOfTextAtSize(priceText, 9);
     page.drawText(priceText, {
       x: margin + 360 - priceWidth,
-      y,
+      y: rowY,
       size: 9,
       font: helvetica,
-      color: rgb(0.37, 0.41, 0.51),
+      color: rgb(colors.textLight.r, colors.textLight.g, colors.textLight.b),
     });
 
+    // Subtotal
     const totalText = formatCurrency(item.subtotal);
     const totalWidth = helvetica.widthOfTextAtSize(totalText, 9);
     page.drawText(totalText, {
-      x: width - margin - 5 - totalWidth,
-      y,
+      x: width - margin - 12 - totalWidth,
+      y: rowY,
       size: 9,
-      font: helvetica,
-      color: rgb(0.37, 0.41, 0.51),
+      font: helveticaBold,
+      color: rgb(colors.secondary.r, colors.secondary.g, colors.secondary.b),
     });
-
-    y -= 20;
   });
 
-  // Totals Section
-  y -= 30;
-  const totalsX = width - margin - 200;
+  // ========== TOTALS SECTION ==========
+  y -= data.items.length * 28 + 40;
+  const totalsX = width - margin - 220;
+
+  // Totals card background
+  page.drawRectangle({
+    x: totalsX - 15,
+    y: y - 100,
+    width: 235,
+    height: 110,
+    color: rgb(1, 1, 1),
+    borderColor: rgb(colors.border.r, colors.border.g, colors.border.b),
+    borderWidth: 1,
+  });
 
   // Subtotal
-  page.drawText('Subtotal:', {
+  y -= 5;
+  page.drawText('Subtotal productos', {
     x: totalsX,
     y,
     size: 10,
     font: helvetica,
-    color: rgb(0.42, 0.45, 0.51),
+    color: rgb(colors.textLight.r, colors.textLight.g, colors.textLight.b),
   });
   const subtotalText = formatCurrency(data.subtotal);
   const subtotalWidth = helvetica.widthOfTextAtSize(subtotalText, 10);
   page.drawText(subtotalText, {
-    x: width - margin - 5 - subtotalWidth,
+    x: width - margin - 12 - subtotalWidth,
     y,
     size: 10,
     font: helvetica,
-    color: rgb(0.37, 0.41, 0.51),
+    color: rgb(colors.textLight.r, colors.textLight.g, colors.textLight.b),
   });
-  y -= 18;
+  y -= 22;
 
   // Shipping
-  page.drawText('Envío:', {
+  page.drawText('Envío', {
     x: totalsX,
     y,
     size: 10,
     font: helvetica,
-    color: rgb(0.42, 0.45, 0.51),
+    color: rgb(colors.textLight.r, colors.textLight.g, colors.textLight.b),
   });
   const shippingText = formatCurrency(data.shipping);
   const shippingWidth = helvetica.widthOfTextAtSize(shippingText, 10);
   page.drawText(shippingText, {
-    x: width - margin - 5 - shippingWidth,
+    x: width - margin - 12 - shippingWidth,
     y,
     size: 10,
     font: helvetica,
-    color: rgb(0.37, 0.41, 0.51),
+    color: rgb(colors.textLight.r, colors.textLight.g, colors.textLight.b),
   });
-  y -= 18;
+  y -= 22;
 
   // VAT
-  page.drawText(`IVA (${data.vatRate}%):`, {
+  page.drawText(`IVA (${data.vatRate}%)`, {
     x: totalsX,
     y,
     size: 10,
     font: helvetica,
-    color: rgb(0.42, 0.45, 0.51),
+    color: rgb(colors.textLight.r, colors.textLight.g, colors.textLight.b),
   });
   const vatText = formatCurrency(data.vatAmount);
   const vatWidth = helvetica.widthOfTextAtSize(vatText, 10);
   page.drawText(vatText, {
-    x: width - margin - 5 - vatWidth,
+    x: width - margin - 12 - vatWidth,
     y,
     size: 10,
     font: helvetica,
-    color: rgb(0.37, 0.41, 0.51),
+    color: rgb(colors.textLight.r, colors.textLight.g, colors.textLight.b),
   });
-  y -= 22;
+  y -= 25;
 
-  // Total with background
-  page.drawRectangle({
-    x: totalsX - 10,
-    y: y - 5,
-    width: 210,
-    height: 28,
-    color: rgb(0.95, 0.95, 0.95),
+  // Separator line
+  page.drawLine({
+    start: { x: totalsX, y },
+    end: { x: width - margin - 12, y },
+    thickness: 1,
+    color: rgb(colors.border.r, colors.border.g, colors.border.b),
   });
+  y -= 18;
 
-  page.drawText('TOTAL:', {
+  // Grand Total
+  page.drawText('TOTAL', {
     x: totalsX,
     y,
-    size: 12,
+    size: 13,
     font: helveticaBold,
-    color: rgb(0.12, 0.16, 0.22),
+    color: rgb(colors.secondary.r, colors.secondary.g, colors.secondary.b),
   });
   const grandTotalText = formatCurrency(data.total);
-  const grandTotalWidth = helveticaBold.widthOfTextAtSize(grandTotalText, 14);
+  const grandTotalWidth = helveticaBold.widthOfTextAtSize(grandTotalText, 16);
   page.drawText(grandTotalText, {
-    x: width - margin - 5 - grandTotalWidth,
+    x: width - margin - 12 - grandTotalWidth,
     y,
-    size: 14,
+    size: 16,
     font: helveticaBold,
-    color: rgb(0.31, 0.27, 0.9),
+    color: rgb(colors.primary.r, colors.primary.g, colors.primary.b),
   });
 
-  // Payment Info
-  y -= 50;
+  // ========== PAYMENT INFO ==========
+  y -= 40;
+  const paymentY = y;
+
+  // Payment card
   page.drawRectangle({
     x: margin,
-    y: y - 25,
-    width: width - margin * 2,
-    height: 40,
-    color: rgb(0.98, 0.98, 0.98),
+    y: paymentY - 35,
+    width: 300,
+    height: 50,
+    color: rgb(colors.background.r, colors.background.g, colors.background.b),
   });
 
-  page.drawText('MÉTODO DE PAGO:', {
-    x: margin + 10,
-    y: y - 10,
-    size: 9,
+  page.drawText('MÉTODO DE PAGO', {
+    x: margin + 12,
+    y: paymentY,
+    size: 8,
     font: helveticaBold,
-    color: rgb(0.42, 0.45, 0.51),
+    color: rgb(colors.textMuted.r, colors.textMuted.g, colors.textMuted.b),
   });
-  page.drawText(getPaymentMethodName(data.paymentMethod).toUpperCase(), {
-    x: margin + 10,
-    y: y - 25,
+
+  page.drawText(getPaymentMethodName(data.paymentMethod), {
+    x: margin + 12,
+    y: paymentY - 18,
     size: 10,
-    font: helvetica,
-    color: rgb(0.22, 0.24, 0.29),
+    font: helveticaBold,
+    color: rgb(colors.secondary.r, colors.secondary.g, colors.secondary.b),
   });
 
   if (data.orderNumber) {
-    page.drawText('PEDIDO:', {
-      x: margin + 200,
-      y: y - 10,
-      size: 9,
+    page.drawText('Nº PEDIDO', {
+      x: margin + 160,
+      y: paymentY,
+      size: 8,
       font: helveticaBold,
-      color: rgb(0.42, 0.45, 0.51),
+      color: rgb(colors.textMuted.r, colors.textMuted.g, colors.textMuted.b),
     });
+
     page.drawText(data.orderNumber, {
-      x: margin + 200,
-      y: y - 25,
+      x: margin + 160,
+      y: paymentY - 18,
       size: 10,
-      font: helvetica,
-      color: rgb(0.22, 0.24, 0.29),
+      font: helveticaBold,
+      color: rgb(colors.secondary.r, colors.secondary.g, colors.secondary.b),
     });
   }
 
-  // Footer
-  const footerY = 50;
+  // ========== FOOTER ==========
+  const footerY = 60;
+
+  // Footer line
   page.drawLine({
-    start: { x: margin, y: footerY + 15 },
-    end: { x: width - margin, y: footerY + 15 },
+    start: { x: margin, y: footerY + 20 },
+    end: { x: width - margin, y: footerY + 20 },
     thickness: 1,
-    color: rgb(0.9, 0.9, 0.9),
+    color: rgb(colors.border.r, colors.border.g, colors.border.b),
   });
 
-  const footerText = `${data.companyName} · ${data.companyCity}, ${data.companyProvince} | Factura generada electrónicamente | Este documento es válido sin firma según la normativa vigente`;
-  const footerWidth = helvetica.widthOfTextAtSize(footerText, 8);
-  page.drawText(footerText, {
-    x: (width - footerWidth) / 2,
+  // Footer text
+  const footerLine1 = `${data.companyName} · ${data.companyAddress}, ${data.companyPostalCode} ${data.companyCity}`;
+  const footerLine1Width = helvetica.widthOfTextAtSize(footerLine1, 8);
+  page.drawText(footerLine1, {
+    x: (width - footerLine1Width) / 2,
     y: footerY,
     size: 8,
     font: helvetica,
-    color: rgb(0.61, 0.64, 0.69),
+    color: rgb(colors.textLight.r, colors.textLight.g, colors.textLight.b),
   });
 
-  // Cancelled Stamp
+  const footerLine2 =
+    'Factura generada electrónicamente · Este documento es válido sin firma según la normativa vigente';
+  const footerLine2Width = helvetica.widthOfTextAtSize(footerLine2, 7);
+  page.drawText(footerLine2, {
+    x: (width - footerLine2Width) / 2,
+    y: footerY - 12,
+    size: 7,
+    font: helvetica,
+    color: rgb(colors.textMuted.r, colors.textMuted.g, colors.textMuted.b),
+  });
+
+  // ========== CANCELLED STAMP ==========
   if (data.isCancelled) {
+    // Large rotated "ANULADA" stamp
+    const stampWidth = 200;
+    const stampHeight = 80;
+    const stampX = (width - stampWidth) / 2;
+    const stampY = height / 2;
+
+    // Stamp background
     page.drawRectangle({
-      x: width / 2 - 80,
-      y: height / 2 + 40,
-      width: 160,
-      height: 50,
-      color: rgb(0.99, 0.89, 0.89),
-      borderColor: rgb(0.93, 0.26, 0.27),
-      borderWidth: 3,
+      x: stampX,
+      y: stampY,
+      width: stampWidth,
+      height: stampHeight,
+      color: rgb(colors.dangerBg.r, colors.dangerBg.g, colors.dangerBg.b),
+      borderColor: rgb(colors.danger.r, colors.danger.g, colors.danger.b),
+      borderWidth: 4,
     });
 
     page.drawText('ANULADA', {
-      x: width / 2 - 50,
-      y: height / 2 + 55,
-      size: 24,
+      x: stampX + 25,
+      y: stampY + 28,
+      size: 36,
       font: helveticaBold,
-      color: rgb(0.93, 0.26, 0.27),
+      color: rgb(colors.danger.r, colors.danger.g, colors.danger.b),
     });
   }
 
