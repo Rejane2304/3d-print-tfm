@@ -9,8 +9,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
-import { COMPANY_CONFIG, generatePDF, generatePrintableHTML } from '@/lib/invoices/pdf-generator';
-import { generatePDFServerless } from '@/lib/invoices/pdf-generator-serverless';
+import { COMPANY_CONFIG, generatePrintableHTML } from '@/lib/invoices/pdf-generator';
 
 // Type for invoice item
 interface InvoiceItem {
@@ -142,50 +141,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       orderNumber: factura.order?.orderNumber || undefined,
     };
 
-    // En producción, generar PDF real con pdf-lib (funciona en serverless)
-    if (process.env.NODE_ENV === 'production') {
-      console.log('[Invoice PDF] Generando PDF real en producción con pdf-lib');
-      try {
-        const pdfBuffer = await generatePDFServerless(invoiceData);
+    // Generar HTML (mismo en desarrollo y producción para diseño idéntico)
+    const htmlContent = generatePrintableHTML(invoiceData, shouldAutoPrint);
 
-        return new NextResponse(new Uint8Array(pdfBuffer), {
-          headers: {
-            'Content-Type': 'application/pdf',
-            'Content-Disposition': `attachment; filename="factura-${factura.invoiceNumber}.pdf"`,
-          },
-        });
-      } catch (pdfError) {
-        console.error('[Invoice PDF] Error generating PDF with pdf-lib:', pdfError);
-        // Fallback to HTML if PDF generation fails
-        const htmlContent = generatePrintableHTML(invoiceData, shouldAutoPrint);
-        return new NextResponse(htmlContent, {
-          headers: {
-            'Content-Type': 'text/html; charset=utf-8',
-            'Content-Disposition': `attachment; filename="factura-${factura.invoiceNumber}.html"`,
-          },
-        });
-      }
-    }
-
-    // En desarrollo, intentar generar PDF
-    try {
-      const html = generatePrintableHTML(invoiceData);
-      const pdfBuffer = await generatePDF({ html });
-
-      if (pdfBuffer) {
-        return new NextResponse(new Uint8Array(pdfBuffer), {
-          headers: {
-            'Content-Type': 'application/pdf',
-            'Content-Disposition': `attachment; filename="factura-${factura.invoiceNumber}.pdf"`,
-          },
-        });
-      }
-    } catch (pdfError) {
-      console.error('[Invoice PDF] Error generating PDF:', pdfError);
-    }
-
-    // Fallback a HTML si PDF falla
-    const htmlContent = generatePrintableHTML(invoiceData);
+    // Devolver HTML con header PDF para que el navegador lo trate como documento
     return new NextResponse(htmlContent, {
       headers: {
         'Content-Type': 'text/html; charset=utf-8',

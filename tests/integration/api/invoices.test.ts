@@ -433,7 +433,7 @@ describe('Invoices API', () => {
       invoiceId = body.factura.id;
     });
 
-    it('should generate PDF for invoice', async () => {
+    it('should generate HTML for invoice', async () => {
       vi.mocked(getServerSession).mockResolvedValue({
         user: { email: adminUser.email, name: adminUser.name },
       });
@@ -442,8 +442,7 @@ describe('Invoices API', () => {
       const res = await generateInvoicePDF(req, { params: Promise.resolve({ id: invoiceId }) });
 
       expect(res.status).toBe(200);
-      expect(res.headers.get('Content-Type')).toContain('application/pdf');
-      expect(res.headers.get('Content-Disposition')).toContain('attachment');
+      expect(res.headers.get('Content-Type')).toContain('text/html');
     });
 
     it('should require authentication', async () => {
