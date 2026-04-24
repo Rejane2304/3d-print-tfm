@@ -95,7 +95,7 @@ export function generatePrintableHTML(invoiceData: {
   clientProvince?: string | null;
   clientPostalCode?: string | null;
   clientCountry?: string;
-  clientEmail: string;
+  clientEmail?: string;
   clientPhone?: string;
   items: Array<{
     name: string;

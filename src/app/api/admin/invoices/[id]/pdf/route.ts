@@ -173,11 +173,22 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     const html = generateInvoiceHTML(invoiceData);
 
     // Generar PDF usando Puppeteer
-    const pdfBuffer = await generatePDF({
-      html,
-    });
+    const pdfBuffer = await generatePDF({ html });
 
-    // Retornar el PDF como descarga
+    // Si pdfBuffer es null (producción), usar HTML fallback
+    if (!pdfBuffer) {
+      const { generatePrintableHTML } = await import('@/lib/invoices/pdf-generator');
+      const htmlContent = generatePrintableHTML(invoiceData);
+
+      return new NextResponse(htmlContent, {
+        headers: {
+          'Content-Type': 'text/html; charset=utf-8',
+          'Content-Disposition': `inline; filename="factura-${factura.invoiceNumber}.html"`,
+        },
+      });
+    }
+
+    // En desarrollo, retornar el PDF
     return new NextResponse(new Uint8Array(pdfBuffer), {
       headers: {
         'Content-Type': 'application/pdf',
