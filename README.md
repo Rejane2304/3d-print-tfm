@@ -6,7 +6,7 @@
 
 [![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Presentation](https://img.shields.io/badge/📹-Ver%20Presentación-red)](./docs/3D_Print_TFM__Un_Modelo_para_Apps_Web.mp4)
+[![Presentation](https://img.shields.io/badge/📹-Ver%20Presentación-red)](https://github.com/Rejane2304/3d-print-tfm/releases/download/v1.1.0-presentation/3D_Print_TFM__Un_Modelo_para_Apps_Web.mp4)
 [![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)](docs/TESTING.md)
 [![Coverage](https://img.shields.io/badge/coverage-80%25-green.svg)](docs/TESTING.md)
 [![License](https://img.shields.io/badge/license-Academic-orange.svg)](LICENSE)
@@ -15,7 +15,7 @@
 
 🚀 **Demo en Vivo:** [https://3d-print-tfm.vercel.app](https://3d-print-tfm.vercel.app)
 
-📹 **[Ver Presentación del Proyecto (MP4)](./docs/3D_Print_TFM__Un_Modelo_para_Apps_Web.mp4)** - Demo en video del TFM
+📹 **[Ver Presentación del Proyecto (MP4)](https://github.com/Rejane2304/3d-print-tfm/releases/download/v1.1.0-presentation/3D_Print_TFM__Un_Modelo_para_Apps_Web.mp4)** - Demo en video del TFM
 
 </div>
 
