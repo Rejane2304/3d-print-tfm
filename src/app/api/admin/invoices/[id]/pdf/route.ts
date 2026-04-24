@@ -1,6 +1,6 @@
 /**
  * API de Generación de PDF de Factura
- * Genera PDF de factura para descarga usando Puppeteer
+ * Genera PDF de factura para descarga
  *
  * Requiere: Rol ADMIN
  */
@@ -9,14 +9,10 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
+import { COMPANY_CONFIG, generatePDF, generatePrintableHTML } from '@/lib/invoices/pdf-generator';
 import type { Prisma } from '@prisma/client';
-import { generateInvoiceHTML } from '@/lib/invoices/invoice-template';
-import { COMPANY_CONFIG, generatePDF } from '@/lib/invoices/pdf-generator';
-import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
 
-// Type for invoice with order - kept for future use
-
+// Type for invoice with order
 export type _InvoiceWithOrder = Prisma.InvoiceGetPayload<{
   include: {
     order: {
@@ -36,39 +32,19 @@ export type _InvoiceWithOrder = Prisma.InvoiceGetPayload<{
 }>;
 
 /**
- * Convierte una imagen a base64
+ * Get image URL - returns absolute URL or placeholder
  */
-async function getImageAsBase64(imageUrl: string): Promise<string | undefined> {
-  try {
-    // Si ya es una URL absoluta (http/https), devolverla tal cual
-    if (imageUrl.startsWith('http')) {
-      return imageUrl;
-    }
+function getImageUrl(imageUrl: string | undefined): string | undefined {
+  if (!imageUrl) return undefined;
 
-    // Convertir ruta relativa a ruta del sistema de archivos
-    // /images/products/p1/p1-1.jpg -> public/images/products/p1/p1-1.jpg
-    const cleanPath = imageUrl.startsWith('/') ? imageUrl.slice(1) : imageUrl;
-    const filePath = join(process.cwd(), 'public', cleanPath);
-
-    // Verificar si el archivo existe
-    if (!existsSync(filePath)) {
-      return undefined;
-    }
-
-    // Leer archivo y convertir a base64
-    const imageBuffer = readFileSync(filePath);
-    const ext = filePath.split('.').pop()?.toLowerCase() || 'png';
-    let mimeType = 'image/jpeg';
-    if (ext === 'png') {
-      mimeType = 'image/png';
-    } else if (ext === 'gif') {
-      mimeType = 'image/gif';
-    }
-    return `data:${mimeType};base64,${imageBuffer.toString('base64')}`;
-  } catch (error) {
-    console.error(`Error converting image to base64: ${imageUrl}`, error);
-    return undefined;
+  // If already absolute URL, return as-is
+  if (imageUrl.startsWith('http')) {
+    return imageUrl;
   }
+
+  // If relative path, convert to absolute URL
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://3d-print-tfm.vercel.app';
+  return `${baseUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
 }
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -117,21 +93,17 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       return NextResponse.json({ success: false, error: 'Factura no encontrada' }, { status: 404 });
     }
 
-    // Procesar items y convertir imágenes a base64
-    const itemsWithBase64Images = await Promise.all(
-      (factura.order?.items || []).map(async item => {
-        const imageUrl = item.product?.images?.[0]?.url;
-        const base64Image = imageUrl ? await getImageAsBase64(imageUrl) : undefined;
-
-        return {
-          name: item.name,
-          quantity: item.quantity,
-          price: Number(item.price),
-          subtotal: Number(item.subtotal),
-          image: base64Image,
-        };
-      }),
-    );
+    // Procesar items - usar URLs de imágenes directamente
+    const itemsWithImages = (factura.order?.items || []).map(item => {
+      const imageUrl = item.product?.images?.[0]?.url;
+      return {
+        name: item.name,
+        quantity: item.quantity,
+        price: Number(item.price),
+        subtotal: Number(item.subtotal),
+        image: getImageUrl(imageUrl),
+      };
+    });
 
     // Mapear datos al formato del template usando los datos CORRECTOS de la empresa
     const invoiceData = {
@@ -159,7 +131,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       clientEmail: factura.order?.user?.email || undefined,
       clientPhone: factura.order?.user?.phone || undefined,
       // Items y totales
-      items: itemsWithBase64Images,
+      items: itemsWithImages,
       subtotal: Number(factura.subtotal),
       shipping: Number(factura.shipping),
       vatRate: Number(factura.vatRate),
@@ -169,15 +141,9 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       orderNumber: factura.order?.orderNumber,
     };
 
-    // Generar HTML de la factura usando el template
-    const html = generateInvoiceHTML(invoiceData);
-
-    // Generar PDF usando Puppeteer
-    const pdfBuffer = await generatePDF({ html });
-
-    // Si pdfBuffer es null (producción), usar HTML fallback
-    if (!pdfBuffer) {
-      const { generatePrintableHTML } = await import('@/lib/invoices/pdf-generator');
+    // En producción, usar HTML directamente (PDF no funciona en Vercel)
+    if (process.env.NODE_ENV === 'production') {
+      console.log('[Admin Invoice PDF] Usando HTML fallback en producción');
       const htmlContent = generatePrintableHTML(invoiceData);
 
       return new NextResponse(htmlContent, {
@@ -188,15 +154,33 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       });
     }
 
-    // En desarrollo, retornar el PDF
-    return new NextResponse(new Uint8Array(pdfBuffer), {
+    // En desarrollo, intentar generar PDF
+    try {
+      const html = generatePrintableHTML(invoiceData);
+      const pdfBuffer = await generatePDF({ html });
+
+      if (pdfBuffer) {
+        return new NextResponse(new Uint8Array(pdfBuffer), {
+          headers: {
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': `attachment; filename="factura-${factura.invoiceNumber}.pdf"`,
+          },
+        });
+      }
+    } catch (pdfError) {
+      console.error('[Admin Invoice PDF] Error generating PDF:', pdfError);
+    }
+
+    // Fallback a HTML si PDF falla
+    const htmlContent = generatePrintableHTML(invoiceData);
+    return new NextResponse(htmlContent, {
       headers: {
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="factura-${factura.invoiceNumber}.pdf"`,
+        'Content-Type': 'text/html; charset=utf-8',
+        'Content-Disposition': `inline; filename="factura-${factura.invoiceNumber}.html"`,
       },
     });
   } catch (error) {
-    console.error('Error generando PDF:', error);
+    console.error('[Admin Invoice PDF] Error:', error);
     return NextResponse.json({ success: false, error: 'Error al generar el PDF' }, { status: 500 });
   }
 }
