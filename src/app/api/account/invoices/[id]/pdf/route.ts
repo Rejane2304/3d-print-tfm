@@ -141,15 +141,15 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       orderNumber: factura.order?.orderNumber || undefined,
     };
 
-    // En producción, usar HTML directamente (PDF no funciona en Vercel)
+    // En producción, usar HTML con descarga (PDF no funciona en Vercel)
     if (process.env.NODE_ENV === 'production') {
-      console.log('[Invoice PDF] Usando HTML fallback en producción');
+      console.log('[Invoice PDF] Generando HTML descargable en producción');
       const htmlContent = generatePrintableHTML(invoiceData, shouldAutoPrint);
 
       return new NextResponse(htmlContent, {
         headers: {
           'Content-Type': 'text/html; charset=utf-8',
-          'Content-Disposition': `inline; filename="factura-${factura.invoiceNumber}.html"`,
+          'Content-Disposition': `attachment; filename="factura-${factura.invoiceNumber}.html"`,
         },
       });
     }

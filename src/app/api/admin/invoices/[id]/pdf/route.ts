@@ -47,9 +47,13 @@ function getImageUrl(imageUrl: string | undefined): string | undefined {
   return `${baseUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
 }
 
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
+
+    // Check if auto-print is requested
+    const { searchParams } = new URL(req.url);
+    const shouldAutoPrint = searchParams.get('print') === 'true';
 
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -141,15 +145,15 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       orderNumber: factura.order?.orderNumber,
     };
 
-    // En producción, usar HTML directamente (PDF no funciona en Vercel)
+    // En producción, usar HTML con descarga (PDF no funciona en Vercel)
     if (process.env.NODE_ENV === 'production') {
-      console.log('[Admin Invoice PDF] Usando HTML fallback en producción');
-      const htmlContent = generatePrintableHTML(invoiceData);
+      console.log('[Admin Invoice PDF] Generando HTML descargable en producción');
+      const htmlContent = generatePrintableHTML(invoiceData, shouldAutoPrint);
 
       return new NextResponse(htmlContent, {
         headers: {
           'Content-Type': 'text/html; charset=utf-8',
-          'Content-Disposition': `inline; filename="factura-${factura.invoiceNumber}.html"`,
+          'Content-Disposition': `attachment; filename="factura-${factura.invoiceNumber}.html"`,
         },
       });
     }
