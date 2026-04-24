@@ -14,7 +14,7 @@
 
 🚀 **Demo en Vivo:** [https://3d-print-tfm.vercel.app](https://3d-print-tfm.vercel.app)
 
-📹 **[Ver Presentación del Proyecto (MP4)](https://github.com/Rejane2304/3d-print-tfm/releases/download/v1.1.0-presentation/3D_Print_TFM__Un_Modelo_para_Apps_Web.mp4)** - Demo en video del TFM
+📹 **Presentación del Proyecto:** [Descargar Video MP4](https://github.com/Rejane2304/3d-print-tfm/releases/download/v1.1.0-presentation/3D_Print_TFM__Un_Modelo_para_Apps_Web.mp4)
 
 </div>
 
