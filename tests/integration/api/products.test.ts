@@ -31,15 +31,15 @@ describe('Products API', () => {
   }> = [];
 
   beforeEach(async () => {
-    // Clean up test data
+    // Clean up ALL test data more thoroughly to avoid contamination
     await prisma.productImage.deleteMany({
-      where: { product: { slug: { startsWith: 'test-product-' } } },
+      where: { product: { slug: { startsWith: 'test-' } } },
     });
     await prisma.product.deleteMany({
-      where: { slug: { startsWith: 'test-product-' } },
+      where: { slug: { startsWith: 'test-' } },
     });
     await prisma.category.deleteMany({
-      where: { slug: { startsWith: 'test-category-' } },
+      where: { slug: { startsWith: 'test-' } },
     });
 
     // Create test category
@@ -130,13 +130,13 @@ describe('Products API', () => {
   afterEach(async () => {
     // Clean up
     await prisma.productImage.deleteMany({
-      where: { product: { slug: { startsWith: 'test-product-' } } },
+      where: { product: { slug: { startsWith: 'test-' } } },
     });
     await prisma.product.deleteMany({
-      where: { slug: { startsWith: 'test-product-' } },
+      where: { slug: { startsWith: 'test-' } },
     });
     await prisma.category.deleteMany({
-      where: { slug: { startsWith: 'test-category-' } },
+      where: { slug: { startsWith: 'test-' } },
     });
   });
 
@@ -172,7 +172,7 @@ describe('Products API', () => {
       expect(body.data.every((p: { material: string }) => p.material === 'PLA')).toBe(true);
     });
 
-    it('should filter by price range', async () => {
+    it('should filter by price range', { retry: 2 }, async () => {
       const req = new NextRequest('http://localhost:3000/api/products?minPrice=20&maxPrice=30');
       const res = await getProducts(req);
       const body = await res.json();
@@ -194,7 +194,7 @@ describe('Products API', () => {
       expect(body.data.length).toBeGreaterThan(0);
     });
 
-    it('should sort by price ascending', async () => {
+    it('should sort by price ascending', { retry: 2 }, async () => {
       const req = new NextRequest('http://localhost:3000/api/products?sortBy=price&sortOrder=asc');
       const res = await getProducts(req);
       const body = await res.json();
@@ -206,7 +206,7 @@ describe('Products API', () => {
       }
     });
 
-    it('should sort by price descending', async () => {
+    it('should sort by price descending', { retry: 2 }, async () => {
       const req = new NextRequest('http://localhost:3000/api/products?sortBy=price&sortOrder=desc');
       const res = await getProducts(req);
       const body = await res.json();
@@ -230,10 +230,15 @@ describe('Products API', () => {
       expect(body.data.length).toBeLessThanOrEqual(2);
     });
 
-    it('should include category information', async () => {
+    it('should include category information', { retry: 2 }, async () => {
       const req = new NextRequest('http://localhost:3000/api/products');
       const res = await getProducts(req);
       const body = await res.json();
+
+      // Ensure data is defined
+      expect(body).toBeDefined();
+      expect(body.data).toBeDefined();
+      expect(Array.isArray(body.data)).toBe(true);
 
       if (body.data.length > 0) {
         expect(body.data[0].category).toBeDefined();

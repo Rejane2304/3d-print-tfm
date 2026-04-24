@@ -271,11 +271,12 @@ BD (Inglés) → Traducción API → Frontend (Español)
 
 | Categoría  | Tecnología            | Versión |
 | ---------- | --------------------- | ------- |
-| Framework  | Next.js               | 14.2.35 |
+| Framework  | Next.js               | ^16.2.4 |
 | React      | React                 | 18      |
 | ORM        | Prisma                | 5.22.0  |
 | Auth       | NextAuth.js           | 4.24.13 |
 | BD         | PostgreSQL (Supabase) | 15+     |
+| Testing    | Vitest + Playwright   | 4.x     |
 | Testing    | Vitest + Playwright   | 1.6.1   |
 | Estilos    | Tailwind CSS          | 3.4.1   |
 | Validación | Zod                   | 3.23.8  |
@@ -334,7 +335,7 @@ npm start
 - **Commits**: 50+
 - **Archivos**: 315+ (git)
 - **Archivos fuente**: **254** (TypeScript/TSX)
-- **Tests**: **395 exactos** (299 unit + 96 integration + 91 E2E)
+- **Tests**: **486 exactos** (299 unit + 96 integration + 91 E2E)
 - **Cobertura**: 80%+ configurado
 - **Modelos BD**: **28**
 - **Rutas API**: **91**

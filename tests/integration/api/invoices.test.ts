@@ -109,8 +109,8 @@ describe('Invoices API', () => {
       },
     });
 
-    // Reset mocks
-    vi.mocked(getServerSession).mockReset();
+    // Reset and clear all mocks to prevent contamination
+    vi.clearAllMocks();
   });
 
   afterEach(async () => {
@@ -162,6 +162,8 @@ describe('Invoices API', () => {
     });
 
     it('should require orderId', async () => {
+      // Clear any previous mocks and set admin session
+      vi.clearAllMocks();
       vi.mocked(getServerSession).mockResolvedValue({
         user: { email: adminUser.email, name: adminUser.name },
       });

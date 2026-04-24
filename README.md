@@ -5,6 +5,7 @@
 # 🖨️ E-commerce de Impresión 3D
 
 [![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](CHANGELOG.md)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)](docs/TESTING.md)
 [![Coverage](https://img.shields.io/badge/coverage-80%25-green.svg)](docs/TESTING.md)
 [![License](https://img.shields.io/badge/license-Academic-orange.svg)](LICENSE)
@@ -131,7 +132,7 @@
 
 | Tecnología       | Versión | Uso                                                      |
 | ---------------- | ------- | -------------------------------------------------------- |
-| **Next.js**      | 16.2.4  | Framework full-stack con App Router (actualizado de v14) |
+| **Next.js**      | ^16.2.4 | Framework full-stack con App Router (actualizado de v14) |
 | **React**        | ^18.3.0 | Biblioteca UI                                            |
 | **TypeScript**   | ^5.x    | Tipado estático                                          |
 | **Tailwind CSS** | ^3.4.19 | Estilos utility-first                                    |
@@ -145,7 +146,7 @@
 | **Prisma**         | ^5.22.0  | ORM y migraciones               |
 | **NextAuth.js**    | ^4.24.13 | Autenticación JWT               |
 | **bcrypt**         | ^5.x     | Hash de contraseñas (12 rounds) |
-| **Socket.io**      | ^4.x     | Comunicación tiempo real        |
+| **TanStack Query** | ^5.x     | Data fetching y caché           |
 | **TanStack Query** | ^5.x     | Data fetching y caché           |
 
 ### Pagos

@@ -4,7 +4,7 @@ Plan de desarrollo y mejoras del proyecto.
 
 ---
 
-## ✅ Completado (Abril 2025)
+## ✅ Completado (Abril 2026)
 
 ### Core Features
 
@@ -119,7 +119,7 @@ Plan de desarrollo y mejoras del proyecto.
 | Módulos Admin      | 15+           |
 | APIs               | 62+ endpoints |
 | Cobertura de Tests | 80%+          |
-| Tests              | 395 total     |
+| Tests              | 486 total     |
 | Lighthouse Score   | 85+           |
 
 ---
