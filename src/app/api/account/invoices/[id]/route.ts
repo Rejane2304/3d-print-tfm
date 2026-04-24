@@ -122,15 +122,26 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
           quantity: number;
           price: unknown;
           subtotal: unknown;
-        }) => ({
-          id: item.id || '',
-          name: item.product?.slug ? translateProductName(item.product.slug) : item.name || 'Producto',
-          quantity: item.quantity || 1,
-          price: Number(item.price) || 0,
-          subtotal: Number(item.subtotal) || 0,
-          image: item.product?.images?.[0]?.url || undefined,
-          description: item.product?.description || undefined,
-        }),
+        }) => {
+          let productName = item.name || 'Producto';
+          try {
+            if (item.product?.slug) {
+              productName = translateProductName(item.product.slug);
+            }
+          } catch {
+            // Si la traducción falla, usar el nombre original
+            productName = item.name || 'Producto';
+          }
+          return {
+            id: item.id || '',
+            name: productName,
+            quantity: item.quantity || 1,
+            price: Number(item.price) || 0,
+            subtotal: Number(item.subtotal) || 0,
+            image: item.product?.images?.[0]?.url || undefined,
+            description: item.product?.description || undefined,
+          };
+        },
       ),
     };
 
