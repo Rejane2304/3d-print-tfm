@@ -191,9 +191,56 @@ export function generateInvoiceHTML(data: InvoiceData): string {
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 20px;
+        font-size: 16px;
         font-weight: 800;
         color: #4f46e5;
+      }
+
+      .logo-icon svg {
+        width: 28px;
+        height: 28px;
+      }
+
+      /* Print Button */
+      .print-button {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 14px 24px;
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        z-index: 1000;
+      }
+
+      .print-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(79, 70, 229, 0.5);
+      }
+
+      .print-button:active {
+        transform: translateY(0);
+      }
+
+      .print-button svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      @media print {
+        .print-button {
+          display: none !important;
+        }
       }
 
       .company-name {
@@ -573,7 +620,13 @@ export function generateInvoiceHTML(data: InvoiceData): string {
           <div class="header-content">
             <div class="company-section">
               <div class="logo-container">
-                <div class="logo-icon">3D</div>
+                <div class="logo-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                    <line x1="12" y1="22.08" x2="12" y2="12"/>
+                  </svg>
+                </div>
                 <div class="company-name">${data.companyName}</div>
               </div>
               <div class="company-details">
@@ -704,6 +757,16 @@ export function generateInvoiceHTML(data: InvoiceData): string {
         </div>
       </div>
     </div>
+
+    <!-- Print Button -->
+    <button class="print-button" onclick="window.print()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="6 9 6 2 18 2 18 9"></polyline>
+        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+        <rect x="6" y="14" width="12" height="8"></rect>
+      </svg>
+      Imprimir
+    </button>
 </body>
 </html>
   `;
