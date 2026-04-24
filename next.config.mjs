@@ -29,16 +29,6 @@ const nextConfig = {
       },
     ],
   },
-  // Puppeteer configuration for serverless
-  serverRuntimeConfig: {
-    puppeteerExecutablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '',
-  },
-  // API configuration
-  api: {
-    bodyParser: {
-      sizeLimit: '10mb',
-    },
-  },
 };
 
 export default nextConfig;

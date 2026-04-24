@@ -1,6 +1,6 @@
 /**
  * API de Descarga de Factura para Usuarios
- * Permite a los usuarios descargar sus propias facturas en PDF
+ * Permite a los usuarios descargar sus propias facturas en PDF o HTML
  *
  * GET /api/account/invoices/[id]/pdf
  */
@@ -9,8 +9,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
-import { COMPANY_CONFIG, generatePDF } from '@/lib/invoices/pdf-generator';
-import { generateInvoiceHTML } from '@/lib/invoices/invoice-template';
+import { COMPANY_CONFIG, generatePDF, generatePrintableHTML } from '@/lib/invoices/pdf-generator';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -36,13 +35,11 @@ async function getImageAsBase64(imageUrl: string): Promise<string | undefined> {
     }
 
     // Convertir ruta relativa a ruta del sistema de archivos
-    // /images/products/p1/p1-1.jpg -> public/images/products/p1/p1-1.jpg
     const cleanPath = imageUrl.startsWith('/') ? imageUrl.slice(1) : imageUrl;
     const filePath = join(process.cwd(), 'public', cleanPath);
 
     // Verificar si el archivo existe
     if (!existsSync(filePath)) {
-      // Imagen no encontrada, no mostrar advertencia en consola
       return undefined;
     }
 
@@ -166,15 +163,23 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       orderNumber: factura.order?.orderNumber || undefined,
     };
 
-    // Generar HTML de la factura usando el template
-    const html = generateInvoiceHTML(invoiceData);
+    // Intentar generar PDF
+    const pdfBuffer = await generatePDF({ html: '' });
 
-    // Generar PDF usando Puppeteer
-    const pdfBuffer = await generatePDF({
-      html,
-    });
+    // Si pdfBuffer es null (producción), usar HTML fallback
+    if (!pdfBuffer) {
+      console.log('[Invoice PDF] Usando fallback HTML en producción');
+      const htmlContent = generatePrintableHTML(invoiceData);
 
-    // Retornar el PDF como descarga
+      return new NextResponse(htmlContent, {
+        headers: {
+          'Content-Type': 'text/html; charset=utf-8',
+          'Content-Disposition': `inline; filename="factura-${factura.invoiceNumber}.html"`,
+        },
+      });
+    }
+
+    // En desarrollo, retornar el PDF
     return new NextResponse(new Uint8Array(pdfBuffer), {
       headers: {
         'Content-Type': 'application/pdf',
@@ -182,7 +187,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       },
     });
   } catch (error) {
-    console.error('Error generando PDF:', error);
-    return NextResponse.json({ success: false, error: 'Error al generar el PDF' }, { status: 500 });
+    console.error('[Invoice PDF] Error:', error);
+    return NextResponse.json({ success: false, error: 'Error al generar la factura' }, { status: 500 });
   }
 }
