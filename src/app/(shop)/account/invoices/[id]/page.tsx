@@ -97,11 +97,61 @@ export default function UserInvoiceDetailPage() {
   }, [status, params.id, router]); // Solo dependencias esenciales
 
   const printInvoice = () => {
-    if (invoice && params.id) {
-      // SOLUCIÓN DEFINITIVA: Solo abrir la ventana, el HTML se encarga del auto-print
-      // El parámetro print=true activa el script de auto-print en el HTML generado
-      window.open(`/api/account/invoices/${params.id}/pdf?print=true`, '_blank');
+    if (!invoice) return;
+
+    // SOLUCIÓN DEFINITIVA: Usar la misma página con print CSS
+    // Esto garantiza layout idéntico al InvoiceViewer
+    const printContent = document.getElementById('invoice-printable');
+    if (!printContent) return;
+
+    // Crear ventana de impresión con el HTML actual
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      console.error('Popup bloqueado: Por favor permite ventanas emergentes');
+      return;
     }
+
+    // Copiar estilos de la página actual
+    const styles = Array.from(document.styleSheets)
+      .map(sheet => {
+        try {
+          return Array.from(sheet.cssRules)
+            .map(rule => rule.cssText)
+            .join('\n');
+        } catch {
+          return '';
+        }
+      })
+      .join('\n');
+
+    // Escribir documento completo
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Factura ${invoice.invoiceNumber}</title>
+          <style>
+            ${styles}
+            @media print {
+              .no-print { display: none !important; }
+              body { background: white !important; }
+            }
+          </style>
+        </head>
+        <body>
+          ${printContent.innerHTML}
+          <script>
+            // Auto-print cuando todo cargue
+            window.onload = function() {
+              setTimeout(function() {
+                window.print();
+              }, 500);
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
   };
 
   const downloadPDF = () => {
@@ -214,8 +264,8 @@ export default function UserInvoiceDetailPage() {
         </div>
       )}
 
-      {/* Invoice Viewer */}
-      <div className="py-8 px-4 print:p-0">
+      {/* Invoice Viewer - ID para impresión con layout exacto */}
+      <div id="invoice-printable" className="py-8 px-4 print:p-0">
         <InvoiceViewer data={invoice} />
       </div>
     </div>
