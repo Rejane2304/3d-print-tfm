@@ -142,6 +142,50 @@ src/
 
 ---
 
+## [1.3.0] - 2026-04-24
+
+### 🔧 Hotfixes - Día de Entrega
+
+Esta versión corrige errores críticos de conexión a base de datos y estabiliza la aplicación para la entrega final.
+
+### 🐛 Correcciones Críticas
+
+#### Gestión de Conexiones a Base de Datos
+
+- **EMAXCONNSESSION Fix**: Solucionado error de "max clients reached" en Supabase
+- **Desconexión explícita**: Añadido `await prisma.$disconnect()` en APIs críticas
+- **Archivos actualizados**:
+  - `/api/admin/analytics`
+  - `/api/categories`
+  - `/api/products`
+  - `/api/site-config`
+
+#### Server Components Error - Digest Fixes
+
+- **Digest 2487300856**: Corregido error en panel admin (hydration mismatch)
+- **Digest 3994233889**: Corregido error en página de facturas
+- **Digest 69983904**: Estabilizada carga de páginas con datos dinámicos
+
+#### Sistema de Impresión de Facturas
+
+- **Layout unificado**: Botón "Imprimir" ahora usa el mismo layout que "Descargar PDF"
+- **Sin bucles infinitos**: Corregido auto-print que causaba bloqueos
+- **ClientOnly wrapper**: Añadido para evitar hydration errors
+
+### 📋 Cambios Técnicos
+
+| Archivo                                         | Cambio                                        |
+| ----------------------------------------------- | --------------------------------------------- |
+| `src/lib/db/prisma.ts`                          | Middleware de retry para errores de conexión  |
+| `src/app/api/admin/analytics/route.ts`          | Desconexión explícita post-query              |
+| `src/app/api/categories/route.ts`               | Desconexión explícita post-query              |
+| `src/app/api/products/route.ts`                 | Desconexión explícita post-query              |
+| `src/app/api/site-config/route.ts`              | Desconexión explícita post-query              |
+| `src/app/admin/dashboard/page.tsx`              | ClientOnly para evitar SSR issues             |
+| `src/app/(shop)/account/invoices/[id]/page.tsx` | ClientOnly wrapper + suppressHydrationWarning |
+
+---
+
 ## [1.2.0] - 2026-04-23
 
 ### 💰 Precios con IVA Incluido y Flujo de Checkout Mejorado

@@ -5,14 +5,14 @@
 **E-commerce de Impresión 3D** desarrollado como Trabajo Final de Máster (TFM) del **Máster de Desarrollo con IA**.
 
 - **Enfoque**: TDD (Desarrollo Guiado por Tests)
-
-- **Stack**: Next.js 14 + Prisma + PostgreSQL
-- **Enfoque**: TDD con tests unitarios, integración y E2E
+- **Stack**: Next.js 16 + Prisma + PostgreSQL
+- **Tests**: 395+ (Unit + Integration + E2E)
 - **Idioma**: UI 100% en español con traducción backend
 - **Responsive**: Móvil → 4K
 - **Seguridad**: Nivel empresarial
 - **Estado**: ✅ Completado y en Producción
 - **Deployment**: https://3d-print-tfm.vercel.app
+- **Entrega**: Abril 2026
 
 ---
 
