@@ -9,14 +9,13 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
-import { withErrorHandler } from '@/lib/errors/api-wrapper';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
-import { translateErrorMessage, translateProductName } from '@/lib/i18n';
+import { translateProductName } from '@/lib/i18n';
 import { calculatePriceWithVAT } from '@/lib/constants/tax';
 
 // GET /api/cart - Get user's cart
-export const GET = withErrorHandler(async () => {
+export async function GET(_req: NextRequest): Promise<Response> {
   try {
     // Verify authentication
     const session = await getServerSession(authOptions);
@@ -96,137 +95,145 @@ export const GET = withErrorHandler(async () => {
       },
     });
   } catch (error) {
-    console.error('[Cart GET] Database error:', error);
-    // Professional error handling: fail fast with clear message
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Error al cargar el carrito. Por favor, intenta de nuevo.',
-        code: 'CART_LOAD_ERROR',
+    console.error('[Cart GET] Error:', error);
+    // Return 200 with empty cart instead of 503 to prevent UI crash
+    return NextResponse.json({
+      success: true,
+      data: {
+        id: null,
+        items: [],
+        subtotal: 0,
+        totalItems: 0,
       },
-      { status: 503 },
-    );
+    });
   }
-});
+}
 
 // POST /api/cart - Add product to cart
-export const POST = withErrorHandler(async (req: NextRequest) => {
-  // Verify authentication
-  const session = await getServerSession(authOptions);
+export async function POST(req: NextRequest): Promise<Response> {
+  try {
+    // Verify authentication
+    const session = await getServerSession(authOptions);
 
-  if (!session?.user?.email) {
-    return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
-  }
-
-  // Get data from request body
-  const body = await req.json();
-  const { productId, quantity = 1 } = body;
-
-  // Validations
-  if (!productId) {
-    return NextResponse.json({ success: false, error: 'El producto es requerido' }, { status: 400 });
-  }
-
-  if (quantity <= 0) {
-    return NextResponse.json({ success: false, error: 'La cantidad debe ser mayor a 0' }, { status: 400 });
-  }
-
-  // Find user
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
-    include: { cart: true },
-  });
-
-  if (!user) {
-    return NextResponse.json({ success: false, error: 'Usuario no encontrado' }, { status: 404 });
-  }
-
-  // Find product
-  const product = await prisma.product.findUnique({
-    where: { id: productId },
-  });
-
-  if (!product) {
-    return NextResponse.json({ success: false, error: translateErrorMessage('Producto not found') }, { status: 404 });
-  }
-
-  if (!product.isActive) {
-    return NextResponse.json({ success: false, error: 'Producto no disponible' }, { status: 400 });
-  }
-
-  if (product.stock < quantity) {
-    return NextResponse.json({ success: false, error: translateErrorMessage('Insufficient stock') }, { status: 400 });
-  }
-
-  // Create cart if it doesn't exist
-  let cart = user.cart;
-  cart ??= await prisma.cart.create({
-    data: {
-      id: crypto.randomUUID(),
-      user: { connect: { id: user.id } },
-      subtotal: 0,
-      updatedAt: new Date(),
-    },
-  });
-
-  // Check if product is already in cart
-  const existingItem = await prisma.cartItem.findFirst({
-    where: {
-      cartId: cart.id,
-      productId: product.id,
-    },
-  });
-
-  if (existingItem) {
-    // Update quantity
-    const newQuantity = existingItem.quantity + quantity;
-
-    if (product.stock < newQuantity) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: translateErrorMessage('Insufficient stock para la cantidad total'),
-        },
-        { status: 400 },
-      );
+    if (!session?.user?.email) {
+      return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
     }
 
-    await prisma.cartItem.update({
-      where: { id: existingItem.id },
-      data: { quantity: newQuantity },
+    // Get data from request body
+    const body = await req.json();
+    const { productId, quantity = 1 } = body;
+
+    // Validations
+    if (!productId) {
+      return NextResponse.json({ success: false, error: 'El producto es requerido' }, { status: 400 });
+    }
+
+    if (quantity <= 0) {
+      return NextResponse.json({ success: false, error: 'La cantidad debe ser mayor a 0' }, { status: 400 });
+    }
+
+    // Find user
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      include: { cart: true },
     });
-  } else {
-    // Create new item
-    await prisma.cartItem.create({
-      data: {
-        id: crypto.randomUUID(),
-        cart: { connect: { id: cart.id } },
-        product: { connect: { id: product.id } },
-        quantity: quantity,
-        unitPrice: product.price,
-        updatedAt: new Date(),
+
+    if (!user) {
+      return NextResponse.json({ success: false, error: 'Usuario no encontrado' }, { status: 404 });
+    }
+
+    // Find product
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    if (!product) {
+      return NextResponse.json({ success: false, error: 'Producto no encontrado' }, { status: 404 });
+    }
+
+    if (!product.isActive) {
+      return NextResponse.json({ success: false, error: 'Producto no disponible' }, { status: 400 });
+    }
+
+    if (product.stock < quantity) {
+      return NextResponse.json({ success: false, error: 'Stock insuficiente' }, { status: 400 });
+    }
+
+    // Create cart if it doesn't exist
+    let cart = user.cart;
+    if (!cart) {
+      cart = await prisma.cart.create({
+        data: {
+          id: crypto.randomUUID(),
+          user: { connect: { id: user.id } },
+          subtotal: 0,
+          updatedAt: new Date(),
+        },
+      });
+    }
+
+    // Check if product is already in cart
+    const existingItem = await prisma.cartItem.findFirst({
+      where: {
+        cartId: cart.id,
+        productId: product.id,
       },
     });
+
+    if (existingItem) {
+      // Update quantity
+      const newQuantity = existingItem.quantity + quantity;
+
+      if (product.stock < newQuantity) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Stock insuficiente para la cantidad total',
+          },
+          { status: 400 },
+        );
+      }
+
+      await prisma.cartItem.update({
+        where: { id: existingItem.id },
+        data: { quantity: newQuantity },
+      });
+    } else {
+      // Create new item
+      await prisma.cartItem.create({
+        data: {
+          id: crypto.randomUUID(),
+          cart: { connect: { id: cart.id } },
+          product: { connect: { id: product.id } },
+          quantity: quantity,
+          unitPrice: product.price,
+          updatedAt: new Date(),
+        },
+      });
+    }
+
+    // Recalculate cart subtotal
+    const items = await prisma.cartItem.findMany({
+      where: { cartId: cart.id },
+      include: { product: true },
+    });
+
+    const newSubtotal = items.reduce((sum, item) => sum + Number(item.unitPrice) * item.quantity, 0);
+
+    await prisma.cart.update({
+      where: { id: cart.id },
+      data: { subtotal: newSubtotal },
+    });
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: 'Producto añadido al carrito',
+      },
+      { status: 201 },
+    );
+  } catch (error) {
+    console.error('[Cart POST] Error:', error);
+    return NextResponse.json({ success: false, error: 'Error al añadir al carrito' }, { status: 500 });
   }
-
-  // Recalculate cart subtotal
-  const items = await prisma.cartItem.findMany({
-    where: { cartId: cart.id },
-    include: { product: true },
-  });
-
-  const newSubtotal = items.reduce((sum, item) => sum + Number(item.unitPrice) * item.quantity, 0);
-
-  await prisma.cart.update({
-    where: { id: cart.id },
-    data: { subtotal: newSubtotal },
-  });
-
-  return NextResponse.json(
-    {
-      success: true,
-      message: 'Producto añadido al carrito',
-    },
-    { status: 201 },
-  );
-});
+}

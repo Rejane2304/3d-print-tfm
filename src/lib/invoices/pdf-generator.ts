@@ -1,10 +1,10 @@
 /**
  * PDF Generator Service
- * Generates PDFs from HTML using Puppeteer
- * Compatible with Vercel serverless environment using @sparticuz/chromium
+ * Generates PDFs from HTML using Puppeteer with @sparticuz/chromium
+ * Compatible with Vercel serverless environment
  */
 import puppeteer from 'puppeteer-core';
-import chromium from '@sparticuz/chromium';
+import chromium from '@sparticuz/chromium-min';
 import { getCompanyDataForInvoice, getDefaultVatRate } from '@/lib/site-config';
 
 interface PDFOptions {
@@ -19,7 +19,7 @@ export async function generatePDF({ html }: PDFOptions): Promise<Buffer> {
     const isProduction = process.env.NODE_ENV === 'production';
 
     if (isProduction) {
-      // Use @sparticuz/chromium for serverless environments
+      // Use puppeteer-core with @sparticuz/chromium for serverless
       browser = await puppeteer.launch({
         args: chromium.args,
         executablePath: await chromium.executablePath(),
