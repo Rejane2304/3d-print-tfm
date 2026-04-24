@@ -24,7 +24,7 @@
 
 ---
 
-## Estado Actual del Proyecto (Abril 2026)
+## Estado Actual del Proyecto (Abril 2026 - Día de Entrega)
 
 ### ✅ Implementado
 
@@ -45,15 +45,16 @@
 | **Error Boundaries**         | ✅ Completo     | 8 archivos error.tsx + ErrorMessage global                   |
 | **Service Worker**           | ✅ Completo     | PWA con sw.js, manifest.json, registro automático            |
 | **Lazy Loading**             | ✅ Completo     | Componentes pesados con dynamic imports                      |
-| **Real-time**                | ✅ Activo       | SSE + Socket.io para notificaciones en tiempo real           |
+| **Real-time**                | ✅ Desactivado  | SSE desactivado para evitar bucles - auto-refresh cada 30s   |
 | **Accesibilidad**            | ✅ Completo     | A11y audit + Skip Links + Focus Traps + Announcer            |
-| **Documentación**            | ✅ Completo     | 13 archivos en /docs con guías y reportes                    |
+| **Documentación**            | ✅ Completo     | 21 archivos .md documentando el proyecto                     |
 | **Network Status**           | ✅ Completo     | Hook useNetworkStatus para detectar conexión                 |
 | **ClientOnly**               | ✅ Completo     | Wrapper para componentes solo cliente                        |
 | **Precios con IVA**          | ✅ Completo     | Todos los precios mostrados incluyen IVA (21%)               |
 | **Checkout Flow**            | ✅ Completo     | Flujo de pago con múltiples métodos (Stripe, PayPal, etc.)   |
 | **Cupones de Descuento**     | ✅ Completo     | Sistema de cupones con restricciones de monto mínimo         |
 | **Pasarela de Pagos**        | ✅ Estabilizado | PayPal y Stripe con cálculo de totales corregido             |
+| **Gestión de Conexiones BD** | ✅ Estabilizado | `prisma.$disconnect()` en APIs para evitar EMAXCONNSESSION   |
 
 ### 📁 Archivos Clave
 
@@ -443,6 +444,16 @@ if (!databaseUrl.includes('test') && !databaseUrl.includes('localhost:5433')) {
 ---
 
 ## Troubleshooting
+
+### Error EMAXCONNSESSION: max clients reached
+
+**Causa:** Supabase alcanzó el límite de 15 conexiones simultáneas
+
+**Solución implementada (Abril 2026):**
+
+- Añadido `await prisma.$disconnect()` explícito en APIs críticas
+- Las conexiones se liberan inmediatamente después de cada request
+- Archivos actualizados: `/api/admin/analytics`, `/api/categories`, `/api/products`, `/api/site-config`
 
 ### "The column X does not exist in the current database"
 
