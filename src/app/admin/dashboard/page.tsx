@@ -255,6 +255,18 @@ export default function AdminPanelPage() {
     return statusMap[status] || 'bg-gray-100 text-gray-800';
   };
 
+  // No renderizar nada hasta estar en cliente (evita hydration mismatch)
+  if (!isClient) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-indigo-600 mx-auto mb-4" />
+          <p className="text-gray-600">Cargando panel admin...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -271,6 +283,12 @@ export default function AdminPanelPage() {
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-600">Error al cargar datos</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+          >
+            Reintentar
+          </button>
         </div>
       </div>
     );
