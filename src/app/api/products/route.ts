@@ -76,6 +76,11 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
           mode: 'insensitive' as Prisma.QueryMode,
         },
       },
+      // Also search in bilingual fields
+      { nameEs: { contains: search, mode: 'insensitive' as Prisma.QueryMode } },
+      { nameEn: { contains: search, mode: 'insensitive' as Prisma.QueryMode } },
+      { descriptionEs: { contains: search, mode: 'insensitive' as Prisma.QueryMode } },
+      { descriptionEn: { contains: search, mode: 'insensitive' as Prisma.QueryMode } },
     ];
   }
 
