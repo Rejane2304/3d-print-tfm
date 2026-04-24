@@ -99,9 +99,8 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     // Calcular subtotal (total de productos sin envío)
     const subtotal = itemsWithImages.reduce((sum, item) => sum + item.subtotal, 0);
 
-    // Calcular envío (diferencia entre total de orden y subtotal)
-    const orderTotal = Number(factura.order?.total || 0);
-    const shipping = orderTotal - subtotal;
+    // Usar el valor de envío que viene de la factura (ya calculado correctamente)
+    const shipping = Number(factura.shipping || 0);
 
     // Mapear datos de la factura al formato del template usando datos CORRECTOS de empresa
     const invoiceData = {

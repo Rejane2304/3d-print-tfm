@@ -11,28 +11,6 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
 
-// Type for client order data
-interface ClientOrder {
-  total: number | { toNumber(): number };
-  status: string;
-  createdAt: Date;
-}
-
-// Type for client with orders
-interface ClientWithData {
-  id: string;
-  name: string;
-  email: string;
-  phone: string | null;
-  isActive: boolean;
-  createdAt: Date;
-  lastAccess: Date | null;
-  _count: {
-    orders: number;
-  };
-  orders: ClientOrder[];
-}
-
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -84,7 +62,7 @@ export async function GET(req: NextRequest) {
     const total = await prisma.user.count({ where });
 
     // Get clients with aggregated data
-    const clients = (await prisma.user.findMany({
+    const clients = await prisma.user.findMany({
       where,
       select: {
         id: true,
@@ -110,18 +88,19 @@ export async function GET(req: NextRequest) {
       orderBy: { name: 'asc' },
       skip,
       take: limit,
-    })) as ClientWithData[];
+    });
 
     // Calculate total spent per client
-    const clientsWithStats = clients.map((client: ClientWithData) => {
-      const totalSpent = client.orders
-        .filter((o: ClientOrder) => o.status !== 'CANCELLED')
-        .reduce((sum: number, o: ClientOrder) => sum + Number(o.total), 0);
+    const clientsWithStats = clients.map(client => {
+      const totalSpent = (client.orders || [])
+        .filter(o => o.status !== 'CANCELLED')
+        .reduce((sum, o) => sum + Number(o.total || 0), 0);
 
-      let lastOrder: ClientOrder | null = null;
-      if (client.orders.length > 0) {
-        const sortedOrders = [...client.orders].sort(
-          (a: ClientOrder, b: ClientOrder) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      let lastOrder: (typeof client.orders)[0] | null = null;
+      const orders = client.orders || [];
+      if (orders.length > 0) {
+        const sortedOrders = [...orders].sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
         );
         lastOrder = sortedOrders[0];
       }

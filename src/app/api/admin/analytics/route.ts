@@ -354,11 +354,13 @@ export async function GET(req: NextRequest) {
     });
 
     const statusCounts: Record<string, number> = {};
-    const statusData = orderStats[8] as Array<{ status: string; _count: { status: number } }>;
-    statusData.forEach(s => {
-      const translatedStatus = translateOrderStatus(s.status);
-      statusCounts[translatedStatus] = s._count.status;
-    });
+    const statusData = orderStats[8] as Array<{ status: string; _count: { status: number } }> | undefined;
+    if (Array.isArray(statusData)) {
+      statusData.forEach(s => {
+        const translatedStatus = translateOrderStatus(s.status);
+        statusCounts[translatedStatus] = s._count.status;
+      });
+    }
 
     return NextResponse.json({
       success: true,
@@ -366,42 +368,42 @@ export async function GET(req: NextRequest) {
         salesSummary: {
           // INGRESOS BRUTOS (todos los pedidos, incluyendo cancelados)
           gross: {
-            today: Number(salesSummary[0]._sum.total || 0),
-            thisWeek: Number(salesSummary[1]._sum.total || 0),
-            thisMonth: Number(salesSummary[2]._sum.total || 0),
-            lastMonth: Number(salesSummary[3]._sum.total || 0),
-            total: Number(salesSummary[4]._sum.total || 0),
+            today: Number(salesSummary[0]?._sum?.total || 0),
+            thisWeek: Number(salesSummary[1]?._sum?.total || 0),
+            thisMonth: Number(salesSummary[2]?._sum?.total || 0),
+            lastMonth: Number(salesSummary[3]?._sum?.total || 0),
+            total: Number(salesSummary[4]?._sum?.total || 0),
           },
           // INGRESOS NETOS (excluyendo cancelados) - Lo que se espera recibir
           net: {
-            today: Number(salesSummary[5]._sum.total || 0),
-            thisWeek: Number(salesSummary[6]._sum.total || 0),
-            thisMonth: Number(salesSummary[7]._sum.total || 0),
-            lastMonth: Number(salesSummary[8]._sum.total || 0),
-            total: Number(salesSummary[9]._sum.total || 0),
+            today: Number(salesSummary[5]?._sum?.total || 0),
+            thisWeek: Number(salesSummary[6]?._sum?.total || 0),
+            thisMonth: Number(salesSummary[7]?._sum?.total || 0),
+            lastMonth: Number(salesSummary[8]?._sum?.total || 0),
+            total: Number(salesSummary[9]?._sum?.total || 0),
           },
           // INGRESOS ENTREGADOS (DELIVERED) - Pedidos ya completados
           delivered: {
-            today: Number(salesSummary[10]._sum.total || 0),
-            thisWeek: Number(salesSummary[11]._sum.total || 0),
-            thisMonth: Number(salesSummary[12]._sum.total || 0),
-            lastMonth: Number(salesSummary[13]._sum.total || 0),
-            total: Number(salesSummary[14]._sum.total || 0),
+            today: Number(salesSummary[10]?._sum?.total || 0),
+            thisWeek: Number(salesSummary[11]?._sum?.total || 0),
+            thisMonth: Number(salesSummary[12]?._sum?.total || 0),
+            lastMonth: Number(salesSummary[13]?._sum?.total || 0),
+            total: Number(salesSummary[14]?._sum?.total || 0),
           },
           // CANCELACIONES (pérdidas)
           cancelled: {
-            today: Number(salesSummary[15]._sum.total || 0),
-            thisWeek: Number(salesSummary[16]._sum.total || 0),
-            thisMonth: Number(salesSummary[17]._sum.total || 0),
-            lastMonth: Number(salesSummary[18]._sum.total || 0),
-            total: Number(salesSummary[19]._sum.total || 0),
+            today: Number(salesSummary[15]?._sum?.total || 0),
+            thisWeek: Number(salesSummary[16]?._sum?.total || 0),
+            thisMonth: Number(salesSummary[17]?._sum?.total || 0),
+            lastMonth: Number(salesSummary[18]?._sum?.total || 0),
+            total: Number(salesSummary[19]?._sum?.total || 0),
           },
           // Legacy (para compatibilidad con frontend actual)
-          today: Number(salesSummary[5]._sum.total || 0),
-          thisWeek: Number(salesSummary[6]._sum.total || 0),
-          thisMonth: Number(salesSummary[7]._sum.total || 0),
-          lastMonth: Number(salesSummary[8]._sum.total || 0),
-          total: Number(salesSummary[9]._sum.total || 0),
+          today: Number(salesSummary[5]?._sum?.total || 0),
+          thisWeek: Number(salesSummary[6]?._sum?.total || 0),
+          thisMonth: Number(salesSummary[7]?._sum?.total || 0),
+          lastMonth: Number(salesSummary[8]?._sum?.total || 0),
+          total: Number(salesSummary[9]?._sum?.total || 0),
         },
         orderStats: {
           // Métricas de gestoría completas
