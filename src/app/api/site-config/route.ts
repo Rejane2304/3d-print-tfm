@@ -6,6 +6,7 @@
 
 import { NextResponse } from 'next/server';
 import { getSiteConfig } from '@/lib/site-config';
+import { prisma } from '@/lib/db/prisma';
 
 // Default config for production fallback
 const DEFAULT_CONFIG = {
@@ -31,6 +32,7 @@ export async function GET() {
     // Si no hay config en BD, usar valores por defecto
     if (!config) {
       console.warn('[SiteConfig] Using default config - database record not found');
+      await prisma.$disconnect().catch(() => {});
       return NextResponse.json({
         success: true,
         config: DEFAULT_CONFIG,
@@ -38,7 +40,7 @@ export async function GET() {
     }
 
     // Return formatted response for frontend
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       config: {
         _ref: config.id.toUpperCase(),
@@ -55,8 +57,15 @@ export async function GET() {
         actualizadoEn: config.updatedAt,
       },
     });
+
+    // Liberar conexión para evitar EMAXCONNSESSION
+    await prisma.$disconnect().catch(() => {});
+
+    return response;
   } catch (error) {
     console.error('Error getting site config:', error);
+    // Liberar conexión incluso en error
+    await prisma.$disconnect().catch(() => {});
     // Incluso en error, retornar config por defecto para no romper la app
     return NextResponse.json({
       success: true,

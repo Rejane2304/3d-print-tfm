@@ -218,7 +218,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Return simplified response
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       data: {
         summary: {
@@ -235,8 +235,15 @@ export async function GET(req: NextRequest) {
         generatedAt: new Date().toISOString(),
       },
     });
+
+    // CRITICAL: Disconnect to free up connection pool
+    await prisma.$disconnect();
+
+    return response;
   } catch (error) {
     console.error('[Analytics API] Critical error:', error);
+    // Ensure disconnect on error
+    await prisma.$disconnect().catch(() => {});
     return NextResponse.json(
       {
         success: false,

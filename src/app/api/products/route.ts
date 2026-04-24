@@ -138,7 +138,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     return 0;
   });
 
-  return NextResponse.json({
+  const response = NextResponse.json({
     success: true,
     data: sortedProducts,
     pagination: {
@@ -160,4 +160,9 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       search,
     },
   });
+
+  // CRITICAL: Disconnect to free up connection pool
+  await prisma.$disconnect();
+
+  return response;
 });

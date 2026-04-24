@@ -28,12 +28,18 @@ export async function GET() {
       descripcion: cat.description,
     }));
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       categories: categoriesTranslated,
     });
+
+    // Liberar conexión para evitar EMAXCONNSESSION
+    await prisma.$disconnect();
+
+    return response;
   } catch (error) {
     console.error('Error fetching categories:', error);
+    await prisma.$disconnect().catch(() => {});
     return NextResponse.json({ success: false, error: 'Error al cargar categorías' }, { status: 500 });
   }
 }
