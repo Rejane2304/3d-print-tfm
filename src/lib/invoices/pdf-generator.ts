@@ -39,44 +39,47 @@ export async function generatePDF({ html }: PDFOptions): Promise<Buffer | null> 
  * Genera HTML profesional para factura
  * Usa el MISMO diseño que InvoiceViewer para consistencia visual
  */
-export function generatePrintableHTML(invoiceData: {
-  invoiceNumber: string;
-  issuedAt: Date;
-  isCancelled?: boolean;
-  cancelledAt?: Date | null;
-  companyName: string;
-  companyTaxId: string;
-  companyAddress: string;
-  companyCity: string;
-  companyProvince: string;
-  companyPostalCode: string;
-  companyEmail: string;
-  companyPhone: string;
-  clientName: string;
-  clientTaxId?: string | null;
-  clientAddress?: string | null;
-  clientCity?: string | null;
-  clientProvince?: string | null;
-  clientPostalCode?: string | null;
-  clientCountry?: string;
-  clientEmail?: string;
-  clientPhone?: string;
-  items: Array<{
-    name: string;
-    quantity: number;
-    price: number;
+export function generatePrintableHTML(
+  invoiceData: {
+    invoiceNumber: string;
+    issuedAt: Date;
+    isCancelled?: boolean;
+    cancelledAt?: Date | null;
+    companyName: string;
+    companyTaxId: string;
+    companyAddress: string;
+    companyCity: string;
+    companyProvince: string;
+    companyPostalCode: string;
+    companyEmail: string;
+    companyPhone: string;
+    clientName: string;
+    clientTaxId?: string | null;
+    clientAddress?: string | null;
+    clientCity?: string | null;
+    clientProvince?: string | null;
+    clientPostalCode?: string | null;
+    clientCountry?: string;
+    clientEmail?: string;
+    clientPhone?: string;
+    items: Array<{
+      name: string;
+      quantity: number;
+      price: number;
+      subtotal: number;
+      image?: string;
+      description?: string;
+    }>;
     subtotal: number;
-    image?: string;
-    description?: string;
-  }>;
-  subtotal: number;
-  shipping: number;
-  vatRate: number;
-  vatAmount: number;
-  total: number;
-  paymentMethod?: string;
-  orderNumber?: string;
-}): string {
+    shipping: number;
+    vatRate: number;
+    vatAmount: number;
+    total: number;
+    paymentMethod?: string;
+    orderNumber?: string;
+  },
+  shouldAutoPrint = false,
+): string {
   const formatDate = (date: Date) =>
     new Date(date).toLocaleDateString('es-ES', {
       day: '2-digit',
@@ -561,6 +564,20 @@ export function generatePrintableHTML(invoiceData: {
   <button class="no-print" onclick="window.print()" style="position: fixed; bottom: 20px; right: 20px; padding: 12px 24px; background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
     🖨️ Imprimir Factura
   </button>
+  ${
+    shouldAutoPrint
+      ? `
+  <script>
+    // Auto-print when page loads
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        window.print();
+      }, 500);
+    });
+  </script>
+  `
+      : ''
+  }
 </body>
 </html>
   `;

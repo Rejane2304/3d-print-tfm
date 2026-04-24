@@ -39,9 +39,13 @@ function getImageUrl(imageUrl: string | undefined): string | undefined {
   return `${baseUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
 }
 
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
+
+    // Check if auto-print is requested
+    const { searchParams } = new URL(req.url);
+    const shouldAutoPrint = searchParams.get('print') === 'true';
 
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -140,7 +144,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     // En producción, usar HTML directamente (PDF no funciona en Vercel)
     if (process.env.NODE_ENV === 'production') {
       console.log('[Invoice PDF] Usando HTML fallback en producción');
-      const htmlContent = generatePrintableHTML(invoiceData);
+      const htmlContent = generatePrintableHTML(invoiceData, shouldAutoPrint);
 
       return new NextResponse(htmlContent, {
         headers: {

@@ -98,9 +98,27 @@ export default function UserInvoiceDetailPage() {
 
   const printInvoice = () => {
     if (invoice && params.id) {
-      // Simplemente abrir el HTML limpio de la factura en nueva pestaña
-      // El HTML ya tiene botón de imprimir y estilos @media print
-      window.open(`/api/account/invoices/${params.id}/pdf`, '_blank');
+      // Abrir el HTML de la factura en una ventana nueva con parámetro de impresión
+      const printWindow = window.open(`/api/account/invoices/${params.id}/pdf?print=true`, '_blank');
+      if (printWindow) {
+        // Intentar activar el diálogo de impresión después de que cargue
+        const tryPrint = () => {
+          setTimeout(() => {
+            try {
+              printWindow.print();
+            } catch (e) {
+              console.error('Error al imprimir:', e);
+            }
+          }, 1000); // Esperar 1 segundo para que cargue todo
+        };
+
+        // Si ya cargó, imprimir. Si no, esperar al evento load
+        if (printWindow.document.readyState === 'complete') {
+          tryPrint();
+        } else {
+          printWindow.addEventListener('load', tryPrint);
+        }
+      }
     }
   };
 
