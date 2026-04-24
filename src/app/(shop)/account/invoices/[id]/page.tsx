@@ -10,6 +10,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { AlertCircle, ArrowLeft, Download, FileText, Loader2, Printer, XCircle } from 'lucide-react';
 import { InvoiceViewer } from '@/components/invoices/InvoiceViewer';
+import { ClientOnly } from '@/components/providers/ClientOnly';
 
 interface InvoiceData {
   invoiceNumber: string;
@@ -206,7 +207,7 @@ export default function UserInvoiceDetailPage() {
                   <FileText className="h-6 w-6 text-indigo-600" />
                   <h1 className="text-2xl font-bold text-gray-900">Factura {invoice.invoiceNumber}</h1>
                 </div>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-gray-500 mt-1" suppressHydrationWarning>
                   Emitida el{' '}
                   {new Date(invoice.issuedAt).toLocaleDateString('es-ES', {
                     weekday: 'long',
@@ -264,10 +265,24 @@ export default function UserInvoiceDetailPage() {
         </div>
       )}
 
-      {/* Invoice Viewer - ID para impresión con layout exacto */}
-      <div id="invoice-printable" className="py-8 px-4 print:p-0">
-        <InvoiceViewer data={invoice} />
-      </div>
+      {/* Invoice Viewer - ClientOnly para evitar hydration mismatch */}
+      <ClientOnly
+        fallback={
+          <div className="py-8 px-4">
+            <div className="max-w-[210mm] mx-auto bg-white rounded-2xl shadow-lg p-12 min-h-[800px] animate-pulse">
+              <div className="h-32 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg mb-8"></div>
+              <div className="space-y-4">
+                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+              </div>
+            </div>
+          </div>
+        }
+      >
+        <div id="invoice-printable" className="py-8 px-4 print:p-0">
+          <InvoiceViewer data={invoice} />
+        </div>
+      </ClientOnly>
     </div>
   );
 }

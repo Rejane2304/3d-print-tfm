@@ -4,7 +4,7 @@
  */
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -137,6 +137,16 @@ export default function AdminPanelPage() {
 
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
+  // Estado para controlar si estamos en cliente (evita hydration mismatch)
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Ref para controlar si ya se cargaron datos inicialmente
+  const hasInitialFetch = useRef(false);
+
   const fetchAnalytics = useCallback(async () => {
     try {
       setLoading(true);
@@ -145,7 +155,10 @@ export default function AdminPanelPage() {
 
       if (data.success) {
         setAnalytics(data.data);
-        setLastUpdated(new Date());
+        // Solo actualizar fecha en cliente para evitar hydration mismatch
+        if (typeof window !== 'undefined') {
+          setLastUpdated(new Date());
+        }
       }
     } catch {
       // Error silently handled - analytics not critical
@@ -162,6 +175,7 @@ export default function AdminPanelPage() {
     // Intentionally empty - real-time disabled
   }, []);
 
+  // Efecto de autenticación - solo se ejecuta una vez
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/auth?callbackUrl=/admin/dashboard');
@@ -173,26 +187,39 @@ export default function AdminPanelPage() {
       router.push('/');
       return;
     }
+  }, [status, session, router]);
 
-    if (status === 'authenticated') {
+  // Efecto de carga inicial de datos - SOLO UNA VEZ al montar
+  useEffect(() => {
+    if (status === 'authenticated' && !hasInitialFetch.current) {
+      hasInitialFetch.current = true;
       fetchAnalytics().catch(() => {
         // Error handled in fetchAnalytics
       });
     }
-  }, [status, session, router, fetchAnalytics]);
+  }, [status, fetchAnalytics]);
 
-  // Auto-refresh metrics every 30 seconds (academic project - simple approach)
+  // Efecto para recargar cuando cambia dateRange (manualmente por usuario)
   useEffect(() => {
+    if (status === 'authenticated' && hasInitialFetch.current) {
+      fetchAnalytics().catch(() => {
+        // Error handled in fetchAnalytics
+      });
+    }
+  }, [dateRange, status, fetchAnalytics]);
+
+  // Auto-refresh metrics every 30 seconds - SOLO EN CLIENTE
+  useEffect(() => {
+    if (!isClient || status !== 'authenticated') return;
+
     const interval = setInterval(() => {
-      if (status === 'authenticated') {
-        fetchAnalytics().catch(() => {
-          // Error handled in fetchAnalytics
-        });
-      }
+      fetchAnalytics().catch(() => {
+        // Error handled in fetchAnalytics
+      });
     }, 30000);
 
     return () => clearInterval(interval);
-  }, [status, fetchAnalytics]);
+  }, [isClient, status, fetchAnalytics]);
 
   const formatCurrency = (amount: number | undefined | null) => {
     if (amount === undefined || amount === null) {
@@ -551,9 +578,9 @@ export default function AdminPanelPage() {
           </Link>
         </div>
       </div>
-      {/* Real-time Notifications - Solo renderizar cuando está autenticado */}
-      {status === 'authenticated' && <RealTimeManager />}
-      <Toaster notifications={[]} onDismiss={() => {}} />
+      {/* Real-time Notifications - Solo renderizar cuando está autenticado y en cliente */}
+      {isClient && status === 'authenticated' && <RealTimeManager />}
+      {isClient && <Toaster notifications={[]} onDismiss={() => {}} />}
     </div>
   );
 }
