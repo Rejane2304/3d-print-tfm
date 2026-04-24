@@ -129,13 +129,13 @@
 
 ### Core
 
-| Tecnología       | Versión | Uso                                 |
-| ---------------- | ------- | ----------------------------------- |
-| **Next.js**      | 16.2.4  | Framework full-stack con App Router |
-| **React**        | ^18.3.0 | Biblioteca UI                       |
-| **TypeScript**   | ^5.x    | Tipado estático                     |
-| **Tailwind CSS** | ^3.4.19 | Estilos utility-first               |
-| **Node.js**      | 18+     | Runtime                             |
+| Tecnología       | Versión | Uso                                                      |
+| ---------------- | ------- | -------------------------------------------------------- |
+| **Next.js**      | 16.2.4  | Framework full-stack con App Router (actualizado de v14) |
+| **React**        | ^18.3.0 | Biblioteca UI                                            |
+| **TypeScript**   | ^5.x    | Tipado estático                                          |
+| **Tailwind CSS** | ^3.4.19 | Estilos utility-first                                    |
+| **Node.js**      | 18+     | Runtime                                                  |
 
 ### Backend y Datos
 
