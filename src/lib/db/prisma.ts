@@ -64,7 +64,8 @@ const prismaClientSingleton = () => {
 // Singleton pattern - solo una instancia de Prisma
 export const prisma = globalForPrisma.prisma ?? prismaClientSingleton();
 
-if (process.env.NODE_ENV !== 'production') {
+// Siempre guardar en globalThis para evitar múltiples instancias en hot reloading
+if (!globalForPrisma.prisma) {
   globalForPrisma.prisma = prisma;
 }
 

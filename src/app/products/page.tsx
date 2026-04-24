@@ -62,112 +62,123 @@ export async function generateMetadata({ searchParams }: Readonly<ProductsPagePr
 }
 
 async function getProducts(searchParams: ProductsPageProps['searchParams']) {
-  // Unwrap the Promise
-  const params = await searchParams;
+  try {
+    // Unwrap the Promise
+    const params = await searchParams;
 
-  const page = Number.parseInt(params.page || '1', 10);
-  const pageSize = 12;
-  const skip = (page - 1) * pageSize;
+    const page = Number.parseInt(params.page || '1', 10);
+    const pageSize = 12;
+    const skip = (page - 1) * pageSize;
 
-  const where: Prisma.ProductWhereInput = { isActive: true };
+    const where: Prisma.ProductWhereInput = { isActive: true };
 
-  if (params.category) {
-    const category = await prisma.category.findUnique({
-      where: { slug: params.category },
-    });
-    if (category) {
-      where.categoryId = category.id;
-    }
-  }
-
-  if (params.material) {
-    where.material = params.material as Prisma.EnumMaterialFilter;
-  }
-
-  if (params.minPrice || params.maxPrice) {
-    where.price = {};
-    if (params.minPrice) {
-      where.price.gte = Number.parseFloat(params.minPrice);
-    }
-    if (params.maxPrice) {
-      where.price.lte = Number.parseFloat(params.maxPrice);
-    }
-  }
-
-  if (params.inStock === 'true') {
-    where.stock = { gt: 0 };
-  }
-
-  if (params.search) {
-    where.OR = [
-      {
-        name: {
-          contains: params.search,
-          mode: 'insensitive' as Prisma.QueryMode,
-        },
-      },
-      {
-        description: {
-          contains: params.search,
-          mode: 'insensitive' as Prisma.QueryMode,
-        },
-      },
-    ];
-  }
-
-  const orderBy: Prisma.ProductOrderByWithRelationInput = {};
-  if (params.sortBy === 'price') {
-    orderBy.price = (params.sortOrder as Prisma.SortOrder) || 'asc';
-  } else if (params.sortBy === 'stock') {
-    orderBy.stock = (params.sortOrder as Prisma.SortOrder) || 'desc';
-  }
-
-  const [products, total] = await Promise.all([
-    prisma.product.findMany({
-      where,
-      include: {
-        images: {
-          orderBy: { displayOrder: 'asc' },
-        },
-      },
-      orderBy,
-      skip,
-      take: pageSize,
-    }),
-    prisma.product.count({ where }),
-  ]);
-
-  const translatedProducts = products.map(product => ({
-    ...product,
-    name: translateProductName(product.slug),
-    description: translateProductDescription(product.slug),
-  }));
-
-  // Client-side sorting for translated products
-  const sortedProducts = [...translatedProducts].sort((a, b) => {
-    let comparison = 0;
-
-    if (params.sortBy === 'price') {
-      const priceA = Number(a.price);
-      const priceB = Number(b.price);
-      comparison = priceA - priceB;
-    } else if (params.sortBy === 'stock') {
-      comparison = a.stock - b.stock;
-    } else {
-      comparison = (a.name || '').localeCompare(b.name || '', 'es', {
-        sensitivity: 'base',
+    if (params.category) {
+      const category = await prisma.category.findUnique({
+        where: { slug: params.category },
       });
+      if (category) {
+        where.categoryId = category.id;
+      }
     }
 
-    return params.sortOrder === 'desc' ? -comparison : comparison;
-  });
+    if (params.material) {
+      where.material = params.material as Prisma.EnumMaterialFilter;
+    }
 
-  return {
-    products: sortedProducts,
-    total,
-    totalPages: Math.ceil(total / pageSize),
-    page,
-  };
+    if (params.minPrice || params.maxPrice) {
+      where.price = {};
+      if (params.minPrice) {
+        where.price.gte = Number.parseFloat(params.minPrice);
+      }
+      if (params.maxPrice) {
+        where.price.lte = Number.parseFloat(params.maxPrice);
+      }
+    }
+
+    if (params.inStock === 'true') {
+      where.stock = { gt: 0 };
+    }
+
+    if (params.search) {
+      where.OR = [
+        {
+          name: {
+            contains: params.search,
+            mode: 'insensitive' as Prisma.QueryMode,
+          },
+        },
+        {
+          description: {
+            contains: params.search,
+            mode: 'insensitive' as Prisma.QueryMode,
+          },
+        },
+      ];
+    }
+
+    const orderBy: Prisma.ProductOrderByWithRelationInput = {};
+    if (params.sortBy === 'price') {
+      orderBy.price = (params.sortOrder as Prisma.SortOrder) || 'asc';
+    } else if (params.sortBy === 'stock') {
+      orderBy.stock = (params.sortOrder as Prisma.SortOrder) || 'desc';
+    }
+
+    const [products, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        include: {
+          images: {
+            orderBy: { displayOrder: 'asc' },
+          },
+        },
+        orderBy,
+        skip,
+        take: pageSize,
+      }),
+      prisma.product.count({ where }),
+    ]);
+
+    const translatedProducts = products.map(product => ({
+      ...product,
+      name: translateProductName(product.slug),
+      description: translateProductDescription(product.slug),
+    }));
+
+    // Client-side sorting for translated products
+    const sortedProducts = [...translatedProducts].sort((a, b) => {
+      let comparison = 0;
+
+      if (params.sortBy === 'price') {
+        const priceA = Number(a.price);
+        const priceB = Number(b.price);
+        comparison = priceA - priceB;
+      } else if (params.sortBy === 'stock') {
+        comparison = a.stock - b.stock;
+      } else {
+        comparison = (a.name || '').localeCompare(b.name || '', 'es', {
+          sensitivity: 'base',
+        });
+      }
+
+      return params.sortOrder === 'desc' ? -comparison : comparison;
+    });
+
+    return {
+      products: sortedProducts,
+      total,
+      totalPages: Math.ceil(total / pageSize),
+      page,
+    };
+  } catch (error) {
+    console.error('Error loading products:', error);
+    // Return empty state on error - error boundary will handle display
+    return {
+      products: [],
+      total: 0,
+      totalPages: 0,
+      page: 1,
+    };
+  }
 }
 
 export default async function ProductsPage({ searchParams }: Readonly<ProductsPageProps>) {

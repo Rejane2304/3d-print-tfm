@@ -1,8 +1,10 @@
 /**
  * PDF Generator Service
  * Generates PDFs from HTML using Puppeteer
+ * Compatible with Vercel serverless environment using @sparticuz/chromium
  */
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-core';
+import chromium from '@sparticuz/chromium';
 import { getCompanyDataForInvoice, getDefaultVatRate } from '@/lib/site-config';
 
 interface PDFOptions {
@@ -10,13 +12,28 @@ interface PDFOptions {
 }
 
 export async function generatePDF({ html }: PDFOptions): Promise<Buffer> {
-  // Launch browser
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  });
+  let browser;
 
   try {
+    // Check if running in production (Vercel)
+    const isProduction = process.env.NODE_ENV === 'production';
+
+    if (isProduction) {
+      // Use @sparticuz/chromium for serverless environments
+      browser = await puppeteer.launch({
+        args: chromium.args,
+        executablePath: await chromium.executablePath(),
+        headless: true,
+      });
+    } else {
+      // Use regular puppeteer in development
+      const puppeteerDev = await import('puppeteer');
+      browser = await puppeteerDev.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      });
+    }
+
     const page = await browser.newPage();
 
     // Set HTML content
@@ -56,8 +73,13 @@ export async function generatePDF({ html }: PDFOptions): Promise<Buffer> {
     });
 
     return Buffer.from(pdf);
+  } catch (error) {
+    console.error('[PDF Generator] Error generating PDF:', error);
+    throw error;
   } finally {
-    await browser.close();
+    if (browser) {
+      await browser.close();
+    }
   }
 }
 

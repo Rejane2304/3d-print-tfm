@@ -179,7 +179,31 @@ export async function checkUnpaidOrders() {
   }
 }
 
-// Ejecutar todas las verificaciones
+// Ejecutar todas las verificaciones con manejo de errores individual
 export async function runAllScheduledChecks() {
-  await Promise.all([checkExpiringCoupons(), checkLongPreparationOrders(), checkDelayedOrders(), checkUnpaidOrders()]);
+  const checks = [
+    { name: 'expiringCoupons', fn: checkExpiringCoupons },
+    { name: 'longPreparationOrders', fn: checkLongPreparationOrders },
+    { name: 'delayedOrders', fn: checkDelayedOrders },
+    { name: 'unpaidOrders', fn: checkUnpaidOrders },
+  ];
+
+  const results = await Promise.allSettled(
+    checks.map(async check => {
+      try {
+        await check.fn();
+        return { name: check.name, success: true };
+      } catch (error) {
+        console.error(`[ScheduledChecks] Error in ${check.name}:`, error);
+        return { name: check.name, success: false, error };
+      }
+    }),
+  );
+
+  const failed = results.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value.success));
+  if (failed.length > 0) {
+    console.warn(`[ScheduledChecks] ${failed.length} checks failed`);
+  }
+
+  return results;
 }

@@ -49,132 +49,138 @@ async function getProduct(slug: string): Promise<{
   reviews: unknown[];
   reviewStats: unknown;
 } | null> {
-  const product = await prisma.product.findUnique({
-    where: { slug },
-    include: {
-      images: {
-        orderBy: { displayOrder: 'asc' },
+  try {
+    const product = await prisma.product.findUnique({
+      where: { slug },
+      include: {
+        images: {
+          orderBy: { displayOrder: 'asc' },
+        },
+        category: true,
       },
-      category: true,
-    },
-  });
+    });
 
-  if (!product?.isActive) {
-    return null;
-  }
+    if (!product?.isActive) {
+      return null;
+    }
 
-  // Traducir datos del producto
-  const translatedProduct: ProductWithDimensions = {
-    id: product.id,
-    slug: product.slug,
-    name: translateProductName(product.slug),
-    description: translateProductDescription(product.slug),
-    price: product.price,
-    previousPrice: product.previousPrice,
-    stock: product.stock,
-    weight: product.weight,
-    material: product.material,
-    widthCm: product.widthCm,
-    heightCm: product.heightCm,
-    depthCm: product.depthCm,
-    printTime: product.printTime,
-    images: product.images.map(img => ({
-      id: img.id,
-      url: img.url,
-      altText: img.altText,
-    })),
-    category: product.category
-      ? {
-          name: translateCategoryName(product.category.slug),
-        }
-      : null,
-  };
+    // Traducir datos del producto
+    const translatedProduct: ProductWithDimensions = {
+      id: product.id,
+      slug: product.slug,
+      name: translateProductName(product.slug),
+      description: translateProductDescription(product.slug),
+      price: product.price,
+      previousPrice: product.previousPrice,
+      stock: product.stock,
+      weight: product.weight,
+      material: product.material,
+      widthCm: product.widthCm,
+      heightCm: product.heightCm,
+      depthCm: product.depthCm,
+      printTime: product.printTime,
+      images: product.images.map(img => ({
+        id: img.id,
+        url: img.url,
+        altText: img.altText,
+      })),
+      category: product.category
+        ? {
+            name: translateCategoryName(product.category.slug),
+          }
+        : null,
+    };
 
-  // Obtener productos relacionados
-  const related = await prisma.product.findMany({
-    where: {
-      isActive: true,
-      categoryId: product.categoryId,
-      id: { not: product.id },
-    },
-    include: {
-      images: {
-        where: { isMain: true },
-        take: 1,
+    // Obtener productos relacionados
+    const related = await prisma.product.findMany({
+      where: {
+        isActive: true,
+        categoryId: product.categoryId,
+        id: { not: product.id },
       },
-    },
-    take: 4,
-  });
-
-  // Traducir productos relacionados
-  const translatedRelated = related.map(p => ({
-    ...p,
-    name: translateProductName(p.slug),
-  }));
-
-  // Obtener reseñas aprobadas
-  const reviews = await prisma.review.findMany({
-    where: {
-      productId: product.id,
-      isApproved: true,
-    },
-    include: {
-      user: {
-        select: {
-          id: true,
-          name: true,
+      include: {
+        images: {
+          where: { isMain: true },
+          take: 1,
         },
       },
-    },
-    orderBy: {
-      createdAt: 'desc',
-    },
-    take: 10,
-  });
+      take: 4,
+    });
 
-  // Formatear reseñas
-  const formattedReviews = reviews.map(review => ({
-    id: review.id,
-    usuarioNombre: review.user.name,
-    puntuacion: review.rating,
-    titulo: review.title,
-    comentario: review.comment,
-    verificado: review.isVerified,
-    creadoEn: review.createdAt.toISOString(),
-  }));
+    // Traducir productos relacionados
+    const translatedRelated = related.map(p => ({
+      ...p,
+      name: translateProductName(p.slug),
+    }));
 
-  // Calcular estadísticas
-  const allReviews = await prisma.review.findMany({
-    where: {
-      productId: product.id,
-      isApproved: true,
-    },
-    select: {
-      rating: true,
-    },
-  });
+    // Obtener reseñas aprobadas
+    const reviews = await prisma.review.findMany({
+      where: {
+        productId: product.id,
+        isApproved: true,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: 10,
+    });
 
-  const ratingCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
-  let totalRating = 0;
+    // Formatear reseñas
+    const formattedReviews = reviews.map(review => ({
+      id: review.id,
+      usuarioNombre: review.user.name,
+      puntuacion: review.rating,
+      titulo: review.title,
+      comentario: review.comment,
+      verificado: review.isVerified,
+      creadoEn: review.createdAt.toISOString(),
+    }));
 
-  allReviews.forEach(review => {
-    ratingCounts[review.rating as 1 | 2 | 3 | 4 | 5]++;
-    totalRating += review.rating;
-  });
+    // Calcular estadísticas
+    const allReviews = await prisma.review.findMany({
+      where: {
+        productId: product.id,
+        isApproved: true,
+      },
+      select: {
+        rating: true,
+      },
+    });
 
-  const totalCount = allReviews.length;
-  const averageRating = totalCount > 0 ? totalRating / totalCount : 0;
+    const ratingCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+    let totalRating = 0;
 
-  return {
-    product: translatedProduct,
-    related: translatedRelated,
-    reviews: formattedReviews,
-    reviewStats: {
-      promedio: Number(averageRating.toFixed(1)),
-      total: totalCount,
-      distribucion: ratingCounts,
-    },
-  };
+    allReviews.forEach(review => {
+      ratingCounts[review.rating as 1 | 2 | 3 | 4 | 5]++;
+      totalRating += review.rating;
+    });
+
+    const totalCount = allReviews.length;
+    const averageRating = totalCount > 0 ? totalRating / totalCount : 0;
+
+    return {
+      product: translatedProduct,
+      related: translatedRelated,
+      reviews: formattedReviews,
+      reviewStats: {
+        promedio: Number(averageRating.toFixed(1)),
+        total: totalCount,
+        distribucion: ratingCounts,
+      },
+    };
+  } catch (error) {
+    console.error('[ProductDetail] Error loading product:', error);
+    // Return null to trigger notFound() gracefully
+    return null;
+  }
 }
 
 export default async function ProductDetailPage({ params }: Readonly<ProductDetailPageProps>) {

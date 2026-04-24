@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
     try {
       await runAllScheduledChecks();
     } catch (checksError) {
-      console.error('Error en verificaciones programadas:', checksError);
+      console.error('[AdminAlerts] Error en verificaciones programadas:', checksError);
       // No fallar la petición si las verificaciones fallan
     }
 
@@ -82,42 +82,49 @@ export async function GET(req: NextRequest) {
       ];
     }
 
-    const [alertas, total, pendientes, critica, alta] = await Promise.all([
-      prisma.alert.findMany({
-        where,
-        include: {
-          product: {
-            select: {
-              id: true,
-              name: true,
-              slug: true,
-              stock: true,
-              minStock: true,
-              images: {
-                where: { isMain: true },
-                select: { url: true },
-                take: 1,
+    let alertas, total, pendientes, critica, alta;
+
+    try {
+      [alertas, total, pendientes, critica, alta] = await Promise.all([
+        prisma.alert.findMany({
+          where,
+          include: {
+            product: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+                stock: true,
+                minStock: true,
+                images: {
+                  where: { isMain: true },
+                  select: { url: true },
+                  take: 1,
+                },
+              },
+            },
+            resolvedByUser: {
+              select: {
+                id: true,
+                name: true,
               },
             },
           },
-          resolvedByUser: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-        },
-        orderBy: [{ severity: 'desc' }, { createdAt: 'desc' }],
-        skip,
-        take: limit,
-      }),
-      prisma.alert.count({ where }),
-      prisma.alert.count({ where: { status: 'PENDING' } }),
-      prisma.alert.count({
-        where: { status: 'PENDING', severity: 'CRITICAL' },
-      }),
-      prisma.alert.count({ where: { status: 'PENDING', severity: 'HIGH' } }),
-    ]);
+          orderBy: [{ severity: 'desc' }, { createdAt: 'desc' }],
+          skip,
+          take: limit,
+        }),
+        prisma.alert.count({ where }),
+        prisma.alert.count({ where: { status: 'PENDING' } }),
+        prisma.alert.count({
+          where: { status: 'PENDING', severity: 'CRITICAL' },
+        }),
+        prisma.alert.count({ where: { status: 'PENDING', severity: 'HIGH' } }),
+      ]);
+    } catch (dbError) {
+      console.error('[AdminAlerts] Database error:', dbError);
+      return NextResponse.json({ success: false, error: 'Database error' }, { status: 500 });
+    }
 
     // Translate only for UI, keep original values
     const translatedAlertas = alertas.map(alerta => {
@@ -173,7 +180,7 @@ export async function GET(req: NextRequest) {
       limit,
     });
   } catch (error) {
-    console.error('Error listing alerts:', error);
+    console.error('[AdminAlerts] Error listing alerts:', error);
     return NextResponse.json({ success: false, error: translateErrorMessage('Internal error') }, { status: 500 });
   }
 }
@@ -248,7 +255,7 @@ export async function PATCH(req: NextRequest) {
         { status: 400 },
       );
     }
-    console.error('Error updating alert:', error);
+    console.error('[AdminAlerts] Error updating alert:', error);
     return NextResponse.json({ success: false, error: translateErrorMessage('Internal error') }, { status: 500 });
   }
 }
