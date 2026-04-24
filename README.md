@@ -6,7 +6,7 @@
 
 [![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-Academic-orange.svg)](LICENSE)
-[![Presentation](https://img.shields.io/badge/📹-Ver%20Presentación-red)](https://github.com/Rejane2304/3d-print-tfm/releases/download/v1.1.0-presentation/3D_Print_TFM__Un_Modelo_para_Apps_Web.mp4)
+[![Presentation](https://img.shields.io/badge/📹-Ver%20Presentación-red)](https://youtu.be/q4wxPvIjm80)
 [![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)](docs/TESTING.md)
 [![Coverage](https://img.shields.io/badge/coverage-80%25-green.svg)](docs/TESTING.md)
 
@@ -14,7 +14,7 @@
 
 🚀 **Demo en Vivo:** [https://3d-print-tfm.vercel.app](https://3d-print-tfm.vercel.app)
 
-📹 **Presentación del Proyecto:** [Ver Video MP4](https://github.com/Rejane2304/3d-print-tfm/releases/download/v1.1.0-presentation/3D_Print_TFM__Un_Modelo_para_Apps_Web.mp4)
+📹 **Presentación del Proyecto:** [Ver en YouTube](https://youtu.be/q4wxPvIjm80)
 
 </div>
 
@@ -542,15 +542,12 @@ Ver [ROADMAP.md](docs/ROADMAP.md) para detalles completos.
 
 - 📚 **Documentación:** Ver carpeta `/docs/`
 - 🤖 **Guía Agentes:** Ver [AGENTS.md](AGENTS.md)
-- 🐛 **Issues:** [GitHub Issues](https://github.com/Rejane2304/3d-print-tfm/issues)
 
 ### Desarrollador
 
 **Rejane Rodrigues**
 
 - 🎓 Máster en Desarrollo de Aplicaciones con IA
-- 📧 Email: [tu-email@example.com](mailto:tu-email@example.com)
-- 💼 LinkedIn: [linkedin.com/in/rejane-rodrigues](https://linkedin.com/in/rejane-rodrigues)
 - 🐙 GitHub: [github.com/Rejane2304](https://github.com/Rejane2304)
 
 ---
