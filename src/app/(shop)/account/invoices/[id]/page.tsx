@@ -98,61 +98,11 @@ export default function UserInvoiceDetailPage() {
   }, [status, params.id, router]); // Solo dependencias esenciales
 
   const printInvoice = () => {
-    if (!invoice) return;
+    if (!invoice || !params.id) return;
 
-    // SOLUCIÓN DEFINITIVA: Usar la misma página con print CSS
-    // Esto garantiza layout idéntico al InvoiceViewer
-    const printContent = document.getElementById('invoice-printable');
-    if (!printContent) return;
-
-    // Crear ventana de impresión con el HTML actual
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-      console.error('Popup bloqueado: Por favor permite ventanas emergentes');
-      return;
-    }
-
-    // Copiar estilos de la página actual
-    const styles = Array.from(document.styleSheets)
-      .map(sheet => {
-        try {
-          return Array.from(sheet.cssRules)
-            .map(rule => rule.cssText)
-            .join('\n');
-        } catch {
-          return '';
-        }
-      })
-      .join('\n');
-
-    // Escribir documento completo
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Factura ${invoice.invoiceNumber}</title>
-          <style>
-            ${styles}
-            @media print {
-              .no-print { display: none !important; }
-              body { background: white !important; }
-            }
-          </style>
-        </head>
-        <body>
-          ${printContent.innerHTML}
-          <script>
-            // Auto-print cuando todo cargue
-            window.onload = function() {
-              setTimeout(function() {
-                window.print();
-              }, 500);
-            };
-          </script>
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
+    // SOLUCIÓN PRODUCCIÓN: Abrir PDF endpoint con auto-print
+    // Esto evita problemas de CSP con document.write() y scripts inline
+    window.open(`/api/account/invoices/${params.id}/pdf?print=true`, '_blank');
   };
 
   const downloadPDF = () => {

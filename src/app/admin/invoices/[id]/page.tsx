@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { AlertCircle, ArrowLeft, Loader2 } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Download, Loader2, Printer } from 'lucide-react';
 import { InvoiceViewer, useInvoiceData } from '@/components/invoices/InvoiceViewer';
 
 interface InvoiceDetail {
@@ -89,6 +89,24 @@ export default function AdminInvoiceDetailPage() {
     }
   }, [params.id]);
 
+  const printInvoice = () => {
+    if (params.id) {
+      window.open(`/api/admin/invoices/${params.id}/pdf?print=true`, '_blank');
+    }
+  };
+
+  const downloadPDF = () => {
+    if (params.id) {
+      const link = document.createElement('a');
+      link.href = `/api/admin/invoices/${params.id}/pdf`;
+      link.download = `factura-${params.id}.pdf`;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }
+  };
+
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/auth?callbackUrl=/admin/invoices');
@@ -151,6 +169,23 @@ export default function AdminInvoiceDetailPage() {
                   {invoice.issuedAt ? new Date(invoice.issuedAt).toLocaleDateString('es-ES') : 'Fecha no disponible'}
                 </p>
               </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={printInvoice}
+                className="inline-flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+              >
+                <Printer className="h-4 w-4" />
+                Imprimir
+              </button>
+              <button
+                onClick={downloadPDF}
+                className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+              >
+                <Download className="h-4 w-4" />
+                Descargar PDF
+              </button>
             </div>
 
             <Link href="/admin/dashboard" className="text-indigo-600 hover:text-indigo-800 font-medium">

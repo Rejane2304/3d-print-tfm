@@ -171,6 +171,8 @@ Esta versión corrige errores críticos de conexión a base de datos y estabiliz
 - **Layout unificado**: Botón "Imprimir" ahora usa el mismo layout que "Descargar PDF"
 - **Sin bucles infinitos**: Corregido auto-print que causaba bloqueos
 - **ClientOnly wrapper**: Añadido para evitar hydration errors
+- **Fix CSP Producción**: Cambiado de `document.write()` a endpoint PDF con `?print=true`
+- **Botón en Admin**: Añadidos botones "Imprimir" y "Descargar PDF" en `/admin/invoices/[id]`
 
 ### 📋 Cambios Técnicos
 
