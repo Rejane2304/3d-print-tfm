@@ -561,19 +561,31 @@ export function generatePrintableHTML(
     </div>
   </div>
 
-  <button class="no-print" onclick="window.print()" style="position: fixed; bottom: 20px; right: 20px; padding: 12px 24px; background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+  <button class="no-print" id="printBtn" onclick="window.print(); this.disabled=true; this.style.opacity='0.5'; this.textContent='🖨️ Imprimiendo...';" style="position: fixed; bottom: 20px; right: 20px; padding: 12px 24px; background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
     🖨️ Imprimir Factura
   </button>
   ${
     shouldAutoPrint
       ? `
   <script>
-    // Auto-print when page loads
-    window.addEventListener('load', function() {
-      setTimeout(function() {
-        window.print();
-      }, 500);
-    });
+    // Auto-print when page loads - SOLO UNA VEZ
+    (function() {
+      let printed = false;
+      window.addEventListener('load', function() {
+        if (printed) return;
+        printed = true;
+        setTimeout(function() {
+          window.print();
+          // Deshabilitar botón después de auto-print
+          var btn = document.getElementById('printBtn');
+          if (btn) {
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+            btn.textContent = '🖨️ Imprimiendo...';
+          }
+        }, 800);
+      });
+    })();
   </script>
   `
       : ''
